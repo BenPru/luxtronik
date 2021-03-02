@@ -39,6 +39,16 @@ luxtronik:
   - required: false
   - default: true
   - type: boolean
+- lock_timeout
+  - description: Lock timeout for concurrent read- and write operations in seconds.
+  - required: false
+  - default: 30
+  - type: integer
+- update_immediately_after_write
+  - description: Update sensor data after every write operation
+  - required: false
+  - default: false
+  - type: boolean
 
 **Note:**
 
