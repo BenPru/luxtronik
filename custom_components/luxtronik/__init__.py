@@ -156,9 +156,12 @@ class LuxtronikDevice:
         return sensor.value
 
     def get_sensor_by_id(self, group_sensor_id: str):
-        group = group_sensor_id.split('.')[0]
-        sensor_id = group_sensor_id.split('.')[1]
-        return self.get_sensor(group, sensor_id)
+        try:
+	        group = group_sensor_id.split('.')[0]
+	        sensor_id = group_sensor_id.split('.')[1]
+	        return self.get_sensor(group, sensor_id)
+        except Exception as e:
+            LOGGER.critical(group_sensor_id, e, exc_info=True)
 
     def get_sensor(self, group, sensor_id):
         """Get sensor by configured sensor ID."""

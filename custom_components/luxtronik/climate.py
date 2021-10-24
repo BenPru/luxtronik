@@ -60,12 +60,7 @@ async def async_setup_entry(
 
     async_add_entities(
         [
-            LuxtronikThermostat(luxtronik, status_sensor='calculations.ID_WEB_WP_BZ_akt',
-                current_temperature_sensor='calculations.ID_WEB_Temperatur_TBW',
-                target_temperature_sensor='calculations.ID_WEB_Einst_BWS_akt',
-                target_temperature_sensor_write='ID_Einst_BWS_akt',
-                heater_sensor='parameters.ID_Ba_Bw_akt',
-                heat_status='hot water')
+            LuxtronikDomesticWaterThermostat(luxtronik)
             # FritzboxThermostat(coordinator, ain)
             # for ain, device in coordinator.data.items()
             # if device.has_thermostat
@@ -77,20 +72,33 @@ async def async_setup_entry(
 class LuxtronikThermostat(ClimateEntity):
     """Representation of a Luxtronik Thermostat device."""
 
-    def __init__(self, luxtronik: LuxtronikDevice, status_sensor: str, current_temperature_sensor: str,
-            target_temperature_sensor: str, target_temperature_sensor_write: str, heater_sensor: str, heat_status='heating'):
+    _heater_sensor = 'parameters.ID_Ba_Bw_akt'
+
+    def __init__(self, luxtronik: LuxtronikDevice):
         self._luxtronik = luxtronik
-        self._status_sensor = status_sensor
-        self._heat_status = heat_status
-        self._current_temperature_sensor = current_temperature_sensor
-        self._target_temperature_sensor = target_temperature_sensor
-        self._target_temperature_sensor_write = target_temperature_sensor_write
-        self._heater_sensor = heater_sensor
         # def set_hvac_mode(self, hvac_mode):
         #     """Set new target hvac mode."""
 
         # async def async_set_hvac_mode(self, hvac_mode):
         #     """Set new target hvac mode."""
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return self._name
+
+    @property
+    def unique_id(self):
+        return self._unique_id
+
+    @property
+    def icon(self):
+        """Icon of the entity."""
+        return self._icon
+
+    @property
+    def device_class(self):
+        return self._device_class
 
     @property
     def hvac_action(self):
@@ -233,6 +241,18 @@ class LuxtronikThermostat(ClimateEntity):
     #         attrs[ATTR_STATE_WINDOW_OPEN] = self.device.window_open
 
     #     return attrs
+
+class LuxtronikDomesticWaterThermostat(LuxtronikThermostat):
+    _unique_id = 'domestic_water'
+    _name = "Brauchwasser"
+    _icon = 'mdi:water-boiler'
+    _device_class = 'domestic_water'
+
+    _status_sensor = 'calculations.ID_WEB_WP_BZ_akt'
+    _current_temperature_sensor = 'calculations.ID_WEB_Temperatur_TBW'
+    _target_temperature_sensor = 'calculations.ID_WEB_Einst_BWS_akt'
+    _target_temperature_sensor_write = 'ID_Einst_BWS_akt'
+    _heat_status = 'hot water'
 
 # def setup_platform(
 #     hass: HomeAssistant,
