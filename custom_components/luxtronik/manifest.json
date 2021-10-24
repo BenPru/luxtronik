@@ -1,0 +1,20 @@
+{
+  "domain": "luxtronik2",
+  "name": "Luxtronik",
+  "version": "2021.10.21",
+  "config_flow": true,
+  "iot_class": "local_polling",
+  "documentation": "https://www.home-assistant.io/integrations/luxtronik",
+  "dependencies": [],
+  "after_dependencies": ["http"],
+  "codeowners": ["@bouni", "@benpru"],
+  "requirements": ["luxtronik==0.3.9"],
+  "dhcp": [
+    {
+      "macaddress": "000E8C*"
+    },
+    {
+      "hostname": "wp-novelan"
+    }
+  ]
+}

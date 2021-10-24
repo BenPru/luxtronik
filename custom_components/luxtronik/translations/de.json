@@ -1,0 +1,20 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Der Dienst ist bereits konfiguriert",
+      "existing_instance_updated": "Bestehende Konfiguration wurde aktualisiert."
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "host": "Netzwerkname oder IP Adresse",
+          "port": "Port (meist 8888 oder 8889)"
+        },
+        "description": "Richte deine Luxtronik W\u00e4rmepumpe ein um sie zu \u00fcberwachen und zu steuern."
+      }
+    }
+  }
+}

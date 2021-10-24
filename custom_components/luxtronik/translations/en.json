@@ -1,0 +1,20 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Service is already configured",
+      "existing_instance_updated": "Updated existing configuration."
+    },
+    "error": {
+      "cannot_connect": "Failed to connect"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "host": "Hostname or ip address",
+          "port": "Network Port (Usually 8888 or 8889)"
+        },
+        "description": "Set up your Luxtronik heatpump controller to allow monitoring and control."
+      }
+    }
+  }
+}
