@@ -5,8 +5,8 @@ from typing import Any, Final
 
 from homeassistant.components.sensor import STATE_CLASS_MEASUREMENT, SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (CONF_SENSORS, PRECISION_HALVES,
-                                 PRECISION_TENTHS, TEMP_CELSIUS)
+from homeassistant.const import (CONF_SENSORS, PRECISION_HALVES, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_TIMESTAMP,
+                                 PRECISION_TENTHS, TEMP_CELSIUS, TIME_SECONDS)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -34,22 +34,23 @@ async def async_setup_entry(
 
     deviceInfo = DeviceInfo(
                 identifiers={(LUXTRONIK_DOMAIN)},
-                name='Luxtronik',
+                name='Luxtronik'
             )
     entities = [
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt', 'status', 'Status', 'status', 'mdi:text-short'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeit', 'status time', 'Status Time', 'status_time', 'mdi:timer-sand'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile1', 'status line 1', 'Status Line 1', 'status_line_1', 'numeric-1-circle'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile2', 'status line 2', 'Status Line 2', 'status_line_2', 'numeric-2-circle'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile3', 'status line 3', 'Status Line 3', 'status_line_3', 'numeric-3-circle'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TVL', 'flow in temperature', 'Flow In Temperature', 'flow_in_temperature', 'mdi:waves-arrow-left'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TRL', 'flow out temperature', 'Flow Out Temperature', 'flow_out_temperature', 'mdi:waves-arrow-right'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Sollwert_TRL_HZ', 'flow out target temperature', 'Flow Out Target Temperature', 'flow_out_target_temperature', 'mdi:temperature'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TWA', 'output temperature', 'Output Temperature', 'output_temperature', 'mdi:temperature'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TA', 'outdoor temperature', 'Outdoor Temperature', 'outdoor_temperature', 'mdi:home-thermometer'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Mitteltemperatur', 'average outdoor temperature', 'Average Outdoor Temperature', 'average_outdoor_temperature', 'mdi:temperature'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TSK', 'solar collector temperature', 'Solar collector Temperature', 'solar_collector_temperature', 'mdi:solar-panel-large'),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TSS', 'solar buffer temperature', 'Solar Buffer Temperature', 'solar_buffer_temperature', 'mdi:propane-tank-outline')
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt', 'status', 'Status', 'mdi:text-short', 'status', None, None),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeit', 'status time', 'Status Time', 'mdi:timer-sand', DEVICE_CLASS_TIMESTAMP, 'status_time', TIME_SECONDS),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile1', 'status line 1', 'Status Line 1', 'numeric-1-circle', 'status_line_1', None, None),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile2', 'status line 2', 'Status Line 2', 'numeric-2-circle', 'status_line_2', None, None),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile3', 'status line 3', 'Status Line 3', 'numeric-3-circle', 'status_line_3', None, None),
+
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TVL', 'flow in temperature', 'Flow In Temperature', 'mdi:waves-arrow-left'),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TRL', 'flow out temperature', 'Flow Out Temperature', 'mdi:waves-arrow-right'),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Sollwert_TRL_HZ', 'flow out temperature target', 'Flow Out Temperature Target'),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TWA', 'output temperature', 'Output Temperature'),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TA', 'outdoor temperature', 'Outdoor Temperature',),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Mitteltemperatur', 'average outdoor temperature', 'Average Outdoor Temperature'),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TSK', 'solar collector temperature', 'Solar Collector Temperature', 'mdi:solar-panel-large'),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TSS', 'solar buffer temperature', 'Solar Buffer Temperature', 'mdi:propane-tank-outline')
     ]
 
     async_add_entities(entities)
@@ -66,10 +67,10 @@ class LuxtronikSensor(SensorEntity):
         sensor_key: str,
         unique_id: str,
         name: str,
-        device_class: str,
-        icon: str,
-        state_class: str = None,
-        unit_of_measurement: str = None,
+        icon: str = 'mdi:thermometer',
+        device_class: str = DEVICE_CLASS_TEMPERATURE,
+        state_class: str = STATE_CLASS_MEASUREMENT,
+        unit_of_measurement: str = TEMP_CELSIUS,
     ) -> None:
         """Initialize the sensor."""
         self._hass = hass

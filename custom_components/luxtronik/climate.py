@@ -19,6 +19,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_SENSORS, PRECISION_HALVES,
                                  PRECISION_TENTHS, TEMP_CELSIUS)
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -51,8 +52,12 @@ async def async_setup_entry(
         LOGGER.warning("climate.async_setup_entry no luxtronik!")
         return False
 
+    deviceInfo = DeviceInfo(
+                identifiers={(LUXTRONIK_DOMAIN)},
+                name='Luxtronik',
+            )
     entities = [
-        LuxtronikDomesticWaterThermostat(hass, luxtronik)
+        LuxtronikDomesticWaterThermostat(hass, luxtronik, deviceInfo)
         # , LuxtronikHeatingThermostat(hass, luxtronik)
         ]
 
@@ -79,9 +84,10 @@ class LuxtronikThermostat(ClimateEntity):
 
     _heat_status = LUX_STATUS_HEATING
 
-    def __init__(self, hass: HomeAssistant, luxtronik: LuxtronikDevice):
+    def __init__(self, hass: HomeAssistant, luxtronik: LuxtronikDevice, deviceInfo: DeviceInfo):
         self._hass = hass
         self._luxtronik = luxtronik
+        self._attr_device_info = deviceInfo
 
     @property
     def hvac_action(self):
