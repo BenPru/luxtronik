@@ -1,9 +1,8 @@
 """Config flow to configure the Luxtronik heatpump controller integration."""
 # region Imports
 from __future__ import annotations
-import logging
-
 from typing import Any
+import socket
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -12,10 +11,7 @@ from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.components.dhcp import HOSTNAME, IP_ADDRESS
 
-from .const import DEFAULT_PORT, DOMAIN, CONF_SAFE, CONF_LOCK_TIMEOUT, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE
-
-
-_LOGGER = logging.getLogger(__name__)
+from .const import LOGGER, DEFAULT_PORT, DOMAIN, CONF_SAFE, CONF_LOCK_TIMEOUT, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE
 # endregion Imports
 
 
@@ -24,19 +20,66 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
     _hassio_discovery = None
-    discovery_host = None
+    _discovery_host = None
+    _discovery_port = None
+
+    def discover(self):
+        """Broadcast discovery for luxtronik heatpumps."""
+
+        for p in (4444, 47808):
+            LOGGER.debug(f"Send discovery packets to port {p}")
+            server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            server.bind(("", p))
+            server.settimeout(2)
+
+            # send AIT magic brodcast packet
+            data = "2000;111;1;\x00"
+            server.sendto(data.encode(), ("<broadcast>", p))
+            LOGGER.debug(f"Sending broadcast request \"{data.encode()}\"")
+
+            while True:
+                try:
+                    res, con = server.recvfrom(1024)
+                    res = res.decode("ascii", errors="ignore")
+                    # if we receive what we just sent, continue
+                    if res == data:
+                        continue
+                    ip = con[0]
+                    # if the response starts with the magic nonsense
+                    if res.startswith("2500;111;"):
+                        res = res.split(";")
+                        port = None
+                        try:
+                            port = int(res[2])
+                            LOGGER.debug(f"Received answer from {ip}:{port} \"{res}\"")
+                        except Exception as e:
+                            LOGGER.debug(f"Received answer from {ip}:invalid_port \"{res}\"")                    
+                        return (ip, port)
+                    # if not, continue
+                    else:
+                        LOGGER.debug(f"Received answer, but with wrong magic bytes, from {ip} skip this one")
+                        continue
+                # if the timout triggers, go on an use the other broadcast port
+                except socket.timeout:
+                    break
 
     async def async_step_dhcp(self, discovery_info: dict):
         """Prepare configuration for a DHCP discovered Luxtronik heatpump."""
-        _LOGGER.info("Found device with hostname '%s' IP '%s'", discovery_info.get(HOSTNAME), discovery_info[IP_ADDRESS])
+        LOGGER.info("Found device with hostname '%s' IP '%s'", discovery_info.get(HOSTNAME), discovery_info[IP_ADDRESS])
+        # Validate dhcp result with socket broadcast:
+        broadcast_discover_ip, broadcast_discover_port = self.discover()
+        if broadcast_discover_ip != discovery_info[IP_ADDRESS]:
+            return
         await self.async_set_unique_id(discovery_info.get(HOSTNAME))
         self._abort_if_unique_id_configured()
 
-        self.discovery_host = discovery_info[IP_ADDRESS]
+        self._discovery_host = discovery_info[IP_ADDRESS]
+        self._discovery_port = DEFAULT_PORT if broadcast_discover_port is None else broadcast_discover_port
         self.discovery_schema = vol.Schema(
             {
-                vol.Required(CONF_HOST, default=discovery_info[IP_ADDRESS]): str,
-                vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
+                vol.Required(CONF_HOST, default=self._discovery_host): str,
+                vol.Required(CONF_PORT, default=self._discovery_port): int,
             }
         )
         return await self.async_step_user()
@@ -49,9 +92,9 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_HOST, default=self.discovery_host): cv.string,
+                    vol.Required(CONF_HOST, default=self._discovery_host): cv.string,
                     # vol.Required(CONF_PORT, default=DEFAULT_PORT): cv.port,
-                    vol.Required(CONF_PORT, default=DEFAULT_PORT): vol.Coerce(int),
+                    vol.Required(CONF_PORT, default=self._discovery_port): vol.Coerce(int),
                 }
             ),
             errors=errors or {},

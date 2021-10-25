@@ -1,4 +1,5 @@
 """Support for Luxtronik heatpump controllers."""
+# region Imports
 import threading
 from datetime import timedelta
 from typing import Optional
@@ -19,13 +20,15 @@ from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_CALCULATIONS,
                     CONF_COORDINATOR, CONF_LOCK_TIMEOUT, CONF_PARAMETERS,
                     CONF_SAFE, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
                     CONF_VISIBILITIES, DEFAULT_PORT, DOMAIN, LOGGER, PLATFORMS)
+# endregion Imports
 
+# region Constants
 LuxLogger.setLevel(level="WARNING")
 
 
 SERVICE_WRITE = "write"
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=1)
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -50,7 +53,7 @@ SERVICE_WRITE_SCHEMA = vol.Schema(
         vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),
     }
 )
-
+# endregion Constants
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up from config entry."""
@@ -58,7 +61,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     LOGGER.info("async_setup_entry '%s'", entry)
 
-    setup_int(hass, entry.data)
+    setup_internal(hass, entry.data)
 
     luxtronik = hass.data[DOMAIN]
 
@@ -105,10 +108,10 @@ def setup(hass, config):
         return True
     # LOGGER.info("async_setup '%s'", config)
     conf = config[DOMAIN]
-    return setup_int(hass, conf)
+    return setup_internal(hass, conf)
 
 
-def setup_int(hass, conf):
+def setup_internal(hass, conf):
     """Set up the Luxtronik component."""
     host = conf[CONF_HOST]
     port = conf[CONF_PORT]
