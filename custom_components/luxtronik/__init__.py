@@ -1,6 +1,7 @@
 """Support for Luxtronik heatpump controllers."""
 # region Imports
 import threading
+import time
 from datetime import timedelta
 from typing import Optional
 
@@ -9,6 +10,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import (CoordinatorEntity,
                                                       DataUpdateCoordinator)
 from homeassistant.util import Throttle
@@ -19,7 +21,9 @@ from luxtronik import Luxtronik as Lux
 from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_CALCULATIONS,
                     CONF_COORDINATOR, CONF_LOCK_TIMEOUT, CONF_PARAMETERS,
                     CONF_SAFE, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
-                    CONF_VISIBILITIES, DEFAULT_PORT, DOMAIN, LOGGER, PLATFORMS)
+                    CONF_VISIBILITIES, DEFAULT_PORT, DOMAIN, LOGGER,
+                    LUX_SENSOR_DETECT_COOLING, PLATFORMS)
+
 # endregion Imports
 
 # region Constants
@@ -120,8 +124,22 @@ def setup_internal(hass, conf):
     update_immediately_after_write = conf[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
 
     luxtronik = LuxtronikDevice(host, port, safe, lock_timeout)
+    luxtronik.read()
 
     hass.data[DOMAIN] = luxtronik
+    # Create DeviceInfos:
+    sn = luxtronik.get_value('parameters.ID_WP_SerienNummer_DATUM')
+    hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(luxtronik, sn)
+    hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
+        identifiers={(DOMAIN, 'Domestic_Water', sn)},
+        default_name='Domestic Water')
+    hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
+        identifiers={(DOMAIN, 'Heating', sn)},
+        default_name='Heating')
+    if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING):
+        hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = DeviceInfo(
+            identifiers={(DOMAIN, 'Cooling', sn)},
+            default_name='Cooling')
 
     def write_parameter(service):
         """Write a parameter to the Luxtronik heatpump."""
@@ -183,8 +201,6 @@ class LuxtronikDevice:
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
                 self._luxtronik.parameters.set(parameter, value)
                 self._luxtronik.write()
-                if update_immediately_after_write:
-                    self._luxtronik.read()
             else:
                 LOGGER.warning(
                     "Couldn't write luxtronik parameter %s with value %s because of lock timeout %s",
@@ -194,9 +210,15 @@ class LuxtronikDevice:
                 )
         finally:
             self.lock.release()
+            if update_immediately_after_write:
+                time.sleep(3)
+                self._luxtronik.read()
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
+        self.read()
+
+    def read(self):
         """Get the data from Luxtronik."""
         try:
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
@@ -208,6 +230,30 @@ class LuxtronikDevice:
                 )
         finally:
             self.lock.release()
+
+
+def build_device_info(luxtronik: LuxtronikDevice, sn: str) -> DeviceInfo:
+    model = luxtronik.get_value('calculations.ID_WEB_Code_WP_akt')
+    deviceInfo = DeviceInfo(
+        identifiers={(DOMAIN, 'Heatpump', sn)},
+        name=f"Heatpump S/N {sn}",
+        default_name='Heatpump',
+        default_manufacturer='Alpha Innotec',
+        manufacturer=get_manufacturer_by_model(model),
+        default_model='',
+        model=model,
+        sw_version=luxtronik.get_value('calculations.ID_WEB_SoftStand')
+    )
+    LOGGER.info("build_device_info '%s'", deviceInfo)
+    return deviceInfo
+
+
+def get_manufacturer_by_model(model: str) -> str:
+    if model is None:
+        return None
+    if model.startswith('LD'):
+        return 'Novelan'
+    return None
 
 
 async def async_unload_entry(hass, config_entry):

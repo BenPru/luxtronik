@@ -14,6 +14,7 @@ from homeassistant.components.climate.const import (ATTR_HVAC_MODE,
                                                     PRESET_BOOST, PRESET_NONE,
                                                     SUPPORT_PRESET_MODE,
                                                     SUPPORT_TARGET_TEMPERATURE)
+from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.components.water_heater import ATTR_TEMPERATURE
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_SENSORS, PRECISION_HALVES,
@@ -39,31 +40,38 @@ MAX_TEMPERATURE: Final = 48
 # endregion Constants
 
 
+async def async_setup_platform(
+    hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
+) -> None:
+    luxtronik: LuxtronikDevice = hass.data.get(LUXTRONIK_DOMAIN)
+    if not luxtronik:
+        LOGGER.warning("climate.async_setup_platform no luxtronik!")
+        return False
+
+    # build_device_info(luxtronik)
+    deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
+    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
+    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
+    entities = [
+        LuxtronikDomesticWaterThermostat(
+            hass, luxtronik, deviceInfoDomesticWater)
+        # , LuxtronikHeatingThermostat(hass, luxtronik, deviceInfoHeating)
+        ]
+
+    if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING):
+        deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
+        entities.append(LuxtronikCoolingThermostat(
+            hass, luxtronik, deviceInfoCooling))
+    async_add_entities(entities)
+
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up a Luxtronik thermostat from ConfigEntry."""
-    LOGGER.info("climate.async_setup_entry 1")
-    # coordinator = hass.data[LUXTRONIK_DOMAIN][entry.entry_id][CONF_COORDINATOR]
+    LOGGER.info("climate.async_setup_entry entry: '%s'", entry)
+    await async_setup_platform(hass, {}, async_add_entities)
 
-    luxtronik: LuxtronikDevice = hass.data.get(LUXTRONIK_DOMAIN)
-    LOGGER.info("climate.async_setup_entry 2")
-    if not luxtronik:
-        LOGGER.warning("climate.async_setup_entry no luxtronik!")
-        return False
-
-    deviceInfo = DeviceInfo(
-                identifiers={(LUXTRONIK_DOMAIN)},
-                name='Luxtronik',
-            )
-    entities = [
-        LuxtronikDomesticWaterThermostat(hass, luxtronik, deviceInfo)
-        # , LuxtronikHeatingThermostat(hass, luxtronik)
-        ]
-
-    if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING):
-        entities.append(LuxtronikCoolingThermostat(hass, luxtronik))
-    async_add_entities(entities)
 
 # class LuxtronikThermostat(CoordinatorEntity, ClimateEntity):
 class LuxtronikThermostat(ClimateEntity):
@@ -88,6 +96,8 @@ class LuxtronikThermostat(ClimateEntity):
         self._hass = hass
         self._luxtronik = luxtronik
         self._attr_device_info = deviceInfo
+        self.entity_id = ENTITY_ID_FORMAT.format(
+            f"{LUXTRONIK_DOMAIN}_{self._attr_unique_id}")
 
     @property
     def hvac_action(self):
@@ -158,7 +168,7 @@ class LuxtronikThermostat(ClimateEntity):
     async def async_set_hvac_mode(self, hvac_mode: str) -> None:
         """Set new operation mode."""
         self._luxtronik.write(self._heater_sensor.split('.')[1],
-            self.__get_luxmode(hvac_mode, self.preset_mode), False)
+                              self.__get_luxmode(hvac_mode, self.preset_mode), True)
 
     @property
     def preset_mode(self): # -> str | None:
@@ -177,7 +187,7 @@ class LuxtronikThermostat(ClimateEntity):
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set preset mode."""
         self._luxtronik.write(self._heater_sensor.split('.')[1],
-            self.__get_luxmode(self.hvac_mode, preset_mode), False)
+                              self.__get_luxmode(self.hvac_mode, preset_mode), True)
 
     # @property
     # def extra_state_attributes(self) -> ClimateExtraAttributes:
@@ -216,7 +226,7 @@ class LuxtronikThermostat(ClimateEntity):
 
 class LuxtronikDomesticWaterThermostat(LuxtronikThermostat):
     _attr_unique_id: Final = 'domestic_water'
-    _name = "Domestic Water"
+    _attr_name = "Domestic Water"
     _attr_icon = 'mdi:water-boiler'
     _attr_device_class: Final = f"{LUXTRONIK_DOMAIN}__{_attr_unique_id}"
 
