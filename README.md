@@ -19,5 +19,3 @@ Its only necessary to connect the Luxtronik controller to your network, no addit
 ## Configuration
 Your heatpump should autodiscovered by home assistant.
 If not, please give feedback with the first six chars of your luxtronik heatpump mac address and/or hostname.
-
-After discover you only have to set the port of the your heatpump. Normally it should be 8888 or 8889.
