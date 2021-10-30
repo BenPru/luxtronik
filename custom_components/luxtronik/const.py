@@ -22,7 +22,7 @@ CONF_COORDINATOR: Final = "coordinator"
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
 
 # "binary_sensor"
-PLATFORMS: Final[list[str]] = ["climate", "sensor"]
+PLATFORMS: Final[list[str]] = ["climate", "sensor", "number"]
 
 PRESET_SECOND_HEATSOURCE: Final = 'second_heatsource'
 

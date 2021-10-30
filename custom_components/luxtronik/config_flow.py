@@ -49,12 +49,12 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     # if the response starts with the magic nonsense
                     if res.startswith("2500;111;"):
                         res = res.split(";")
-                    LOGGER.debug(f"Received answer from {ip} \"{res}\"")
+                        LOGGER.debug(f"Received answer from {ip} \"{res}\"")
                         try:
                             port = int(res[2])
-                    except ValueError:
-                        LOGGER.debug("Response did not contain a valid port number, an old Luxtronic software version might be the reason.")
-                        port = None
+                        except ValueError:
+                            LOGGER.debug("Response did not contain a valid port number, an old Luxtronic software version might be the reason.")
+                            port = None
                         return (ip, port)
                     # if not, continue
                     else:

@@ -76,11 +76,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     #     data[device.ain] = device
     #     return data
-        
+
     # async def async_update_coordinator() -> dict[str, LuxtronikThermostat]:
     #     """Fetch all device data."""
     #     return await hass.async_add_executor_job(_update_luxtronik_devices)
-        
+
     # hass.data[DOMAIN][entry.entry_id][
     #     CONF_COORDINATOR
     # ] = coordinator = DataUpdateCoordinator(
@@ -136,10 +136,9 @@ def setup_internal(hass, conf):
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
         identifiers={(DOMAIN, 'Heating', sn)},
         default_name='Heating')
-    if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING):
-        hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = DeviceInfo(
-            identifiers={(DOMAIN, 'Cooling', sn)},
-            default_name='Cooling')
+    hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = DeviceInfo(
+        identifiers={(DOMAIN, 'Cooling', sn)},
+        default_name='Cooling') if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING) else None
 
     def write_parameter(service):
         """Write a parameter to the Luxtronik heatpump."""
@@ -178,9 +177,9 @@ class LuxtronikDevice:
 
     def get_sensor_by_id(self, group_sensor_id: str):
         try:
-	        group = group_sensor_id.split('.')[0]
-	        sensor_id = group_sensor_id.split('.')[1]
-	        return self.get_sensor(group, sensor_id)
+            group = group_sensor_id.split('.')[0]
+            sensor_id = group_sensor_id.split('.')[1]
+            return self.get_sensor(group, sensor_id)
         except Exception as e:
             LOGGER.critical(group_sensor_id, e, exc_info=True)
 

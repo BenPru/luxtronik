@@ -25,6 +25,9 @@ from .const import *
 # region Constants
 # endregion Constants
 
+# EVU active
+# ID_WEB_EVUin
+
 
 async def async_setup_platform(
     hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
@@ -68,8 +71,7 @@ async def async_setup_platform(
         LuxtronikSensor(hass, luxtronik, deviceInfoHeating, 'calculations.ID_WEB_Temperatur_TSS',
                         'solar_buffer_temperature', 'Solar Buffer Temperature', 'mdi:propane-tank-outline')
     ]
-    if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING):
-        deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
+    deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
 
     async_add_entities(entities)
 
@@ -105,7 +107,7 @@ class LuxtronikSensor(SensorEntity):
         self.entity_id = ENTITY_ID_FORMAT.format(
             f"{LUXTRONIK_DOMAIN}_{unique_id}")
         self._attr_unique_id = self.entity_id
-        # self._attr_device_class = device_class
+        self._attr_device_class = device_class
         self._attr_name = name
         self._icon = icon
         # self._attr_icon = icon
@@ -126,9 +128,13 @@ class LuxtronikSensor(SensorEntity):
         return self._icon
 
     @property
-    def native_value(self): # -> float | int | None:
+    def native_value(self):  # -> float | int | None:
         """Return the state of the sensor."""
         return self._luxtronik.get_value(self._sensor_key)
+
+    def update(self):
+        """Get the latest status and use it to update our sensor state."""
+        self._luxtronik.update()
 
     # @callback
     # def _update_and_write_state(self, *_):
