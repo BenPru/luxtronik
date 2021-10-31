@@ -18,6 +18,7 @@ from luxtronik import LOGGER as LuxLogger
 from luxtronik import Luxtronik as Lux
 
 # from . import LuxtronikThermostat
+from .debounce import debounce
 from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_CALCULATIONS,
                     CONF_COORDINATOR, CONF_LOCK_TIMEOUT, CONF_PARAMETERS,
                     CONF_SAFE, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
@@ -29,10 +30,9 @@ from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_CALCULATIONS,
 # region Constants
 LuxLogger.setLevel(level="WARNING")
 
-
 SERVICE_WRITE = "write"
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=1)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=10)
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -58,6 +58,7 @@ SERVICE_WRITE_SCHEMA = vol.Schema(
     }
 )
 # endregion Constants
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up from config entry."""
@@ -155,6 +156,7 @@ def setup_internal(hass, conf):
 
 class LuxtronikDevice:
     """Handle all communication with Luxtronik."""
+    __ignore_update = False
 
     def __init__(self, host, port, safe, lock_timeout_sec):
         """Initialize the Luxtronik connection."""
@@ -196,8 +198,15 @@ class LuxtronikDevice:
 
     def write(self, parameter, value, update_immediately_after_write):
         """Write a parameter to the Luxtronik heatpump."""
+        self.__ignore_update = True
+        self.__write(parameter, value, update_immediately_after_write)
+
+    @debounce(3)
+    def __write(self, parameter, value, update_immediately_after_write):
         try:
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
+                LOGGER.info('LuxtronikDevice.write %s value: "%s" - %s',
+                            parameter, value, update_immediately_after_write)
                 self._luxtronik.parameters.set(parameter, value)
                 self._luxtronik.write()
             else:
@@ -211,16 +220,22 @@ class LuxtronikDevice:
             self.lock.release()
             if update_immediately_after_write:
                 time.sleep(3)
-                self._luxtronik.read()
+                self.read()
+            self.__ignore_update = False
+            LOGGER.info(
+                'LuxtronikDevice.write finished %s value: "%s" - %s', parameter, value, update_immediately_after_write)
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
+        if self.__ignore_update:
+            return
         self.read()
 
     def read(self):
         """Get the data from Luxtronik."""
         try:
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
+                LOGGER.info('LuxtronikDevice.read')
                 self._luxtronik.read()
             else:
                 LOGGER.warning(
@@ -228,6 +243,7 @@ class LuxtronikDevice:
                     self._lock_timeout_sec,
                 )
         finally:
+            LOGGER.info('LuxtronikDevice.read finished')
             self.lock.release()
 
 

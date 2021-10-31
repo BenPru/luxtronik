@@ -101,7 +101,7 @@ class LuxtronikSensor(SensorEntity):
         unit_of_measurement: str = TEMP_CELSIUS,
     ) -> None:
         """Initialize the sensor."""
-        self._hass = hass
+        self.hass = hass
         self._luxtronik = luxtronik
 
         self.entity_id = ENTITY_ID_FORMAT.format(

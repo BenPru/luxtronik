@@ -22,8 +22,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import LuxtronikDevice
 from .const import *
-
-# from .debounce import debounce
+from .debounce import debounce
 
 # from homeassistant.components.number.const import MODE_AUTO, MODE_BOX, MODE_SLIDER
 
@@ -32,34 +31,6 @@ from .const import *
 
 # region Constants
 # endregion Constants
-
-def debounce(wait):
-    """ Decorator that will postpone a functions
-        execution until after wait seconds
-        have elapsed since the last time it was invoked. """
-
-    def decorator(fn):
-        def debounced(*args, **kwargs):
-            def call_it():
-                debounced._timer = None
-                debounced._last_call = time.time()
-                return fn(*args, **kwargs)
-
-            time_since_last_call = time.time() - debounced._last_call
-            if time_since_last_call >= wait:
-                return call_it()
-
-            if debounced._timer is None:
-                debounced._timer = Timer(wait - time_since_last_call, call_it)
-                debounced._timer.start()
-
-        debounced._timer = None
-        debounced._last_call = 0
-
-        return debounced
-
-    return decorator
-
 
 async def async_setup_platform(
     hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
@@ -93,7 +64,7 @@ async def async_setup_entry(
 
 class LuxtronikNumber(NumberEntity):
     """Representation of a Luxtronik number."""
-    _attr_should_poll = True
+    # _attr_should_poll = True
 
     def __init__(
         self,
@@ -160,31 +131,9 @@ class LuxtronikNumber(NumberEntity):
         """Return the state of the entity."""
         return self._luxtronik.get_value(self._number_key)
 
-    # @debounce(5)
     async def async_set_value(self, value: float) -> None:
-        # def set_value(self, value: float) -> None:
         """Update the current value."""
-        LOGGER.info('async_set_value value: "%s"', value)
-
         self._luxtronik.write(self._number_key.split('.')[1], value, False)
-
-        async def __async_set_value_internal():
-            await self.__async_set_value_internal(value)
-
-    #     Debouncer(
-    #         self._hass,
-    #         LOGGER,
-    #         cooldown=3,
-    #         immediate=True,
-    #         function=__async_set_value_internal,
-    #     ).async_call()
-
-    async def __async_set_value_internal(self, value) -> None:
-        LOGGER.info('__async_set_value_internal value: "%s"', value)
-    #     self._attr_value = value
-        self._luxtronik.write(self._number_key.split('.')[1], value, True)
-    #     await self.async_write_ha_state()
-        LOGGER.info('__async_set_value_internal ready value: "%s"', value)
 
     # @callback
     # def _update_and_write_state(self, *_):

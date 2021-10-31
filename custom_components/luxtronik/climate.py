@@ -73,6 +73,8 @@ async def async_setup_entry(
 
 
 # class LuxtronikThermostat(CoordinatorEntity, ClimateEntity):
+
+
 class LuxtronikThermostat(ClimateEntity):
     """Representation of a Luxtronik Thermostat device."""
 
@@ -162,7 +164,6 @@ class LuxtronikThermostat(ClimateEntity):
         elif hvac_mode == HVAC_MODE_AUTO:
             return LUX_MODE_AUTOMATIC
         return LUX_MODE_OFF
-
 
     async def async_set_hvac_mode(self, hvac_mode: str) -> None:
         """Set new operation mode."""
@@ -340,4 +341,3 @@ class LuxtronikCoolingThermostat(LuxtronikThermostat):
 #             if device.has_thermostat
 #         ]
 #     )
-
