@@ -133,7 +133,7 @@ class LuxtronikNumber(NumberEntity):
 
     async def async_set_value(self, value: float) -> None:
         """Update the current value."""
-        self._luxtronik.write(self._number_key.split('.')[1], value, False)
+        self._luxtronik.write(self._number_key.split('.')[1], value)
 
     # @callback
     # def _update_and_write_state(self, *_):

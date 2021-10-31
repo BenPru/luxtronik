@@ -139,7 +139,7 @@ class LuxtronikThermostat(ClimateEntity):
         self._attr_target_temperature = kwargs[ATTR_TEMPERATURE]
         if not self._target_temperature_sensor_write is None:
             self._luxtronik.write(
-                self._target_temperature_sensor_write, self._attr_target_temperature, True)
+                self._target_temperature_sensor_write, self._attr_target_temperature, debounce=False, update_immediately_after_write=True)
         elif not self._target_temperature_sensor is None:
             self._hass.states.set(
                 self._target_temperature_sensor, self._attr_target_temperature)
@@ -168,7 +168,7 @@ class LuxtronikThermostat(ClimateEntity):
     async def async_set_hvac_mode(self, hvac_mode: str) -> None:
         """Set new operation mode."""
         self._luxtronik.write(self._heater_sensor.split('.')[1],
-                              self.__get_luxmode(hvac_mode, self.preset_mode), True)
+                              self.__get_luxmode(hvac_mode, self.preset_mode), debounce=False, update_immediately_after_write=True)
 
     @property
     def preset_mode(self):  # -> str | None:
@@ -187,7 +187,7 @@ class LuxtronikThermostat(ClimateEntity):
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set preset mode."""
         self._luxtronik.write(self._heater_sensor.split('.')[1],
-                              self.__get_luxmode(self.hvac_mode, preset_mode), True)
+                              self.__get_luxmode(self.hvac_mode, preset_mode), debounce=False, update_immediately_after_write=True)
 
     # @property
     # def extra_state_attributes(self) -> ClimateExtraAttributes:

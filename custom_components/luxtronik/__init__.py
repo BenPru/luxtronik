@@ -196,12 +196,18 @@ class LuxtronikDevice:
             sensor = self._luxtronik.visibilities.get(sensor_id)
         return sensor
 
-    def write(self, parameter, value, update_immediately_after_write):
+    def write(self, parameter, value, debounce=True, update_immediately_after_write=False):
         """Write a parameter to the Luxtronik heatpump."""
         self.__ignore_update = True
-        self.__write(parameter, value, update_immediately_after_write)
+        if debounce:
+            self.__write_debounced(parameter, value, update_immediately_after_write)
+        else:
+            self.__write(parameter, value, update_immediately_after_write)
 
     @debounce(3)
+    def __write_debounced(self, parameter, value, update_immediately_after_write):
+        self.__write(parameter, value, update_immediately_after_write)
+
     def __write(self, parameter, value, update_immediately_after_write):
         try:
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
