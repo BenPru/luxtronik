@@ -190,7 +190,7 @@ class LuxtronikThermostat(ClimateEntity):
                               self.__get_luxmode(hvac_mode, self.preset_mode), debounce=False, update_immediately_after_write=True)
 
     @property
-    def preset_mode(self) -> str | None:
+    def preset_mode(self) -> str:  # | None:
         """Return current preset mode."""
         luxmode = self._luxtronik.get_value(self._heater_sensor)
         if luxmode == LUX_MODE_OFF and self._control_mode_home_assistant and self.hvac_action == CURRENT_HVAC_IDLE:
