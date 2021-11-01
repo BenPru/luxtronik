@@ -16,5 +16,14 @@
         "description": "Richte deine Luxtronik W\u00e4rmepumpe ein um sie zu \u00fcberwachen und zu steuern."
       }
     }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "control_mode_home_assistant": "Thermostat An/Aus-Status durch Home Assistant steuern. - D.h. wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus übermittelt und Luxtronik kann dieses Element nicht starten."
+        }
+      }
+    }
   }
 }

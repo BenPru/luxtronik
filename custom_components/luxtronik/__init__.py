@@ -2,11 +2,8 @@
 # region Imports
 import threading
 import time
-from datetime import timedelta
 from typing import Optional
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant
@@ -17,46 +14,20 @@ from homeassistant.util import Throttle
 from luxtronik import LOGGER as LuxLogger
 from luxtronik import Luxtronik as Lux
 
-# from . import LuxtronikThermostat
-from .debounce import debounce
 from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_CALCULATIONS,
                     CONF_COORDINATOR, CONF_LOCK_TIMEOUT, CONF_PARAMETERS,
                     CONF_SAFE, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
                     CONF_VISIBILITIES, DEFAULT_PORT, DOMAIN, LOGGER,
-                    LUX_SENSOR_DETECT_COOLING, PLATFORMS)
+                    LUX_SENSOR_DETECT_COOLING, MIN_TIME_BETWEEN_UPDATES,
+                    PLATFORMS, SERVICE_WRITE, SERVICE_WRITE_SCHEMA)
+# from . import LuxtronikThermostat
+from .helpers.debounce import debounce
+from .helpers.lux_helper import get_manufacturer_by_model
 
 # endregion Imports
 
 # region Constants
 LuxLogger.setLevel(level="WARNING")
-
-SERVICE_WRITE = "write"
-
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=10)
-
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_HOST): cv.string,
-                vol.Required(CONF_PORT, default=DEFAULT_PORT): cv.port,
-                vol.Optional(CONF_SAFE, default=True): cv.boolean,
-                vol.Optional(CONF_LOCK_TIMEOUT, default=30): cv.positive_int,
-                vol.Optional(
-                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, default=False
-                ): cv.boolean,
-            }
-        )
-    },
-    extra=vol.ALLOW_EXTRA,
-)
-
-SERVICE_WRITE_SCHEMA = vol.Schema(
-    {
-        vol.Required(ATTR_PARAMETER): cv.string,
-        vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),
-    }
-)
 # endregion Constants
 
 
@@ -107,6 +78,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 # async def async_setup(hass, config):
 
 
+def setup_hass_services(hass):
+    """Home Assistant services."""
+
+    LOGGER.info('setup_hass_services')
+
+    def write_parameter(service):
+        """Write a parameter to the Luxtronik heatpump."""
+        parameter = service.data.get(ATTR_PARAMETER)
+        value = service.data.get(ATTR_VALUE)
+        luxtronik = hass.data[DOMAIN]
+        update_immediately_after_write = hass.data[f"{DOMAIN}_conf"][CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
+        luxtronik.write(parameter, value, debounce=True,
+                        update_immediately_after_write=update_immediately_after_write)
+
+    hass.services.register(
+        DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
+    )
+
+
 def setup(hass, config):
     if DOMAIN not in config:
         # Setup via UI. No need to continue yaml-based setup
@@ -128,6 +118,7 @@ def setup_internal(hass, conf):
     luxtronik.read()
 
     hass.data[DOMAIN] = luxtronik
+    hass.data[f"{DOMAIN}_conf"] = conf
     # Create DeviceInfos:
     sn = luxtronik.get_value('parameters.ID_WP_SerienNummer_DATUM')
     hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(luxtronik, sn)
@@ -140,17 +131,6 @@ def setup_internal(hass, conf):
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = DeviceInfo(
         identifiers={(DOMAIN, 'Cooling', sn)},
         default_name='Cooling') if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING) else None
-
-    def write_parameter(service):
-        """Write a parameter to the Luxtronik heatpump."""
-        parameter = service.data.get(ATTR_PARAMETER)
-        value = service.data.get(ATTR_VALUE)
-        luxtronik.write(parameter, value, update_immediately_after_write)
-
-    # hass.services.register(
-    #     DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
-    # )
-
     return True
 
 
@@ -200,7 +180,8 @@ class LuxtronikDevice:
         """Write a parameter to the Luxtronik heatpump."""
         self.__ignore_update = True
         if debounce:
-            self.__write_debounced(parameter, value, update_immediately_after_write)
+            self.__write_debounced(
+                parameter, value, update_immediately_after_write)
         else:
             self.__write(parameter, value, update_immediately_after_write)
 
@@ -267,14 +248,6 @@ def build_device_info(luxtronik: LuxtronikDevice, sn: str) -> DeviceInfo:
     )
     LOGGER.info("build_device_info '%s'", deviceInfo)
     return deviceInfo
-
-
-def get_manufacturer_by_model(model: str) -> str:
-    if model is None:
-        return None
-    if model.startswith('LD'):
-        return 'Novelan'
-    return None
 
 
 async def async_unload_entry(hass, config_entry):

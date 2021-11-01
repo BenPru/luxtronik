@@ -14,7 +14,6 @@ from homeassistant.const import (CONF_SENSORS, DEVICE_CLASS_TEMPERATURE,
                                  DEVICE_CLASS_TIMESTAMP, PRECISION_HALVES,
                                  PRECISION_TENTHS, TEMP_CELSIUS, TIME_SECONDS)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity import DeviceInfo, async_generate_entity_id
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, StateType
@@ -22,7 +21,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import LuxtronikDevice
 from .const import *
-from .debounce import debounce
 
 # from homeassistant.components.number.const import MODE_AUTO, MODE_BOX, MODE_SLIDER
 

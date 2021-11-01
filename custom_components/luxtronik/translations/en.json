@@ -16,5 +16,14 @@
         "description": "Set up your Luxtronik heatpump controller to allow monitoring and control."
       }
     }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "control_mode_home_assistant": "Control thermostat on / off status through Home Assistant. - I.e. if the Home Assistant thermostat is in the idle status, the status off is transmitted to Luxtronik and Luxtronik cannot start this element."
+        }
+      }
+    }
   }
 }

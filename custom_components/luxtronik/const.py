@@ -1,9 +1,15 @@
 """Constants for the Paul Novus 300 Bus integration."""
 import logging
+from datetime import timedelta
 from typing import Dict, Final
+
+import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
+from homeassistant.const import CONF_HOST, CONF_PORT
 
 DOMAIN: Final = "luxtronik2"
 
+LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
 DEFAULT_PORT: Final = 8888
 
 ATTR_PARAMETER: Final = "parameter"
@@ -19,7 +25,36 @@ CONF_VISIBILITIES: Final = "visibilities"
 
 CONF_COORDINATOR: Final = "coordinator"
 
-LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
+CONF_CONTROL_MODE_HOME_ASSISTANT = "control_mode_home_assistant"
+
+
+SERVICE_WRITE = "write"
+
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=10)
+
+CONFIG_SCHEMA = vol.Schema(
+    {
+        DOMAIN: vol.Schema(
+            {
+                vol.Required(CONF_HOST): cv.string,
+                vol.Required(CONF_PORT, default=DEFAULT_PORT): cv.port,
+                vol.Optional(CONF_SAFE, default=True): cv.boolean,
+                vol.Optional(CONF_LOCK_TIMEOUT, default=30): cv.positive_int,
+                vol.Optional(
+                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, default=False
+                ): cv.boolean,
+            }
+        )
+    },
+    extra=vol.ALLOW_EXTRA,
+)
+
+SERVICE_WRITE_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_PARAMETER): cv.string,
+        vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),
+    }
+)
 
 # "binary_sensor"
 PLATFORMS: Final[list[str]] = ["climate", "sensor", "number"]
