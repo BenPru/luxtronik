@@ -28,6 +28,7 @@ from .helpers.lux_helper import get_manufacturer_by_model
 
 # region Constants
 LuxLogger.setLevel(level="WARNING")
+# LOGGER.setLevel(level="WARNING")
 # endregion Constants
 
 
@@ -73,6 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, logout_luxtronik)
     )
+    await hass.async_add_executor_job(setup_hass_services, hass)
     return True
 
 # async def async_setup(hass, config):
@@ -80,8 +82,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 def setup_hass_services(hass):
     """Home Assistant services."""
-
-    LOGGER.info('setup_hass_services')
 
     def write_parameter(service):
         """Write a parameter to the Luxtronik heatpump."""
@@ -222,7 +222,6 @@ class LuxtronikDevice:
         """Get the data from Luxtronik."""
         try:
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
-                LOGGER.info('LuxtronikDevice.read')
                 self._luxtronik.read()
             else:
                 LOGGER.warning(
@@ -230,7 +229,6 @@ class LuxtronikDevice:
                     self._lock_timeout_sec,
                 )
         finally:
-            LOGGER.info('LuxtronikDevice.read finished')
             self.lock.release()
 
 

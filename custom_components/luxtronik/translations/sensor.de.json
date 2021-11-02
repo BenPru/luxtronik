@@ -1,0 +1,49 @@
+{
+  "state": {
+    "luxtronik2__status": {
+      "heating": "Heizt",
+      "hot water": "Warmwasser",
+      "swimming pool/solar": "Pool / Solar",
+      "evu": "Netzsperre - kein Strom",
+      "defrost": "Abtauen",
+      "heating external source": "Heizt aus externer Quelle",
+      "cooling": "K\u00fchlen",
+      "no request": "Standby (keine Anfrage)"
+    },
+    "luxtronik2__status_line_1": {
+      "heatpump running": "Die W\u00e4rmepumpe l\u00e4uft",
+      "heatpump idle": "Die W\u00e4rmepumpe ist im Leerlauf",
+      "heatpump coming": "Die W\u00e4rmepumpe startet",
+      "errorcode slot": "W\u00e4rmepumpe Fehlercode in Schacht 0",
+      "pump forerun": "Pumpenvorlauf",
+      "defrost": "Taut ab",
+      "witing on LIN connection": "Schreibt auf LIN Verbindung",
+      "compressor heating up": "Der Kompressor heizt auf"
+    },
+    "luxtronik2__status_line_2": {
+      "since": "seit",
+      "in": "in"
+    },
+    "luxtronik2__status_line_3": {
+      "heating": "heizt",
+      "defrost": "abtauen",
+      "cooling": "k\u00fchlen",
+      "pump forerun": "Pumpenvorlauf",
+      "thermal desinfection": "thermische Desinfektion",
+      "swimming pool/solar": "Pool / Solar",
+      "no request": "keine Anfrage",
+      "cycle lock": "Einschaltsperre",
+      "lock time": "Sperrzeit",
+      "domestic water": "Brauchwasser",
+      "flow monitoring": "Durchfluss\u00fcberwachung",
+      "grid switch on delay": "Verz\u00f6gerung beim Einschalten des Netzes",
+      "info bake out program": "Information aus Aufheizprogramm",
+      "heating external engery source": "heizen aus externer Energiequelle",
+      "domestic water external energy source": "Brauchwasser aus externer Energiequelle",
+      "second heat generator 1 active": "zweiter W\u00e4rmeerzeuger 1 aktiv"
+    },
+    "_": {
+      "no request": "Test 0"
+    }
+  }
+}

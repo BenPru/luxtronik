@@ -42,13 +42,17 @@ async def async_setup_platform(
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     entities = [
-        LuxtronikNumber(hass, luxtronik, deviceInfoHeating, 'parameters.ID_Einst_WK_akt',
+        LuxtronikNumber(hass, luxtronik, deviceInfoHeating, LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
                         'heating_temperature_correction', 'Temperature Correction', False,
                         'mdi:plus-minus-variant', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
                         TEMP_CELSIUS, -5.0, 5.0, 0.5),
+
+        LuxtronikNumber(hass, luxtronik, deviceInfoDomesticWater, LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
+                        'domestic_water_target_temperature', 'Domestic Water Target Temperature', False,
+                        'mdi:water-boiler', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
+                        TEMP_CELSIUS, 40.0, 60.0, 2.5),
     ]
-    if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING):
-        deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
+    deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
 
     async_add_entities(entities)
 

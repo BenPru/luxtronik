@@ -11,7 +11,8 @@ from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import (CONF_CONTROL_MODE_HOME_ASSISTANT, CONF_LOCK_TIMEOUT,
+from .const import (CONF_CONTROL_MODE_HOME_ASSISTANT,
+                    CONF_HA_SENSOR_INDOOR_TEMPERATURE, CONF_LOCK_TIMEOUT,
                     CONF_SAFE, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
                     DEFAULT_PORT, DOMAIN, LOGGER)
 from .helpers.lux_helper import discover
@@ -57,7 +58,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_HOST, default=self._discovery_host): cv.string,
-                    # vol.Required(CONF_PORT, default=DEFAULT_PORT): cv.port,
                     vol.Required(CONF_PORT, default=self._discovery_port): vol.Coerce(int),
                 }
             ),
@@ -120,9 +120,11 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         if not options:
             options = {
                 CONF_CONTROL_MODE_HOME_ASSISTANT: False,
+                CONF_HA_SENSOR_INDOOR_TEMPERATURE: ''
             }
         return {
             vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=options.get(CONF_CONTROL_MODE_HOME_ASSISTANT)): bool,
+            vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=options.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)): str,
         }
 
     async def async_step_init(self, _user_input=None):

@@ -21,8 +21,11 @@
     "step": {
       "user": {
         "data": {
-          "control_mode_home_assistant": "Thermostat An/Aus-Status durch Home Assistant steuern. - D.h. wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus übermittelt und Luxtronik kann dieses Element nicht starten."
-        }
+          "control_mode_home_assistant": "Thermostat An/Aus-Status durch Home Assistant steuern. - D.h. wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
+          "ha_sensor_indoor_temperature": "Home Assistant Sensor ID f\u00fcr die Innentemperatur"
+        },
+        "description": "description Test",
+        "title": "Titel Test!"
       }
     }
   }
