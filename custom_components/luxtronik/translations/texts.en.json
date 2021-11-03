@@ -1,0 +1,16 @@
+{
+  "average": "Average",
+  "outdoor": "Outdoor",
+  "output": "Output",
+  "time": "Time",
+  "domestic_water": "Domestic Water",
+  "target": "Target",
+  "temperature": "Temperature",
+  "buffer": "Buffer",
+  "collector": "Collector",
+  "flow_in": "Flow In",
+  "flow_out": "Flow Out",
+  "correction": "Correction",
+  "heating": "Heating",
+  "heatpump": "Heatpump"
+}

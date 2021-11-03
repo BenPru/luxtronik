@@ -11,7 +11,10 @@
       "user": {
         "data": {
           "host": "Hostname or ip address",
-          "port": "Network Port (Usually 8888 or 8889)"
+          "port": "Network Port (Usually 8888 or 8889)",
+          "control_mode_home_assistant": "Control thermostat on / off status through Home Assistant. - I.e. if the Home Assistant thermostat is in the idle status, the status off is transmitted to Luxtronik and Luxtronik cannot start this element.",
+          "ha_sensor_indoor_temperature": "Home Assistant sensor id for the current indoor temperature",
+          "language_sensor_names": "Language key Sensor Names"
         },
         "description": "Set up your Luxtronik heatpump controller to allow monitoring and control."
       }
@@ -22,8 +25,11 @@
       "user": {
         "data": {
           "control_mode_home_assistant": "Control thermostat on / off status through Home Assistant. - I.e. if the Home Assistant thermostat is in the idle status, the status off is transmitted to Luxtronik and Luxtronik cannot start this element.",
-          "ha_sensor_indoor_temperature": "Home Assistant sensor id for the current indoor temperature"
-        }
+          "ha_sensor_indoor_temperature": "Home Assistant sensor id for the current indoor temperature",
+          "language_sensor_names": "Language key Sensor Names"
+        },
+        "description": "Please restart the integration manually after change the configuration.",
+        "title": "Configuration Luxtronik"
       }
     }
   }

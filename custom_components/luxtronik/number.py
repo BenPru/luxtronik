@@ -21,9 +21,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import LuxtronikDevice
 from .const import *
-
-# from homeassistant.components.number.const import MODE_AUTO, MODE_BOX, MODE_SLIDER
-
+from .helpers.helper import get_sensor_text
 
 # endregion Imports
 
@@ -33,35 +31,43 @@ from .const import *
 async def async_setup_platform(
     hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
 ) -> None:
+    pass
+
+
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up a Luxtronik number from ConfigEntry."""
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
-        LOGGER.warning("number.async_setup_platform no luxtronik!")
+        LOGGER.warning("number.async_setup_entry no luxtronik!")
         return False
 
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
+
+    # Build Sensor names with local language:
+    lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
+    text_temp = get_sensor_text(lang, 'temperature')
+    text_target = get_sensor_text(lang, 'target')
+    text_domestic_water = get_sensor_text(lang, 'domestic_water')
+    text_correction = get_sensor_text(lang, 'correction')
+
     entities = [
         LuxtronikNumber(hass, luxtronik, deviceInfoHeating, LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
-                        'heating_temperature_correction', 'Temperature Correction', False,
+                        'heating_temperature_correction', f"{text_temp} {text_correction}", False,
                         'mdi:plus-minus-variant', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
                         TEMP_CELSIUS, -5.0, 5.0, 0.5),
 
         LuxtronikNumber(hass, luxtronik, deviceInfoDomesticWater, LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
-                        'domestic_water_target_temperature', 'Domestic Water Target Temperature', False,
+                        'domestic_water_target_temperature', f"{text_domestic_water} {text_target} {text_temp}", False,
                         'mdi:water-boiler', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
                         TEMP_CELSIUS, 40.0, 60.0, 2.5),
     ]
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
 
     async_add_entities(entities)
-
-
-async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
-) -> None:
-    """Set up a Luxtronik number from ConfigEntry."""
-    await async_setup_platform(hass, {}, async_add_entities)
 
 
 class LuxtronikNumber(NumberEntity):

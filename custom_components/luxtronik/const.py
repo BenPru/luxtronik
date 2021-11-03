@@ -1,6 +1,7 @@
 """Constants for the Paul Novus 300 Bus integration."""
 import logging
 from datetime import timedelta
+from enum import Enum
 from typing import Dict, Final
 
 import homeassistant.helpers.config_validation as cv
@@ -24,6 +25,8 @@ DEFAULT_TOLERANCE = 0.3
 ATTR_PARAMETER: Final = "parameter"
 ATTR_VALUE: Final = "value"
 
+ATTR_STATUS_TEXT: Final = "status_text"
+
 CONF_SAFE: Final = "safe"
 CONF_LOCK_TIMEOUT: Final = "lock_timeout"
 CONF_UPDATE_IMMEDIATELY_AFTER_WRITE: Final = "update_immediately_after_write"
@@ -36,11 +39,17 @@ CONF_COORDINATOR: Final = "coordinator"
 
 CONF_CONTROL_MODE_HOME_ASSISTANT = "control_mode_home_assistant"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE = "ha_sensor_indoor_temperature"
+CONF_LANGUAGE_SENSOR_NAMES = "language_sensor_names"
 
 
 SERVICE_WRITE = "write"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=10)
+
+LANG_EN = 'en'
+LANG_DE = 'de'
+LANG_DEFAULT = LANG_EN
+LANGUAGES = Enum(LANG_EN, LANG_DE)
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -85,6 +94,9 @@ LUX_STATUS_DEFROST: Final = 'defrost'                                   # 4
 LUX_STATUS_NO_REQUEST: Final = 'no request'                             # 5
 LUX_STATUS_HEATING_EXTERNAL_SOURCE: Final = 'heating external source'   # 6
 LUX_STATUS_COOLING: Final = 'cooling'                                   # 7
+
+LUX_STATES_ON = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER, LUX_STATUS_SWIMMING_POOL_SOLAR,
+                 LUX_STATUS_DEFROST, LUX_STATUS_HEATING_EXTERNAL_SOURCE, LUX_STATUS_COOLING]
 
 LUX_STATE_ICON_MAP: Dict[str, str] = {
     LUX_STATUS_HEATING: 'mdi:radiator',

@@ -1,0 +1,16 @@
+{
+  "average": "Mittel",
+  "outdoor": "Außen",
+  "output": "Ausgang",
+  "time": "Zeit",
+  "domestic_water": "Brauchwasser",
+  "target": "Soll",
+  "temperature": "Temperatur",
+  "buffer": "Puffer",
+  "collector": "Kollektor",
+  "flow_in": "Vorlauf",
+  "flow_out": "Rücklauf",
+  "correction": "Korrektur",
+  "heating": "Heizung",
+  "heatpump": "Wärmepumpe"
+}

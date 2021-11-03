@@ -15,13 +15,15 @@ from luxtronik import LOGGER as LuxLogger
 from luxtronik import Luxtronik as Lux
 
 from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_CALCULATIONS,
-                    CONF_COORDINATOR, CONF_LOCK_TIMEOUT, CONF_PARAMETERS,
-                    CONF_SAFE, CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
-                    CONF_VISIBILITIES, DEFAULT_PORT, DOMAIN, LOGGER,
+                    CONF_COORDINATOR, CONF_LANGUAGE_SENSOR_NAMES,
+                    CONF_LOCK_TIMEOUT, CONF_PARAMETERS, CONF_SAFE,
+                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, CONF_VISIBILITIES,
+                    DEFAULT_PORT, DOMAIN, LANG_DEFAULT, LOGGER,
                     LUX_SENSOR_DETECT_COOLING, MIN_TIME_BETWEEN_UPDATES,
                     PLATFORMS, SERVICE_WRITE, SERVICE_WRITE_SCHEMA)
 # from . import LuxtronikThermostat
 from .helpers.debounce import debounce
+from .helpers.helper import get_sensor_text
 from .helpers.lux_helper import get_manufacturer_by_model
 
 # endregion Imports
@@ -114,6 +116,12 @@ def setup_internal(hass, conf):
     lock_timeout = conf[CONF_LOCK_TIMEOUT]
     update_immediately_after_write = conf[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
 
+    # Build Sensor names with local language:
+    lang = conf[CONF_LANGUAGE_SENSOR_NAMES] if CONF_LANGUAGE_SENSOR_NAMES in conf else LANG_DEFAULT
+    text_domestic_water = get_sensor_text(lang, 'domestic_water')
+    text_heating = get_sensor_text(lang, 'heating')
+    text_heatpump = get_sensor_text(lang, 'heatpump')
+
     luxtronik = LuxtronikDevice(host, port, safe, lock_timeout)
     luxtronik.read()
 
@@ -121,13 +129,14 @@ def setup_internal(hass, conf):
     hass.data[f"{DOMAIN}_conf"] = conf
     # Create DeviceInfos:
     sn = luxtronik.get_value('parameters.ID_WP_SerienNummer_DATUM')
-    hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(luxtronik, sn)
+    hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(
+        luxtronik, sn, text_heatpump)
     hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
         identifiers={(DOMAIN, 'Domestic_Water', sn)},
-        default_name='Domestic Water')
+        default_name=text_domestic_water)
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
         identifiers={(DOMAIN, 'Heating', sn)},
-        default_name='Heating')
+        default_name=text_heating)
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = DeviceInfo(
         identifiers={(DOMAIN, 'Cooling', sn)},
         default_name='Cooling') if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING) else None
@@ -232,12 +241,12 @@ class LuxtronikDevice:
             self.lock.release()
 
 
-def build_device_info(luxtronik: LuxtronikDevice, sn: str) -> DeviceInfo:
+def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str) -> DeviceInfo:
     model = luxtronik.get_value('calculations.ID_WEB_Code_WP_akt')
     deviceInfo = DeviceInfo(
         identifiers={(DOMAIN, 'Heatpump', sn)},
-        name=f"Heatpump S/N {sn}",
-        default_name='Heatpump',
+        name=f"{name} S/N {sn}",
+        default_name=name,
         default_manufacturer='Alpha Innotec',
         manufacturer=get_manufacturer_by_model(model),
         default_model='',
