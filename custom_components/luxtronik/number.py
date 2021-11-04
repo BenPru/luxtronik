@@ -1,23 +1,18 @@
 """Luxtronik heatpump number."""
 # region Imports
-import logging
-import time
 from threading import Timer
 from typing import Any, Final, Literal
 
 from homeassistant.components.number import NumberEntity
+from homeassistant.components.number.const import MODE_AUTO, MODE_BOX
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
-                                             STATE_CLASS_MEASUREMENT,
-                                             SensorEntity)
+                                             STATE_CLASS_MEASUREMENT)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (CONF_SENSORS, DEVICE_CLASS_TEMPERATURE,
-                                 DEVICE_CLASS_TIMESTAMP, PRECISION_HALVES,
-                                 PRECISION_TENTHS, TEMP_CELSIUS, TIME_SECONDS)
+from homeassistant.const import DEVICE_CLASS_TEMPERATURE, TEMP_CELSIUS
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo, async_generate_entity_id
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, StateType
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.typing import ConfigType
 
 from . import LuxtronikDevice
 from .const import *
@@ -27,6 +22,9 @@ from .helpers.helper import get_sensor_text
 
 # region Constants
 # endregion Constants
+
+# region Setup
+
 
 async def async_setup_platform(
     hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
@@ -58,16 +56,17 @@ async def async_setup_entry(
         LuxtronikNumber(hass, luxtronik, deviceInfoHeating, LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
                         'heating_temperature_correction', f"{text_temp} {text_correction}", False,
                         'mdi:plus-minus-variant', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
-                        TEMP_CELSIUS, -5.0, 5.0, 0.5),
+                        TEMP_CELSIUS, -5.0, 5.0, 0.5, mode=MODE_BOX),
 
         LuxtronikNumber(hass, luxtronik, deviceInfoDomesticWater, LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                         'domestic_water_target_temperature', f"{text_domestic_water} {text_target} {text_temp}", False,
                         'mdi:water-boiler', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
-                        TEMP_CELSIUS, 40.0, 60.0, 2.5),
+                        TEMP_CELSIUS, 40.0, 60.0, 2.5, mode=MODE_BOX),
     ]
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
 
     async_add_entities(entities)
+# endregion Setup
 
 
 class LuxtronikNumber(NumberEntity):
@@ -91,7 +90,7 @@ class LuxtronikNumber(NumberEntity):
         min_value: float = None,  # | None = None,
         max_value: float = None,  # | None = None,
         step: float = None,  # | None = None,
-        mode: Literal["auto", "box", "slider"] = "auto",  # MODE_AUTO,
+        mode: Literal["auto", "box", "slider"] = MODE_AUTO
     ) -> None:
         """Initialize the number."""
         self._hass = hass

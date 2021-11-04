@@ -95,6 +95,9 @@ LUX_STATUS_NO_REQUEST: Final = 'no request'                             # 5
 LUX_STATUS_HEATING_EXTERNAL_SOURCE: Final = 'heating external source'   # 6
 LUX_STATUS_COOLING: Final = 'cooling'                                   # 7
 
+LUX_STATUS_NONE: Final = 'None'
+LUX_STATUS_UNKNOWN: Final = 'unknown'
+
 LUX_STATES_ON = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER, LUX_STATUS_SWIMMING_POOL_SOLAR,
                  LUX_STATUS_DEFROST, LUX_STATUS_HEATING_EXTERNAL_SOURCE, LUX_STATUS_COOLING]
 
@@ -112,15 +115,23 @@ LUX_STATE_ICON_MAP: Dict[str, str] = {
 # region Luxtronik Sensor ids
 LUX_SENSOR_DETECT_COOLING: Final = 'calculations.ID_WEB_FreigabKuehl'
 LUX_SENSOR_STATUS: Final = 'calculations.ID_WEB_WP_BZ_akt'
+LUX_SENSOR_STATUS3: Final = 'calculations.ID_WEB_HauptMenuStatus_Zeile3'
+LUX_STATUS3_WORKAROUND: Final = [LUX_STATUS_NO_REQUEST] # LUX_STATUS_UNKNOWN, LUX_STATUS_NONE, 
 
 LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION: Final = 'parameters.ID_Einst_WK_akt'
-LUX_SENSOR_HEATING_HEATER: Final = 'parameters.ID_Ba_Hz_akt'
+LUX_SENSOR_MODE_HEATING: Final = 'parameters.ID_Ba_Hz_akt'
 
 LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE: Final = 'calculations.ID_WEB_Temperatur_TBW'
 LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = 'parameters.ID_Einst_BWS_akt'
 # LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = 'calculations.ID_WEB_Einst_BWS_akt'
 # LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE_WRITE: Final = 'ID_Einst_BWS_akt'
-LUX_SENSOR_DOMESTIC_WATER_HEATER: Final = 'parameters.ID_Ba_Bw_akt'
+LUX_SENSOR_MODE_DOMESTIC_WATER: Final = 'parameters.ID_Ba_Bw_akt'
+
+LUX_SENSOR_MODE_COOLING: Final = 'parameters.ID_Einst_BA_Kuehl_akt'
+LUX_SENSOR_MODE_FAN: Final = 'parameters.ID_Einst_BA_Lueftung_akt'
+# LUX_SENSOR_MODE_???: Final = 'parameters.ID_Ba_Sw_akt'
+LUX_SENSORS_MODE = [LUX_SENSOR_MODE_HEATING, LUX_SENSOR_MODE_DOMESTIC_WATER,
+                    LUX_SENSOR_MODE_COOLING, LUX_SENSOR_MODE_FAN]
 # endregion Luxtronik Sensor ids
 
 # region Legacy consts

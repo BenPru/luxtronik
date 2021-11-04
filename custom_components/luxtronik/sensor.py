@@ -34,6 +34,7 @@ from .model import LuxtronikStatusExtraAttributes
 # ID_WEB_EVUin
 
 
+# region Setup
 async def async_setup_platform(
     hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
 ) -> None:
@@ -116,7 +117,7 @@ async def async_setup_entry(
     entities = [
         # LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt',
         #                 'status', 'Status', 'mdi:text-short', f"{DOMAIN}__status", None, None),
-        LuxtronikStatusSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt',
+        LuxtronikStatusSensor(hass, luxtronik, deviceInfo, LUX_SENSOR_STATUS,
                               'status', 'Status', LUX_STATE_ICON_MAP, f"{DOMAIN}__status", None, None),
         # LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt',
         #                 'status', 'Status', LUX_STATE_ICON_MAP, 'status', None, None),  # 'mdi:text-short'
@@ -151,6 +152,7 @@ async def async_setup_entry(
     ]
 
     async_add_entities(entities)
+# endregion Setup
 
 
 class LuxtronikSensor(SensorEntity, RestoreEntity):
@@ -180,15 +182,11 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         self._attr_device_class = device_class
         self._attr_name = name
         self._icon = icon
-        # self._attr_icon = icon
         self._attr_native_unit_of_measurement = unit_of_measurement
         self._sensor_key = sensor_key
         self._attr_state_class = state_class
 
         self._attr_device_info = deviceInfo
-
-        # self._luxtronik.write(
-        #     self._target_temperature_sensor_write, self._attr_target_temperature, True)
 
     @property
     def icon(self):  # -> str | None:
@@ -202,7 +200,15 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
     @property
     def native_value(self):  # -> float | int | None:
         """Return the state of the sensor."""
-        return self._luxtronik.get_value(self._sensor_key)
+        value = self._luxtronik.get_value(self._sensor_key)
+
+        # region Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+        if self._sensor_key == LUX_SENSOR_STATUS and value == LUX_STATUS_HEATING:
+            if self._luxtronik.get_value(LUX_SENSOR_STATUS3) in LUX_STATUS3_WORKAROUND:
+                return LUX_STATUS_NO_REQUEST
+        # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+
+        return value
 
     def update(self):
         """Get the latest status and use it to update our sensor state."""

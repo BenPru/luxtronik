@@ -1,19 +1,14 @@
 """Luxtronik heatpump climate thermostat."""
 # region Imports
-import logging
 import math
 from typing import Any, Final
 
 from homeassistant.components.climate import ClimateEntity
-from homeassistant.components.climate.const import (ATTR_HVAC_MODE,
-                                                    CURRENT_HVAC_COOL,
-                                                    CURRENT_HVAC_DRY,
-                                                    CURRENT_HVAC_FAN,
+from homeassistant.components.climate.const import (CURRENT_HVAC_COOL,
                                                     CURRENT_HVAC_HEAT,
                                                     CURRENT_HVAC_IDLE,
                                                     CURRENT_HVAC_OFF,
                                                     HVAC_MODE_AUTO,
-                                                    HVAC_MODE_HEAT,
                                                     HVAC_MODE_OFF, PRESET_AWAY,
                                                     PRESET_BOOST, PRESET_NONE,
                                                     SUPPORT_PRESET_MODE,
@@ -21,15 +16,12 @@ from homeassistant.components.climate.const import (ATTR_HVAC_MODE,
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.components.water_heater import ATTR_TEMPERATURE
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (CONF_SENSORS, PRECISION_HALVES,
-                                 PRECISION_TENTHS, STATE_UNAVAILABLE,
-                                 STATE_UNKNOWN, TEMP_CELSIUS)
+from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN, TEMP_CELSIUS
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import LuxtronikDevice
 from .const import *
@@ -44,6 +36,8 @@ OPERATION_LIST: Final = [HVAC_MODE_AUTO, HVAC_MODE_OFF]
 MIN_TEMPERATURE: Final = 40
 MAX_TEMPERATURE: Final = 48
 # endregion Constants
+
+# region Setup
 
 
 async def async_setup_platform(
@@ -90,6 +84,7 @@ async def async_setup_entry(
         entities.append(LuxtronikCoolingThermostat(
             hass, luxtronik, deviceInfoCooling))
     async_add_entities(entities)
+# endregion Setup
 
 
 class LuxtronikThermostat(ClimateEntity, RestoreEntity):
@@ -179,12 +174,23 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         await self._async_control_heating()
     # endregion Temperatures
 
+    def _is_heating_on(self) -> bool:
+        status = self._luxtronik.get_value(self._status_sensor)
+        # region Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+        if LUX_STATUS_HEATING in self._heat_status and status == LUX_STATUS_HEATING:
+            status3 = self._luxtronik.get_value(LUX_SENSOR_STATUS3)
+            LOGGER.info("climate._is_heating_on %s self._heat_status: %s status: %s status3: %s result: %s",
+                        self._attr_unique_id, self._heat_status, status, status3, not status3 is None and not status3 in LUX_STATUS3_WORKAROUND)
+            return not status3 is None and not status3 in [None, LUX_STATUS_UNKNOWN, LUX_STATUS_NONE, LUX_STATUS_NO_REQUEST]
+        # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+        return status in self._heat_status or status in [LUX_STATUS_DEFROST, LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE]
+
     @property
     def hvac_action(self):
         """Return the current mode."""
         new_hvac_action = self._attr_hvac_action
         status = self._luxtronik.get_value(self._status_sensor)
-        if status in self._heat_status or status in [LUX_STATUS_DEFROST, LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE]:
+        if self._is_heating_on():
             new_hvac_action = CURRENT_HVAC_HEAT
         elif status == LUX_STATUS_COOLING:
             new_hvac_action = CURRENT_HVAC_COOL
@@ -195,6 +201,8 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         if new_hvac_action != self._attr_hvac_action:
             self._attr_hvac_action = new_hvac_action
             self._async_control_heating()
+        LOGGER.info("climate.hvac_action %s hvac_action: %s",
+                    self._attr_unique_id, new_hvac_action)
         return new_hvac_action
 
     async def _async_control_heating(self) -> bool:
@@ -255,8 +263,8 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
     def __get_luxmode(self, hvac_mode: str, preset_mode: str) -> str:
         if hvac_mode == HVAC_MODE_OFF:
             return LUX_MODE_OFF
-        elif self._control_mode_home_assistant and self.hvac_action in [CURRENT_HVAC_OFF, CURRENT_HVAC_IDLE]:
-            return LUX_MODE_OFF
+        # elif self._control_mode_home_assistant and self.hvac_action in [CURRENT_HVAC_OFF, CURRENT_HVAC_IDLE]:
+        #     return LUX_MODE_OFF
         elif preset_mode == PRESET_AWAY:
             return LUX_MODE_HOLIDAYS
         elif preset_mode == PRESET_BOOST:
@@ -313,7 +321,7 @@ class LuxtronikDomesticWaterThermostat(LuxtronikThermostat):
     _attr_target_temperature_step = 2.5
 
     _target_temperature_sensor: Final = LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE
-    _heater_sensor: Final = LUX_SENSOR_DOMESTIC_WATER_HEATER
+    _heater_sensor: Final = LUX_SENSOR_MODE_DOMESTIC_WATER
     _heat_status: Final = [LUX_STATUS_DOMESTIC_WATER]
 
 
@@ -327,8 +335,7 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
     _attr_min_temp = 18.0
     _attr_max_temp = 23.0
 
-    _heater_sensor: Final = LUX_SENSOR_HEATING_HEATER
-    _heat_status: Final = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER]
+    _heater_sensor: Final = LUX_SENSOR_MODE_HEATING
 
 # class LuxtronikHeatingCorrectionThermostat(LuxtronikThermostat):
 #     _unique_id = 'heating_temperature_correction'

@@ -8,7 +8,7 @@
       "defrost": "Abtauen",
       "heating external source": "Heizt aus externer Quelle",
       "cooling": "K\u00fchlen",
-      "no request": "Standby (keine Anfrage)"
+      "no request": "Leerlauf (keine Anfrage)"
     },
     "luxtronik2__status_line_1": {
       "heatpump running": "Die W\u00e4rmepumpe l\u00e4uft",
