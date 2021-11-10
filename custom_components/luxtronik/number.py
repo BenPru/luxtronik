@@ -60,7 +60,7 @@ async def async_setup_entry(
                             icon='mdi:plus-minus-variant', min_value=-5.0, max_value=5.0, step=0.5, mode=MODE_BOX),
             LuxtronikNumber(hass, luxtronik, deviceInfoHeating, number_key=LUX_SENSOR_HEATING_THRESHOLD,
                             unique_id='heating_threshold_temperature', name=f"{text_heating_threshold}",
-                            icon='mdi:thermometer-low', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=12.0, step=0.5, mode=MODE_BOX)
+                            icon='mdi:download-outline', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=12.0, step=0.5, mode=MODE_BOX)
         ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
@@ -74,6 +74,13 @@ async def async_setup_entry(
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
+    if deviceInfoCooling is not None:
+        text_cooling_threshold_temperature = get_sensor_text(lang, 'cooling_threshold_temperature')
+        entities += [
+            LuxtronikNumber(hass, luxtronik, deviceInfoCooling, number_key=LUX_SENSOR_COOLING_THRESHOLD,
+                            unique_id='cooling_threshold_temperature', name=f"{text_cooling_threshold_temperature}",
+                            icon='mdi:upload-outline', unit_of_measurement=TEMP_CELSIUS, min_value=18.0, max_value=30.0, step=0.5, mode=MODE_BOX)
+        ]
 
     async_add_entities(entities)
 # endregion Setup

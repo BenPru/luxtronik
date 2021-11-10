@@ -104,7 +104,8 @@ async def async_setup_entry(
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     text_time = get_sensor_text(lang, 'time')
     text_temp = get_sensor_text(lang, 'temperature')
-    text_output = get_sensor_text(lang, 'output')
+    text_heat_source_output = get_sensor_text(lang, 'heat_source_output')
+    text_heat_source_input = get_sensor_text(lang, 'heat_source_input')
     text_outdoor = get_sensor_text(lang, 'outdoor')
     text_average = get_sensor_text(lang, 'average')
     text_compressor_impulses = get_sensor_text(lang, 'compressor_impulses')
@@ -126,7 +127,9 @@ async def async_setup_entry(
         LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile3',
                         'status_line_3', 'Status 3', 'mdi:numeric-3-circle', f"{DOMAIN}__status_line_3", None, None, entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
         LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TWA',
-                        'output_temperature', f"{text_output} {text_temp}", entity_category=None),
+                        'heat_source_output_temperature', f"{text_heat_source_output} {text_temp}", entity_category=None),
+        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TWE',
+                        'heat_source_input_temperature', f"{text_heat_source_input} {text_temp}", entity_category=None),
         LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TA',
                         'outdoor_temperature', f"{text_outdoor} {text_temp}", entity_category=None),
         LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Mitteltemperatur',

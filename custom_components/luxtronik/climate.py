@@ -90,8 +90,12 @@ async def async_setup_entry(
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
+        text_cooling = get_sensor_text(lang, 'cooling')
         entities += [
-            LuxtronikCoolingThermostat(hass, luxtronik, deviceInfoCooling)
+            # TODO:
+            # LuxtronikCoolingThermostat(hass, luxtronik, deviceInfoCooling, name=text_cooling,
+            #     control_mode_home_assistant=control_mode_home_assistant, 
+            #     current_temperature_sensor=LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE, entity_category=None)
         ]
 
     async_add_entities(entities)
@@ -369,10 +373,27 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
 
 
 class LuxtronikCoolingThermostat(LuxtronikThermostat):
-    _unique_id = 'cooling'
-    _name = "Kühlung"
-    _icon = 'far:snowflake'
-    _device_class = _unique_id
+    _attr_unique_id = 'cooling'
+    _attr_icon = 'mdi:snowflake'
+    _attr_device_class: Final = f"{DOMAIN}__{_attr_unique_id}"
 
+    _attr_target_temperature = 20.5
+    _attr_target_temperature_step = 0.5
+    _attr_min_temp = 18.0
+    _attr_max_temp = 30.0
+
+    # _heater_sensor: Final = LUX_SENSOR_MODE_HEATING
+
+# temperature setpoint for cooling
+# parameters.ID_Sollwert_KuCft2_akt
+# 20.0
+
+# parameters.ID_Einst_Kuhl_Zeit_Ein_akt
+# start cooling after this timeout
+# 12.0
+
+# parameters.ID_Einst_Kuhl_Zeit_Aus_akt
+# stop cooling after this timeout
+# 12.0
     _heater_sensor = 'calculations.ID_WEB_FreigabKuehl'
     _heat_status = ['cooling']

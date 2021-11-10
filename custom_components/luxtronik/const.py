@@ -155,6 +155,8 @@ LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION: Final = 'parameters.ID_Einst_WK_akt'
 LUX_SENSOR_HEATING_THRESHOLD: Final = 'parameters.ID_Einst_Heizgrenze_Temp'
 LUX_SENSOR_MODE_HEATING: Final = 'parameters.ID_Ba_Hz_akt'
 
+LUX_SENSOR_COOLING_THRESHOLD: Final = 'parameters.ID_Einst_KuehlFreig_akt'
+
 LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE: Final = 'calculations.ID_WEB_Temperatur_TBW'
 LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = 'parameters.ID_Einst_BWS_akt'
 # LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = 'calculations.ID_WEB_Einst_BWS_akt'
