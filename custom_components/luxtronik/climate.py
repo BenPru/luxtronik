@@ -16,9 +16,11 @@ from homeassistant.components.climate.const import (CURRENT_HVAC_COOL,
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.components.water_heater import ATTR_TEMPERATURE
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN, TEMP_CELSIUS
+from homeassistant.const import (ENTITY_CATEGORY_CONFIG,
+                                 ENTITY_CATEGORY_DIAGNOSTIC, STATE_UNAVAILABLE,
+                                 STATE_UNKNOWN, TEMP_CELSIUS)
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
@@ -63,26 +65,35 @@ async def async_setup_entry(
 
     # build_device_info(luxtronik)
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
-    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
-    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
 
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
-    text_domestic_water = get_sensor_text(lang, 'domestic_water')
-    text_heating = get_sensor_text(lang, 'heating')
-    entities = [
-        LuxtronikDomesticWaterThermostat(
-            hass, luxtronik, deviceInfoDomesticWater, name=text_domestic_water, control_mode_home_assistant=control_mode_home_assistant,
-            current_temperature_sensor=LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE),
-        LuxtronikHeatingThermostat(
-            hass, luxtronik, deviceInfoHeating, name=text_heating, control_mode_home_assistant=control_mode_home_assistant,
-            current_temperature_sensor=ha_sensor_indoor_temperature)
-    ]
+    entities = []
+
+    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
+    if deviceInfoHeating is not None:
+        text_heating = get_sensor_text(lang, 'heating')
+        entities += [
+            LuxtronikHeatingThermostat(
+                hass, luxtronik, deviceInfoHeating, name=text_heating, control_mode_home_assistant=control_mode_home_assistant,
+                current_temperature_sensor=ha_sensor_indoor_temperature, entity_category=None)
+        ]
+
+    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
+    if deviceInfoDomesticWater is not None:
+        text_domestic_water = get_sensor_text(lang, 'domestic_water')
+        entities += [
+            LuxtronikDomesticWaterThermostat(
+                hass, luxtronik, deviceInfoDomesticWater, name=text_domestic_water, control_mode_home_assistant=control_mode_home_assistant,
+                current_temperature_sensor=LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE, entity_category=None)
+        ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
-        entities.append(LuxtronikCoolingThermostat(
-            hass, luxtronik, deviceInfoCooling))
+        entities += [
+            LuxtronikCoolingThermostat(hass, luxtronik, deviceInfoCooling)
+        ]
+
     async_add_entities(entities)
 # endregion Setup
 
@@ -106,14 +117,16 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
     _attr_max_temp = MAX_TEMPERATURE
 
     _status_sensor: Final = LUX_SENSOR_STATUS
-    _target_temperature_sensor = None
+    _target_temperature_sensor: str = None
 
     _heat_status = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER]
 
     _cold_tolerance = DEFAULT_TOLERANCE
     _hot_tolerance = DEFAULT_TOLERANCE
 
-    def __init__(self, hass: HomeAssistant, luxtronik: LuxtronikDevice, deviceInfo: DeviceInfo, name: str, control_mode_home_assistant: bool, current_temperature_sensor: str):
+    _last_lux_mode: LuxMode = None
+
+    def __init__(self, hass: HomeAssistant, luxtronik: LuxtronikDevice, deviceInfo: DeviceInfo, name: str, control_mode_home_assistant: bool, current_temperature_sensor: str, entity_category: ENTITY_CATEGORIES = None):
         self._hass = hass
         self._luxtronik = luxtronik
         self._attr_device_info = deviceInfo
@@ -122,6 +135,7 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         self._current_temperature_sensor = current_temperature_sensor
         self.entity_id = ENTITY_ID_FORMAT.format(
             f"{DOMAIN}_{self._attr_unique_id}")
+        self._attr_entity_category = entity_category
     # endregion Properties / Init
 
     # region Temperatures
@@ -177,12 +191,21 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
     def _is_heating_on(self) -> bool:
         status = self._luxtronik.get_value(self._status_sensor)
         # region Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
-        if LUX_STATUS_HEATING in self._heat_status and status == LUX_STATUS_HEATING:
+        if status == LUX_STATUS_HEATING:
+            status1 = self._luxtronik.get_value(LUX_SENSOR_STATUS1)
             status3 = self._luxtronik.get_value(LUX_SENSOR_STATUS3)
-            LOGGER.info("climate._is_heating_on %s self._heat_status: %s status: %s status3: %s result: %s",
-                        self._attr_unique_id, self._heat_status, status, status3, not status3 is None and not status3 in LUX_STATUS3_WORKAROUND)
-            return not status3 is None and not status3 in [None, LUX_STATUS_UNKNOWN, LUX_STATUS_NONE, LUX_STATUS_NO_REQUEST]
-        # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+            if status1 in LUX_STATUS1_WORKAROUND and status3 in LUX_STATUS3_WORKAROUND:
+                # pump forerun
+                LOGGER.info("climate._is_heating_on1 %s self._heat_status: %s status: %s status1: %s status3: %s result: %s",
+                            self._attr_unique_id, self._heat_status, status, status1, status3, False)
+                return False
+            # return not status3 is None and not status3 in [None, LUX_STATUS_UNKNOWN, LUX_STATUS_NONE, LUX_STATUS_NO_REQUEST]
+            LOGGER.info("climate._is_heating_on1 %s self._heat_status: %s status: %s status1: %s status3: %s result: %s",
+                        self._attr_unique_id, self._heat_status, status, status1, status3, LUX_STATUS_HEATING in self._heat_status)
+            return LUX_STATUS_HEATING in self._heat_status
+            # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+        LOGGER.info("climate._is_heating_on2 %s self._heat_status: %s status: %s result: %s",
+                    self._attr_unique_id, self._heat_status, status, status in self._heat_status or status in [LUX_STATUS_DEFROST, LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE])
         return status in self._heat_status or status in [LUX_STATUS_DEFROST, LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE]
 
     @property
@@ -215,18 +238,18 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         too_hot = self._attr_current_temperature >= self._attr_target_temperature + \
             self._hot_tolerance
         status = self._luxtronik.get_value(self._status_sensor)
-        if too_hot and status != LUX_MODE_OFF and self._attr_hvac_action != CURRENT_HVAC_HEAT:
+        if too_hot and status != LuxMode.off.value and self._attr_hvac_action != CURRENT_HVAC_HEAT:
             # Turn off heating
             LOGGER.info(
                 "climate._async_control_heating %s Turn OFF heating", self._attr_unique_id)
             self._luxtronik.write(self._heater_sensor.split(
-                '.')[1], LUX_MODE_OFF, debounce=False, update_immediately_after_write=True)
-        elif too_cold and status == LUX_MODE_OFF and self._attr_hvac_action == CURRENT_HVAC_HEAT:
+                '.')[1], LuxMode.off.value, debounce=False, update_immediately_after_write=True)
+        elif too_cold and status == LuxMode.off.value and self._attr_hvac_action == CURRENT_HVAC_HEAT:
             # Turn on heating
             LOGGER.info(
                 "climate._async_control_heating %s Turn ON heating", self._attr_unique_id)
             self._luxtronik.write(self._heater_sensor.split(
-                '.')[1], LUX_MODE_AUTOMATIC, debounce=False, update_immediately_after_write=True)
+                '.')[1], LuxMode.automatic.value, debounce=False, update_immediately_after_write=True)
         else:
             LOGGER.info("climate._async_control_heating %s Nothing! too_hot: %s too_cold: %s status: %s _attr_hvac_action: %s",
                         self._attr_unique_id, too_hot, too_cold, status, self._attr_hvac_action)
@@ -247,55 +270,62 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
                     self._attr_unique_id, hvac_mode)
         self._attr_hvac_mode = hvac_mode
         if not await self._async_control_heating():
+            self._last_lux_mode = self.__get_luxmode(
+                hvac_mode, self.preset_mode)
             self._luxtronik.write(self._heater_sensor.split('.')[1],
-                                  self.__get_luxmode(hvac_mode, self.preset_mode), debounce=False, update_immediately_after_write=True)
+                                  self._last_lux_mode.value, debounce=False, update_immediately_after_write=True)
 
     def __get_hvac_mode(self, hvac_action):
-        luxmode = self._luxtronik.get_value(self._heater_sensor)
-        if luxmode in [LUX_MODE_HOLIDAYS, LUX_MODE_PARTY, LUX_MODE_SECOND_HEATSOURCE]:
+        luxmode = LuxMode[self._luxtronik.get_value(
+            self._heater_sensor).lower().replace(' ', '_')]
+        if luxmode != self._last_lux_mode:
+            self._last_lux_mode = luxmode
+        if luxmode in [LuxMode.holidays, LuxMode.party, LuxMode.second_heatsource]:
             return self._attr_hvac_mode
-        elif luxmode == LUX_MODE_OFF and self._control_mode_home_assistant and hvac_action == CURRENT_HVAC_IDLE:
+        elif luxmode == LuxMode.off and self._control_mode_home_assistant and hvac_action == CURRENT_HVAC_IDLE:
             return self._attr_hvac_mode
-        elif luxmode == LUX_MODE_OFF:
+        elif luxmode == LuxMode.off:
             return HVAC_MODE_OFF
         return HVAC_MODE_AUTO
 
-    def __get_luxmode(self, hvac_mode: str, preset_mode: str) -> str:
+    def __get_luxmode(self, hvac_mode: str, preset_mode: str) -> LuxMode:
         if hvac_mode == HVAC_MODE_OFF:
-            return LUX_MODE_OFF
+            return LuxMode.off
         # elif self._control_mode_home_assistant and self.hvac_action in [CURRENT_HVAC_OFF, CURRENT_HVAC_IDLE]:
-        #     return LUX_MODE_OFF
+        #     return LuxMode.off.value
         elif preset_mode == PRESET_AWAY:
-            return LUX_MODE_HOLIDAYS
+            return LuxMode.holidays
         elif preset_mode == PRESET_BOOST:
-            return LUX_MODE_PARTY
+            return LuxMode.party
         elif preset_mode == PRESET_SECOND_HEATSOURCE:
-            return LUX_MODE_SECOND_HEATSOURCE
+            return LuxMode.second_heatsource
         elif hvac_mode == HVAC_MODE_AUTO:
-            return LUX_MODE_AUTOMATIC
-        return LUX_MODE_AUTOMATIC
+            return LuxMode.automatic
+        return LuxMode.automatic
 
     @property
     def preset_mode(self) -> str:  # | None:
         """Return current preset mode."""
-        luxmode = self._luxtronik.get_value(self._heater_sensor)
-        if luxmode == LUX_MODE_OFF and self._control_mode_home_assistant and self.hvac_action == CURRENT_HVAC_IDLE:
+        luxmode = LuxMode[self._luxtronik.get_value(
+            self._heater_sensor).lower().replace(' ', '_')]
+        if luxmode == LuxMode.off and self._control_mode_home_assistant and self.hvac_action == CURRENT_HVAC_IDLE:
             return self._attr_preset_mode
-        elif luxmode in [LUX_MODE_OFF, LUX_MODE_AUTOMATIC]:
+        elif luxmode in [LuxMode.off, LuxMode.automatic]:
             return PRESET_NONE
-        elif luxmode == LUX_MODE_SECOND_HEATSOURCE:
+        elif luxmode == LuxMode.second_heatsource:
             return PRESET_SECOND_HEATSOURCE
-        elif luxmode == LUX_MODE_PARTY:
+        elif luxmode == LuxMode.party:
             return PRESET_BOOST
-        elif luxmode == LUX_MODE_HOLIDAYS:
+        elif luxmode == LuxMode.holidays:
             return PRESET_AWAY
         return PRESET_NONE
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set preset mode."""
         self._attr_preset_mode = preset_mode
+        self._last_lux_mode = self.__get_luxmode(self.hvac_mode, preset_mode)
         self._luxtronik.write(self._heater_sensor.split('.')[1],
-                              self.__get_luxmode(self.hvac_mode, preset_mode), debounce=False, update_immediately_after_write=True)
+                              self._last_lux_mode.value, debounce=False, update_immediately_after_write=True)
 
     # region Helper
     def __is_luxtronik_sensor(self, sensor: str) -> bool:
@@ -337,15 +367,6 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
 
     _heater_sensor: Final = LUX_SENSOR_MODE_HEATING
 
-# class LuxtronikHeatingCorrectionThermostat(LuxtronikThermostat):
-#     _unique_id = 'heating_temperature_correction'
-#     _name = "Heizung Temperatur Korrektur"
-#     _icon = 'mdi:thermometer'
-#     _device_class = _unique_id
-
-#     _current_temperature_sensor = 'sensor.innentemperatur'
-#     _heater_sensor = 'parameters.ID_Ba_Hz_akt'
-
 
 class LuxtronikCoolingThermostat(LuxtronikThermostat):
     _unique_id = 'cooling'
@@ -355,76 +376,3 @@ class LuxtronikCoolingThermostat(LuxtronikThermostat):
 
     _heater_sensor = 'calculations.ID_WEB_FreigabKuehl'
     _heat_status = ['cooling']
-
-# def setup_platform(
-#     hass: HomeAssistant,
-#     config: ConfigType,
-#     add_entities_callback: AddEntitiesCallback,
-#     discovery_info # : dict[str, Any] | None = None,
-# ) -> None:
-#     """Set up the Luxtronik climate sensor."""
-#     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
-#     _LOGGER.info("Set up the Luxtronik climate sensor.")
-#     if not luxtronik:
-#         _LOGGER.warning("climate.setup_platform no luxtronik!")
-#         return False
-
-#     # input_boolean.brauchwasser
-#     _LOGGER.info("climate.setup_platform 1")
-#     heater_sensor = luxtronik.get_sensor("parameters", "ID_Ba_Bw_akt")
-
-#     # luxtronik.brauchwasser_soll
-#     target_sensor = luxtronik.get_sensor(
-#         "calculations", "ID_WEB_Einst_BWS_akt")
-#     _LOGGER.info("climate.setup_platform 2")
-#     source_sensor = luxtronik.get_sensor(
-#         "calculations", "ID_WEB_Temperatur_TBW")
-
-#     sensors = config.get(CONF_SENSORS)
-#     _LOGGER.info("climate.setup_platform 2")
-
-#     entities = [LuxtronikThermostat(
-#         luxtronik, 'calculations.ID_WEB_WP_BZ_akt', 'calculations.ID_WEB_Temperatur_TBW', 'calculations.ID_Einst_BWS_akt', 'parameters.ID_Ba_Bw_akt', 'hot water')]
-#         # luxtronik, 'calculations.ID_WEB_WP_BZ_akt', 'calculations.ID_WEB_Temperatur_TBW', 'calculations.ID_WEB_Einst_BWS_akt', 'hot water')]
-#     _LOGGER.info("climate.setup_platform 4")
-#     # for sensor_cfg in sensors:
-#     #     sensor = luxtronik.get_sensor(sensor_cfg[CONF_GROUP], sensor_cfg[CONF_ID])
-#     #     if sensor:
-#     #         entities.append(
-#     #             LuxtronikBinarySensor(
-#     #                 luxtronik,
-#     #                 sensor,
-#     #                 sensor_cfg.get(CONF_FRIENDLY_NAME),
-#     #                 sensor_cfg.get(CONF_ICON),
-#     #                 sensor_cfg.get(CONF_INVERT_STATE),
-#     #             )
-#     #         )
-#     #     else:
-#     #         _LOGGER.warning(
-#     #             "Invalid Luxtronik ID %s in group %s",
-#     #             sensor_cfg[CONF_ID],
-#     #             sensor_cfg[CONF_GROUP],
-#     #         )
-
-#     _LOGGER.info("climate.setup_platform 5")
-#     add_entities_callback(entities, True)
-#     _LOGGER.info("climate.setup_platform 6")
-
-
-# async def async_setup_entry(
-#     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
-# ) -> None:
-#     """Set up the Luxtronik thermostat from ConfigEntry."""
-#     luxtronik = hass.data.get(DOMAIN)
-#     if not luxtronik:
-#         return False
-
-#     coordinator = hass.data[DOMAIN][entry.entry_id][CONF_COORDINATOR]
-
-#     async_add_entities(
-#         [
-#             LuxtronikThermostat(coordinator, ain)
-#             for ain, device in coordinator.data.items()
-#             if device.has_thermostat
-#         ]
-#     )

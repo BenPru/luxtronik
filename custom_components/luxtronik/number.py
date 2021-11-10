@@ -8,9 +8,11 @@ from homeassistant.components.number.const import MODE_AUTO, MODE_BOX
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import DEVICE_CLASS_TEMPERATURE, TEMP_CELSIUS
+from homeassistant.const import (DEVICE_CLASS_TEMPERATURE,
+                                 ENTITY_CATEGORY_CONFIG,
+                                 ENTITY_CATEGORY_DIAGNOSTIC, TEMP_CELSIUS)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
 
@@ -42,27 +44,35 @@ async def async_setup_entry(
         return False
 
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
-    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
-    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
 
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     text_temp = get_sensor_text(lang, 'temperature')
-    text_target = get_sensor_text(lang, 'target')
-    text_domestic_water = get_sensor_text(lang, 'domestic_water')
-    text_correction = get_sensor_text(lang, 'correction')
+    entities = []
 
-    entities = [
-        LuxtronikNumber(hass, luxtronik, deviceInfoHeating, LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
-                        'heating_temperature_correction', f"{text_temp} {text_correction}", False,
-                        'mdi:plus-minus-variant', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
-                        TEMP_CELSIUS, -5.0, 5.0, 0.5, mode=MODE_BOX),
+    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
+    if deviceInfoHeating is not None:
+        text_heating_threshold = get_sensor_text(lang, 'heating_threshold')
+        text_correction = get_sensor_text(lang, 'correction')
+        entities += [
+            LuxtronikNumber(hass, luxtronik, deviceInfoHeating, number_key=LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
+                            unique_id='heating_temperature_correction', name=f"{text_temp} {text_correction}",
+                            icon='mdi:plus-minus-variant', min_value=-5.0, max_value=5.0, step=0.5, mode=MODE_BOX),
+            LuxtronikNumber(hass, luxtronik, deviceInfoHeating, number_key=LUX_SENSOR_HEATING_THRESHOLD,
+                            unique_id='heating_threshold_temperature', name=f"{text_heating_threshold}",
+                            icon='mdi:thermometer-low', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=12.0, step=0.5, mode=MODE_BOX)
+        ]
 
-        LuxtronikNumber(hass, luxtronik, deviceInfoDomesticWater, LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
-                        'domestic_water_target_temperature', f"{text_domestic_water} {text_target} {text_temp}", False,
-                        'mdi:water-boiler', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT,
-                        TEMP_CELSIUS, 40.0, 60.0, 2.5, mode=MODE_BOX),
-    ]
+    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
+    if deviceInfoDomesticWater is not None:
+        text_target = get_sensor_text(lang, 'target')
+        text_domestic_water = get_sensor_text(lang, 'domestic_water')
+        entities += [
+            LuxtronikNumber(hass, luxtronik, deviceInfoDomesticWater, number_key=LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
+                            unique_id='domestic_water_target_temperature', name=f"{text_domestic_water} {text_target} {text_temp}",
+                            icon='mdi:water-boiler', min_value=40.0, max_value=60.0, step=2.5, mode=MODE_BOX)
+        ]
+
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
 
     async_add_entities(entities)
@@ -71,7 +81,6 @@ async def async_setup_entry(
 
 class LuxtronikNumber(NumberEntity):
     """Representation of a Luxtronik number."""
-    # _attr_should_poll = True
 
     def __init__(
         self,
@@ -81,7 +90,6 @@ class LuxtronikNumber(NumberEntity):
         number_key: str,
         unique_id: str,
         name: str,
-        assumed: bool,
         icon: str = 'mdi:thermometer',
         device_class: str = DEVICE_CLASS_TEMPERATURE,
         state_class: str = STATE_CLASS_MEASUREMENT,
@@ -90,7 +98,8 @@ class LuxtronikNumber(NumberEntity):
         min_value: float = None,  # | None = None,
         max_value: float = None,  # | None = None,
         step: float = None,  # | None = None,
-        mode: Literal["auto", "box", "slider"] = MODE_AUTO
+        mode: Literal["auto", "box", "slider"] = MODE_AUTO,
+        entity_category: ENTITY_CATEGORIES = None,
     ) -> None:
         """Initialize the number."""
         self._hass = hass
@@ -101,9 +110,7 @@ class LuxtronikNumber(NumberEntity):
         self._attr_unique_id = self.entity_id
         self._attr_device_class = device_class
         self._attr_name = name
-        self._attr_assumed_state = assumed
         self._icon = icon
-        # self._attr_icon = icon
         self._attr_native_unit_of_measurement = unit_of_measurement
         self._attr_state_class = state_class
 
@@ -116,6 +123,7 @@ class LuxtronikNumber(NumberEntity):
             self._attr_max_value = max_value
         if step is not None:
             self._attr_step = step
+        self._attr_entity_category = entity_category
 
     @property
     def icon(self):  # -> str | None:
