@@ -56,7 +56,7 @@ async def async_setup_platform(
     hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
 ) -> None:
     """Set up a Luxtronik binary sensor from yaml config."""
-    LOGGER.info("luxtronik2.binary_sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
+    LOGGER.info(f"{DOMAIN}.binary_sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
                 config, discovery_info)
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
@@ -105,7 +105,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up a Luxtronik sensor from ConfigEntry."""
     LOGGER.info(
-        "luxtronik2.binary_sensor.async_setup_entry ConfigType: %s", config_entry)
+        f"{DOMAIN}.binary_sensor.async_setup_entry ConfigType: %s", config_entry)
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
         LOGGER.warning("binary_sensor.async_setup_entry no luxtronik!")

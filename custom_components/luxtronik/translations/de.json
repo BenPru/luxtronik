@@ -12,7 +12,7 @@
         "data": {
           "host": "Netzwerkname oder IP Adresse",
           "port": "Port (meist 8888 oder 8889)",
-          "control_mode_home_assistant": "Thermostat An/Aus-Status durch Home Assistant steuern. - D.h. wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
+          "control_mode_home_assistant": "Experimentell!: Thermostat An/Aus-Status durch Home Assistant steuern. - D.h. wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
           "ha_sensor_indoor_temperature": "Home Assistant Sensor ID f\u00fcr die Innentemperatur",
           "language_sensor_names": "Sprachk\u00fcrzel Sensornamen"
         },
@@ -28,7 +28,7 @@
           "ha_sensor_indoor_temperature": "Home Assistant Sensor ID f\u00fcr die Innentemperatur",
           "language_sensor_names": "Sprachk\u00fcrzel Sensornamen"
         },
-        "description": "Nach \u00c4nderungen bitte Integration manuell neu starten.",
+        "description": "Nach \u00c4nderungen wird die Integration automatisch neu gestartet.",
         "title": "Einstellungen Luxtronik"
       }
     }

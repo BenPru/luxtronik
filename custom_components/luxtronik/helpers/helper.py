@@ -6,16 +6,19 @@ from ..const import LANG_DEFAULT, LANGUAGES, LOGGER
 __content_locale__ = None
 __content_default__ = None
 
+__content_sensor_locale__ = None
+__content_sensor_default__ = None
 
-def _load_lang_from_file(fname: str):
+
+def _load_lang_from_file(fname: str, log_warning=True):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     fname = os.path.join(dir_path, fname)
     if not os.path.isfile(fname):
-        LOGGER.warning("_load_lang_from_file - file not found %s", fname)
+        if log_warning:
+            LOGGER.warning("_load_lang_from_file - file not found %s", fname)
         return {}
     f = open(fname, "r")
     data = json.loads(f.read())
-    LOGGER.info("Load from file %s - content: %s", fname, data)
     f.close
     return data
 
@@ -35,4 +38,21 @@ def get_sensor_text(lang: LANGUAGES, key: str) -> str:
         return __content_default__[key]
     LOGGER.warning("get_sensor_text key %s not found in %s",
                    key, __content_default__)
+    return key.replace('_', ' ').title()
+
+
+def get_sensor_value_text(lang: LANGUAGES, key: str, value: str, platform='sensor') -> str:
+    global __content_sensor_locale__
+    global __content_sensor_default__
+    if __content_sensor_locale__ is None and lang != LANG_DEFAULT:
+        __content_sensor_locale__ = _load_lang_from_file(
+            f"../translations/{platform}.{lang}.json", log_warning=False)
+    if __content_sensor_default__ is None:
+        __content_sensor_default__ = _load_lang_from_file(
+            f"../translations/{platform}.{LANG_DEFAULT}.json", log_warning=False)
+    content = __content_sensor_default__ if lang == LANG_DEFAULT else __content_sensor_locale__
+    if 'state' in content and key in content['state'] and value in content['state'][key]:
+        return content['state'][key][value]
+    LOGGER.warning("get_sensor_value_text key %s / value %s not found in %s",
+                   key, value, __content_sensor_default__)
     return key.replace('_', ' ').title()

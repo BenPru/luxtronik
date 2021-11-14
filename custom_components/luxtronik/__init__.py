@@ -34,13 +34,21 @@ LuxLogger.setLevel(level="WARNING")
 # endregion Constants
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_reload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
+    """Reload the HACS config entry."""
+    await async_unload_entry(hass, config_entry)
+    await async_setup_entry(hass, config_entry)
+
+
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up from config entry."""
     hass.data.setdefault(DOMAIN, {})
 
-    LOGGER.info("async_setup_entry '%s'", entry)
+    LOGGER.info("async_setup_entry '%s'", config_entry.data)
+    config_entry.add_update_listener(async_reload_entry)
 
-    setup_internal(hass, entry.data)
+
+    setup_internal(hass, config_entry.data)
 
     luxtronik = hass.data[DOMAIN]
 
@@ -67,13 +75,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # )
 
     # await coordinator.async_config_entry_first_refresh()
-    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
 
     def logout_luxtronik(event: Event) -> None:
         """Close connections to this heatpump."""
         luxtronik.disconnect()
 
-    entry.async_on_unload(
+    config_entry.async_on_unload(
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, logout_luxtronik)
     )
     await hass.async_add_executor_job(setup_hass_services, hass)
@@ -118,6 +126,7 @@ def setup_internal(hass, conf):
 
     # Build Sensor names with local language:
     lang = conf[CONF_LANGUAGE_SENSOR_NAMES] if CONF_LANGUAGE_SENSOR_NAMES in conf else LANG_DEFAULT
+    LOGGER.info('Luxtronik2.setup_internal lang %s', lang)
     text_domestic_water = get_sensor_text(lang, 'domestic_water')
     text_heating = get_sensor_text(lang, 'heating')
     text_heatpump = get_sensor_text(lang, 'heatpump')
@@ -143,6 +152,22 @@ def setup_internal(hass, conf):
     return True
 
 
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unloading the Luxtronik platforms."""
+    luxtronik = hass.data[DOMAIN]
+    if luxtronik is None:
+        return
+    
+    await hass.async_add_executor_job(luxtronik.disconnect)
+
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        # hass.data[DOMAIN].pop(entry.entry_id)
+        hass.data[DOMAIN] = None
+
+    return unload_ok
+
+
 class LuxtronikDevice:
     """Handle all communication with Luxtronik."""
     __ignore_update = False
@@ -156,6 +181,10 @@ class LuxtronikDevice:
         self._lock_timeout_sec = lock_timeout_sec
         self._luxtronik = Lux(host, port, safe)
         self.update()
+
+    async def async_will_remove_from_hass(self):
+        """Disconnect from Luxtronik by stopping monitor."""
+        self.disconnect()
 
     def disconnect(self):
         self._luxtronik._disconnect()

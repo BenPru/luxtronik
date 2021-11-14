@@ -12,10 +12,12 @@ from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS, DEVICE_CLASS_TEMPERATURE,
                                  DEVICE_CLASS_TIMESTAMP, ENERGY_KILO_WATT_HOUR,
                                  ENTITY_CATEGORY_CONFIG,
-                                 ENTITY_CATEGORY_DIAGNOSTIC, STATE_UNAVAILABLE,
-                                 TEMP_CELSIUS, TIME_HOURS, TIME_SECONDS)
+                                 ENTITY_CATEGORY_DIAGNOSTIC, STATE_ON,
+                                 STATE_UNAVAILABLE, TEMP_CELSIUS, TIME_HOURS,
+                                 TIME_SECONDS, EVENT_HOMEASSISTANT_STOP)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
+from homeassistant.helpers.entity import (ENTITY_CATEGORIES, DeviceInfo,
+                                          ToggleEntity)
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
@@ -23,7 +25,7 @@ from homeassistant.helpers.typing import ConfigType
 from . import DOMAIN as LUXTRONIK_DOMAIN
 from . import LuxtronikDevice
 from .const import *
-from .helpers.helper import get_sensor_text
+from .helpers.helper import get_sensor_text, get_sensor_value_text
 from .model import LuxtronikStatusExtraAttributes
 
 # endregion Imports
@@ -41,7 +43,7 @@ async def async_setup_platform(
     hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
 ) -> None:
     """Set up a Luxtronik sensor from yaml config."""
-    LOGGER.info("luxtronik2.sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
+    LOGGER.info(f"{DOMAIN}.sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
                 config, discovery_info)
     luxtronik: LuxtronikDevice = hass.data.get(LUXTRONIK_DOMAIN)
     if not luxtronik:
@@ -92,7 +94,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up a Luxtronik sensor from ConfigEntry."""
     LOGGER.info(
-        "luxtronik2.sensor.async_setup_entry ConfigType: %s", config_entry)
+        f"{DOMAIN}.sensor.async_setup_entry ConfigType: %s", config_entry)
     luxtronik: LuxtronikDevice = hass.data.get(LUXTRONIK_DOMAIN)
     if not luxtronik:
         LOGGER.warning("sensor.async_setup_entry no luxtronik!")
@@ -102,6 +104,7 @@ async def async_setup_entry(
 
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
+    hass.data[f"{DOMAIN}_language"] = lang
     text_time = get_sensor_text(lang, 'time')
     text_temp = get_sensor_text(lang, 'temperature')
     text_heat_source_output = get_sensor_text(lang, 'heat_source_output')
@@ -119,7 +122,8 @@ async def async_setup_entry(
         # LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt',
         #                 'status', 'Status', LUX_STATE_ICON_MAP, 'status', None, None),  # 'mdi:text-short'
         LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeit', 'status_time',
-                        f"Status {text_time}", 'mdi:timer-sand', DEVICE_CLASS_TIMESTAMP, 'status_time', TIME_SECONDS, entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
+                        f"Status {text_time}", 'mdi:timer-sand', device_class=None, state_class=None, unit_of_measurement=TIME_SECONDS,
+                        entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
         LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile1',
                         'status_line_1', 'Status 1', 'mdi:numeric-1-circle', f"{DOMAIN}__status_line_1", None, None, entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
         LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile2',
@@ -219,13 +223,17 @@ async def async_setup_entry(
                             unit_of_measurement=TIME_HOURS, entity_category=ENTITY_CATEGORY_DIAGNOSTIC, factor=SECOUND_TO_HOUR_FACTOR)
         ]
 
+    hass.bus.async_listen_once(
+        EVENT_HOMEASSISTANT_STOP, luxtronik.async_will_remove_from_hass()
+    )
+
     async_add_entities(entities)
 # endregion Setup
 
 
 class LuxtronikSensor(SensorEntity, RestoreEntity):
     """Representation of a Luxtronik Sensor."""
-    _attr_should_poll = True
+    _attr_is_on = True
 
     def __init__(
         self,
@@ -294,11 +302,17 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         """Get the latest status and use it to update our sensor state."""
         self._luxtronik.update()
 
-    # @callback
-    # def _update_and_write_state(self, *_):
-    #     """Update the sensor and write state."""
-    #     self._update()
-    #     self.async_write_ha_state()
+        if self._sensor_key == 'calculations.ID_WEB_HauptMenuStatus_Zeit':
+            v = self.native_value
+            if v is None:
+                time_str = None
+            else:
+                m, s = divmod(int(v), 60)
+                h, m = divmod(m, 60)
+                time_str = '{:01.0f}:{:02.0f} h'.format(h, m)
+            self._attr_extra_state_attributes = {
+                ATTR_STATUS_TEXT: time_str
+            }
 
 
 class LuxtronikStatusSensor(LuxtronikSensor):
@@ -312,20 +326,26 @@ class LuxtronikStatusSensor(LuxtronikSensor):
             return sensor.state
         return None
 
+    def _get_sensor_attr(self, sensor_name: str, attr: str):
+        sensor = self.hass.states.get(sensor_name)
+        if not sensor is None and attr in sensor.attributes:
+            return sensor.attributes[attr]
+        return None
     def _build_status_text(self) -> str:
-        status_time = self._get_sensor_value('sensor.luxtronik2_status_time')
-        l1 = self._get_sensor_value('sensor.luxtronik2_status_line_1')
-        l2 = self._get_sensor_value('sensor.luxtronik2_status_line_2')
+        status_time = self._get_sensor_attr(
+            f"sensor.{DOMAIN}_status_time", ATTR_STATUS_TEXT)
+        l1 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_1")
+        l2 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_2")
         if status_time is None or status_time == STATE_UNAVAILABLE or l1 is None or l1 == STATE_UNAVAILABLE or l2 is None or l2 == STATE_UNAVAILABLE:
             return ''
-        status_time = int(status_time)
-        time_str = '{:01.0f}:{:02.0f}'.format(
-            int(status_time / 3600), int(status_time / 60) % 60)
-        return f"{l1} {l2} {time_str}"
+        lang = self.hass.data[f"{DOMAIN}_language"]
+        l1 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_1", l1)
+        l2 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_2", l2)
+        return f"{l1} {l2} {status_time}."
 
     @property
     def extra_state_attributes(self) -> LuxtronikStatusExtraAttributes:
         """Return the state attributes of the device."""
         return {
-            # ATTR_STATUS_TEXT: self._build_status_text(),
+            ATTR_STATUS_TEXT: self._build_status_text(),
         }

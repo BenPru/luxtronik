@@ -15,7 +15,7 @@ from .const import (CONF_CONTROL_MODE_HOME_ASSISTANT,
                     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
                     CONF_LANGUAGE_SENSOR_NAMES, CONF_LOCK_TIMEOUT, CONF_SAFE,
                     CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, DEFAULT_PORT, DOMAIN,
-                    LANG_DEFAULT, LOGGER)
+                    LANG_DEFAULT, LANGUAGES_SENSOR_NAMES, LOGGER)
 from .helpers.lux_helper import discover
 
 # endregion Imports
@@ -48,7 +48,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_PORT, default=self._discovery_port): int,
                 vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
                 vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=''): str,
-                vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): str,
+                vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(LANGUAGES_SENSOR_NAMES),
             }
         )
         return await self.async_step_user()
@@ -65,24 +65,24 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_PORT, default=self._discovery_port): vol.Coerce(int),
                     vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
                     vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=''): str,
-                    vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): str,
+                    vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(LANGUAGES_SENSOR_NAMES),
                 }
             ),
             errors=errors or {},
         )
 
-    async def _show_hassio_form(
-        self, errors: dict[str, str] | None = None
-    ) -> FlowResult:
-        """Show the Hass.io confirmation form to the user."""
-        assert self._hassio_discovery
-        return self.async_show_form(
-            step_id="hassio_confirm",
-            description_placeholders={
-                "addon": self._hassio_discovery["addon"]},
-            data_schema=vol.Schema({}),
-            errors=errors or {},
-        )
+    # async def _show_hassio_form(
+    #     self, errors: dict[str, str] | None = None
+    # ) -> FlowResult:
+    #     """Show the Hass.io confirmation form to the user."""
+    #     assert self._hassio_discovery
+    #     return self.async_show_form(
+    #         step_id="hassio_confirm",
+    #         description_placeholders={
+    #             "addon": self._hassio_discovery["addon"]},
+    #         data_schema=vol.Schema({}),
+    #         errors=errors or {},
+    #     )
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -138,12 +138,12 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         return {
             vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=options.get(CONF_CONTROL_MODE_HOME_ASSISTANT)): bool,
             vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=options.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)): str,
-            vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=options.get(CONF_LANGUAGE_SENSOR_NAMES)): str,
+            vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=options.get(CONF_LANGUAGE_SENSOR_NAMES)): vol.In(LANGUAGES_SENSOR_NAMES),
         }
 
     async def async_step_init(self, _user_input=None):
         """Manage the options."""
-        return await self.async_step_user()
+        return await self.async_step_user(_user_input)
 
     async def async_step_user(self, user_input=None):
         """Handle a flow initialized by the user."""

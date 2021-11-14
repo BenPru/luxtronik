@@ -41,6 +41,7 @@ CONF_COORDINATOR: Final = "coordinator"
 CONF_CONTROL_MODE_HOME_ASSISTANT: Final = "control_mode_home_assistant"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
 CONF_LANGUAGE_SENSOR_NAMES: Final = "language_sensor_names"
+LANGUAGES_SENSOR_NAMES: Final = ["en", "de"]
 
 DEFAULT_PORT: Final = 8888
 
@@ -156,6 +157,8 @@ LUX_SENSOR_HEATING_THRESHOLD: Final = 'parameters.ID_Einst_Heizgrenze_Temp'
 LUX_SENSOR_MODE_HEATING: Final = 'parameters.ID_Ba_Hz_akt'
 
 LUX_SENSOR_COOLING_THRESHOLD: Final = 'parameters.ID_Einst_KuehlFreig_akt'
+LUX_SENSOR_MODE_COOLING: Final = 'parameters.ID_Ba_Hz_akt'
+# LUX_SENSOR_MODE_COOLING: Final = 'parameters.ID_Einst_BA_Kuehl_akt'
 
 LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE: Final = 'calculations.ID_WEB_Temperatur_TBW'
 LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = 'parameters.ID_Einst_BWS_akt'
@@ -163,7 +166,6 @@ LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = 'parameters.ID_Einst_BWS_a
 # LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE_WRITE: Final = 'ID_Einst_BWS_akt'
 LUX_SENSOR_MODE_DOMESTIC_WATER: Final = 'parameters.ID_Ba_Bw_akt'
 
-LUX_SENSOR_MODE_COOLING: Final = 'parameters.ID_Einst_BA_Kuehl_akt'
 LUX_SENSOR_MODE_FAN: Final = 'parameters.ID_Einst_BA_Lueftung_akt'
 LUX_BINARY_SENSOR_EVU_UNLOCKED: Final = 'calculations.ID_WEB_EVUin'
 LUX_BINARY_SENSOR_SOLAR_PUMP: Final = 'calculations.ID_WEB_SLPout'

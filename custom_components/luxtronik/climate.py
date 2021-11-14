@@ -94,7 +94,7 @@ async def async_setup_entry(
         entities += [
             # TODO:
             # LuxtronikCoolingThermostat(hass, luxtronik, deviceInfoCooling, name=text_cooling,
-            #     control_mode_home_assistant=control_mode_home_assistant, 
+            #     control_mode_home_assistant=control_mode_home_assistant,
             #     current_temperature_sensor=LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE, entity_category=None)
         ]
 

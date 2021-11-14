@@ -12,7 +12,7 @@
         "data": {
           "host": "Hostname or ip address",
           "port": "Network Port (Usually 8888 or 8889)",
-          "control_mode_home_assistant": "Control thermostat on / off status through Home Assistant. - I.e. if the Home Assistant thermostat is in the idle status, the status off is transmitted to Luxtronik and Luxtronik cannot start this element.",
+          "control_mode_home_assistant": "Experimental!: Control thermostat on / off status through Home Assistant. - I.e. if the Home Assistant thermostat is in the idle status, the status off is transmitted to Luxtronik and Luxtronik cannot start this element.",
           "ha_sensor_indoor_temperature": "Home Assistant sensor id for the current indoor temperature",
           "language_sensor_names": "Language key Sensor Names"
         },
@@ -28,7 +28,7 @@
           "ha_sensor_indoor_temperature": "Home Assistant sensor id for the current indoor temperature",
           "language_sensor_names": "Language key Sensor Names"
         },
-        "description": "Please restart the integration manually after change the configuration.",
+        "description": "After changing the configuration the integration restarts.",
         "title": "Configuration Luxtronik"
       }
     }

@@ -75,7 +75,8 @@ async def async_setup_entry(
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
-        text_cooling_threshold_temperature = get_sensor_text(lang, 'cooling_threshold_temperature')
+        text_cooling_threshold_temperature = get_sensor_text(
+            lang, 'cooling_threshold_temperature')
         entities += [
             LuxtronikNumber(hass, luxtronik, deviceInfoCooling, number_key=LUX_SENSOR_COOLING_THRESHOLD,
                             unique_id='cooling_threshold_temperature', name=f"{text_cooling_threshold_temperature}",
