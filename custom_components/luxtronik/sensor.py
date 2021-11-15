@@ -77,7 +77,7 @@ async def async_setup_platform(
                 LOGGER.info(
                     "sensor.async_setup_platform create entity_id: '%s'", entity_id)
                 entities += [
-                    LuxtronikLegacySensor(hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
+                    LuxtronikSensor(hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
                                     unique_id=sensor_id, name=name, icon=icon, device_class=DEVICE_CLASSES.get(
                                         sensor.measurement_type, DEFAULT_DEVICE_CLASS),
                                     state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type))
