@@ -49,7 +49,7 @@ async def async_setup_platform(
         return False
 
     use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
-    LOGGER.info("sensore.async_setup_platform use_legacy_sensor_ids: '%s'",
+    LOGGER.info("sensor.async_setup_platform use_legacy_sensor_ids: '%s'",
                 use_legacy_sensor_ids)
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
@@ -75,11 +75,13 @@ async def async_setup_platform(
                     CONF_ICON) else sensor_cfg.get(CONF_ICON)
                 entity_id = "luxtronik.{}".format(
                     slugify(name)) if use_legacy_sensor_ids else None
+                LOGGER.info(
+                    "sensor.async_setup_platform create entity_id: '%s'", entity_id)
                 entities += [
-                    LuxtronikSensor(hass, luxtronik, deviceInfo=deviceInfo, entity_id=entity_id, sensor_key=f"{group}.{sensor_id}",
+                    LuxtronikSensor(hass, luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
                                     unique_id=sensor_id, name=name, icon=icon, device_class=DEVICE_CLASSES.get(
                                         sensor.measurement_type, DEFAULT_DEVICE_CLASS),
-                                    state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type))
+                                    state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type), entity_id=entity_id)
                 ]
             else:
                 LOGGER.warning(

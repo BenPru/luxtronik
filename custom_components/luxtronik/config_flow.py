@@ -105,21 +105,19 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         """Initialize."""
         self.config_entry = config_entry
 
-    def luxtronik_config_option_schema(self, options: dict = {}) -> dict:
+    def _get_value(self, key: str, default=None):
+        return self.config_entry.options.get(key, self.config_entry.data.get(key, default))
+
+    def _get_options_schema(self):
         """Return a schema for Luxtronik configuration options."""
-        if not options:
-            options = {
-                CONF_CONTROL_MODE_HOME_ASSISTANT: False,
-                CONF_USE_LEGACY_SENSOR_IDS: False,
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE: '',
-                CONF_LANGUAGE_SENSOR_NAMES: LANG_DEFAULT
+        return vol.Schema(
+            {
+                vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=self._get_value(CONF_CONTROL_MODE_HOME_ASSISTANT, False)): bool,
+                vol.Optional(CONF_USE_LEGACY_SENSOR_IDS, default=self._get_value(CONF_USE_LEGACY_SENSOR_IDS, False)): bool,
+                vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE, '')): str,
+                vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=self._get_value(CONF_LANGUAGE_SENSOR_NAMES, LANG_DEFAULT)): vol.In(LANGUAGES_SENSOR_NAMES),
             }
-        return {
-            vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=options.get(CONF_CONTROL_MODE_HOME_ASSISTANT)): bool,
-            vol.Optional(CONF_USE_LEGACY_SENSOR_IDS, default=options.get(CONF_USE_LEGACY_SENSOR_IDS)): bool,
-            vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=options.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)): str,
-            vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=options.get(CONF_LANGUAGE_SENSOR_NAMES)): vol.In(LANGUAGES_SENSOR_NAMES),
-        }
+        )
 
     async def async_step_init(self, _user_input=None):
         """Manage the options."""
@@ -129,8 +127,4 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         """Handle a flow initialized by the user."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
-
-        schema = self.luxtronik_config_option_schema(self.config_entry.options)
-        result = self.async_show_form(
-            step_id="user", data_schema=vol.Schema(schema))
-        return result
+        return self.async_show_form(step_id="user", data_schema=self._get_options_schema())

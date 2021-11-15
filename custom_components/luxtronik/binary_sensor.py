@@ -8,9 +8,7 @@ from homeassistant.components.binary_sensor import (DEVICE_CLASS_LOCK,
                                                     DEVICE_CLASS_RUNNING,
                                                     PLATFORM_SCHEMA,
                                                     BinarySensorEntity)
-from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
-                                             STATE_CLASS_MEASUREMENT,
-                                             SensorEntity)
+from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS)
@@ -63,7 +61,7 @@ async def async_setup_platform(
         LOGGER.warning("binary_sensor.async_setup_platform no luxtronik!")
         return False
 
-    use_legacy_sensor_ids = hass.data[f"{DOMAIN}_f{CONF_USE_LEGACY_SENSOR_IDS}"]
+    use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
@@ -84,11 +82,15 @@ async def async_setup_platform(
             if sensor:
                 name = sensor.name if not sensor_cfg.get(
                     CONF_FRIENDLY_NAME) else sensor_cfg.get(CONF_FRIENDLY_NAME)
+                entity_id = "luxtronik.{}".format(
+                    slugify(name)) if use_legacy_sensor_ids else None
+                LOGGER.info(
+                    "binary_sensor.async_setup_platform create entity_id: '%s'", entity_id)
                 entities += [
                     LuxtronikBinarySensor(hass, luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
                                           unique_id=sensor_id, name=name, icon=sensor_cfg.get(CONF_ICON), device_class=DEVICE_CLASSES.get(
                                               sensor.measurement_type, DEFAULT_DEVICE_CLASS),
-                                          state_class=None, invert_state=sensor_cfg.get(CONF_INVERT_STATE))
+                                          state_class=None, invert_state=sensor_cfg.get(CONF_INVERT_STATE), entity_id=entity_id)
                 ]
             else:
                 LOGGER.warning(
@@ -161,14 +163,16 @@ class LuxtronikBinarySensor(BinarySensorEntity):
         device_class: str,
         state_class: str = None,
         entity_category: ENTITY_CATEGORIES = None,
-        invert_state: bool = False
+        invert_state: bool = False,
+        entity_id: str = None
     ) -> None:
         """Initialize a new Luxtronik binary sensor."""
         self.hass = hass
         self._luxtronik = luxtronik
 
         self._sensor_key = sensor_key
-        self.entity_id = ENTITY_ID_FORMAT.format(f"{DOMAIN}_{unique_id}")
+        self.entity_id = ENTITY_ID_FORMAT.format(
+            f"{DOMAIN}_{unique_id}") if entity_id is None else entity_id
         self._attr_unique_id = self.entity_id
         self._attr_device_info = deviceInfo
         self._attr_name = name
