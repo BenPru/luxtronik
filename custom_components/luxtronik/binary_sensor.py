@@ -4,6 +4,7 @@ import logging
 from typing import Any, Final
 
 import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
 from homeassistant.components.binary_sensor import (DEVICE_CLASS_LOCK,
                                                     DEVICE_CLASS_RUNNING,
                                                     PLATFORM_SCHEMA,
@@ -61,7 +62,7 @@ async def async_setup_platform(
         LOGGER.warning("binary_sensor.async_setup_platform no luxtronik!")
         return False
 
-    use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
+    # use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
@@ -82,8 +83,7 @@ async def async_setup_platform(
             if sensor:
                 name = sensor.name if not sensor_cfg.get(
                     CONF_FRIENDLY_NAME) else sensor_cfg.get(CONF_FRIENDLY_NAME)
-                entity_id = "luxtronik.{}".format(
-                    slugify(name)) if use_legacy_sensor_ids else None
+                entity_id = "luxtronik.{}".format(slugify(name)) # if use_legacy_sensor_ids else None
                 LOGGER.info(
                     "binary_sensor.async_setup_platform create entity_id: '%s'", entity_id)
                 entities += [

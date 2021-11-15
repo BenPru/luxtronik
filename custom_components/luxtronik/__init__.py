@@ -12,7 +12,7 @@ from luxtronik import LOGGER as LuxLogger
 from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_LANGUAGE_SENSOR_NAMES,
                     CONF_LOCK_TIMEOUT, CONF_SAFE,
                     CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
-                    CONF_USE_LEGACY_SENSOR_IDS, DOMAIN, LANG_DEFAULT, LOGGER,
+                    DOMAIN, LANG_DEFAULT, LOGGER,
                     LUX_SENSOR_DETECT_COOLING, PLATFORMS, SERVICE_WRITE,
                     SERVICE_WRITE_SCHEMA)
 from .helpers.helper import get_sensor_text
@@ -86,9 +86,9 @@ def setup_internal(hass, data, conf):
     safe = data[CONF_SAFE]
     lock_timeout = data[CONF_LOCK_TIMEOUT]
     update_immediately_after_write = data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
-    use_legacy_sensor_ids = data[CONF_USE_LEGACY_SENSOR_IDS] if CONF_USE_LEGACY_SENSOR_IDS in data else False
-    LOGGER.info("setup_internal use_legacy_sensor_ids: '%s'",
-                use_legacy_sensor_ids)
+    # use_legacy_sensor_ids = data[CONF_USE_LEGACY_SENSOR_IDS] if CONF_USE_LEGACY_SENSOR_IDS in data else False
+    # LOGGER.info("setup_internal use_legacy_sensor_ids: '%s'",
+    #             use_legacy_sensor_ids)
 
     # Build Sensor names with local language:
     lang = conf[CONF_LANGUAGE_SENSOR_NAMES] if CONF_LANGUAGE_SENSOR_NAMES in conf else LANG_DEFAULT
@@ -101,7 +101,7 @@ def setup_internal(hass, data, conf):
     luxtronik.read()
 
     hass.data[DOMAIN] = luxtronik
-    hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"] = use_legacy_sensor_ids
+    # hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"] = use_legacy_sensor_ids
     hass.data[f"{DOMAIN}_conf"] = conf
     # Create DeviceInfos:
     sn = luxtronik.get_value('parameters.ID_WP_SerienNummer_DATUM')
