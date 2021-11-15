@@ -1,0 +1,46 @@
+{
+  "state": {
+    "luxtronik2__status": {
+      "heating": "Heating",
+      "hot water": "Domestic water",
+      "swimming pool/solar": "Pool / Solar",
+      "evu": "Grid lock - no power",
+      "defrost": "Defrost",
+      "heating external source": "Heating external source",
+      "cooling": "Cooling",
+      "no request": "Idle (no request)"
+    },
+    "luxtronik2__status_line_1": {
+      "heatpump running": "The heatpump runs",
+      "heatpump idle": "The heatpump is idle",
+      "heatpump coming": "The heatpump is coming",
+      "errorcode slot": "Heatpump error code in slot 0",
+      "pump forerun": "Pump forerun",
+      "defrost": "Defrost",
+      "writing on LIN connection": "Writing on LIN connection",
+      "compressor heating up": "Der Kompressor heizt auf"
+    },
+    "luxtronik2__status_line_2": {
+      "since": "since",
+      "in": "in"
+    },
+    "luxtronik2__status_line_3": {
+      "heating": "heating",
+      "defrost": "defrost",
+      "cooling": "cooling",
+      "pump forerun": "pump forerun",
+      "thermal desinfection": "thermal desinfection",
+      "swimming pool/solar": "swimming pool/solar",
+      "no request": "no request",
+      "cycle lock": "cycle lock",
+      "lock time": "lock time",
+      "domestic water": "domestic water",
+      "flow monitoring": "flow monitoring",
+      "grid switch on delay": "grid switch on delay",
+      "info bake out program": "info bake out program",
+      "heating external engery source": "heating external engery source",
+      "domestic water external energy source": "Domestic water external energy source",
+      "second heat generator 1 active": "second heat generator 1 active"
+    }
+  }
+}

@@ -1,53 +1,40 @@
 """Support for Luxtronik heatpump controllers."""
 # region Imports
-import threading
-import time
 from typing import Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.update_coordinator import (CoordinatorEntity,
-                                                      DataUpdateCoordinator)
-from homeassistant.util import Throttle
+from homeassistant.helpers.typing import ConfigType
 from luxtronik import LOGGER as LuxLogger
-from luxtronik import Luxtronik as Lux
 
-from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_CALCULATIONS,
-                    CONF_COORDINATOR, CONF_LANGUAGE_SENSOR_NAMES,
-                    CONF_LOCK_TIMEOUT, CONF_PARAMETERS, CONF_SAFE,
-                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, CONF_VISIBILITIES,
-                    DEFAULT_PORT, DOMAIN, LANG_DEFAULT, LOGGER,
-                    LUX_SENSOR_DETECT_COOLING, MIN_TIME_BETWEEN_UPDATES,
-                    PLATFORMS, SERVICE_WRITE, SERVICE_WRITE_SCHEMA)
-# from . import LuxtronikThermostat
-from .helpers.debounce import debounce
+from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_LANGUAGE_SENSOR_NAMES,
+                    CONF_LOCK_TIMEOUT, CONF_SAFE,
+                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
+                    CONF_USE_LEGACY_SENSOR_IDS, DOMAIN, LANG_DEFAULT, LOGGER,
+                    LUX_SENSOR_DETECT_COOLING, PLATFORMS, SERVICE_WRITE,
+                    SERVICE_WRITE_SCHEMA)
 from .helpers.helper import get_sensor_text
 from .helpers.lux_helper import get_manufacturer_by_model
+from .luxtronik_device import LuxtronikDevice
 
 # endregion Imports
 
 # region Constants
 LuxLogger.setLevel(level="WARNING")
-# LOGGER.setLevel(level="WARNING")
 # endregion Constants
-
-
-async def async_reload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
-    """Reload the HACS config entry."""
-    LOGGER.info("async_reload_entry '%s'", config_entry)
-    await async_unload_entry(hass, config_entry)
-    await async_setup_entry(hass, config_entry)
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up from config entry."""
     hass.data.setdefault(DOMAIN, {})
 
-    LOGGER.info("async_setup_entry options: '%s' data:'%s'", config_entry.options, config_entry.data)
+    LOGGER.info("async_setup_entry options: '%s' data:'%s'",
+                config_entry.options, config_entry.data)
     # config_entry.add_update_listener(async_reload_entry)
-    config_entry.async_on_unload(config_entry.add_update_listener(async_reload_entry))
+    config_entry.async_on_unload(
+        config_entry.add_update_listener(async_reload_entry))
 
     setup_internal(hass, config_entry.data, config_entry.options)
 
@@ -83,7 +70,7 @@ def setup_hass_services(hass):
     )
 
 
-def setup(hass, config):
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     if DOMAIN not in config:
         # Setup via UI. No need to continue yaml-based setup
         return True
@@ -99,10 +86,12 @@ def setup_internal(hass, data, conf):
     safe = data[CONF_SAFE]
     lock_timeout = data[CONF_LOCK_TIMEOUT]
     update_immediately_after_write = data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
+    use_legacy_sensor_ids = data[CONF_USE_LEGACY_SENSOR_IDS] if CONF_USE_LEGACY_SENSOR_IDS in data else False
+    LOGGER.info("setup_internal use_legacy_sensor_ids: '%s'",
+                use_legacy_sensor_ids)
 
     # Build Sensor names with local language:
     lang = conf[CONF_LANGUAGE_SENSOR_NAMES] if CONF_LANGUAGE_SENSOR_NAMES in conf else LANG_DEFAULT
-    LOGGER.info('Luxtronik2.setup_internal lang %s', lang)
     text_domestic_water = get_sensor_text(lang, 'domestic_water')
     text_heating = get_sensor_text(lang, 'heating')
     text_heatpump = get_sensor_text(lang, 'heatpump')
@@ -112,6 +101,7 @@ def setup_internal(hass, data, conf):
     luxtronik.read()
 
     hass.data[DOMAIN] = luxtronik
+    hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"] = use_legacy_sensor_ids
     hass.data[f"{DOMAIN}_conf"] = conf
     # Create DeviceInfos:
     sn = luxtronik.get_value('parameters.ID_WP_SerienNummer_DATUM')
@@ -129,13 +119,20 @@ def setup_internal(hass, data, conf):
     return True
 
 
+async def async_reload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
+    """Reload the HACS config entry."""
+    LOGGER.info("async_reload_entry '%s'", config_entry)
+    await async_unload_entry(hass, config_entry)
+    await async_setup_entry(hass, config_entry)
+
+
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unloading the Luxtronik platforms."""
     LOGGER.info("async_unload_entry '%s'", config_entry)
     luxtronik = hass.data[DOMAIN]
     if luxtronik is None:
         return
-    
+
     await hass.async_add_executor_job(luxtronik.disconnect)
 
     await hass.services.async_remove(DOMAIN, SERVICE_WRITE)
@@ -147,108 +144,6 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         hass.data.pop(DOMAIN)
 
     return unload_ok
-
-
-class LuxtronikDevice:
-    """Handle all communication with Luxtronik."""
-    __ignore_update = False
-
-    def __init__(self, host, port, safe, lock_timeout_sec):
-        """Initialize the Luxtronik connection."""
-        self.lock = threading.Lock()
-
-        self._host = host
-        self._port = port
-        self._lock_timeout_sec = lock_timeout_sec
-        self._luxtronik = Lux(host, port, safe)
-        self.update()
-
-    async def async_will_remove_from_hass(self):
-        """Disconnect from Luxtronik by stopping monitor."""
-        self.disconnect()
-
-    def disconnect(self):
-        self._luxtronik._disconnect()
-
-    def get_value(self, group_sensor_id: str):
-        sensor = self.get_sensor_by_id(group_sensor_id)
-        if sensor is None:
-            return None
-        return sensor.value
-
-    def get_sensor_by_id(self, group_sensor_id: str):
-        try:
-            group = group_sensor_id.split('.')[0]
-            sensor_id = group_sensor_id.split('.')[1]
-            return self.get_sensor(group, sensor_id)
-        except Exception as e:
-            LOGGER.critical(group_sensor_id, e, exc_info=True)
-
-    def get_sensor(self, group, sensor_id):
-        """Get sensor by configured sensor ID."""
-        sensor = None
-        if group == CONF_PARAMETERS:
-            sensor = self._luxtronik.parameters.get(sensor_id)
-        if group == CONF_CALCULATIONS:
-            sensor = self._luxtronik.calculations.get(sensor_id)
-        if group == CONF_VISIBILITIES:
-            sensor = self._luxtronik.visibilities.get(sensor_id)
-        return sensor
-
-    def write(self, parameter, value, debounce=True, update_immediately_after_write=False):
-        """Write a parameter to the Luxtronik heatpump."""
-        self.__ignore_update = True
-        if debounce:
-            self.__write_debounced(
-                parameter, value, update_immediately_after_write)
-        else:
-            self.__write(parameter, value, update_immediately_after_write)
-
-    @debounce(3)
-    def __write_debounced(self, parameter, value, update_immediately_after_write):
-        self.__write(parameter, value, update_immediately_after_write)
-
-    def __write(self, parameter, value, update_immediately_after_write):
-        try:
-            if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
-                LOGGER.info('LuxtronikDevice.write %s value: "%s" - %s',
-                            parameter, value, update_immediately_after_write)
-                self._luxtronik.parameters.set(parameter, value)
-                self._luxtronik.write()
-            else:
-                LOGGER.warning(
-                    "Couldn't write luxtronik parameter %s with value %s because of lock timeout %s",
-                    parameter,
-                    value,
-                    self._lock_timeout_sec,
-                )
-        finally:
-            self.lock.release()
-            if update_immediately_after_write:
-                time.sleep(3)
-                self.read()
-            self.__ignore_update = False
-            LOGGER.info(
-                'LuxtronikDevice.write finished %s value: "%s" - %s', parameter, value, update_immediately_after_write)
-
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
-    def update(self):
-        if self.__ignore_update:
-            return
-        self.read()
-
-    def read(self):
-        """Get the data from Luxtronik."""
-        try:
-            if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
-                self._luxtronik.read()
-            else:
-                LOGGER.warning(
-                    "Couldn't read luxtronik data because of lock timeout %s",
-                    self._lock_timeout_sec,
-                )
-        finally:
-            self.lock.release()
 
 
 def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str) -> DeviceInfo:

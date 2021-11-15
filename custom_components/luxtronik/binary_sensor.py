@@ -20,9 +20,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import slugify
 
-from . import LuxtronikDevice
 from .const import *
 from .helpers.helper import get_sensor_text
+from .luxtronik_device import LuxtronikDevice
 
 # endregion Imports
 
@@ -63,6 +63,7 @@ async def async_setup_platform(
         LOGGER.warning("binary_sensor.async_setup_platform no luxtronik!")
         return False
 
+    use_legacy_sensor_ids = hass.data[f"{DOMAIN}_f{CONF_USE_LEGACY_SENSOR_IDS}"]
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]

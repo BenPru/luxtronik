@@ -10,22 +10,20 @@ from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS, DEVICE_CLASS_TEMPERATURE,
-                                 DEVICE_CLASS_TIMESTAMP, ENERGY_KILO_WATT_HOUR,
-                                 ENTITY_CATEGORY_CONFIG,
-                                 ENTITY_CATEGORY_DIAGNOSTIC, STATE_ON,
-                                 STATE_UNAVAILABLE, TEMP_CELSIUS, TIME_HOURS,
-                                 TIME_SECONDS, EVENT_HOMEASSISTANT_STOP)
+                                 ENERGY_KILO_WATT_HOUR,
+                                 ENTITY_CATEGORY_DIAGNOSTIC,
+                                 EVENT_HOMEASSISTANT_STOP, STATE_UNAVAILABLE,
+                                 TEMP_CELSIUS, TIME_HOURS, TIME_SECONDS)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import (ENTITY_CATEGORIES, DeviceInfo,
-                                          ToggleEntity)
+from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.util import slugify
 
-from . import DOMAIN as LUXTRONIK_DOMAIN
-from . import LuxtronikDevice
 from .const import *
 from .helpers.helper import get_sensor_text, get_sensor_value_text
+from .luxtronik_device import LuxtronikDevice
 from .model import LuxtronikStatusExtraAttributes
 
 # endregion Imports
@@ -45,11 +43,14 @@ async def async_setup_platform(
     """Set up a Luxtronik sensor from yaml config."""
     LOGGER.info(f"{DOMAIN}.sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
                 config, discovery_info)
-    luxtronik: LuxtronikDevice = hass.data.get(LUXTRONIK_DOMAIN)
+    luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
         LOGGER.warning("sensor.async_setup_platform no luxtronik!")
         return False
 
+    use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
+    LOGGER.info("sensore.async_setup_platform use_legacy_sensor_ids: '%s'",
+                use_legacy_sensor_ids)
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
@@ -72,8 +73,10 @@ async def async_setup_platform(
                     CONF_FRIENDLY_NAME) else sensor_cfg.get(CONF_FRIENDLY_NAME)
                 icon = ICONS.get(sensor.measurement_type) if not sensor_cfg.get(
                     CONF_ICON) else sensor_cfg.get(CONF_ICON)
+                entity_id = "luxtronik.{}".format(
+                    slugify(name)) if use_legacy_sensor_ids else None
                 entities += [
-                    LuxtronikSensor(hass, luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
+                    LuxtronikSensor(hass, luxtronik, deviceInfo=deviceInfo, entity_id=entity_id, sensor_key=f"{group}.{sensor_id}",
                                     unique_id=sensor_id, name=name, icon=icon, device_class=DEVICE_CLASSES.get(
                                         sensor.measurement_type, DEFAULT_DEVICE_CLASS),
                                     state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type))
@@ -95,7 +98,7 @@ async def async_setup_entry(
     """Set up a Luxtronik sensor from ConfigEntry."""
     LOGGER.info(
         f"{DOMAIN}.sensor.async_setup_entry ConfigType: %s", config_entry)
-    luxtronik: LuxtronikDevice = hass.data.get(LUXTRONIK_DOMAIN)
+    luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
         LOGGER.warning("sensor.async_setup_entry no luxtronik!")
         return False
@@ -229,12 +232,13 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unloading the Luxtronik platforms."""
     luxtronik = hass.data[DOMAIN]
     if luxtronik is None:
         return
-    
+
     await hass.async_add_executor_job(luxtronik.disconnect)
 
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
@@ -264,13 +268,14 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         unit_of_measurement: str = TEMP_CELSIUS,
         entity_category: ENTITY_CATEGORIES = None,
         factor: float = None,
+        entity_id: str = None
     ) -> None:
         """Initialize the sensor."""
         self.hass = hass
         self._luxtronik = luxtronik
 
         self.entity_id = ENTITY_ID_FORMAT.format(
-            f"{LUXTRONIK_DOMAIN}_{unique_id}")
+            f"{DOMAIN}_{unique_id}") if entity_id is None else entity_id
         self._attr_unique_id = self.entity_id
         self._attr_device_class = device_class
         self._attr_name = name

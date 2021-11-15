@@ -39,9 +39,9 @@ CONF_VISIBILITIES: Final = "visibilities"
 CONF_COORDINATOR: Final = "coordinator"
 
 CONF_CONTROL_MODE_HOME_ASSISTANT: Final = "control_mode_home_assistant"
+CONF_USE_LEGACY_SENSOR_IDS: Final = "use_legacy_sensor_ids"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
 CONF_LANGUAGE_SENSOR_NAMES: Final = "language_sensor_names"
-LANGUAGES_SENSOR_NAMES: Final = ["en", "de"]
 
 DEFAULT_PORT: Final = 8888
 
@@ -77,6 +77,7 @@ LANG_EN: Final = 'en'
 LANG_DE: Final = 'de'
 LANG_DEFAULT: Final = LANG_EN
 LANGUAGES: Final = Enum(LANG_EN, LANG_DE)
+LANGUAGES_SENSOR_NAMES: Final = [LANG_EN, LANG_DE]
 # endregion Conf
 
 
@@ -92,6 +93,8 @@ MIN_TIME_BETWEEN_UPDATES: Final = timedelta(seconds=10)
 PRESET_SECOND_HEATSOURCE: Final = 'second_heatsource'
 
 # region Lux Modes
+
+
 class LuxMode(Enum):
     off: Final = 'Off'
     automatic: Final = 'Automatic'
@@ -99,6 +102,7 @@ class LuxMode(Enum):
     party: Final = 'Party'
     holidays: Final = 'Holidays'
 # endregion Lux Modes
+
 
 # region Lux Status
 LUX_STATUS_HEATING: Final = 'heating'                                   # 0

@@ -1,6 +1,7 @@
 """Config flow to configure the Luxtronik heatpump controller integration."""
 # region Imports
 from __future__ import annotations
+
 from typing import Any
 
 import homeassistant.helpers.config_validation as cv
@@ -14,7 +15,8 @@ from homeassistant.data_entry_flow import FlowResult
 from .const import (CONF_CONTROL_MODE_HOME_ASSISTANT,
                     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
                     CONF_LANGUAGE_SENSOR_NAMES, CONF_LOCK_TIMEOUT, CONF_SAFE,
-                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, DEFAULT_PORT, DOMAIN,
+                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
+                    CONF_USE_LEGACY_SENSOR_IDS, DEFAULT_PORT, DOMAIN,
                     LANG_DEFAULT, LANGUAGES_SENSOR_NAMES, LOGGER)
 from .helpers.lux_helper import discover
 
@@ -29,6 +31,18 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     _discovery_host = None
     _discovery_port = None
 
+    def _get_schema(self):
+        return vol.Schema(
+            {
+                vol.Required(CONF_HOST, default=self._discovery_host): str,
+                vol.Required(CONF_PORT, default=self._discovery_port): int,
+                vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
+                vol.Optional(CONF_USE_LEGACY_SENSOR_IDS, default=False): bool,
+                vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=''): str,
+                vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(LANGUAGES_SENSOR_NAMES),
+            }
+        )
+
     async def async_step_dhcp(self, discovery_info: dict):
         """Prepare configuration for a DHCP discovered Luxtronik heatpump."""
         LOGGER.info("Found device with hostname '%s' IP '%s'",
@@ -42,15 +56,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         self._discovery_host = discovery_info[IP_ADDRESS]
         self._discovery_port = DEFAULT_PORT if broadcast_discover_port is None else broadcast_discover_port
-        self.discovery_schema = vol.Schema(
-            {
-                vol.Required(CONF_HOST, default=self._discovery_host): str,
-                vol.Required(CONF_PORT, default=self._discovery_port): int,
-                vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
-                vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=''): str,
-                vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(LANGUAGES_SENSOR_NAMES),
-            }
-        )
+        self.discovery_schema = self._get_schema()
         return await self.async_step_user()
 
     async def _show_setup_form(
@@ -59,30 +65,9 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Show the setup form to the user."""
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_HOST, default=self._discovery_host): cv.string,
-                    vol.Required(CONF_PORT, default=self._discovery_port): vol.Coerce(int),
-                    vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
-                    vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=''): str,
-                    vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(LANGUAGES_SENSOR_NAMES),
-                }
-            ),
+            data_schema=self._get_schema(),
             errors=errors or {},
         )
-
-    # async def _show_hassio_form(
-    #     self, errors: dict[str, str] | None = None
-    # ) -> FlowResult:
-    #     """Show the Hass.io confirmation form to the user."""
-    #     assert self._hassio_discovery
-    #     return self.async_show_form(
-    #         step_id="hassio_confirm",
-    #         description_placeholders={
-    #             "addon": self._hassio_discovery["addon"]},
-    #         data_schema=vol.Schema({}),
-    #         errors=errors or {},
-    #     )
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -91,34 +76,27 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is None:
             return await self._show_setup_form(user_input)
 
-        self._async_abort_entries_match(
-            {CONF_HOST: user_input[CONF_HOST],
-                CONF_PORT: user_input[CONF_PORT],
-                CONF_CONTROL_MODE_HOME_ASSISTANT: user_input[CONF_CONTROL_MODE_HOME_ASSISTANT],
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE: user_input[CONF_HA_SENSOR_INDOOR_TEMPERATURE],
-                CONF_LANGUAGE_SENSOR_NAMES: user_input[CONF_LANGUAGE_SENSOR_NAMES]}
-        )
+        data = {
+            CONF_HOST: user_input[CONF_HOST],
+            CONF_PORT: user_input[CONF_PORT],
+            CONF_SAFE: False,
+            CONF_LOCK_TIMEOUT: 30,
+            CONF_UPDATE_IMMEDIATELY_AFTER_WRITE: True,
+            CONF_CONTROL_MODE_HOME_ASSISTANT: user_input[CONF_CONTROL_MODE_HOME_ASSISTANT],
+            CONF_USE_LEGACY_SENSOR_IDS: user_input[CONF_USE_LEGACY_SENSOR_IDS],
+            CONF_HA_SENSOR_INDOOR_TEMPERATURE: user_input[CONF_HA_SENSOR_INDOOR_TEMPERATURE],
+            CONF_LANGUAGE_SENSOR_NAMES: user_input[CONF_LANGUAGE_SENSOR_NAMES]
+        }
+        self._async_abort_entries_match(data)
 
         errors = {}
-
-        return self.async_create_entry(
-            title=user_input[CONF_HOST],
-            data={
-                CONF_HOST: user_input[CONF_HOST],
-                CONF_PORT: user_input[CONF_PORT],
-                CONF_SAFE: False,
-                CONF_LOCK_TIMEOUT: 30,
-                CONF_UPDATE_IMMEDIATELY_AFTER_WRITE: True,
-                CONF_CONTROL_MODE_HOME_ASSISTANT: user_input[CONF_CONTROL_MODE_HOME_ASSISTANT],
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE: user_input[CONF_HA_SENSOR_INDOOR_TEMPERATURE],
-                CONF_LANGUAGE_SENSOR_NAMES: user_input[CONF_LANGUAGE_SENSOR_NAMES]
-            },
-        )
+        return self.async_create_entry(title=user_input[CONF_HOST], data=data)
 
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
         return LuxtronikOptionsFlowHandler(config_entry)
+
 
 class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle a Luxtronik options flow."""
@@ -132,11 +110,13 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         if not options:
             options = {
                 CONF_CONTROL_MODE_HOME_ASSISTANT: False,
+                CONF_USE_LEGACY_SENSOR_IDS: False,
                 CONF_HA_SENSOR_INDOOR_TEMPERATURE: '',
                 CONF_LANGUAGE_SENSOR_NAMES: LANG_DEFAULT
             }
         return {
             vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=options.get(CONF_CONTROL_MODE_HOME_ASSISTANT)): bool,
+            vol.Optional(CONF_USE_LEGACY_SENSOR_IDS, default=options.get(CONF_USE_LEGACY_SENSOR_IDS)): bool,
             vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=options.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)): str,
             vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=options.get(CONF_LANGUAGE_SENSOR_NAMES)): vol.In(LANGUAGES_SENSOR_NAMES),
         }
@@ -151,4 +131,6 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=user_input)
 
         schema = self.luxtronik_config_option_schema(self.config_entry.options)
-        return self.async_show_form(step_id="user", data_schema=vol.Schema(schema))
+        result = self.async_show_form(
+            step_id="user", data_schema=vol.Schema(schema))
+        return result
