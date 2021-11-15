@@ -36,6 +36,7 @@ LuxLogger.setLevel(level="WARNING")
 
 async def async_reload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
     """Reload the HACS config entry."""
+    LOGGER.info("async_reload_entry '%s'", config_entry)
     await async_unload_entry(hass, config_entry)
     await async_setup_entry(hass, config_entry)
 
@@ -44,37 +45,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     """Set up from config entry."""
     hass.data.setdefault(DOMAIN, {})
 
-    LOGGER.info("async_setup_entry '%s'", config_entry.data)
-    config_entry.add_update_listener(async_reload_entry)
+    LOGGER.info("async_setup_entry options: '%s' data:'%s'", config_entry.options, config_entry.data)
+    # config_entry.add_update_listener(async_reload_entry)
+    config_entry.async_on_unload(config_entry.add_update_listener(async_reload_entry))
 
-
-    setup_internal(hass, config_entry.data)
+    setup_internal(hass, config_entry.data, config_entry.options)
 
     luxtronik = hass.data[DOMAIN]
 
-    # def _update_luxtronik_devices() -> dict[str, LuxtronikThermostat]:
-    #     """Update all luxtronik device data."""
-    #     data = {}
-    #     luxtronik.update()
-
-    #     data[device.ain] = device
-    #     return data
-
-    # async def async_update_coordinator() -> dict[str, LuxtronikThermostat]:
-    #     """Fetch all device data."""
-    #     return await hass.async_add_executor_job(_update_luxtronik_devices)
-
-    # hass.data[DOMAIN][entry.entry_id][
-    #     CONF_COORDINATOR
-    # ] = coordinator = DataUpdateCoordinator(
-    #     hass,
-    #     LOGGER,
-    #     name=f"{entry.entry_id}",
-    #     update_method=async_update_coordinator,
-    #     update_interval=timedelta(seconds=30),
-    # )
-
-    # await coordinator.async_config_entry_first_refresh()
     hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
 
     def logout_luxtronik(event: Event) -> None:
@@ -86,8 +64,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     )
     await hass.async_add_executor_job(setup_hass_services, hass)
     return True
-
-# async def async_setup(hass, config):
 
 
 def setup_hass_services(hass):
@@ -113,16 +89,16 @@ def setup(hass, config):
         return True
     # LOGGER.info("async_setup '%s'", config)
     conf = config[DOMAIN]
-    return setup_internal(hass, conf)
+    return setup_internal(hass, conf, conf)
 
 
-def setup_internal(hass, conf):
+def setup_internal(hass, data, conf):
     """Set up the Luxtronik component."""
-    host = conf[CONF_HOST]
-    port = conf[CONF_PORT]
-    safe = conf[CONF_SAFE]
-    lock_timeout = conf[CONF_LOCK_TIMEOUT]
-    update_immediately_after_write = conf[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
+    host = data[CONF_HOST]
+    port = data[CONF_PORT]
+    safe = data[CONF_SAFE]
+    lock_timeout = data[CONF_LOCK_TIMEOUT]
+    update_immediately_after_write = data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
 
     # Build Sensor names with local language:
     lang = conf[CONF_LANGUAGE_SENSOR_NAMES] if CONF_LANGUAGE_SENSOR_NAMES in conf else LANG_DEFAULT
@@ -130,6 +106,7 @@ def setup_internal(hass, conf):
     text_domestic_water = get_sensor_text(lang, 'domestic_water')
     text_heating = get_sensor_text(lang, 'heating')
     text_heatpump = get_sensor_text(lang, 'heatpump')
+    text_cooling = get_sensor_text(lang, 'cooling')
 
     luxtronik = LuxtronikDevice(host, port, safe, lock_timeout)
     luxtronik.read()
@@ -142,28 +119,32 @@ def setup_internal(hass, conf):
         luxtronik, sn, text_heatpump)
     hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
         identifiers={(DOMAIN, 'Domestic_Water', sn)},
-        default_name=text_domestic_water)
+        default_name=text_domestic_water, name=text_domestic_water)
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
         identifiers={(DOMAIN, 'Heating', sn)},
-        default_name=text_heating)
+        default_name=text_heating, name=text_heating)
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = DeviceInfo(
         identifiers={(DOMAIN, 'Cooling', sn)},
-        default_name='Cooling') if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING) else None
+        default_name=text_cooling, name=text_cooling) if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING) else None
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unloading the Luxtronik platforms."""
+    LOGGER.info("async_unload_entry '%s'", config_entry)
     luxtronik = hass.data[DOMAIN]
     if luxtronik is None:
         return
     
     await hass.async_add_executor_job(luxtronik.disconnect)
 
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    await hass.services.async_remove(DOMAIN, SERVICE_WRITE)
+
+    unload_ok = await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
     if unload_ok:
         # hass.data[DOMAIN].pop(entry.entry_id)
         hass.data[DOMAIN] = None
+        hass.data.pop(DOMAIN)
 
     return unload_ok
 

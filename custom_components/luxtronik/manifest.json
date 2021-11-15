@@ -1,7 +1,7 @@
 {
   "domain": "luxtronik2",
   "name": "Luxtronik",
-  "version": "2021.10.21",
+  "version": "2021.11.15",
   "config_flow": true,
   "iot_class": "local_polling",
   "documentation": "https://www.home-assistant.io/integrations/luxtronik",

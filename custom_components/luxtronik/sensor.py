@@ -228,6 +228,21 @@ async def async_setup_entry(
     )
 
     async_add_entities(entities)
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unloading the Luxtronik platforms."""
+    luxtronik = hass.data[DOMAIN]
+    if luxtronik is None:
+        return
+    
+    await hass.async_add_executor_job(luxtronik.disconnect)
+
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        # hass.data[DOMAIN].pop(entry.entry_id)
+        hass.data[DOMAIN] = None
+
+    return unload_ok
 # endregion Setup
 
 
@@ -301,7 +316,6 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
     def update(self):
         """Get the latest status and use it to update our sensor state."""
         self._luxtronik.update()
-
         if self._sensor_key == 'calculations.ID_WEB_HauptMenuStatus_Zeit':
             v = self.native_value
             if v is None:
@@ -331,6 +345,7 @@ class LuxtronikStatusSensor(LuxtronikSensor):
         if not sensor is None and attr in sensor.attributes:
             return sensor.attributes[attr]
         return None
+
     def _build_status_text(self) -> str:
         status_time = self._get_sensor_attr(
             f"sensor.{DOMAIN}_status_time", ATTR_STATUS_TEXT)
