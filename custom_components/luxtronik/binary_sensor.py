@@ -17,6 +17,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util import slugify
 
 from .const import *
@@ -148,7 +149,7 @@ async def async_setup_entry(
 # endregion Setup
 
 
-class LuxtronikBinarySensor(BinarySensorEntity):
+class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
     """Representation of a Luxtronik binary sensor."""
 
     def __init__(

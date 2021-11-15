@@ -8,13 +8,12 @@ from homeassistant.components.number.const import MODE_AUTO, MODE_BOX
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (DEVICE_CLASS_TEMPERATURE,
-                                 ENTITY_CATEGORY_CONFIG,
-                                 ENTITY_CATEGORY_DIAGNOSTIC, TEMP_CELSIUS)
+from homeassistant.const import (DEVICE_CLASS_TEMPERATURE, TEMP_CELSIUS)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import LuxtronikDevice
 from .const import *
@@ -87,7 +86,7 @@ async def async_setup_entry(
 # endregion Setup
 
 
-class LuxtronikNumber(NumberEntity):
+class LuxtronikNumber(NumberEntity, RestoreEntity):
     """Representation of a Luxtronik number."""
 
     def __init__(

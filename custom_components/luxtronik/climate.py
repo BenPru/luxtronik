@@ -16,8 +16,7 @@ from homeassistant.components.climate.const import (CURRENT_HVAC_COOL,
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.components.water_heater import ATTR_TEMPERATURE
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (ENTITY_CATEGORY_CONFIG,
-                                 ENTITY_CATEGORY_DIAGNOSTIC, STATE_UNAVAILABLE,
+from homeassistant.const import (STATE_UNAVAILABLE,
                                  STATE_UNKNOWN, TEMP_CELSIUS)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
