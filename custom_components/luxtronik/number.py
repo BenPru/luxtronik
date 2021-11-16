@@ -8,12 +8,11 @@ from homeassistant.components.number.const import MODE_AUTO, MODE_BOX
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (DEVICE_CLASS_TEMPERATURE,
-                                 ENTITY_CATEGORY_CONFIG,
-                                 ENTITY_CATEGORY_DIAGNOSTIC, TEMP_CELSIUS)
+from homeassistant.const import DEVICE_CLASS_TEMPERATURE, TEMP_CELSIUS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import LuxtronikDevice
@@ -57,7 +56,7 @@ async def async_setup_entry(
         entities += [
             LuxtronikNumber(hass, luxtronik, deviceInfoHeating, number_key=LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
                             unique_id='heating_temperature_correction', name=f"{text_temp} {text_correction}",
-                            icon='mdi:plus-minus-variant', min_value=-5.0, max_value=5.0, step=0.5, mode=MODE_BOX),
+                            icon='mdi:plus-minus-variant', unit_of_measurement=TEMP_CELSIUS, min_value=-5.0, max_value=5.0, step=0.5, mode=MODE_BOX),
             LuxtronikNumber(hass, luxtronik, deviceInfoHeating, number_key=LUX_SENSOR_HEATING_THRESHOLD,
                             unique_id='heating_threshold_temperature', name=f"{text_heating_threshold}",
                             icon='mdi:download-outline', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=12.0, step=0.5, mode=MODE_BOX)
@@ -70,7 +69,7 @@ async def async_setup_entry(
         entities += [
             LuxtronikNumber(hass, luxtronik, deviceInfoDomesticWater, number_key=LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                             unique_id='domestic_water_target_temperature', name=f"{text_domestic_water} {text_target} {text_temp}",
-                            icon='mdi:water-boiler', min_value=40.0, max_value=60.0, step=2.5, mode=MODE_BOX)
+                            icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=2.5, mode=MODE_BOX)
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
@@ -87,7 +86,7 @@ async def async_setup_entry(
 # endregion Setup
 
 
-class LuxtronikNumber(NumberEntity):
+class LuxtronikNumber(NumberEntity, RestoreEntity):
     """Representation of a Luxtronik number."""
 
     def __init__(
@@ -119,7 +118,7 @@ class LuxtronikNumber(NumberEntity):
         self._attr_device_class = device_class
         self._attr_name = name
         self._icon = icon
-        self._attr_native_unit_of_measurement = unit_of_measurement
+        self._attr_unit_of_measurement = unit_of_measurement
         self._attr_state_class = state_class
 
         self._attr_device_info = deviceInfo
@@ -136,14 +135,7 @@ class LuxtronikNumber(NumberEntity):
     @property
     def icon(self):  # -> str | None:
         """Return the icon to be used for this entity."""
-        # if type(self._icon) is dict and not isinstance(self._icon, str):
-        #     return self._icon[self.native_value()]
         return self._icon
-
-    # @property
-    # def native_value(self):  # -> float | int | None:
-    #     """Return the state of the number."""
-    #     return self._luxtronik.get_value(self._number_key)
 
     def update(self):
         """Get the latest status and use it to update our sensor state."""
@@ -154,12 +146,7 @@ class LuxtronikNumber(NumberEntity):
         """Return the state of the entity."""
         return self._luxtronik.get_value(self._number_key)
 
-    async def async_set_value(self, value: float) -> None:
+    def set_value(self, value: float) -> None:
         """Update the current value."""
         self._luxtronik.write(self._number_key.split('.')[1], value)
-
-    # @callback
-    # def _update_and_write_state(self, *_):
-    #     """Update the number and write state."""
-    #     self._update()
-    #     self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)

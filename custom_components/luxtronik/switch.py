@@ -4,21 +4,12 @@ import logging
 from typing import Any, Final
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.binary_sensor import (DEVICE_CLASS_HEAT,
-                                                    PLATFORM_SCHEMA,
-                                                    BinarySensorEntity)
-from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
-                                             STATE_CLASS_MEASUREMENT,
-                                             SensorEntity)
+from homeassistant.components.binary_sensor import DEVICE_CLASS_HEAT
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
-                                 CONF_SENSORS)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.util import slugify
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import LuxtronikDevice
 from .binary_sensor import LuxtronikBinarySensor
@@ -74,7 +65,7 @@ async def async_setup_entry(
 # endregion Setup
 
 
-class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity):
+class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity, RestoreEntity):
     """Representation of a Luxtronik switch."""
 
     def __init__(
@@ -98,8 +89,10 @@ class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity):
         """Turn the switch on."""
         self._luxtronik.write(self._sensor_key.split(
             '.')[1], self._on_state, debounce=False, update_immediately_after_write=True)
+        self.schedule_update_ha_state(force_refresh=True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the switch off."""
         self._luxtronik.write(self._sensor_key.split(
             '.')[1], self._off_state, debounce=False, update_immediately_after_write=True)
+        self.schedule_update_ha_state(force_refresh=True)

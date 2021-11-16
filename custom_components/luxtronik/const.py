@@ -39,7 +39,7 @@ CONF_VISIBILITIES: Final = "visibilities"
 CONF_COORDINATOR: Final = "coordinator"
 
 CONF_CONTROL_MODE_HOME_ASSISTANT: Final = "control_mode_home_assistant"
-CONF_USE_LEGACY_SENSOR_IDS: Final = "use_legacy_sensor_ids"
+# Disabled - not working: CONF_USE_LEGACY_SENSOR_IDS: Final = "use_legacy_sensor_ids"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
 CONF_LANGUAGE_SENSOR_NAMES: Final = "language_sensor_names"
 

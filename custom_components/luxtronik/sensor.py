@@ -48,9 +48,9 @@ async def async_setup_platform(
         LOGGER.warning("sensor.async_setup_platform no luxtronik!")
         return False
 
-    use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
-    LOGGER.info("sensor.async_setup_platform use_legacy_sensor_ids: '%s'",
-                use_legacy_sensor_ids)
+    # use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
+    # LOGGER.info("sensor.async_setup_platform use_legacy_sensor_ids: '%s'",
+    #             use_legacy_sensor_ids)
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
@@ -73,15 +73,19 @@ async def async_setup_platform(
                     CONF_FRIENDLY_NAME) else sensor_cfg.get(CONF_FRIENDLY_NAME)
                 icon = ICONS.get(sensor.measurement_type) if not sensor_cfg.get(
                     CONF_ICON) else sensor_cfg.get(CONF_ICON)
-                entity_id = "luxtronik.{}".format(
-                    slugify(name)) if use_legacy_sensor_ids else None
+                entity_id = "luxtronik.{}".format(slugify(name)) # if use_legacy_sensor_ids else None
                 LOGGER.info(
                     "sensor.async_setup_platform create entity_id: '%s'", entity_id)
                 entities += [
-                    LuxtronikSensor(hass, luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
+                    LuxtronikSensor(hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
                                     unique_id=sensor_id, name=name, icon=icon, device_class=DEVICE_CLASSES.get(
                                         sensor.measurement_type, DEFAULT_DEVICE_CLASS),
-                                    state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type), entity_id=entity_id)
+                                    state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type))
+                    # Not working!
+                    # LuxtronikLegacySensor(set_entity_id=entity_id, hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
+                    #                 unique_id=sensor_id, name=name, icon=icon, device_class=DEVICE_CLASSES.get(
+                    #                     sensor.measurement_type, DEFAULT_DEVICE_CLASS),
+                    #                 state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type))
                 ]
             else:
                 LOGGER.warning(
@@ -269,16 +273,14 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         state_class: str = STATE_CLASS_MEASUREMENT,
         unit_of_measurement: str = TEMP_CELSIUS,
         entity_category: ENTITY_CATEGORIES = None,
-        factor: float = None,
-        entity_id: str = None
+        factor: float = None
     ) -> None:
         """Initialize the sensor."""
         self.hass = hass
         self._luxtronik = luxtronik
 
-        self.entity_id = ENTITY_ID_FORMAT.format(
-            f"{DOMAIN}_{unique_id}") if entity_id is None else entity_id
-        self._attr_unique_id = self.entity_id
+        self._entity_id = ENTITY_ID_FORMAT.format(f"{DOMAIN}_{unique_id}")
+        self._attr_unique_id = self._entity_id
         self._attr_device_class = device_class
         self._attr_name = name
         self._icon = icon
@@ -336,10 +338,37 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
             }
 
 
+class LuxtronikLegacySensor(LuxtronikSensor):
+
+    def __init__(
+        self,
+        set_entity_id: str,
+        *args, **kwargs
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        # self._set_entity_id = set_entity_id
+        # self.entity_id = set_entity_id
+        self._attr_unique_id = set_entity_id
+        # self.unique_id = set_entity_id
+        # self._attr_entity_id = set_entity_id
+
+        # self.domain = "luxtronik"
+        # self.platform_name = "luxtronik"
+        self.entity_namespace = "luxtronik"
+
+    # @property
+    # def entity_id(self):
+    #     """Return the entity_id of the sensor."""
+    #     return self._set_entity_id
+
+    # @entity_id.setter
+    # def set_entity_id(self, x):
+    #     pass
+
 class LuxtronikStatusSensor(LuxtronikSensor):
-    @property
-    def is_on(self) -> bool:  # | None:
-        return self.native_value in LUX_STATES_ON
+    # @property
+    # def is_on(self) -> bool:  # | None:
+    #     return self.native_value in LUX_STATES_ON
 
     def _get_sensor_value(self, sensor_name: str):
         sensor = self.hass.states.get(sensor_name)
