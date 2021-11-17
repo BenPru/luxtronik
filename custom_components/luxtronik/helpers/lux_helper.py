@@ -1,3 +1,4 @@
+"""Helper for luxtronik heatpump module."""
 import socket
 
 from ..const import LOGGER
@@ -8,16 +9,15 @@ def discover():
 
     for p in (4444, 47808):
         LOGGER.debug(f"Send discovery packets to port {p}")
-        server = socket.socket(
-            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         server.bind(("", p))
         server.settimeout(2)
 
-        # send AIT magic brodcast packet
+        # send AIT magic broadcast packet
         data = "2000;111;1;\x00"
         server.sendto(data.encode(), ("<broadcast>", p))
-        LOGGER.debug(f"Sending broadcast request \"{data.encode()}\"")
+        LOGGER.debug(f'Sending broadcast request "{data.encode()}"')
 
         while True:
             try:
@@ -30,27 +30,30 @@ def discover():
                 # if the response starts with the magic nonsense
                 if res.startswith("2500;111;"):
                     res = res.split(";")
-                    LOGGER.debug(f"Received answer from {ip} \"{res}\"")
+                    LOGGER.debug(f'Received answer from {ip} "{res}"')
                     try:
                         port = int(res[2])
                     except ValueError:
                         LOGGER.debug(
-                            "Response did not contain a valid port number, an old Luxtronic software version might be the reason.")
+                            "Response did not contain a valid port number, an old Luxtronic software version might be the reason."
+                        )
                         port = None
                     return (ip, port)
                 # if not, continue
                 else:
                     LOGGER.debug(
-                        f"Received answer, but with wrong magic bytes, from {ip} skip this one")
+                        f"Received answer, but with wrong magic bytes, from {ip} skip this one"
+                    )
                     continue
-            # if the timout triggers, go on an use the other broadcast port
+            # if the timeout triggers, go on an use the other broadcast port
             except socket.timeout:
                 break
 
 
 def get_manufacturer_by_model(model: str) -> str:
+    """Return the manufacturer."""
     if model is None:
         return None
-    if model.startswith('LD'):
-        return 'Novelan'
+    if model.startswith("LD"):
+        return "Novelan"
     return None

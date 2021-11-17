@@ -30,11 +30,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     """Set up from config entry."""
     hass.data.setdefault(DOMAIN, {})
 
-    LOGGER.info("async_setup_entry options: '%s' data:'%s'",
-                config_entry.options, config_entry.data)
-    # config_entry.add_update_listener(async_reload_entry)
-    config_entry.async_on_unload(
-        config_entry.add_update_listener(async_reload_entry))
+    LOGGER.info(
+        "%s.async_setup_entry options: '%s' data:'%s'",
+        DOMAIN,
+        config_entry.options,
+        config_entry.data,
+    )
+    config_entry.async_on_unload(config_entry.add_update_listener(async_reload_entry))
 
     setup_internal(hass, config_entry.data, config_entry.options)
 
@@ -71,10 +73,10 @@ def setup_hass_services(hass):
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the luxtronik component."""
     if DOMAIN not in config:
         # Setup via UI. No need to continue yaml-based setup
         return True
-    # LOGGER.info("async_setup '%s'", config)
     conf = config[DOMAIN]
     return setup_internal(hass, conf, conf)
 
@@ -91,31 +93,43 @@ def setup_internal(hass, data, conf):
     #             use_legacy_sensor_ids)
 
     # Build Sensor names with local language:
-    lang = conf[CONF_LANGUAGE_SENSOR_NAMES] if CONF_LANGUAGE_SENSOR_NAMES in conf else LANG_DEFAULT
-    text_domestic_water = get_sensor_text(lang, 'domestic_water')
-    text_heating = get_sensor_text(lang, 'heating')
-    text_heatpump = get_sensor_text(lang, 'heatpump')
-    text_cooling = get_sensor_text(lang, 'cooling')
+    lang = (
+        conf[CONF_LANGUAGE_SENSOR_NAMES]
+        if CONF_LANGUAGE_SENSOR_NAMES in conf
+        else LANG_DEFAULT
+    )
+    text_domestic_water = get_sensor_text(lang, "domestic_water")
+    text_heating = get_sensor_text(lang, "heating")
+    text_heatpump = get_sensor_text(lang, "heatpump")
+    text_cooling = get_sensor_text(lang, "cooling")
 
     luxtronik = LuxtronikDevice(host, port, safe, lock_timeout)
     luxtronik.read()
 
     hass.data[DOMAIN] = luxtronik
-    # hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"] = use_legacy_sensor_ids
     hass.data[f"{DOMAIN}_conf"] = conf
     # Create DeviceInfos:
-    sn = luxtronik.get_value('parameters.ID_WP_SerienNummer_DATUM')
-    hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(
-        luxtronik, sn, text_heatpump)
+    sn = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
+    hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(luxtronik, sn, text_heatpump)
     hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
-        identifiers={(DOMAIN, 'Domestic_Water', sn)},
-        default_name=text_domestic_water, name=text_domestic_water)
+        identifiers={(DOMAIN, "Domestic_Water", sn)},
+        default_name=text_domestic_water,
+        name=text_domestic_water,
+    )
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
-        identifiers={(DOMAIN, 'Heating', sn)},
-        default_name=text_heating, name=text_heating)
-    hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = DeviceInfo(
-        identifiers={(DOMAIN, 'Cooling', sn)},
-        default_name=text_cooling, name=text_cooling) if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING) else None
+        identifiers={(DOMAIN, "Heating", sn)},
+        default_name=text_heating,
+        name=text_heating,
+    )
+    hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = (
+        DeviceInfo(
+            identifiers={(DOMAIN, "Cooling", sn)},
+            default_name=text_cooling,
+            name=text_cooling,
+        )
+        if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING)
+        else None
+    )
     return True
 
 
@@ -137,9 +151,10 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
     await hass.services.async_remove(DOMAIN, SERVICE_WRITE)
 
-    unload_ok = await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        config_entry, PLATFORMS
+    )
     if unload_ok:
-        # hass.data[DOMAIN].pop(entry.entry_id)
         hass.data[DOMAIN] = None
         hass.data.pop(DOMAIN)
 
@@ -147,32 +162,17 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 
 def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str) -> DeviceInfo:
-    model = luxtronik.get_value('calculations.ID_WEB_Code_WP_akt')
+    """Build luxtronik device info."""
+    model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
     deviceInfo = DeviceInfo(
-        identifiers={(DOMAIN, 'Heatpump', sn)},
+        identifiers={(DOMAIN, "Heatpump", sn)},
         name=f"{name} S/N {sn}",
         default_name=name,
-        default_manufacturer='Alpha Innotec',
+        default_manufacturer="Alpha Innotec",
         manufacturer=get_manufacturer_by_model(model),
-        default_model='',
+        default_model="",
         model=model,
-        sw_version=luxtronik.get_value('calculations.ID_WEB_SoftStand')
+        sw_version=luxtronik.get_value("calculations.ID_WEB_SoftStand"),
     )
     LOGGER.info("build_device_info '%s'", deviceInfo)
     return deviceInfo
-
-
-async def async_unload_entry(hass, config_entry):
-    """Unloading the luxtronik platforms."""
-
-    unload_ok = await hass.config_entries.async_unload_platforms(
-        config_entry, PLATFORMS
-    )
-
-    # hass.data[DOMAIN][config_entry.entry_id][UNDO_UPDATE_LISTENER]()
-
-    if unload_ok:
-        hass.data[DOMAIN].disconnect()
-        # hass.data[DOMAIN].pop(config_entry.entry_id)
-
-    return unload_ok

@@ -32,81 +32,90 @@ from .model import LuxtronikStatusExtraAttributes
 SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
 # endregion Constants
 
-# EVU active
-# ID_WEB_EVUin
-
-
 # region Setup
+
+
 async def async_setup_platform(
-    hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
+    hass: HomeAssistant,
+    config: ConfigType,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: dict[str, Any] = None,
 ) -> None:
     """Set up a Luxtronik sensor from yaml config."""
     LOGGER.info(f"{DOMAIN}.sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
                 config, discovery_info)
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
-        LOGGER.warning("sensor.async_setup_platform no luxtronik!")
+        LOGGER.warning("%s.sensor.async_setup_platform no luxtronik!", DOMAIN)
         return False
 
     # use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
     # LOGGER.info("sensor.async_setup_platform use_legacy_sensor_ids: '%s'",
     #             use_legacy_sensor_ids)
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
-    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
-    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
-    deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
 
     sensors = config.get(CONF_SENSORS)
     entities = []
     if sensors:
-        # region Legacy part:
+        # region yaml sensors part:
         for sensor_cfg in sensors:
             sensor_id = sensor_cfg[CONF_ID]
-            if '.' in sensor_id:
-                group = sensor_id.split('.')[0]
-                sensor_id = sensor_id.split('.')[1]
+            if "." in sensor_id:
+                group = sensor_id.split(".")[0]
+                sensor_id = sensor_id.split(".")[1]
             else:
                 group = sensor_cfg[CONF_GROUP]
             sensor = luxtronik.get_sensor(group, sensor_id)
             if sensor:
-                name = sensor.name if not sensor_cfg.get(
-                    CONF_FRIENDLY_NAME) else sensor_cfg.get(CONF_FRIENDLY_NAME)
-                icon = ICONS.get(sensor.measurement_type) if not sensor_cfg.get(
-                    CONF_ICON) else sensor_cfg.get(CONF_ICON)
-                entity_id = "luxtronik.{}".format(slugify(name)) # if use_legacy_sensor_ids else None
-                LOGGER.info(
-                    "sensor.async_setup_platform create entity_id: '%s'", entity_id)
+                name = (
+                    sensor.name
+                    if not sensor_cfg.get(CONF_FRIENDLY_NAME)
+                    else sensor_cfg.get(CONF_FRIENDLY_NAME)
+                )
+                icon = (
+                    ICONS.get(sensor.measurement_type)
+                    if not sensor_cfg.get(CONF_ICON)
+                    else sensor_cfg.get(CONF_ICON)
+                )
                 entities += [
-                    LuxtronikSensor(hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
-                                    unique_id=sensor_id, name=name, icon=icon, device_class=DEVICE_CLASSES.get(
-                                        sensor.measurement_type, DEFAULT_DEVICE_CLASS),
-                                    state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type))
-                    # Not working!
-                    # LuxtronikLegacySensor(set_entity_id=entity_id, hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
-                    #                 unique_id=sensor_id, name=name, icon=icon, device_class=DEVICE_CLASSES.get(
-                    #                     sensor.measurement_type, DEFAULT_DEVICE_CLASS),
-                    #                 state_class=None, unit_of_measurement=UNITS.get(sensor.measurement_type))
+                    LuxtronikSensor(
+                        hass=hass,
+                        luxtronik=luxtronik,
+                        deviceInfo=deviceInfo,
+                        sensor_key=f"{group}.{sensor_id}",
+                        unique_id=sensor_id,
+                        name=name,
+                        icon=icon,
+                        device_class=DEVICE_CLASSES.get(
+                            sensor.measurement_type, DEFAULT_DEVICE_CLASS
+                        ),
+                        state_class=None,
+                        unit_of_measurement=UNITS.get(sensor.measurement_type),
+                    )
                 ]
             else:
                 LOGGER.warning(
-                    "Invalid Luxtronik ID %s in group %s",
+                    "%s.sensor.async_setup_platform: Invalid Luxtronik ID %s in group %s",
+                    DOMAIN,
                     sensor_id,
                     group,
                 )
-        # endregion Legacy part:
+        # endregion yaml sensors part
 
     async_add_entities(entities)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a Luxtronik sensor from ConfigEntry."""
     LOGGER.info(
         f"{DOMAIN}.sensor.async_setup_entry ConfigType: %s", config_entry)
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
-        LOGGER.warning("sensor.async_setup_entry no luxtronik!")
+        LOGGER.warning("%s.sensor.async_setup_entry no luxtronik!", DOMAIN)
         return False
 
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
@@ -114,15 +123,15 @@ async def async_setup_entry(
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     hass.data[f"{DOMAIN}_language"] = lang
-    text_time = get_sensor_text(lang, 'time')
-    text_temp = get_sensor_text(lang, 'temperature')
-    text_heat_source_output = get_sensor_text(lang, 'heat_source_output')
-    text_heat_source_input = get_sensor_text(lang, 'heat_source_input')
-    text_outdoor = get_sensor_text(lang, 'outdoor')
-    text_average = get_sensor_text(lang, 'average')
-    text_compressor_impulses = get_sensor_text(lang, 'compressor_impulses')
-    text_operation_hours = get_sensor_text(lang, 'operation_hours')
-    text_heat_amount_counter = get_sensor_text(lang, 'heat_amount_counter')
+    text_time = get_sensor_text(lang, "time")
+    text_temp = get_sensor_text(lang, "temperature")
+    text_heat_source_output = get_sensor_text(lang, "heat_source_output")
+    text_heat_source_input = get_sensor_text(lang, "heat_source_input")
+    text_outdoor = get_sensor_text(lang, "outdoor")
+    text_average = get_sensor_text(lang, "average")
+    text_compressor_impulses = get_sensor_text(lang, "compressor_impulses")
+    text_operation_hours = get_sensor_text(lang, "operation_hours")
+    text_heat_amount_counter = get_sensor_text(lang, "heat_amount_counter")
     entities = [
         # LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt',
         #                 'status', 'Status', 'mdi:text-short', f"{DOMAIN}__status", None, None),
@@ -164,12 +173,11 @@ async def async_setup_entry(
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if deviceInfoHeating is not None:
-        text_flow_in = get_sensor_text(lang, 'flow_in')
-        text_flow_out = get_sensor_text(lang, 'flow_out')
-        text_target = get_sensor_text(lang, 'target')
-        text_operation_hours_heating = get_sensor_text(
-            lang, 'operation_hours_heating')
-        text_heat_amount_heating = get_sensor_text(lang, 'heat_amount_heating')
+        text_flow_in = get_sensor_text(lang, "flow_in")
+        text_flow_out = get_sensor_text(lang, "flow_out")
+        text_target = get_sensor_text(lang, "target")
+        text_operation_hours_heating = get_sensor_text(lang, "operation_hours_heating")
+        text_heat_amount_heating = get_sensor_text(lang, "heat_amount_heating")
         entities += [
             LuxtronikSensor(hass, luxtronik, deviceInfoHeating, 'calculations.ID_WEB_Temperatur_TVL',
                             'flow_in_temperature', f"{text_flow_in} {text_temp}", 'mdi:waves-arrow-left', entity_category=None),
@@ -190,15 +198,16 @@ async def async_setup_entry(
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if deviceInfoDomesticWater is not None:
-        text_collector = get_sensor_text(lang, 'collector')
-        text_buffer = get_sensor_text(lang, 'buffer')
-        text_domestic_water = get_sensor_text(lang, 'domestic_water')
+        text_collector = get_sensor_text(lang, "collector")
+        text_buffer = get_sensor_text(lang, "buffer")
+        text_domestic_water = get_sensor_text(lang, "domestic_water")
         text_operation_hours_domestic_water = get_sensor_text(
-            lang, 'operation_hours_domestic_water')
-        text_operation_hours_solar = get_sensor_text(
-            lang, 'operation_hours_solar')
+            lang, "operation_hours_domestic_water"
+        )
+        text_operation_hours_solar = get_sensor_text(lang, "operation_hours_solar")
         text_heat_amount_domestic_water = get_sensor_text(
-            lang, 'heat_amount_domestic_water')
+            lang, "heat_amount_domestic_water"
+        )
         entities += [
             LuxtronikSensor(hass, luxtronik, deviceInfoDomesticWater, 'calculations.ID_WEB_Temperatur_TSK',
                             'solar_collector_temperature', f"Solar {text_collector} {text_temp}", 'mdi:solar-panel-large', entity_category=None),
@@ -223,8 +232,7 @@ async def async_setup_entry(
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
-        text_operation_hours_cooling = get_sensor_text(
-            lang, 'operation_hours_cooling')
+        text_operation_hours_cooling = get_sensor_text(lang, "operation_hours_cooling")
         entities += [
             LuxtronikSensor(hass, luxtronik, deviceInfoCooling, sensor_key='calculations.ID_WEB_Zaehler_BetrZeitKue',
                             unique_id='operation_hours_cooling', name=f"{text_operation_hours_cooling}",
@@ -249,7 +257,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
-        # hass.data[DOMAIN].pop(entry.entry_id)
         hass.data[DOMAIN] = None
 
     return unload_ok
@@ -268,12 +275,12 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         sensor_key: str,
         unique_id: str,
         name: str,
-        icon: str = 'mdi:thermometer',
+        icon: str = "mdi:thermometer",
         device_class: str = DEVICE_CLASS_TEMPERATURE,
         state_class: str = STATE_CLASS_MEASUREMENT,
         unit_of_measurement: str = TEMP_CELSIUS,
         entity_category: ENTITY_CATEGORIES = None,
-        factor: float = None
+        factor: float = None,
     ) -> None:
         """Initialize the sensor."""
         self.hass = hass
@@ -295,7 +302,11 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
     @property
     def icon(self):  # -> str | None:
         """Return the icon to be used for this entity."""
-        if not self._icon is None and type(self._icon) is dict and not isinstance(self._icon, str):
+        if (
+            self._icon is not None
+            and type(self._icon) is dict
+            and not isinstance(self._icon, str)
+        ):
             if self.native_value in self._icon:
                 return self._icon[self.native_value]
             return None
@@ -325,17 +336,15 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
     def update(self):
         """Get the latest status and use it to update our sensor state."""
         self._luxtronik.update()
-        if self._sensor_key == 'calculations.ID_WEB_HauptMenuStatus_Zeit':
+        if self._sensor_key == "calculations.ID_WEB_HauptMenuStatus_Zeit":
             v = self.native_value
             if v is None:
                 time_str = None
             else:
                 m, s = divmod(int(v), 60)
                 h, m = divmod(m, 60)
-                time_str = '{:01.0f}:{:02.0f} h'.format(h, m)
-            self._attr_extra_state_attributes = {
-                ATTR_STATUS_TEXT: time_str
-            }
+                time_str = f"{h:01.0f}:{m:02.0f} h"
+            self._attr_extra_state_attributes = {ATTR_STATUS_TEXT: time_str}
 
 
 class LuxtronikLegacySensor(LuxtronikSensor):
@@ -366,29 +375,35 @@ class LuxtronikLegacySensor(LuxtronikSensor):
     #     pass
 
 class LuxtronikStatusSensor(LuxtronikSensor):
-    # @property
-    # def is_on(self) -> bool:  # | None:
-    #     return self.native_value in LUX_STATES_ON
+    """Luxtronik Status Sensor with extended attr."""
 
     def _get_sensor_value(self, sensor_name: str):
         sensor = self.hass.states.get(sensor_name)
-        if not sensor is None:
+        if sensor is not None:
             return sensor.state
         return None
 
     def _get_sensor_attr(self, sensor_name: str, attr: str):
         sensor = self.hass.states.get(sensor_name)
-        if not sensor is None and attr in sensor.attributes:
+        if sensor is not None and attr in sensor.attributes:
             return sensor.attributes[attr]
         return None
 
     def _build_status_text(self) -> str:
         status_time = self._get_sensor_attr(
-            f"sensor.{DOMAIN}_status_time", ATTR_STATUS_TEXT)
+            f"sensor.{DOMAIN}_status_time", ATTR_STATUS_TEXT
+        )
         l1 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_1")
         l2 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_2")
-        if status_time is None or status_time == STATE_UNAVAILABLE or l1 is None or l1 == STATE_UNAVAILABLE or l2 is None or l2 == STATE_UNAVAILABLE:
-            return ''
+        if (
+            status_time is None
+            or status_time == STATE_UNAVAILABLE
+            or l1 is None
+            or l1 == STATE_UNAVAILABLE
+            or l2 is None
+            or l2 == STATE_UNAVAILABLE
+        ):
+            return ""
         lang = self.hass.data[f"{DOMAIN}_language"]
         l1 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_1", l1)
         l2 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_2", l2)

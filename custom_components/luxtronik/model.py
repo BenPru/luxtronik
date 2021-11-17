@@ -1,3 +1,4 @@
+"""Model for LuxtronikStatusExtraAttributes."""
 from typing import TypedDict
 
 class LuxtronikStatusExtraAttributes(TypedDict):
