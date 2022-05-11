@@ -1,18 +1,21 @@
 """Debounce help module."""
 from threading import Timer
+from typing import Any, Callable
 
-def debounce(wait):
+
+def debounce(wait: int):
     """Debounce main method."""
 
-    def decorator(fn):
-        def debounced(*args, **kwargs):
-            def call_it():
+    def decorator(fn: Callable):
+        def debounced(*args: Any, **kwargs: Any):
+            def call_it() -> None:
                 fn(*args, **kwargs)
             try:
-                debounced.t.cancel()
+                debounced.timer.cancel()
             except (AttributeError):
                 pass
-            debounced.t = Timer(wait, call_it)
-            debounced.t.start()
+            debounced.timer = Timer(wait, call_it)
+            debounced.timer.start()
+
         return debounced
     return decorator

@@ -1,26 +1,39 @@
 """Support for Luxtronik heatpump binary states."""
 # region Imports
-import logging
-from typing import Any, Final
+from typing import Any
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.components.binary_sensor import (DEVICE_CLASS_LOCK,
-                                                    DEVICE_CLASS_RUNNING,
-                                                    PLATFORM_SCHEMA,
-                                                    BinarySensorEntity)
+from homeassistant.components.binary_sensor import (
+    DEVICE_CLASS_LOCK,
+    DEVICE_CLASS_RUNNING,
+    PLATFORM_SCHEMA,
+    BinarySensorEntity,
+)
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
-                                 CONF_SENSORS)
+from homeassistant.const import CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID, CONF_SENSORS, ENTITY_CATEGORIES
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import slugify
 
-from .const import *
+from .const import (
+    CONF_CALCULATIONS,
+    CONF_GROUP,
+    CONF_INVERT_STATE,
+    CONF_LANGUAGE_SENSOR_NAMES,
+    CONF_PARAMETERS,
+    CONF_VISIBILITIES,
+    DEFAULT_DEVICE_CLASS,
+    DEVICE_CLASSES,
+    DOMAIN,
+    LOGGER,
+    LUX_BINARY_SENSOR_EVU_UNLOCKED,
+    LUX_BINARY_SENSOR_SOLAR_PUMP,
+)
 from .helpers.helper import get_sensor_text
 from .luxtronik_device import LuxtronikDevice
 
@@ -33,10 +46,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
             cv.ensure_list,
             [
                 {
-                    vol.Required(CONF_GROUP): vol.All(
+                    vol.Optional(CONF_GROUP): vol.All(
                         cv.string,
-                        vol.In(
-                            [CONF_PARAMETERS, CONF_CALCULATIONS, CONF_VISIBILITIES]),
+                        vol.In([CONF_PARAMETERS, CONF_CALCULATIONS, CONF_VISIBILITIES]),
                     ),
                     vol.Required(CONF_ID): cv.string,
                     vol.Optional(CONF_FRIENDLY_NAME): cv.string,
@@ -53,11 +65,17 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 
 async def async_setup_platform(
-    hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: dict[str, Any] = None,
+    hass: HomeAssistant,
+    config: ConfigType,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: dict[str, Any] = None,
 ) -> None:
     """Set up a Luxtronik binary sensor from yaml config."""
-    LOGGER.info(f"{DOMAIN}.binary_sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
-                config, discovery_info)
+    LOGGER.info(
+        f"{DOMAIN}.binary_sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
+        config,
+        discovery_info,
+    )
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
         LOGGER.warning("binary_sensor.async_setup_platform no luxtronik!")
@@ -65,9 +83,6 @@ async def async_setup_platform(
 
     # use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
-    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
-    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
-    deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
 
     sensors = config.get(CONF_SENSORS)
     entities = []
@@ -75,23 +90,39 @@ async def async_setup_platform(
         # region Legacy part:
         for sensor_cfg in sensors:
             sensor_id = sensor_cfg[CONF_ID]
-            if '.' in sensor_id:
-                group = sensor_id.split('.')[0]
-                sensor_id = sensor_id.split('.')[1]
+            if "." in sensor_id:
+                group = sensor_id.split(".")[0]
+                sensor_id = sensor_id.split(".")[1]
             else:
                 group = sensor_cfg[CONF_GROUP]
             sensor = luxtronik.get_sensor(group, sensor_id)
             if sensor:
-                name = sensor.name if not sensor_cfg.get(
-                    CONF_FRIENDLY_NAME) else sensor_cfg.get(CONF_FRIENDLY_NAME)
-                entity_id = "luxtronik.{}".format(slugify(name)) # if use_legacy_sensor_ids else None
+                name = (
+                    sensor.name
+                    if not sensor_cfg.get(CONF_FRIENDLY_NAME)
+                    else sensor_cfg.get(CONF_FRIENDLY_NAME)
+                )
+                # if use_legacy_sensor_ids else None
+                entity_id = "luxtronik.{}".format(slugify(name))
                 LOGGER.info(
-                    "binary_sensor.async_setup_platform create entity_id: '%s'", entity_id)
+                    "binary_sensor.async_setup_platform create entity_id: '%s'",
+                    entity_id,
+                )
                 entities += [
-                    LuxtronikBinarySensor(hass, luxtronik, deviceInfo=deviceInfo, sensor_key=f"{group}.{sensor_id}",
-                                          unique_id=sensor_id, name=name, icon=sensor_cfg.get(CONF_ICON), device_class=DEVICE_CLASSES.get(
-                                              sensor.measurement_type, DEFAULT_DEVICE_CLASS),
-                                          state_class=None, invert_state=sensor_cfg.get(CONF_INVERT_STATE))
+                    LuxtronikBinarySensor(
+                        hass,
+                        luxtronik,
+                        deviceInfo=deviceInfo,
+                        sensor_key=f"{group}.{sensor_id}",
+                        unique_id=sensor_id,
+                        name=name,
+                        icon=sensor_cfg.get(CONF_ICON),
+                        device_class=DEVICE_CLASSES.get(
+                            sensor.measurement_type, DEFAULT_DEVICE_CLASS
+                        ),
+                        state_class=None,
+                        invert_state=sensor_cfg.get(CONF_INVERT_STATE),
+                    )
                 ]
             else:
                 LOGGER.warning(
@@ -105,44 +136,67 @@ async def async_setup_platform(
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a Luxtronik sensor from ConfigEntry."""
     LOGGER.info(
-        f"{DOMAIN}.binary_sensor.async_setup_entry ConfigType: %s", config_entry)
+        f"{DOMAIN}.binary_sensor.async_setup_entry ConfigType: %s", config_entry
+    )
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
         LOGGER.warning("binary_sensor.async_setup_entry no luxtronik!")
         return False
 
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
-    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
 
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
-    text_evu_unlocked = get_sensor_text(lang, 'evu_unlocked')
+    text_evu_unlocked = get_sensor_text(lang, "evu_unlocked")
     entities = [
-        LuxtronikBinarySensor(hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfo, sensor_key=LUX_BINARY_SENSOR_EVU_UNLOCKED,
-                              unique_id='evu_unlocked', name=text_evu_unlocked, icon='mdi:lock',
-                              device_class=DEVICE_CLASS_LOCK)
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key=LUX_BINARY_SENSOR_EVU_UNLOCKED,
+            unique_id="evu_unlocked",
+            name=text_evu_unlocked,
+            icon="mdi:lock",
+            device_class=DEVICE_CLASS_LOCK,
+        )
     ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if deviceInfoDomesticWater is not None:
-        text_solar_pump = get_sensor_text(lang, 'solar_pump')
+        text_solar_pump = get_sensor_text(lang, "solar_pump")
         entities += [
-            LuxtronikBinarySensor(hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoDomesticWater, sensor_key=LUX_BINARY_SENSOR_SOLAR_PUMP,
-                                  unique_id='solar_pump', name=text_solar_pump, icon='mdi:pump',
-                                  device_class=DEVICE_CLASS_RUNNING)
+            LuxtronikBinarySensor(
+                hass=hass,
+                luxtronik=luxtronik,
+                deviceInfo=deviceInfoDomesticWater,
+                sensor_key=LUX_BINARY_SENSOR_SOLAR_PUMP,
+                unique_id="solar_pump",
+                name=text_solar_pump,
+                icon="mdi:pump",
+                device_class=DEVICE_CLASS_RUNNING,
+            )
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
-        text_approval_cooling = get_sensor_text(lang, 'approval_cooling')
+        text_approval_cooling = get_sensor_text(lang, "approval_cooling")
         entities += [
-            LuxtronikBinarySensor(hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoCooling, sensor_key='calculations.ID_WEB_FreigabKuehl',
-                                  unique_id='approval_cooling', name=text_approval_cooling, icon='mdi:lock',
-                                  device_class=DEVICE_CLASS_LOCK)
+            LuxtronikBinarySensor(
+                hass=hass,
+                luxtronik=luxtronik,
+                deviceInfo=deviceInfoCooling,
+                sensor_key="calculations.ID_WEB_FreigabKuehl",
+                unique_id="approval_cooling",
+                name=text_approval_cooling,
+                icon="mdi:lock",
+                device_class=DEVICE_CLASS_LOCK,
+            )
         ]
 
     async_add_entities(entities)
@@ -164,7 +218,7 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         device_class: str,
         state_class: str = None,
         entity_category: ENTITY_CATEGORIES = None,
-        invert_state: bool = False
+        invert_state: bool = False,
     ) -> None:
         """Initialize a new Luxtronik binary sensor."""
         self.hass = hass

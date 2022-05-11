@@ -1,20 +1,37 @@
 """Constants for the Luxtronik integration."""
 # region Imports
+import logging
+from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
-import logging
-from typing import Dict, Final
+from typing import Final
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.const import (CONF_HOST, CONF_PORT, DEVICE_CLASS_ENERGY,
-                                 DEVICE_CLASS_PRESSURE,
-                                 DEVICE_CLASS_TEMPERATURE,
-                                 DEVICE_CLASS_TIMESTAMP,
-                                 ELECTRIC_POTENTIAL_VOLT,
-                                 ENERGY_KILO_WATT_HOUR, PERCENTAGE,
-                                 PRESSURE_BAR, TEMP_CELSIUS, TEMP_KELVIN,
-                                 TIME_HOURS, TIME_SECONDS)
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.components.sensor import (
+    STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
+    SensorDeviceClass,
+    SensorEntityDescription,
+    SensorStateClass,
+)
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PORT,
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_PRESSURE,
+    DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_TIMESTAMP,
+    ELECTRIC_POTENTIAL_VOLT,
+    ENERGY_KILO_WATT_HOUR,
+    PERCENTAGE,
+    PRESSURE_BAR,
+    TEMP_CELSIUS,
+    TEMP_KELVIN,
+    TIME_HOURS,
+    TIME_SECONDS,
+)
 
 # endregion Imports
 
@@ -23,8 +40,7 @@ DOMAIN: Final = "luxtronik2"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
 
-PLATFORMS: Final[list[str]] = [
-    "sensor", "binary_sensor", "climate", "number", "switch"]
+PLATFORMS: list[str] = ["sensor", "binary_sensor", "climate", "number", "switch"]
 # endregion Constants Main
 
 # region Conf
@@ -79,9 +95,14 @@ LANGUAGES: Final = Enum(LANG_EN, LANG_DE)
 LANGUAGES_SENSOR_NAMES: Final = [LANG_EN, LANG_DE]
 # endregion Conf
 
+@dataclass
+class LuxtronikSensorEntityDescription(SensorEntityDescription):
+    sensor_key: str = None
+    factor: float = None
+
 
 DEFAULT_TOLERANCE: Final = 0.3
-
+SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
 
 ATTR_STATUS_TEXT: Final = "status_text"
 
@@ -126,7 +147,7 @@ LUX_STATUS1_HEATPUMP_COMING: Final = "heatpump coming"
 
 LUX_STATUS3_GRID_SWITCH_ON_DELAY: Final = "grid switch on delay"
 
-LUX_STATES_ON: Final[list[str]] = [
+LUX_STATES_ON: list[str] = [
     LUX_STATUS_HEATING,
     LUX_STATUS_DOMESTIC_WATER,
     LUX_STATUS_SWIMMING_POOL_SOLAR,
@@ -135,7 +156,7 @@ LUX_STATES_ON: Final[list[str]] = [
     LUX_STATUS_COOLING,
 ]
 
-LUX_STATUS1_WORKAROUND: Final[list[str]] = [
+LUX_STATUS1_WORKAROUND: list[str] = [
     LUX_STATUS1_HEATPUMP_IDLE,
     LUX_STATUS1_PUMP_FORERUN,
     LUX_STATUS1_HEATPUMP_COMING,
@@ -150,7 +171,8 @@ LUX_STATUS3_WORKAROUND: Final[list] = [
 # endregion Lux Status
 
 # region Lux Icons
-LUX_STATE_ICON_MAP: Final[Dict[str, str]] = {
+# LUX_STATE_ICON_MAP: Final[dict[str, str | None]] = {
+LUX_STATE_ICON_MAP: Final[dict[str, str]] = {
     LUX_STATUS_HEATING: "mdi:radiator",
     LUX_STATUS_DOMESTIC_WATER: "mdi:waves",
     LUX_STATUS_SWIMMING_POOL_SOLAR: None,
@@ -201,6 +223,226 @@ LUX_SENSORS_MODE: Final[list[str]] = [
 ]
 # endregion Luxtronik Sensor ids
 
+GLOBAL_STATUS_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
+    LuxtronikSensorEntityDescription(
+        key="status",
+        name="Status",
+        device_class=f"{DOMAIN}__status",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key=LUX_SENSOR_STATUS,
+    ),
+)
+
+GLOBAL_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
+    LuxtronikSensorEntityDescription(
+        key="status_time",
+        # name=f"Status {text_time}",
+        icon="mdi:timer-sand",
+        # unit_of_measurement=TIME_SECONDS,
+        native_unit_of_measurement=TIME_SECONDS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_HauptMenuStatus_Zeit",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="status_line_1",
+        name="Status 1",
+        icon="mdi:numeric-1-circle",
+        device_class=f"{DOMAIN}__status_line_1",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_HauptMenuStatus_Zeile1",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="status_line_2",
+        name="Status 2",
+        icon="mdi:numeric-2-circle",
+        device_class=f"{DOMAIN}__status_line_2",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_HauptMenuStatus_Zeile2",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="status_line_3",
+        name="Status 3",
+        icon="mdi:numeric-3-circle",
+        device_class=f"{DOMAIN}__status_line_3",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_HauptMenuStatus_Zeile3",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="heat_source_output_temperature",
+        # name=f"{text_heat_source_output} {text_temp}",
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        # unit_of_measurement=TEMP_CELSIUS,
+        sensor_key="calculations.ID_WEB_Temperatur_TWA",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="heat_source_input_temperature",
+        # name=f"{text_heat_source_input} {text_temp}",
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        # unit_of_measurement=TEMP_CELSIUS,
+        sensor_key="calculations.ID_WEB_Temperatur_TWE",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="outdoor_temperature",
+        # name=f"{text_outdoor} {text_temp}",
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        # unit_of_measurement=TEMP_CELSIUS,
+        sensor_key="calculations.ID_WEB_Temperatur_TA",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="outdoor_temperature_average",
+        # name=f"{text_average} {text_outdoor} {text_temp}",
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        # unit_of_measurement=TEMP_CELSIUS,
+        sensor_key="calculations.ID_WEB_Mitteltemperatur",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="compressor_impulses",
+        # name=f"{text_compressor_impulses}",
+        icon="mdi:pulse",
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement="Anzahl",
+        native_unit_of_measurement="Anzahl",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_Zaehler_BetrZeitImpVD1",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="operation_hours",
+        # name=f"{text_operation_hours}",
+        icon="mdi:timer-sand",
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement=TIME_HOURS,
+        native_unit_of_measurement=TIME_HOURS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        factor=SECOUND_TO_HOUR_FACTOR,
+        sensor_key="calculations.ID_WEB_Zaehler_BetrZeitWP",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="heat_amount_counter",
+        # name=f"{text_heat_amount_counter}",
+        icon="mdi:lightning-bolt-circle",
+        device_class=DEVICE_CLASS_ENERGY,
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_WMZ_Seit",
+    ),
+)
+
+HEATING_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
+    LuxtronikSensorEntityDescription(
+        key="flow_in_temperature",
+        # f"{text_flow_in} {text_temp}",
+        icon="mdi:waves-arrow-left",
+        sensor_key="calculations.ID_WEB_Temperatur_TVL",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="flow_out_temperature",
+        # f"{text_flow_out} {text_temp}",
+        icon="mdi:waves-arrow-right",
+        sensor_key="calculations.ID_WEB_Temperatur_TRL",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="flow_out_temperature_target",
+        # f"{text_flow_out} {text_temp} {text_target}",
+        sensor_key="calculations.ID_WEB_Sollwert_TRL_HZ",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="operation_hours_heating",
+        # name=f"{text_operation_hours_heating}",
+        icon="mdi:timer-sand",
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        native_unit_of_measurement=TIME_HOURS,
+        # unit_of_measurement=TIME_HOURS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        factor=SECOUND_TO_HOUR_FACTOR,
+        sensor_key="calculations.ID_WEB_Zaehler_BetrZeitHz",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="heat_amount_heating",
+        # name=f"{text_heat_amount_heating}",
+        icon="mdi:lightning-bolt-circle",
+        device_class=DEVICE_CLASS_ENERGY,
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_WMZ_Heizung",
+    ),
+)
+
+DOMESTIC_WATER_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
+    LuxtronikSensorEntityDescription(
+        key="solar_collector_temperature",
+        # name=f"Solar {text_collector} {text_temp}",
+        icon="mdi:solar-panel-large",
+        sensor_key="calculations.ID_WEB_Temperatur_TSK",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="solar_buffer_temperature",
+        # name=f"Solar {text_buffer} {text_temp}",
+        icon="mdi:propane-tank-outline",
+        sensor_key="calculations.ID_WEB_Temperatur_TSS",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="domestic_water_temperature",
+        # name=f"{text_domestic_water} {text_temp}",
+        icon="mdi:coolant-temperature",
+        sensor_key="calculations.ID_WEB_Temperatur_TBW",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="operation_hours_domestic_water",
+        # name=f"{text_operation_hours_domestic_water}",
+        icon="mdi:timer-sand",
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement=TIME_HOURS,
+        native_unit_of_measurement=TIME_HOURS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_Zaehler_BetrZeitBW",
+        factor=SECOUND_TO_HOUR_FACTOR,
+    ),
+    LuxtronikSensorEntityDescription(
+        key="operation_hours_solar",
+        # name=f"{text_operation_hours_solar}",
+        icon="mdi:timer-sand",
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement=TIME_HOURS,
+        native_unit_of_measurement=TIME_HOURS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="parameters.ID_BSTD_Solar",
+        factor=SECOUND_TO_HOUR_FACTOR,
+    ),
+    LuxtronikSensorEntityDescription(
+        key="heat_amount_domestic_water",
+        # name=f"{text_heat_amount_domestic_water}",
+        icon="mdi:lightning-bolt-circle",
+        device_class=DEVICE_CLASS_ENERGY,
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_WMZ_Brauchwasser",
+    ),
+)
+
+COOLING_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
+    LuxtronikSensorEntityDescription(
+        key="operation_hours_cooling",
+        # name=f"{text_operation_hours_cooling}",
+        icon="mdi:timer-sand",
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+        # unit_of_measurement=TIME_HOURS,
+        native_unit_of_measurement=TIME_HOURS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.ID_WEB_Zaehler_BetrZeitKue",
+        factor=SECOUND_TO_HOUR_FACTOR,
+    ),
+)
+
 # region Legacy consts
 CONF_GROUP: Final = "group"
 CONF_INVERT_STATE: Final = "invert"
@@ -242,8 +484,8 @@ DEVICE_CLASSES: Final = {
     CONF_CELSIUS: DEVICE_CLASS_TEMPERATURE,
     CONF_KELVIN: DEVICE_CLASS_TEMPERATURE,
     CONF_BAR: DEVICE_CLASS_PRESSURE,
-    CONF_SECONDS: DEVICE_CLASS_TIMESTAMP,
-    CONF_HOURS: DEVICE_CLASS_TIMESTAMP,
+    CONF_SECONDS: None,  # DEVICE_CLASS_TIMESTAMP,
+    CONF_HOURS: None,  # DEVICE_CLASS_TIMESTAMP,
     CONF_TIMESTAMP: DEVICE_CLASS_TIMESTAMP,
     CONF_ENERGY: DEVICE_CLASS_ENERGY,
 }

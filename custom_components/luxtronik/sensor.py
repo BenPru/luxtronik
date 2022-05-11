@@ -1,27 +1,61 @@
 """Luxtronik heatpump sensor."""
 # region Imports
-import logging
 from typing import Any, Final
 
-from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
-                                             STATE_CLASS_MEASUREMENT,
-                                             STATE_CLASS_TOTAL_INCREASING,
-                                             SensorEntity)
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.components.sensor import (
+    ENTITY_ID_FORMAT,
+    STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
+    SensorEntity,
+    SensorEntityDescription,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
-                                 CONF_SENSORS, DEVICE_CLASS_TEMPERATURE,
-                                 ENERGY_KILO_WATT_HOUR,
-                                 ENTITY_CATEGORY_DIAGNOSTIC,
-                                 EVENT_HOMEASSISTANT_STOP, STATE_UNAVAILABLE,
-                                 TEMP_CELSIUS, TIME_HOURS, TIME_SECONDS)
+from homeassistant.const import (
+    CONF_FRIENDLY_NAME,
+    CONF_ICON,
+    CONF_ID,
+    CONF_SENSORS,
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_TEMPERATURE,
+    ENERGY_KILO_WATT_HOUR,
+    ENTITY_CATEGORIES,
+    EVENT_HOMEASSISTANT_STOP,
+    STATE_UNAVAILABLE,
+    TEMP_CELSIUS,
+    TIME_HOURS,
+    TIME_SECONDS,
+)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import ENTITY_CATEGORIES, DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.util import slugify
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from .const import *
+from .const import (
+    ATTR_STATUS_TEXT,
+    CONF_GROUP,
+    CONF_LANGUAGE_SENSOR_NAMES,
+    DEFAULT_DEVICE_CLASS,
+    DEVICE_CLASSES,
+    DOMAIN,
+    GLOBAL_SENSOR_TYPES,
+    GLOBAL_STATUS_SENSOR_TYPES,
+    ICONS,
+    LOGGER,
+    LUX_SENSOR_STATUS,
+    LUX_SENSOR_STATUS1,
+    LUX_SENSOR_STATUS3,
+    LUX_STATE_ICON_MAP,
+    LUX_STATES_ON,
+    LUX_STATUS1_WORKAROUND,
+    LUX_STATUS3_WORKAROUND,
+    LUX_STATUS_HEATING,
+    LUX_STATUS_NO_REQUEST,
+    PLATFORMS,
+    SECOUND_TO_HOUR_FACTOR,
+    UNITS,
+)
 from .helpers.helper import get_sensor_text, get_sensor_value_text
 from .luxtronik_device import LuxtronikDevice
 from .model import LuxtronikStatusExtraAttributes
@@ -29,7 +63,6 @@ from .model import LuxtronikStatusExtraAttributes
 # endregion Imports
 
 # region Constants
-SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
 # endregion Constants
 
 # region Setup
@@ -39,11 +72,14 @@ async def async_setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
     async_add_entities: AddEntitiesCallback,
-    discovery_info: dict[str, Any] = None,
+    discovery_info: DiscoveryInfoType = None,
 ) -> None:
     """Set up a Luxtronik sensor from yaml config."""
-    LOGGER.info(f"{DOMAIN}.sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
-                config, discovery_info)
+    LOGGER.info(
+        f"{DOMAIN}.sensor.async_setup_platform ConfigType: %s - discovery_info: %s",
+        config,
+        discovery_info,
+    )
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
         LOGGER.warning("%s.sensor.async_setup_platform no luxtronik!", DOMAIN)
@@ -52,7 +88,7 @@ async def async_setup_platform(
     # use_legacy_sensor_ids = hass.data[f"{DOMAIN}_{CONF_USE_LEGACY_SENSOR_IDS}"]
     # LOGGER.info("sensor.async_setup_platform use_legacy_sensor_ids: '%s'",
     #             use_legacy_sensor_ids)
-    deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
+    device_info = hass.data[f"{DOMAIN}_DeviceInfo"]
 
     sensors = config.get(CONF_SENSORS)
     entities = []
@@ -81,7 +117,7 @@ async def async_setup_platform(
                     LuxtronikSensor(
                         hass=hass,
                         luxtronik=luxtronik,
-                        deviceInfo=deviceInfo,
+                        deviceInfo=device_info,
                         sensor_key=f"{group}.{sensor_id}",
                         unique_id=sensor_id,
                         name=name,
@@ -111,14 +147,13 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a Luxtronik sensor from ConfigEntry."""
-    LOGGER.info(
-        f"{DOMAIN}.sensor.async_setup_entry ConfigType: %s", config_entry)
+    LOGGER.info(f"{DOMAIN}.sensor.async_setup_entry ConfigType: %s", config_entry)
     luxtronik: LuxtronikDevice = hass.data.get(DOMAIN)
     if not luxtronik:
         LOGGER.warning("%s.sensor.async_setup_entry no luxtronik!", DOMAIN)
         return False
 
-    deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
+    device_info = hass.data[f"{DOMAIN}_DeviceInfo"]
 
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
@@ -132,72 +167,230 @@ async def async_setup_entry(
     text_compressor_impulses = get_sensor_text(lang, "compressor_impulses")
     text_operation_hours = get_sensor_text(lang, "operation_hours")
     text_heat_amount_counter = get_sensor_text(lang, "heat_amount_counter")
-    entities = [
-        # LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt',
-        #                 'status', 'Status', 'mdi:text-short', f"{DOMAIN}__status", None, None),
-        LuxtronikStatusSensor(hass, luxtronik, deviceInfo, LUX_SENSOR_STATUS,
-                              'status', 'Status', LUX_STATE_ICON_MAP, f"{DOMAIN}__status", None, None, entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
-        # LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_WP_BZ_akt',
-        #                 'status', 'Status', LUX_STATE_ICON_MAP, 'status', None, None),  # 'mdi:text-short'
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeit', 'status_time',
-                        f"Status {text_time}", 'mdi:timer-sand', device_class=None, state_class=None, unit_of_measurement=TIME_SECONDS,
-                        entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile1',
-                        'status_line_1', 'Status 1', 'mdi:numeric-1-circle', f"{DOMAIN}__status_line_1", None, None, entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile2',
-                        'status_line_2', 'Status 2', 'mdi:numeric-2-circle', f"{DOMAIN}__status_line_2", None, None, entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_HauptMenuStatus_Zeile3',
-                        'status_line_3', 'Status 3', 'mdi:numeric-3-circle', f"{DOMAIN}__status_line_3", None, None, entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TWA',
-                        'heat_source_output_temperature', f"{text_heat_source_output} {text_temp}", entity_category=None),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TWE',
-                        'heat_source_input_temperature', f"{text_heat_source_input} {text_temp}", entity_category=None),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Temperatur_TA',
-                        'outdoor_temperature', f"{text_outdoor} {text_temp}", entity_category=None),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, 'calculations.ID_WEB_Mitteltemperatur',
-                        'outdoor_temperature_average', f"{text_average} {text_outdoor} {text_temp}", entity_category=None),
+    # entities: list[LuxtronikSensor] = [
+    #     LuxtronikStatusSensor(hass, luxtronik, device_info, description)
+    #     for description in GLOBAL_STATUS_SENSOR_TYPES
+    #     # if description.key in MONITORED_CONDITIONS
+    # ]
+    # entities.extend(
+    #     [
+    #         LuxtronikSensor(hass, luxtronik, device_info, description)
+    #         for description in GLOBAL_SENSOR_TYPES
+    #     ]
+    # )
 
-        LuxtronikSensor(hass, luxtronik, deviceInfo, sensor_key='calculations.ID_WEB_Zaehler_BetrZeitImpVD1',
-                        unique_id='compressor_impulses', name=f"{text_compressor_impulses}",
-                        icon='mdi:pulse', state_class=STATE_CLASS_TOTAL_INCREASING,
-                        unit_of_measurement='Anzahl', entity_category=ENTITY_CATEGORY_DIAGNOSTIC),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, sensor_key='calculations.ID_WEB_Zaehler_BetrZeitWP',
-                        unique_id='operation_hours', name=f"{text_operation_hours}",
-                        icon='mdi:timer-sand', state_class=STATE_CLASS_TOTAL_INCREASING,
-                        unit_of_measurement=TIME_HOURS, entity_category=ENTITY_CATEGORY_DIAGNOSTIC, factor=SECOUND_TO_HOUR_FACTOR),
-        LuxtronikSensor(hass, luxtronik, deviceInfo, sensor_key='calculations.ID_WEB_WMZ_Seit',
-                        unique_id='heat_amount_counter', name=f"{text_heat_amount_counter}",
-                        icon='mdi:lightning-bolt-circle', state_class=STATE_CLASS_TOTAL_INCREASING,
-                        unit_of_measurement=ENERGY_KILO_WATT_HOUR, entity_category=ENTITY_CATEGORY_DIAGNOSTIC)
+    entities = [
+        LuxtronikStatusSensor(
+            hass,
+            luxtronik,
+            device_info,
+            LUX_SENSOR_STATUS,
+            "status",
+            "Status",
+            LUX_STATE_ICON_MAP,
+            f"{DOMAIN}__status",
+            None,
+            None,
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_HauptMenuStatus_Zeit",
+            "status_time",
+            f"Status {text_time}",
+            "mdi:timer-sand",
+            device_class=None,
+            state_class=None,
+            unit_of_measurement=TIME_SECONDS,
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_HauptMenuStatus_Zeile1",
+            "status_line_1",
+            "Status 1",
+            "mdi:numeric-1-circle",
+            f"{DOMAIN}__status_line_1",
+            None,
+            None,
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_HauptMenuStatus_Zeile2",
+            "status_line_2",
+            "Status 2",
+            "mdi:numeric-2-circle",
+            f"{DOMAIN}__status_line_2",
+            None,
+            None,
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_HauptMenuStatus_Zeile3",
+            "status_line_3",
+            "Status 3",
+            "mdi:numeric-3-circle",
+            f"{DOMAIN}__status_line_3",
+            None,
+            None,
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_Temperatur_TWA",
+            "heat_source_output_temperature",
+            f"{text_heat_source_output} {text_temp}",
+            entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_Temperatur_TWE",
+            "heat_source_input_temperature",
+            f"{text_heat_source_input} {text_temp}",
+            entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_Temperatur_TA",
+            "outdoor_temperature",
+            f"{text_outdoor} {text_temp}",
+            entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_Mitteltemperatur",
+            "outdoor_temperature_average",
+            f"{text_average} {text_outdoor} {text_temp}",
+            entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            sensor_key="calculations.ID_WEB_Zaehler_BetrZeitImpVD1",
+            unique_id="compressor_impulses",
+            name=f"{text_compressor_impulses}",
+            icon="mdi:pulse",
+            device_class=None,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            unit_of_measurement="Anzahl",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            sensor_key="calculations.ID_WEB_Zaehler_BetrZeitWP",
+            unique_id="operation_hours",
+            name=f"{text_operation_hours}",
+            icon="mdi:timer-sand",
+            device_class=None,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            unit_of_measurement=TIME_HOURS,
+            entity_category=EntityCategory.DIAGNOSTIC,
+            factor=SECOUND_TO_HOUR_FACTOR,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            sensor_key="calculations.ID_WEB_WMZ_Seit",
+            unique_id="heat_amount_counter",
+            name=f"{text_heat_amount_counter}",
+            icon="mdi:lightning-bolt-circle",
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
     ]
 
-    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
-    if deviceInfoHeating is not None:
+    device_info_heating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
+    if device_info_heating is not None:
         text_flow_in = get_sensor_text(lang, "flow_in")
         text_flow_out = get_sensor_text(lang, "flow_out")
         text_target = get_sensor_text(lang, "target")
         text_operation_hours_heating = get_sensor_text(lang, "operation_hours_heating")
         text_heat_amount_heating = get_sensor_text(lang, "heat_amount_heating")
         entities += [
-            LuxtronikSensor(hass, luxtronik, deviceInfoHeating, 'calculations.ID_WEB_Temperatur_TVL',
-                            'flow_in_temperature', f"{text_flow_in} {text_temp}", 'mdi:waves-arrow-left', entity_category=None),
-            LuxtronikSensor(hass, luxtronik, deviceInfoHeating, 'calculations.ID_WEB_Temperatur_TRL',
-                            'flow_out_temperature', f"{text_flow_out} {text_temp}", 'mdi:waves-arrow-right', entity_category=None),
-            LuxtronikSensor(hass, luxtronik, deviceInfoHeating, 'calculations.ID_WEB_Sollwert_TRL_HZ',
-                            'flow_out_temperature_target', f"{text_flow_out} {text_temp} {text_target}", entity_category=None),
-
-            LuxtronikSensor(hass, luxtronik, deviceInfoHeating, sensor_key='calculations.ID_WEB_Zaehler_BetrZeitHz',
-                            unique_id='operation_hours_heating', name=f"{text_operation_hours_heating}",
-                            icon='mdi:timer-sand', state_class=STATE_CLASS_TOTAL_INCREASING,
-                            unit_of_measurement=TIME_HOURS, entity_category=ENTITY_CATEGORY_DIAGNOSTIC, factor=SECOUND_TO_HOUR_FACTOR),
-            LuxtronikSensor(hass, luxtronik, deviceInfoHeating, sensor_key='calculations.ID_WEB_WMZ_Heizung',
-                            unique_id='heat_amount_heating', name=f"{text_heat_amount_heating}",
-                            icon='mdi:lightning-bolt-circle', state_class=STATE_CLASS_TOTAL_INCREASING,
-                            unit_of_measurement=ENERGY_KILO_WATT_HOUR, entity_category=ENTITY_CATEGORY_DIAGNOSTIC)
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                "calculations.ID_WEB_Temperatur_TVL",
+                "flow_in_temperature",
+                f"{text_flow_in} {text_temp}",
+                "mdi:waves-arrow-left",
+                entity_category=None,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                "calculations.ID_WEB_Temperatur_TRL",
+                "flow_out_temperature",
+                f"{text_flow_out} {text_temp}",
+                "mdi:waves-arrow-right",
+                entity_category=None,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                "calculations.ID_WEB_Sollwert_TRL_HZ",
+                "flow_out_temperature_target",
+                f"{text_flow_out} {text_temp} {text_target}",
+                entity_category=None,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                sensor_key="calculations.ID_WEB_Zaehler_BetrZeitHz",
+                unique_id="operation_hours_heating",
+                name=f"{text_operation_hours_heating}",
+                icon="mdi:timer-sand",
+                device_class=None,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=TIME_HOURS,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                factor=SECOUND_TO_HOUR_FACTOR,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                sensor_key="calculations.ID_WEB_WMZ_Heizung",
+                unique_id="heat_amount_heating",
+                name=f"{text_heat_amount_heating}",
+                icon="mdi:lightning-bolt-circle",
+                device_class=DEVICE_CLASS_ENERGY,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+                entity_category=EntityCategory.DIAGNOSTIC,
+            ),
         ]
 
-    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
-    if deviceInfoDomesticWater is not None:
+    device_info_domestic_water = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
+    if device_info_domestic_water is not None:
         text_collector = get_sensor_text(lang, "collector")
         text_buffer = get_sensor_text(lang, "buffer")
         text_domestic_water = get_sensor_text(lang, "domestic_water")
@@ -209,35 +402,97 @@ async def async_setup_entry(
             lang, "heat_amount_domestic_water"
         )
         entities += [
-            LuxtronikSensor(hass, luxtronik, deviceInfoDomesticWater, 'calculations.ID_WEB_Temperatur_TSK',
-                            'solar_collector_temperature', f"Solar {text_collector} {text_temp}", 'mdi:solar-panel-large', entity_category=None),
-            LuxtronikSensor(hass, luxtronik, deviceInfoDomesticWater, 'calculations.ID_WEB_Temperatur_TSS',
-                            'solar_buffer_temperature', f"Solar {text_buffer} {text_temp}", 'mdi:propane-tank-outline', entity_category=None),
-            LuxtronikSensor(hass, luxtronik, deviceInfoDomesticWater, 'calculations.ID_WEB_Temperatur_TBW',
-                            'domestic_water_temperature', f"{text_domestic_water} {text_temp}", 'mdi:coolant-temperature', entity_category=None),
-
-            LuxtronikSensor(hass, luxtronik, deviceInfoDomesticWater, sensor_key='calculations.ID_WEB_Zaehler_BetrZeitBW',
-                            unique_id='operation_hours_domestic_water', name=f"{text_operation_hours_domestic_water}",
-                            icon='mdi:timer-sand', state_class=STATE_CLASS_TOTAL_INCREASING,
-                            unit_of_measurement=TIME_HOURS, entity_category=ENTITY_CATEGORY_DIAGNOSTIC, factor=SECOUND_TO_HOUR_FACTOR),
-            LuxtronikSensor(hass, luxtronik, deviceInfoDomesticWater, sensor_key='parameters.ID_BSTD_Solar',
-                            unique_id='operation_hours_solar', name=f"{text_operation_hours_solar}",
-                            icon='mdi:timer-sand', state_class=STATE_CLASS_TOTAL_INCREASING,
-                            unit_of_measurement=TIME_HOURS, entity_category=ENTITY_CATEGORY_DIAGNOSTIC, factor=SECOUND_TO_HOUR_FACTOR),
-            LuxtronikSensor(hass, luxtronik, deviceInfoDomesticWater, sensor_key='calculations.ID_WEB_WMZ_Brauchwasser',
-                            unique_id='heat_amount_domestic_water', name=f"{text_heat_amount_domestic_water}",
-                            icon='mdi:lightning-bolt-circle', state_class=STATE_CLASS_TOTAL_INCREASING,
-                            unit_of_measurement=ENERGY_KILO_WATT_HOUR, entity_category=ENTITY_CATEGORY_DIAGNOSTIC)
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_domestic_water,
+                "calculations.ID_WEB_Temperatur_TSK",
+                "solar_collector_temperature",
+                f"Solar {text_collector} {text_temp}",
+                "mdi:solar-panel-large",
+                entity_category=None,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_domestic_water,
+                "calculations.ID_WEB_Temperatur_TSS",
+                "solar_buffer_temperature",
+                f"Solar {text_buffer} {text_temp}",
+                "mdi:propane-tank-outline",
+                entity_category=None,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_domestic_water,
+                "calculations.ID_WEB_Temperatur_TBW",
+                "domestic_water_temperature",
+                f"{text_domestic_water} {text_temp}",
+                "mdi:coolant-temperature",
+                entity_category=None,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_domestic_water,
+                sensor_key="calculations.ID_WEB_Zaehler_BetrZeitBW",
+                unique_id="operation_hours_domestic_water",
+                name=f"{text_operation_hours_domestic_water}",
+                icon="mdi:timer-sand",
+                device_class=None,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=TIME_HOURS,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                factor=SECOUND_TO_HOUR_FACTOR,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_domestic_water,
+                sensor_key="parameters.ID_BSTD_Solar",
+                unique_id="operation_hours_solar",
+                name=f"{text_operation_hours_solar}",
+                icon="mdi:timer-sand",
+                device_class=None,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=TIME_HOURS,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                factor=SECOUND_TO_HOUR_FACTOR,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_domestic_water,
+                sensor_key="calculations.ID_WEB_WMZ_Brauchwasser",
+                unique_id="heat_amount_domestic_water",
+                name=f"{text_heat_amount_domestic_water}",
+                icon="mdi:lightning-bolt-circle",
+                device_class=DEVICE_CLASS_ENERGY,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+                entity_category=EntityCategory.DIAGNOSTIC,
+            ),
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
         text_operation_hours_cooling = get_sensor_text(lang, "operation_hours_cooling")
         entities += [
-            LuxtronikSensor(hass, luxtronik, deviceInfoCooling, sensor_key='calculations.ID_WEB_Zaehler_BetrZeitKue',
-                            unique_id='operation_hours_cooling', name=f"{text_operation_hours_cooling}",
-                            icon='mdi:timer-sand', state_class=STATE_CLASS_TOTAL_INCREASING,
-                            unit_of_measurement=TIME_HOURS, entity_category=ENTITY_CATEGORY_DIAGNOSTIC, factor=SECOUND_TO_HOUR_FACTOR)
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                deviceInfoCooling,
+                sensor_key="calculations.ID_WEB_Zaehler_BetrZeitKue",
+                unique_id="operation_hours_cooling",
+                name=f"{text_operation_hours_cooling}",
+                icon="mdi:timer-sand",
+                device_class=None,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=TIME_HOURS,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                factor=SECOUND_TO_HOUR_FACTOR,
+            )
         ]
 
     hass.bus.async_listen_once(
@@ -247,19 +502,21 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unloading the Luxtronik platforms."""
-    luxtronik = hass.data[DOMAIN]
-    if luxtronik is None:
-        return
+# async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+#     """Unloading the Luxtronik platforms."""
+#     luxtronik = hass.data[DOMAIN]
+#     if luxtronik is None:
+#         return
 
-    await hass.async_add_executor_job(luxtronik.disconnect)
+#     await hass.async_add_executor_job(luxtronik.disconnect)
 
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unload_ok:
-        hass.data[DOMAIN] = None
+#     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+#     if unload_ok:
+#         hass.data[DOMAIN] = None
 
-    return unload_ok
+#     return unload_ok
+
+
 # endregion Setup
 
 
@@ -286,8 +543,8 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         self.hass = hass
         self._luxtronik = luxtronik
 
-        self._entity_id = ENTITY_ID_FORMAT.format(f"{DOMAIN}_{unique_id}")
-        self._attr_unique_id = self._entity_id
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{DOMAIN}_{unique_id}")
+        self._attr_unique_id = self.entity_id
         self._attr_device_class = device_class
         self._attr_name = name
         self._icon = icon
@@ -304,7 +561,7 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         """Return the icon to be used for this entity."""
         if (
             self._icon is not None
-            and type(self._icon) is dict
+            and isinstance(self._icon, dict)
             and not isinstance(self._icon, str)
         ):
             if self.native_value in self._icon:
@@ -337,23 +594,18 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         """Get the latest status and use it to update our sensor state."""
         self._luxtronik.update()
         if self._sensor_key == "calculations.ID_WEB_HauptMenuStatus_Zeit":
-            v = self.native_value
-            if v is None:
+            value = self.native_value
+            if value is None:
                 time_str = None
             else:
-                m, s = divmod(int(v), 60)
-                h, m = divmod(m, 60)
-                time_str = f"{h:01.0f}:{m:02.0f} h"
+                (minutes, seconds) = divmod(int(value), 60)
+                hours, minutes = divmod(minutes, 60)
+                time_str = f"{hours:01.0f}:{minutes:02.0f} h"
             self._attr_extra_state_attributes = {ATTR_STATUS_TEXT: time_str}
 
 
 class LuxtronikLegacySensor(LuxtronikSensor):
-
-    def __init__(
-        self,
-        set_entity_id: str,
-        *args, **kwargs
-    ) -> None:
+    def __init__(self, set_entity_id: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         # self._set_entity_id = set_entity_id
         # self.entity_id = set_entity_id
@@ -393,21 +645,21 @@ class LuxtronikStatusSensor(LuxtronikSensor):
         status_time = self._get_sensor_attr(
             f"sensor.{DOMAIN}_status_time", ATTR_STATUS_TEXT
         )
-        l1 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_1")
-        l2 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_2")
+        line_1 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_1")
+        line_2 = self._get_sensor_value(f"sensor.{DOMAIN}_status_line_2")
         if (
             status_time is None
             or status_time == STATE_UNAVAILABLE
-            or l1 is None
-            or l1 == STATE_UNAVAILABLE
-            or l2 is None
-            or l2 == STATE_UNAVAILABLE
+            or line_1 is None
+            or line_1 == STATE_UNAVAILABLE
+            or line_2 is None
+            or line_2 == STATE_UNAVAILABLE
         ):
             return ""
         lang = self.hass.data[f"{DOMAIN}_language"]
-        l1 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_1", l1)
-        l2 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_2", l2)
-        return f"{l1} {l2} {status_time}."
+        line_1 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_1", line_1)
+        line_2 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_2", line_2)
+        return f"{line_1} {line_2} {status_time}."
 
     @property
     def extra_state_attributes(self) -> LuxtronikStatusExtraAttributes:

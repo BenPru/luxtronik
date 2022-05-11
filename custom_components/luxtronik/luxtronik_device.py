@@ -6,8 +6,13 @@ import time
 from luxtronik import Luxtronik as Lux
 from homeassistant.util import Throttle
 
-from .const import (CONF_CALCULATIONS, CONF_PARAMETERS, CONF_VISIBILITIES,
-                    LOGGER, MIN_TIME_BETWEEN_UPDATES)
+from .const import (
+    CONF_CALCULATIONS,
+    CONF_PARAMETERS,
+    CONF_VISIBILITIES,
+    LOGGER,
+    MIN_TIME_BETWEEN_UPDATES,
+)
 from .helpers.debounce import debounce
 
 # endregion Imports
@@ -17,7 +22,7 @@ class LuxtronikDevice:
     """Handle all communication with Luxtronik."""
     __ignore_update = False
 
-    def __init__(self, host: str, port: int, safe: bool, lock_timeout_sec: int):
+    def __init__(self, host: str, port: int, safe: bool, lock_timeout_sec: int) -> None:
         """Initialize the Luxtronik connection."""
         self.lock = threading.Lock()
 
@@ -32,8 +37,8 @@ class LuxtronikDevice:
         self.disconnect()
 
     def disconnect(self):
-        """Disconnect from Luxtronik."""
-        self._luxtronik._disconnect()
+        """Disconnect from Luxtronik. - Nothing todo - disconnected after every read!"""
+        pass
 
     def get_value(self, group_sensor_id: str):
         """Get a sensor value from Luxtronik."""
@@ -48,8 +53,8 @@ class LuxtronikDevice:
             group = group_sensor_id.split(".")[0]
             sensor_id = group_sensor_id.split(".")[1]
             return self.get_sensor(group, sensor_id)
-        except Exception as e:
-            LOGGER.critical(group_sensor_id, e, exc_info=True)
+        except IndexError as error:
+            LOGGER.critical(group_sensor_id, error, exc_info=True)
 
     def get_sensor(self, group, sensor_id):
         """Get sensor by configured sensor ID."""
@@ -63,11 +68,11 @@ class LuxtronikDevice:
         return sensor
 
     def write(
-        self, parameter, value, debounce=True, update_immediately_after_write=False
+        self, parameter, value, use_debounce=True, update_immediately_after_write=False
     ):
         """Write a parameter to the Luxtronik heatpump."""
         self.__ignore_update = True
-        if debounce:
+        if use_debounce:
             self.__write_debounced(parameter, value, update_immediately_after_write)
         else:
             self.__write(parameter, value, update_immediately_after_write)
@@ -78,6 +83,8 @@ class LuxtronikDevice:
 
     def __write(self, parameter, value, update_immediately_after_write):
         try:
+            # TODO: change to "with"
+            # with self.lock.acquire_timeout(self._lock_timeout_sec) as lock_result:
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
                 LOGGER.info(
                     'LuxtronikDevice.write %s value: "%s" - %s',
@@ -117,6 +124,7 @@ class LuxtronikDevice:
     def read(self):
         """Get the data from Luxtronik."""
         try:
+            # TODO: change to "with"
             if self.lock.acquire(blocking=True, timeout=self._lock_timeout_sec):
                 self._luxtronik.read()
             else:

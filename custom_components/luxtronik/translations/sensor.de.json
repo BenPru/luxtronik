@@ -2,7 +2,7 @@
   "state": {
     "luxtronik2__status": {
       "heating": "Heizt",
-      "hot water": "Warmwasser",
+      "hot water": "Brauchwasser",
       "swimming pool/solar": "Pool / Solar",
       "evu": "Netzsperre - kein Strom",
       "defrost": "Abtauen",

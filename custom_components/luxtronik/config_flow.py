@@ -4,20 +4,27 @@ from __future__ import annotations
 
 from typing import Any
 
-import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.components.dhcp import HOSTNAME, IP_ADDRESS
+from homeassistant.components.dhcp import HOSTNAME  # , DhcpServiceInfo
+from homeassistant.components.dhcp import IP_ADDRESS
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import (CONF_CONTROL_MODE_HOME_ASSISTANT,
-                    CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-                    CONF_LANGUAGE_SENSOR_NAMES, CONF_LOCK_TIMEOUT, CONF_SAFE,
-                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
-                    DEFAULT_PORT, DOMAIN,
-                    LANG_DEFAULT, LANGUAGES_SENSOR_NAMES, LOGGER)
+from .const import (
+    CONF_CONTROL_MODE_HOME_ASSISTANT,
+    CONF_HA_SENSOR_INDOOR_TEMPERATURE,
+    CONF_LANGUAGE_SENSOR_NAMES,
+    CONF_LOCK_TIMEOUT,
+    CONF_SAFE,
+    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
+    DEFAULT_PORT,
+    DOMAIN,
+    LANG_DEFAULT,
+    LANGUAGES_SENSOR_NAMES,
+    LOGGER,
+)
 from .helpers.lux_helper import discover
 
 # endregion Imports
@@ -30,6 +37,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     _hassio_discovery = None
     _discovery_host = None
     _discovery_port = None
+    _discovery_schema = None
 
     def _get_schema(self):
         return vol.Schema(
@@ -44,25 +52,26 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
 
-    async def async_step_dhcp(self, discovery_info: dict):
+    # async def async_step_dhcp(self, discovery_info: DhcpServiceInfo) -> FlowResult:
+    async def async_step_dhcp(self, discovery_info) -> FlowResult:
         """Prepare configuration for a DHCP discovered Luxtronik heatpump."""
         LOGGER.info(
             "Found device with hostname '%s' IP '%s'",
-            discovery_info.get(HOSTNAME),
-            discovery_info[IP_ADDRESS],
+            discovery_info.hostname,
+            discovery_info.ip,
         )
         # Validate dhcp result with socket broadcast:
         broadcast_discover_ip, broadcast_discover_port = discover()
-        if broadcast_discover_ip != discovery_info[IP_ADDRESS]:
-            return
-        await self.async_set_unique_id(discovery_info.get(HOSTNAME))
+        if broadcast_discover_ip != discovery_info.ip:
+            return None
+        await self.async_set_unique_id(discovery_info.hostname)
         self._abort_if_unique_id_configured()
 
-        self._discovery_host = discovery_info[IP_ADDRESS]
+        self._discovery_host = discovery_info.ip
         self._discovery_port = (
             DEFAULT_PORT if broadcast_discover_port is None else broadcast_discover_port
         )
-        self.discovery_schema = self._get_schema()
+        self._discovery_schema = self._get_schema()
         return await self.async_step_user()
 
     async def _show_setup_form(

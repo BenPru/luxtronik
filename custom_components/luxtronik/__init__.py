@@ -9,12 +9,21 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.typing import ConfigType
 from luxtronik import LOGGER as LuxLogger
 
-from .const import (ATTR_PARAMETER, ATTR_VALUE, CONF_LANGUAGE_SENSOR_NAMES,
-                    CONF_LOCK_TIMEOUT, CONF_SAFE,
-                    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
-                    DOMAIN, LANG_DEFAULT, LOGGER,
-                    LUX_SENSOR_DETECT_COOLING, PLATFORMS, SERVICE_WRITE,
-                    SERVICE_WRITE_SCHEMA)
+from .const import (
+    ATTR_PARAMETER,
+    ATTR_VALUE,
+    CONF_LANGUAGE_SENSOR_NAMES,
+    CONF_LOCK_TIMEOUT,
+    CONF_SAFE,
+    CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
+    DOMAIN,
+    LANG_DEFAULT,
+    LOGGER,
+    LUX_SENSOR_DETECT_COOLING,
+    PLATFORMS,
+    SERVICE_WRITE,
+    SERVICE_WRITE_SCHEMA,
+)
 from .helpers.helper import get_sensor_text
 from .helpers.lux_helper import get_manufacturer_by_model
 from .luxtronik_device import LuxtronikDevice
@@ -63,9 +72,15 @@ def setup_hass_services(hass):
         parameter = service.data.get(ATTR_PARAMETER)
         value = service.data.get(ATTR_VALUE)
         luxtronik = hass.data[DOMAIN]
-        update_immediately_after_write = hass.data[f"{DOMAIN}_conf"][CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
-        luxtronik.write(parameter, value, debounce=True,
-                        update_immediately_after_write=update_immediately_after_write)
+        update_immediately_after_write = hass.data[f"{DOMAIN}_conf"][
+            CONF_UPDATE_IMMEDIATELY_AFTER_WRITE
+        ]
+        luxtronik.write(
+            parameter,
+            value,
+            use_debounce=True,
+            update_immediately_after_write=update_immediately_after_write,
+        )
 
     hass.services.register(
         DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
@@ -87,7 +102,7 @@ def setup_internal(hass, data, conf):
     port = data[CONF_PORT]
     safe = data[CONF_SAFE]
     lock_timeout = data[CONF_LOCK_TIMEOUT]
-    update_immediately_after_write = data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
+    # update_immediately_after_write = data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
     # use_legacy_sensor_ids = data[CONF_USE_LEGACY_SENSOR_IDS] if CONF_USE_LEGACY_SENSOR_IDS in data else False
     # LOGGER.info("setup_internal use_legacy_sensor_ids: '%s'",
     #             use_legacy_sensor_ids)
@@ -109,21 +124,23 @@ def setup_internal(hass, data, conf):
     hass.data[DOMAIN] = luxtronik
     hass.data[f"{DOMAIN}_conf"] = conf
     # Create DeviceInfos:
-    sn = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
-    hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(luxtronik, sn, text_heatpump)
+    serial_number = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
+    hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(
+        luxtronik, serial_number, text_heatpump
+    )
     hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
-        identifiers={(DOMAIN, "Domestic_Water", sn)},
+        identifiers={(DOMAIN, "Domestic_Water", serial_number)},
         default_name=text_domestic_water,
         name=text_domestic_water,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
-        identifiers={(DOMAIN, "Heating", sn)},
+        identifiers={(DOMAIN, "Heating", serial_number)},
         default_name=text_heating,
         name=text_heating,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = (
         DeviceInfo(
-            identifiers={(DOMAIN, "Cooling", sn)},
+            identifiers={(DOMAIN, "Cooling", serial_number)},
             default_name=text_cooling,
             name=text_cooling,
         )
@@ -142,14 +159,17 @@ async def async_reload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unloading the Luxtronik platforms."""
-    LOGGER.info("async_unload_entry '%s'", config_entry)
+    LOGGER.info("async_unload_entry '%s' - %s", config_entry, hass.data[DOMAIN])
     luxtronik = hass.data[DOMAIN]
     if luxtronik is None:
-        return
+        return True
 
-    await hass.async_add_executor_job(luxtronik.disconnect)
+    try:
+        await hass.async_add_executor_job(luxtronik.disconnect)
 
-    await hass.services.async_remove(DOMAIN, SERVICE_WRITE)
+        await hass.services.async_remove(DOMAIN, SERVICE_WRITE)
+    except Exception as e:
+        LOGGER.critical("Remove service!", e, exc_info=True)
 
     unload_ok = await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
@@ -164,8 +184,8 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str) -> DeviceInfo:
     """Build luxtronik device info."""
     model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
-    deviceInfo = DeviceInfo(
-        identifiers={(DOMAIN, "Heatpump", sn)},
+    device_info = DeviceInfo(
+        identifiers={(DOMAIN, "Heatpump", sn)},  # type: ignore
         name=f"{name} S/N {sn}",
         default_name=name,
         default_manufacturer="Alpha Innotec",
@@ -174,5 +194,5 @@ def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str) -> DeviceI
         model=model,
         sw_version=luxtronik.get_value("calculations.ID_WEB_SoftStand"),
     )
-    LOGGER.info("build_device_info '%s'", deviceInfo)
-    return deviceInfo
+    LOGGER.debug("build_device_info '%s'", device_info)
+    return device_info
