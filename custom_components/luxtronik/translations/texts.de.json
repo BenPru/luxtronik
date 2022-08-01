@@ -29,5 +29,7 @@
   "heat_amount_counter": "W\u00e4rmemenge Z\u00e4hler",
   "heat_amount_heating": "W\u00e4rmemenge Heizung",
   "heat_amount_domestic_water": "W\u00e4rmemenge Brauchwasser",
-  "approval_cooling": "K\u00fchlung Freigabe"
+  "approval_cooling": "K\u00fchlung Freigabe",
+  "remote_maintenance": "Fernwartung",
+  "min_flow_out_temperature": "Min.Soll R\u00fccklauf"
 }

@@ -29,5 +29,7 @@
   "heat_amount_counter": "Heat amount counter",
   "heat_amount_heating": "Heat amount heating",
   "heat_amount_domestic_water": "Heat amount domestic water",
-  "approval_cooling": "Approval cooling"
+  "approval_cooling": "Approval cooling",
+  "remote_maintenance": "Remote maintenance",
+  "min_flow_out_temperature": "Min.Target Flow Out"
 }

@@ -194,8 +194,12 @@ LUX_SENSOR_STATUS: Final = "calculations.ID_WEB_WP_BZ_akt"
 LUX_SENSOR_STATUS1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
 LUX_SENSOR_STATUS3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
 
+LUX_SENSOR_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
+
 LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION: Final = "parameters.ID_Einst_WK_akt"
-LUX_SENSOR_HEATING_THRESHOLD: Final = "parameters.ID_Einst_Heizgrenze_Temp"
+LUX_SENSOR_HEATING_THRESHOLD: Final = "parameters.ID_Einst_Heizgrenze"
+LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE: Final = "parameters.ID_Einst_Heizgrenze_Temp"
+LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
 LUX_SENSOR_MODE_HEATING: Final = "parameters.ID_Ba_Hz_akt"
 
 LUX_SENSOR_COOLING_THRESHOLD: Final = "parameters.ID_Einst_KuehlFreig_akt"

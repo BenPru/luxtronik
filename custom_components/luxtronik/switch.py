@@ -6,6 +6,7 @@ from homeassistant.components.binary_sensor import DEVICE_CLASS_HEAT
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
@@ -13,7 +14,7 @@ from . import LuxtronikDevice
 from .binary_sensor import LuxtronikBinarySensor
 from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
                     LUX_SENSOR_MODE_DOMESTIC_WATER, LUX_SENSOR_MODE_HEATING,
-                    LuxMode)
+                    LuxMode, LUX_SENSOR_HEATING_THRESHOLD, LUX_SENSOR_REMOTE_MAINTENANCE)
 from .helpers.helper import get_sensor_text
 
 # endregion Imports
@@ -41,16 +42,33 @@ async def async_setup_entry(
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     entities = []
 
+    device_info = hass.data[f"{DOMAIN}_DeviceInfo"]
+    text_remote_maintenance = get_sensor_text(lang, 'remote_maintenance')
+    entities += [
+        LuxtronikSwitch(
+            hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
+            sensor_key=LUX_SENSOR_REMOTE_MAINTENANCE, unique_id='remote_maintenance',
+            name=f"{text_remote_maintenance}", icon='mdi:remote-desktop',
+            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG)
+    ]
+
+
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if deviceInfoHeating is not None:
         text_heating_mode = get_sensor_text(lang, 'heating_mode_auto')
+        text_heating_threshold = get_sensor_text(lang, 'heating_threshold')
         entities += [
             LuxtronikSwitch(
                 on_state=LuxMode.automatic.value, off_state=LuxMode.off.value,
                 hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoHeating,
                 sensor_key=LUX_SENSOR_MODE_HEATING, unique_id='heating',
                 name=text_heating_mode, icon='mdi:radiator',
-                device_class=DEVICE_CLASS_HEAT)
+                device_class=DEVICE_CLASS_HEAT),
+            LuxtronikSwitch(
+                hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoHeating,
+                sensor_key=LUX_SENSOR_HEATING_THRESHOLD, unique_id='heating_threshold',
+                name=f"{text_heating_threshold}", icon='mdi:download-outline',
+                device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG)
         ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
