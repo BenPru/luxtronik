@@ -53,7 +53,7 @@ Install the integration
 Your heatpump should be autodiscovered by home assistant.
 ![image](https://user-images.githubusercontent.com/5879533/178813978-bd8f13ff-ed27-4fa8-bfd0-6ff86a6e9786.png)
 
-'If auto discovery does not work, please give feedback with the first six chars of your luxtronik heatpump mac address and/or hostname.'
+'If auto discovery does not work, please give feedback with the first six chars of your luxtronik heatpump mac address, the original hostname, the manufacturer and model. To add the heatpump manually go to Settings => Devices and Services => Add Integration and add a new luxtronik device.'
 
 Select Configure and review the settings 
 ![image](https://user-images.githubusercontent.com/5879533/178814105-1dfc9445-1591-417b-9162-0b9f341cd0b2.png)
