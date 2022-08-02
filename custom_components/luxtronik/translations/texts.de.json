@@ -8,6 +8,7 @@
   "cooling": "K\u00fchlung",
   "target": "Soll",
   "temperature": "Temperatur",
+  "external": "extern",
   "buffer": "Puffer",
   "collector": "Kollektor",
   "flow_in": "Vorlauf",

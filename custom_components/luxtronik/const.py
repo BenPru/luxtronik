@@ -351,6 +351,12 @@ HEATING_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
         sensor_key="calculations.ID_WEB_Temperatur_TRL",
     ),
     LuxtronikSensorEntityDescription(
+        key="flow_out_temperature_external",
+        # f"{text_flow_out} {text_temp} ({text_external})",
+        icon="mdi:waves-arrow-right",
+        sensor_key="calculations.ID_WEB_Temperatur_TRL_ext",
+    ),
+    LuxtronikSensorEntityDescription(
         key="flow_out_temperature_target",
         # f"{text_flow_out} {text_temp} {text_target}",
         sensor_key="calculations.ID_WEB_Sollwert_TRL_HZ",
