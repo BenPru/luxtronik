@@ -8,6 +8,7 @@
   "cooling": "Cooling",
   "target": "Target",
   "temperature": "Temperature",
+  "external": "external",
   "buffer": "Buffer",
   "collector": "Collector",
   "flow_in": "Flow In",

@@ -160,6 +160,7 @@ async def async_setup_entry(
     hass.data[f"{DOMAIN}_language"] = lang
     text_time = get_sensor_text(lang, "time")
     text_temp = get_sensor_text(lang, "temperature")
+    text_external = get_sensor_text(lang, "external")
     text_heat_source_output = get_sensor_text(lang, "heat_source_output")
     text_heat_source_input = get_sensor_text(lang, "heat_source_input")
     text_outdoor = get_sensor_text(lang, "outdoor")
@@ -348,6 +349,16 @@ async def async_setup_entry(
                 "calculations.ID_WEB_Temperatur_TRL",
                 "flow_out_temperature",
                 f"{text_flow_out} {text_temp}",
+                "mdi:waves-arrow-right",
+                entity_category=None,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                "calculations.ID_WEB_Temperatur_TRL_ext",
+                "flow_out_temperature",
+                f"{text_flow_out} {text_temp} ({text_external})",
                 "mdi:waves-arrow-right",
                 entity_category=None,
             ),
