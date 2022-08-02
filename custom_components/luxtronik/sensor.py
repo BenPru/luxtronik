@@ -357,7 +357,7 @@ async def async_setup_entry(
                 luxtronik,
                 device_info_heating,
                 "calculations.ID_WEB_Temperatur_TRL_ext",
-                "flow_out_temperature",
+                "flow_out_temperature_external",
                 f"{text_flow_out} {text_temp} ({text_external})",
                 "mdi:waves-arrow-right",
                 entity_category=None,
