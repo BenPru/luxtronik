@@ -1,6 +1,8 @@
 {
   "average": "Mittel",
   "outdoor": "Aussen",
+  "room": "Zimmer",
+  "pump": "Verdichter",
   "heat_source_output": "Heizquelle Ausgang",
   "heat_source_input": "Heizquelle Eingang",
   "time": "Zeit",
