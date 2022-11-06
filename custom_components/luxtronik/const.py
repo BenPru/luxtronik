@@ -335,6 +335,13 @@ GLOBAL_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         sensor_key="calculations.ID_WEB_WMZ_Seit",
     ),
+    LuxtronikSensorEntityDescription(
+        key="pump_frequency",
+        # name=f"{text_pump}",
+        icon="mdi:percent",
+        unit_of_measurement=PERCENTAGE,
+        sensor_key="calculations.ID_WEB_Freq_VD",
+    ),
 )
 
 HEATING_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
@@ -382,6 +389,12 @@ HEATING_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         entity_category=EntityCategory.DIAGNOSTIC,
         sensor_key="calculations.ID_WEB_WMZ_Heizung",
+    ),
+    LuxtronikSensorEntityDescription(
+        key="room_temperature",
+        # name=f"{text_room} {text_temperature}",
+        icon="mdi:thermometer",
+        sensor_key="calculations.ID_WEB_Freq_VD",
     ),
 )
 
