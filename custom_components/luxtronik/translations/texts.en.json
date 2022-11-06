@@ -1,6 +1,8 @@
 {
   "average": "Average",
   "outdoor": "Outdoor",
+  "room": "Room",
+  "pump": "Compressor",
   "heat_source_output": "Heat source output",
   "heat_source_input": "Heat source input",
   "time": "Time",
