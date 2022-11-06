@@ -164,6 +164,8 @@ async def async_setup_entry(
     text_heat_source_output = get_sensor_text(lang, "heat_source_output")
     text_heat_source_input = get_sensor_text(lang, "heat_source_input")
     text_outdoor = get_sensor_text(lang, "outdoor")
+    text_room = get_sensor_text(lang, "room")
+    text_pump = get_sensor_text(lang, "pump")    
     text_average = get_sensor_text(lang, "average")
     text_compressor_impulses = get_sensor_text(lang, "compressor_impulses")
     text_operation_hours = get_sensor_text(lang, "operation_hours")
@@ -322,6 +324,17 @@ async def async_setup_entry(
             unit_of_measurement=ENERGY_KILO_WATT_HOUR,
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_Freq_VD",
+            "pump frequency",
+            f"{text_pump} Frequency",
+            entity_category=None,
+            icon="mdi:sine-wave",
+            unit_of_measurement='Hz'
+        ),
     ]
 
     device_info_heating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
@@ -397,6 +410,15 @@ async def async_setup_entry(
                 state_class=STATE_CLASS_TOTAL_INCREASING,
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
+            ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                "calculations.ID_WEB_RBE_RT_Ist",
+                "room_temperature",
+                f"{text_room} {text_temp}",
+                entity_category=None,
             ),
         ]
 
