@@ -8,7 +8,8 @@ from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (DEVICE_CLASS_TEMPERATURE, ENTITY_CATEGORIES,
-                                 TEMP_CELSIUS)
+                                 TEMP_CELSIUS,
+                                 TIME_HOURS)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -18,6 +19,9 @@ from homeassistant.helpers.typing import ConfigType
 from . import LuxtronikDevice
 from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
                     LUX_SENSOR_COOLING_THRESHOLD,
+                    LUX_SENSOR_COOLING_START_DELAY,
+                    LUX_SENSOR_COOLING_STOP_DELAY,
+                    LUX_SENSOR_COOLING_TARGET,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                     LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
                     LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
@@ -87,17 +91,48 @@ async def async_setup_entry(
                 hass, luxtronik, deviceInfoDomesticWater,
                 number_key=LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                 unique_id='domestic_water_target_temperature', name=f"{text_domestic_water} {text_target} {text_temp}",
-                icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=2.5, mode=MODE_BOX)
+                icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=1.0, mode=MODE_BOX)
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
         text_cooling_threshold_temperature = get_sensor_text(
             lang, 'cooling_threshold_temperature')
+        text_cooling_start_delay_hours = get_sensor_text(
+            lang, 'cooling_start_delay_hours')
+        text_cooling_stop_delay_hours = get_sensor_text(
+            lang, 'cooling_stop_delay_hours')
+        text_cooling_target_temperature = get_sensor_text(
+            lang, 'cooling_target_temperature')
         entities += [
-            LuxtronikNumber(hass, luxtronik, deviceInfoCooling, number_key=LUX_SENSOR_COOLING_THRESHOLD,
-                            unique_id='cooling_threshold_temperature', name=f"{text_cooling_threshold_temperature}",
-                            icon='mdi:upload-outline', unit_of_measurement=TEMP_CELSIUS, min_value=18.0, max_value=30.0, step=0.5, mode=MODE_BOX)
+            LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
+                            number_key=LUX_SENSOR_COOLING_THRESHOLD,
+                            unique_id='cooling_threshold_temperature',
+                            name=f"{text_cooling_threshold_temperature}",
+                            icon='mdi:sun-thermometer',
+                            unit_of_measurement=TEMP_CELSIUS,
+                            min_value=18.0, max_value=30.0, step=0.5, mode=MODE_BOX),
+            LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
+                            number_key=LUX_SENSOR_COOLING_TARGET,
+                            unique_id='cooling_target_temperature',
+                            name=f"{text_cooling_target_temperature}",
+                            icon='mdi:snowflake-thermometer',
+                            unit_of_measurement=TEMP_CELSIUS,
+                            min_value=18.0, max_value=25.0, step=1.0, mode=MODE_BOX),
+            LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
+                            number_key=LUX_SENSOR_COOLING_START_DELAY,
+                            unique_id='cooling_start_delay_hours',
+                            name=f"{text_cooling_start_delay_hours}",
+                            icon='mdi:clock-start',
+                            unit_of_measurement=TIME_HOURS,
+                            min_value=0.0, max_value=12.0, step=0.5, mode=MODE_BOX),
+            LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
+                            number_key=LUX_SENSOR_COOLING_STOP_DELAY,
+                            unique_id='cooling_stop_delay_hours',
+                            name=f"{text_cooling_stop_delay_hours}",
+                            icon='mdi:clock-end',
+                            unit_of_measurement=TIME_HOURS,
+                            min_value=0.0, max_value=12.0, step=0.5, mode=MODE_BOX),
         ]
 
     async_add_entities(entities)
