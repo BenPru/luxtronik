@@ -28,16 +28,28 @@ from .const import (CONF_CALCULATIONS, CONF_CONTROL_MODE_HOME_ASSISTANT,
                     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
                     CONF_LANGUAGE_SENSOR_NAMES, CONF_PARAMETERS,
                     CONF_VISIBILITIES, DEFAULT_TOLERANCE, DOMAIN, LOGGER,
+                    
                     LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
-                    LUX_SENSOR_MODE_DOMESTIC_WATER, LUX_SENSOR_MODE_HEATING,
+                    LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
+                    LUX_SENSOR_COOLING_TARGET,
+                    LUX_SENSOR_COOLING_THRESHOLD,
+                    LUX_SENSOR_OUTDOOR_TEMPERATURE,
+                    
+                    LUX_SENSOR_MODE_DOMESTIC_WATER,
+                    LUX_SENSOR_MODE_HEATING,
+                    LUX_SENSOR_MODE_COOLING,
+                    
                     LUX_SENSOR_STATUS, LUX_SENSOR_STATUS1, LUX_SENSOR_STATUS3,
                     LUX_STATUS1_WORKAROUND, LUX_STATUS3_WORKAROUND,
                     LUX_STATUS_COOLING, LUX_STATUS_DEFROST,
-                    LUX_STATUS_DOMESTIC_WATER, LUX_STATUS_EVU,
-                    LUX_STATUS_HEATING, LUX_STATUS_HEATING_EXTERNAL_SOURCE,
+                    LUX_STATUS_DOMESTIC_WATER,
+                    LUX_STATUS_EVU,
+                    LUX_STATUS_HEATING,
+                    LUX_STATUS_HEATING_EXTERNAL_SOURCE,
                     LUX_STATUS_NO_REQUEST, LUX_STATUS_SWIMMING_POOL_SOLAR,
-                    PRESET_SECOND_HEATSOURCE, LuxMode)
+                    PRESET_SECOND_HEATSOURCE, PRESET_AUTO,
+                    LuxMode)
 from .helpers.helper import get_sensor_text
 
 # endregion Imports
@@ -98,13 +110,11 @@ async def async_setup_entry(
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
-        # Future use: cooling
-        # text_cooling = get_sensor_text(lang, 'cooling')
+        text_cooling = get_sensor_text(lang, 'cooling')
         entities += [
-            # TODO:
-            # LuxtronikCoolingThermostat(hass, luxtronik, deviceInfoCooling, name=text_cooling,
-            #     control_mode_home_assistant=control_mode_home_assistant,
-            #     current_temperature_sensor=LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE, entity_category=None)
+            LuxtronikCoolingThermostat(
+                hass, luxtronik, deviceInfoCooling, name=text_cooling, control_mode_home_assistant=control_mode_home_assistant,
+                current_temperature_sensor=LUX_SENSOR_OUTDOOR_TEMPERATURE, entity_category=None)
         ]
 
     async_add_entities(entities)
@@ -132,7 +142,7 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
     _status_sensor: Final = LUX_SENSOR_STATUS
     _target_temperature_sensor: str = None
 
-    _heat_status = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER]
+    _heat_status = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER, LUX_STATUS_COOLING]
 
     _cold_tolerance = DEFAULT_TOLERANCE
     _hot_tolerance = DEFAULT_TOLERANCE
@@ -367,7 +377,9 @@ class LuxtronikDomesticWaterThermostat(LuxtronikThermostat):
     _attr_icon = 'mdi:water-boiler'
     _attr_device_class: Final = f"{DOMAIN}__{_attr_unique_id}"
 
-    _attr_target_temperature_step = 2.5
+    _attr_target_temperature_step = 1.0
+    _attr_min_temp = 40.0
+    _attr_max_temp = 58.0
 
     _target_temperature_sensor: Final = LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE
     _heater_sensor: Final = LUX_SENSOR_MODE_DOMESTIC_WATER
@@ -379,23 +391,25 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
     _attr_icon = 'mdi:radiator'
     _attr_device_class: Final = f"{DOMAIN}__{_attr_unique_id}"
 
-    _attr_target_temperature = 20.5
-    _attr_target_temperature_step = 0.1
-    _attr_min_temp = 18.0
-    _attr_max_temp = 23.0
+    #_attr_target_temperature = 20.5
+    _attr_target_temperature_step = 0.5
+    _attr_min_temp = -5.0
+    _attr_max_temp = +5.0
 
+    _target_temperature_sensor: Final = LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION
     _heater_sensor: Final = LUX_SENSOR_MODE_HEATING
-
+    _heat_status: Final = [LUX_STATUS_HEATING]
 
 class LuxtronikCoolingThermostat(LuxtronikThermostat):
     _attr_unique_id = 'cooling'
     _attr_icon = 'mdi:snowflake'
     _attr_device_class: Final = f"{DOMAIN}__{_attr_unique_id}"
 
-    _attr_target_temperature = 20.5
+    _target_temperature_sensor = LUX_SENSOR_COOLING_THRESHOLD
     _attr_target_temperature_step = 0.5
     _attr_min_temp = 18.0
     _attr_max_temp = 30.0
+    _attr_preset_modes = [PRESET_NONE]
 
     # _heater_sensor: Final = LUX_SENSOR_MODE_HEATING
 
@@ -410,5 +424,5 @@ class LuxtronikCoolingThermostat(LuxtronikThermostat):
 # parameters.ID_Einst_Kuhl_Zeit_Aus_akt
 # stop cooling after this timeout
 # 12.0
-    _heater_sensor = 'calculations.ID_WEB_FreigabKuehl'
-    _heat_status = ['cooling']
+    _heater_sensor = LUX_SENSOR_MODE_COOLING
+    _heat_status = [LUX_STATUS_COOLING]
