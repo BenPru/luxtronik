@@ -19,6 +19,7 @@
   "heating": "Heizung",
   "heating_mode_auto": "Heizungsmodus Automatik",
   "domestic_water_mode_auto": "Brauchwassermodus Automatik",
+  "cooling_mode_auto": "K\u00fchlungmodus Automatik",
   "heatpump": "W\u00e4rmepumpe",
   "heating_threshold": "Heizgrenze",
   "evu_unlocked": "Sperrzeit Freigabe",
@@ -34,5 +35,9 @@
   "heat_amount_domestic_water": "W\u00e4rmemenge Brauchwasser",
   "approval_cooling": "K\u00fchlung Freigabe",
   "remote_maintenance": "Fernwartung",
-  "min_flow_out_temperature": "Min.Soll R\u00fccklauf"
+  "min_flow_out_temperature": "Min.Soll R\u00fccklauf",
+  "cooling_threshold_temperature": "T_aussen > ",
+  "cooling_start_delay_hours": "Start verzogerung.",
+  "cooling_stop_delay_hours":  "Stop verzogerung",
+  "cooling_target_temperature": "K\u00fchl Soll"
 }
