@@ -22,7 +22,8 @@
     },
     "luxtronik2__status_line_2": {
       "since": "seit",
-      "in": "in"
+      "in": "in",
+      "unknown": "Unbekannt"
     },
     "luxtronik2__status_line_3": {
       "heating": "heizt",
