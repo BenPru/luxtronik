@@ -13,7 +13,9 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from . import LuxtronikDevice
 from .binary_sensor import LuxtronikBinarySensor
 from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
-                    LUX_SENSOR_MODE_DOMESTIC_WATER, LUX_SENSOR_MODE_HEATING,
+                    LUX_SENSOR_MODE_DOMESTIC_WATER,
+                    LUX_SENSOR_MODE_HEATING,
+                    LUX_SENSOR_MODE_COOLING,
                     LuxMode, LUX_SENSOR_HEATING_THRESHOLD, LUX_SENSOR_REMOTE_MAINTENANCE)
 from .helpers.helper import get_sensor_text
 
@@ -85,6 +87,21 @@ async def async_setup_entry(
                 name=text_domestic_water_mode_auto, icon='mdi:water-boiler',
                 device_class=DEVICE_CLASS_HEAT)
         ]
+        
+    deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
+    if deviceInfoCooling is not None:
+        text_cooling_mode_auto = get_sensor_text(
+            lang, 'cooling_mode_auto')
+        entities += [
+            LuxtronikSwitch(
+                on_state=LuxMode.automatic.value, off_state=LuxMode.off.value,
+                hass=hass, luxtronik=luxtronik,
+                deviceInfo=deviceInfoCooling,
+                sensor_key=LUX_SENSOR_MODE_COOLING,
+                unique_id='cooling',
+                name=text_cooling_mode_auto, icon='mdi:snowflake',
+                device_class=DEVICE_CLASS_HEAT)
+        ]        
 
     async_add_entities(entities)
 # endregion Setup
