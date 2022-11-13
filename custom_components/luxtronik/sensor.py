@@ -52,6 +52,7 @@ from .const import (
     LUX_STATUS3_WORKAROUND,
     LUX_STATUS_HEATING,
     LUX_STATUS_NO_REQUEST,
+    LUX_STATUS_THERMAL_DESINFECTION,
     PLATFORMS,
     SECOUND_TO_HOUR_FACTOR,
     UNITS,
@@ -161,11 +162,10 @@ async def async_setup_entry(
     text_time = get_sensor_text(lang, "time")
     text_temp = get_sensor_text(lang, "temperature")
     text_external = get_sensor_text(lang, "external")
+    text_pump  = get_sensor_text(lang, "pump")
     text_heat_source_output = get_sensor_text(lang, "heat_source_output")
     text_heat_source_input = get_sensor_text(lang, "heat_source_input")
     text_outdoor = get_sensor_text(lang, "outdoor")
-    text_room = get_sensor_text(lang, "room")
-    text_pump = get_sensor_text(lang, "pump")    
     text_average = get_sensor_text(lang, "average")
     text_compressor_impulses = get_sensor_text(lang, "compressor_impulses")
     text_operation_hours = get_sensor_text(lang, "operation_hours")
@@ -341,10 +341,20 @@ async def async_setup_entry(
     if device_info_heating is not None:
         text_flow_in = get_sensor_text(lang, "flow_in")
         text_flow_out = get_sensor_text(lang, "flow_out")
+        text_room  = get_sensor_text(lang, "room")
         text_target = get_sensor_text(lang, "target")
         text_operation_hours_heating = get_sensor_text(lang, "operation_hours_heating")
         text_heat_amount_heating = get_sensor_text(lang, "heat_amount_heating")
         entities += [
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                "calculations.ID_WEB_RBE_RT_Ist",
+                "room_temperature",
+                f"{text_room} {text_temp}",
+                entity_category=None,
+            ),
             LuxtronikSensor(
                 hass,
                 luxtronik,
@@ -410,15 +420,6 @@ async def async_setup_entry(
                 state_class=STATE_CLASS_TOTAL_INCREASING,
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
-            ),
-            LuxtronikSensor(
-                hass,
-                luxtronik,
-                device_info_heating,
-                "calculations.ID_WEB_RBE_RT_Ist",
-                "room_temperature",
-                f"{text_room} {text_temp}",
-                entity_category=None,
             ),
         ]
 
@@ -607,6 +608,12 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         """Return the state of the sensor."""
         value = self._luxtronik.get_value(self._sensor_key)
 
+        if self._sensor_key == LUX_SENSOR_STATUS:
+            status3 = self._luxtronik.get_value(LUX_SENSOR_STATUS3)
+            if status3 == LUX_STATUS_THERMAL_DESINFECTION:
+                # map thermal desinfection to Domestic Water iso Heating
+                return LUX_STATUS_DOMESTIC_WATER
+
         # region Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
         if self._sensor_key == LUX_SENSOR_STATUS and value == LUX_STATUS_HEATING:
             status1 = self._luxtronik.get_value(LUX_SENSOR_STATUS1)
@@ -614,8 +621,9 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
             if status1 in LUX_STATUS1_WORKAROUND and status3 in LUX_STATUS3_WORKAROUND:
                 # pump forerun
                 return LUX_STATUS_NO_REQUEST
-        # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+            # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
 
+            
         return value if self._factor is None else round(value * self._factor, 2)
 
     @property
