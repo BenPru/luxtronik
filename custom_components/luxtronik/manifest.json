@@ -9,7 +9,7 @@
   "dependencies": [],
   "after_dependencies": ["http"],
   "codeowners": ["@bouni", "@benpru"],
-  "requirements": ["luxtronik==0.3.9"],
+  "requirements": ["luxtronik==0.3.14"],
   "dhcp": [
     {
       "macaddress": "000E8C*"
