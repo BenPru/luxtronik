@@ -48,7 +48,7 @@ CONF_SAFE: Final = "safe"
 CONF_LOCK_TIMEOUT: Final = "lock_timeout"
 CONF_UPDATE_IMMEDIATELY_AFTER_WRITE: Final = "update_immediately_after_write"
 
-CONF_PARAMETERS: Final = "parameters"
+CONF_PARAMETERS:   Final = "parameters"
 CONF_CALCULATIONS: Final = "calculations"
 CONF_VISIBILITIES: Final = "visibilities"
 
@@ -109,7 +109,7 @@ ATTR_STATUS_TEXT: Final = "status_text"
 
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(seconds=10)
 
-
+PRESET_AUTO:              Final = 'automatic'
 PRESET_SECOND_HEATSOURCE: Final = "second_heatsource"
 
 # region Lux Modes
@@ -137,6 +137,7 @@ LUX_STATUS_DEFROST: Final = "defrost"  # 4
 LUX_STATUS_NO_REQUEST: Final = "no request"  # 5
 LUX_STATUS_HEATING_EXTERNAL_SOURCE: Final = "heating external source"  # 6
 LUX_STATUS_COOLING: Final = "cooling"  # 7
+LUX_STATUS_THERMAL_DESINFECTION: Final = "thermal desinfection"  
 
 LUX_STATUS_NONE: Final = "None"
 LUX_STATUS_UNKNOWN: Final = "unknown"
@@ -190,20 +191,25 @@ ICON_OFF = "mdi:circle-outline"
 
 # region Luxtronik Sensor ids
 LUX_SENSOR_DETECT_COOLING: Final = "calculations.ID_WEB_FreigabKuehl"
-LUX_SENSOR_STATUS: Final = "calculations.ID_WEB_WP_BZ_akt"
+LUX_SENSOR_STATUS:  Final = "calculations.ID_WEB_WP_BZ_akt"
 LUX_SENSOR_STATUS1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
 LUX_SENSOR_STATUS3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
 
 LUX_SENSOR_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
 
-LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION: Final = "parameters.ID_Einst_WK_akt"
-LUX_SENSOR_HEATING_THRESHOLD: Final = "parameters.ID_Einst_Heizgrenze"
-LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE: Final = "parameters.ID_Einst_Heizgrenze_Temp"
-LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
-LUX_SENSOR_MODE_HEATING: Final = "parameters.ID_Ba_Hz_akt"
+LUX_SENSOR_OUTDOOR_TEMPERATURE:              Final = "calculations.ID_WEB_Temperatur_TA"
 
-LUX_SENSOR_COOLING_THRESHOLD: Final = "parameters.ID_Einst_KuehlFreig_akt"
-LUX_SENSOR_MODE_COOLING: Final = "parameters.ID_Ba_Hz_akt"
+LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION:   Final = "parameters.ID_Einst_WK_akt"
+LUX_SENSOR_HEATING_THRESHOLD:                Final = "parameters.ID_Einst_Heizgrenze"
+LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE:    Final = "parameters.ID_Einst_Heizgrenze_Temp"
+LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
+LUX_SENSOR_MODE_HEATING:                     Final = "parameters.ID_Ba_Hz_akt"
+
+LUX_SENSOR_COOLING_THRESHOLD:                Final = "parameters.ID_Einst_KuehlFreig_akt"
+LUX_SENSOR_COOLING_START_DELAY:              Final = "parameters.ID_Einst_Kuhl_Zeit_Ein_akt"
+LUX_SENSOR_COOLING_STOP_DELAY:               Final = "parameters.ID_Einst_Kuhl_Zeit_Aus_akt"
+LUX_SENSOR_COOLING_TARGET:                   Final = "parameters.ID_Sollwert_KuCft2_akt"
+LUX_SENSOR_MODE_COOLING:                     Final = "parameters.ID_Einst_BA_Kuehl_akt"
 # Future use:
 # LUX_SENSOR_MODE_COOLING: Final = 'parameters.ID_Einst_BA_Kuehl_akt'
 
@@ -295,6 +301,14 @@ GLOBAL_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
         # unit_of_measurement=TEMP_CELSIUS,
         sensor_key="calculations.ID_WEB_Temperatur_TA",
     ),
+    LuxtronikSensorEntityDescription(
+        key="indoor_RBE_temperature",
+        # name=f"{text_outdoor} {text_temp}",
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        # unit_of_measurement=TEMP_CELSIUS,
+        sensor_key="calculations.ID_WEB_RBE_RT_Ist",
+    ),    
     LuxtronikSensorEntityDescription(
         key="outdoor_temperature_average",
         # name=f"{text_average} {text_outdoor} {text_temp}",
