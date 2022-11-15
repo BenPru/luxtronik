@@ -2,7 +2,6 @@
 # region Imports
 from typing import Any, Final
 
-from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.sensor import (
     ENTITY_ID_FORMAT,
     STATE_CLASS_MEASUREMENT,
@@ -27,7 +26,7 @@ from homeassistant.const import (
     TIME_SECONDS,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -162,7 +161,7 @@ async def async_setup_entry(
     text_time = get_sensor_text(lang, "time")
     text_temp = get_sensor_text(lang, "temperature")
     text_external = get_sensor_text(lang, "external")
-    text_pump  = get_sensor_text(lang, "pump")
+    text_pump = get_sensor_text(lang, "pump")
     text_heat_source_output = get_sensor_text(lang, "heat_source_output")
     text_heat_source_input = get_sensor_text(lang, "heat_source_input")
     text_outdoor = get_sensor_text(lang, "outdoor")
@@ -170,6 +169,10 @@ async def async_setup_entry(
     text_compressor_impulses = get_sensor_text(lang, "compressor_impulses")
     text_operation_hours = get_sensor_text(lang, "operation_hours")
     text_heat_amount_counter = get_sensor_text(lang, "heat_amount_counter")
+    text_hot_gas = get_sensor_text(lang, "hot_gas")
+    text_suction_compressor = get_sensor_text(lang, "suction_compressor")
+    text_suction_evaporator = get_sensor_text(lang, "suction_evaporator")
+    text_compressor_heating = get_sensor_text(lang, "compressor_heating")
     # entities: list[LuxtronikSensor] = [
     #     LuxtronikStatusSensor(hass, luxtronik, device_info, description)
     #     for description in GLOBAL_STATUS_SENSOR_TYPES
@@ -334,6 +337,42 @@ async def async_setup_entry(
             entity_category=None,
             icon="mdi:sine-wave",
             unit_of_measurement='Hz'
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_Temperatur_THG",
+            "hot_gas_temperature",
+            f"{text_hot_gas} {text_temp}",
+            entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_LIN_ANSAUG_VERDICHTER",
+            "suction_compressor_temperature",
+            f"{text_suction_compressor} {text_temp}",
+            entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_LIN_ANSAUG_VERDAMPFER",
+            "suction_evaporator_temperature",
+            f"{text_suction_evaporator} {text_temp}",
+            entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_LIN_VDH",
+            "compressor_heating_temperature",
+            f"{text_compressor_heating} {text_temp}",
+            entity_category=None,
         ),
     ]
 

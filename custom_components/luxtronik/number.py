@@ -23,6 +23,9 @@ from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
                     LUX_SENSOR_COOLING_STOP_DELAY,
                     LUX_SENSOR_COOLING_TARGET,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
+		    LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
+		    LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
+		    LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
                     LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
                     LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
                     LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE)
@@ -64,6 +67,9 @@ async def async_setup_entry(
         text_heating_threshold = get_sensor_text(lang, 'heating_threshold')
         text_correction = get_sensor_text(lang, 'correction')
         text_min_flow_out_temperature = get_sensor_text(lang, 'min_flow_out_temperature')
+        text_heating_circuit_curve1_temperature = get_sensor_text(lang, 'circuit_curve1_temperature')
+        text_heating_circuit_curve2_temperature = get_sensor_text(lang, 'circuit_curve2_temperature')
+        text_heating_circuit_curve_night_temperature = get_sensor_text(lang, 'circuit_curve_night_temperature')
         entities += [
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
@@ -79,7 +85,22 @@ async def async_setup_entry(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
                 unique_id='heating_min_flow_out_temperature', name=f"{text_min_flow_out_temperature}",
-                icon='mdi:waves-arrow-left', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=30.0, step=0.5, factor=0.1, mode=MODE_BOX, entity_category=EntityCategory.CONFIG)
+                icon='mdi:waves-arrow-left', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=30.0, step=0.5, factor=0.1, mode=MODE_BOX, entity_category=EntityCategory.CONFIG),
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key=LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
+                unique_id='heating_circuit_curve1_temperature', name=f"{text_heating_circuit_curve1_temperature}",
+                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=20.0, max_value=70.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG),
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key=LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
+                unique_id='heating_circuit_curve2_temperature', name=f"{text_heating_circuit_curve2_temperature}",
+                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=35.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG),
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key=LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
+                unique_id='heating_circuit_curve_night_temperature', name=f"{text_heating_circuit_curve_night_temperature}",
+                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=-15.0, max_value=10.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG)
         ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]

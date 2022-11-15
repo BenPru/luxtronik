@@ -36,8 +36,15 @@
   "approval_cooling": "Approval cooling",
   "remote_maintenance": "Remote maintenance",
   "min_flow_out_temperature": "Min.Target Flow Out",
+  "circuit_curve1_temperature": "Heating curve 1",
+  "circuit_curve2_temperature": "Heating curve 2",
+  "circuit_curve_night_temperature": "Heating night",
   "cooling_threshold_temperature": "T_outside > ",
   "cooling_start_delay_hours": "Start delay",
   "cooling_stop_delay_hours":  "Stop delay",
-  "cooling_target_temperature": "Cooling target"
+  "cooling_target_temperature": "Cooling target",
+  "hot_gas": "Hot gas",
+  "suction_compressor": "Suction compressor",
+  "suction_evaporator": "Suction evaporator",
+  "compressor_heating": "Compressor heating"
 }

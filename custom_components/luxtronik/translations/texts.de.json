@@ -36,8 +36,15 @@
   "approval_cooling": "K\u00fchlung Freigabe",
   "remote_maintenance": "Fernwartung",
   "min_flow_out_temperature": "Min.Soll R\u00fccklauf",
+  "circuit_curve1_temperature": "Heizkurve 1",
+  "circuit_curve2_temperature": "Heizkurve 2",
+  "circuit_curve_night_temperature": "Heizkurve Nachts",
   "cooling_threshold_temperature": "T_aussen > ",
   "cooling_start_delay_hours": "Start verzogerung.",
   "cooling_stop_delay_hours":  "Stop verzogerung",
-  "cooling_target_temperature": "K\u00fchl Soll"
+  "cooling_target_temperature": "K\u00fchl Soll",
+  "hot_gas": "Heissgas",
+  "suction_compressor": "Ansaug Verdichter",
+  "suction_evaporator": "Ansaug Verdampfer",
+  "compressor_heating": "Verdichter Heizung"
 }

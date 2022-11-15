@@ -203,6 +203,9 @@ LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION:   Final = "parameters.ID_Einst_WK_akt
 LUX_SENSOR_HEATING_THRESHOLD:                Final = "parameters.ID_Einst_Heizgrenze"
 LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE:    Final = "parameters.ID_Einst_Heizgrenze_Temp"
 LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
+LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE: Final = "parameters.ID_Einst_HzHwHKE_akt"
+LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE: Final = "parameters.ID_Einst_HzHKRANH_akt"
+LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = "parameters.ID_Einst_HzHKRABS_akt"
 LUX_SENSOR_MODE_HEATING:                     Final = "parameters.ID_Ba_Hz_akt"
 
 LUX_SENSOR_COOLING_THRESHOLD:                Final = "parameters.ID_Einst_KuehlFreig_akt"

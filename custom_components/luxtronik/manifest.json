@@ -1,7 +1,7 @@
 {
   "domain": "luxtronik2",
   "name": "Luxtronik",
-  "version": "2022.08.01",
+  "version": "2022.11.15",
   "config_flow": true,
   "iot_class": "local_polling",
   "documentation": "https://www.home-assistant.io/integrations/luxtronik",
@@ -9,7 +9,7 @@
   "dependencies": [],
   "after_dependencies": ["http"],
   "codeowners": ["@bouni", "@benpru"],
-  "requirements": ["luxtronik==0.3.14"],
+  "requirements": ["luxtronik>=0.3.14"],
   "dhcp": [
     {
       "macaddress": "000E8C*"
