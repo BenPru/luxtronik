@@ -15,7 +15,7 @@
   "collector": "Kollektor",
   "flow_in": "Vorlauf",
   "flow_out": "R\u00fccklauf",
-  "correction": "Korrektur",
+  "correction": "Ziel Korrektur",
   "heating": "Heizung",
   "heating_mode_auto": "Heizungsmodus Automatik",
   "domestic_water_mode_auto": "Brauchwassermodus Automatik",
