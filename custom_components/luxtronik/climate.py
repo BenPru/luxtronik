@@ -31,7 +31,7 @@ from .const import (CONF_CALCULATIONS, CONF_CONTROL_MODE_HOME_ASSISTANT,
                     
                     LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
-                    LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
+                    LUX_SENSOR_HEATING_TARGET_CORRECTION,
                     LUX_SENSOR_COOLING_TARGET,
                     LUX_SENSOR_COOLING_THRESHOLD,
                     LUX_SENSOR_OUTDOOR_TEMPERATURE,
@@ -396,7 +396,7 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
     _attr_min_temp = -5.0
     _attr_max_temp = +5.0
 
-    _target_temperature_sensor: Final = LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION
+    _target_temperature_sensor: Final = LUX_SENSOR_HEATING_TARGET_CORRECTION
     _heater_sensor: Final = LUX_SENSOR_MODE_HEATING
     _heat_status: Final = [LUX_STATUS_HEATING]
 
