@@ -15,7 +15,7 @@
   "collector": "Collector",
   "flow_in": "Outgoing flow",
   "flow_out": "Return flow",
-  "correction": "Correction",
+  "correction": "Target correction",
   "heating": "Heating",
   "heating_mode_auto": "Heating mode automatic",
   "domestic_water_mode_auto": "Domestic water mode automatic",
