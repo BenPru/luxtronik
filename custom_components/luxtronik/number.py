@@ -27,7 +27,7 @@ from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
 		    LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
 		    LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
                     LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
-                    LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
+                    LUX_SENSOR_HEATING_TARGET_CORRECTION,
                     LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE)
 from .helpers.helper import get_sensor_text
 
@@ -73,8 +73,8 @@ async def async_setup_entry(
         entities += [
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
-                number_key=LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION,
-                unique_id='heating_temperature_correction', name=f"{text_temp} {text_correction}",
+                number_key=LUX_SENSOR_HEATING_TARGET_CORRECTION,
+                unique_id='heating_target_correction', name=f"{text_correction}",
                 icon='mdi:plus-minus-variant', unit_of_measurement=TEMP_CELSIUS, min_value=-5.0, max_value=5.0, step=0.5, mode=MODE_BOX, entity_category=None),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
