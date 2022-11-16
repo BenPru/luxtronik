@@ -199,7 +199,7 @@ LUX_SENSOR_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
 
 LUX_SENSOR_OUTDOOR_TEMPERATURE:              Final = "calculations.ID_WEB_Temperatur_TA"
 
-LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION:   Final = "parameters.ID_Einst_WK_akt"
+LUX_SENSOR_HEATING_TARGET_CORRECTION:        Final = "parameters.ID_Einst_WK_akt"
 LUX_SENSOR_HEATING_THRESHOLD:                Final = "parameters.ID_Einst_Heizgrenze"
 LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE:    Final = "parameters.ID_Einst_Heizgrenze_Temp"
 LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
