@@ -120,11 +120,14 @@ def setup_internal(hass, data, conf):
 
     luxtronik = LuxtronikDevice(host, port, safe, lock_timeout)
     luxtronik.read()
-
+    
     hass.data[DOMAIN] = luxtronik
     hass.data[f"{DOMAIN}_conf"] = conf
+    
     # Create DeviceInfos:
     serial_number = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
+    model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
+    
     hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(
         luxtronik, serial_number, text_heatpump
     )
@@ -132,19 +135,25 @@ def setup_internal(hass, data, conf):
         identifiers={(DOMAIN, "Domestic_Water", serial_number)},
         default_name=text_domestic_water,
         name=text_domestic_water,
+        manufacturer=get_manufacturer_by_model(model),
+        model=model,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
         identifiers={(DOMAIN, "Heating", serial_number)},
         default_name=text_heating,
         name=text_heating,
+        manufacturer=get_manufacturer_by_model(model),
+        model=model,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = (
         DeviceInfo(
             identifiers={(DOMAIN, "Cooling", serial_number)},
             default_name=text_cooling,
             name=text_cooling,
+            manufacturer=get_manufacturer_by_model(model),
+            model=model,
         )
-        if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING)
+        if luxtronik.get_value(LUX_SENSOR_DETECT_COOLING) > 0
         else None
     )
     return True
