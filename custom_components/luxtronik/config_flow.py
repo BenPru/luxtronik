@@ -38,6 +38,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     _discovery_host = None
     _discovery_port = None
     _discovery_schema = None
+    
+    _sensor_prefix = DOMAIN
 
     def _get_schema(self):
         return vol.Schema(
@@ -45,7 +47,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_HOST, default=self._discovery_host): str,
                 vol.Required(CONF_PORT, default=self._discovery_port): int,
                 vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
-                vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=""): str,
+                vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=f"sensor.{self._sensor_prefix}_room_temperature"): str,
                 vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(
                     LANGUAGES_SENSOR_NAMES
                 ),
@@ -119,6 +121,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle a Luxtronik options flow."""
 
+    _sensor_prefix = DOMAIN
+    
     def __init__(self, config_entry):
         """Initialize."""
         self.config_entry = config_entry
@@ -138,7 +142,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                 ): bool,
                 vol.Optional(
                     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-                    default=self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE, ""),
+                    default=self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE, f"sensor.{self._sensor_prefix}_room_temperature"),
                 ): str,
                 vol.Optional(
                     CONF_LANGUAGE_SENSOR_NAMES,
