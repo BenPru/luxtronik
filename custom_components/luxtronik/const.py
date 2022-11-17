@@ -190,7 +190,7 @@ ICON_OFF = "mdi:circle-outline"
 
 
 # region Luxtronik Sensor ids
-LUX_SENSOR_DETECT_COOLING: Final = "calculations.ID_WEB_FreigabKuehl"
+LUX_SENSOR_DETECT_COOLING: Final = "parameters.ID_Sollwert_KuCft2_akt"
 LUX_SENSOR_STATUS:  Final = "calculations.ID_WEB_WP_BZ_akt"
 LUX_SENSOR_STATUS1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
 LUX_SENSOR_STATUS3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
