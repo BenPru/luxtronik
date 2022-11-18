@@ -4,15 +4,14 @@ from typing import Any
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.components.binary_sensor import (
-    DEVICE_CLASS_LOCK,
-    DEVICE_CLASS_RUNNING,
-    PLATFORM_SCHEMA,
-    BinarySensorEntity,
-)
+from homeassistant.components.binary_sensor import (DEVICE_CLASS_LOCK,
+                                                    DEVICE_CLASS_RUNNING,
+                                                    PLATFORM_SCHEMA,
+                                                    BinarySensorEntity)
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID, CONF_SENSORS, ENTITY_CATEGORIES
+from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
+                                 CONF_SENSORS, ENTITY_CATEGORIES)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -20,22 +19,17 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import slugify
 
-from .const import (
-    CONF_CALCULATIONS,
-    CONF_GROUP,
-    CONF_INVERT_STATE,
-    CONF_LANGUAGE_SENSOR_NAMES,
-    CONF_PARAMETERS,
-    CONF_VISIBILITIES,
-    DEFAULT_DEVICE_CLASS,
-    DEVICE_CLASSES,
-    DOMAIN,
-    LOGGER,
-    LUX_BINARY_SENSOR_EVU_UNLOCKED,
-    LUX_BINARY_SENSOR_SOLAR_PUMP,
-)
-from .helpers.helper import get_sensor_text
-from .luxtronik_device import LuxtronikDevice
+from custom_components.luxtronik.const import (CONF_CALCULATIONS, CONF_GROUP,
+                                               CONF_INVERT_STATE,
+                                               CONF_LANGUAGE_SENSOR_NAMES,
+                                               CONF_PARAMETERS,
+                                               CONF_VISIBILITIES,
+                                               DEFAULT_DEVICE_CLASS,
+                                               DEVICE_CLASSES, DOMAIN, LOGGER,
+                                               LUX_BINARY_SENSOR_EVU_UNLOCKED,
+                                               LUX_BINARY_SENSOR_SOLAR_PUMP)
+from custom_components.luxtronik.helpers.helper import get_sensor_text
+from custom_components.luxtronik.luxtronik_device import LuxtronikDevice
 
 # endregion Imports
 
@@ -154,6 +148,12 @@ async def async_setup_entry(
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     text_evu_unlocked = get_sensor_text(lang, "evu_unlocked")
+    text_compressor = get_sensor_text(lang, "compressor")
+    text_circulating_pump_domestic_water = get_sensor_text(lang, "circulating_pump_domestic_water")
+    text_circulating_pump_heating = get_sensor_text(lang, "circulating_pump_heating")
+    text_circulating_pump_water = get_sensor_text(lang, "circulating_pump_water")
+    text_unloading_pump = get_sensor_text(lang, "unloading_pump")
+
     entities = [
         LuxtronikBinarySensor(
             hass=hass,
@@ -164,8 +164,74 @@ async def async_setup_entry(
             name=text_evu_unlocked,
             icon="mdi:lock",
             device_class=DEVICE_CLASS_LOCK,
-        )
+        ),
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_VD1out',
+            unique_id="compressor",
+            name=text_compressor,
+            icon="mdi:heat-pump",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_ZIPout',
+            unique_id="circulating_pump_domestic_water",
+            name=text_circulating_pump_domestic_water,
+            icon="mdi:pump",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_ZUPout',
+            unique_id="circulating_pump_heating",
+            name=text_circulating_pump_heating,
+            icon="mdi:pump",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_BUPout',
+            unique_id="circulating_pump_water",
+            name=text_circulating_pump_water,
+            icon="mdi:pump",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
+
+        # calculations.ID_WEB_ASDin Soledruck ausreichend
+        # calculations.ID_WEB_HDin Hochdruck OK
+        # calculations.ID_WEB_MOTin Motorschutz OK
+        # calculations.ID_WEB_FP2out FBH Umwälzpumpe 2
+        # calculations.ID_WEB_MA1out Mischer 1 auf
+        # calculations.ID_WEB_MZ1out Mischer 1 zu
+        # calculations.ID_WEB_MA2out Mischer 2 auf
+        # calculations.ID_WEB_MZ2out Mischer 2 zu
+        # calculations.ID_WEB_VBOout Brunnenwasserpumpe (true)
     ]
+
+    deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
+    if deviceInfoHeating is not None:
+        text_solar_pump = get_sensor_text(lang, "solar_pump")
+        entities += [
+            LuxtronikBinarySensor(
+                hass=hass,
+                luxtronik=luxtronik,
+                deviceInfo=deviceInfo,
+                sensor_key='calculations.ID_WEB_HUPout',
+                unique_id="unloading_pump",
+                name=text_unloading_pump,
+                icon="mdi:pump",
+                device_class=DEVICE_CLASS_RUNNING,
+            ),
+        ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if deviceInfoDomesticWater is not None:

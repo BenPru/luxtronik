@@ -1,64 +1,43 @@
 """Luxtronik heatpump sensor."""
 # region Imports
-from typing import Any, Final
 
-from homeassistant.components.sensor import (
-    ENTITY_ID_FORMAT,
-    STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL_INCREASING,
-    SensorEntity,
-    SensorEntityDescription,
-)
+from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
+                                             STATE_CLASS_MEASUREMENT,
+                                             STATE_CLASS_TOTAL_INCREASING,
+                                             SensorEntity)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    CONF_FRIENDLY_NAME,
-    CONF_ICON,
-    CONF_ID,
-    CONF_SENSORS,
-    DEVICE_CLASS_ENERGY,
-    DEVICE_CLASS_TEMPERATURE,
-    ENERGY_KILO_WATT_HOUR,
-    ENTITY_CATEGORIES,
-    EVENT_HOMEASSISTANT_STOP,
-    STATE_UNAVAILABLE,
-    TEMP_CELSIUS,
-    TIME_HOURS,
-    TIME_SECONDS,
-)
+from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
+                                 CONF_SENSORS, DEVICE_CLASS_ENERGY,
+                                 DEVICE_CLASS_TEMPERATURE,
+                                 ENERGY_KILO_WATT_HOUR, ENTITY_CATEGORIES,
+                                 EVENT_HOMEASSISTANT_STOP, STATE_UNAVAILABLE,
+                                 TEMP_CELSIUS, TEMP_KELVIN, TIME_HOURS,
+                                 TIME_SECONDS, UnitOfPressure)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from .const import (
-    ATTR_STATUS_TEXT,
-    CONF_GROUP,
-    CONF_LANGUAGE_SENSOR_NAMES,
-    DEFAULT_DEVICE_CLASS,
-    DEVICE_CLASSES,
-    DOMAIN,
-    GLOBAL_SENSOR_TYPES,
-    GLOBAL_STATUS_SENSOR_TYPES,
-    ICONS,
-    LOGGER,
-    LUX_SENSOR_STATUS,
-    LUX_SENSOR_STATUS1,
-    LUX_SENSOR_STATUS3,
-    LUX_STATE_ICON_MAP,
-    LUX_STATES_ON,
-    LUX_STATUS1_WORKAROUND,
-    LUX_STATUS3_WORKAROUND,
-    LUX_STATUS_HEATING,
-    LUX_STATUS_NO_REQUEST,
-    LUX_STATUS_THERMAL_DESINFECTION,
-    PLATFORMS,
-    SECOUND_TO_HOUR_FACTOR,
-    UNITS,
-)
-from .helpers.helper import get_sensor_text, get_sensor_value_text
-from .luxtronik_device import LuxtronikDevice
-from .model import LuxtronikStatusExtraAttributes
+from custom_components.luxtronik.const import (ATTR_STATUS_TEXT, CONF_GROUP,
+                                               CONF_LANGUAGE_SENSOR_NAMES,
+                                               DEFAULT_DEVICE_CLASS,
+                                               DEVICE_CLASSES, DOMAIN, ICONS,
+                                               LOGGER, LUX_SENSOR_STATUS,
+                                               LUX_SENSOR_STATUS1,
+                                               LUX_SENSOR_STATUS3,
+                                               LUX_STATE_ICON_MAP,
+                                               LUX_STATES_ON,
+                                               LUX_STATUS1_WORKAROUND,
+                                               LUX_STATUS3_WORKAROUND,
+                                               LUX_STATUS_HEATING,
+                                               LUX_STATUS_NO_REQUEST,
+                                               LUX_STATUS_THERMAL_DESINFECTION,
+                                               SECOUND_TO_HOUR_FACTOR, UNITS)
+from custom_components.luxtronik.helpers.helper import (get_sensor_text,
+                                                        get_sensor_value_text)
+from custom_components.luxtronik.luxtronik_device import LuxtronikDevice
+from custom_components.luxtronik.model import LuxtronikStatusExtraAttributes
 
 # endregion Imports
 
@@ -173,6 +152,10 @@ async def async_setup_entry(
     text_suction_compressor = get_sensor_text(lang, "suction_compressor")
     text_suction_evaporator = get_sensor_text(lang, "suction_evaporator")
     text_compressor_heating = get_sensor_text(lang, "compressor_heating")
+    text_overheating = get_sensor_text(lang, "overheating")
+    text_overheating_target = get_sensor_text(lang, "overheating_target")
+    text_high_pressure = get_sensor_text(lang, "high_pressure")
+    text_low_pressure = get_sensor_text(lang, "low_pressure")
     # entities: list[LuxtronikSensor] = [
     #     LuxtronikStatusSensor(hass, luxtronik, device_info, description)
     #     for description in GLOBAL_STATUS_SENSOR_TYPES
@@ -257,7 +240,7 @@ async def async_setup_entry(
             device_info,
             "calculations.ID_WEB_Temperatur_TWA",
             "heat_source_output_temperature",
-            f"{text_heat_source_output} {text_temp}",
+            f"{text_heat_source_output}",
             entity_category=None,
         ),
         LuxtronikSensor(
@@ -266,7 +249,7 @@ async def async_setup_entry(
             device_info,
             "calculations.ID_WEB_Temperatur_TWE",
             "heat_source_input_temperature",
-            f"{text_heat_source_input} {text_temp}",
+            f"{text_heat_source_input}",
             entity_category=None,
         ),
         LuxtronikSensor(
@@ -344,7 +327,7 @@ async def async_setup_entry(
             device_info,
             "calculations.ID_WEB_Temperatur_THG",
             "hot_gas_temperature",
-            f"{text_hot_gas} {text_temp}",
+            f"{text_hot_gas}",
             entity_category=None,
         ),
         LuxtronikSensor(
@@ -353,7 +336,7 @@ async def async_setup_entry(
             device_info,
             "calculations.ID_WEB_LIN_ANSAUG_VERDICHTER",
             "suction_compressor_temperature",
-            f"{text_suction_compressor} {text_temp}",
+            f"{text_suction_compressor}",
             entity_category=None,
         ),
         LuxtronikSensor(
@@ -362,7 +345,7 @@ async def async_setup_entry(
             device_info,
             "calculations.ID_WEB_LIN_ANSAUG_VERDAMPFER",
             "suction_evaporator_temperature",
-            f"{text_suction_evaporator} {text_temp}",
+            f"{text_suction_evaporator}",
             entity_category=None,
         ),
         LuxtronikSensor(
@@ -371,8 +354,48 @@ async def async_setup_entry(
             device_info,
             "calculations.ID_WEB_LIN_VDH",
             "compressor_heating_temperature",
-            f"{text_compressor_heating} {text_temp}",
+            f"{text_compressor_heating}",
             entity_category=None,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_LIN_UH",
+            "overheating_temperature",
+            f"{text_overheating}",
+            entity_category=None,
+            unit_of_measurement=TEMP_KELVIN,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_LIN_UH_Soll",
+            "overheating_target_temperature",
+            f"{text_overheating_target}",
+            entity_category=None,
+            unit_of_measurement=TEMP_KELVIN,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_LIN_HD",
+            "high_pressure",
+            f"{text_high_pressure}",
+            entity_category=None,
+            unit_of_measurement=UnitOfPressure.BAR,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            "calculations.ID_WEB_LIN_ND",
+            "low_pressure",
+            f"{text_low_pressure}",
+            entity_category=None,
+            unit_of_measurement=UnitOfPressure.BAR,
         ),
     ]
 
@@ -380,27 +403,32 @@ async def async_setup_entry(
     if device_info_heating is not None:
         text_flow_in = get_sensor_text(lang, "flow_in")
         text_flow_out = get_sensor_text(lang, "flow_out")
-        text_room  = get_sensor_text(lang, "room")
         text_target = get_sensor_text(lang, "target")
         text_operation_hours_heating = get_sensor_text(lang, "operation_hours_heating")
         text_heat_amount_heating = get_sensor_text(lang, "heat_amount_heating")
+        has_room_temp = luxtronik.get_value("parameters.ID_Einst_RFVEinb_akt") != 0
+        if has_room_temp:
+            text_room = get_sensor_text(lang, "room")
+            entities += [
+                LuxtronikSensor(
+                    hass,
+                    luxtronik,
+                    device_info_heating,
+                    "calculations.ID_WEB_RBE_RT_Ist",
+                    "room_temperature",
+                    f"{text_room}",
+                    entity_category=None,
+                )
+            ]
+
         entities += [
-            LuxtronikSensor(
-                hass,
-                luxtronik,
-                device_info_heating,
-                "calculations.ID_WEB_RBE_RT_Ist",
-                "room_temperature",
-                f"{text_room} {text_temp}",
-                entity_category=None,
-            ),
             LuxtronikSensor(
                 hass,
                 luxtronik,
                 device_info_heating,
                 "calculations.ID_WEB_Temperatur_TVL",
                 "flow_in_temperature",
-                f"{text_flow_in} {text_temp}",
+                f"{text_flow_in}",
                 "mdi:waves-arrow-left",
                 entity_category=None,
             ),
@@ -410,7 +438,7 @@ async def async_setup_entry(
                 device_info_heating,
                 "calculations.ID_WEB_Temperatur_TRL",
                 "flow_out_temperature",
-                f"{text_flow_out} {text_temp}",
+                f"{text_flow_out}",
                 "mdi:waves-arrow-right",
                 entity_category=None,
             ),
@@ -420,7 +448,7 @@ async def async_setup_entry(
                 device_info_heating,
                 "calculations.ID_WEB_Temperatur_TRL_ext",
                 "flow_out_temperature_external",
-                f"{text_flow_out} {text_temp} ({text_external})",
+                f"{text_flow_out} ({text_external})",
                 "mdi:waves-arrow-right",
                 entity_category=None,
             ),
@@ -430,7 +458,7 @@ async def async_setup_entry(
                 device_info_heating,
                 "calculations.ID_WEB_Sollwert_TRL_HZ",
                 "flow_out_temperature_target",
-                f"{text_flow_out} {text_temp} {text_target}",
+                f"{text_flow_out} {text_target}",
                 entity_category=None,
             ),
             LuxtronikSensor(
@@ -481,7 +509,7 @@ async def async_setup_entry(
                 device_info_domestic_water,
                 "calculations.ID_WEB_Temperatur_TSK",
                 "solar_collector_temperature",
-                f"Solar {text_collector} {text_temp}",
+                f"Solar {text_collector}",
                 "mdi:solar-panel-large",
                 entity_category=None,
             ),
@@ -491,7 +519,7 @@ async def async_setup_entry(
                 device_info_domestic_water,
                 "calculations.ID_WEB_Temperatur_TSS",
                 "solar_buffer_temperature",
-                f"Solar {text_buffer} {text_temp}",
+                f"Solar {text_buffer}",
                 "mdi:propane-tank-outline",
                 entity_category=None,
             ),
@@ -501,7 +529,7 @@ async def async_setup_entry(
                 device_info_domestic_water,
                 "calculations.ID_WEB_Temperatur_TBW",
                 "domestic_water_temperature",
-                f"{text_domestic_water} {text_temp}",
+                f"{text_domestic_water}",
                 "mdi:coolant-temperature",
                 entity_category=None,
             ),

@@ -9,7 +9,7 @@ from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (DEVICE_CLASS_TEMPERATURE, ENTITY_CATEGORIES,
                                  TEMP_CELSIUS,
-                                 TIME_HOURS)
+                                 TIME_HOURS, TIME_MINUTES, PERCENTAGE)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -23,12 +23,15 @@ from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
                     LUX_SENSOR_COOLING_STOP_DELAY,
                     LUX_SENSOR_COOLING_TARGET,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
-		    LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
-		    LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
-		    LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
+                    LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
+                    LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
+                    LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
                     LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
+                    LUX_SENSOR_PUMP_OPTIMIZATION_TIME,
+                    LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED,
                     LUX_SENSOR_HEATING_TARGET_CORRECTION,
-                    LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE)
+                    LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE,
+                    LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR)
 from .helpers.helper import get_sensor_text
 
 # endregion Imports
@@ -60,10 +63,26 @@ async def async_setup_entry(
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     text_temp = get_sensor_text(lang, 'temperature')
-    entities = []
+
+    deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
+    text_pump_optimization_time = get_sensor_text(lang, 'pump_optimization_time')
+    text_maximum_circulation_pump_speed = get_sensor_text(lang, 'maximum_circulation_pump_speed')
+    entities = [
+        LuxtronikNumber(
+            hass, luxtronik, deviceInfo,
+            number_key=LUX_SENSOR_PUMP_OPTIMIZATION_TIME,
+            unique_id='pump_optimization_time', name=f"{text_pump_optimization_time}",
+            icon='mdi:timer-settings', unit_of_measurement=TIME_MINUTES, min_value=5, max_value=180, step=5, mode=MODE_AUTO, entity_category=EntityCategory.CONFIG),
+        LuxtronikNumber(
+            hass, luxtronik, deviceInfo,
+            number_key=LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED,
+            unique_id='maximum_circulation_pump_speed', name=f"{text_maximum_circulation_pump_speed}",
+            icon='mdi:speedometer', unit_of_measurement=PERCENTAGE, min_value=0, max_value=100, step=10, mode=MODE_AUTO, entity_category=EntityCategory.CONFIG)
+    ]
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if deviceInfoHeating is not None:
+        text_heating_room_temperature_impact_factor = get_sensor_text(lang, 'heating_room_temperature_impact_factor')
         text_heating_threshold = get_sensor_text(lang, 'heating_threshold')
         text_correction = get_sensor_text(lang, 'correction')
         text_min_flow_out_temperature = get_sensor_text(lang, 'min_flow_out_temperature')
@@ -71,6 +90,11 @@ async def async_setup_entry(
         text_heating_circuit_curve2_temperature = get_sensor_text(lang, 'circuit_curve2_temperature')
         text_heating_circuit_curve_night_temperature = get_sensor_text(lang, 'circuit_curve_night_temperature')
         entities += [
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key=LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+                unique_id='heating_room_temperature_impact_factor', name=f"{text_heating_room_temperature_impact_factor}",
+                icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=5, mode=MODE_AUTO, entity_category=EntityCategory.CONFIG),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_TARGET_CORRECTION,
@@ -111,7 +135,7 @@ async def async_setup_entry(
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoDomesticWater,
                 number_key=LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
-                unique_id='domestic_water_target_temperature', name=f"{text_domestic_water} {text_target} {text_temp}",
+                unique_id='domestic_water_target_temperature', name=f"{text_domestic_water} {text_target}",
                 icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=1.0, mode=MODE_BOX)
         ]
 

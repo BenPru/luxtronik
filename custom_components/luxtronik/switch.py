@@ -16,7 +16,9 @@ from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
                     LUX_SENSOR_MODE_DOMESTIC_WATER,
                     LUX_SENSOR_MODE_HEATING,
                     LUX_SENSOR_MODE_COOLING,
-                    LuxMode, LUX_SENSOR_HEATING_THRESHOLD, LUX_SENSOR_REMOTE_MAINTENANCE)
+                    LuxMode, LUX_SENSOR_HEATING_THRESHOLD, LUX_SENSOR_REMOTE_MAINTENANCE,
+                    LUX_SENSOR_PUMP_OPTIMIZATION,
+                    LUX_SENSOR_EFFICIENCY_PUMP)
 from .helpers.helper import get_sensor_text
 
 # endregion Imports
@@ -46,14 +48,31 @@ async def async_setup_entry(
 
     device_info = hass.data[f"{DOMAIN}_DeviceInfo"]
     text_remote_maintenance = get_sensor_text(lang, 'remote_maintenance')
+    text_pump_optimization = get_sensor_text(lang, 'pump_optimization')
+    text_efficiency_pump = get_sensor_text(lang, 'efficiency_pump')
+    text_pump_heat_control = get_sensor_text(lang, 'pump_heat_control')
     entities += [
         LuxtronikSwitch(
             hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
             sensor_key=LUX_SENSOR_REMOTE_MAINTENANCE, unique_id='remote_maintenance',
             name=f"{text_remote_maintenance}", icon='mdi:remote-desktop',
-            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG)
+            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
+        LuxtronikSwitch(
+            hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
+            sensor_key=LUX_SENSOR_PUMP_OPTIMIZATION, unique_id='pump_optimization',
+            name=f"{text_pump_optimization}", icon='mdi:tune',
+            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
+        LuxtronikSwitch(
+            hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
+            sensor_key=LUX_SENSOR_EFFICIENCY_PUMP, unique_id='efficiency_pump',
+            name=f"{text_efficiency_pump}", icon='mdi:leaf-circle',
+            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
+        LuxtronikSwitch(
+            hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
+            sensor_key='parameters.ID_Einst_P155_PumpHeatCtrl', unique_id='pump_heat_control',
+            name=text_pump_heat_control, icon='mdi:pump',
+            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
     ]
-
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if deviceInfoHeating is not None:

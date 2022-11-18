@@ -196,10 +196,15 @@ LUX_SENSOR_STATUS1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
 LUX_SENSOR_STATUS3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
 
 LUX_SENSOR_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
+LUX_SENSOR_PUMP_OPTIMIZATION: Final = "parameters.ID_Einst_Popt_akt"
+LUX_SENSOR_EFFICIENCY_PUMP: Final = "parameters.ID_Einst_Effizienzpumpe_akt"
 
 LUX_SENSOR_OUTDOOR_TEMPERATURE:              Final = "calculations.ID_WEB_Temperatur_TA"
 
-LUX_SENSOR_HEATING_TARGET_CORRECTION:        Final = "parameters.ID_Einst_WK_akt"
+LUX_SENSOR_PUMP_OPTIMIZATION_TIME:           Final = "parameters.ID_Einst_Popt_Nachlauf_akt"
+LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED:   Final = "parameters.ID_Einst_P155_PumpHeat_Max"
+LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION:   Final = "parameters.ID_Einst_WK_akt"
+LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR:  Final = "parameters.ID_RBE_Einflussfaktor_RT_akt"
 LUX_SENSOR_HEATING_THRESHOLD:                Final = "parameters.ID_Einst_Heizgrenze"
 LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE:    Final = "parameters.ID_Einst_Heizgrenze_Temp"
 LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
@@ -225,6 +230,7 @@ LUX_SENSOR_MODE_DOMESTIC_WATER: Final = "parameters.ID_Ba_Bw_akt"
 LUX_SENSOR_MODE_FAN: Final = "parameters.ID_Einst_BA_Lueftung_akt"
 LUX_BINARY_SENSOR_EVU_UNLOCKED: Final = "calculations.ID_WEB_EVUin"
 LUX_BINARY_SENSOR_SOLAR_PUMP: Final = "calculations.ID_WEB_SLPout"
+LUX_BINARY_SENSOR_Circulation_Pump: Final = "calculations.ID_WEB_HUPout"
 # Future use:
 
 # LUX_SENSOR_MODE_???: Final = 'parameters.ID_Ba_Sw_akt'
