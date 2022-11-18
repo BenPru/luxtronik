@@ -21,7 +21,6 @@ from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
                     LUX_SENSOR_COOLING_THRESHOLD,
                     LUX_SENSOR_COOLING_START_DELAY,
                     LUX_SENSOR_COOLING_STOP_DELAY,
-                    LUX_SENSOR_COOLING_TARGET,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
 		    LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
 		    LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
@@ -34,6 +33,10 @@ from .helpers.helper import get_sensor_text
 # endregion Imports
 
 # region Constants
+
+
+
+
 # endregion Constants
 
 # region Setup
@@ -117,6 +120,20 @@ async def async_setup_entry(
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
+        # detect which MK to use as LUX_SENSOR_COOLING_TARGET
+        MK1 = luxtronik.get_value('parameters.ID_Einst_MK1Typ_akt')
+        MK2 = luxtronik.get_value('parameters.ID_Einst_MK2Typ_akt')
+        MK3 = luxtronik.get_value('parameters.ID_Einst_MK3Typ_akt')
+        if   (MK1 in [3,4])     & (MK2 not in [3,4]) & (MK3 not in [4]):
+            LUX_SENSOR_COOLING_TARGET: Final = "parameters.ID_Sollwert_KuCft1_akt"
+        elif (MK1 not in [3,4]) & (MK2     in [3,4]) & (MK3 not in [4]):
+            LUX_SENSOR_COOLING_TARGET: Final = "parameters.ID_Sollwert_KuCft2_akt"
+        elif (MK1 not in [3,4]) & (MK2 not in [3,4]) & (MK3     in [4]):
+            LUX_SENSOR_COOLING_TARGET: Final = "parameters.ID_Sollwert_KuCft3_akt"
+        else:
+            LUX_SENSOR_COOLING_TARGET = None
+        LOGGER.info(f"LUX_SENSOR_COOLING_TARGET = {LUX_SENSOR_COOLING_TARGET}") 
+
         text_cooling_threshold_temperature = get_sensor_text(
             lang, 'cooling_threshold_temperature')
         text_cooling_start_delay_hours = get_sensor_text(
@@ -134,13 +151,6 @@ async def async_setup_entry(
                             unit_of_measurement=TEMP_CELSIUS,
                             min_value=18.0, max_value=30.0, step=0.5, mode=MODE_BOX),
             LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
-                            number_key=LUX_SENSOR_COOLING_TARGET,
-                            unique_id='cooling_target_temperature',
-                            name=f"{text_cooling_target_temperature}",
-                            icon='mdi:snowflake-thermometer',
-                            unit_of_measurement=TEMP_CELSIUS,
-                            min_value=18.0, max_value=25.0, step=1.0, mode=MODE_BOX),
-            LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
                             number_key=LUX_SENSOR_COOLING_START_DELAY,
                             unique_id='cooling_start_delay_hours',
                             name=f"{text_cooling_start_delay_hours}",
@@ -155,6 +165,16 @@ async def async_setup_entry(
                             unit_of_measurement=TIME_HOURS,
                             min_value=0.0, max_value=12.0, step=0.5, mode=MODE_BOX),
         ]
+        if LUX_SENSOR_COOLING_TARGET != None:
+            entities += [
+                        LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
+                                number_key=LUX_SENSOR_COOLING_TARGET,
+                                unique_id='cooling_target_temperature',
+                                name=f"{text_cooling_target_temperature}",
+                                icon='mdi:snowflake-thermometer',
+                                unit_of_measurement=TEMP_CELSIUS,
+                                min_value=18.0, max_value=25.0, step=1.0, mode=MODE_BOX) 
+                        ]
 
     async_add_entities(entities)
 # endregion Setup
