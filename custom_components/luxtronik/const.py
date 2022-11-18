@@ -190,7 +190,6 @@ ICON_OFF = "mdi:circle-outline"
 
 
 # region Luxtronik Sensor ids
-LUX_SENSOR_DETECT_COOLING: Final = "parameters.ID_Sollwert_KuCft2_akt"
 LUX_SENSOR_STATUS:  Final = "calculations.ID_WEB_WP_BZ_akt"
 LUX_SENSOR_STATUS1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
 LUX_SENSOR_STATUS3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
@@ -213,8 +212,6 @@ LUX_SENSOR_COOLING_START_DELAY:              Final = "parameters.ID_Einst_Kuhl_Z
 LUX_SENSOR_COOLING_STOP_DELAY:               Final = "parameters.ID_Einst_Kuhl_Zeit_Aus_akt"
 LUX_SENSOR_COOLING_TARGET:                   Final = "parameters.ID_Sollwert_KuCft2_akt"
 LUX_SENSOR_MODE_COOLING:                     Final = "parameters.ID_Einst_BA_Kuehl_akt"
-# Future use:
-# LUX_SENSOR_MODE_COOLING: Final = 'parameters.ID_Einst_BA_Kuehl_akt'
 
 LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE: Final = (
     "calculations.ID_WEB_Temperatur_TBW"
