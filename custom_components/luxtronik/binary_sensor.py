@@ -205,6 +205,16 @@ async def async_setup_entry(
             icon="mdi:pump",
             device_class=DEVICE_CLASS_RUNNING,
         ),
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_HUPout',
+            unique_id="unloading_pump",
+            name=text_unloading_pump,
+            icon="mdi:pump",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
 
         # calculations.ID_WEB_ASDin Soledruck ausreichend
         # calculations.ID_WEB_HDin Hochdruck OK
@@ -219,18 +229,7 @@ async def async_setup_entry(
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if deviceInfoHeating is not None:
-        text_solar_pump = get_sensor_text(lang, "solar_pump")
         entities += [
-            LuxtronikBinarySensor(
-                hass=hass,
-                luxtronik=luxtronik,
-                deviceInfo=deviceInfo,
-                sensor_key='calculations.ID_WEB_HUPout',
-                unique_id="unloading_pump",
-                name=text_unloading_pump,
-                icon="mdi:pump",
-                device_class=DEVICE_CLASS_RUNNING,
-            ),
         ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]

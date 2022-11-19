@@ -203,7 +203,7 @@ LUX_SENSOR_OUTDOOR_TEMPERATURE:              Final = "calculations.ID_WEB_Temper
 
 LUX_SENSOR_PUMP_OPTIMIZATION_TIME:           Final = "parameters.ID_Einst_Popt_Nachlauf_akt"
 LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED:   Final = "parameters.ID_Einst_P155_PumpHeat_Max"
-LUX_SENSOR_HEATING_TEMPERATURE_CORRECTION:   Final = "parameters.ID_Einst_WK_akt"
+LUX_SENSOR_HEATING_TARGET_CORRECTION:        Final = "parameters.ID_Einst_WK_akt"
 LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR:  Final = "parameters.ID_RBE_Einflussfaktor_RT_akt"
 LUX_SENSOR_HEATING_THRESHOLD:                Final = "parameters.ID_Einst_Heizgrenze"
 LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE:    Final = "parameters.ID_Einst_Heizgrenze_Temp"
