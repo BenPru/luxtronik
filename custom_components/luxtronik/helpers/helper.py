@@ -28,7 +28,7 @@ def get_sensor_text(lang: LANGUAGES, key: str) -> str:
     """Get a sensor text."""
     global __content_locale__
     global __content_default__
-    if __content_locale__ is None and lang != LANG_DEFAULT:
+    if __content_locale__ is None and not lang is None and lang != LANG_DEFAULT:
         __content_locale__ = _load_lang_from_file(f"../translations/texts.{lang}.json")
     if __content_default__ is None:
         __content_default__ = _load_lang_from_file(

@@ -19,7 +19,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from custom_components.luxtronik.const import (ATTR_STATUS_TEXT, CONF_GROUP,
+from .const import (ATTR_STATUS_TEXT, CONF_GROUP,
                                                CONF_LANGUAGE_SENSOR_NAMES,
                                                DEFAULT_DEVICE_CLASS,
                                                DEVICE_CLASSES, DOMAIN, ICONS,
@@ -34,10 +34,9 @@ from custom_components.luxtronik.const import (ATTR_STATUS_TEXT, CONF_GROUP,
                                                LUX_STATUS_NO_REQUEST,
                                                LUX_STATUS_THERMAL_DESINFECTION,
                                                SECOUND_TO_HOUR_FACTOR, UNITS)
-from custom_components.luxtronik.helpers.helper import (get_sensor_text,
-                                                        get_sensor_value_text)
-from custom_components.luxtronik.luxtronik_device import LuxtronikDevice
-from custom_components.luxtronik.model import LuxtronikStatusExtraAttributes
+from .helpers.helper import (get_sensor_text, get_sensor_value_text)
+from .luxtronik_device import LuxtronikDevice
+from .model import LuxtronikStatusExtraAttributes
 
 # endregion Imports
 

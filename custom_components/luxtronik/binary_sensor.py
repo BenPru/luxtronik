@@ -19,7 +19,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import slugify
 
-from custom_components.luxtronik.const import (CONF_CALCULATIONS, CONF_GROUP,
+from .const import (CONF_CALCULATIONS, CONF_GROUP,
                                                CONF_INVERT_STATE,
                                                CONF_LANGUAGE_SENSOR_NAMES,
                                                CONF_PARAMETERS,
@@ -28,8 +28,8 @@ from custom_components.luxtronik.const import (CONF_CALCULATIONS, CONF_GROUP,
                                                DEVICE_CLASSES, DOMAIN, LOGGER,
                                                LUX_BINARY_SENSOR_EVU_UNLOCKED,
                                                LUX_BINARY_SENSOR_SOLAR_PUMP)
-from custom_components.luxtronik.helpers.helper import get_sensor_text
-from custom_components.luxtronik.luxtronik_device import LuxtronikDevice
+from .helpers.helper import get_sensor_text
+from .luxtronik_device import LuxtronikDevice
 
 # endregion Imports
 
