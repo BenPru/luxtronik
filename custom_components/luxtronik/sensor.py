@@ -237,15 +237,6 @@ async def async_setup_entry(
             hass,
             luxtronik,
             device_info,
-            "calculations.ID_WEB_Temperatur_TWA",
-            "heat_source_output_temperature",
-            f"{text_heat_source_output}",
-            entity_category=None,
-        ),
-        LuxtronikSensor(
-            hass,
-            luxtronik,
-            device_info,
             "calculations.ID_WEB_Temperatur_TWE",
             "heat_source_input_temperature",
             f"{text_heat_source_input}",
@@ -308,17 +299,6 @@ async def async_setup_entry(
             state_class=STATE_CLASS_TOTAL_INCREASING,
             unit_of_measurement=ENERGY_KILO_WATT_HOUR,
             entity_category=EntityCategory.DIAGNOSTIC,
-        ),
-        LuxtronikSensor(
-            hass,
-            luxtronik,
-            device_info,
-            "calculations.ID_WEB_Freq_VD",
-            "pump frequency",
-            f"{text_pump} Frequency",
-            entity_category=None,
-            icon="mdi:sine-wave",
-            unit_of_measurement='Hz'
         ),
         LuxtronikSensor(
             hass,
@@ -397,6 +377,30 @@ async def async_setup_entry(
             unit_of_measurement=UnitOfPressure.BAR,
         ),
     ]
+
+    if device_info.model != 'LD7':
+        entities += [
+          LuxtronikSensor(
+                      hass,
+                      luxtronik,
+                      device_info,
+                      "calculations.ID_WEB_Freq_VD",
+                      "pump frequency",
+                      f"{text_pump} Frequency",
+                      entity_category=None,
+                      icon="mdi:sine-wave",
+                      unit_of_measurement='Hz'
+                  ),
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info,
+                "calculations.ID_WEB_Temperatur_TWA",
+                "heat_source_output_temperature",
+                f"{text_heat_source_output}",
+                entity_category=None,
+            ),
+        ]
 
     device_info_heating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if device_info_heating is not None:
