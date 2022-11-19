@@ -378,7 +378,7 @@ async def async_setup_entry(
         ),
     ]
 
-    if device_info.model != 'LD7':
+    if device_info.get('model') != 'LD7':
         entities += [
           LuxtronikSensor(
                       hass,
