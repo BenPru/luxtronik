@@ -36,10 +36,6 @@ from .helpers.helper import get_sensor_text
 # endregion Imports
 
 # region Constants
-
-
-
-
 # endregion Constants
 
 # region Setup
@@ -85,19 +81,14 @@ async def async_setup_entry(
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if deviceInfoHeating is not None:
-        text_heating_room_temperature_impact_factor = get_sensor_text(lang, 'heating_room_temperature_impact_factor')
         text_heating_threshold = get_sensor_text(lang, 'heating_threshold')
         text_correction = get_sensor_text(lang, 'correction')
         text_min_flow_out_temperature = get_sensor_text(lang, 'min_flow_out_temperature')
         text_heating_circuit_curve1_temperature = get_sensor_text(lang, 'circuit_curve1_temperature')
         text_heating_circuit_curve2_temperature = get_sensor_text(lang, 'circuit_curve2_temperature')
         text_heating_circuit_curve_night_temperature = get_sensor_text(lang, 'circuit_curve_night_temperature')
+        has_room_temp = luxtronik.get_value("parameters.ID_Einst_RFVEinb_akt") != 0
         entities += [
-            LuxtronikNumber(
-                hass, luxtronik, deviceInfoHeating,
-                number_key=LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
-                unique_id='heating_room_temperature_impact_factor', name=f"{text_heating_room_temperature_impact_factor}",
-                icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=5, mode=MODE_AUTO, entity_category=EntityCategory.CONFIG),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_TARGET_CORRECTION,
@@ -130,6 +121,16 @@ async def async_setup_entry(
                 icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=-15.0, max_value=10.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG)
         ]
 
+        if has_room_temp:
+            text_heating_room_temperature_impact_factor = get_sensor_text(lang, 'heating_room_temperature_impact_factor')
+            entities += [
+                    LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key=LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+                unique_id='heating_room_temperature_impact_factor', name=f"{text_heating_room_temperature_impact_factor}",
+                icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=10, mode=MODE_BOX, entity_category=EntityCategory.CONFIG)
+            ]
+
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if deviceInfoDomesticWater is not None:
         text_target = get_sensor_text(lang, 'target')
@@ -144,20 +145,6 @@ async def async_setup_entry(
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
-        # detect which MK to use as LUX_SENSOR_COOLING_TARGET
-        MK1 = luxtronik.get_value('parameters.ID_Einst_MK1Typ_akt')
-        MK2 = luxtronik.get_value('parameters.ID_Einst_MK2Typ_akt')
-        MK3 = luxtronik.get_value('parameters.ID_Einst_MK3Typ_akt')
-        if   (MK1 in [3,4])     & (MK2 not in [3,4]) & (MK3 not in [4]):
-            LUX_SENSOR_COOLING_TARGET: Final = "parameters.ID_Sollwert_KuCft1_akt"
-        elif (MK1 not in [3,4]) & (MK2     in [3,4]) & (MK3 not in [4]):
-            LUX_SENSOR_COOLING_TARGET: Final = "parameters.ID_Sollwert_KuCft2_akt"
-        elif (MK1 not in [3,4]) & (MK2 not in [3,4]) & (MK3     in [4]):
-            LUX_SENSOR_COOLING_TARGET: Final = "parameters.ID_Sollwert_KuCft3_akt"
-        else:
-            LUX_SENSOR_COOLING_TARGET = None
-        LOGGER.info(f"LUX_SENSOR_COOLING_TARGET = {LUX_SENSOR_COOLING_TARGET}") 
-
         text_cooling_threshold_temperature = get_sensor_text(
             lang, 'cooling_threshold_temperature')
         text_cooling_start_delay_hours = get_sensor_text(
@@ -166,6 +153,7 @@ async def async_setup_entry(
             lang, 'cooling_stop_delay_hours')
         text_cooling_target_temperature = get_sensor_text(
             lang, 'cooling_target_temperature')
+            
         entities += [
             LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
                             number_key=LUX_SENSOR_COOLING_THRESHOLD,
@@ -189,16 +177,16 @@ async def async_setup_entry(
                             unit_of_measurement=TIME_HOURS,
                             min_value=0.0, max_value=12.0, step=0.5, mode=MODE_BOX),
         ]
-        if LUX_SENSOR_COOLING_TARGET != None:
-            entities += [
-                        LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
-                                number_key=LUX_SENSOR_COOLING_TARGET,
-                                unique_id='cooling_target_temperature',
-                                name=f"{text_cooling_target_temperature}",
-                                icon='mdi:snowflake-thermometer',
-                                unit_of_measurement=TEMP_CELSIUS,
-                                min_value=18.0, max_value=25.0, step=1.0, mode=MODE_BOX) 
-                        ]
+        LUX_SENSOR_COOLING_TARGET = luxtronik.detect_cooling_target_temperature_sensor()
+        entities += [
+                    LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
+                            number_key=LUX_SENSOR_COOLING_TARGET,
+                            unique_id='cooling_target_temperature',
+                            name=f"{text_cooling_target_temperature}",
+                            icon='mdi:snowflake-thermometer',
+                            unit_of_measurement=TEMP_CELSIUS,
+                            min_value=18.0, max_value=25.0, step=1.0, mode=MODE_BOX) 
+                    ] if LUX_SENSOR_COOLING_TARGET != None else []
 
     async_add_entities(entities)
 # endregion Setup
