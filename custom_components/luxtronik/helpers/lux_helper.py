@@ -1,9 +1,12 @@
 """Helper for luxtronik heatpump module."""
 import socket
 
-from ..const import LOGGER
-
-
+from ..const import (
+    LOGGER,
+    LUX_MODELS_AlphaInnotec,
+    LUX_MODELS_Novelan    
+    )
+    
 def discover():
     """Broadcast discovery for luxtronik heatpumps."""
 
@@ -52,13 +55,11 @@ def discover():
 
 def get_manufacturer_by_model(model: str) -> str:
     """Return the manufacturer."""
-    models_AlphaInnotec = ['LWP','LWV','MSW','SWC','SWP']
-    models_Novelan      = ['BW','LA','LD','LI','SI','ZLW']
 
     if model is None:
         return None
-    if model.startswith(tuple(models_Novelan)):
+    if model.startswith(tuple(LUX_MODELS_Novelan)):
         return "Novelan"
-    if model.startswith(tuple(models_AlphaInnotec)):
+    if model.startswith(tuple(LUX_MODELS_AlphaInnotec)):
         return "Alpha Innotec"
     return None
