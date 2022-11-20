@@ -34,7 +34,7 @@ def get_sensor_text(lang: LANGUAGES, key: str) -> str:
         __content_default__ = _load_lang_from_file(
             f"../translations/texts.{LANG_DEFAULT}.json"
         )
-    if lang != LANG_DEFAULT and key in __content_locale__:
+    if lang != LANG_DEFAULT and not __content_locale__ is None and key in __content_locale__:
         return __content_locale__[key]
     if key in __content_default__:
         return __content_default__[key]
