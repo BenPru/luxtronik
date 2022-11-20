@@ -233,7 +233,8 @@ async def async_setup_entry(
         ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
-    if deviceInfoDomesticWater is not None:
+    solar_present = luxtronik.detect_solar_present()
+    if (deviceInfoDomesticWater is not None) & (solar_present):
         text_solar_pump = get_sensor_text(lang, "solar_pump")
         entities += [
             LuxtronikBinarySensor(
