@@ -2,7 +2,8 @@
 # region Imports
 import threading
 import time
-
+import re
+    
 from luxtronik import Luxtronik as Lux
 from homeassistant.util import Throttle
 
@@ -12,6 +13,8 @@ from .const import (
     CONF_VISIBILITIES,
     LOGGER,
     MIN_TIME_BETWEEN_UPDATES,
+    LUX_MK_SENSORS, LuxMkTypes,
+    LUX_DETECT_SOLAR_SENSOR
 )
 from .helpers.debounce import debounce
 
@@ -66,6 +69,47 @@ class LuxtronikDevice:
         if group == CONF_VISIBILITIES:
             sensor = self._luxtronik.visibilities.get(sensor_id)
         return sensor
+
+                    
+    def detect_cooling_Mk(self):
+        """ returns list of parameters that are may show cooling is enabled """
+        coolingMk = []
+        for Mk in LUX_MK_SENSORS:
+            sensor_value = self.get_value(Mk)
+            #LOGGER.info(f"{Mk} = {sensor_value}")
+            if sensor_value in [LuxMkTypes.cooling.value,
+                                LuxMkTypes.heating_cooling.value]:
+                coolingMk = coolingMk + [Mk]
+        
+        LOGGER.info(f"CoolingMk = {coolingMk}")        
+        return coolingMk
+        
+    def detect_solar_present(self):
+        sensor_value = self.get_value(LUX_DETECT_SOLAR_SENSOR)
+        SolarPresent = (sensor_value > 0.01)
+        LOGGER.info(f"SolarPresent = {SolarPresent}") 
+        return SolarPresent
+
+        
+    def detect_cooling_present(self):  
+        """ returns True if Cooling is present """
+        CoolingPresent = (len(self.detect_cooling_Mk()) > 0)
+        LOGGER.info(f"CoolingPresent = {CoolingPresent}") 
+        return CoolingPresent
+        
+
+    def detect_cooling_target_temperature_sensor(self):
+        """ if only 1 MK parameter related to cooling is returned
+            return the corresponding colloing_target_temperature sensor"""
+        Mk_param = self.detect_cooling_Mk()
+        if len(Mk_param) == 1:
+            Mk = re.findall('[0-9]+', Mk_param[0])[0]
+            cooling_target_temperature_sensor = f"parameters.ID_Sollwert_KuCft{Mk}_akt"
+        else:
+            cooling_target_temperature_sensor = None
+        LOGGER.info(f"cooling_target_temperature_sensor = '{cooling_target_temperature_sensor}' ") 
+        return cooling_target_temperature_sensor
+
 
     def write(
         self, parameter, value, use_debounce=True, update_immediately_after_write=False
