@@ -125,6 +125,7 @@ class LuxMode(Enum):
     holidays: Final = "Holidays"
 
 
+    
 # endregion Lux Modes
 
 
@@ -238,6 +239,21 @@ LUX_SENSORS_MODE: Final[list[str]] = [
     LUX_SENSOR_MODE_FAN,
 ]
 # endregion Luxtronik Sensor ids
+
+LUX_DETECT_SOLAR_SENSOR: Final = "parameters.ID_BSTD_Solar" 
+LUX_MK_SENSORS = ['parameters.ID_Einst_MK1Typ_akt',
+                'parameters.ID_Einst_MK2Typ_akt',
+                'parameters.ID_Einst_MK3Typ_akt']
+                
+class LuxMkTypes(Enum):
+    off: Final = 0
+    discharge: Final = 1
+    load: Final = 2
+    cooling: Final = 3
+    heating_cooling: Final = 4
+    
+LUX_MODELS_AlphaInnotec = ['LWP','LWV','MSW','SWC','SWP']
+LUX_MODELS_Novelan      = ['BW','LA','LD','LI','SI','ZLW']
 
 GLOBAL_STATUS_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
     LuxtronikSensorEntityDescription(
@@ -532,3 +548,4 @@ UNITS: Final = {
     CONF_FLOW: "l/h",
 }
 # endregion Legacy consts
+
