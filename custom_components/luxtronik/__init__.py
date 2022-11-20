@@ -31,8 +31,6 @@ from .luxtronik_device import LuxtronikDevice
 
 # region Constants
 LuxLogger.setLevel(level="WARNING")
-
-
 # endregion Constants
 
 
@@ -97,7 +95,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return setup_internal(hass, conf, conf)
 
 
-
 def setup_internal(hass, data, conf):
     """Set up the Luxtronik component."""
     host = data[CONF_HOST]
@@ -122,7 +119,7 @@ def setup_internal(hass, data, conf):
 
     luxtronik = LuxtronikDevice(host, port, safe, lock_timeout)
     luxtronik.read()
-    
+
     hass.data[DOMAIN] = luxtronik
     hass.data[f"{DOMAIN}_conf"] = conf
     
@@ -147,14 +144,6 @@ def setup_internal(hass, data, conf):
         manufacturer=get_manufacturer_by_model(model),
         model=model,
     )
-    
-    MK1 = luxtronik.get_value('parameters.ID_Einst_MK1Typ_akt')
-    MK2 = luxtronik.get_value('parameters.ID_Einst_MK2Typ_akt')
-    MK3 = luxtronik.get_value('parameters.ID_Einst_MK3Typ_akt')
-    CoolingPresent = ((MK1 in [3,4]) | (MK2 in [3,4]) | (MK3 in [4]))
-    LOGGER.info(f"Mk1-2-3 = {MK1},{MK2},{MK3}")
-    LOGGER.info(f"CoolingPresent = {CoolingPresent}") 
-    
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = (
         DeviceInfo(
             identifiers={(DOMAIN, "Cooling", serial_number)},
@@ -163,7 +152,7 @@ def setup_internal(hass, data, conf):
             manufacturer=get_manufacturer_by_model(model),
             model=model,
         )
-        if CoolingPresent
+        if luxtronik.detect_cooling_present()
         else None
     )
     return True
