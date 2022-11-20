@@ -3,6 +3,7 @@
   "outdoor": "Outdoor",
   "room": "Room",
   "pump": "Compressor",
+  "compressor": "Compressor",
   "heat_source_output": "To heat source",
   "heat_source_input": "From heat source",
   "time": "Time",
@@ -46,5 +47,19 @@
   "hot_gas": "Hot gas",
   "suction_compressor": "Suction compressor",
   "suction_evaporator": "Suction evaporator",
-  "compressor_heating": "Compressor heating"
+  "compressor_heating": "Compressor heating",
+  "pump_optimization": "Pump optimization",
+  "pump_optimization_time": "Pump optimization",
+  "efficiency_pump": "Efficiency pump",
+  "maximum_circulation_pump_speed": "Maximum circulation pump speed",
+  "heating_room_temperature_impact_factor": "Room temperature impact factor",
+  "overheating": "Overheating",
+  "overheating_target": "Overheating target",
+  "high_pressure": "High pressure",
+  "low_pressure": "Low pressure",
+  "circulating_pump_domestic_water": "Circulating pump domestic water",
+  "circulating_pump_heating": "Circulating pump heating",
+  "circulating_pump_water": "Circulating pump water",
+  "unloading_pump": "Unloading pump",
+  "pump_heat_control": "Pump heat control"
 }

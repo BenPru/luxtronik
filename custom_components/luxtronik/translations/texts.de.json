@@ -1,8 +1,9 @@
 {
   "average": "Mittel",
   "outdoor": "Aussen",
-  "room": "Zimmer",
+  "room": "Raum",
   "pump": "Verdichter",
+  "compressor": "Verdichter",
   "heat_source_output": "Heizquelle Ausgang",
   "heat_source_input": "Heizquelle Eingang",
   "time": "Zeit",
@@ -46,5 +47,19 @@
   "hot_gas": "Heissgas",
   "suction_compressor": "Ansaug Verdichter",
   "suction_evaporator": "Ansaug Verdampfer",
-  "compressor_heating": "Verdichter Heizung"
+  "compressor_heating": "Verdichter Heizung",
+  "pump_optimization": "Pumpenoptimierung",
+  "pump_optimization_time": "Pumpenoptimierung",
+  "efficiency_pump": "Effizienzpumpe",
+  "maximum_circulation_pump_speed": "Maximale Pumpen Zirkulations Geschwindigkeit",
+  "heating_room_temperature_impact_factor": "Raum Temperatur Einflußfaktor",
+  "overheating": "Überhitzung",
+  "overheating_target": "Überhitzung Soll",
+  "high_pressure": "Hochdruck",
+  "low_pressure": "Niederdruck",
+  "circulating_pump_domestic_water": "Zirkulationspumpe Brauchwasser",
+  "circulating_pump_heating": "Zusatzumwälzpumpe Heizung",
+  "circulating_pump_water": "Warmwasserumwälzpumpe",
+  "unloading_pump": "Entladepumpe Heizkreis",
+  "pump_heat_control": "Pumpenheizkontrolle"
 }
