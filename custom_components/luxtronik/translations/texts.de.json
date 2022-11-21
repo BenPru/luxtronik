@@ -60,6 +60,6 @@
   "circulating_pump_domestic_water": "Zirkulationspumpe Brauchwasser",
   "circulating_pump_heating": "Zusatzumwälzpumpe Heizung",
   "circulating_pump_water": "Warmwasserumwälzpumpe",
-  "unloading_pump": "Entladepumpe Heizkreis",
+  "heating_main_circulation_pump": "Heizung Umwälzpumpe",
   "pump_heat_control": "Pumpenheizkontrolle"
 }
