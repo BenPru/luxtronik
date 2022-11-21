@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS, DEVICE_CLASS_ENERGY,
                                  DEVICE_CLASS_TEMPERATURE,
-                                 ENERGY_KILO_WATT_HOUR, ENTITY_CATEGORIES,
+                                 ENERGY_KILO_WATT_HOUR, ENTITY_CATEGORIES, POWER_WATT,
                                  EVENT_HOMEASSISTANT_STOP, STATE_UNAVAILABLE,
                                  TEMP_CELSIUS, TEMP_KELVIN, TIME_HOURS,
                                  TIME_SECONDS, UnitOfPressure)
@@ -147,6 +147,7 @@ async def async_setup_entry(
     text_compressor_impulses = get_sensor_text(lang, "compressor_impulses")
     text_operation_hours = get_sensor_text(lang, "operation_hours")
     text_heat_amount_counter = get_sensor_text(lang, "heat_amount_counter")
+    text_current_heat_output = get_sensor_text(lang, "current_heat_output")
     text_hot_gas = get_sensor_text(lang, "hot_gas")
     text_suction_compressor = get_sensor_text(lang, "suction_compressor")
     text_suction_evaporator = get_sensor_text(lang, "suction_evaporator")
@@ -298,6 +299,19 @@ async def async_setup_entry(
             device_class=DEVICE_CLASS_ENERGY,
             state_class=STATE_CLASS_TOTAL_INCREASING,
             unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+            entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            sensor_key="calculations.Heat_Output",
+            unique_id="current_heat_output",
+            name=f"{text_current_heat_output}",
+            icon="mdi:lightning-bolt-circle",
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_MEASUREMENT,
+            unit_of_measurement=POWER_WATT,
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
         LuxtronikSensor(

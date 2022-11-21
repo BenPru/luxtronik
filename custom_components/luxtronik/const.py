@@ -26,6 +26,7 @@ from homeassistant.const import (
     ELECTRIC_POTENTIAL_VOLT,
     ENERGY_KILO_WATT_HOUR,
     PERCENTAGE,
+    PWOER_WATT,
     PRESSURE_BAR,
     TEMP_CELSIUS,
     TEMP_KELVIN,
@@ -370,6 +371,17 @@ GLOBAL_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         entity_category=EntityCategory.DIAGNOSTIC,
         sensor_key="calculations.ID_WEB_WMZ_Seit",
+    ),
+        LuxtronikSensorEntityDescription(
+        key="current_heat_output",
+        # name=f"{text_heat_amount_counter}",
+        icon="mdi:lightning-bolt-circle",
+        device_class=DEVICE_CLASS_ENERGY,
+        state_class=STATE_CLASS_MEASUREMENT,
+        unit_of_measurement=POWER_WATT,
+        #native_unit_of_measurement="W",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        sensor_key="calculations.Heat_Output",
     ),
 )
 
