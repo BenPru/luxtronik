@@ -152,7 +152,7 @@ async def async_setup_entry(
     text_circulating_pump_domestic_water = get_sensor_text(lang, "circulating_pump_domestic_water")
     text_circulating_pump_heating = get_sensor_text(lang, "circulating_pump_heating")
     text_circulating_pump_water = get_sensor_text(lang, "circulating_pump_water")
-    text_unloading_pump = get_sensor_text(lang, "unloading_pump")
+    text_heating_main_circulation_pump = get_sensor_text(lang, "heating_main_circulation_pump")
 
     entities = [
         LuxtronikBinarySensor(
@@ -210,8 +210,8 @@ async def async_setup_entry(
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key='calculations.ID_WEB_HUPout',
-            unique_id="unloading_pump",
-            name=text_unloading_pump,
+            unique_id="heating_main_circulation_pump",
+            name=text_heating_main_circulation_pump,
             icon="mdi:pump",
             device_class=DEVICE_CLASS_RUNNING,
         ),
