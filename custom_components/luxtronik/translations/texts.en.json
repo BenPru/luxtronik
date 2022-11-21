@@ -58,7 +58,7 @@
   "high_pressure": "High pressure",
   "low_pressure": "Low pressure",
   "circulating_pump_domestic_water": "Circulating pump domestic water",
-  "circulating_pump_heating": "Circulating pump heating",
+  "additional_circulating_pump1": "Additional circulating pump 1",
   "circulating_pump_water": "Circulating pump water",
   "heating_main_circulation_pump": "Main circulation pump heating circuit",
   "pump_heat_control": "Pump heat control"
