@@ -301,19 +301,7 @@ async def async_setup_entry(
             unit_of_measurement=ENERGY_KILO_WATT_HOUR,
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
-        LuxtronikSensor(
-            hass,
-            luxtronik,
-            device_info,
-            sensor_key="calculations.Heat_Output",
-            unique_id="current_heat_output",
-            name=f"{text_current_heat_output}",
-            icon="mdi:lightning-bolt-circle",
-            device_class=DEVICE_CLASS_POWER,
-            state_class=STATE_CLASS_MEASUREMENT,
-            unit_of_measurement=POWER_WATT,
-            entity_category=EntityCategory.DIAGNOSTIC,
-        ),
+        
         LuxtronikSensor(
             hass,
             luxtronik,
@@ -391,6 +379,22 @@ async def async_setup_entry(
             unit_of_measurement=UnitOfPressure.BAR,
         ),
     ]
+    if luxtronik.get_value("calculations.Heat_Output") != None:
+        entities += [
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info,
+                sensor_key="calculations.Heat_Output",
+                unique_id="current_heat_output",
+                name=f"{text_current_heat_output}",
+                icon="mdi:lightning-bolt-circle",
+                device_class=DEVICE_CLASS_POWER,
+                state_class=STATE_CLASS_MEASUREMENT,
+                unit_of_measurement=POWER_WATT,
+                entity_category=EntityCategory.DIAGNOSTIC,
+            ),
+        ]
 
     if device_info.get('model') != 'LD7':
         entities += [
