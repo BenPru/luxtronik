@@ -375,7 +375,7 @@ GLOBAL_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
     ),
         LuxtronikSensorEntityDescription(
         key="current_heat_output",
-        # name=f"{text_heat_amount_counter}",
+        # name=f"{text_heat_output}",
         icon="mdi:lightning-bolt-circle",
         device_class=DEVICE_CLASS_POWER,
         state_class=STATE_CLASS_MEASUREMENT,
