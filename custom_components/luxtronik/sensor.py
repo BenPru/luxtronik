@@ -421,6 +421,15 @@ async def async_setup_entry(
                     "room_temperature",
                     f"{text_room}",
                     entity_category=None,
+                ),
+                LuxtronikSensor(
+                    hass,
+                    luxtronik,
+                    device_info_heating,
+                    "calculations.ID_WEB_RBE_RT_Soll",
+                    "room_target_temperature",
+                    f"{text_room} {text_target}",
+                    entity_category=None,
                 )
             ]
 
@@ -505,27 +514,9 @@ async def async_setup_entry(
         text_heat_amount_domestic_water = get_sensor_text(
             lang, "heat_amount_domestic_water"
         )
+        solar_present = luxtronik.detect_solar_present()
+
         entities += [
-            LuxtronikSensor(
-                hass,
-                luxtronik,
-                device_info_domestic_water,
-                "calculations.ID_WEB_Temperatur_TSK",
-                "solar_collector_temperature",
-                f"Solar {text_collector}",
-                "mdi:solar-panel-large",
-                entity_category=None,
-            ),
-            LuxtronikSensor(
-                hass,
-                luxtronik,
-                device_info_domestic_water,
-                "calculations.ID_WEB_Temperatur_TSS",
-                "solar_buffer_temperature",
-                f"Solar {text_buffer}",
-                "mdi:propane-tank-outline",
-                entity_category=None,
-            ),
             LuxtronikSensor(
                 hass,
                 luxtronik,
@@ -554,20 +545,6 @@ async def async_setup_entry(
                 hass,
                 luxtronik,
                 device_info_domestic_water,
-                sensor_key="parameters.ID_BSTD_Solar",
-                unique_id="operation_hours_solar",
-                name=f"{text_operation_hours_solar}",
-                icon="mdi:timer-sand",
-                device_class=None,
-                state_class=STATE_CLASS_TOTAL_INCREASING,
-                unit_of_measurement=TIME_HOURS,
-                entity_category=EntityCategory.DIAGNOSTIC,
-                factor=SECOUND_TO_HOUR_FACTOR,
-            ),
-            LuxtronikSensor(
-                hass,
-                luxtronik,
-                device_info_domestic_water,
                 sensor_key="calculations.ID_WEB_WMZ_Brauchwasser",
                 unique_id="heat_amount_domestic_water",
                 name=f"{text_heat_amount_domestic_water}",
@@ -578,6 +555,44 @@ async def async_setup_entry(
                 entity_category=EntityCategory.DIAGNOSTIC,
             ),
         ]
+        if solar_present:
+            entities += [
+                LuxtronikSensor(
+                    hass,
+                    luxtronik,
+                    device_info_domestic_water,
+                    "calculations.ID_WEB_Temperatur_TSK",
+                    "solar_collector_temperature",
+                    f"Solar {text_collector}",
+                    "mdi:solar-panel-large",
+                    entity_category=None,
+                ),
+                LuxtronikSensor(
+                    hass,
+                    luxtronik,
+                    device_info_domestic_water,
+                    "calculations.ID_WEB_Temperatur_TSS",
+                    "solar_buffer_temperature",
+                    f"Solar {text_buffer}",
+                    "mdi:propane-tank-outline",
+                    entity_category=None,
+                ),
+                LuxtronikSensor(
+                    hass,
+                    luxtronik,
+                    device_info_domestic_water,
+                    sensor_key="parameters.ID_BSTD_Solar",
+                    unique_id="operation_hours_solar",
+                    name=f"{text_operation_hours_solar}",
+                    icon="mdi:timer-sand",
+                    device_class=None,
+                    state_class=STATE_CLASS_TOTAL_INCREASING,
+                    unit_of_measurement=TIME_HOURS,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    factor=SECOUND_TO_HOUR_FACTOR,
+                ),
+
+            ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:

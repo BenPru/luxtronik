@@ -125,6 +125,7 @@ class LuxMode(Enum):
     holidays: Final = "Holidays"
 
 
+    
 # endregion Lux Modes
 
 
@@ -190,7 +191,6 @@ ICON_OFF = "mdi:circle-outline"
 
 
 # region Luxtronik Sensor ids
-LUX_SENSOR_DETECT_COOLING: Final = "calculations.ID_WEB_FreigabKuehl"
 LUX_SENSOR_STATUS:  Final = "calculations.ID_WEB_WP_BZ_akt"
 LUX_SENSOR_STATUS1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
 LUX_SENSOR_STATUS3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
@@ -218,8 +218,6 @@ LUX_SENSOR_COOLING_START_DELAY:              Final = "parameters.ID_Einst_Kuhl_Z
 LUX_SENSOR_COOLING_STOP_DELAY:               Final = "parameters.ID_Einst_Kuhl_Zeit_Aus_akt"
 LUX_SENSOR_COOLING_TARGET:                   Final = "parameters.ID_Sollwert_KuCft2_akt"
 LUX_SENSOR_MODE_COOLING:                     Final = "parameters.ID_Einst_BA_Kuehl_akt"
-# Future use:
-# LUX_SENSOR_MODE_COOLING: Final = 'parameters.ID_Einst_BA_Kuehl_akt'
 
 LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE: Final = (
     "calculations.ID_WEB_Temperatur_TBW"
@@ -241,6 +239,21 @@ LUX_SENSORS_MODE: Final[list[str]] = [
     LUX_SENSOR_MODE_FAN,
 ]
 # endregion Luxtronik Sensor ids
+
+LUX_DETECT_SOLAR_SENSOR: Final = "parameters.ID_BSTD_Solar" 
+LUX_MK_SENSORS = ['parameters.ID_Einst_MK1Typ_akt',
+                'parameters.ID_Einst_MK2Typ_akt',
+                'parameters.ID_Einst_MK3Typ_akt']
+                
+class LuxMkTypes(Enum):
+    off: Final = 0
+    discharge: Final = 1
+    load: Final = 2
+    cooling: Final = 3
+    heating_cooling: Final = 4
+    
+LUX_MODELS_AlphaInnotec = ['LWP','LWV','MSW','SWC','SWP']
+LUX_MODELS_Novelan      = ['BW','LA','LD','LI','SI','ZLW']
 
 GLOBAL_STATUS_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
     LuxtronikSensorEntityDescription(
@@ -535,3 +548,4 @@ UNITS: Final = {
     CONF_FLOW: "l/h",
 }
 # endregion Legacy consts
+
