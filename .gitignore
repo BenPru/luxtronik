@@ -129,3 +129,10 @@ dmypy.json
 .pyre/
 
 *.bak
+
+
+#VSCode
+.vscode
+
+#Mac
+.DS_Store
