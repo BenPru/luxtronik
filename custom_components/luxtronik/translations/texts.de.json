@@ -58,7 +58,7 @@
   "high_pressure": "Hochdruck",
   "low_pressure": "Niederdruck",
   "circulating_pump_domestic_water": "Zirkulationspumpe Brauchwasser",
-  "circulating_pump_heating": "Zusatzumwälzpumpe Heizung",
+  "additional_circulating_pump1": "Zusätzliche Umwälzpumpe 1",
   "circulating_pump_water": "Warmwasserumwälzpumpe",
   "heating_main_circulation_pump": "Heizung Umwälzpumpe",
   "pump_heat_control": "Pumpenheizkontrolle"
