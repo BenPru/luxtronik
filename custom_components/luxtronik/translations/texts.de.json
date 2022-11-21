@@ -61,5 +61,6 @@
   "additional_circulating_pump1": "Zusätzliche Umwälzpumpe 1",
   "circulating_pump_water": "Warmwasserumwälzpumpe",
   "heating_main_circulation_pump": "Heizung Umwälzpumpe",
-  "pump_heat_control": "Pumpenheizkontrolle"
+  "pump_heat_control": "Pumpenheizkontrolle",
+  "fan_brine_or_solar_heat_source_pump": "Ventilator, Brunnen- oder Soleumwälzpumpe"
 }
