@@ -150,7 +150,7 @@ async def async_setup_entry(
     text_evu_unlocked = get_sensor_text(lang, "evu_unlocked")
     text_compressor = get_sensor_text(lang, "compressor")
     text_circulating_pump_domestic_water = get_sensor_text(lang, "circulating_pump_domestic_water")
-    text_circulating_pump_heating = get_sensor_text(lang, "circulating_pump_heating")
+    text_additional_circulating_pump1 = get_sensor_text(lang, "additional_circulating_pump1")
     text_circulating_pump_water = get_sensor_text(lang, "circulating_pump_water")
     text_heating_main_circulation_pump = get_sensor_text(lang, "heating_main_circulation_pump")
 
@@ -190,8 +190,8 @@ async def async_setup_entry(
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key='calculations.ID_WEB_ZUPout',
-            unique_id="circulating_pump_heating",
-            name=text_circulating_pump_heating,
+            unique_id="additional_circulating_pump1",
+            name=text_additional_circulating_pump1,
             icon="mdi:pump",
             device_class=DEVICE_CLASS_RUNNING,
         ),
