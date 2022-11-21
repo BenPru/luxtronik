@@ -153,6 +153,7 @@ async def async_setup_entry(
     text_additional_circulating_pump1 = get_sensor_text(lang, "additional_circulating_pump1")
     text_circulating_pump_water = get_sensor_text(lang, "circulating_pump_water")
     text_heating_main_circulation_pump = get_sensor_text(lang, "heating_main_circulation_pump")
+    text_fan_brine_or_solar_heat_source_pump = get_sensor_text(lang, "fan_brine_or_solar_heat_source_pump")
 
     entities = [
         LuxtronikBinarySensor(
@@ -214,8 +215,17 @@ async def async_setup_entry(
             name=text_heating_main_circulation_pump,
             icon="mdi:pump",
             device_class=DEVICE_CLASS_RUNNING,
+        ),        
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_VBOout',
+            unique_id="fan_brine_or_solar_heat_source_pump",
+            name=text_fan_brine_or_solar_heat_source_pump,
+            icon="mdi:pump",
+            device_class=DEVICE_CLASS_RUNNING,
         ),
-
         # calculations.ID_WEB_ASDin Soledruck ausreichend
         # calculations.ID_WEB_HDin Hochdruck OK
         # calculations.ID_WEB_MOTin Motorschutz OK
@@ -224,7 +234,6 @@ async def async_setup_entry(
         # calculations.ID_WEB_MZ1out Mischer 1 zu
         # calculations.ID_WEB_MA2out Mischer 2 auf
         # calculations.ID_WEB_MZ2out Mischer 2 zu
-        # calculations.ID_WEB_VBOout Brunnenwasserpumpe (true)
     ]
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
