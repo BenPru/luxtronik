@@ -61,5 +61,6 @@
   "additional_circulating_pump1": "Additional circulating pump 1",
   "circulating_pump_water": "Circulating pump water",
   "heating_main_circulation_pump": "Main circulation pump heating circuit",
-  "pump_heat_control": "Pump heat control"
+  "pump_heat_control": "Pump heat control",
+  "fan_brine_or_solar_heat_source_pump": "Fan, brine pump or solar heat source pump"
 }
