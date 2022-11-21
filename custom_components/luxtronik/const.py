@@ -26,7 +26,7 @@ from homeassistant.const import (
     ELECTRIC_POTENTIAL_VOLT,
     ENERGY_KILO_WATT_HOUR,
     PERCENTAGE,
-    PWOER_WATT,
+    POWER_WATT,
     PRESSURE_BAR,
     TEMP_CELSIUS,
     TEMP_KELVIN,
