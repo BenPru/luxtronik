@@ -32,6 +32,7 @@
   "operation_hours_solar": "Operation hours solar",
   "operation_hours_cooling": "Operation hours cooling",
   "heat_amount_counter": "Heat amount counter",
+  "current_heat_output": "Current heat output",
   "heat_amount_heating": "Heat amount heating",
   "heat_amount_domestic_water": "Heat amount domestic water",
   "approval_cooling": "Approval cooling",

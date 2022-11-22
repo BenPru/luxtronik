@@ -33,6 +33,7 @@
   "operation_hours_cooling": "Betriebsstunden K\u00fchlung",
   "heat_amount_counter": "W\u00e4rmemenge Z\u00e4hler",
   "heat_amount_heating": "W\u00e4rmemenge Heizung",
+  "current_heat_output": "Leistung Ist",
   "heat_amount_domestic_water": "W\u00e4rmemenge Brauchwasser",
   "approval_cooling": "K\u00fchlung Freigabe",
   "remote_maintenance": "Fernwartung",
