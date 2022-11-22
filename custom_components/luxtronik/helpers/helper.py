@@ -48,14 +48,16 @@ def get_sensor_value_text(
     """Get a sensor value text."""
     global __content_sensor_locale__
     global __content_sensor_default__
-    if __content_sensor_locale__ is None and lang != LANG_DEFAULT:
-        __content_sensor_locale__ = _load_lang_from_file(
-            f"../translations/{platform}.{lang}.json", log_warning=False
-        )
     if __content_sensor_default__ is None:
         __content_sensor_default__ = _load_lang_from_file(
             f"../translations/{platform}.{LANG_DEFAULT}.json", log_warning=False
         )
+    if __content_sensor_locale__ is None and lang != LANG_DEFAULT:
+        __content_sensor_locale__ = _load_lang_from_file(
+            f"../translations/{platform}.{lang}.json", log_warning=False
+        )
+    else:
+        lang = LANG_DEFAULT
     content = (
         __content_sensor_default__
         if lang == LANG_DEFAULT
