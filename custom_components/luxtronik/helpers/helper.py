@@ -50,7 +50,7 @@ def get_sensor_value_text(
     global __content_sensor_default__
     if __content_sensor_default__ is None:
         __content_sensor_default__ = _load_lang_from_file(
-            f"../translations/{platform}.{LANG_DEFAULT}.json", log_warning=False
+            f"../translations/{platform}.{LANG_DEFAULT}.json", log_warning=True
         )
     if __content_sensor_locale__ is None and lang != LANG_DEFAULT:
         __content_sensor_locale__ = _load_lang_from_file(
