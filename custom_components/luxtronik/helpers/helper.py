@@ -71,6 +71,6 @@ def get_sensor_value_text(
         "get_sensor_value_text key %s / value %s not found in %s",
         key,
         value,
-        __content_sensor_default__,
+        content,
     )
     return key.replace("_", " ").title()
