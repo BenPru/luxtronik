@@ -379,7 +379,7 @@ async def async_setup_entry(
             unit_of_measurement=UnitOfPressure.BAR,
         ),
     ]
-    if luxtronik.get_value("calculations.Heat_Output") != None:
+    if luxtronik.get_value("calculations.Heat_Output") is not None:
         entities += [
             LuxtronikSensor(
                 hass,
