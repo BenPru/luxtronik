@@ -2,14 +2,13 @@
 # region Imports
 from typing import Any, Literal
 
-from homeassistant.components.number import NumberEntity
-from homeassistant.components.number.const import MODE_AUTO, MODE_BOX
+from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (DEVICE_CLASS_TEMPERATURE, ENTITY_CATEGORIES,
-                                 TEMP_CELSIUS,
-                                 TIME_HOURS, TIME_MINUTES, PERCENTAGE)
+                                 PERCENTAGE, TEMP_CELSIUS, TIME_HOURS,
+                                 TIME_MINUTES)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -71,12 +70,12 @@ async def async_setup_entry(
             hass, luxtronik, deviceInfo,
             number_key=LUX_SENSOR_PUMP_OPTIMIZATION_TIME,
             unique_id='pump_optimization_time', name=f"{text_pump_optimization_time}",
-            icon='mdi:timer-settings', unit_of_measurement=TIME_MINUTES, min_value=5, max_value=180, step=5, mode=MODE_AUTO, entity_category=EntityCategory.CONFIG),
+            icon='mdi:timer-settings', unit_of_measurement=TIME_MINUTES, min_value=5, max_value=180, step=5, mode=NumberMode.AUTO, entity_category=EntityCategory.CONFIG),
         LuxtronikNumber(
             hass, luxtronik, deviceInfo,
             number_key=LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED,
             unique_id='maximum_circulation_pump_speed', name=f"{text_maximum_circulation_pump_speed}",
-            icon='mdi:speedometer', unit_of_measurement=PERCENTAGE, min_value=0, max_value=100, step=10, mode=MODE_AUTO, entity_category=EntityCategory.CONFIG)
+            icon='mdi:speedometer', unit_of_measurement=PERCENTAGE, min_value=0, max_value=100, step=10, mode=NumberMode.AUTO, entity_category=EntityCategory.CONFIG)
     ]
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
@@ -93,32 +92,32 @@ async def async_setup_entry(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_TARGET_CORRECTION,
                 unique_id='heating_target_correction', name=f"{text_correction}",
-                icon='mdi:plus-minus-variant', unit_of_measurement=TEMP_CELSIUS, min_value=-5.0, max_value=5.0, step=0.5, mode=MODE_BOX, entity_category=None),
+                icon='mdi:plus-minus-variant', unit_of_measurement=TEMP_CELSIUS, min_value=-2.0, max_value=2.0, step=0.1, mode=NumberMode.SLIDER, entity_category=None),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE,
                 unique_id='heating_threshold_temperature', name=f"{text_heating_threshold}",
-                icon='mdi:download-outline', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=12.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG),
+                icon='mdi:download-outline', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=12.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
                 unique_id='heating_min_flow_out_temperature', name=f"{text_min_flow_out_temperature}",
-                icon='mdi:waves-arrow-left', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=30.0, step=0.5, factor=0.1, mode=MODE_BOX, entity_category=EntityCategory.CONFIG),
+                icon='mdi:waves-arrow-left', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=30.0, step=0.5, factor=0.1, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
                 unique_id='heating_circuit_curve1_temperature', name=f"{text_heating_circuit_curve1_temperature}",
-                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=20.0, max_value=70.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG),
+                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=20.0, max_value=70.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
                 unique_id='heating_circuit_curve2_temperature', name=f"{text_heating_circuit_curve2_temperature}",
-                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=35.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG),
+                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=35.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
                 unique_id='heating_circuit_curve_night_temperature', name=f"{text_heating_circuit_curve_night_temperature}",
-                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=-15.0, max_value=10.0, step=0.5, mode=MODE_BOX, entity_category=EntityCategory.CONFIG)
+                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=-15.0, max_value=10.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG)
         ]
 
         if has_room_temp:
@@ -128,7 +127,7 @@ async def async_setup_entry(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
                 unique_id='heating_room_temperature_impact_factor', name=f"{text_heating_room_temperature_impact_factor}",
-                icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=10, mode=MODE_BOX, entity_category=EntityCategory.CONFIG)
+                icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=10, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG)
             ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
@@ -140,7 +139,7 @@ async def async_setup_entry(
                 hass, luxtronik, deviceInfoDomesticWater,
                 number_key=LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                 unique_id='domestic_water_target_temperature', name=f"{text_domestic_water} {text_target}",
-                icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=1.0, mode=MODE_BOX)
+                icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=1.0, mode=NumberMode.BOX)
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
@@ -161,21 +160,21 @@ async def async_setup_entry(
                             name=f"{text_cooling_threshold_temperature}",
                             icon='mdi:sun-thermometer',
                             unit_of_measurement=TEMP_CELSIUS,
-                            min_value=18.0, max_value=30.0, step=0.5, mode=MODE_BOX),
+                            min_value=18.0, max_value=30.0, step=0.5, mode=NumberMode.BOX),
             LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
                             number_key=LUX_SENSOR_COOLING_START_DELAY,
                             unique_id='cooling_start_delay_hours',
                             name=f"{text_cooling_start_delay_hours}",
                             icon='mdi:clock-start',
                             unit_of_measurement=TIME_HOURS,
-                            min_value=0.0, max_value=12.0, step=0.5, mode=MODE_BOX),
+                            min_value=0.0, max_value=12.0, step=0.5, mode=NumberMode.BOX),
             LuxtronikNumber(hass, luxtronik, deviceInfoCooling,
                             number_key=LUX_SENSOR_COOLING_STOP_DELAY,
                             unique_id='cooling_stop_delay_hours',
                             name=f"{text_cooling_stop_delay_hours}",
                             icon='mdi:clock-end',
                             unit_of_measurement=TIME_HOURS,
-                            min_value=0.0, max_value=12.0, step=0.5, mode=MODE_BOX),
+                            min_value=0.0, max_value=12.0, step=0.5, mode=NumberMode.BOX),
         ]
         LUX_SENSOR_COOLING_TARGET = luxtronik.detect_cooling_target_temperature_sensor()
         entities += [
@@ -185,7 +184,7 @@ async def async_setup_entry(
                             name=f"{text_cooling_target_temperature}",
                             icon='mdi:snowflake-thermometer',
                             unit_of_measurement=TEMP_CELSIUS,
-                            min_value=18.0, max_value=25.0, step=1.0, mode=MODE_BOX) 
+                            min_value=18.0, max_value=25.0, step=1.0, mode=NumberMode.BOX) 
                     ] if LUX_SENSOR_COOLING_TARGET != None else []
 
     async_add_entities(entities)
@@ -211,7 +210,7 @@ class LuxtronikNumber(NumberEntity, RestoreEntity):
         min_value: float = None,  # | None = None,
         max_value: float = None,  # | None = None,
         step: float = None,  # | None = None,
-        mode: Literal["auto", "box", "slider"] = MODE_AUTO,
+        mode: Literal["auto", "box", "slider"] = NumberMode.AUTO,
         entity_category: ENTITY_CATEGORIES = None,
         factor: float = 1.0,
     ) -> None:
