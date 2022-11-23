@@ -153,6 +153,8 @@ async def async_setup_entry(
     text_circulating_pump_heating = get_sensor_text(lang, "circulating_pump_heating")
     text_circulating_pump_water = get_sensor_text(lang, "circulating_pump_water")
     text_unloading_pump = get_sensor_text(lang, "unloading_pump")
+    text_pump_flow = get_sensor_text(lang, "pump_flow")
+    text_compressor_heater = get_sensor_text(lang, "compressor_heater")
 
     entities = [
         LuxtronikBinarySensor(
@@ -172,7 +174,7 @@ async def async_setup_entry(
             sensor_key='calculations.ID_WEB_VD1out',
             unique_id="compressor",
             name=text_compressor,
-            icon="mdi:heat-pump",
+            icon="mdi:arrow-collapse-all",
             device_class=DEVICE_CLASS_RUNNING,
         ),
         LuxtronikBinarySensor(
@@ -212,9 +214,33 @@ async def async_setup_entry(
             sensor_key='calculations.ID_WEB_HUPout',
             unique_id="unloading_pump",
             name=text_unloading_pump,
+            icon="mdi:car-turbocharger",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
+        # Soleumwälzpumpe
+        # Umwälzpumpe Ventilator, Brunnen- oder Sole
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_VBOout',
+            unique_id="pump_flow",
+            name=text_pump_flow,
             icon="mdi:pump",
             device_class=DEVICE_CLASS_RUNNING,
         ),
+        LuxtronikBinarySensor(
+            hass=hass,
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_LIN_VDH_out',
+            unique_id="compressor_heater",
+            name=text_compressor_heater,
+            icon="mdi:heat-wave",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
+
+	# ID_WEB_LIN_VDH_out
 
         # calculations.ID_WEB_ASDin Soledruck ausreichend
         # calculations.ID_WEB_HDin Hochdruck OK
@@ -224,7 +250,6 @@ async def async_setup_entry(
         # calculations.ID_WEB_MZ1out Mischer 1 zu
         # calculations.ID_WEB_MA2out Mischer 2 auf
         # calculations.ID_WEB_MZ2out Mischer 2 zu
-        # calculations.ID_WEB_VBOout Brunnenwasserpumpe (true)
     ]
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]

@@ -156,6 +156,7 @@ async def async_setup_entry(
     text_overheating_target = get_sensor_text(lang, "overheating_target")
     text_high_pressure = get_sensor_text(lang, "high_pressure")
     text_low_pressure = get_sensor_text(lang, "low_pressure")
+    text_operation_hours_additional_heat_generator = get_sensor_text(lang, "operation_hours_additional_heat_generator")
     # entities: list[LuxtronikSensor] = [
     #     LuxtronikStatusSensor(hass, luxtronik, device_info, description)
     #     for description in GLOBAL_STATUS_SENSOR_TYPES
@@ -378,6 +379,20 @@ async def async_setup_entry(
             entity_category=None,
             unit_of_measurement=UnitOfPressure.BAR,
         ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            sensor_key="calculations.ID_WEB_Zaehler_BetrZeitZWE1",
+            unique_id="operation_hours_additional_heat_generator",
+            name=text_operation_hours_additional_heat_generator,
+            icon="mdi:timer-sand",
+            device_class=None,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            unit_of_measurement=TIME_HOURS,
+            entity_category=EntityCategory.DIAGNOSTIC,
+            factor=SECOUND_TO_HOUR_FACTOR,
+        ),
     ]
     if luxtronik.get_value("calculations.Heat_Output") is not None:
         entities += [
@@ -395,7 +410,25 @@ async def async_setup_entry(
                 entity_category=EntityCategory.DIAGNOSTIC,
             ),
         ]
-
+    if luxtronik.get_value("parameters.ID_Waermemenge_ZWE") > 0:
+        text_additional_heat_generator_amount_counter = get_sensor_text(lang, "additional_heat_generator_amount_counter")
+        entities += [
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info,
+                sensor_key="parameters.ID_Waermemenge_ZWE",
+                unique_id="additional_heat_generator_amount_counter",
+                name=text_additional_heat_generator_amount_counter,
+                icon="mdi:lightning-bolt-circle",
+                device_class=DEVICE_CLASS_ENERGY,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                factor=0.1
+            ),
+        ]
+        
     if device_info.get('model') != 'LD7':
         entities += [
           LuxtronikSensor(

@@ -62,5 +62,9 @@
   "circulating_pump_heating": "Circulating pump heating",
   "circulating_pump_water": "Circulating pump water",
   "unloading_pump": "Unloading pump",
-  "pump_heat_control": "Pump heat control"
+  "pump_heat_control": "Pump heat control",
+  "pump_flow": "Pump flow",
+  "compressor_heater": "Compressor heater",
+  "additional_heat_generator_amount_counter": "Heat amount second/additional heat generator",
+  "operation_hours_additional_heat_generator": "Operation hours second/additional heat generator"
 }
