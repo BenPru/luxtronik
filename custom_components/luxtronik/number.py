@@ -16,20 +16,21 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import LuxtronikDevice
-from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
-                    LUX_SENSOR_COOLING_THRESHOLD,
+from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY,
+                    CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
                     LUX_SENSOR_COOLING_START_DELAY,
                     LUX_SENSOR_COOLING_STOP_DELAY,
+                    LUX_SENSOR_COOLING_THRESHOLD,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                     LUX_SENSOR_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
                     LUX_SENSOR_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
                     LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
                     LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
-                    LUX_SENSOR_PUMP_OPTIMIZATION_TIME,
-                    LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED,
+                    LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
                     LUX_SENSOR_HEATING_TARGET_CORRECTION,
                     LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE,
-                    LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR)
+                    LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED,
+                    LUX_SENSOR_PUMP_OPTIMIZATION_TIME)
 from .helpers.helper import get_sensor_text
 
 # endregion Imports
@@ -238,6 +239,7 @@ class LuxtronikNumber(NumberEntity, RestoreEntity):
             self._attr_native_step = step
         self._attr_entity_category = entity_category
         self._factor = factor
+        self._attr_extra_state_attributes = { ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: number_key }
 
     @property
     def icon(self):  # -> str | None:

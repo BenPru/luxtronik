@@ -1,5 +1,6 @@
 """Luxtronik heatpump sensor."""
 # region Imports
+from datetime import datetime, time
 
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT,
@@ -9,17 +10,18 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS, DEVICE_CLASS_ENERGY,
                                  DEVICE_CLASS_POWER, DEVICE_CLASS_TEMPERATURE,
-                                 ENERGY_KILO_WATT_HOUR, ENTITY_CATEGORIES, POWER_WATT,
-                                 EVENT_HOMEASSISTANT_STOP, STATE_UNAVAILABLE,
-                                 TEMP_CELSIUS, TEMP_KELVIN, TIME_HOURS,
-                                 TIME_SECONDS, UnitOfPressure)
-from homeassistant.core import HomeAssistant
+                                 ENERGY_KILO_WATT_HOUR, ENTITY_CATEGORIES,
+                                 EVENT_HOMEASSISTANT_STOP, POWER_WATT,
+                                 STATE_UNAVAILABLE, TEMP_CELSIUS, TEMP_KELVIN,
+                                 TIME_HOURS, TIME_SECONDS, UnitOfPressure)
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from .const import (ATTR_STATUS_TEXT, CONF_GROUP,
+from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY, ATTR_STATUS_TEXT, CONF_GROUP,
                                                CONF_LANGUAGE_SENSOR_NAMES,
                                                DEFAULT_DEVICE_CLASS,
                                                DEVICE_CLASSES, DOMAIN, ICONS,
@@ -28,6 +30,8 @@ from .const import (ATTR_STATUS_TEXT, CONF_GROUP,
                                                LUX_SENSOR_STATUS3,
                                                LUX_STATE_ICON_MAP,
                                                LUX_STATES_ON,
+                                               LUX_STATUS_DOMESTIC_WATER,
+                                               LUX_STATUS_EVU,
                                                LUX_STATUS1_WORKAROUND,
                                                LUX_STATUS3_WORKAROUND,
                                                LUX_STATUS_HEATING,
@@ -725,6 +729,7 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         self._attr_device_info = deviceInfo
         self._attr_entity_category = entity_category
         self._factor = factor
+        self._attr_extra_state_attributes = { ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: sensor_key }
 
     @property
     def icon(self):  # -> str | None:
@@ -778,7 +783,8 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
                 (minutes, seconds) = divmod(int(value), 60)
                 hours, minutes = divmod(minutes, 60)
                 time_str = f"{hours:01.0f}:{minutes:02.0f} h"
-            self._attr_extra_state_attributes = {ATTR_STATUS_TEXT: time_str}
+            self._attr_extra_state_attributes[ATTR_STATUS_TEXT] = time_str
+            # self._attr_extra_state_attributes = {ATTR_STATUS_TEXT: time_str}
 
 
 class LuxtronikLegacySensor(LuxtronikSensor):
@@ -803,8 +809,33 @@ class LuxtronikLegacySensor(LuxtronikSensor):
     # def set_entity_id(self, x):
     #     pass
 
-class LuxtronikStatusSensor(LuxtronikSensor):
+class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
     """Luxtronik Status Sensor with extended attr."""
+
+    _last_state: str = None
+
+    _first_evu_start_time: time = None
+    _first_evu_end_time: time = None
+    _second_evu_start_time: time = None
+    _second_evu_end_time: time = None
+
+    def update(self):
+        LuxtronikSensor.update(self)
+        time_now = time(datetime.utcnow().hour, datetime.utcnow().minute)
+        if self.native_value == LUX_STATUS_EVU and self._last_state != LUX_STATUS_EVU:
+            # evu start
+            if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour:
+                self._first_evu_start_time = time_now
+            else:
+                self._second_evu_start_time = time_now
+        elif self.native_value != LUX_STATUS_EVU and self._last_state == LUX_STATUS_EVU:
+            # evu end
+            if self._first_evu_end_time is None or time_now.hour <= self._first_evu_end_time.hour:
+                self._first_evu_end_time = time_now
+            else:
+                self._second_evu_end_time = time_now
+
+        self._last_state = self.native_value
 
     def _get_sensor_value(self, sensor_name: str):
         sensor = self.hass.states.get(sensor_name)
@@ -836,11 +867,79 @@ class LuxtronikStatusSensor(LuxtronikSensor):
         lang = self.hass.data[f"{DOMAIN}_language"]
         line_1 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_1", line_1)
         line_2 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_2", line_2)
+        # TODO: Show evu end time if available
+        # if 
         return f"{line_1} {line_2} {status_time}."
+
+    def _calc_next_evu_event_minutes_text(self) -> str:
+        minutes = self._calc_next_evu_event_minutes()
+        return '' if minutes is None else str(minutes)
+
+    def _calc_next_evu_event_minutes(self) -> int:
+        evu_time = self._get_next_evu_event_time()
+        time_now = time(datetime.utcnow().hour, datetime.utcnow().minute)
+        if evu_time is None:
+            return None
+        evu_hours = (24 if evu_time < time_now else 0) + evu_time.hour
+        return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute
+
+    def _get_next_evu_event_time(self) -> time:
+        event: time = None
+        time_now = time(datetime.utcnow().hour, datetime.utcnow().minute)
+        for evu_time in [self._first_evu_start_time, self._first_evu_end_time, self._second_evu_start_time, self._second_evu_end_time]:
+            if evu_time is None:
+                continue
+            if evu_time > time_now and (event is None or evu_time < event):
+                event = evu_time
+        if event is None:
+            for evu_time in [self._first_evu_start_time, self._first_evu_end_time, self._second_evu_start_time, self._second_evu_end_time]:
+                if evu_time is None:
+                    continue
+                if event is None or evu_time < event:
+                    event = evu_time
+        return event
+
 
     @property
     def extra_state_attributes(self) -> LuxtronikStatusExtraAttributes:
         """Return the state attributes of the device."""
         return {
             ATTR_STATUS_TEXT: self._build_status_text(),
+            ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: self._sensor_key,
+            'status raw': self._luxtronik.get_value(self._sensor_key),
+            'EVU first start time': '' if self._first_evu_start_time is None else self._first_evu_start_time.strftime('%H:%M'),
+            'EVU first end time': '' if self._first_evu_end_time is None else self._first_evu_end_time.strftime('%H:%M'),
+            'EVU second start time': '' if self._second_evu_start_time is None else self._second_evu_start_time.strftime('%H:%M'),
+            'EVU second end time': '' if self._second_evu_end_time is None else self._second_evu_end_time.strftime('%H:%M'),
+            'EVU minutes until next event': self._calc_next_evu_event_minutes_text(),
         }
+
+    def _restore_value(self, value: str) -> time:
+        if value is None or not ':' in value:
+            return None
+        vals = value.split(':')
+        return time(int(vals[0]), int(vals[1]))
+
+    async def async_added_to_hass(self) -> None:
+        """Handle entity which will be added."""
+        await super().async_added_to_hass()
+        state = await self.async_get_last_state()
+        if not state:
+            return
+        self._state = state.state
+
+        # ADDED CODE HERE
+        if 'EVU first start time' in state.attributes:
+            self._first_evu_start_time = self._restore_value(state.attributes['EVU first start time'])
+            self._first_evu_end_time = self._restore_value(state.attributes['EVU first end time'])
+            self._second_evu_start_time = self._restore_value(state.attributes['EVU second start time'])
+            self._second_evu_end_time = self._restore_value(state.attributes['EVU second end time'])
+
+        DATA_UPDATED = f"{DOMAIN}_data_updated"
+        async_dispatcher_connect(
+            self.hass, DATA_UPDATED, self._schedule_immediate_update
+        )
+
+    @callback
+    def _schedule_immediate_update(self):
+        self.async_schedule_update_ha_state(True)

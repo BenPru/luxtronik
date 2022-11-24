@@ -1,6 +1,5 @@
 """Support for Luxtronik heatpump controllers."""
 # region Imports
-from typing import Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP
@@ -24,7 +23,10 @@ from .const import (
     SERVICE_WRITE_SCHEMA,
 )
 from .helpers.helper import get_sensor_text
-from .helpers.lux_helper import get_manufacturer_by_model
+from .helpers.lux_helper import (
+    get_manufacturer_by_model,
+    get_manufacturer_firmware_url_by_model
+)
 from .luxtronik_device import LuxtronikDevice
 
 # endregion Imports
@@ -128,10 +130,11 @@ def setup_internal(hass, data, conf):
     model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
     
     hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(
-        luxtronik, serial_number, text_heatpump
+        luxtronik, serial_number, text_heatpump, data[CONF_HOST]
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
         identifiers={(DOMAIN, "Domestic_Water", serial_number)},
+        configuration_url="https://www.heatpump24.com/",
         default_name=text_domestic_water,
         name=text_domestic_water,
         manufacturer=get_manufacturer_by_model(model),
@@ -139,6 +142,7 @@ def setup_internal(hass, data, conf):
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
         identifiers={(DOMAIN, "Heating", serial_number)},
+        configuration_url=get_manufacturer_firmware_url_by_model(model),
         default_name=text_heating,
         name=text_heating,
         manufacturer=get_manufacturer_by_model(model),
@@ -189,17 +193,19 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str) -> DeviceInfo:
+def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str, ip_host: str) -> DeviceInfo:
     """Build luxtronik device info."""
     model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
     device_info = DeviceInfo(
         identifiers={(DOMAIN, "Heatpump", sn)},  # type: ignore
+        configuration_url=f"http://{ip_host}/",
         name=f"{name} S/N {sn}",
         default_name=name,
         default_manufacturer="Alpha Innotec",
         manufacturer=get_manufacturer_by_model(model),
         default_model="",
         model=model,
+        suggested_area='Utility room',
         sw_version=luxtronik.get_value("calculations.ID_WEB_SoftStand"),
     )
     LOGGER.debug("build_device_info '%s'", device_info)

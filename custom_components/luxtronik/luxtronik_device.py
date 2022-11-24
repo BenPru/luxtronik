@@ -1,20 +1,21 @@
 """Luxtronik device."""
 # region Imports
+import re
 import threading
 import time
-import re
-    
-from luxtronik import Luxtronik as Lux
+
 from homeassistant.util import Throttle
+from luxtronik import Luxtronik as Lux
 
 from .const import (
     CONF_CALCULATIONS,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     LOGGER,
-    MIN_TIME_BETWEEN_UPDATES,
-    LUX_MK_SENSORS, LuxMkTypes,
     LUX_DETECT_SOLAR_SENSOR
+    LUX_MK_SENSORS,
+    LuxMkTypes,
+    MIN_TIME_BETWEEN_UPDATES,
 )
 from .helpers.debounce import debounce
 

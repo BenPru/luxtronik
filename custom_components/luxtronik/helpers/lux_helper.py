@@ -4,7 +4,8 @@ import socket
 from ..const import (
     LOGGER,
     LUX_MODELS_AlphaInnotec,
-    LUX_MODELS_Novelan    
+    LUX_MODELS_Novelan,
+    LUX_MODELS_Other    
     )
     
 def discover():
@@ -63,3 +64,18 @@ def get_manufacturer_by_model(model: str) -> str:
     if model.startswith(tuple(LUX_MODELS_AlphaInnotec)):
         return "Alpha Innotec"
     return None
+
+
+def get_manufacturer_firmware_url_by_model(model: str) -> str:
+    """Return the manufacturer firmware download url."""
+    layout_id = 0
+
+    if model is None:
+        layout_id = 0
+    elif model.startswith(tuple(LUX_MODELS_AlphaInnotec)):
+        layout_id = 1
+    elif model.startswith(tuple(LUX_MODELS_Novelan)):
+        layout_id = 2
+    elif model.startswith(tuple(LUX_MODELS_Other)):
+        layout_id = 3
+    return f"https://www.heatpump24.com/DownloadArea.php?layout={layout_id}"

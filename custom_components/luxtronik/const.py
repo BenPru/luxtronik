@@ -12,9 +12,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.sensor import (
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
-    SensorDeviceClass,
     SensorEntityDescription,
-    SensorStateClass,
 )
 from homeassistant.const import (
     CONF_HOST,
@@ -107,6 +105,7 @@ DEFAULT_TOLERANCE: Final = 0.3
 SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
 
 ATTR_STATUS_TEXT: Final = "status_text"
+ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: Final = "Luxtronik Key"
 
 
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(seconds=10)
@@ -256,6 +255,7 @@ class LuxMkTypes(Enum):
     
 LUX_MODELS_AlphaInnotec = ['LWP','LWV','MSW','SWC','SWP']
 LUX_MODELS_Novelan      = ['BW','LA','LD','LI','SI','ZLW']
+LUX_MODELS_Other        = ['CB','CI','CN','CS']
 
 GLOBAL_STATUS_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
     LuxtronikSensorEntityDescription(

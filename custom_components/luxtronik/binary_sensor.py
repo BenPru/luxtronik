@@ -19,15 +19,18 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import slugify
 
-from .const import (CONF_CALCULATIONS, CONF_GROUP,
-                                               CONF_INVERT_STATE,
-                                               CONF_LANGUAGE_SENSOR_NAMES,
-                                               CONF_PARAMETERS,
-                                               CONF_VISIBILITIES,
-                                               DEFAULT_DEVICE_CLASS,
-                                               DEVICE_CLASSES, DOMAIN, LOGGER,
-                                               LUX_BINARY_SENSOR_EVU_UNLOCKED,
-                                               LUX_BINARY_SENSOR_SOLAR_PUMP)
+from .const import (
+    ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY,
+    CONF_CALCULATIONS, CONF_GROUP,
+    CONF_INVERT_STATE,
+    CONF_LANGUAGE_SENSOR_NAMES,
+    CONF_PARAMETERS,
+    CONF_VISIBILITIES,
+    DEFAULT_DEVICE_CLASS,
+    DEVICE_CLASSES, DOMAIN, LOGGER,
+    LUX_BINARY_SENSOR_EVU_UNLOCKED,
+    LUX_BINARY_SENSOR_SOLAR_PUMP
+)
 from .helpers.helper import get_sensor_text
 from .luxtronik_device import LuxtronikDevice
 
@@ -149,10 +152,10 @@ async def async_setup_entry(
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     text_evu_unlocked = get_sensor_text(lang, "evu_unlocked")
     text_compressor = get_sensor_text(lang, "compressor")
-    text_circulating_pump_domestic_water = get_sensor_text(lang, "circulating_pump_domestic_water")
-    text_circulating_pump_heating = get_sensor_text(lang, "circulating_pump_heating")
-    text_circulating_pump_water = get_sensor_text(lang, "circulating_pump_water")
-    text_unloading_pump = get_sensor_text(lang, "unloading_pump")
+    text_circulation_pump = get_sensor_text(lang, "circulation_pump")
+    text_additional_circulation_pump = get_sensor_text(lang, "additional_circulation_pump")
+    text_circulation_pump_domestic_water = get_sensor_text(lang, "circulation_pump_domestic_water")
+    text_circulation_pump_heating = get_sensor_text(lang, "circulation_pump_heating")
     text_pump_flow = get_sensor_text(lang, "pump_flow")
     text_compressor_heater = get_sensor_text(lang, "compressor_heater")
 
@@ -182,8 +185,8 @@ async def async_setup_entry(
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key='calculations.ID_WEB_ZIPout',
-            unique_id="circulating_pump_domestic_water",
-            name=text_circulating_pump_domestic_water,
+            unique_id="circulation_pump",
+            name=text_circulation_pump,
             icon="mdi:pump",
             device_class=DEVICE_CLASS_RUNNING,
         ),
@@ -192,29 +195,9 @@ async def async_setup_entry(
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key='calculations.ID_WEB_ZUPout',
-            unique_id="circulating_pump_heating",
-            name=text_circulating_pump_heating,
+            unique_id="additional_circulation_pump",
+            name=text_additional_circulation_pump,
             icon="mdi:pump",
-            device_class=DEVICE_CLASS_RUNNING,
-        ),
-        LuxtronikBinarySensor(
-            hass=hass,
-            luxtronik=luxtronik,
-            deviceInfo=deviceInfo,
-            sensor_key='calculations.ID_WEB_BUPout',
-            unique_id="circulating_pump_water",
-            name=text_circulating_pump_water,
-            icon="mdi:pump",
-            device_class=DEVICE_CLASS_RUNNING,
-        ),
-        LuxtronikBinarySensor(
-            hass=hass,
-            luxtronik=luxtronik,
-            deviceInfo=deviceInfo,
-            sensor_key='calculations.ID_WEB_HUPout',
-            unique_id="unloading_pump",
-            name=text_unloading_pump,
-            icon="mdi:car-turbocharger",
             device_class=DEVICE_CLASS_RUNNING,
         ),
         # Soleumwälzpumpe
@@ -240,8 +223,6 @@ async def async_setup_entry(
             device_class=DEVICE_CLASS_RUNNING,
         ),
 
-	# ID_WEB_LIN_VDH_out
-
         # calculations.ID_WEB_ASDin Soledruck ausreichend
         # calculations.ID_WEB_HDin Hochdruck OK
         # calculations.ID_WEB_MOTin Motorschutz OK
@@ -255,6 +236,16 @@ async def async_setup_entry(
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
     if deviceInfoHeating is not None:
         entities += [
+            LuxtronikBinarySensor(
+                hass=hass,
+                luxtronik=luxtronik,
+                deviceInfo=deviceInfoHeating,
+                sensor_key='calculations.ID_WEB_HUPout',
+                unique_id="circulation_pump_heating",
+                name=text_circulation_pump_heating,
+                icon="mdi:car-turbocharger",
+                device_class=DEVICE_CLASS_RUNNING,
+            ),
         ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
@@ -271,7 +262,17 @@ async def async_setup_entry(
                 name=text_solar_pump,
                 icon="mdi:pump",
                 device_class=DEVICE_CLASS_RUNNING,
-            )
+            ),
+            LuxtronikBinarySensor(
+                hass=hass,
+                luxtronik=luxtronik,
+                deviceInfo=deviceInfoDomesticWater,
+                sensor_key='calculations.ID_WEB_BUPout',
+                unique_id="circulation_pump_domestic_water",
+                name=text_circulation_pump_domestic_water,
+                icon="mdi:pump",
+                device_class=DEVICE_CLASS_RUNNING,
+            ),
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
@@ -325,6 +326,8 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         self._attr_state_class = state_class
         self._attr_entity_category = entity_category
         self._invert = invert_state
+        self._attr_extra_state_attributes = { ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: sensor_key }
+
 
     @property
     def is_on(self):
