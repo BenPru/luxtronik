@@ -389,19 +389,19 @@ HEATING_SENSOR_TYPES: tuple[LuxtronikSensorEntityDescription, ...] = (
     LuxtronikSensorEntityDescription(
         key="flow_in_temperature",
         # f"{text_flow_in} {text_temp}",
-        icon="mdi:waves-arrow-left",
+        icon="mdi:waves-arrow-right",
         sensor_key="calculations.ID_WEB_Temperatur_TVL",
     ),
     LuxtronikSensorEntityDescription(
         key="flow_out_temperature",
         # f"{text_flow_out} {text_temp}",
-        icon="mdi:waves-arrow-right",
+        icon="mdi:waves-arrow-left",
         sensor_key="calculations.ID_WEB_Temperatur_TRL",
     ),
     LuxtronikSensorEntityDescription(
         key="flow_out_temperature_external",
         # f"{text_flow_out} {text_temp} ({text_external})",
-        icon="mdi:waves-arrow-right",
+        icon="mdi:waves-arrow-left",
         sensor_key="calculations.ID_WEB_Temperatur_TRL_ext",
     ),
     LuxtronikSensorEntityDescription(

@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS, DEVICE_CLASS_ENERGY,
                                  DEVICE_CLASS_POWER, DEVICE_CLASS_TEMPERATURE,
+                                 ELECTRIC_POTENTIAL_VOLT,
                                  ENERGY_KILO_WATT_HOUR, ENTITY_CATEGORIES,
                                  EVENT_HOMEASSISTANT_STOP, POWER_WATT,
                                  STATE_UNAVAILABLE, TEMP_CELSIUS, TEMP_KELVIN,
@@ -161,6 +162,7 @@ async def async_setup_entry(
     text_high_pressure = get_sensor_text(lang, "high_pressure")
     text_low_pressure = get_sensor_text(lang, "low_pressure")
     text_operation_hours_additional_heat_generator = get_sensor_text(lang, "operation_hours_additional_heat_generator")
+    text_analog_out = get_sensor_text(lang, "analog_out")
     # entities: list[LuxtronikSensor] = [
     #     LuxtronikStatusSensor(hass, luxtronik, device_info, description)
     #     for description in GLOBAL_STATUS_SENSOR_TYPES
@@ -397,6 +399,30 @@ async def async_setup_entry(
             entity_category=EntityCategory.DIAGNOSTIC,
             factor=SECOUND_TO_HOUR_FACTOR,
         ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            sensor_key="calculations.ID_WEB_AnalogOut1",
+            unique_id="analog_out1",
+            name=f"{text_analog_out} 1",
+            icon="mdi:alpha-v-circle-outline",
+            device_class=DEVICE_CLASS_ENERGY,
+            unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,
+            factor=0.1,
+        ),
+        LuxtronikSensor(
+            hass,
+            luxtronik,
+            device_info,
+            sensor_key="calculations.ID_WEB_AnalogOut2",
+            unique_id="analog_out2",
+            name=f"{text_analog_out} 2",
+            icon="mdi:alpha-v-circle-outline",
+            device_class=DEVICE_CLASS_ENERGY,
+            unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,
+            factor=0.1,
+        ),
     ]
     if luxtronik.get_value("calculations.Heat_Output") is not None:
         entities += [
@@ -485,7 +511,7 @@ async def async_setup_entry(
                     "room_target_temperature",
                     f"{text_room} {text_target}",
                     entity_category=None,
-                )
+                ),
             ]
 
         entities += [
@@ -496,7 +522,7 @@ async def async_setup_entry(
                 "calculations.ID_WEB_Temperatur_TVL",
                 "flow_in_temperature",
                 f"{text_flow_in}",
-                "mdi:waves-arrow-left",
+                "mdi:waves-arrow-right",
                 entity_category=None,
             ),
             LuxtronikSensor(
@@ -506,17 +532,7 @@ async def async_setup_entry(
                 "calculations.ID_WEB_Temperatur_TRL",
                 "flow_out_temperature",
                 f"{text_flow_out}",
-                "mdi:waves-arrow-right",
-                entity_category=None,
-            ),
-            LuxtronikSensor(
-                hass,
-                luxtronik,
-                device_info_heating,
-                "calculations.ID_WEB_Temperatur_TRL_ext",
-                "flow_out_temperature_external",
-                f"{text_flow_out} ({text_external})",
-                "mdi:waves-arrow-right",
+                "mdi:waves-arrow-left",
                 entity_category=None,
             ),
             LuxtronikSensor(
@@ -557,6 +573,20 @@ async def async_setup_entry(
             ),
         ]
 
+    if luxtronik.get_value("calculations.ID_WEB_Temperatur_TRL_ext") != 5.0:
+        entities += [
+            LuxtronikSensor(
+                hass,
+                luxtronik,
+                device_info_heating,
+                "calculations.ID_WEB_Temperatur_TRL_ext",
+                "flow_out_temperature_external",
+                f"{text_flow_out} ({text_external})",
+                "mdi:waves-arrow-right",
+                entity_category=None,
+            ),
+        ]
+
     device_info_domestic_water = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if device_info_domestic_water is not None:
         text_collector = get_sensor_text(lang, "collector")
@@ -569,7 +599,6 @@ async def async_setup_entry(
         text_heat_amount_domestic_water = get_sensor_text(
             lang, "heat_amount_domestic_water"
         )
-        solar_present = luxtronik.detect_solar_present()
 
         entities += [
             LuxtronikSensor(
@@ -610,6 +639,8 @@ async def async_setup_entry(
                 entity_category=EntityCategory.DIAGNOSTIC,
             ),
         ]
+
+        solar_present = luxtronik.detect_solar_present()
         if solar_present:
             entities += [
                 LuxtronikSensor(
@@ -822,13 +853,13 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
     def update(self):
         LuxtronikSensor.update(self)
         time_now = time(datetime.utcnow().hour, datetime.utcnow().minute)
-        if self.native_value == LUX_STATUS_EVU and self._last_state != LUX_STATUS_EVU:
+        if self.native_value is not None and self._last_state is not None and self.native_value == LUX_STATUS_EVU and self._last_state != LUX_STATUS_EVU:
             # evu start
             if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour:
                 self._first_evu_start_time = time_now
             else:
                 self._second_evu_start_time = time_now
-        elif self.native_value != LUX_STATUS_EVU and self._last_state == LUX_STATUS_EVU:
+        elif self.native_value is not None and self._last_state is not None and self.native_value != LUX_STATUS_EVU and self._last_state == LUX_STATUS_EVU:
             # evu end
             if self._first_evu_end_time is None or time_now.hour <= self._first_evu_end_time.hour:
                 self._first_evu_end_time = time_now
@@ -867,8 +898,14 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
         lang = self.hass.data[f"{DOMAIN}_language"]
         line_1 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_1", line_1)
         line_2 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_2", line_2)
-        # TODO: Show evu end time if available
-        # if 
+        # Show evu end time if available
+        evu_event_minutes = self._calc_next_evu_event_minutes()
+        if self.native_value == LUX_STATUS_EVU:
+            evu_until = get_sensor_text(lang, 'evu_until').format(evu_time = evu_event_minutes)
+            return f"{evu_until}. {line_1} {line_2} {status_time}."
+        elif evu_event_minutes <= 30:
+            evu_in = get_sensor_text(lang, 'evu_in').format(evu_time = evu_event_minutes)
+            return f"{line_1} {line_2} {status_time}. {evu_in}."
         return f"{line_1} {line_2} {status_time}."
 
     def _calc_next_evu_event_minutes_text(self) -> str:
@@ -928,7 +965,6 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
             return
         self._state = state.state
 
-        # ADDED CODE HERE
         if 'EVU first start time' in state.attributes:
             self._first_evu_start_time = self._restore_value(state.attributes['EVU first start time'])
             self._first_evu_end_time = self._restore_value(state.attributes['EVU first end time'])

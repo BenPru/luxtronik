@@ -54,8 +54,8 @@
   "efficiency_pump": "Effizienzpumpe",
   "maximum_circulation_pump_speed": "Maximale Pumpen Zirkulations Geschwindigkeit",
   "heating_room_temperature_impact_factor": "Raum Temperatur Einflussfaktor",
-  "overheating": "\u00d6berhitzung",
-  "overheating_target": "\u00d6berhitzung Soll",
+  "overheating": "\u00dcberhitzung",
+  "overheating_target": "\u00dcberhitzung Soll",
   "high_pressure": "Hochdruck",
   "low_pressure": "Niederdruck",
   "circulation_pump": "Zirkulationspumpe",
@@ -66,5 +66,12 @@
   "pump_flow": "Soleumw\u00e4lzpumpe",
   "compressor_heater": "Verdichterheizung",
   "additional_heat_generator_amount_counter": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge",
-  "operation_hours_additional_heat_generator": "Zus\u00e4tzlicher W\u00e4rmeerzeuger Betriebsstunden"
+  "operation_hours_additional_heat_generator": "Zus\u00e4tzlicher W\u00e4rmeerzeuger Betriebsstunden",
+  "analog_out": "Analog Ausgang",
+  "thermal_desinfection": "Thermische Desinfektion",
+  "heating_night_lowering_to_temperature": "Absenkung bis Aussentemperatur",
+  "heating_difference_temperature_on": "Einschalt Differenz R\u00fccklauf",
+  "heating_difference_temperature_off": "Ausschalt Differenz R\u00fccklauf",
+  "evu_until": "Noch {evu_time} Minuten Netzsperre.",
+  "evu_in": "Netzsperre in {evu_time} Minuten."
 }

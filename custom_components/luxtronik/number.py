@@ -7,8 +7,8 @@ from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (DEVICE_CLASS_TEMPERATURE, ENTITY_CATEGORIES,
-                                 PERCENTAGE, TEMP_CELSIUS, TIME_HOURS,
-                                 TIME_MINUTES)
+                                 PERCENTAGE, TEMP_CELSIUS, TEMP_KELVIN,
+                                 TIME_HOURS, TIME_MINUTES)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -87,7 +87,9 @@ async def async_setup_entry(
         text_heating_circuit_curve1_temperature = get_sensor_text(lang, 'circuit_curve1_temperature')
         text_heating_circuit_curve2_temperature = get_sensor_text(lang, 'circuit_curve2_temperature')
         text_heating_circuit_curve_night_temperature = get_sensor_text(lang, 'circuit_curve_night_temperature')
-        has_room_temp = luxtronik.get_value("parameters.ID_Einst_RFVEinb_akt") != 0
+        text_heating_night_lowering_to_temperature = get_sensor_text(lang, 'heating_night_lowering_to_temperature')
+        text_heating_difference_temperature_on = get_sensor_text(lang, 'heating_difference_temperature_on')
+        text_heating_difference_temperature_off = get_sensor_text(lang, 'heating_difference_temperature_off')
         entities += [
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoHeating,
@@ -118,9 +120,29 @@ async def async_setup_entry(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
                 unique_id='heating_circuit_curve_night_temperature', name=f"{text_heating_circuit_curve_night_temperature}",
-                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=-15.0, max_value=10.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG)
+                icon='mdi:chart-bell-curve', unit_of_measurement=TEMP_CELSIUS, min_value=-15.0, max_value=10.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key='parameters.ID_Einst_TAbsMin_akt',
+                unique_id='heating_night_lowering_to_temperature', name=f"{text_heating_night_lowering_to_temperature}",
+                icon='mdi:thermometer-low', unit_of_measurement=TEMP_CELSIUS, min_value=-20.0, max_value=10.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG, factor=0.1),
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key='parameters.ID_Einst_TDC_Ein_akt',
+                unique_id='heating_difference_temperature_on', name=f"{text_heating_difference_temperature_on}",
+                icon='mdi:radiator', unit_of_measurement=TEMP_KELVIN, min_value=2.0, max_value=15.0, step=0.1, mode=NumberMode.BOX, entity_category=None),
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoHeating,
+                number_key='parameters.ID_Einst_TDC_Aus_akt',
+                unique_id='heating_difference_temperature_off', name=f"{text_heating_difference_temperature_off}",
+                icon='mdi:radiator-off', unit_of_measurement=TEMP_KELVIN, min_value=0.5, max_value=10.0, step=0.1, mode=NumberMode.BOX, entity_category=None),
+            # ID_Einst_HysHzExEn_akt TEE Heizung    2 1-15
+            # ID_Einst_HysBwExEn_akt TEE Warmw.     5 1-15
+            # T-Diff. Speicher max 70 20-95
+            # T-Diff. Koll. max 110 90-120
         ]
 
+        has_room_temp = luxtronik.get_value("parameters.ID_Einst_RFVEinb_akt") != 0
         if has_room_temp:
             text_heating_room_temperature_impact_factor = get_sensor_text(lang, 'heating_room_temperature_impact_factor')
             entities += [
@@ -128,19 +150,25 @@ async def async_setup_entry(
                 hass, luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
                 unique_id='heating_room_temperature_impact_factor', name=f"{text_heating_room_temperature_impact_factor}",
-                icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=10, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG)
+                icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=10, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
             ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if deviceInfoDomesticWater is not None:
         text_target = get_sensor_text(lang, 'target')
         text_domestic_water = get_sensor_text(lang, 'domestic_water')
+        text_thermal_desinfection = get_sensor_text(lang, 'thermal_desinfection')
         entities += [
             LuxtronikNumber(
                 hass, luxtronik, deviceInfoDomesticWater,
                 number_key=LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                 unique_id='domestic_water_target_temperature', name=f"{text_domestic_water} {text_target}",
-                icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=1.0, mode=NumberMode.BOX)
+                icon='mdi:water-boiler', unit_of_measurement=TEMP_CELSIUS, min_value=40.0, max_value=60.0, step=1.0, mode=NumberMode.BOX),
+            LuxtronikNumber(
+                hass, luxtronik, deviceInfoDomesticWater,
+                number_key='parameters.ID_Einst_LGST_akt',
+                unique_id='domestic_water_thermal_desinfection_target', name=f"{text_domestic_water} {text_thermal_desinfection} {text_target}",
+                icon='mdi:thermometer-high', unit_of_measurement=TEMP_CELSIUS, min_value=50.0, max_value=70.0, step=1.0, mode=NumberMode.BOX, factor=0.1, entity_category=EntityCategory.CONFIG),
         ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
@@ -253,7 +281,10 @@ class LuxtronikNumber(NumberEntity, RestoreEntity):
     @property
     def native_value(self):
         """Return the current value."""
-        return self._luxtronik.get_value(self._number_key) * self._factor
+        value = self._luxtronik.get_value(self._number_key)
+        if value is None:
+            return None
+        return value * self._factor
 
 #    @property
 #    def value(self) -> float:

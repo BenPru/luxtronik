@@ -66,5 +66,12 @@
   "pump_flow": "Pump flow",
   "compressor_heater": "Compressor heater",
   "additional_heat_generator_amount_counter": "Heat amount second/additional heat generator",
-  "operation_hours_additional_heat_generator": "Operation hours second/additional heat generator"
+  "operation_hours_additional_heat_generator": "Operation hours second/additional heat generator",
+  "analog_out": "Analog output",
+  "thermal_desinfection": "Thermal desinfection",
+  "heating_night_lowering_to_temperature": "Heating night lowering to temperature",
+  "heating_difference_temperature_on": "Switch-on differential return",
+  "heating_difference_temperature_off": "Switch-off differential return",
+  "evu_until": "{evu_time} minutes more locktime.",
+  "evu_in": "Locktime in {evu_time} minutes."
 }
