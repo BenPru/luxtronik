@@ -52,7 +52,7 @@
   "pump_optimization": "Pumpenoptimierung",
   "pump_optimization_time": "Pumpenoptimierung",
   "efficiency_pump": "Effizienzpumpe",
-  "maximum_circulation_pump_speed": "Maximale Pumpen Zirkulations Geschwindigkeit",
+  "heating_maximum_circulation_pump_speed": "Maximale Pumpen Zirkulations Geschwindigkeit (Heizen)",
   "heating_room_temperature_impact_factor": "Raum Temperatur Einflussfaktor",
   "overheating": "\u00dcberhitzung",
   "overheating_target": "\u00dcberhitzung Soll",
@@ -70,8 +70,10 @@
   "analog_out": "Analog Ausgang",
   "thermal_desinfection": "Thermische Desinfektion",
   "heating_night_lowering_to_temperature": "Absenkung bis Aussentemperatur",
-  "heating_difference_temperature_on": "Einschalt Differenz R\u00fccklauf",
-  "heating_difference_temperature_off": "Ausschalt Differenz R\u00fccklauf",
+  "solar_pump_on_difference_temperature": "Einschalt Differenz Kollektor/Speicher (Solar Pumpe)",
+  "solar_pump_off_difference_temperature": "Ausschalt Differenz Kollektor/Speicher (Solar Pumpe)",
+  "solar_pump_off_max_difference_temperature_boiler": "Ausschalt max. Differenz Kollektor/Speicher (Solar Pumpe)",
+  "solar_pump_max_temperature_collector": "Max. Temperatur Solar Kollektor",
   "evu_until": "Noch {evu_time} Minuten Netzsperre.",
   "evu_in": "Netzsperre in {evu_time} Minuten."
 }

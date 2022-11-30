@@ -71,7 +71,8 @@ async def async_setup_entry(
             hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
             sensor_key='parameters.ID_Einst_P155_PumpHeatCtrl', unique_id='pump_heat_control',
             name=text_pump_heat_control, icon='mdi:pump',
-            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
+            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False),
     ]
 
     deviceInfoHeating = hass.data[f"{DOMAIN}_DeviceInfo_Heating"]
@@ -83,7 +84,7 @@ async def async_setup_entry(
                 on_state=LuxMode.automatic.value, off_state=LuxMode.off.value,
                 hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoHeating,
                 sensor_key=LUX_SENSOR_MODE_HEATING, unique_id='heating',
-                name=text_heating_mode, icon='mdi:radiator',
+                name=text_heating_mode, icon='mdi:radiator', icon_off='mdi:radiator-off',
                 device_class=DEVICE_CLASS_HEAT),
             LuxtronikSwitch(
                 hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoHeating,
@@ -103,7 +104,7 @@ async def async_setup_entry(
                 deviceInfo=deviceInfoDomesticWater,
                 sensor_key=LUX_SENSOR_MODE_DOMESTIC_WATER,
                 unique_id='domestic_water',
-                name=text_domestic_water_mode_auto, icon='mdi:water-boiler',
+                name=text_domestic_water_mode_auto, icon='mdi:water-boiler-auto', icon_off='mdi:water-boiler-off',
                 device_class=DEVICE_CLASS_HEAT)
         ]
         
@@ -131,20 +132,17 @@ class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity, RestoreEntity):
 
     def __init__(
         self,
+        icon_off: str = None,
         on_state: str = True,
         off_state: str = False,
-        **kwargs: Any
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize a new Luxtronik switch."""
         super().__init__(**kwargs)
+        self._icon_off = icon_off
         self._on_state = on_state
         self._off_state = off_state
-
-    @property
-    def is_on(self):
-        """Return true if switch is on."""
-        value = self._luxtronik.get_value(self._sensor_key) == self._on_state
-        return not value if self._invert else value
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""

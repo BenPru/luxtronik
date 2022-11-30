@@ -28,6 +28,8 @@ from .const import (
     CONF_VISIBILITIES,
     DEFAULT_DEVICE_CLASS,
     DEVICE_CLASSES, DOMAIN, LOGGER,
+    LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
+    LUX_BINARY_SENSOR_CIRCULATION_PUMP,
     LUX_BINARY_SENSOR_EVU_UNLOCKED,
     LUX_BINARY_SENSOR_SOLAR_PUMP
 )
@@ -107,7 +109,6 @@ async def async_setup_platform(
                 )
                 entities += [
                     LuxtronikBinarySensor(
-                        hass,
                         luxtronik,
                         deviceInfo=deviceInfo,
                         sensor_key=f"{group}.{sensor_id}",
@@ -161,7 +162,6 @@ async def async_setup_entry(
 
     entities = [
         LuxtronikBinarySensor(
-            hass=hass,
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key=LUX_BINARY_SENSOR_EVU_UNLOCKED,
@@ -171,7 +171,6 @@ async def async_setup_entry(
             device_class=DEVICE_CLASS_LOCK,
         ),
         LuxtronikBinarySensor(
-            hass=hass,
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key='calculations.ID_WEB_VD1out',
@@ -180,30 +179,9 @@ async def async_setup_entry(
             icon="mdi:arrow-collapse-all",
             device_class=DEVICE_CLASS_RUNNING,
         ),
-        LuxtronikBinarySensor(
-            hass=hass,
-            luxtronik=luxtronik,
-            deviceInfo=deviceInfo,
-            sensor_key='calculations.ID_WEB_ZIPout',
-            unique_id="circulation_pump",
-            name=text_circulation_pump,
-            icon="mdi:pump",
-            device_class=DEVICE_CLASS_RUNNING,
-        ),
-        LuxtronikBinarySensor(
-            hass=hass,
-            luxtronik=luxtronik,
-            deviceInfo=deviceInfo,
-            sensor_key='calculations.ID_WEB_ZUPout',
-            unique_id="additional_circulation_pump",
-            name=text_additional_circulation_pump,
-            icon="mdi:pump",
-            device_class=DEVICE_CLASS_RUNNING,
-        ),
         # Soleumwälzpumpe
         # Umwälzpumpe Ventilator, Brunnen- oder Sole
         LuxtronikBinarySensor(
-            hass=hass,
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key='calculations.ID_WEB_VBOout',
@@ -213,7 +191,6 @@ async def async_setup_entry(
             device_class=DEVICE_CLASS_RUNNING,
         ),
         LuxtronikBinarySensor(
-            hass=hass,
             luxtronik=luxtronik,
             deviceInfo=deviceInfo,
             sensor_key='calculations.ID_WEB_LIN_VDH_out',
@@ -237,34 +214,30 @@ async def async_setup_entry(
     if deviceInfoHeating is not None:
         entities += [
             LuxtronikBinarySensor(
-                hass=hass,
                 luxtronik=luxtronik,
                 deviceInfo=deviceInfoHeating,
-                sensor_key='calculations.ID_WEB_HUPout',
+                sensor_key=LUX_BINARY_SENSOR_CIRCULATION_PUMP,
                 unique_id="circulation_pump_heating",
                 name=text_circulation_pump_heating,
                 icon="mdi:car-turbocharger",
                 device_class=DEVICE_CLASS_RUNNING,
             ),
-        ]
-
-    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
-    solar_present = luxtronik.detect_solar_present()
-    if (deviceInfoDomesticWater is not None) & (solar_present):
-        text_solar_pump = get_sensor_text(lang, "solar_pump")
-        entities += [
             LuxtronikBinarySensor(
-                hass=hass,
                 luxtronik=luxtronik,
-                deviceInfo=deviceInfoDomesticWater,
-                sensor_key=LUX_BINARY_SENSOR_SOLAR_PUMP,
-                unique_id="solar_pump",
-                name=text_solar_pump,
+                deviceInfo=deviceInfoHeating,
+                sensor_key=LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
+                unique_id="additional_circulation_pump",
+                name=text_additional_circulation_pump,
                 icon="mdi:pump",
                 device_class=DEVICE_CLASS_RUNNING,
             ),
+        ]
+
+    deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
+    if deviceInfoDomesticWater is not None:
+        text_solar_pump = get_sensor_text(lang, "solar_pump")
+        entities += [
             LuxtronikBinarySensor(
-                hass=hass,
                 luxtronik=luxtronik,
                 deviceInfo=deviceInfoDomesticWater,
                 sensor_key='calculations.ID_WEB_BUPout',
@@ -273,20 +246,41 @@ async def async_setup_entry(
                 icon="mdi:pump",
                 device_class=DEVICE_CLASS_RUNNING,
             ),
+            LuxtronikBinarySensor(
+                luxtronik=luxtronik,
+                deviceInfo=deviceInfoDomesticWater,
+                sensor_key='calculations.ID_WEB_ZIPout',
+                unique_id="circulation_pump",
+                name=text_circulation_pump,
+                icon="mdi:pump",
+                device_class=DEVICE_CLASS_RUNNING,
+            ),
         ]
+        solar_present = luxtronik.detect_solar_present()
+        if solar_present:
+            entities += [
+                LuxtronikBinarySensor(
+                    luxtronik=luxtronik,
+                    deviceInfo=deviceInfoDomesticWater,
+                    sensor_key=LUX_BINARY_SENSOR_SOLAR_PUMP,
+                    unique_id="solar_pump",
+                    name=text_solar_pump,
+                    icon="mdi:pump",
+                    device_class=DEVICE_CLASS_RUNNING,
+                ),
+            ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
     if deviceInfoCooling is not None:
         text_approval_cooling = get_sensor_text(lang, "approval_cooling")
         entities += [
             LuxtronikBinarySensor(
-                hass=hass,
                 luxtronik=luxtronik,
                 deviceInfo=deviceInfoCooling,
                 sensor_key="calculations.ID_WEB_FreigabKuehl",
                 unique_id="approval_cooling",
                 name=text_approval_cooling,
-                icon="mdi:lock",
+                _icon="mdi:lock",
                 device_class=DEVICE_CLASS_LOCK,
             )
         ]
@@ -298,9 +292,11 @@ async def async_setup_entry(
 class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
     """Representation of a Luxtronik binary sensor."""
 
+    _icon_off: str = None
+    _on_state: str = True
+
     def __init__(
         self,
-        hass: HomeAssistant,
         luxtronik: LuxtronikDevice,
         deviceInfo: DeviceInfo,
         sensor_key: str,
@@ -311,9 +307,13 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         state_class: str = None,
         entity_category: ENTITY_CATEGORIES = None,
         invert_state: bool = False,
+        entity_registry_enabled_default = True,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize a new Luxtronik binary sensor."""
-        self.hass = hass
+        # super().__init__(*args)
+        # self.hass = hass
         self._luxtronik = luxtronik
 
         self._sensor_key = sensor_key
@@ -326,14 +326,22 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         self._attr_state_class = state_class
         self._attr_entity_category = entity_category
         self._invert = invert_state
+        self._attr_entity_registry_enabled_default = entity_registry_enabled_default
         self._attr_extra_state_attributes = { ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: sensor_key }
 
 
     @property
     def is_on(self):
         """Return true if binary sensor is on."""
-        value = self._luxtronik.get_value(self._sensor_key)
+        value = self._luxtronik.get_value(self._sensor_key) == self._on_state
         return not value if self._invert else value
+
+    @property
+    def icon(self):  # -> str | None:
+        """Return the icon to be used for this entity."""
+        if not self.is_on and self._icon_off is not None:
+            return self._icon_off
+        return self._attr_icon
 
     def update(self):
         """Get the latest status and use it to update our sensor state."""

@@ -52,7 +52,7 @@
   "pump_optimization": "Pump optimization",
   "pump_optimization_time": "Pump optimization",
   "efficiency_pump": "Efficiency pump",
-  "maximum_circulation_pump_speed": "Maximum circulation pump speed",
+  "heating_maximum_circulation_pump_speed": "Maximum circulation pump speed (Heating)",
   "heating_room_temperature_impact_factor": "Room temperature impact factor",
   "overheating": "Overheating",
   "overheating_target": "Overheating target",
@@ -72,6 +72,10 @@
   "heating_night_lowering_to_temperature": "Heating night lowering to temperature",
   "heating_difference_temperature_on": "Switch-on differential return",
   "heating_difference_temperature_off": "Switch-off differential return",
+  "solar_pump_on_difference_temperature": "Switch-on differential collector/boiler (solarpump)",
+  "solar_pump_off_difference_temperature": "Switch-off differential collector/boiler (solarpump)",
+  "solar_pump_off_max_difference_temperature_boiler": "Switch-off max. differential collector/boiler (solarpump)",
+  "solar_pump_max_temperature_collector": "Max. temperature solar collector",
   "evu_until": "{evu_time} minutes more locktime.",
   "evu_in": "Locktime in {evu_time} minutes."
 }

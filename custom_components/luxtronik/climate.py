@@ -32,7 +32,6 @@ from .const import (CONF_CALCULATIONS, CONF_CONTROL_MODE_HOME_ASSISTANT,
                     LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                     LUX_SENSOR_HEATING_TARGET_CORRECTION,
-                    LUX_SENSOR_COOLING_TARGET,
                     LUX_SENSOR_COOLING_THRESHOLD,
                     LUX_SENSOR_OUTDOOR_TEMPERATURE,
                     
@@ -48,8 +47,7 @@ from .const import (CONF_CALCULATIONS, CONF_CONTROL_MODE_HOME_ASSISTANT,
                     LUX_STATUS_HEATING,
                     LUX_STATUS_HEATING_EXTERNAL_SOURCE,
                     LUX_STATUS_NO_REQUEST, LUX_STATUS_SWIMMING_POOL_SOLAR,
-                    PRESET_SECOND_HEATSOURCE, PRESET_AUTO,
-                    LuxMode)
+                    PRESET_SECOND_HEATSOURCE, LuxMode)
 from .helpers.helper import get_sensor_text
 
 # endregion Imports
@@ -173,8 +171,10 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         else:
             current_temperature_sensor = self._hass.states.get(
                 self._current_temperature_sensor)
-            self._attr_current_temperature = None if current_temperature_sensor is None else float(
-                current_temperature_sensor.state)
+            if current_temperature_sensor is None or current_temperature_sensor.state is None or current_temperature_sensor.state == 'unknown':
+                self._attr_current_temperature = None
+            else:
+                self._attr_current_temperature = float(current_temperature_sensor.state)
         return self._attr_current_temperature
 
     @property

@@ -178,11 +178,11 @@ LUX_STATUS3_WORKAROUND: Final[list] = [
 LUX_STATE_ICON_MAP: Final[dict[str, str]] = {
     LUX_STATUS_HEATING: "mdi:radiator",
     LUX_STATUS_DOMESTIC_WATER: "mdi:waves",
-    LUX_STATUS_SWIMMING_POOL_SOLAR: None,
+    LUX_STATUS_SWIMMING_POOL_SOLAR: "mdi:pool",
     LUX_STATUS_EVU: "mdi:power-plug-off",
     LUX_STATUS_DEFROST: "mdi:car-defrost-rear",
-    LUX_STATUS_NO_REQUEST: "mdi:radiator-disabled",
-    LUX_STATUS_HEATING_EXTERNAL_SOURCE: None,
+    LUX_STATUS_NO_REQUEST: "mdi:heat-pump-outline", #"mdi:radiator-disabled",
+    LUX_STATUS_HEATING_EXTERNAL_SOURCE: "mdi:patio-heater",
     LUX_STATUS_COOLING: "mdi:air-conditioner",
 }
 
@@ -203,7 +203,7 @@ LUX_SENSOR_EFFICIENCY_PUMP: Final = "parameters.ID_Einst_Effizienzpumpe_akt"
 LUX_SENSOR_OUTDOOR_TEMPERATURE:              Final = "calculations.ID_WEB_Temperatur_TA"
 
 LUX_SENSOR_PUMP_OPTIMIZATION_TIME:           Final = "parameters.ID_Einst_Popt_Nachlauf_akt"
-LUX_SENSOR_MAXIMUM_CIRCULATION_PUMP_SPEED:   Final = "parameters.ID_Einst_P155_PumpHeat_Max"
+LUX_SENSOR_HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED:  Final = "parameters.ID_Einst_P155_PumpHeat_Max"
 LUX_SENSOR_HEATING_TARGET_CORRECTION:        Final = "parameters.ID_Einst_WK_akt"
 LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR:  Final = "parameters.ID_RBE_Einflussfaktor_RT_akt"
 LUX_SENSOR_HEATING_THRESHOLD:                Final = "parameters.ID_Einst_Heizgrenze"
@@ -229,7 +229,9 @@ LUX_SENSOR_MODE_DOMESTIC_WATER: Final = "parameters.ID_Ba_Bw_akt"
 LUX_SENSOR_MODE_FAN: Final = "parameters.ID_Einst_BA_Lueftung_akt"
 LUX_BINARY_SENSOR_EVU_UNLOCKED: Final = "calculations.ID_WEB_EVUin"
 LUX_BINARY_SENSOR_SOLAR_PUMP: Final = "calculations.ID_WEB_SLPout"
-LUX_BINARY_SENSOR_Circulation_Pump: Final = "calculations.ID_WEB_HUPout"
+LUX_BINARY_SENSOR_CIRCULATION_PUMP: Final = "calculations.ID_WEB_HUPout"
+LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP: Final = "calculations.ID_WEB_ZUPout"
+
 # Future use:
 
 # LUX_SENSOR_MODE_???: Final = 'parameters.ID_Ba_Sw_akt'
