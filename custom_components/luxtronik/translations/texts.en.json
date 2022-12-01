@@ -77,5 +77,6 @@
   "solar_pump_off_max_difference_temperature_boiler": "Switch-off max. differential collector/boiler (solarpump)",
   "solar_pump_max_temperature_collector": "Max. temperature solar collector",
   "evu_until": "{evu_time} minutes more locktime.",
-  "evu_in": "Locktime in {evu_time} minutes."
+  "evu_in": "Locktime in {evu_time} minutes.",
+  "defrost_valve": "Defrost valve"
 }

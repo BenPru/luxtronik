@@ -1,6 +1,5 @@
 """Luxtronik heatpump sensor."""
 # region Imports
-from typing import Any
 from datetime import datetime, time
 
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
@@ -143,6 +142,7 @@ async def async_setup_entry(
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     hass.data[f"{DOMAIN}_language"] = lang
+    text_heatpump = get_sensor_text(lang, "heatpump")
     text_time = get_sensor_text(lang, "time")
     text_temp = get_sensor_text(lang, "temperature")
     text_external = get_sensor_text(lang, "external")
@@ -183,7 +183,7 @@ async def async_setup_entry(
             device_info,
             LUX_SENSOR_STATUS,
             "status",
-            "Status",
+            text_heatpump,
             LUX_STATE_ICON_MAP,
             f"{DOMAIN}__status",
             None,

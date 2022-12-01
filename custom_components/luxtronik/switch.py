@@ -132,7 +132,6 @@ class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity, RestoreEntity):
 
     def __init__(
         self,
-        icon_off: str = None,
         on_state: str = True,
         off_state: str = False,
         *args: Any,
@@ -140,7 +139,6 @@ class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity, RestoreEntity):
     ) -> None:
         """Initialize a new Luxtronik switch."""
         super().__init__(**kwargs)
-        self._icon_off = icon_off
         self._on_state = on_state
         self._off_state = off_state
 

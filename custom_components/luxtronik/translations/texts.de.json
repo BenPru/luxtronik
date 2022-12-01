@@ -75,5 +75,6 @@
   "solar_pump_off_max_difference_temperature_boiler": "Ausschalt max. Differenz Kollektor/Speicher (Solar Pumpe)",
   "solar_pump_max_temperature_collector": "Max. Temperatur Solar Kollektor",
   "evu_until": "Noch {evu_time} Minuten Netzsperre.",
-  "evu_in": "Netzsperre in {evu_time} Minuten."
+  "evu_in": "Netzsperre in {evu_time} Minuten.",
+  "defrost_valve": "Abtau Ventil"
 }

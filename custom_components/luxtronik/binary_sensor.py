@@ -5,6 +5,7 @@ from typing import Any
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.binary_sensor import (DEVICE_CLASS_LOCK,
+                                                    DEVICE_CLASS_OPENING,
                                                     DEVICE_CLASS_RUNNING,
                                                     PLATFORM_SCHEMA,
                                                     BinarySensorEntity)
@@ -159,6 +160,7 @@ async def async_setup_entry(
     text_circulation_pump_heating = get_sensor_text(lang, "circulation_pump_heating")
     text_pump_flow = get_sensor_text(lang, "pump_flow")
     text_compressor_heater = get_sensor_text(lang, "compressor_heater")
+    text_defrost_valve = get_sensor_text(lang, "defrost_valve")
 
     entities = [
         LuxtronikBinarySensor(
@@ -198,6 +200,16 @@ async def async_setup_entry(
             name=text_compressor_heater,
             icon="mdi:heat-wave",
             device_class=DEVICE_CLASS_RUNNING,
+        ),
+        LuxtronikBinarySensor(
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_AVout',
+            unique_id="defrost_valve",
+            name=text_defrost_valve,
+            icon="mdi:valve-open",
+            icon_off="mdi:valve-closed",
+            device_class=DEVICE_CLASS_OPENING,
         ),
 
         # calculations.ID_WEB_ASDin Soledruck ausreichend
@@ -292,7 +304,6 @@ async def async_setup_entry(
 class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
     """Representation of a Luxtronik binary sensor."""
 
-    _icon_off: str = None
     _on_state: str = True
 
     def __init__(
@@ -307,6 +318,7 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         state_class: str = None,
         entity_category: ENTITY_CATEGORIES = None,
         invert_state: bool = False,
+        icon_off: str = None,
         entity_registry_enabled_default = True,
         *args: Any,
         **kwargs: Any,
@@ -322,6 +334,7 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         self._attr_device_info = deviceInfo
         self._attr_name = name
         self._attr_icon = icon
+        self._icon_off = icon_off
         self._attr_device_class = device_class
         self._attr_state_class = state_class
         self._attr_entity_category = entity_category
