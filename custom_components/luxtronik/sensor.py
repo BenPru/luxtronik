@@ -882,7 +882,7 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
         evu_event_minutes = self._calc_next_evu_event_minutes()
         if evu_event_minutes is None:
             pass
-        if self.native_value == LUX_STATUS_EVU:
+        elif self.native_value == LUX_STATUS_EVU:
             evu_until = get_sensor_text(lang, 'evu_until').format(evu_time = evu_event_minutes)
             return f"{evu_until} {line_1} {line_2} {status_time}."
         elif evu_event_minutes <= 30:
