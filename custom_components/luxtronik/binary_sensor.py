@@ -280,7 +280,7 @@ async def async_setup_entry(
                 sensor_key="calculations.ID_WEB_FreigabKuehl",
                 unique_id="approval_cooling",
                 name=text_approval_cooling,
-                _icon="mdi:lock",
+                icon="mdi:lock",
                 device_class=DEVICE_CLASS_LOCK,
             )
         ]
