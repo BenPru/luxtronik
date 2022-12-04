@@ -143,6 +143,7 @@ async def async_setup_entry(
     # Build Sensor names with local language:
     lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
     hass.data[f"{DOMAIN}_language"] = lang
+    text_heatpump = get_sensor_text(lang, "heatpump")
     text_time = get_sensor_text(lang, "time")
     text_temp = get_sensor_text(lang, "temperature")
     text_external = get_sensor_text(lang, "external")
@@ -158,7 +159,7 @@ async def async_setup_entry(
     text_hot_gas = get_sensor_text(lang, "hot_gas")
     text_suction_compressor = get_sensor_text(lang, "suction_compressor")
     text_suction_evaporator = get_sensor_text(lang, "suction_evaporator")
-    text_compressor_heating = get_sensor_text(lang, "compressor_heating")
+    text_compressor = get_sensor_text(lang, "compressor")
     text_overheating = get_sensor_text(lang, "overheating")
     text_overheating_target = get_sensor_text(lang, "overheating_target")
     text_high_pressure = get_sensor_text(lang, "high_pressure")
@@ -183,7 +184,7 @@ async def async_setup_entry(
             device_info,
             LUX_SENSOR_STATUS,
             "status",
-            "Status",
+            text_heatpump,
             LUX_STATE_ICON_MAP,
             f"{DOMAIN}__status",
             None,
@@ -335,7 +336,7 @@ async def async_setup_entry(
             device_info,
             "calculations.ID_WEB_LIN_VDH",
             "compressor_heating_temperature",
-            f"{text_compressor_heating}",
+            text_compressor,
             entity_category=None,
         ),
         LuxtronikSensor(

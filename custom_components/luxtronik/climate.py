@@ -93,7 +93,7 @@ async def async_setup_entry(
         text_heating = get_sensor_text(lang, 'heating')
         entities += [
             LuxtronikHeatingThermostat(
-                hass, luxtronik, deviceInfoHeating, name=text_heating, control_mode_home_assistant=control_mode_home_assistant,
+                luxtronik, deviceInfoHeating, name=text_heating, control_mode_home_assistant=control_mode_home_assistant,
                 current_temperature_sensor=ha_sensor_indoor_temperature, entity_category=None)
         ]
 
@@ -102,7 +102,7 @@ async def async_setup_entry(
         text_domestic_water = get_sensor_text(lang, 'domestic_water')
         entities += [
             LuxtronikDomesticWaterThermostat(
-                hass, luxtronik, deviceInfoDomesticWater, name=text_domestic_water, control_mode_home_assistant=control_mode_home_assistant,
+                luxtronik, deviceInfoDomesticWater, name=text_domestic_water, control_mode_home_assistant=control_mode_home_assistant,
                 current_temperature_sensor=LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE, entity_category=None)
         ]
 
@@ -111,7 +111,7 @@ async def async_setup_entry(
         text_cooling = get_sensor_text(lang, 'cooling')
         entities += [
             LuxtronikCoolingThermostat(
-                hass, luxtronik, deviceInfoCooling, name=text_cooling, control_mode_home_assistant=control_mode_home_assistant,
+                luxtronik, deviceInfoCooling, name=text_cooling, control_mode_home_assistant=control_mode_home_assistant,
                 current_temperature_sensor=LUX_SENSOR_OUTDOOR_TEMPERATURE, entity_category=None)
         ]
 
@@ -141,14 +141,14 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
     _target_temperature_sensor: str = None
 
     _heat_status = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER, LUX_STATUS_COOLING]
+    _last_status: str = None
 
     _cold_tolerance = DEFAULT_TOLERANCE
     _hot_tolerance = DEFAULT_TOLERANCE
 
     _last_lux_mode: LuxMode = None
 
-    def __init__(self, hass: HomeAssistant, luxtronik: LuxtronikDevice, deviceInfo: DeviceInfo, name: str, control_mode_home_assistant: bool, current_temperature_sensor: str, entity_category: ENTITY_CATEGORIES = None):
-        self._hass = hass
+    def __init__(self, luxtronik: LuxtronikDevice, deviceInfo: DeviceInfo, name: str, control_mode_home_assistant: bool, current_temperature_sensor: str, entity_category: ENTITY_CATEGORIES = None):
         self._luxtronik = luxtronik
         self._attr_device_info = deviceInfo
         self._attr_name = name
@@ -169,7 +169,7 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
             self._attr_current_temperature = self._luxtronik.get_value(
                 self._current_temperature_sensor)
         else:
-            current_temperature_sensor = self._hass.states.get(
+            current_temperature_sensor = self.hass.states.get(
                 self._current_temperature_sensor)
             if current_temperature_sensor is None or current_temperature_sensor.state is None or current_temperature_sensor.state == 'unknown':
                 self._attr_current_temperature = None
@@ -186,7 +186,7 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
             self._attr_target_temperature = self._luxtronik.get_value(
                 self._target_temperature_sensor)
         else:
-            self._attr_target_temperature = float(self._hass.states.get(
+            self._attr_target_temperature = float(self.hass.states.get(
                 self._target_temperature_sensor).state)
         return self._attr_target_temperature
 
@@ -212,7 +212,7 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         if not await self._async_control_heating() and changed:
             self.schedule_update_ha_state(force_refresh=True)
     # endregion Temperatures
-
+    
     def _is_heating_on(self) -> bool:
         status = self._luxtronik.get_value(self._status_sensor)
         # region Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
@@ -231,7 +231,12 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
             # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
         # 211123 LOGGER.info("climate._is_heating_on2 %s self._heat_status: %s status: %s result: %s",
         #             self._attr_unique_id, self._heat_status, status, status in self._heat_status or status in [LUX_STATUS_DEFROST, LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE])
-        return status in self._heat_status or (status in [LUX_STATUS_DEFROST, LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE] and self._attr_hvac_mode != HVAC_MODE_OFF)
+        result = status in self._heat_status or (status in [LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE] and self._attr_hvac_mode != HVAC_MODE_OFF)
+        if not result and status == LUX_STATUS_DEFROST and self._attr_hvac_mode != HVAC_MODE_OFF and self._last_status == self._heat_status:
+            result = True
+        if self._last_status is None or self._last_status != status:
+            self._last_status = status
+        return result
 
     @property
     def hvac_action(self):
@@ -392,7 +397,7 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
     _attr_device_class: Final = f"{DOMAIN}__{_attr_unique_id}"
 
     #_attr_target_temperature = 20.5
-    _attr_target_temperature_step = 0.5
+    _attr_target_temperature_step = 0.1
     _attr_min_temp = -5.0
     _attr_max_temp = +5.0
 
