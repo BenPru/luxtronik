@@ -47,6 +47,8 @@ from .const import (CONF_CALCULATIONS, CONF_CONTROL_MODE_HOME_ASSISTANT,
                     LUX_STATUS_HEATING,
                     LUX_STATUS_HEATING_EXTERNAL_SOURCE,
                     LUX_STATUS_NO_REQUEST, LUX_STATUS_SWIMMING_POOL_SOLAR,
+                    LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
+                    LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER,
                     PRESET_SECOND_HEATSOURCE, LuxMode)
 from .helpers.helper import get_sensor_text
 
@@ -141,12 +143,13 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
     _target_temperature_sensor: str = None
 
     _heat_status = [LUX_STATUS_HEATING, LUX_STATUS_DOMESTIC_WATER, LUX_STATUS_COOLING]
-    _last_status: str = None
 
     _cold_tolerance = DEFAULT_TOLERANCE
     _hot_tolerance = DEFAULT_TOLERANCE
 
     _last_lux_mode: LuxMode = None
+    _last_hvac_action = None
+
 
     def __init__(self, luxtronik: LuxtronikDevice, deviceInfo: DeviceInfo, name: str, control_mode_home_assistant: bool, current_temperature_sensor: str, entity_category: ENTITY_CATEGORIES = None):
         self._luxtronik = luxtronik
@@ -254,8 +257,10 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         if new_hvac_action != self._attr_hvac_action:
             self._attr_hvac_action = new_hvac_action
             self._async_control_heating()
-        LOGGER.info("climate.hvac_action %s status: %s hvac_action: %s",
-                    self._attr_unique_id, status, new_hvac_action)
+        if self._last_hvac_action != new_hvac_action:
+            self._last_hvac_action = new_hvac_action
+            LOGGER.info("climate.hvac_action changed %s status: %s hvac_action: %s",
+                        self._attr_unique_id, status, new_hvac_action)
         return new_hvac_action
 
     async def _async_control_heating(self) -> bool:
@@ -379,7 +384,6 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
 
 class LuxtronikDomesticWaterThermostat(LuxtronikThermostat):
     _attr_unique_id: Final = 'domestic_water'
-    _attr_icon = 'mdi:water-boiler'
     _attr_device_class: Final = f"{DOMAIN}__{_attr_unique_id}"
 
     _attr_target_temperature_step = 1.0
@@ -390,10 +394,21 @@ class LuxtronikDomesticWaterThermostat(LuxtronikThermostat):
     _heater_sensor: Final = LUX_SENSOR_MODE_DOMESTIC_WATER
     _heat_status: Final = [LUX_STATUS_DOMESTIC_WATER]
 
+    @property
+    def icon(self):  # -> str | None:
+        result_icon = 'mdi:water-boiler'
+        if self.hvac_mode == HVAC_MODE_OFF:
+            result_icon += '-off'
+        elif self.hvac_mode == HVAC_MODE_AUTO:
+            result_icon += '-auto'
+        return result_icon
+
+    def _is__heating_on_special(self) -> bool:
+        return self._luxtronik.get_value(self._status_sensor) == LUX_STATUS_DEFROST and self._attr_hvac_mode != HVAC_MODE_OFF and self._luxtronik.get_value(LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER)
+
 
 class LuxtronikHeatingThermostat(LuxtronikThermostat):
     _attr_unique_id = 'heating'
-    _attr_icon = 'mdi:radiator'
     _attr_device_class: Final = f"{DOMAIN}__{_attr_unique_id}"
 
     #_attr_target_temperature = 20.5
@@ -404,6 +419,16 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
     _target_temperature_sensor: Final = LUX_SENSOR_HEATING_TARGET_CORRECTION
     _heater_sensor: Final = LUX_SENSOR_MODE_HEATING
     _heat_status: Final = [LUX_STATUS_HEATING]
+
+    @property
+    def icon(self):  # -> str | None:
+        result_icon = 'mdi:radiator'
+        if self.hvac_mode == HVAC_MODE_OFF:
+            result_icon += '-off'
+        return result_icon
+
+    def _is__heating_on_special(self) -> bool:
+        return self._luxtronik.get_value(self._status_sensor) in [LUX_STATUS_DEFROST, LUX_STATUS_DOMESTIC_WATER] and self._attr_hvac_mode != HVAC_MODE_OFF and self._luxtronik.get_value(LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING)
 
 class LuxtronikCoolingThermostat(LuxtronikThermostat):
     _attr_unique_id = 'cooling'

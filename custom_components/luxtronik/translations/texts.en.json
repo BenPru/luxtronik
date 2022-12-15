@@ -37,7 +37,8 @@
   "heat_amount_domestic_water": "Heat amount domestic water",
   "approval_cooling": "Approval cooling",
   "remote_maintenance": "Remote maintenance",
-  "min_flow_out_temperature": "Min.Target Flow Out",
+  "min_flow_out_temperature": "Min. target flow out",
+  "heating_max_flow_out_increase_temperature": "Max. target flow out increase",
   "circuit_curve1_temperature": "Heating curve 1",
   "circuit_curve2_temperature": "Heating curve 2",
   "circuit_curve_night_temperature": "Heating night",
@@ -66,6 +67,7 @@
   "compressor_heater": "Compressor heater",
   "additional_heat_generator_amount_counter": "Heat amount second/additional heat generator",
   "operation_hours_additional_heat_generator": "Operation hours second/additional heat generator",
+  "additional_heat_generator": "Additional heat generator",
   "analog_out": "Analog output",
   "thermal_desinfection": "Thermal desinfection",
   "heating_night_lowering_to_temperature": "Heating night lowering to temperature",
@@ -76,5 +78,9 @@
   "solar_pump_off_max_difference_temperature_boiler": "Switch-off max. differential collector/boiler (solarpump)",
   "solar_pump_max_temperature_collector": "Max. temperature solar collector",
   "evu_until": "{evu_time} minutes more locktime.",
-  "evu_in": "Locktime in {evu_time} minutes."
+  "evu_in": "Locktime in {evu_time} minutes.",
+  "defrost_valve": "Defrost valve",
+  "release_second_heat_generator": "Release second heat generator",
+  "heating_hysteresis": "Hysteresis heating",
+  "domestic_water_hysteresis": "Hysteresis domestic water"
 }

@@ -12,13 +12,19 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import LuxtronikDevice
 from .binary_sensor import LuxtronikBinarySensor
-from .const import (CONF_LANGUAGE_SENSOR_NAMES, DOMAIN, LOGGER,
-                    LUX_SENSOR_MODE_DOMESTIC_WATER,
-                    LUX_SENSOR_MODE_HEATING,
-                    LUX_SENSOR_MODE_COOLING,
-                    LuxMode, LUX_SENSOR_HEATING_THRESHOLD, LUX_SENSOR_REMOTE_MAINTENANCE,
-                    LUX_SENSOR_PUMP_OPTIMIZATION,
-                    LUX_SENSOR_EFFICIENCY_PUMP)
+from .const import (
+    CONF_LANGUAGE_SENSOR_NAMES,
+    DOMAIN,
+    LOGGER,
+    LUX_SENSOR_MODE_DOMESTIC_WATER,
+    LUX_SENSOR_MODE_HEATING,
+    LUX_SENSOR_MODE_COOLING,
+    LuxMode,
+    LUX_SENSOR_HEATING_THRESHOLD,
+    LUX_SENSOR_REMOTE_MAINTENANCE,
+    LUX_SENSOR_PUMP_OPTIMIZATION,
+    LUX_SENSOR_EFFICIENCY_PUMP
+)
 from .helpers.helper import get_sensor_text
 
 # endregion Imports
@@ -59,11 +65,6 @@ async def async_setup_entry(
             device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
         LuxtronikSwitch(
             hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
-            sensor_key=LUX_SENSOR_PUMP_OPTIMIZATION, unique_id='pump_optimization',
-            name=f"{text_pump_optimization}", icon='mdi:tune',
-            device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
-        LuxtronikSwitch(
-            hass=hass, luxtronik=luxtronik, deviceInfo=device_info,
             sensor_key=LUX_SENSOR_EFFICIENCY_PUMP, unique_id='efficiency_pump',
             name=f"{text_efficiency_pump}", icon='mdi:leaf-circle',
             device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
@@ -80,6 +81,11 @@ async def async_setup_entry(
         text_heating_mode = get_sensor_text(lang, 'heating_mode_auto')
         text_heating_threshold = get_sensor_text(lang, 'heating_threshold')
         entities += [
+            LuxtronikSwitch(
+                hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoHeating,
+                sensor_key=LUX_SENSOR_PUMP_OPTIMIZATION, unique_id='pump_optimization',
+                name=text_pump_optimization, icon='mdi:tune',
+                device_class=DEVICE_CLASS_HEAT, entity_category=EntityCategory.CONFIG),
             LuxtronikSwitch(
                 on_state=LuxMode.automatic.value, off_state=LuxMode.off.value,
                 hass=hass, luxtronik=luxtronik, deviceInfo=deviceInfoHeating,
@@ -132,7 +138,6 @@ class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity, RestoreEntity):
 
     def __init__(
         self,
-        icon_off: str = None,
         on_state: str = True,
         off_state: str = False,
         *args: Any,
@@ -140,7 +145,6 @@ class LuxtronikSwitch(LuxtronikBinarySensor, SwitchEntity, RestoreEntity):
     ) -> None:
         """Initialize a new Luxtronik switch."""
         super().__init__(**kwargs)
-        self._icon_off = icon_off
         self._on_state = on_state
         self._off_state = off_state
 

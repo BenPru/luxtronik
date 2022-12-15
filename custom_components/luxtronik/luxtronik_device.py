@@ -4,6 +4,7 @@ import re
 import threading
 import time
 
+from homeassistant.core import HomeAssistant
 from homeassistant.util import Throttle
 from luxtronik import Luxtronik as Lux
 
@@ -11,6 +12,7 @@ from .const import (
     CONF_CALCULATIONS,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
+    DOMAIN,
     LOGGER,
     LUX_DETECT_SOLAR_SENSOR,
     LUX_MK_SENSORS,
@@ -70,8 +72,17 @@ class LuxtronikDevice:
         if group == CONF_VISIBILITIES:
             sensor = self._luxtronik.visibilities.get(sensor_id)
         return sensor
+ 
+    @property
+    def has_second_heat_generator(self) -> bool:
+        """Is second heat generator activated 1=electrical heater"""
+        try:
+            self.read()
+            return int(self.get_value('parameters.ID_Einst_ZWE1Art_akt')) > 0
+            # ID_Einst_ZWE1Fkt_akt = 1 --> Heating and domestic water
+        except Exception as e:
+            return False
 
-                    
     def detect_cooling_Mk(self):
         """ returns list of parameters that are may show cooling is enabled """
         coolingMk = []
@@ -108,9 +119,8 @@ class LuxtronikDevice:
             cooling_target_temperature_sensor = f"parameters.ID_Sollwert_KuCft{Mk}_akt"
         else:
             cooling_target_temperature_sensor = None
-        LOGGER.info(f"cooling_target_temperature_sensor = '{cooling_target_temperature_sensor}' ") 
+        LOGGER.info(f"cooling_target_temperature_sensor = '{cooling_target_temperature_sensor}' ")
         return cooling_target_temperature_sensor
-
 
     def write(
         self, parameter, value, use_debounce=True, update_immediately_after_write=False

@@ -106,6 +106,7 @@ SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
 
 ATTR_STATUS_TEXT: Final = "status_text"
 ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: Final = "Luxtronik Key"
+ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION: Final = "Last thermal desinfection"
 
 
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(seconds=10)
@@ -228,9 +229,13 @@ LUX_SENSOR_MODE_DOMESTIC_WATER: Final = "parameters.ID_Ba_Bw_akt"
 
 LUX_SENSOR_MODE_FAN: Final = "parameters.ID_Einst_BA_Lueftung_akt"
 LUX_BINARY_SENSOR_EVU_UNLOCKED: Final = "calculations.ID_WEB_EVUin"
-LUX_BINARY_SENSOR_SOLAR_PUMP: Final = "calculations.ID_WEB_SLPout"
-LUX_BINARY_SENSOR_CIRCULATION_PUMP: Final = "calculations.ID_WEB_HUPout"
+
+LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING: Final = "calculations.ID_WEB_HUPout"
 LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP: Final = "calculations.ID_WEB_ZUPout"
+
+LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER: Final = "calculations.ID_WEB_BUPout"
+
+LUX_BINARY_SENSOR_SOLAR_PUMP: Final = "calculations.ID_WEB_SLPout"
 
 # Future use:
 

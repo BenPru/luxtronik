@@ -5,6 +5,7 @@ from typing import Any
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.binary_sensor import (DEVICE_CLASS_LOCK,
+                                                    DEVICE_CLASS_OPENING,
                                                     DEVICE_CLASS_RUNNING,
                                                     PLATFORM_SCHEMA,
                                                     BinarySensorEntity)
@@ -21,13 +22,16 @@ from homeassistant.util import slugify
 
 from .const import (
     ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY,
-    CONF_CALCULATIONS, CONF_GROUP,
+    CONF_CALCULATIONS,
+    CONF_GROUP,
     CONF_INVERT_STATE,
     CONF_LANGUAGE_SENSOR_NAMES,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     DEFAULT_DEVICE_CLASS,
-    DEVICE_CLASSES, DOMAIN, LOGGER,
+    DEVICE_CLASSES,
+    DOMAIN,
+    LOGGER,
     LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
     LUX_BINARY_SENSOR_CIRCULATION_PUMP,
     LUX_BINARY_SENSOR_EVU_UNLOCKED,
@@ -159,6 +163,8 @@ async def async_setup_entry(
     text_circulation_pump_heating = get_sensor_text(lang, "circulation_pump_heating")
     text_pump_flow = get_sensor_text(lang, "pump_flow")
     text_compressor_heater = get_sensor_text(lang, "compressor_heater")
+    text_additional_heat_generator = get_sensor_text(lang, "additional_heat_generator")
+    text_defrost_valve = get_sensor_text(lang, "defrost_valve")
 
     entities = [
         LuxtronikBinarySensor(
@@ -199,6 +205,25 @@ async def async_setup_entry(
             icon="mdi:heat-wave",
             device_class=DEVICE_CLASS_RUNNING,
         ),
+        LuxtronikBinarySensor(
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_AVout',
+            unique_id="defrost_valve",
+            name=text_defrost_valve,
+            icon="mdi:valve-open",
+            icon_off="mdi:valve-closed",
+            device_class=DEVICE_CLASS_OPENING,
+        ),
+        LuxtronikBinarySensor(
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_ZW1out',
+            unique_id="additional_heat_generator",
+            name=text_additional_heat_generator,
+            icon="mdi:patio-heater",
+            device_class=DEVICE_CLASS_RUNNING,
+        ),
 
         # calculations.ID_WEB_ASDin Soledruck ausreichend
         # calculations.ID_WEB_HDin Hochdruck OK
@@ -216,7 +241,7 @@ async def async_setup_entry(
             LuxtronikBinarySensor(
                 luxtronik=luxtronik,
                 deviceInfo=deviceInfoHeating,
-                sensor_key=LUX_BINARY_SENSOR_CIRCULATION_PUMP,
+                sensor_key=LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
                 unique_id="circulation_pump_heating",
                 name=text_circulation_pump_heating,
                 icon="mdi:car-turbocharger",
@@ -240,7 +265,7 @@ async def async_setup_entry(
             LuxtronikBinarySensor(
                 luxtronik=luxtronik,
                 deviceInfo=deviceInfoDomesticWater,
-                sensor_key='calculations.ID_WEB_BUPout',
+                sensor_key=LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER,
                 unique_id="circulation_pump_domestic_water",
                 name=text_circulation_pump_domestic_water,
                 icon="mdi:pump",
@@ -292,7 +317,6 @@ async def async_setup_entry(
 class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
     """Representation of a Luxtronik binary sensor."""
 
-    _icon_off: str = None
     _on_state: str = True
 
     def __init__(
@@ -307,6 +331,7 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         state_class: str = None,
         entity_category: ENTITY_CATEGORIES = None,
         invert_state: bool = False,
+        icon_off: str = None,
         entity_registry_enabled_default = True,
         *args: Any,
         **kwargs: Any,
@@ -322,6 +347,7 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         self._attr_device_info = deviceInfo
         self._attr_name = name
         self._attr_icon = icon
+        self._icon_off = icon_off
         self._attr_device_class = device_class
         self._attr_state_class = state_class
         self._attr_entity_category = entity_category
