@@ -33,6 +33,7 @@ from .const import (
     DOMAIN,
     LOGGER,
     LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
+    LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER,
     LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
     LUX_BINARY_SENSOR_EVU_UNLOCKED,
     LUX_BINARY_SENSOR_SOLAR_PUMP
@@ -332,7 +333,7 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         entity_category: ENTITY_CATEGORIES = None,
         invert_state: bool = False,
         icon_off: str = None,
-        entity_registry_enabled_default = True,
+        entity_registry_enabled_default: bool = True,
         *args: Any,
         **kwargs: Any,
     ) -> None:
