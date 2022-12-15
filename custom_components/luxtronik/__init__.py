@@ -61,11 +61,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     config_entry.async_on_unload(
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, logout_luxtronik)
     )
-    await hass.async_add_executor_job(setup_hass_services, hass)
+    await hass.async_add_executor_job(setup_hass_services, hass, config_entry)
     return True
 
 
-def setup_hass_services(hass):
+def setup_hass_services(hass: HomeAssistant, config_entry: ConfigEntry):
     """Home Assistant services."""
 
     def write_parameter(service):
@@ -73,9 +73,7 @@ def setup_hass_services(hass):
         parameter = service.data.get(ATTR_PARAMETER)
         value = service.data.get(ATTR_VALUE)
         luxtronik = hass.data[DOMAIN]
-        update_immediately_after_write = hass.data[f"{DOMAIN}_conf"][
-            CONF_UPDATE_IMMEDIATELY_AFTER_WRITE
-        ]
+        update_immediately_after_write = config_entry.data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
         luxtronik.write(
             parameter,
             value,
@@ -103,6 +101,8 @@ def setup_internal(hass, data, conf):
     port = data[CONF_PORT]
     safe = data[CONF_SAFE]
     lock_timeout = data[CONF_LOCK_TIMEOUT]
+    if CONF_UPDATE_IMMEDIATELY_AFTER_WRITE not in data:
+        data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE] = True
     # update_immediately_after_write = data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
     # use_legacy_sensor_ids = data[CONF_USE_LEGACY_SENSOR_IDS] if CONF_USE_LEGACY_SENSOR_IDS in data else False
     # LOGGER.info("setup_internal use_legacy_sensor_ids: '%s'",
