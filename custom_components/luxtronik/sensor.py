@@ -22,6 +22,7 @@ from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.util import dt as dt_util
 
 from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY, ATTR_STATUS_TEXT, CONF_GROUP,
                                                CONF_LANGUAGE_SENSOR_NAMES,
@@ -137,6 +138,7 @@ async def async_setup_entry(
     if not luxtronik:
         LOGGER.warning("%s.sensor.async_setup_entry no luxtronik!", DOMAIN)
         return False
+    luxtronik.read()
 
     device_info = hass.data[f"{DOMAIN}_DeviceInfo"]
 
@@ -203,6 +205,22 @@ async def async_setup_entry(
             unit_of_measurement=TIME_SECONDS,
             entity_category=EntityCategory.DIAGNOSTIC,
             entity_registry_visible_default=False,
+            extra_attributes = {
+                # Laufzeit seit dem WP aktiv ist
+                'WP Seit (ID_WEB_Time_WPein_akt)': 'calculations.ID_WEB_Time_WPein_akt',
+                'ZWE1 seit (ID_WEB_Time_ZWE1_akt)': 'calculations.ID_WEB_Time_ZWE1_akt',
+                # 'ZWE2 seit (ID_WEB_Time_ZWE2_akt)': 'calculations.ID_WEB_Time_ZWE2_akt',
+                'Netzeinschaltv. (ID_WEB_Timer_EinschVerz)': 'calculations.ID_WEB_Timer_EinschVerz',
+                'SSP-Aus-Zeit (ID_WEB_Time_SSPAUS_akt)': 'calculations.ID_WEB_Time_SSPAUS_akt',
+                'SSP-Ein-Zeit (ID_WEB_Time_SSPEIN_akt)': 'calculations.ID_WEB_Time_SSPEIN_akt',
+                'VD-Stand (ID_WEB_Time_VDStd_akt)': 'calculations.ID_WEB_Time_VDStd_akt',
+                # Zeit seit Modus "Heizung" aktiv?
+                'HRM-Zeit (ID_WEB_Time_HRM_akt)': 'calculations.ID_WEB_Time_HRM_akt',
+                # Zeit seit Modus "Wasser" aktiv?
+                'HRW-Stand (ID_WEB_Time_HRW_akt)': 'calculations.ID_WEB_Time_HRW_akt',
+                'ID_WEB_Time_LGS_akt': 'calculations.ID_WEB_Time_LGS_akt',
+                'ID_WEB_Time_SBW_akt': 'calculations.ID_WEB_Time_SBW_akt'
+            }
         ),
         LuxtronikSensor(
             luxtronik,
@@ -432,7 +450,7 @@ async def async_setup_entry(
                 entity_category=EntityCategory.DIAGNOSTIC,
             ),
         ]
-    if luxtronik.get_value("parameters.ID_Waermemenge_ZWE") > 0:
+    if luxtronik.get_value("parameters.ID_Waermemenge_ZWE") is not None and luxtronik.get_value("parameters.ID_Waermemenge_ZWE") > 0:
         text_additional_heat_generator_amount_counter = get_sensor_text(lang, "additional_heat_generator_amount_counter")
         entities += [
             LuxtronikSensor(
@@ -718,6 +736,7 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         factor: float = None,
         entity_registry_visible_default = True,
         entity_registry_enabled_default = True,
+        extra_attributes: dict = None,
         # *args: Any,
         # **kwargs: Any
     ) -> None:
@@ -741,6 +760,7 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         self._attr_entity_registry_visible_default = entity_registry_visible_default
         self._attr_entity_registry_enabled_default = entity_registry_enabled_default
         self._attr_extra_state_attributes = { ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: sensor_key }
+        self._extra_attributes = extra_attributes
 
     @property
     def icon(self):  # -> str | None:
@@ -759,6 +779,9 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
     def native_value(self):  # -> float | int | None:
         """Return the state of the sensor."""
         value = self._luxtronik.get_value(self._sensor_key)
+        if isinstance(value, datetime) and value.tzinfo is None:
+            time_zone = dt_util.get_time_zone(self.hass.config.time_zone)
+            value = value.replace(tzinfo=time_zone)
 
         if self._sensor_key == LUX_SENSOR_STATUS:
             status3 = self._luxtronik.get_value(LUX_SENSOR_STATUS3)
@@ -796,7 +819,9 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
                 hours, minutes = divmod(minutes, 60)
                 time_str = f"{hours:01.0f}:{minutes:02.0f} h"
             self._attr_extra_state_attributes[ATTR_STATUS_TEXT] = time_str
-            # self._attr_extra_state_attributes = {ATTR_STATUS_TEXT: time_str}
+        if self._extra_attributes is not None:
+            for key, value in self._extra_attributes.items():
+                self._attr_extra_state_attributes[key] = self._luxtronik.get_value(value)
 
 
 class LuxtronikLegacySensor(LuxtronikSensor):

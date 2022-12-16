@@ -234,12 +234,14 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
             # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
         # 211123 LOGGER.info("climate._is_heating_on2 %s self._heat_status: %s status: %s result: %s",
         #             self._attr_unique_id, self._heat_status, status, status in self._heat_status or status in [LUX_STATUS_DEFROST, LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE])
-        result = status in self._heat_status or (status in [LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE] and self._attr_hvac_mode != HVAC_MODE_OFF)
-        if not result and status == LUX_STATUS_DEFROST and self._attr_hvac_mode != HVAC_MODE_OFF and self._last_status == self._heat_status:
-            result = True
-        if self._last_status is None or self._last_status != status:
-            self._last_status = status
-        return result
+        if status in self._heat_status or (status in [LUX_STATUS_SWIMMING_POOL_SOLAR, LUX_STATUS_HEATING_EXTERNAL_SOURCE] and self._attr_hvac_mode != HVAC_MODE_OFF):
+            return True
+        # if not result and status == LUX_STATUS_DEFROST and self._attr_hvac_mode != HVAC_MODE_OFF and self._last_status == self._heat_status:
+        #     result = True
+        return self._is__heating_on_special()
+
+    def _is__heating_on_special(self) -> bool:
+        return False
 
     @property
     def hvac_action(self):

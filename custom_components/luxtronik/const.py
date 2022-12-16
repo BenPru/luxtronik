@@ -519,6 +519,8 @@ CONF_KELVIN: Final = "kelvin"
 CONF_BAR: Final = "bar"
 CONF_PERCENT: Final = "percent"
 CONF_ENERGY: Final = "energy"
+CONF_WATT: Final = "W"
+CONF_FREQUENCY = "Hz"
 CONF_HOURS: Final = "hours"
 CONF_VOLTAGE: Final = "voltage"
 CONF_FLOW: Final = "flow"
@@ -543,6 +545,7 @@ ICONS: Final = {
     "level": "mdi:format-list-numbered",
     "count": "mdi:counter",
     "version": "mdi:information-outline",
+    "frequency": "mdi:cosine-wave",
 }
 
 DEVICE_CLASSES: Final = {
@@ -553,6 +556,8 @@ DEVICE_CLASSES: Final = {
     CONF_HOURS: None,  # DEVICE_CLASS_TIMESTAMP,
     CONF_TIMESTAMP: DEVICE_CLASS_TIMESTAMP,
     CONF_ENERGY: DEVICE_CLASS_ENERGY,
+    CONF_WATT: DEVICE_CLASS_POWER,
+    CONF_FREQUENCY: DEVICE_CLASS_FREQUENCY,
 }
 
 UNITS: Final = {
@@ -565,6 +570,8 @@ UNITS: Final = {
     CONF_VOLTAGE: ELECTRIC_POTENTIAL_VOLT,
     CONF_HOURS: TIME_HOURS,
     CONF_FLOW: "l/h",
+    CONF_WATT: "W",
+    CONF_FREQUENCY: "Hz",
 }
 # endregion Legacy consts
 
