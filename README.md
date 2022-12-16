@@ -2,6 +2,8 @@
 
 This component has been created to be used with Home Assistant.
 
+# ${{\color{red}Use\ it\ at\ your\ own\ risk!\ You\ can\ write\ config\ parameters\ to\ your\ heatpump.\ Please\ be\ careful.}}\$
+
 Based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik) / [Bouni/python-luxtronik](https://github.com/Bouni/python-luxtronik). This component extends the original luxtronik component with automatic discovery of the heatpump und home assistant climate thermostat.
 
 The `Luxtronik` integration lets you monitor and control heat pump units containing a Luxtronik controller. It is used by various manufacturers such as:
