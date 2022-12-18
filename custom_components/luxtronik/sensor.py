@@ -779,7 +779,7 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
     def native_value(self):  # -> float | int | None:
         """Return the state of the sensor."""
         value = self._luxtronik.get_value(self._sensor_key)
-        if isinstance(value, datetime) and value.tzinfo is None:
+        if value is not None and isinstance(value, datetime) and value.tzinfo is None:
             time_zone = dt_util.get_time_zone(self.hass.config.time_zone)
             value = value.replace(tzinfo=time_zone)
 
