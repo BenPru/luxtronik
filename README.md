@@ -22,9 +22,9 @@ This integration works locally. It's only necessary to connect the Luxtronik con
 
 # Installation
 
-1a. Install via HACS (recommended) 
-1b. Install manually;
-2 Configuration
+1a. Install via HACS (recommended).  
+1b. Install manually.  
+2. Configuration.  
 
 ## 1a. Install via HACS (recommended)
 
