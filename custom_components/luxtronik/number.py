@@ -172,7 +172,7 @@ async def async_setup_entry(
                     luxtronik, deviceInfoHeating,
                     number_key=LUX_SENSOR_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
                     unique_id='heating_room_temperature_impact_factor', name=f"{text_heating_room_temperature_impact_factor}",
-                    icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=100, max_value=200, step=10, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
+                    icon='mdi:thermometer-chevron-up', unit_of_measurement=PERCENTAGE, min_value=0, max_value=200, step=10, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
             ]
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
