@@ -96,13 +96,6 @@ async def async_setup_entry(
     if deviceInfoDomesticWater is not None:
         text_domestic_water_mode_auto = get_sensor_text(
             lang, 'domestic_water_mode_auto')
-        text_circulation_pump = get_sensor_text(lang, "circulation_pump")
-        if luxtronik.has_domestic_water_circulation_pump:
-            circulation_pump_unique_id = 'domestic_water_circulation_pump_release'
-            text_domestic_water_circulation_pump = get_sensor_text(lang, "domestic_water_circulation_pump_release")
-        else:
-            circulation_pump_unique_id = 'domestic_water_charging_pump_release'
-            text_domestic_water_circulation_pump = get_sensor_text(lang, "domestic_water_charging_pump_release")
         entities += [
             LuxtronikSwitch(
                 on_state=LuxMode.automatic.value, off_state=LuxMode.off.value,
@@ -112,13 +105,6 @@ async def async_setup_entry(
                 unique_id='domestic_water',
                 name=text_domestic_water_mode_auto, icon='mdi:water-boiler-auto', icon_off='mdi:water-boiler-off',
                 device_class=DEVICE_CLASS_HEAT),
-            LuxtronikSwitch(
-                hass=hass, luxtronik=luxtronik,
-                deviceInfo=deviceInfoDomesticWater,
-                sensor_key='parameters.ID_Einst_BWZIP_akt',
-                unique_id=circulation_pump_unique_id,
-                name=text_domestic_water_circulation_pump, icon='mdi:pump',
-                device_class=DEVICE_CLASS_RUNNING, entity_category=EntityCategory.CONFIG),
         ]
         
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
