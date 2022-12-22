@@ -28,27 +28,20 @@ from .const import (CONF_CALCULATIONS, CONF_CONTROL_MODE_HOME_ASSISTANT,
                     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
                     CONF_LANGUAGE_SENSOR_NAMES, CONF_PARAMETERS,
                     CONF_VISIBILITIES, DEFAULT_TOLERANCE, DOMAIN, LOGGER,
-                    
+                    LUX_BINARY_SENSOR_DOMESTIC_WATER_RECIRCULATION_PUMP,
+                    LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
+                    LUX_SENSOR_COOLING_THRESHOLD,
                     LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE,
                     LUX_SENSOR_DOMESTIC_WATER_TARGET_TEMPERATURE,
                     LUX_SENSOR_HEATING_TARGET_CORRECTION,
-                    LUX_SENSOR_COOLING_THRESHOLD,
-                    LUX_SENSOR_OUTDOOR_TEMPERATURE,
-                    
-                    LUX_SENSOR_MODE_DOMESTIC_WATER,
-                    LUX_SENSOR_MODE_HEATING,
-                    LUX_SENSOR_MODE_COOLING,
-                    
+                    LUX_SENSOR_MODE_COOLING, LUX_SENSOR_MODE_DOMESTIC_WATER,
+                    LUX_SENSOR_MODE_HEATING, LUX_SENSOR_OUTDOOR_TEMPERATURE,
                     LUX_SENSOR_STATUS, LUX_SENSOR_STATUS1, LUX_SENSOR_STATUS3,
                     LUX_STATUS1_WORKAROUND, LUX_STATUS3_WORKAROUND,
                     LUX_STATUS_COOLING, LUX_STATUS_DEFROST,
-                    LUX_STATUS_DOMESTIC_WATER,
-                    LUX_STATUS_EVU,
-                    LUX_STATUS_HEATING,
-                    LUX_STATUS_HEATING_EXTERNAL_SOURCE,
+                    LUX_STATUS_DOMESTIC_WATER, LUX_STATUS_EVU,
+                    LUX_STATUS_HEATING, LUX_STATUS_HEATING_EXTERNAL_SOURCE,
                     LUX_STATUS_NO_REQUEST, LUX_STATUS_SWIMMING_POOL_SOLAR,
-                    LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
-                    LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER,
                     PRESET_SECOND_HEATSOURCE, LuxMode)
 from .helpers.helper import get_sensor_text
 
@@ -406,7 +399,7 @@ class LuxtronikDomesticWaterThermostat(LuxtronikThermostat):
         return result_icon
 
     def _is__heating_on_special(self) -> bool:
-        return self._luxtronik.get_value(self._status_sensor) == LUX_STATUS_DEFROST and self._attr_hvac_mode != HVAC_MODE_OFF and self._luxtronik.get_value(LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER)
+        return self._luxtronik.get_value(self._status_sensor) == LUX_STATUS_DEFROST and self._attr_hvac_mode != HVAC_MODE_OFF and self._luxtronik.get_value(LUX_BINARY_SENSOR_DOMESTIC_WATER_RECIRCULATION_PUMP)
 
 
 class LuxtronikHeatingThermostat(LuxtronikThermostat):

@@ -24,26 +24,19 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.util import dt as dt_util
 
-from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY, ATTR_STATUS_TEXT, CONF_GROUP,
-                                               CONF_LANGUAGE_SENSOR_NAMES,
-                                               DEFAULT_DEVICE_CLASS,
-                                               DEVICE_CLASSES, DOMAIN, ICONS,
-                                               LOGGER,
-                                               LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
-                                               LUX_SENSOR_STATUS,
-                                               LUX_SENSOR_STATUS1,
-                                               LUX_SENSOR_STATUS3,
-                                               LUX_STATE_ICON_MAP,
-                                               LUX_STATES_ON,
-                                               LUX_STATUS_DOMESTIC_WATER,
-                                               LUX_STATUS_EVU,
-                                               LUX_STATUS1_WORKAROUND,
-                                               LUX_STATUS3_WORKAROUND,
-                                               LUX_STATUS_HEATING,
-                                               LUX_STATUS_NO_REQUEST,
-                                               LUX_STATUS_THERMAL_DESINFECTION,
-                                               SECOUND_TO_HOUR_FACTOR, UNITS)
-from .helpers.helper import (get_sensor_text, get_sensor_value_text)
+from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY, ATTR_STATUS_TEXT,
+                    CONF_GROUP, CONF_LANGUAGE_SENSOR_NAMES,
+                    DEFAULT_DEVICE_CLASS, DEVICE_CLASSES, DOMAIN, ICONS,
+                    LOGGER, LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
+                    LUX_SENSOR_MODE_HEATING, LUX_SENSOR_STATUS,
+                    LUX_SENSOR_STATUS1, LUX_SENSOR_STATUS3, LUX_STATE_ICON_MAP,
+                    LUX_STATES_ON, LUX_STATUS1_HEATPUMP_COMING,
+                    LUX_STATUS1_HEATPUMP_SHUTDOWN, LUX_STATUS1_WORKAROUND,
+                    LUX_STATUS3_WORKAROUND, LUX_STATUS_DOMESTIC_WATER,
+                    LUX_STATUS_EVU, LUX_STATUS_HEATING, LUX_STATUS_NO_REQUEST,
+                    LUX_STATUS_THERMAL_DESINFECTION, SECOUND_TO_HOUR_FACTOR,
+                    UNITS, LuxMode)
+from .helpers.helper import get_sensor_text, get_sensor_value_text
 from .luxtronik_device import LuxtronikDevice
 from .model import LuxtronikStatusExtraAttributes
 
@@ -211,21 +204,22 @@ async def async_setup_entry(
                 'ZWE1 seit (ID_WEB_Time_ZWE1_akt)': 'calculations.ID_WEB_Time_ZWE1_akt',
                 # 'ZWE2 seit (ID_WEB_Time_ZWE2_akt)': 'calculations.ID_WEB_Time_ZWE2_akt',
                 'Netzeinschaltv. (ID_WEB_Timer_EinschVerz)': 'calculations.ID_WEB_Timer_EinschVerz',
-                'SSP-Aus-Zeit (ID_WEB_Time_SSPAUS_akt)': 'calculations.ID_WEB_Time_SSPAUS_akt',
-                'SSP-Ein-Zeit (ID_WEB_Time_SSPEIN_akt)': 'calculations.ID_WEB_Time_SSPEIN_akt',
+                'Schaltspielsperre SSP-Aus-Zeit (ID_WEB_Time_SSPAUS_akt)': 'calculations.ID_WEB_Time_SSPAUS_akt',
+                'Schaltspielsperre SSP-Ein-Zeit (ID_WEB_Time_SSPEIN_akt)': 'calculations.ID_WEB_Time_SSPEIN_akt',
                 'VD-Stand (ID_WEB_Time_VDStd_akt)': 'calculations.ID_WEB_Time_VDStd_akt',
-                # Zeit seit Modus "Heizung" aktiv?
-                'HRM-Zeit (ID_WEB_Time_HRM_akt)': 'calculations.ID_WEB_Time_HRM_akt',
-                # Zeit seit Modus "Wasser" aktiv?
-                'HRW-Stand (ID_WEB_Time_HRW_akt)': 'calculations.ID_WEB_Time_HRW_akt',
+                'Heizungsregler Mehr-Zeit HRM-Zeit (ID_WEB_Time_HRM_akt)': 'calculations.ID_WEB_Time_HRM_akt',
+                'Heizungsregler Weniger-Zeit HRW-Stand (ID_WEB_Time_HRW_akt)': 'calculations.ID_WEB_Time_HRW_akt',
+                # TDI seti?
                 'ID_WEB_Time_LGS_akt': 'calculations.ID_WEB_Time_LGS_akt',
-                'ID_WEB_Time_SBW_akt': 'calculations.ID_WEB_Time_SBW_akt'
+                'Sperre WW? ID_WEB_Time_SBW_akt': 'calculations.ID_WEB_Time_SBW_akt',
+                'Abtauen in ID_WEB_Time_AbtIn': 'calculations.ID_WEB_Time_AbtIn',
+                'ID_WEB_Time_Heissgas': 'calculations.ID_WEB_Time_Heissgas'
             }
         ),
         LuxtronikSensor(
             luxtronik,
             device_info,
-            "calculations.ID_WEB_HauptMenuStatus_Zeile1",
+            LUX_SENSOR_STATUS1,
             "status_line_1",
             "Status 1",
             "mdi:numeric-1-circle",
@@ -251,7 +245,7 @@ async def async_setup_entry(
         LuxtronikSensor(
             luxtronik,
             device_info,
-            "calculations.ID_WEB_HauptMenuStatus_Zeile3",
+            LUX_SENSOR_STATUS3,
             "status_line_3",
             "Status 3",
             "mdi:numeric-3-circle",
@@ -538,7 +532,7 @@ async def async_setup_entry(
                 "mdi:waves-arrow-left",
                 entity_category=None,
             ),
-            LuxtronikSensor(
+            LuxtronikFlowOutStatusSensor(
                 luxtronik,
                 device_info_heating,
                 "calculations.ID_WEB_Sollwert_TRL_HZ",
@@ -798,6 +792,11 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
                 # pump forerun
                 return LUX_STATUS_NO_REQUEST
             # endregion Workaround Luxtronik Bug: Status shows heating but status 3 = no request!
+        # region Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
+        elif self._sensor_key == LUX_SENSOR_STATUS1 and value == LUX_STATUS1_HEATPUMP_COMING:
+            if int(self._luxtronik.get_value('calculations.ID_WEB_Time_SSPEIN_akt')) < 10 and int(self._luxtronik.get_value('calculations.ID_WEB_Time_SSPAUS_akt')) > 0:
+                return LUX_STATUS1_HEATPUMP_SHUTDOWN
+            # endregion Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
 
             
         return value if self._factor is None else round(value * self._factor, 2)
@@ -842,9 +841,26 @@ class LuxtronikLegacySensor(LuxtronikSensor):
     #     """Return the entity_id of the sensor."""
     #     return self._set_entity_id
 
-    # @entity_id.setter
-    # def set_entity_id(self, x):
-    #     pass
+class LuxtronikFlowOutStatusSensor(LuxtronikSensor, RestoreEntity):
+    def _calc_switch_gap(self) -> float:
+        flow_out_target = float(self._luxtronik.get_value("calculations.ID_WEB_Sollwert_TRL_HZ"))
+        flow_out = float(self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TRL"))
+        hyst = float(self._luxtronik.get_value("parameters.ID_Einst_HRHyst_akt")) * 0.1
+
+        if self._luxtronik.get_value(LUX_SENSOR_STATUS) == LUX_STATUS_HEATING:
+            return flow_out + hyst - flow_out_target
+        elif self._luxtronik.get_value(LUX_SENSOR_MODE_HEATING) != LuxMode.off.value:
+            return flow_out - hyst - flow_out_target
+        return None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str]:
+        """Return the state attributes of the device."""
+        return {
+            ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: self._sensor_key,
+            'switch_gap': self._calc_switch_gap(),
+        }
+
 
 class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
     """Luxtronik Status Sensor with extended attr."""
@@ -858,10 +874,10 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
 
     def update(self):
         LuxtronikSensor.update(self)
-        time_now = time(datetime.utcnow().hour, datetime.utcnow().minute)
+        time_now = time(datetime.now().hour, datetime.now().minute)
         if self.native_value is not None and self._last_state is not None and self.native_value == LUX_STATUS_EVU and self._last_state != LUX_STATUS_EVU:
             # evu start
-            if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour:
+            if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour or time_now.hour <= self._first_evu_end_time.hour:
                 self._first_evu_start_time = time_now
             else:
                 self._second_evu_start_time = time_now
@@ -922,7 +938,7 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
 
     def _calc_next_evu_event_minutes(self) -> int:
         evu_time = self._get_next_evu_event_time()
-        time_now = time(datetime.utcnow().hour, datetime.utcnow().minute)
+        time_now = time(datetime.now().hour, datetime.now().minute)
         if evu_time is None:
             return None
         evu_hours = (24 if evu_time < time_now else 0) + evu_time.hour
@@ -930,7 +946,7 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
 
     def _get_next_evu_event_time(self) -> time:
         event: time = None
-        time_now = time(datetime.utcnow().hour, datetime.utcnow().minute)
+        time_now = time(datetime.now().hour, datetime.now().minute)
         for evu_time in [self._first_evu_start_time, self._first_evu_end_time, self._second_evu_start_time, self._second_evu_end_time]:
             if evu_time is None:
                 continue
@@ -946,7 +962,7 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
 
 
     @property
-    def extra_state_attributes(self) -> LuxtronikStatusExtraAttributes:
+    def extra_state_attributes(self) -> dict[str, str]:
         """Return the state attributes of the device."""
         return {
             ATTR_STATUS_TEXT: self._build_status_text(),

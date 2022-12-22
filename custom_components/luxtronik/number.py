@@ -398,3 +398,25 @@ class LuxtronikNumberThermalDesinfection(LuxtronikNumber, RestoreEntity):
                 ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION: datetime.utcnow()
             }
 
+    async def async_added_to_hass(self) -> None:
+        """Handle entity which will be added."""
+        await super().async_added_to_hass()
+        state = await self.async_get_last_state()
+        if not state:
+            return
+        self._state = state.state
+
+        if ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION in state.attributes:
+            self._attr_extra_state_attributes = {
+                ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: self._number_key,
+                ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION: state.attributes[ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION]
+            }
+
+        DATA_UPDATED = f"{DOMAIN}_data_updated"
+        async_dispatcher_connect(
+            self.hass, DATA_UPDATED, self._schedule_immediate_update
+        )
+
+    @callback
+    def _schedule_immediate_update(self):
+        self.async_schedule_update_ha_state(True)

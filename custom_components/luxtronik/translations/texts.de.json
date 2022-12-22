@@ -59,8 +59,10 @@
   "high_pressure": "Hochdruck",
   "low_pressure": "Niederdruck",
   "circulation_pump": "Zirkulationspumpe",
+  "domestic_water_circulation_pump_release": "Zirkulationspumpe Freigabe",
+  "domestic_water_charging_pump_release": "Boilerladepumpe Freigabe",
   "additional_circulation_pump": "Zusatzumw\u00e4lzpumpe",
-  "circulation_pump_domestic_water": "Umw\u00e4lzpumpe Brauchwasser",
+  "domestic_water_recirculation_pump": "Umw\u00e4lzpumpe Brauchwasser",
   "circulation_pump_heating": "Umw\u00e4lzpumpe Heizung",
   "pump_heat_control": "Pumpenheizkontrolle",
   "pump_flow": "Soleumw\u00e4lzpumpe",
@@ -80,5 +82,6 @@
   "defrost_valve": "Abtau Ventil",
   "release_second_heat_generator": "Freigabe ZWE",
   "heating_hysteresis": "Hysterese Heizungsregler",
-  "domestic_water_hysteresis": "Hysterese Brauchwasser"
+  "domestic_water_hysteresis": "Hysterese Brauchwasser",
+  "domestic_water_charging_pump": "Boilerladepumpe"
 }

@@ -14,6 +14,7 @@
       "heatpump running": "Die W\u00e4rmepumpe l\u00e4uft",
       "heatpump idle": "Die W\u00e4rmepumpe ist im Leerlauf",
       "heatpump coming": "Die W\u00e4rmepumpe startet",
+      "heatpump shutdown": "Die W\u00e4rmepumpe schaltet ab",
       "errorcode slot": "W\u00e4rmepumpe Fehlercode in Schacht 0",
       "pump forerun": "Pumpenvorlauf",
       "defrost": "Taut ab",

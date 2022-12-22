@@ -47,6 +47,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_HOST, default=self._discovery_host): str,
                 vol.Required(CONF_PORT, default=self._discovery_port): int,
                 vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
+                vol.Optional(CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, default=True): bool,
                 vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=f"sensor.{self._sensor_prefix}_room_temperature"): str,
                 vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(
                     LANGUAGES_SENSOR_NAMES

@@ -20,24 +20,16 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import slugify
 
-from .const import (
-    ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY,
-    CONF_CALCULATIONS,
-    CONF_GROUP,
-    CONF_INVERT_STATE,
-    CONF_LANGUAGE_SENSOR_NAMES,
-    CONF_PARAMETERS,
-    CONF_VISIBILITIES,
-    DEFAULT_DEVICE_CLASS,
-    DEVICE_CLASSES,
-    DOMAIN,
-    LOGGER,
-    LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
-    LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER,
-    LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
-    LUX_BINARY_SENSOR_EVU_UNLOCKED,
-    LUX_BINARY_SENSOR_SOLAR_PUMP
-)
+from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY,
+                    CONF_CALCULATIONS, CONF_GROUP, CONF_INVERT_STATE,
+                    CONF_LANGUAGE_SENSOR_NAMES, CONF_PARAMETERS,
+                    CONF_VISIBILITIES, DEFAULT_DEVICE_CLASS, DEVICE_CLASSES,
+                    DOMAIN, LOGGER,
+                    LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
+                    LUX_BINARY_SENSOR_DOMESTIC_WATER_RECIRCULATION_PUMP,
+                    LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
+                    LUX_BINARY_SENSOR_EVU_UNLOCKED,
+                    LUX_BINARY_SENSOR_SOLAR_PUMP)
 from .helpers.helper import get_sensor_text
 from .luxtronik_device import LuxtronikDevice
 
@@ -160,7 +152,7 @@ async def async_setup_entry(
     text_compressor = get_sensor_text(lang, "compressor")
     text_circulation_pump = get_sensor_text(lang, "circulation_pump")
     text_additional_circulation_pump = get_sensor_text(lang, "additional_circulation_pump")
-    text_circulation_pump_domestic_water = get_sensor_text(lang, "circulation_pump_domestic_water")
+    text_domestic_water_recirculation_pump = get_sensor_text(lang, "domestic_water_recirculation_pump")
     text_circulation_pump_heating = get_sensor_text(lang, "circulation_pump_heating")
     text_pump_flow = get_sensor_text(lang, "pump_flow")
     text_compressor_heater = get_sensor_text(lang, "compressor_heater")
@@ -262,13 +254,19 @@ async def async_setup_entry(
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if deviceInfoDomesticWater is not None:
         text_solar_pump = get_sensor_text(lang, "solar_pump")
+        if luxtronik.has_domestic_water_circulation_pump:
+            circulation_pump_unique_id = 'domestic_water_circulation_pump'
+            text_domestic_water_circulation_pump = text_circulation_pump
+        else:
+            circulation_pump_unique_id = 'domestic_water_charging_pump'
+            text_domestic_water_circulation_pump = get_sensor_text(lang, "domestic_water_charging_pump")
         entities += [
             LuxtronikBinarySensor(
                 luxtronik=luxtronik,
                 deviceInfo=deviceInfoDomesticWater,
-                sensor_key=LUX_BINARY_SENSOR_CIRCULATION_PUMP_DOMESTIC_WATER,
-                unique_id="circulation_pump_domestic_water",
-                name=text_circulation_pump_domestic_water,
+                sensor_key=LUX_BINARY_SENSOR_DOMESTIC_WATER_RECIRCULATION_PUMP,
+                unique_id="domestic_water_recirculation_pump",
+                name=text_domestic_water_recirculation_pump,
                 icon="mdi:pump",
                 device_class=DEVICE_CLASS_RUNNING,
             ),
@@ -276,8 +274,8 @@ async def async_setup_entry(
                 luxtronik=luxtronik,
                 deviceInfo=deviceInfoDomesticWater,
                 sensor_key='calculations.ID_WEB_ZIPout',
-                unique_id="circulation_pump",
-                name=text_circulation_pump,
+                unique_id=circulation_pump_unique_id,
+                name=text_domestic_water_circulation_pump,
                 icon="mdi:pump",
                 device_class=DEVICE_CLASS_RUNNING,
             ),

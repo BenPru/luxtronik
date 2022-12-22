@@ -126,7 +126,9 @@ def setup_internal(hass, data, conf):
     hass.data[f"{DOMAIN}_conf"] = conf
     
     # Create DeviceInfos:
-    serial_number = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
+    serial_number_date = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
+    serial_number_hex = hex(int(luxtronik.get_value("parameters.ID_WP_SerienNummer_HEX")))
+    serial_number = f"{serial_number_date}-{serial_number_hex}".replace('x', '')
     model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
     
     hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(

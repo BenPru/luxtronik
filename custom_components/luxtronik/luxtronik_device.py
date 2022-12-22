@@ -80,7 +80,16 @@ class LuxtronikDevice:
             self.read()
             return int(self.get_value('parameters.ID_Einst_ZWE1Art_akt')) > 0
             # ID_Einst_ZWE1Fkt_akt = 1 --> Heating and domestic water
-        except Exception as e:
+        except Exception:
+            return False
+
+    @property
+    def has_domestic_water_circulation_pump(self) -> bool:
+        """Exists a domestic water circulation pump. If not it is a domestic water charging pump"""
+        try:
+            self.read()
+            return int(self.get_value('parameters.ID_Einst_BWZIP_akt')) != 1
+        except Exception:
             return False
 
     def detect_cooling_Mk(self):
