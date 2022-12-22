@@ -11,7 +11,7 @@
   "after_dependencies": ["http"],
   "codeowners": ["@bouni", "@benpru"],
   "requirements": ["luxtronik>=0.3.14"],
-  "homeassistant": "2022.09.00",
+  "homeassistant": "2022.9.0",
   "dhcp": [
     {
       "macaddress": "000E8C*"
