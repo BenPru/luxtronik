@@ -64,7 +64,7 @@ async def async_setup_entry(
         return False
 
     # Build Sensor names with local language:
-    lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
+    lang = hass.config.language
     text_temp = get_sensor_text(lang, 'temperature')
 
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
@@ -381,6 +381,8 @@ class LuxtronikNumber(NumberEntity, RestoreEntity):
 #        self.schedule_update_ha_state(force_refresh=True)
 
 class LuxtronikNumberThermalDesinfection(LuxtronikNumber, RestoreEntity):
+    _last_thermal_desinfection: datetime.date = None
+
     def __init__(self, *args, **kwargs):
         super(LuxtronikNumberThermalDesinfection, self).__init__(*args, **kwargs)
         default_timestamp: datetime = None
@@ -392,10 +394,11 @@ class LuxtronikNumberThermalDesinfection(LuxtronikNumber, RestoreEntity):
     def update(self):
         LuxtronikNumber.update(self)
         domesticWaterCurrent = float(self._luxtronik.get_value(LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE))
-        if domesticWaterCurrent >= float(self.native_value):
+        if domesticWaterCurrent >= float(self.native_value) and (self._last_thermal_desinfection is None or self._last_thermal_desinfection < datetime.now().date):
+            self._last_thermal_desinfection = datetime.now().date
             self._attr_extra_state_attributes = {
                 ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: self._number_key,
-                ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION: datetime.utcnow()
+                ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION: datetime.now()
             }
 
     async def async_added_to_hass(self) -> None:
@@ -407,9 +410,10 @@ class LuxtronikNumberThermalDesinfection(LuxtronikNumber, RestoreEntity):
         self._state = state.state
 
         if ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION in state.attributes:
+            self._last_thermal_desinfection = state.attributes[ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION]
             self._attr_extra_state_attributes = {
                 ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: self._number_key,
-                ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION: state.attributes[ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION]
+                ATTR_EXTRA_STATE_ATTRIBUTE_LAST_THERMAL_DESINFECTION: self._last_thermal_desinfection
             }
 
         DATA_UPDATED = f"{DOMAIN}_data_updated"

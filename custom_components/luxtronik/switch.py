@@ -42,7 +42,7 @@ async def async_setup_entry(
         return False
 
     # Build Sensor names with local language:
-    lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
+    lang = hass.config.language
     entities = []
 
     device_info = hass.data[f"{DOMAIN}_DeviceInfo"]

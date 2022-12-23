@@ -147,7 +147,7 @@ async def async_setup_entry(
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
 
     # Build Sensor names with local language:
-    lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
+    lang = hass.config.language
     text_evu_unlocked = get_sensor_text(lang, "evu_unlocked")
     text_compressor = get_sensor_text(lang, "compressor")
     text_circulation_pump = get_sensor_text(lang, "circulation_pump")

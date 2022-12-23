@@ -2,7 +2,7 @@
 import json
 import os.path
 
-from ..const import LANG_DEFAULT, LANGUAGES, LOGGER
+from ..const import LANG_DEFAULT, LANGUAGES_SENSOR_NAMES, LOGGER
 
 __content_locale__ = None
 __content_default__ = None
@@ -24,17 +24,19 @@ def _load_lang_from_file(fname: str, log_warning=True):
     return data
 
 
-def get_sensor_text(lang: LANGUAGES, key: str) -> str:
+def get_sensor_text(lang: str, key: str) -> str:
     """Get a sensor text."""
     global __content_locale__
     global __content_default__
-    if __content_locale__ is None and not lang is None and lang != LANG_DEFAULT:
+    if __content_locale__ is None and lang is not None and lang != LANG_DEFAULT:
         __content_locale__ = _load_lang_from_file(f"../translations/texts.{lang}.json")
     if __content_default__ is None:
         __content_default__ = _load_lang_from_file(
             f"../translations/texts.{LANG_DEFAULT}.json"
         )
-    if lang != LANG_DEFAULT and not __content_locale__ is None and key in __content_locale__:
+    if lang is None or lang not in LANGUAGES_SENSOR_NAMES:
+        lang = LANG_DEFAULT
+    if lang != LANG_DEFAULT and __content_locale__ is not None and key in __content_locale__:
         return __content_locale__[key]
     if key in __content_default__:
         return __content_default__[key]
@@ -43,7 +45,7 @@ def get_sensor_text(lang: LANGUAGES, key: str) -> str:
 
 
 def get_sensor_value_text(
-    lang: LANGUAGES, key: str, value: str, platform="sensor"
+    lang: str, key: str, value: str, platform="sensor"
 ) -> str:
     """Get a sensor value text."""
     global __content_sensor_locale__
@@ -52,7 +54,7 @@ def get_sensor_value_text(
         __content_sensor_default__ = _load_lang_from_file(
             f"../translations/{platform}.{LANG_DEFAULT}.json", log_warning=True
         )
-    if lang is None:
+    if lang is None or lang not in LANGUAGES_SENSOR_NAMES:
         lang = LANG_DEFAULT
     if __content_sensor_locale__ is None and lang != LANG_DEFAULT:
         __content_sensor_locale__ = _load_lang_from_file(

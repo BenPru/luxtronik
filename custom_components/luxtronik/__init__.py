@@ -6,17 +6,16 @@ from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.typing import ConfigType
+
 from luxtronik import LOGGER as LuxLogger
 
 from .const import (
     ATTR_PARAMETER,
     ATTR_VALUE,
-    CONF_LANGUAGE_SENSOR_NAMES,
     CONF_LOCK_TIMEOUT,
     CONF_SAFE,
     CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
     DOMAIN,
-    LANG_DEFAULT,
     LOGGER,
     PLATFORMS,
     SERVICE_WRITE,
@@ -25,7 +24,7 @@ from .const import (
 from .helpers.helper import get_sensor_text
 from .helpers.lux_helper import (
     get_manufacturer_by_model,
-    get_manufacturer_firmware_url_by_model
+    get_manufacturer_firmware_url_by_model,
 )
 from .luxtronik_device import LuxtronikDevice
 
@@ -73,7 +72,9 @@ def setup_hass_services(hass: HomeAssistant, config_entry: ConfigEntry):
         parameter = service.data.get(ATTR_PARAMETER)
         value = service.data.get(ATTR_VALUE)
         luxtronik = hass.data[DOMAIN]
-        update_immediately_after_write = config_entry.data[CONF_UPDATE_IMMEDIATELY_AFTER_WRITE]
+        update_immediately_after_write = config_entry.data[
+            CONF_UPDATE_IMMEDIATELY_AFTER_WRITE
+        ]
         luxtronik.write(
             parameter,
             value,
@@ -109,11 +110,7 @@ def setup_internal(hass, data, conf):
     #             use_legacy_sensor_ids)
 
     # Build Sensor names with local language:
-    lang = (
-        conf[CONF_LANGUAGE_SENSOR_NAMES]
-        if CONF_LANGUAGE_SENSOR_NAMES in conf
-        else LANG_DEFAULT
-    )
+    lang = hass.config.language
     text_domestic_water = get_sensor_text(lang, "domestic_water")
     text_heating = get_sensor_text(lang, "heating")
     text_heatpump = get_sensor_text(lang, "heatpump")
@@ -124,13 +121,15 @@ def setup_internal(hass, data, conf):
 
     hass.data[DOMAIN] = luxtronik
     hass.data[f"{DOMAIN}_conf"] = conf
-    
+
     # Create DeviceInfos:
     serial_number_date = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
-    serial_number_hex = hex(int(luxtronik.get_value("parameters.ID_WP_SerienNummer_HEX")))
-    serial_number = f"{serial_number_date}-{serial_number_hex}".replace('x', '')
+    serial_number_hex = hex(
+        int(luxtronik.get_value("parameters.ID_WP_SerienNummer_HEX"))
+    )
+    serial_number = f"{serial_number_date}-{serial_number_hex}".replace("x", "")
     model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
-    
+
     hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(
         luxtronik, serial_number, text_heatpump, data[CONF_HOST]
     )
@@ -195,7 +194,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str, ip_host: str) -> DeviceInfo:
+def build_device_info(
+    luxtronik: LuxtronikDevice, sn: str, name: str, ip_host: str
+) -> DeviceInfo:
     """Build luxtronik device info."""
     model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
     device_info = DeviceInfo(
@@ -207,7 +208,7 @@ def build_device_info(luxtronik: LuxtronikDevice, sn: str, name: str, ip_host: s
         manufacturer=get_manufacturer_by_model(model),
         default_model="",
         model=model,
-        suggested_area='Utility room',
+        suggested_area="Utility room",
         sw_version=luxtronik.get_value("calculations.ID_WEB_SoftStand"),
     )
     LOGGER.debug("build_device_info '%s'", device_info)

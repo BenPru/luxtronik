@@ -15,14 +15,11 @@ from homeassistant.data_entry_flow import FlowResult
 from .const import (
     CONF_CONTROL_MODE_HOME_ASSISTANT,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-    CONF_LANGUAGE_SENSOR_NAMES,
     CONF_LOCK_TIMEOUT,
     CONF_SAFE,
     CONF_UPDATE_IMMEDIATELY_AFTER_WRITE,
     DEFAULT_PORT,
     DOMAIN,
-    LANG_DEFAULT,
-    LANGUAGES_SENSOR_NAMES,
     LOGGER,
 )
 from .helpers.lux_helper import discover
@@ -49,9 +46,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
                 vol.Optional(CONF_UPDATE_IMMEDIATELY_AFTER_WRITE, default=True): bool,
                 vol.Optional(CONF_HA_SENSOR_INDOOR_TEMPERATURE, default=f"sensor.{self._sensor_prefix}_room_temperature"): str,
-                vol.Optional(CONF_LANGUAGE_SENSOR_NAMES, default=LANG_DEFAULT): vol.In(
-                    LANGUAGES_SENSOR_NAMES
-                ),
             }
         )
 
@@ -106,7 +100,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             CONF_HA_SENSOR_INDOOR_TEMPERATURE: user_input[
                 CONF_HA_SENSOR_INDOOR_TEMPERATURE
             ],
-            CONF_LANGUAGE_SENSOR_NAMES: user_input[CONF_LANGUAGE_SENSOR_NAMES],
         }
         self._async_abort_entries_match(data)
 
@@ -145,10 +138,6 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
                     default=self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE, f"sensor.{self._sensor_prefix}_room_temperature"),
                 ): str,
-                vol.Optional(
-                    CONF_LANGUAGE_SENSOR_NAMES,
-                    default=self._get_value(CONF_LANGUAGE_SENSOR_NAMES, LANG_DEFAULT),
-                ): vol.In(LANGUAGES_SENSOR_NAMES),
             }
         )
 

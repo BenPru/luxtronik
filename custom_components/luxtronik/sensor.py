@@ -136,7 +136,7 @@ async def async_setup_entry(
     device_info = hass.data[f"{DOMAIN}_DeviceInfo"]
 
     # Build Sensor names with local language:
-    lang = config_entry.options.get(CONF_LANGUAGE_SENSOR_NAMES)
+    lang = hass.config.language
     hass.data[f"{DOMAIN}_language"] = lang
     text_heatpump = get_sensor_text(lang, "heatpump")
     text_time = get_sensor_text(lang, "time")
@@ -877,7 +877,7 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
         time_now = time(datetime.now().hour, datetime.now().minute)
         if self.native_value is not None and self._last_state is not None and self.native_value == LUX_STATUS_EVU and self._last_state != LUX_STATUS_EVU:
             # evu start
-            if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour or time_now.hour <= self._first_evu_end_time.hour:
+            if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour or time_now.hour <= self._second_evu_start_time or time_now.hour <= self._first_evu_end_time.hour:
                 self._first_evu_start_time = time_now
             else:
                 self._second_evu_start_time = time_now
@@ -917,7 +917,7 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
             or line_2 == STATE_UNAVAILABLE
         ):
             return ""
-        lang = self.hass.data[f"{DOMAIN}_language"]
+        lang = self.hass.config.language
         line_1 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_1", line_1)
         line_2 = get_sensor_value_text(lang, f"{DOMAIN}__status_line_2", line_2)
         # Show evu end time if available
