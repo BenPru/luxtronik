@@ -24,18 +24,28 @@ def _load_lang_from_file(fname: str, log_warning=True):
     return data
 
 
+def _normalize_lang(lang: str) -> str:
+    if lang is None:
+        return LANG_DEFAULT
+    lang = lang.lower()
+    if '-' in lang:
+        lang = lang.split('-')[0]
+    if lang not in LANGUAGES_SENSOR_NAMES:
+        return LANG_DEFAULT
+    return lang
+
+
 def get_sensor_text(lang: str, key: str) -> str:
     """Get a sensor text."""
     global __content_locale__
     global __content_default__
+    lang = _normalize_lang(lang)
     if __content_locale__ is None and lang is not None and lang != LANG_DEFAULT:
         __content_locale__ = _load_lang_from_file(f"../translations/texts.{lang}.json")
     if __content_default__ is None:
         __content_default__ = _load_lang_from_file(
             f"../translations/texts.{LANG_DEFAULT}.json"
         )
-    if lang is None or lang not in LANGUAGES_SENSOR_NAMES:
-        lang = LANG_DEFAULT
     if lang != LANG_DEFAULT and __content_locale__ is not None and key in __content_locale__:
         return __content_locale__[key]
     if key in __content_default__:
@@ -54,8 +64,7 @@ def get_sensor_value_text(
         __content_sensor_default__ = _load_lang_from_file(
             f"../translations/{platform}.{LANG_DEFAULT}.json", log_warning=True
         )
-    if lang is None or lang not in LANGUAGES_SENSOR_NAMES:
-        lang = LANG_DEFAULT
+    lang = _normalize_lang(lang)
     if __content_sensor_locale__ is None and lang != LANG_DEFAULT:
         __content_sensor_locale__ = _load_lang_from_file(
             f"../translations/{platform}.{lang}.json", log_warning=False
