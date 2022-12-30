@@ -1,7 +1,7 @@
 {
   "domain": "luxtronik2",
   "name": "Luxtronik",
-  "version": "2022.12.24",
+  "version": "2022.12.30",
   "integration_type": "hub",
   "config_flow": true,
   "iot_class": "local_polling",
