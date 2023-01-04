@@ -116,7 +116,7 @@ async def async_setup_entry(
                 luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_THRESHOLD_TEMPERATURE,
                 unique_id='heating_threshold_temperature', name=f"{text_heating_threshold}",
-                icon='mdi:download-outline', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=12.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
+                icon='mdi:download-outline', unit_of_measurement=TEMP_CELSIUS, min_value=5.0, max_value=30.0, step=0.5, mode=NumberMode.BOX, entity_category=EntityCategory.CONFIG),
             LuxtronikNumber(
                 luxtronik, deviceInfoHeating,
                 number_key=LUX_SENSOR_HEATING_MIN_FLOW_OUT_TEMPERATURE,
