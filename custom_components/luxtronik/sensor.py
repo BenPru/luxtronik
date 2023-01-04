@@ -877,13 +877,13 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
         time_now = time(datetime.now().hour, datetime.now().minute)
         if self.native_value is not None and self._last_state is not None and self.native_value == LUX_STATUS_EVU and self._last_state != LUX_STATUS_EVU:
             # evu start
-            if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour or (self._second_evu_start_time is not None and time_now.hour <= self._second_evu_start_time.hour) or time_now.hour <= self._first_evu_end_time.hour:
+            if self._first_evu_start_time is None or time_now.hour <= self._first_evu_start_time.hour or (self._second_evu_start_time is not None and time_now.hour < self._second_evu_start_time.hour) or time_now.hour <= self._first_evu_end_time.hour:
                 self._first_evu_start_time = time_now
             else:
                 self._second_evu_start_time = time_now
         elif self.native_value is not None and self._last_state is not None and self.native_value != LUX_STATUS_EVU and self._last_state == LUX_STATUS_EVU:
             # evu end
-            if self._first_evu_end_time is None or time_now.hour <= self._first_evu_end_time.hour:
+            if self._first_evu_end_time is None or time_now.hour <= self._first_evu_end_time.hour or (self._second_evu_start_time is not None and time_now < self._second_evu_start_time):
                 self._first_evu_end_time = time_now
             else:
                 self._second_evu_end_time = time_now
