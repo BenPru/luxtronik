@@ -14,8 +14,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry
 from luxtronik import Luxtronik as Lux
 
-from .const import CONF_COORDINATOR, DOMAIN
-
 TO_REDACT = {CONF_USERNAME, CONF_PASSWORD}
 
 

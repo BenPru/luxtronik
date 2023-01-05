@@ -629,18 +629,6 @@ async def async_setup_entry(
             ),
         ]
 
-        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarkoll") > 0:
-            entities += [
-                LuxtronikSensor(
-                    luxtronik,
-                    device_info_domestic_water,
-                    "calculations.ID_WEB_Temperatur_TSK",
-                    "solar_collector_temperature",
-                    f"Solar {text_collector}",
-                    "mdi:solar-panel-large",
-                    entity_category=None,
-                ),
-            ]
         # Temp. disabled:
         # solar_present = luxtronik.detect_solar_present()
         # if solar_present:

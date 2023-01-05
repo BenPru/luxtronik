@@ -8,31 +8,19 @@ from typing import Final
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+from homeassistant.components.sensor import (STATE_CLASS_MEASUREMENT,
+                                             STATE_CLASS_TOTAL_INCREASING,
+                                             SensorEntityDescription)
+from homeassistant.const import (CONF_HOST, CONF_PORT, DEVICE_CLASS_ENERGY,
+                                 DEVICE_CLASS_FREQUENCY, DEVICE_CLASS_POWER,
+                                 DEVICE_CLASS_PRESSURE,
+                                 DEVICE_CLASS_TEMPERATURE,
+                                 DEVICE_CLASS_TIMESTAMP,
+                                 ELECTRIC_POTENTIAL_VOLT,
+                                 ENERGY_KILO_WATT_HOUR, PERCENTAGE, POWER_WATT,
+                                 PRESSURE_BAR, TEMP_CELSIUS, TEMP_KELVIN,
+                                 TIME_HOURS, TIME_SECONDS, Platform)
 from homeassistant.helpers.entity import EntityCategory
-from homeassistant.components.sensor import (
-    STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL_INCREASING,
-    SensorEntityDescription,
-)
-from homeassistant.const import (
-    CONF_HOST,
-    CONF_PORT,
-    DEVICE_CLASS_FREQUENCY,
-    DEVICE_CLASS_ENERGY,
-    DEVICE_CLASS_POWER,
-    DEVICE_CLASS_PRESSURE,
-    DEVICE_CLASS_TEMPERATURE,
-    DEVICE_CLASS_TIMESTAMP,
-    ELECTRIC_POTENTIAL_VOLT,
-    ENERGY_KILO_WATT_HOUR,
-    PERCENTAGE,
-    POWER_WATT,
-    PRESSURE_BAR,
-    TEMP_CELSIUS,
-    TEMP_KELVIN,
-    TIME_HOURS,
-    TIME_SECONDS,
-)
 
 # endregion Imports
 
@@ -41,7 +29,14 @@ DOMAIN: Final = "luxtronik2"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
 
-PLATFORMS: list[str] = ["sensor", "binary_sensor", "climate", "number", "switch"]
+PLATFORMS: list[str] = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.CLIMATE,
+    Platform.NUMBER,
+    Platform.SWITCH,
+    Platform.UPDATE,
+]
 # endregion Constants Main
 
 # region Conf
@@ -255,6 +250,10 @@ LUX_MK_SENSORS = ['parameters.ID_Einst_MK1Typ_akt',
                 'parameters.ID_Einst_MK2Typ_akt',
                 'parameters.ID_Einst_MK3Typ_akt']
                 
+DOWNLOAD_PORTAL_URL: Final = (
+    "https://www.heatpump24.com/software/fetchSoftware.php?softwareID="
+)
+
 class LuxMkTypes(Enum):
     off: Final = 0
     discharge: Final = 1

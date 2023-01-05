@@ -1,10 +1,12 @@
 """Support for Luxtronik heatpump controllers."""
 # region Imports
 
+from dataclasses import dataclass
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo, EntityDescription
 from homeassistant.helpers.typing import ConfigType
 
 from luxtronik import LOGGER as LuxLogger
@@ -33,6 +35,12 @@ from .luxtronik_device import LuxtronikDevice
 # region Constants
 LuxLogger.setLevel(level="WARNING")
 # endregion Constants
+
+@dataclass
+class LuxtronikEntityDescription(EntityDescription):
+    """Class describing Luxtronik entities."""
+
+    luxtronik_key: str = ""
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
