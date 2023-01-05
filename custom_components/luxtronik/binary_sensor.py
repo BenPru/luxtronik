@@ -26,8 +26,8 @@ from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY,
                     CONF_VISIBILITIES, DEFAULT_DEVICE_CLASS, DEVICE_CLASSES,
                     DOMAIN, LOGGER,
                     LUX_BINARY_SENSOR_ADDITIONAL_CIRCULATION_PUMP,
-                    LUX_BINARY_SENSOR_DOMESTIC_WATER_RECIRCULATION_PUMP,
                     LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING,
+                    LUX_BINARY_SENSOR_DOMESTIC_WATER_RECIRCULATION_PUMP,
                     LUX_BINARY_SENSOR_EVU_UNLOCKED,
                     LUX_BINARY_SENSOR_SOLAR_PUMP)
 from .helpers.helper import get_sensor_text
@@ -253,7 +253,6 @@ async def async_setup_entry(
 
     deviceInfoDomesticWater = hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"]
     if deviceInfoDomesticWater is not None:
-        text_solar_pump = get_sensor_text(lang, "solar_pump")
         if luxtronik.has_domestic_water_circulation_pump:
             circulation_pump_unique_id = 'domestic_water_circulation_pump'
             text_domestic_water_circulation_pump = text_circulation_pump
@@ -282,6 +281,7 @@ async def async_setup_entry(
         ]
         solar_present = luxtronik.detect_solar_present()
         if solar_present:
+            text_solar_pump = get_sensor_text(lang, "solar_pump")
             entities += [
                 LuxtronikBinarySensor(
                     luxtronik=luxtronik,

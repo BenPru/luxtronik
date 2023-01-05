@@ -250,7 +250,7 @@ LUX_SENSORS_MODE: Final[list[str]] = [
 ]
 # endregion Luxtronik Sensor ids
 
-LUX_DETECT_SOLAR_SENSOR: Final = "parameters.ID_BSTD_Solar" 
+LUX_DETECT_SOLAR_SENSOR: Final = "visibilities.ID_Visi_Solar" 
 LUX_MK_SENSORS = ['parameters.ID_Einst_MK1Typ_akt',
                 'parameters.ID_Einst_MK2Typ_akt',
                 'parameters.ID_Einst_MK3Typ_akt']

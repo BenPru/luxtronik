@@ -107,7 +107,10 @@ class LuxtronikDevice:
         
     def detect_solar_present(self):
         sensor_value = self.get_value(LUX_DETECT_SOLAR_SENSOR)
-        SolarPresent = (sensor_value > 0.01)
+        solar_koll = self.get_value("visibilities.ID_Visi_Temp_Solarkoll")
+        solar_buffer = self.get_value("visibilities.ID_Visi_Temp_Solarsp")
+        working_hours = self.get_value("parameters.ID_BSTD_Solar")
+        SolarPresent = (sensor_value > 0 or working_hours > 0.01 or solar_koll > 0 or solar_buffer > 0)
         LOGGER.info(f"SolarPresent = {SolarPresent}") 
         return SolarPresent
 

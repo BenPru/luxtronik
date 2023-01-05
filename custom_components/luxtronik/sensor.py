@@ -1,7 +1,7 @@
 """Luxtronik heatpump sensor."""
 # region Imports
-from typing import Any
 from datetime import datetime, time
+from typing import Any
 
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
                                              STATE_CLASS_MEASUREMENT,
@@ -588,7 +588,6 @@ async def async_setup_entry(
         text_operation_hours_domestic_water = get_sensor_text(
             lang, "operation_hours_domestic_water"
         )
-        text_operation_hours_solar = get_sensor_text(lang, "operation_hours_solar")
         text_heat_amount_domestic_water = get_sensor_text(
             lang, "heat_amount_domestic_water"
         )
@@ -630,8 +629,7 @@ async def async_setup_entry(
             ),
         ]
 
-        solar_present = luxtronik.detect_solar_present()
-        if solar_present:
+        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarkoll") > 0:
             entities += [
                 LuxtronikSensor(
                     luxtronik,
@@ -642,6 +640,24 @@ async def async_setup_entry(
                     "mdi:solar-panel-large",
                     entity_category=None,
                 ),
+            ]
+        # Temp. disabled:
+        # solar_present = luxtronik.detect_solar_present()
+        # if solar_present:
+        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarkoll") > 0:
+            entities += [
+                LuxtronikSensor(
+                    luxtronik,
+                    device_info_domestic_water,
+                    "calculations.ID_WEB_Temperatur_TSK",
+                    "solar_collector_temperature",
+                    f"Solar {text_collector}",
+                    "mdi:solar-panel-large",
+                    entity_category=None,
+                ),
+            ]
+        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarsp") > 0:
+            entities += [
                 LuxtronikSensor(
                     luxtronik,
                     device_info_domestic_water,
@@ -651,6 +667,10 @@ async def async_setup_entry(
                     "mdi:propane-tank-outline",
                     entity_category=None,
                 ),
+            ]
+        if luxtronik.get_value("parameters.ID_BSTD_Solar") > 0:
+            text_operation_hours_solar = get_sensor_text(lang, "operation_hours_solar")
+            entities += [
                 LuxtronikSensor(
                     luxtronik,
                     device_info_domestic_water,
@@ -664,7 +684,6 @@ async def async_setup_entry(
                     entity_category=EntityCategory.DIAGNOSTIC,
                     factor=SECOUND_TO_HOUR_FACTOR,
                 ),
-
             ]
 
     deviceInfoCooling = hass.data[f"{DOMAIN}_DeviceInfo_Cooling"]
