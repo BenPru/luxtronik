@@ -23,6 +23,7 @@ from .const import (
     LOGGER,
 )
 from .helpers.lux_helper import discover
+from .luxtronik_device import LuxtronikDevice
 
 # endregion Imports
 
@@ -30,7 +31,7 @@ from .helpers.lux_helper import discover
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
-    VERSION = 1
+    VERSION = 2
     _hassio_discovery = None
     _discovery_host = None
     _discovery_port = None
@@ -61,7 +62,9 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         broadcast_discover_ip, broadcast_discover_port = discover()
         if broadcast_discover_ip != discovery_info.ip:
             return None
-        await self.async_set_unique_id(discovery_info.hostname)
+
+        luxtronik = LuxtronikDevice.connect(broadcast_discover_ip, broadcast_discover_port)
+        await self.async_set_unique_id(luxtronik.unique_id)
         self._abort_if_unique_id_configured()
 
         self._discovery_host = discovery_info.ip
@@ -103,7 +106,11 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         }
         self._async_abort_entries_match(data)
 
-        return self.async_create_entry(title=user_input[CONF_HOST], data=data)
+        luxtronik = LuxtronikDevice.connect(user_input[CONF_HOST], user_input[CONF_PORT])
+
+        await self.async_set_unique_id(luxtronik.unique_id)
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(title=f"{luxtronik.manufacturer} {luxtronik.model} {luxtronik.serial_number}", data=data)
 
     @staticmethod
     @callback

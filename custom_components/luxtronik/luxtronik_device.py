@@ -20,6 +20,7 @@ from .const import (
     MIN_TIME_BETWEEN_UPDATES,
 )
 from .helpers.debounce import debounce
+from .helpers.lux_helper import get_manufacturer_by_model
 
 # endregion Imports
 
@@ -37,6 +38,11 @@ class LuxtronikDevice:
         self._lock_timeout_sec = lock_timeout_sec
         self._luxtronik = Lux(host, port, safe)
         self.update()
+
+    @staticmethod
+    def connect(host: str, port: int):
+        """Connect to heatpump."""
+        return LuxtronikDevice(host, port, False, 30)
 
     async def async_will_remove_from_hass(self):
         """Disconnect from Luxtronik by stopping monitor."""
@@ -73,6 +79,30 @@ class LuxtronikDevice:
             sensor = self._luxtronik.visibilities.get(sensor_id)
         return sensor
  
+    @property
+    def serial_number(self) -> str:
+        """Return the serial number."""
+        serial_number_date = self.get_value("parameters.ID_WP_SerienNummer_DATUM")
+        serial_number_hex = hex(
+            int(self.get_value("parameters.ID_WP_SerienNummer_HEX"))
+        )
+        return f"{serial_number_date}-{serial_number_hex}".replace("x", "")
+
+    @property
+    def unique_id(self) -> str:
+        """Return the unique id."""
+        return self.serial_number.lower().replace("-", "_")
+
+    @property
+    def model(self) -> str:
+        """Return the heatpump model."""
+        return self.get_value("calculations.ID_WEB_Code_WP_akt")
+
+    @property
+    def manufacturer(self) -> str:
+        """Return the heatpump manufacturer."""
+        return get_manufacturer_by_model(self.model)
+
     @property
     def has_second_heat_generator(self) -> bool:
         """Is second heat generator activated 1=electrical heater"""

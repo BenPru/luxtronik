@@ -565,6 +565,19 @@ async def async_setup_entry(
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
             ),
+            LuxtronikSensor(
+                luxtronik,
+                device_info_heating,
+                sensor_key="parameters.Unknown_Parameter_1136",
+                unique_id="heat_energy_input",
+                name="Heat energy input",
+                icon="mdi:circle-slice-3",
+                device_class=DEVICE_CLASS_ENERGY,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                factor=0.01,
+            ),
         ]
 
     if luxtronik.get_value("calculations.ID_WEB_Temperatur_TRL_ext") != 5.0:
@@ -626,6 +639,19 @@ async def async_setup_entry(
                 state_class=STATE_CLASS_TOTAL_INCREASING,
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
+            ),
+            LuxtronikSensor(
+                luxtronik,
+                device_info_domestic_water,
+                sensor_key="parameters.Unknown_Parameter_1137",
+                unique_id="domestic_water_energy_input",
+                name="Domestic water energy input",
+                icon="mdi:circle-slice-3",
+                device_class=DEVICE_CLASS_ENERGY,
+                state_class=STATE_CLASS_TOTAL_INCREASING,
+                unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                factor=0.01,
             ),
         ]
 

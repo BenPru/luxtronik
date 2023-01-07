@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo, EntityDescription
 from homeassistant.helpers.typing import ConfigType
-
 from luxtronik import LOGGER as LuxLogger
 
 from .const import (
@@ -131,39 +131,32 @@ def setup_internal(hass, data, conf):
     hass.data[f"{DOMAIN}_conf"] = conf
 
     # Create DeviceInfos:
-    serial_number_date = luxtronik.get_value("parameters.ID_WP_SerienNummer_DATUM")
-    serial_number_hex = hex(
-        int(luxtronik.get_value("parameters.ID_WP_SerienNummer_HEX"))
-    )
-    serial_number = f"{serial_number_date}-{serial_number_hex}".replace("x", "")
-    model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
-
     hass.data[f"{DOMAIN}_DeviceInfo"] = build_device_info(
-        luxtronik, serial_number, text_heatpump, data[CONF_HOST]
+        luxtronik, text_heatpump, data[CONF_HOST]
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
-        identifiers={(DOMAIN, "Domestic_Water", serial_number)},
+        identifiers={(DOMAIN, f"{luxtronik.unique_id}_domestic_water")},
         configuration_url="https://www.heatpump24.com/",
         default_name=text_domestic_water,
         name=text_domestic_water,
-        manufacturer=get_manufacturer_by_model(model),
-        model=model,
+        manufacturer=luxtronik.manufacturer,
+        model=luxtronik.model,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
-        identifiers={(DOMAIN, "Heating", serial_number)},
-        configuration_url=get_manufacturer_firmware_url_by_model(model),
+        identifiers={(DOMAIN, f"{luxtronik.unique_id}_heating")},
+        configuration_url=get_manufacturer_firmware_url_by_model(luxtronik.model),
         default_name=text_heating,
         name=text_heating,
-        manufacturer=get_manufacturer_by_model(model),
-        model=model,
+        manufacturer=luxtronik.manufacturer,
+        model=luxtronik.model,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = (
         DeviceInfo(
-            identifiers={(DOMAIN, "Cooling", serial_number)},
+            identifiers={(DOMAIN, f"{luxtronik.unique_id}_cooling")},
             default_name=text_cooling,
             name=text_cooling,
-            manufacturer=get_manufacturer_by_model(model),
-            model=model,
+            manufacturer=luxtronik.manufacturer,
+            model=luxtronik.model,
         )
         if luxtronik.detect_cooling_present()
         else None
@@ -185,39 +178,88 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     if luxtronik is None:
         return True
 
+    unload_ok = False
     try:
         await hass.async_add_executor_job(luxtronik.disconnect)
 
         await hass.services.async_remove(DOMAIN, SERVICE_WRITE)
+
+        unload_ok = await hass.config_entries.async_unload_platforms(
+            config_entry, PLATFORMS
+        )
+        if unload_ok:
+            hass.data[DOMAIN] = None
+            hass.data.pop(DOMAIN)
+
     except Exception as e:
         LOGGER.critical("Remove service!", e, exc_info=True)
-
-    unload_ok = await hass.config_entries.async_unload_platforms(
-        config_entry, PLATFORMS
-    )
-    if unload_ok:
-        hass.data[DOMAIN] = None
-        hass.data.pop(DOMAIN)
 
     return unload_ok
 
 
 def build_device_info(
-    luxtronik: LuxtronikDevice, sn: str, name: str, ip_host: str
+    luxtronik: LuxtronikDevice, name: str, ip_host: str
 ) -> DeviceInfo:
     """Build luxtronik device info."""
-    model = luxtronik.get_value("calculations.ID_WEB_Code_WP_akt")
     device_info = DeviceInfo(
-        identifiers={(DOMAIN, "Heatpump", sn)},  # type: ignore
+        identifiers={
+            (
+                DOMAIN,
+                f"{luxtronik.unique_id}_heatpump",
+            )
+        },
         configuration_url=f"http://{ip_host}/",
-        name=f"{name} S/N {sn}",
+        name=f"{name} {luxtronik.serial_number}",
         default_name=name,
         default_manufacturer="Alpha Innotec",
-        manufacturer=get_manufacturer_by_model(model),
+        manufacturer=luxtronik.manufacturer,
         default_model="",
-        model=model,
+        model=luxtronik.model,
         suggested_area="Utility room",
         sw_version=luxtronik.get_value("calculations.ID_WEB_SoftStand"),
     )
     LOGGER.debug("build_device_info '%s'", device_info)
     return device_info
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate old entry."""
+    LOGGER.debug("Migrating from version %s", config_entry.version)
+
+    if config_entry.version == 1:
+        new = {**config_entry.data}
+        luxtronik = LuxtronikDevice.connect(new[CONF_HOST], new[CONF_PORT])
+
+        _delete_legacy_devices(hass, config_entry, luxtronik.unique_id)
+        config_entry.unique_id = luxtronik.unique_id
+        config_entry.title = f"{luxtronik.manufacturer} {luxtronik.model} {luxtronik.serial_number}"
+        config_entry.version = 2
+        hass.config_entries.async_update_entry(config_entry, data=new)
+
+    LOGGER.info("Migration to version %s successful", config_entry.version)
+
+    return True
+
+
+def _identifiers_exists(
+    identifiers_list: list[set[tuple[str, str]]], identifiers: set[tuple[str, str]]
+) -> bool:
+    for ident in identifiers_list:
+        if ident == identifiers:
+            return True
+    return False
+
+
+def _delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry, unique_id: str):
+    dr_instance = dr.async_get(hass)
+    devices: list[dr.DeviceEntry] = dr.async_entries_for_config_entry(
+        dr_instance, config_entry.entry_id
+    )
+    identifiers_list = list()
+    identifiers_list.append({(DOMAIN, f"{unique_id}_heatpump")})
+    identifiers_list.append({(DOMAIN, f"{unique_id}_domestic_water")})
+    identifiers_list.append({(DOMAIN, f"{unique_id}_heating")})
+    identifiers_list.append({(DOMAIN, f"{unique_id}_cooling")})
+    for device in devices:
+        if not _identifiers_exists(identifiers_list, device.identifiers):
+            dr_instance.async_remove_device(device.id)
