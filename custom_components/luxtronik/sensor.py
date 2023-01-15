@@ -4,10 +4,9 @@ from datetime import datetime, time, timezone
 from typing import Any
 
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
-                                             SensorDeviceClass,
                                              STATE_CLASS_MEASUREMENT,
                                              STATE_CLASS_TOTAL_INCREASING,
-                                             SensorEntity)
+                                             SensorDeviceClass, SensorEntity)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS, DEVICE_CLASS_ENERGY,
@@ -647,7 +646,8 @@ async def async_setup_entry(
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
             ),
-            LuxtronikSensor(
+        ]
+        add_sensor_if_min_minor_version(luxtronik, entities, 88, LuxtronikSensor(
                 luxtronik,
                 device_info_heating,
                 sensor_key="parameters.Unknown_Parameter_1136",
@@ -658,9 +658,8 @@ async def async_setup_entry(
                 state_class=STATE_CLASS_TOTAL_INCREASING,
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
-                factor=0.01,
-            ),
-        ]
+                factor=0.01,)
+            )
 
     add_sensor_if_active(luxtronik, entities, "visibilities.ID_Visi_Temp_Rucklauf", LuxtronikSensor(
         luxtronik,
@@ -719,7 +718,8 @@ async def async_setup_entry(
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
             ),
-            LuxtronikSensor(
+        ]
+        add_sensor_if_min_minor_version(luxtronik, entities, 88, LuxtronikSensor(
                 luxtronik,
                 device_info_domestic_water,
                 sensor_key="parameters.Unknown_Parameter_1137",
@@ -730,9 +730,8 @@ async def async_setup_entry(
                 state_class=STATE_CLASS_TOTAL_INCREASING,
                 unit_of_measurement=ENERGY_KILO_WATT_HOUR,
                 entity_category=EntityCategory.DIAGNOSTIC,
-                factor=0.01,
-            ),
-        ]
+                factor=0.01)
+            )
 
         # Temp. disabled:
         # solar_present = luxtronik.detect_solar_present()
@@ -967,7 +966,7 @@ class LuxtronikIndexStatusSensor(LuxtronikSensor):
     def _update_sensor_keys(self):
         self._luxtronik.update()
         if self._key_index is None or self._key_index == "":
-            index = self._luxtronik.get_value(f"parameters.ID_{self._key_template}_index") - 1
+            index = max(self._luxtronik.get_value(f"parameters.ID_{self._key_template}_index") - 1, 0)
             self._sensor_key = f"parameters.ID_{self._key_template}_file_{index}_0"
             self._sensor_key_timestamp = f"parameters.ID_{self._key_template}_file_{index}_1"
         else:
@@ -1185,4 +1184,8 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
 
 def add_sensor_if_active(luxtronik, entities, check_key: str, sensor: LuxtronikSensor):
     if luxtronik.get_value(check_key) > 0:
+        entities += [sensor]
+
+def add_sensor_if_min_minor_version(luxtronik, entities, min_minor: int, sensor: LuxtronikSensor):
+    if luxtronik.firmware_version_minor >= min_minor:
         entities += [sensor]

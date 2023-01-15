@@ -71,12 +71,15 @@ class LuxtronikDevice:
     def get_sensor(self, group, sensor_id):
         """Get sensor by configured sensor ID."""
         sensor = None
-        if group == CONF_PARAMETERS:
-            sensor = self._luxtronik.parameters.get(sensor_id)
-        if group == CONF_CALCULATIONS:
-            sensor = self._luxtronik.calculations.get(sensor_id)
-        if group == CONF_VISIBILITIES:
-            sensor = self._luxtronik.visibilities.get(sensor_id)
+        try:
+            if group == CONF_PARAMETERS:
+                sensor = self._luxtronik.parameters.get(sensor_id)
+            if group == CONF_CALCULATIONS:
+                sensor = self._luxtronik.calculations.get(sensor_id)
+            if group == CONF_VISIBILITIES:
+                sensor = self._luxtronik.visibilities.get(sensor_id)
+        except Exception as err:
+            LOGGER.warning(f"Sensor id not found: {group}.{sensor_id}", err, exc_info=True)
         return sensor
  
     @property
@@ -102,6 +105,19 @@ class LuxtronikDevice:
     def manufacturer(self) -> str:
         """Return the heatpump manufacturer."""
         return get_manufacturer_by_model(self.model)
+
+    @property
+    def firmware_version(self) -> str:
+        """Return the heatpump firmware version."""
+        return str(self.get_value("calculations.ID_WEB_SoftStand"))
+
+    @property
+    def firmware_version_minor(self) -> int:
+        """Return the heatpump firmware minor version."""
+        ver = self.firmware_version
+        if ver is None:
+            return 0
+        return int(ver.split('.')[1])
 
     @property
     def has_second_heat_generator(self) -> bool:
