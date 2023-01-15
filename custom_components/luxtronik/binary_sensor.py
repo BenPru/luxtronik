@@ -6,6 +6,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.binary_sensor import (DEVICE_CLASS_LOCK,
                                                     DEVICE_CLASS_OPENING,
+                                                    DEVICE_CLASS_PROBLEM,
                                                     DEVICE_CLASS_RUNNING,
                                                     PLATFORM_SCHEMA,
                                                     BinarySensorEntity)
@@ -146,7 +147,7 @@ async def async_setup_entry(
 
     deviceInfo = hass.data[f"{DOMAIN}_DeviceInfo"]
 
-    # Build Sensor names with local language:
+    # region: Build Sensor names with local language:
     lang = hass.config.language
     text_evu_unlocked = get_sensor_text(lang, "evu_unlocked")
     text_compressor = get_sensor_text(lang, "compressor")
@@ -158,6 +159,7 @@ async def async_setup_entry(
     text_compressor_heater = get_sensor_text(lang, "compressor_heater")
     text_additional_heat_generator = get_sensor_text(lang, "additional_heat_generator")
     text_defrost_valve = get_sensor_text(lang, "defrost_valve")
+    # endregion: Build Sensor names with local language:
 
     entities = [
         LuxtronikBinarySensor(
@@ -216,6 +218,15 @@ async def async_setup_entry(
             name=text_additional_heat_generator,
             icon="mdi:patio-heater",
             device_class=DEVICE_CLASS_RUNNING,
+        ),
+        LuxtronikBinarySensor(
+            luxtronik=luxtronik,
+            deviceInfo=deviceInfo,
+            sensor_key='calculations.ID_WEB_ZW2SSTout',
+            unique_id="disturbance_output",
+            name="Disturbance output",
+            icon="mdi:patio-heater",
+            device_class=DEVICE_CLASS_PROBLEM,
         ),
 
         # calculations.ID_WEB_ASDin Soledruck ausreichend
@@ -366,6 +377,8 @@ class LuxtronikBinarySensor(BinarySensorEntity, RestoreEntity):
         """Return the icon to be used for this entity."""
         if not self.is_on and self._icon_off is not None:
             return self._icon_off
+        if self._attr_icon is None:
+            super().icon
         return self._attr_icon
 
     def update(self):

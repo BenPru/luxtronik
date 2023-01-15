@@ -1,0 +1,29 @@
+{
+  "entity": {
+    "sensor": {
+      "switchoff_reason": {
+        "state": {
+            "0": "Heatpump disturbance",
+            "1": "Plant disturbance",
+            "2": "Operating mode second heat generator",
+            "3": "EVU-Lock",
+            "4": "",
+            "5": "Air defrosting",
+            "6": "Temperature limitation of use maximal",
+            "7": "Temperature limitation of use minimal",
+            "8": "Lower limitation of use",
+            "9": "no request",
+            "11": "flow rate",
+            "-1": "Unknown switchoff"
+        }
+      },
+      "error_reason": {
+        "state": {
+            "717": "flow rate",
+            "718": "max. outdoor temp.",
+            "761": "LIN-connection lost"
+        }
+      }
+    }
+  }
+}

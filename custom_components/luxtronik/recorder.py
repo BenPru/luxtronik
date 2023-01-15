@@ -34,4 +34,9 @@ def exclude_attributes(hass: HomeAssistant) -> set[str]:
         'EVU second start time',
         'EVU second end time',
         'EVU minutes until next event',
+        'timestamp',
+        'code',
+        'cause',
+        'remedy',
+        'max_allowed'
     }

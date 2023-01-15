@@ -43,6 +43,15 @@
       "heating external engery source": "heating external engery source",
       "domestic water external energy source": "Domestic water external energy source",
       "second heat generator 1 active": "second heat generator 1 active"
+    },
+    "luxtronik2__error_reason": {
+      "717": "flow rate",
+      "718": "max. outdoor temp.",
+      "761": "LIN-connection lost"
+    },
+    "luxtronik2__switchoff_reason": {
+      "9": "no request",
+      "11": "flow rate"
     }
   }
 }
