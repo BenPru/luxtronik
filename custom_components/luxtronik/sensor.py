@@ -832,7 +832,7 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
             # endregion Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
 
             
-        return value if self._factor is None else round(value * self._factor, 2)
+        return value if value is None or self._factor is None else round(value * self._factor, 2)
 
     @property
     def is_on(self) -> bool:
