@@ -403,6 +403,7 @@ async def async_setup_entry(
             "calculations.ID_WEB_LIN_UH",
             "overheating_temperature",
             f"{text_overheating}",
+            device_class=None,
             entity_category=None,
             unit_of_measurement=TEMP_KELVIN,
             entity_registry_enabled_default=False,
