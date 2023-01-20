@@ -10,8 +10,8 @@
   "dependencies": [],
   "after_dependencies": ["http"],
   "codeowners": ["@bouni", "@benpru"],
-  "requirements": ["luxtronik>=0.3.14", "getmac>=0.8.2"],
-  "homeassistant": "2022.9.0",
+  "requirements": ["luxtronik==0.3.14", "getmac>=0.8.2"],
+  "homeassistant": "2023.1.20",
   "dhcp": [
     {
       "macaddress": "000E8C*"
