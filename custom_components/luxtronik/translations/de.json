@@ -12,7 +12,7 @@
         "data": {
           "host": "Netzwerkname oder IP Adresse",
           "port": "Port (meist 8888 oder 8889)",
-          "control_mode_home_assistant": "Experimentell!: Thermostat An/Aus-Status durch Home Assistant steuern. - D.h. wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
+          "control_mode_home_assistant": "[BETA] Enable HomeAssistant Heizing Thermostat. Der Thermostat wird durchl\u00e4ufig  'luxtronik.target_correction' kalkulieren, basiert auf (T_Thermostat - T_Raum). Z.B. wenn (T_Raum < T_Thermostat) wird einen höheren Temperatur für die W\u00e4rmepump gesetzt, damit der Temperaturunterschied sich verkleinert. Definiere den T_Raum Sensor in n\u00e4chsten Feld.",
           "use_legacy_sensor_ids": "Abw\u00e4rtskompatible Sensornamen erzeugen. (luxtronik.\u002a)",
           "ha_sensor_indoor_temperature": "Home Assistant Sensor ID f\u00fcr die Innentemperatur",
           "language_sensor_names": "Sprachk\u00fcrzel Sensornamen"
@@ -25,7 +25,7 @@
     "step": {
       "user": {
         "data": {
-          "control_mode_home_assistant": "Experimentell!: Thermostat An/Aus-Status durch Home Assistant steuern. - D.h. wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
+          "control_mode_home_assistant": "[BETA] Enable HomeAssistant Heizing Thermostat. Der Thermostat wird durchl\u00e4ufig  'luxtronik.target_correction' kalkulieren, basiert auf (T_Thermostat - T_Raum). Z.B. wenn (T_Raum < T_Thermostat) wird einen höheren Temperatur für die W\u00e4rmepump gesetzt, damit der Temperaturunterschied sich verkleinert. Definiere den T_Raum Sensor in n\u00e4chsten Feld.",
           "use_legacy_sensor_ids": "Abw\u00e4rtskompatible Sensornamen erzeugen. (luxtronik.\u002a)",
           "ha_sensor_indoor_temperature": "Home Assistant Sensor ID f\u00fcr die Innentemperatur",
           "language_sensor_names": "Sprachk\u00fcrzel Sensornamen"
