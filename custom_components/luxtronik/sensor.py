@@ -428,7 +428,7 @@ async def async_setup_entry(
             unit_of_measurement=UnitOfPressure.BAR,
             entity_registry_enabled_default=False,
             device_class=SensorDeviceClass.PRESSURE,
-            icon=mdi:gauge,
+            icon="mdi:gauge-full",
         ),
         LuxtronikSensor(
             luxtronik,
@@ -440,7 +440,7 @@ async def async_setup_entry(
             unit_of_measurement=UnitOfPressure.BAR,
             entity_registry_enabled_default=False,
             device_class=SensorDeviceClass.PRESSURE,
-            icon=mdi:gauge-low
+            icon="mdi:gauge-low",
         ),
         LuxtronikSensor(
             luxtronik,
