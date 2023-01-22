@@ -6,7 +6,7 @@
   "compressor": "Compressor",
   "heat_source_output": "To heat source",
   "heat_source_input": "From heat source",
-  "time": "Time",
+  "status_time": "Status time",
   "domestic_water": "Domestic water",
   "cooling": "Cooling",
   "target": "Target",
@@ -63,7 +63,7 @@
   "domestic_water_charging_pump_release": "Charging pump release",
   "additional_circulation_pump": "Additional circulation pump",
   "domestic_water_recirculation_pump": "Circulation pump domestic water",
-  "circulation_pump_heating": "Circulation pump heating",
+  "heating_circulation_pump": "Circulation pump heating",
   "pump_heat_control": "Pump heat control",
   "pump_flow": "Pump flow",
   "compressor_heater": "Compressor heater",
@@ -85,5 +85,6 @@
   "release_second_heat_generator": "Release second heat generator",
   "heating_hysteresis": "Hysteresis heating",
   "domestic_water_hysteresis": "Hysteresis domestic water",
-  "domestic_water_charging_pump": "Charging pump domestic water"
+  "domestic_water_charging_pump": "Charging pump domestic water",
+  "firmware": "Firmware"
 }

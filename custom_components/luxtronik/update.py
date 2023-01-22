@@ -1,27 +1,40 @@
 """Luxtronik Update platform."""
 from __future__ import annotations
 
-import re
-import threading
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+import re
+import threading
 from typing import Final
 
 import requests
-from homeassistant.components.update import (ENTITY_ID_FORMAT, UpdateEntity,
-                                             UpdateEntityDescription)
+
+from homeassistant.components.update import (
+    ENTITY_ID_FORMAT,
+    UpdateEntity,
+    UpdateEntityDescription,
+)
 from homeassistant.components.update.const import UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_UNAVAILABLE
+from homeassistant.const import STATE_UNAVAILABLE, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import Throttle
 
-from . import LuxtronikDevice, LuxtronikEntityDescription
-from .const import (DOMAIN, DOWNLOAD_PORTAL_URL, LOGGER,
-                    LUX_MODELS_AlphaInnotec, LUX_MODELS_Novelan,
-                    LUX_MODELS_Other)
+from .base import LuxtronikEntity
+from .const import (
+    CONF_COORDINATOR,
+    CONF_HA_SENSOR_PREFIX,
+    DOMAIN,
+    DOWNLOAD_PORTAL_URL,
+    LOGGER,
+    DeviceKey,
+    LuxCalculation,
+)
+from .coordinator import LuxtronikCoordinator
+from .lux_helper import get_firmware_download_id, get_manufacturer_firmware_url_by_model
+from .model import LuxtronikEntityDescription
 
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(hours=1)
 
@@ -41,24 +54,24 @@ async def async_setup_entry(
     """Set up Luxtronik update platform."""
 
     LOGGER.debug("Setting up Luxtronik update entity")
-    luxtronik_device: LuxtronikDevice = hass.data.get(DOMAIN)
-    luxtronik_device.read()
-    data: dict = config_entry.data
+    data: dict = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
+    await coordinator.async_config_entry_first_refresh()
 
     description = LuxtronikUpdateEntityDescription(
-        luxtronik_key="calculations.ID_WEB_SoftStand",
+        luxtronik_key=LuxCalculation.C0081_FIRMWARE_VERSION,
         key="firmware",
         entity_category=EntityCategory.CONFIG,
     )
     update_entity = LuxtronikUpdateEntity(
-        entry=config_entry, luxtronik_device=luxtronik_device, description=description, device_info=hass.data[f"{DOMAIN}_DeviceInfo"]
+        entry=config_entry, coordinator=coordinator, description=description
     )
     entities = [update_entity]
 
     async_add_entities(entities)
 
 
-class LuxtronikUpdateEntity(UpdateEntity):
+class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
     """Representation of Luxtronik."""
 
     _attr_title = "Luxtronik Firmware Version"
@@ -69,73 +82,45 @@ class LuxtronikUpdateEntity(UpdateEntity):
     def __init__(
         self,
         entry: ConfigEntry,
-        luxtronik_device: LuxtronikDevice,
+        coordinator: LuxtronikCoordinator,
         description: LuxtronikUpdateEntityDescription,
-        device_info
     ) -> None:
         """Initialize the Luxtronik."""
-        super().__init__()
-        self.entity_description = description
-        self.luxtronik_device = luxtronik_device
-        # self.coordinator = coordinator
-        self._attr_device_info = device_info
-        # self._attr_unique_id = f"tuya.{device.id}"
-        self.luxtronik_key = description.luxtronik_key
-
-        self._attr_name = "Luxtronik Firmware"
-        luxtronik_device.read()
-        # self._attr_state = luxtronik_device.get_value(description.luxtronik_key)
-        prefix = DOMAIN
-        self.entity_id = ENTITY_ID_FORMAT.format(
-            f"{prefix}_{description.key}"
+        super().__init__(
+            coordinator=coordinator,
+            description=description,
+            device_info_ident=DeviceKey.heatpump,
+            platform=Platform.UPDATE,
         )
+        prefix = entry.data[CONF_HA_SENSOR_PREFIX]
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
         self._request_available_firmware_version()
 
     @property
     def installed_version(self) -> str:
         """Return the current app version."""
-        # return self._attr_state
-        return self.luxtronik_device.get_value(self.entity_description.luxtronik_key)
+        return self._attr_state
 
     @property
     def latest_version(self) -> str:
         """Return if there is an update."""
-        if self.__firmware_version_available is None:
-            self._request_available_firmware_version()
-            return None
-        return self.__firmware_version_available[:len(self.installed_version)]
+        return (
+            None
+            if self.__firmware_version_available is None
+            or self.installed_version is None
+            else self.__firmware_version_available[: len(self.installed_version)]
+        )
 
     def release_notes(self) -> str | None:
-        release_url = self._get_manufacturer_firmware_url_by_model(
-            self.luxtronik_device.get_value("calculations.ID_WEB_Code_WP_akt")
-        )
-        download_id = self._get_firmware_download_id(self.installed_version)
+        release_url = get_manufacturer_firmware_url_by_model(self.coordinator.model)
+        download_id = get_firmware_download_id(self.installed_version)
         download_url = f"{DOWNLOAD_PORTAL_URL}{download_id}"
         return f'<a href="{release_url}" target="_blank" rel="noreferrer noopener">Firmware Download Portal</a>&emsp;<a href="{download_url}" target="_blank" rel="noreferrer noopener">Direct Download</a><br><br>alpha innotec doesn\'t provide a changelog.<br>Please contact support for more information.'
 
-    def _get_firmware_download_id(self, installed_version: str) -> int | None:
-        """Return the heatpump firmware id for the download portal."""
-        if installed_version.startswith("V1."):
-            return 0
-        elif installed_version.startswith("V2."):
-            return 1
-        elif installed_version.startswith("V3."):
-            return 2
-        elif installed_version.startswith("V4."):
-            return 3
-        elif installed_version.startswith("F1."):
-            return 4
-        elif installed_version.startswith("WWB1."):
-            return 5
-        elif installed_version.startswith("smo"):
-            return 6
-        return None
-
-    # @Throttle(MIN_TIME_BETWEEN_UPDATES)
+    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self) -> None:
         """Update sensor values."""
-        # self._attr_state = self.luxtronik_device.get_value(self.entity_description.luxtronik_key)
         if (
             self.__firmware_version_available_last_request is None
             or self.__firmware_version_available_last_request
@@ -158,30 +143,17 @@ class LuxtronikUpdateEntity(UpdateEntity):
                     datetime.utcnow().timestamp()
                 )
                 # Filename e.g.: wp2reg-V2.88.1-9086
-                # Extract 'V2.88.1' from 'wp2reg-V2.88.1-9086'
+                # Extract 'V2.88.1' from 'wp2reg-V2.88.1-9086'.
                 self.__firmware_version_available = filename.split("-", 1)[1]
-            except Exception as err:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 LOGGER.warning(
-                    "Could not request download portal firmware version.",
+                    "Could not request download portal firmware version",
                     exc_info=True,
                 )
                 self.__firmware_version_available = STATE_UNAVAILABLE
 
-        download_id = self._get_firmware_download_id(self.installed_version)
-        threading.Thread(
-            target=do_request_available_firmware_version, args=(self, download_id)
-        ).start()
-
-    def _get_manufacturer_firmware_url_by_model(self, model: str) -> str:
-        """Return the manufacturer firmware download url."""
-        layout_id = 0
-
-        if model is None:
-            layout_id = 0
-        elif model.startswith(tuple(LUX_MODELS_AlphaInnotec)):
-            layout_id = 1
-        elif model.startswith(tuple(LUX_MODELS_Novelan)):
-            layout_id = 2
-        elif model.startswith(tuple(LUX_MODELS_Other)):
-            layout_id = 3
-        return f"https://www.heatpump24.com/DownloadArea.php?layout={layout_id}"
+        download_id = get_firmware_download_id(self.installed_version)
+        if download_id is not None:
+            threading.Thread(
+                target=do_request_available_firmware_version, args=(self, download_id)
+            ).start()
