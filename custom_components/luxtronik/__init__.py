@@ -1,6 +1,6 @@
 """The Luxtronik heatpump integration."""
 # region Imports
-from homeassistant.config_entries import ConfigEntry, ConfigEntryDisabler
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 
@@ -89,9 +89,9 @@ def _delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):
     devices: list[dr.DeviceEntry] = dr.async_entries_for_config_entry(
         dr_instance, config_entry.entry_id
     )
-    identifiers_list = list()
-    for device in coordinator.device_infos.values():
-        identifiers_list.append(device["identifiers"])
-    for device in devices:
-        if not _identifiers_exists(identifiers_list, device.identifiers):
-            dr_instance.async_remove_device(device.id)
+    identifiers_list = []
+    for device_info in coordinator.device_infos.values():
+        identifiers_list.append(device_info["identifiers"])
+    for device_entry in devices:
+        if not _identifiers_exists(identifiers_list, device_entry.identifiers):
+            dr_instance.async_remove_device(device_entry.id)

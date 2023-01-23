@@ -5,16 +5,7 @@ from enum import Enum
 import logging
 from typing import Final
 
-from homeassistant.components.climate.const import (
-    CURRENT_HVAC_HEAT,
-    CURRENT_HVAC_IDLE,
-    HVAC_MODE_COOL,
-    PRESET_AWAY,
-    PRESET_BOOST,
-    PRESET_NONE,
-    HVACMode,
-)
-from homeassistant.const import STATE_UNKNOWN, Platform
+from homeassistant.const import Platform
 
 # endregion Imports
 
@@ -199,7 +190,7 @@ class LuxParameter(Enum):
     P0870_AMOUNT_COUNTER_ACTIVE: Final = "parameters.ID_Einst_Waermemenge_akt"
     P0874_SERIAL_NUMBER: Final = "parameters.ID_WP_SerienNummer_DATUM"
     P0875_SERIAL_NUMBER_MODEL: Final = "parameters.ID_WP_SerienNummer_HEX"
-    P0882_SOLAR_DETECT: Final = "parameters.ID_BSTD_Solar"
+    P0882_SOLAR_OPERATION_HOURS: Final = "parameters.ID_BSTD_Solar"
     P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = (
         "parameters.ID_Einst_TDC_Koll_Max_akt"
     )
@@ -233,6 +224,8 @@ class LuxCalculation(Enum):
     C0016_OUTDOOR_TEMPERATURE_AVERAGE: Final = "calculations.ID_WEB_Mitteltemperatur"
     C0017_DOMESTIC_WATER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TBW"
     C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
+    C0026_SOLAR_COLLECTOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSK"
+    C0027_SOLAR_BUFFER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSS"
     C0056_COMPRESSOR1_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitVD1"
     C0057_COMPRESSOR1_IMPULSES: Final = "calculations.ID_WEB_Zaehler_BetrZeitImpVD1"
     C0058_COMPRESSOR2_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitVD2"
@@ -279,6 +272,7 @@ class LuxVisibility(Enum):
     V0027_HOT_GAS_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Heissgas"
     V0029_DOMESTIC_WATER_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_BW_Ist"
     V0038_SOLAR_COLLECTOR: Final = "visibilities.ID_Visi_Temp_Solarkoll"
+    V0039_SOLAR_BUFFER: Final = "visibilities.ID_Visi_Temp_Solarsp"
     V0061_SECOND_HEAT_GENERATOR: Final = "visibilities.ID_Visi_OUT_ZWE1"
     V0080_COMPRESSOR1_OPERATION_HOURS: Final = "visibilities.ID_Visi_Bst_BStdVD1"
     V0081_COMPRESSOR1_IMPULSES: Final = "visibilities.ID_Visi_Bst_ImpVD1"

@@ -10,6 +10,7 @@ import json
 import os.path
 import re
 import threading
+from types import MappingProxyType
 from typing import Any, Final, TypeVar
 
 from luxtronik import Calculations, Luxtronik, Parameters, Visibilities
@@ -118,10 +119,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     async def _read_or_write(self, write, parameter, value) -> LuxtronikCoordinatorData:
         if write:
-            self._write(parameter, value)
+            data = self._write(parameter, value)
         else:
-            self._read()
-        self.async_set_updated_data(self.data)
+            data = self._read()
+        self.async_set_updated_data(data)
+        return data
 
     def _read(self) -> LuxtronikCoordinatorData:
         try:
@@ -178,6 +180,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         hass: HomeAssistant, config_entry: ConfigEntry | dict
     ) -> LuxtronikCoordinator:
         """Connect to heatpump."""
+        config: dict[Any, Any] | MappingProxyType[str, Any] = None
         if isinstance(config_entry, ConfigEntry):
             host = config_entry.data[CONF_HOST]
             port = config_entry.data[CONF_PORT]
@@ -341,9 +344,17 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
-        return (
-            description.visibility is None or self.get_value(description.visibility) > 0
-        )
+        if description.visibility is None:
+            return True
+        # Detecting some options based on visibilities doesn't work reliably.
+        # Use special functions
+        if description.visibility in [
+            LuxVisibility.V0038_SOLAR_COLLECTOR,
+            LuxVisibility.V0039_SOLAR_BUFFER,
+            LuxVisibility.V0250_SOLAR,
+        ]:
+            return self.detect_solar_present()
+        return self.get_value(description.visibility) > 0
 
     def entity_active(self, description: LuxtronikEntityDescription) -> bool:
         """Is description activated."""
@@ -352,17 +363,23 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             and description.min_firmware_version_minor > self.firmware_version_minor
         ):
             return False
-        return self.device_key_active(description.device_key)
+        if not self.device_key_active(description.device_key):
+            return False
+        if description.invisibly_if_value is not None:
+            return description.invisibly_if_value != self.get_value(
+                description.luxtronik_key
+            )
+        return True
 
     def device_key_active(self, device_key: DeviceKey) -> bool:
         """Is device key activated."""
         if device_key == DeviceKey.heatpump:
             return True
-        elif device_key == DeviceKey.heating:
+        if device_key == DeviceKey.heating:
             return self.has_heating
-        elif device_key == DeviceKey.domestic_water:
+        if device_key == DeviceKey.domestic_water:
             return self.has_domestic_water
-        elif device_key == DeviceKey.cooling:
+        if device_key == DeviceKey.cooling:
             return self.detect_cooling_present()
         raise NotImplementedError
 
@@ -422,9 +439,16 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def detect_solar_present(self) -> bool:
         """Detect and returns True if solar is present."""
-        sensor_value = bool(self.get_value(LuxParameter.P0882_SOLAR_DETECT))
-        solar_present = sensor_value > 0.01
-        return solar_present
+        return (
+            bool(self.get_value(LuxVisibility.V0250_SOLAR))
+            or self.get_value(LuxParameter.P0882_SOLAR_OPERATION_HOURS) > 0.01
+            or bool(self.get_value(LuxVisibility.V0038_SOLAR_COLLECTOR))
+            or float(self.get_value(LuxCalculation.C0026_SOLAR_COLLECTOR_TEMPERATURE))
+            != 5.0
+            or bool(self.get_value(LuxVisibility.V0039_SOLAR_BUFFER))
+            or float(self.get_value(LuxCalculation.C0027_SOLAR_BUFFER_TEMPERATURE))
+            != 150.0
+        )
 
     def detect_cooling_present(self) -> bool:
         """Detect and returns True if Cooling is present."""

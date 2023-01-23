@@ -1,5 +1,4 @@
 """Helper for luxtronik heatpump module."""
-# -*- coding: utf-8 -*-
 # region Imports
 from __future__ import annotations
 
@@ -85,19 +84,19 @@ def get_firmware_download_id(installed_version: str) -> int | None:
     """Return the heatpump firmware id for the download portal."""
     if installed_version is None:
         return None
-    elif installed_version.startswith("V1."):
+    if installed_version.startswith("V1."):
         return 0
-    elif installed_version.startswith("V2."):
+    if installed_version.startswith("V2."):
         return 1
-    elif installed_version.startswith("V3."):
+    if installed_version.startswith("V3."):
         return 2
-    elif installed_version.startswith("V4."):
+    if installed_version.startswith("V4."):
         return 3
-    elif installed_version.startswith("F1."):
+    if installed_version.startswith("F1."):
         return 4
-    elif installed_version.startswith("WWB1."):
+    if installed_version.startswith("WWB1."):
         return 5
-    elif installed_version.startswith("smo"):
+    if installed_version.startswith("smo"):
         return 6
     return None
 
@@ -117,7 +116,7 @@ def get_manufacturer_firmware_url_by_model(self, model: str) -> str:
     return f"https://www.heatpump24.com/DownloadArea.php?layout={layout_id}"
 
 
-def is_socket_closed(sock: socket.socket) -> bool:
+def _is_socket_closed(sock: socket.socket) -> bool:
     try:
         # this will try to read bytes without blocking and also without removing them from buffer (peek only)
         data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
@@ -127,7 +126,7 @@ def is_socket_closed(sock: socket.socket) -> bool:
         return False  # socket is open and reading from it would block
     except ConnectionResetError:
         return True  # socket was closed for some other reason
-    except Exception as err:
+    except Exception as err:  # pylint: disable=broad-except
         LOGGER.exception(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
@@ -139,6 +138,7 @@ class Luxtronik:
     """Main luxtronik class."""
 
     def __init__(self, host, port, safe=True):
+        """Init Luxtronik helper."""
         self._lock = threading.Lock()
         self._socket = None
         self._host = host
@@ -149,8 +149,9 @@ class Luxtronik:
         self.read()
 
     def __del__(self):
+        """Luxtronik helper descructor."""
         if self._socket is not None:
-            if not is_socket_closed(self._socket):
+            if not _is_socket_closed(self._socket):
                 self._socket.close()
             self._socket = None
             LOGGER.info(
@@ -162,7 +163,7 @@ class Luxtronik:
         self._read_write(write=False)
 
     def write(self):
-        """Write patameter to heatpump."""
+        """Write parameter to heatpump."""
         self._read_write(write=True)
 
     def _read_write(self, write=False):
@@ -171,7 +172,7 @@ class Luxtronik:
             is_none = self._socket is None
             if is_none:
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if is_none or is_socket_closed(self._socket):
+            if is_none or _is_socket_closed(self._socket):
                 self._socket.connect((self._host, self._port))
                 LOGGER.info(
                     "Connected to Luxtronik heatpump %s:%s", self._host, self._port

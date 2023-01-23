@@ -21,7 +21,7 @@ def _get_key_value(
 ) -> Any:
     if sensors is None:
         return None
-    elif group == CONF_PARAMETERS:
+    if group == CONF_PARAMETERS:
         sensor = sensors.parameters.get(sensor_id)
     elif group == CONF_CALCULATIONS:
         sensor = sensors.calculations.get(sensor_id)

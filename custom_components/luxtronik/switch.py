@@ -12,7 +12,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
-from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
+from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, LOGGER, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikSwitchDescription
 from .switch_entities_predefined import SWITCHES

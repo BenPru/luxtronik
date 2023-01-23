@@ -313,7 +313,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LuxVisibility.V0038_SOLAR_COLLECTOR,
-        value_none_existing=5.0,
     ),
     # endregion Solar
     # endregion Domestic water

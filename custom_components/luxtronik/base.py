@@ -14,6 +14,8 @@ from .model import LuxtronikEntityDescription
 class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator]):
     """Luxtronik base device."""
 
+    entity_description: LuxtronikEntityDescription
+
     def __init__(
         self,
         coordinator: LuxtronikCoordinator,

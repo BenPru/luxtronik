@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.climate.const import HVACAction
+from homeassistant.components.climate import HVACAction
 from homeassistant.components.water_heater import (
     ENTITY_ID_FORMAT,
     STATE_ELECTRIC,
@@ -86,6 +86,8 @@ async def async_setup_entry(
 
 class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     """Representation of an ATAG water heater."""
+
+    entity_description: LuxtronikWaterHeaterDescription
 
     _attr_min_temp = 40.0
     _attr_max_temp = 65.0
@@ -189,8 +191,8 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     async def async_turn_away_mode_off(self) -> None:
         """Turn away mode off."""
         if (self._last_operation_mode_before_away is None) or (
-            not self._last_operation_mode_before_away
-            in self.entity_description.operation_list
+            self._last_operation_mode_before_away
+            not in self.entity_description.operation_list
         ):
             await self._async_set_lux_mode(LuxMode.automatic.value)
         else:

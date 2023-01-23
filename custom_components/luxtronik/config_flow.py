@@ -113,14 +113,15 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _async_migrate_data_from_custom_component_luxtronik2(self):
         """
-        Migrate custom_components/luxtronik2 to components/luxtronik
+        Migrate custom_components/luxtronik2 to components/luxtronik.
+
             - If serial number matches
             1. Set CONF_HA_SENSOR_PREFIX = "luxtronik2"
             2. Disable custom_components/luxtronik2
         """
         # Check if custom_component_luxtronik2 exists:
         for legacy_entry in self.hass.config_entries.async_entries("luxtronik2"):
-            if not CONF_HOST in legacy_entry.data or not CONF_PORT in legacy_entry.data:
+            if CONF_HOST not in legacy_entry.data or CONF_PORT not in legacy_entry.data:
                 continue
             try:
                 # Try to connect and lookup serial number:
