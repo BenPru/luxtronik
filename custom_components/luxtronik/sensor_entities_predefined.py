@@ -275,6 +275,7 @@ SENSORS: list[LuxtronikSensorDescription] = [
         device_class=SensorDeviceClass.ENERGY,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        visible_if_not_value=0.0,
         visibility=LuxVisibility.V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
         factor=0.1,
         decimal_places=1,
