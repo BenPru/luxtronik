@@ -151,14 +151,18 @@ class LuxtronikDevice:
         LOGGER.info(f"CoolingMk = {coolingMk}")        
         return coolingMk
         
-    def detect_solar_present(self):
-        sensor_value = self.get_value(LUX_DETECT_SOLAR_SENSOR)
-        solar_koll = self.get_value("visibilities.ID_Visi_Temp_Solarkoll")
-        solar_buffer = self.get_value("visibilities.ID_Visi_Temp_Solarsp")
-        working_hours = self.get_value("parameters.ID_BSTD_Solar")
-        SolarPresent = (sensor_value > 0 or working_hours > 0.01 or solar_koll > 0 or solar_buffer > 0)
-        LOGGER.info(f"SolarPresent = {SolarPresent}") 
-        return SolarPresent
+    def detect_solar_present(self) -> bool:
+        """Detect and returns True if solar is present."""
+        return (
+            bool(self.get_value(LuxVisibility.V0250_SOLAR))
+            or self.get_value(LuxParameter.P0882_SOLAR_OPERATION_HOURS) > 0.01
+            or bool(self.get_value(LuxVisibility.V0038_SOLAR_COLLECTOR))
+            or float(self.get_value(LuxCalculation.C0026_SOLAR_COLLECTOR_TEMPERATURE))
+            != 5.0
+            or bool(self.get_value(LuxVisibility.V0039_SOLAR_BUFFER))
+            or float(self.get_value(LuxCalculation.C0027_SOLAR_BUFFER_TEMPERATURE))
+            != 150.0
+        )
 
         
     def detect_cooling_present(self):  
