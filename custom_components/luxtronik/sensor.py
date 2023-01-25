@@ -869,6 +869,9 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         self._attr_extra_state_attributes = { ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: sensor_key }
         self._extra_attributes = extra_attributes
 
+    def disable_by_default(self):
+        self._attr_entity_registry_enabled_default = False
+
     @property
     def icon(self):  # -> str | None:
         """Return the icon to be used for this entity."""
@@ -1186,8 +1189,9 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
         self.async_schedule_update_ha_state(True)
 
 def add_sensor_if_active(luxtronik, entities, check_key: str, sensor: LuxtronikSensor):
-    if luxtronik.get_value(check_key) > 0:
-        entities += [sensor]
+    if luxtronik.get_value(check_key) <= 0:
+        sensor.disable_by_default()
+    entities += [sensor]
 
 def add_sensor_if_min_minor_version(luxtronik, entities, min_minor: int, sensor: LuxtronikSensor):
     if luxtronik.firmware_version_minor >= min_minor:
