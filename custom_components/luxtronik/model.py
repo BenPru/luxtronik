@@ -3,27 +3,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from homeassistant.components.climate import (
-    ClimateEntityDescription,
-    ClimateEntityFeature,
-    HVACMode,
-)
+from homeassistant.components.climate import (ClimateEntityDescription,
+                                              ClimateEntityFeature, HVACMode)
 from homeassistant.components.number import NumberEntityDescription, NumberMode
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.water_heater import (
-    WaterHeaterEntityEntityDescription,
-    WaterHeaterEntityFeature,
-)
+    WaterHeaterEntityEntityDescription, WaterHeaterEntityFeature)
 from homeassistant.helpers.entity import EntityDescription
 
-from .const import (
-    DeviceKey,
-    FirmwareVersionMinor,
-    LuxCalculation,
-    LuxParameter,
-    LuxVisibility,
-)
+from .const import (DeviceKey, FirmwareVersionMinor, LuxCalculation,
+                    LuxParameter, LuxVisibility)
 
 
 @dataclass
@@ -39,7 +29,7 @@ class LuxtronikEntityDescription(EntityDescription):
     luxtronik_key: LuxParameter | LuxCalculation = None
     translation_key_name: str = None
     visibility: LuxVisibility = None
-    invisibly_if_value = None
+    visible_if_not_value = None
     min_firmware_version_minor: FirmwareVersionMinor = None
 
 

@@ -2,25 +2,25 @@
 # region Imports
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Coroutine, Mapping
-from dataclasses import dataclass
-from datetime import timedelta
-from functools import wraps
 import json
 import os.path
 import re
 import threading
+from collections.abc import Awaitable, Callable, Coroutine, Mapping
+from dataclasses import dataclass
+from datetime import timedelta
+from functools import wraps
 from types import MappingProxyType
 from typing import Any, Final, TypeVar
-
-from luxtronik import Calculations, Luxtronik, Parameters, Visibilities
-from typing_extensions import Concatenate, ParamSpec
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from typing_extensions import Concatenate, ParamSpec
+
+from luxtronik import Calculations, Luxtronik, Parameters, Visibilities
 
 from .const import (
     CONF_CALCULATIONS,
@@ -344,8 +344,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
+        visibly_by_value: bool | None = None
+        if description.visible_if_not_value is not None:
+            visibly_by_value = description.visible_if_not_value != self.get_value(
+                description.luxtronik_key
+            )
         if description.visibility is None:
-            return True
+            return visibly_by_value is None or visibly_by_value
         # Detecting some options based on visibilities doesn't work reliably.
         # Use special functions
         if description.visibility in [
@@ -354,7 +359,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LuxVisibility.V0250_SOLAR,
         ]:
             return self.detect_solar_present()
-        return self.get_value(description.visibility) > 0
+        if self.get_value(description.visibility) > 0:
+            return True
+        if visibly_by_value is None:
+            return True
+        return visibly_by_value == True
 
     def entity_active(self, description: LuxtronikEntityDescription) -> bool:
         """Is description activated."""
@@ -365,10 +374,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return False
         if not self.device_key_active(description.device_key):
             return False
-        if description.invisibly_if_value is not None:
-            return description.invisibly_if_value != self.get_value(
-                description.luxtronik_key
-            )
         return True
 
     def device_key_active(self, device_key: DeviceKey) -> bool:

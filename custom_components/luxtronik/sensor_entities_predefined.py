@@ -1,25 +1,13 @@
 # All descriptions can be found here.
 # region Imports
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from homeassistant.const import (
-    UnitOfElectricPotential,
-    UnitOfEnergy,
-    UnitOfFrequency,
-    UnitOfPower,
-    UnitOfPressure,
-    UnitOfTemperature,
-    UnitOfTime,
-)
+from homeassistant.const import (UnitOfElectricPotential, UnitOfEnergy,
+                                 UnitOfFrequency, UnitOfPower, UnitOfPressure,
+                                 UnitOfTemperature, UnitOfTime)
 from homeassistant.helpers.entity import EntityCategory
 
-from .const import (
-    LUX_STATE_ICON_MAP,
-    SECOUND_TO_HOUR_FACTOR,
-    DeviceKey,
-    LuxCalculation,
-    LuxParameter,
-    LuxVisibility,
-)
+from .const import (LUX_STATE_ICON_MAP, SECOUND_TO_HOUR_FACTOR, DeviceKey,
+                    LuxCalculation, LuxParameter, LuxVisibility)
 from .model import LuxtronikSensorDescription
 
 # endregion Imports
@@ -341,7 +329,8 @@ SENSORS: list[LuxtronikSensorDescription] = [
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         entity_registry_enabled_default=False,
-        # TODO: Detect visibility=LuxVisibility.V0291_OVERHEATING_TEMPERATURE,
+        visible_if_not_value=-50.0,
+        visibility=LuxVisibility.V0291_OVERHEATING_TEMPERATURE,
     ),
     # TODO:
     # LuxtronikIndexStatusSensor(
