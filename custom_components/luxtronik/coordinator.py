@@ -11,16 +11,15 @@ from dataclasses import dataclass
 from datetime import timedelta
 from functools import wraps
 from types import MappingProxyType
-from typing import Any, Final, TypeVar
+from typing import Any, Concatenate, Final, TypeVar
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from typing_extensions import Concatenate, ParamSpec
-
 from luxtronik import Calculations, Luxtronik, Parameters, Visibilities
+from typing_extensions import ParamSpec
 
 from .const import (
     CONF_CALCULATIONS,
@@ -180,7 +179,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         hass: HomeAssistant, config_entry: ConfigEntry | dict
     ) -> LuxtronikCoordinator:
         """Connect to heatpump."""
-        config: dict[Any, Any] | MappingProxyType[str, Any] = None
+        config: dict[Any, Any] | MappingProxyType[str, Any] | None = None
         if isinstance(config_entry, ConfigEntry):
             host = config_entry.data[CONF_HOST]
             port = config_entry.data[CONF_PORT]
@@ -268,7 +267,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             sw_version=self.firmware_version,
         )
 
-    def get_device_entity_title(self, key: str, platform: Platform) -> str:
+    def get_device_entity_title(self, key: str, platform: Platform | str) -> str:
         """Get a device or entity title text in locale language."""
         if "entity" in self.__content_locale__:
             entity_node = self.__content_locale__["entity"]
@@ -325,7 +324,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return self.get_value(LuxCalculation.C0078_MODEL_CODE)
 
     @property
-    def manufacturer(self) -> str:
+    def manufacturer(self) -> str | None:
         """Return the heatpump manufacturer."""
         return get_manufacturer_by_model(self.model)
 
@@ -344,13 +343,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
-        visibly_by_value: bool | None = None
-        if description.visible_if_not_value is not None:
-            visibly_by_value = description.visible_if_not_value != self.get_value(
-                description.luxtronik_key
-            )
         if description.visibility is None:
-            return visibly_by_value is None or visibly_by_value
+            return True
         # Detecting some options based on visibilities doesn't work reliably.
         # Use special functions
         if description.visibility in [
@@ -359,21 +353,22 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LuxVisibility.V0250_SOLAR,
         ]:
             return self.detect_solar_present()
-        if self.get_value(description.visibility) > 0:
-            return True
-        if visibly_by_value is None:
-            return True
-        return visibly_by_value == True
+        return self.get_value(description.visibility) > 0
 
     def entity_active(self, description: LuxtronikEntityDescription) -> bool:
         """Is description activated."""
         if (
             description.min_firmware_version_minor is not None
-            and description.min_firmware_version_minor > self.firmware_version_minor
+            and description.min_firmware_version_minor.value
+            > self.firmware_version_minor
         ):
             return False
         if not self.device_key_active(description.device_key):
             return False
+        if description.invisible_if_value is not None:
+            return description.invisible_if_value != self.get_value(
+                description.luxtronik_key
+            )
         return True
 
     def device_key_active(self, device_key: DeviceKey) -> bool:

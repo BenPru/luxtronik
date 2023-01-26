@@ -1,4 +1,4 @@
-"""Constants for Luxtronik heatpump integration."""
+"""Constants for the Luxtronik heatpump integration."""
 # region Imports
 from datetime import timedelta
 from enum import Enum
@@ -24,9 +24,29 @@ PLATFORMS: list[str] = [
     Platform.UPDATE,
 ]
 
-SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
-
 ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: Final = "luxtronik_Key"
+SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
+# endregion Constants Main
+
+# region Conf
+CONF_COORDINATOR: Final = "coordinator"
+
+CONF_PARAMETERS: Final = "parameters"
+CONF_CALCULATIONS: Final = "calculations"
+CONF_VISIBILITIES: Final = "visibilities"
+
+CONF_HA_SENSOR_PREFIX: Final = "ha_sensor_prefix"
+CONF_CONTROL_MODE_HOME_ASSISTANT: Final = "control_mode_home_assistant"
+CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
+
+CONF_LOCK_TIMEOUT: Final = "lock_timeout"
+CONF_SAFE: Final = "safe"
+
+DEFAULT_HOST: Final = "wp-novelan"
+DEFAULT_PORT: Final = 8889
+# endregion Conf
+
+# region Lux Definitions
 
 
 class DeviceKey(Enum):
@@ -54,22 +74,6 @@ DOWNLOAD_PORTAL_URL: Final = (
 # endregion Constants Main
 
 # region Conf
-
-CONF_PARAMETERS: Final = "parameters"
-CONF_CALCULATIONS: Final = "calculations"
-CONF_VISIBILITIES: Final = "visibilities"
-
-CONF_COORDINATOR: Final = "coordinator"
-
-CONF_HA_SENSOR_PREFIX: Final = "ha_sensor_prefix"
-CONF_CONTROL_MODE_HOME_ASSISTANT: Final = "control_mode_home_assistant"
-CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
-
-CONF_LOCK_TIMEOUT: Final = "lock_timeout"
-CONF_SAFE: Final = "safe"
-
-DEFAULT_PORT: Final = 8889
-
 LANG_EN: Final = "en"
 LANG_DE: Final = "de"
 LANG_DEFAULT: Final = LANG_EN
@@ -113,6 +117,12 @@ class LuxMkTypes(Enum):
     heating_cooling: Final = 4
 
 
+LUX_PARAMETER_MK_SENSORS: Final = [
+    "parameters.ID_Einst_MK1Typ_akt",
+    "parameters.ID_Einst_MK2Typ_akt",
+    "parameters.ID_Einst_MK3Typ_akt",
+]
+
 class LuxRoomThermostatType(Enum):
     """LuxMkTypes etc."""
 
@@ -125,7 +135,6 @@ class LuxRoomThermostatType(Enum):
     # Smart: Final = 5
 
 
-# endregion Conf
 
 LUX_STATE_ICON_MAP: Final[dict[str, str]] = {
     LuxOperationMode.heating.value: "mdi:radiator",
@@ -138,17 +147,17 @@ LUX_STATE_ICON_MAP: Final[dict[str, str]] = {
     LuxOperationMode.cooling.value: "mdi:air-conditioner",
 }
 
-# region Lux parameters
-LUX_PARAMETER_MK_SENSORS: Final = [
-    "parameters.ID_Einst_MK1Typ_akt",
-    "parameters.ID_Einst_MK2Typ_akt",
-    "parameters.ID_Einst_MK3Typ_akt",
-]
+LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]
+LUX_MODELS_NOVELAN = ["BW", "LA", "LD", "LI", "SI", "ZLW"]
+LUX_MODELS_OTHER = ["CB", "CI", "CN", "CS"]
+# endregion Lux Definitions
 
+# region Lux parameters
 
 class LuxParameter(Enum):
     """Luxtronik parameter ids."""
 
+    UNSET: Final = None
     P0001_HEATING_TARGET_CORRECTION: Final = "parameters.ID_Einst_WK_akt"
     P0002_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = "parameters.ID_Einst_BWS_akt"
     P0003_MODE_HEATING: Final = "parameters.ID_Ba_Hz_akt"
@@ -218,6 +227,7 @@ class LuxParameter(Enum):
 class LuxCalculation(Enum):
     """Luxtronik calculation ids."""
 
+    UNSET: Final = None
     C0012_FLOW_OUT_TEMPERATURE_TARGET: Final = "calculations.ID_WEB_Sollwert_TRL_HZ"
     C0014_HOT_GAS_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_THG"
     C0015_OUTDOOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TA"
@@ -268,6 +278,7 @@ class LuxCalculation(Enum):
 class LuxVisibility(Enum):
     """Luxtronik visibility ids."""
 
+    UNSET: Final = None
     V0023_FLOW_IN_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Vorlauf"
     V0027_HOT_GAS_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Heissgas"
     V0029_DOMESTIC_WATER_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_BW_Ist"
@@ -302,6 +313,3 @@ class LuxVisibility(Enum):
 
 # endregion visibilities
 
-LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]
-LUX_MODELS_NOVELAN = ["BW", "LA", "LD", "LI", "SI", "ZLW"]
-LUX_MODELS_OTHER = ["CB", "CI", "CN", "CS"]

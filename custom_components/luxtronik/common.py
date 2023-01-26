@@ -15,7 +15,7 @@ def get_sensor_data(
 
 
 def _get_key_value(
-    sensors: LuxtronikCoordinatorData,
+    sensors: LuxtronikCoordinatorData | None,
     group: str,
     sensor_id: str,
 ) -> Any:

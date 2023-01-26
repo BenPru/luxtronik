@@ -12,12 +12,13 @@ from homeassistant.components.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import selector
+from homeassistant.helpers import config_entry_flow, selector
 
 from .const import (
     CONF_CONTROL_MODE_HOME_ASSISTANT,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
+    DEFAULT_HOST,
     DEFAULT_PORT,
     DOMAIN,
     LOGGER,
@@ -38,7 +39,7 @@ PORT_SELECTOR = vol.All(
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_HOST, default="10.0.17.39"): str,
+        vol.Required(CONF_HOST, default=DEFAULT_HOST): str,
         vol.Required(CONF_PORT, default=DEFAULT_PORT): PORT_SELECTOR,
     }
 )
@@ -74,6 +75,12 @@ def _get_options_schema(options, default_sensor_indoor_temperature: str) -> vol.
 
 
 # CONFIG_SCHEMA = STEP_OPTIONS_DATA_SCHEMA
+
+async def _async_has_devices(hass: HomeAssistant) -> bool:
+    """Return if there are devices that can be discovered."""
+    # Check if there are any devices that can be discovered in the network.
+    first_device = await hass.async_add_executor_job(discover)
+    return first_device is not None
 
 
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -196,7 +203,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             discovery_info.ip,
         )
         # Validate dhcp result with socket broadcast:
-        broadcast_discover_ip, broadcast_discover_port = discover()
+        broadcast_discover_ip, broadcast_discover_port = discover()[0]
         if broadcast_discover_ip != discovery_info.ip:
             return self.async_abort(reason="no_devices_found")
         config = dict[str, Any]()
@@ -286,3 +293,6 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=_get_options_schema(None, coordinator.serial_number),
             description_placeholders={"name": name},
         )
+
+
+config_entry_flow.register_discovery_flow(DOMAIN, "Luxtronik", _async_has_devices)

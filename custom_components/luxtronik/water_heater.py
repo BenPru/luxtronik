@@ -85,7 +85,7 @@ async def async_setup_entry(
 
 
 class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
-    """Representation of an ATAG water heater."""
+    """Representation of an Luxtronik water heater."""
 
     entity_description: LuxtronikWaterHeaterDescription
 
@@ -94,8 +94,8 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     _attr_target_temperature_low = 45.0
     _attr_target_temperature_high = 65.0
 
-    _last_operation_mode_before_away: str = None
-    _current_action: str = None
+    _last_operation_mode_before_away: str | None = None
+    _current_action: str | None = None
 
     def __init__(
         self,
@@ -114,7 +114,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        self._attr_temperature_unit = description.unit_of_measurement
+        self._attr_temperature_unit = str(description.unit_of_measurement)
         self._attr_operation_list = description.operation_list
         self._attr_supported_features = description.supported_features
 
@@ -125,14 +125,18 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     @property
     def hvac_action(self) -> HVACAction | str | None:
         """Return the current running hvac operation."""
-        if self._current_action == self.entity_description.luxtronik_action_heating:
+        if (
+            self.entity_description.luxtronik_action_heating is not None
+            and self._current_action
+            == self.entity_description.luxtronik_action_heating.value
+        ):
             return HVACAction.HEATING
         return HVACAction.OFF
 
     @property
     def icon(self) -> str | None:
         """Return the icon to use in the frontend, if any."""
-        result_icon = self.entity_description.icon
+        result_icon = str(self.entity_description.icon)
         if self._attr_current_operation == STATE_OFF:
             result_icon += "-off"
         elif self._attr_current_operation == STATE_HEAT_PUMP:
@@ -143,7 +147,9 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self._handle_coordinator_update()
 
     @callback
-    def _handle_coordinator_update(self, data: LuxtronikCoordinatorData = None) -> None:
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
         """Handle updated data from the coordinator."""
         data = self.coordinator.data if data is None else data
         if data is None:
@@ -173,9 +179,11 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""
-        value = int(kwargs.get(ATTR_TEMPERATURE))
+        value = kwargs.get(ATTR_TEMPERATURE)
         lux_key = self.entity_description.luxtronik_key_target_temperature.value
-        data = await self.coordinator.write(lux_key.split(".")[1], value)
+        data: LuxtronikCoordinatorData | None = await self.coordinator.write(
+            lux_key.split(".")[1], value
+        )
         self._handle_coordinator_update(data)
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:
@@ -190,9 +198,9 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
 
     async def async_turn_away_mode_off(self) -> None:
         """Turn away mode off."""
-        if (self._last_operation_mode_before_away is None) or (
-            self._last_operation_mode_before_away
-            not in self.entity_description.operation_list
+        if self._last_operation_mode_before_away is None or (
+            self._attr_operation_list is not None
+            and self._last_operation_mode_before_away not in self._attr_operation_list
         ):
             await self._async_set_lux_mode(LuxMode.automatic.value)
         else:

@@ -22,51 +22,74 @@ from .const import (
 
 WAIT_TIME_WRITE_PARAMETER = 0.2
 
+# List of ports that are known to respond to discovery packets
+LUXTRONIK_DISCOVERY_PORTS = [4444, 47808]
 
-def discover():
-    """Broadcast discovery for luxtronik heatpumps."""
+# Time (in seconds) to wait for response after sending discovery broadcast
+LUXTRONIK_DISCOVERY_TIMEOUT = 2
 
-    for search_port in (4444, 47808):
-        # LOGGER.debug(f"Send discovery packets to port {search_port}")
+# Content of packet that will be sent for discovering heat pumps
+LUXTRONIK_DISCOVERY_MAGIC_PACKET = "2000;111;1;\x00"
+
+# Content of response that is contained in responses to discovery broadcast
+LUXTRONIK_DISCOVERY_RESPONSE_PREFIX = "2500;111;"
+
+def discover() -> list[tuple[str, int | None]]:
+    """Broadcast discovery for Luxtronik heat pumps."""
+
+    results: list[tuple[str, int | None]] = []
+
+    # pylint: disable=too-many-nested-blocks
+    for port in LUXTRONIK_DISCOVERY_PORTS:
+        LOGGER.debug("Send discovery packets to port %s", port)
         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        server.bind(("", search_port))
-        server.settimeout(2)
+        server.bind(("", port))
+        server.settimeout(LUXTRONIK_DISCOVERY_TIMEOUT)
 
         # send AIT magic broadcast packet
-        data = "2000;111;1;\x00"
-        server.sendto(data.encode(), ("<broadcast>", search_port))
-        # LOGGER.debug(f'Sending broadcast request "{data.encode()}"')
+        server.sendto(LUXTRONIK_DISCOVERY_MAGIC_PACKET.encode(), ("<broadcast>", port))
+        LOGGER.debug(
+            "Sending broadcast request %s", LUXTRONIK_DISCOVERY_MAGIC_PACKET.encode()
+        )
 
         while True:
             try:
-                res, con = server.recvfrom(1024)
-                res = res.decode("ascii", errors="ignore")
+                recv_bytes, con = server.recvfrom(1024)
+                res = recv_bytes.decode("ascii", errors="ignore")
                 # if we receive what we just sent, continue
-                if res == data:
+                if res == LUXTRONIK_DISCOVERY_MAGIC_PACKET:
                     continue
-                ip = con[0]
+                ip_address = con[0]
                 # if the response starts with the magic nonsense
-                if res.startswith("2500;111;"):
-                    res = res.split(";")
-                    # LOGGER.debug(f'Received answer from {ip} "{res}"')
+                if res.startswith(LUXTRONIK_DISCOVERY_RESPONSE_PREFIX):
+                    res_list = res.split(";")
+                    LOGGER.debug(
+                        "Received response from %s %s", ip_address, str(res_list)
+                    )
                     try:
-                        port = int(res[2])
+                        res_port: int | None = int(res_list[2])
+                        if res_port is None or res_port < 1 or res_port > 65535:
+                            LOGGER.debug("Response contained an invalid port, ignoring")
+                            res_port = None
                     except ValueError:
-                        # LOGGER.debug(
-                        #     "Response did not contain a valid port number, an old Luxtronic software version might be the reason."
-                        # )
-                        port = None
-                    return (ip, port)
-                # if not, continue
-                # else:
-                # LOGGER.debug(
-                #     f"Received answer, but with wrong magic bytes, from {ip} skip this one"
-                # )
-                # continue
+                        res_port = None
+                    if res_port is None:
+                        LOGGER.debug(
+                            "Response did not contain a valid port number,"
+                            "an old Luxtronic software version might be the reason"
+                        )
+                    results.append((ip_address, res_port))
+                LOGGER.debug(
+                    "Received response from %s, but with wrong content, skipping",
+                    ip_address,
+                )
+                continue
             # if the timeout triggers, go on an use the other broadcast port
             except socket.timeout:
                 break
+
+    return results
 
 
 def get_manufacturer_by_model(model: str) -> str | None:

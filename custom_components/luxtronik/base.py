@@ -1,4 +1,5 @@
 """Luxtronik Home Assistant Base Device Model."""
+# region Imports
 from __future__ import annotations
 
 from homeassistant.const import Platform
@@ -9,6 +10,8 @@ from .common import get_sensor_data
 from .const import ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY, DeviceKey
 from .coordinator import LuxtronikCoordinator
 from .model import LuxtronikEntityDescription
+
+# endregion Imports
 
 
 class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator]):
@@ -43,7 +46,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator]):
             )
         self.entity_description = description
         self._attr_device_info = coordinator.device_infos[device_info_ident.value]
-        # self.luxtronik_key = description.luxtronik_key
 
         translation_key = (
             description.key
@@ -58,13 +60,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator]):
     @property
     def icon(self) -> str | None:
         """Return the icon to be used for this entity."""
-        if (
-            self.entity_description.icon is not None
-            and isinstance(self.entity_description.icon, dict)
-            and not isinstance(self.entity_description.icon, str)
-        ):
-            if self._attr_state in self.entity_description.icon:
-                return self.entity_description.icon[self._attr_state]
+        if self.entity_description.icon_by_state is not None:
+            if self._attr_state in self.entity_description.icon_by_state:
+                return self.entity_description.icon_by_state.get(str(self._attr_state))
             return None
         return super().icon
 
