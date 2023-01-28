@@ -10,7 +10,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.components.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_entry_flow, selector
 
@@ -79,8 +79,8 @@ def _get_options_schema(options, default_sensor_indoor_temperature: str) -> vol.
 async def _async_has_devices(hass: HomeAssistant) -> bool:
     """Return if there are devices that can be discovered."""
     # Check if there are any devices that can be discovered in the network.
-    first_device = await hass.async_add_executor_job(discover)
-    return first_device is not None
+    device_list = await hass.async_add_executor_job(discover)
+    return device_list is not None and len(device_list) > 0
 
 
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -295,4 +295,4 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         )
 
 
-config_entry_flow.register_discovery_flow(DOMAIN, "Luxtronik", _async_has_devices)
+# config_entry_flow.register_discovery_flow(DOMAIN, "Luxtronik", _async_has_devices)

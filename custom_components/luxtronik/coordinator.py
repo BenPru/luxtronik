@@ -2,24 +2,24 @@
 # region Imports
 from __future__ import annotations
 
-import json
-import os.path
-import re
-import threading
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from dataclasses import dataclass
 from datetime import timedelta
 from functools import wraps
+import json
+import os.path
+import re
+import threading
 from types import MappingProxyType
 from typing import Any, Concatenate, Final, TypeVar
 
+from luxtronik import Calculations, Luxtronik, Parameters, Visibilities
+from typing_extensions import ParamSpec
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from luxtronik import Calculations, Luxtronik, Parameters, Visibilities
-from typing_extensions import ParamSpec
 
 from .const import (
     CONF_CALCULATIONS,
@@ -343,7 +343,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
-        if description.visibility is None:
+        if description.visibility is None or description.visibility.value is None:
             return True
         # Detecting some options based on visibilities doesn't work reliably.
         # Use special functions
@@ -353,7 +353,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LuxVisibility.V0250_SOLAR,
         ]:
             return self.detect_solar_present()
-        return self.get_value(description.visibility) > 0
+        visibility_result = self.get_value(description.visibility)
+        if visibility_result is None:
+            LOGGER.warning("Could not load visibility %s", description.visibility)
+            return True
+        return visibility_result > 0
 
     def entity_active(self, description: LuxtronikEntityDescription) -> bool:
         """Is description activated."""

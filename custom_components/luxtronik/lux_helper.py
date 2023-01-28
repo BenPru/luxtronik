@@ -124,7 +124,7 @@ def get_firmware_download_id(installed_version: str) -> int | None:
     return None
 
 
-def get_manufacturer_firmware_url_by_model(self, model: str) -> str:
+def get_manufacturer_firmware_url_by_model(model: str) -> str:
     """Return the manufacturer firmware download url."""
     layout_id = 0
 

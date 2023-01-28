@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 
@@ -34,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Trigger a refresh again now that all platforms have registered
     hass.async_create_task(coordinator.async_refresh())
 
-    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    # hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
     return True
 
