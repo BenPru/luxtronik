@@ -103,7 +103,7 @@ def get_manufacturer_by_model(model: str) -> str | None:
     return None
 
 
-def get_firmware_download_id(installed_version: str) -> int | None:
+def get_firmware_download_id(installed_version: str | None) -> int | None:
     """Return the heatpump firmware id for the download portal."""
     if installed_version is None:
         return None

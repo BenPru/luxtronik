@@ -100,7 +100,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         self._request_available_firmware_version()
 
     @property
-    def installed_version(self) -> str:
+    def installed_version(self) -> str | None:
         """Return the current app version."""
         return self._attr_state
 

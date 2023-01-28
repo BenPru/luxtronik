@@ -121,7 +121,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         await self._set_state(self.entity_description.off_state)
 
     async def _set_state(self, state):
-        data = await self.coordinator.write(
+        data = await self.coordinator.async_write(
             self.entity_description.luxtronik_key.value.split(".")[1], state
         )
         value = get_sensor_data(data, self.entity_description.luxtronik_key.value)

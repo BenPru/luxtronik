@@ -96,7 +96,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         # async def _async_set_native_value(self, value: float) -> None:
         if self.entity_description.factor is not None:
             value = int(value / self.entity_description.factor)
-        data = await self.coordinator.write(
+        data = await self.coordinator.async_write(
             self.entity_description.luxtronik_key.value.split(".")[1], value
         )
         self._handle_coordinator_update(data)

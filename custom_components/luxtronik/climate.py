@@ -192,11 +192,13 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
                 self.entity_description.luxtronik_key_current_temperature
             )
             self._attr_current_temperature = None if temp is None else float(temp.state)
-        else:
+        elif (
+            self.entity_description.luxtronik_key_current_temperature.value is not None
+        ):
             self._attr_current_temperature = get_sensor_data(
                 data, self.entity_description.luxtronik_key_current_temperature.value
             )
-        if self.entity_description.luxtronik_key_target_temperature is not None:
+        if self.entity_description.luxtronik_key_target_temperature.value is not None:
             self._attr_target_temperature = get_sensor_data(
                 data, self.entity_description.luxtronik_key_target_temperature.value
             )
@@ -215,13 +217,15 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
             )
             correction_current = get_sensor_data(data, key_correction_target)
             if correction_current is None or correction_current != correction:
-                self.coordinator.write(key_correction_target.split(".")[1], correction)
+                self.coordinator.async_write(
+                    key_correction_target.split(".")[1], correction
+                )
 
         super()._handle_coordinator_update()
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:
         lux_key = self.entity_description.luxtronik_key.value
-        data = await self.coordinator.write(lux_key.split(".")[1], lux_mode)
+        data = await self.coordinator.async_write(lux_key.split(".")[1], lux_mode)
         self._handle_coordinator_update(data)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
@@ -259,8 +263,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
     async def async_turn_aux_heat_off(self) -> None:
         """Turn auxiliary heater off."""
         if (self._last_hvac_mode_before_preset is None) or (
-            not self._last_hvac_mode_before_preset
-            in self.entity_description.HVAC_PRESET_MAPPING
+            not self._last_hvac_mode_before_preset in HVAC_PRESET_MAPPING
         ):
             await self._async_set_lux_mode(LuxMode.automatic.value)
         else:

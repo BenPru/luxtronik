@@ -81,7 +81,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
     device_infos = dict[str, DeviceInfo]()
-    __content_locale__ = dict[str, str | dict]()
+    __content_locale__ = dict[Any, Any]()  # dict[str, str | dict]()
     __content_sensors_locale__ = dict[str, str]()
 
     def __init__(
@@ -106,17 +106,19 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
         """Connect and fetch data."""
-        self.data = await self._read_data()
+        self.data = await self._async_read_data()
         return self.data
 
-    async def _read_data(self) -> LuxtronikCoordinatorData:
-        return await self._read_or_write(False, None, None)
+    async def _async_read_data(self) -> LuxtronikCoordinatorData:
+        return await self._async_read_or_write(False, None, None)
 
-    async def write(self, parameter, value) -> LuxtronikCoordinatorData:
+    async def async_write(self, parameter, value) -> LuxtronikCoordinatorData:
         """Write a parameter to the Luxtronik heatpump."""
-        return await self._read_or_write(True, parameter, value)
+        return await self._async_read_or_write(True, parameter, value)
 
-    async def _read_or_write(self, write, parameter, value) -> LuxtronikCoordinatorData:
+    async def _async_read_or_write(
+        self, write, parameter, value
+    ) -> LuxtronikCoordinatorData:
         if write:
             data = self._write(parameter, value)
         else:
@@ -225,15 +227,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def _exists_locale_file(self, fname: str) -> bool:
         return os.path.isfile(fname)
 
-    def _load_lang_from_file(self, fname: str, log_warning=True):
+    def _load_lang_from_file(self, fname: str, log_warning=True) -> dict:
         fname = self._build_filepath(fname)
         if not self._exists_locale_file(fname):
             if log_warning:
                 LOGGER.warning("_load_lang_from_file - file not found %s", fname)
             return {}
         with open(fname, encoding="utf8") as locale_file:
-            data = json.loads(locale_file.read())
-            return data
+            return json.load(locale_file)
 
     def _create_device_infos(self, config: Mapping[str, Any]):
         host = config[CONF_HOST]
@@ -269,14 +270,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def get_device_entity_title(self, key: str, platform: Platform | str) -> str:
         """Get a device or entity title text in locale language."""
-        if "entity" in self.__content_locale__:
-            entity_node = self.__content_locale__["entity"]
-            if platform in entity_node:
-                platform_node = entity_node[str(platform)]
-                if key in platform_node:
-                    key_node = platform_node[key]
-                    if "name" in key_node:
-                        return key_node["name"]
+        if "entity" in self.__content_locale__.keys():
+            entity_node: dict = self.__content_locale__.get("entity")
+            if platform in entity_node.keys():
+                platform_node: dict = entity_node.get(str(platform))
+                if key in platform_node.keys():
+                    key_node: dict = platform_node.get(key)
+                    if "name" in key_node.keys():
+                        return key_node.get("name")
         LOGGER.warning(
             "Get_sensor_text key %s.%s not found in",
             platform,
