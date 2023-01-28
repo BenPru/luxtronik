@@ -81,7 +81,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
     device_infos = dict[str, DeviceInfo]()
-    __content_locale__ = dict[str, str]()
+    __content_locale__ = dict[str, str | dict]()
     __content_sensors_locale__ = dict[str, str]()
 
     def __init__(
@@ -272,7 +272,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if "entity" in self.__content_locale__:
             entity_node = self.__content_locale__["entity"]
             if platform in entity_node:
-                platform_node = entity_node[platform]
+                platform_node = entity_node[str(platform)]
                 if key in platform_node:
                     key_node = platform_node[key]
                     if "name" in key_node:

@@ -13,8 +13,8 @@ from homeassistant.components.update import (
     ENTITY_ID_FORMAT,
     UpdateEntity,
     UpdateEntityDescription,
+    UpdateEntityFeature,
 )
-from homeassistant.components.update.const import UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE, Platform
 from homeassistant.core import HomeAssistant
@@ -34,7 +34,7 @@ from .const import (
 )
 from .coordinator import LuxtronikCoordinator
 from .lux_helper import get_firmware_download_id, get_manufacturer_firmware_url_by_model
-from .model import LuxtronikEntityDescription
+from .model import LuxtronikEntityDescription, LuxtronikUpdateDescription
 
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(hours=1)
 
@@ -74,6 +74,8 @@ async def async_setup_entry(
 class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
     """Representation of Luxtronik."""
 
+    entity_description: LuxtronikUpdateDescription
+
     _attr_title = "Luxtronik Firmware Version"
     _attr_supported_features: UpdateEntityFeature = UpdateEntityFeature.RELEASE_NOTES
     __firmware_version_available = None
@@ -103,16 +105,14 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         return self._attr_state
 
     @property
-    def latest_version(self) -> str:
+    def latest_version(self) -> str | None:
         """Return if there is an update."""
-        return (
-            None
-            if self.__firmware_version_available is None
-            or self.installed_version is None
-            else self.__firmware_version_available[: len(self.installed_version)]
-        )
+        if self.__firmware_version_available is None or self.installed_version is None:
+            return None
+        return self.__firmware_version_available[: len(self.installed_version)]
 
     def release_notes(self) -> str | None:
+        """Build release notes."""
         release_url = get_manufacturer_firmware_url_by_model(self.coordinator.model)
         download_id = get_firmware_download_id(self.installed_version)
         download_url = f"{DOWNLOAD_PORTAL_URL}{download_id}"

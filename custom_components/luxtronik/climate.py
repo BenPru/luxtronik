@@ -6,17 +6,13 @@ from typing import Any
 
 from homeassistant.components.climate import (
     ENTITY_ID_FORMAT,
-    ClimateEntity,
-    ClimateEntityFeature,
-    HVACMode,
-)
-from homeassistant.components.climate.const import (
-    CURRENT_HVAC_COOL,
-    CURRENT_HVAC_HEAT,
-    CURRENT_HVAC_IDLE,
     PRESET_AWAY,
     PRESET_BOOST,
     PRESET_NONE,
+    ClimateEntity,
+    ClimateEntityFeature,
+    HVACAction,
+    HVACMode,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -36,7 +32,6 @@ from .const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
-    PRESET_SECOND_HEATSOURCE,
     DeviceKey,
     LuxCalculation,
     LuxMode,
@@ -54,14 +49,14 @@ MIN_TEMPERATURE = 8
 MAX_TEMPERATURE = 28
 
 HVAC_ACTION_MAPPING: dict[str, str] = {
-    LuxOperationMode.heating.value: CURRENT_HVAC_HEAT,
-    LuxOperationMode.domestic_water.value: CURRENT_HVAC_HEAT,
+    LuxOperationMode.heating.value: HVACAction.HEATING.value,
+    LuxOperationMode.domestic_water.value: HVACAction.HEATING.value,
     LuxOperationMode.swimming_pool_solar.value: STATE_UNKNOWN,
-    LuxOperationMode.evu.value: CURRENT_HVAC_IDLE,
-    LuxOperationMode.defrost.value: CURRENT_HVAC_IDLE,
-    LuxOperationMode.no_request.value: CURRENT_HVAC_IDLE,
-    LuxOperationMode.heating_external_source.value: CURRENT_HVAC_HEAT,
-    LuxOperationMode.cooling.value: CURRENT_HVAC_COOL,
+    LuxOperationMode.evu.value: HVACAction.IDLE.value,
+    LuxOperationMode.defrost.value: HVACAction.IDLE.value,
+    LuxOperationMode.no_request.value: HVACAction.IDLE.value,
+    LuxOperationMode.heating_external_source.value: HVACAction.HEATING.value,
+    LuxOperationMode.cooling.value: HVACAction.COOLING.value,
 }
 
 HVAC_MODE_MAPPING: dict[str, str] = {
@@ -92,7 +87,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         # luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_heating=LuxOperationMode.heating,
+        luxtronik_action_heating=LuxOperationMode.heating.value,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
@@ -123,7 +118,9 @@ async def async_setup_entry(
 class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
     """The thermostat class for Luxtronik thermostats."""
 
-    _last_hvac_mode_before_preset: str = None
+    entity_description: LuxtronikClimateDescription
+
+    _last_hvac_mode_before_preset: str | None = None
 
     _attr_precision = PRECISION_HALVES
     _attr_target_temperature = 21.0
@@ -143,7 +140,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
         description: LuxtronikClimateDescription,
     ) -> None:
         """Init Luxtronik Switch."""
-        super(LuxtronikThermostat, self).__init__(
+        super().__init__(
             coordinator=coordinator,
             description=description,
             device_info_ident=DeviceKey.heating,
@@ -169,7 +166,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
         self._handle_coordinator_update()
 
     @callback
-    def _handle_coordinator_update(self, data: LuxtronikCoordinatorData = None) -> None:
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
         """Handle updated data from the coordinator."""
         data = self.coordinator.data if data is None else data
         if data is None:

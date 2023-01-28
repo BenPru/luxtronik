@@ -1,4 +1,4 @@
-# All descriptions can be found here.
+"""Luxtronik sensors definitions."""
 # region Imports
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import (
@@ -29,7 +29,7 @@ SENSORS: list[LuxtronikSensorDescription] = [
     LuxtronikSensorDescription(
         key="status",
         luxtronik_key=LuxCalculation.C0080_STATUS,
-        icon=LUX_STATE_ICON_MAP,
+        icon_by_state=LUX_STATE_ICON_MAP,
         device_class=SensorDeviceClass.ENUM,
         options=[
             "heating",
@@ -101,7 +101,7 @@ SENSORS: list[LuxtronikSensorDescription] = [
             "thermal desinfection",
             "cooling",
             "swimming pool/solar",
-            "heating external engery source",
+            "heating external energy source",
             "domestic water external energy source",
             "flow monitoring",
             "second heat generator 1 active",

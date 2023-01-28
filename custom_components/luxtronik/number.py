@@ -68,7 +68,9 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         self._handle_coordinator_update()
 
     @callback
-    def _handle_coordinator_update(self, data: LuxtronikCoordinatorData = None) -> None:
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
         """Handle updated data from the coordinator."""
         data = self.coordinator.data if data is None else data
         if data is None:

@@ -67,7 +67,9 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._handle_coordinator_update()
 
     @callback
-    def _handle_coordinator_update(self, data: LuxtronikCoordinatorData = None) -> None:
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
         """Handle updated data from the coordinator."""
         data = self.coordinator.data if data is None else data
         if data is None:
@@ -75,11 +77,13 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._attr_native_value = get_sensor_data(
             data, self.entity_description.luxtronik_key.value
         )
-        if self._attr_native_value is not None:
+        if self._attr_native_value is not None and isinstance(
+            self._attr_native_value, float
+        ):
+            float_value = float(self._attr_native_value)
             if self.entity_description.factor is not None:
-                self._attr_native_value *= self.entity_description.factor
+                float_value *= self.entity_description.factor
             if self.entity_description.decimal_places is not None:
-                self._attr_native_value = round(
-                    self._attr_native_value, self.entity_description.decimal_places
-                )
+                float_value = round(float_value, self.entity_description.decimal_places)
+            self._attr_native_value = float_value
         super()._handle_coordinator_update()

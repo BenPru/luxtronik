@@ -12,7 +12,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
-from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, LOGGER, DeviceKey
+from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikSwitchDescription
 from .switch_entities_predefined import SWITCHES
@@ -71,7 +71,9 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self._handle_coordinator_update()
 
     @callback
-    def _handle_coordinator_update(self, data: LuxtronikCoordinatorData = None) -> None:
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
         """Handle updated data from the coordinator."""
         data = self.coordinator.data if data is None else data
         if data is None:
@@ -82,7 +84,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         if (
             self.entity_description.on_state is True
             or self.entity_description.on_state is False
-        ):
+        ) and self._attr_state is not None:
             self._attr_state = bool(self._attr_state)
         self._attr_is_on = (
             self._attr_state != self.entity_description.on_state

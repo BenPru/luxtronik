@@ -12,7 +12,7 @@ from homeassistant.components.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import config_entry_flow, selector
+from homeassistant.helpers import selector
 
 from .const import (
     CONF_CONTROL_MODE_HOME_ASSISTANT,

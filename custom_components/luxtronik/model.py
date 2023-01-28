@@ -13,10 +13,12 @@ from homeassistant.components.climate import (
 from homeassistant.components.number import NumberEntityDescription, NumberMode
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
+from homeassistant.components.update import UpdateEntityDescription
 from homeassistant.components.water_heater import (
     WaterHeaterEntityEntityDescription,
     WaterHeaterEntityFeature,
 )
+from homeassistant.const import UnitOfTemperature
 from homeassistant.helpers.entity import EntityDescription
 
 from .const import (
@@ -54,17 +56,19 @@ class LuxtronikSensorDescription(
 ):
     """Class describing Luxtronik sensor entities."""
 
-    factor: float = None
-    decimal_places: int = None
+    factor: float | None = None
+    decimal_places: int | None = None
 
 
 @dataclass
 class LuxtronikNumberDescription(
-    LuxtronikSensorDescription,
+    LuxtronikEntityDescription,
     NumberEntityDescription,
 ):
     """Class describing Luxtronik number sensor entities."""
 
+    factor: float | None = None
+    decimal_places: int | None = None
     mode: NumberMode = NumberMode.AUTO
 
 
@@ -76,7 +80,7 @@ class LuxtronikSwitchDescription(
     """Class describing Luxtronik switch entities."""
 
     on_state: str | bool = True
-    on_states: list[str] = None
+    on_states: list[str] | None = None
     off_state: str | bool = False
     icon_on: str | None = None
     icon_off: str | None = None
@@ -90,15 +94,16 @@ class LuxtronikClimateDescription(
 ):
     """Class describing Luxtronik climate entities."""
 
-    hvac_modes: list[HVACMode] | None = None
+    hvac_modes: list[HVACMode] = field(default_factory=list)
     preset_modes: list[str] | None = None
     supported_features: ClimateEntityFeature = ClimateEntityFeature(0)
-    luxtronik_key_current_temperature: LuxCalculation | str = None
-    luxtronik_key_current_action: LuxCalculation = None
-    luxtronik_action_heating: str = None
-    luxtronik_key_target_temperature: LuxParameter | LuxCalculation = None
-    luxtronik_key_correction_factor: LuxParameter = None
-    luxtronik_key_correction_target: LuxParameter = None
+    luxtronik_key_current_temperature: LuxCalculation | str = LuxCalculation.UNSET
+    luxtronik_key_current_action: LuxCalculation = LuxCalculation.UNSET
+    luxtronik_action_heating: str | None = None
+    luxtronik_key_target_temperature: LuxParameter | LuxCalculation = LuxParameter.UNSET
+    luxtronik_key_correction_factor: LuxParameter = LuxParameter.UNSET
+    luxtronik_key_correction_target: LuxParameter = LuxParameter.UNSET
+    unit_of_measurement: str = UnitOfTemperature.CELSIUS
 
 
 @dataclass
@@ -116,3 +121,11 @@ class LuxtronikWaterHeaterDescription(
     luxtronik_key_target_temperature: LuxParameter = LuxParameter.UNSET
     luxtronik_key_target_temperature_high: LuxParameter = LuxParameter.UNSET
     luxtronik_key_target_temperature_low: LuxParameter = LuxParameter.UNSET
+
+
+@dataclass
+class LuxtronikUpdateDescription(
+    LuxtronikEntityDescription,
+    UpdateEntityDescription,
+):
+    """Class describing Luxtronik update entities."""

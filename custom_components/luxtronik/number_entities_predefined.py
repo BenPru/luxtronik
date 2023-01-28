@@ -1,4 +1,4 @@
-# All descriptions can be found here.
+"""Luxtronik number sensors definitions."""
 # region Imports
 from homeassistant.components.number import NumberMode
 from homeassistant.components.sensor import SensorDeviceClass

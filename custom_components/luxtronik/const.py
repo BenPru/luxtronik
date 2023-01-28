@@ -1,8 +1,8 @@
 """Constants for the Luxtronik heatpump integration."""
 # region Imports
+import logging
 from datetime import timedelta
 from enum import Enum
-import logging
 from typing import Final
 
 from homeassistant.const import Platform

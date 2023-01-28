@@ -1,5 +1,4 @@
-# All descriptions can be found here. Mostly the Boolean data types in the
-# default instruction set of each category end up being a Switch.
+"""All descriptions can be found here. Mostly the Boolean data types in the default instruction set of each category end up being a Switch."""
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import DeviceKey, LuxMode, LuxParameter, LuxVisibility
