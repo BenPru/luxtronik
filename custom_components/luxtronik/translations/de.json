@@ -1,5 +1,49 @@
 {
     "entity": {
+        "binary_sensor": {
+            "evu_unlocked": {
+                "name": "Sperrzeit Freigabe"
+            },
+            "compressor": {
+                "name": "Verdichter"
+            },
+            "pump_flow": {
+                "name": "Soleumw\u00e4lzpumpe"
+            },
+            "compressor_heater": {
+                "name": "Verdichterheizung"
+            },
+            "defrost_valve": {
+                "name": "Abtau Ventil"
+            },
+            "additional_heat_generator": {
+                "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger"
+            },
+            "disturbance_output": {
+                "name": "Zustand"
+            },
+            "circulation_pump_heating": {
+                "name": "Umw\u00e4lzpumpe Heizung"
+            },
+            "additional_circulation_pump": {
+                "name": "Zusatzumw\u00e4lzpumpe"
+            },
+            "domestic_water_recirculation_pump": {
+                "name": "Umw\u00e4lzpumpe Brauchwasser"
+            },
+            "domestic_water_circulation_pump": {
+                "name": "Zirkulationspumpe"
+            },
+            "domestic_water_charging_pump": {
+                "name": "Boilerladepumpe"
+            },
+            "solar_pump": {
+                "name": "Solar Pumpe"
+            },
+            "approval_cooling": {
+                "name": "K\u00fchlung Freigabe"
+            }
+        },
         "device": {
             "heatpump": {
                 "name": "W\u00e4rmepumpe"
@@ -121,7 +165,7 @@
                     "no request": "Leerlauf (keine Anforderung)"
                 }
             },
-              "error_reason": {
+            "error_reason": {
                 "name": "Letzter Fehler",
                 "state": {
                     "701": "Niederdruckst\u00f6rung",
@@ -200,7 +244,7 @@
                     "-1": "Unbekannter Fehler"
                 }
             },
-              "switchoff_reason": {
+            "switchoff_reason": {
                 "name": "Abschaltung",
                 "state": {
                     "0": "W\u00e4rmepumpe St\u00f6rung",
@@ -338,11 +382,53 @@
             "pump_frequency": {
                 "name": "Pumpenfrequenz"
             },
+            "domestic_water": {
+                "name": "Brauchwasser"
+            },
+            "domestic_water_temperature": {
+                "name": "Brauchwasser Temperatur"
+            },
+            "operation_hours_domestic_water": {
+                "name": "Brauchwasser Betriebsstunden"
+            },
+            "heat_amount_domestic_water": {
+                "name": "Brauchwasser W\u00e4rmemenge"
+            },
+            "domestic_water_energy_input": {
+                "name": "Eingesetzte Energie Brauchwasser "
+            },
+            "flow_in_temperature": {
+                "name": "Vorlauf Temperatur"
+            },
+            "flow_out_temperature": {
+                "name": "R\u00fccklauf Temperatur"
+            },
             "flow_out_temperature_target": {
                 "name": "R\u00fccklauf Soll Temperatur"
             },
-            "domestic_water": {
-                "name": "Brauchwasser"
+            "operation_hours_heating": {
+                "name":"Heizung Betriebsstunden"
+            },
+            "heat_amount_heating": {
+                "name":"Z\u00e4hler W\u00e4rmemenge Heizung"
+            },
+            "heat_energy_input": {
+                "name": "Eingesetzte Energie Heizung"
+            },
+            "flow_out_temperature_external": {
+                "name": "R\u00fccklauf Temperatur extern"
+            },
+            "solar_collector_temperature": {
+                "name": "Solar Kollektor Temperatur"
+            },
+            "solar_buffer_temperature": {
+                "name": "Solar Puffer Temperatur"
+            },
+            "operation_hours_solar": {
+                "name": "Solar Betriebsstunden"
+            },
+            "operation_hours_cooling": {
+                "name": "K\u00fchlung Betriebsstunden"
             }
         },
         "climate": {
@@ -421,4 +507,4 @@
             }
         }
     }
-  }
+}

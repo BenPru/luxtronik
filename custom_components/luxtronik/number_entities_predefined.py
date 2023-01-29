@@ -5,7 +5,7 @@ from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import PERCENTAGE, UnitOfTemperature, UnitOfTime
 from homeassistant.helpers.entity import EntityCategory
 
-from .const import DeviceKey, LuxParameter, LuxVisibility
+from .const import DeviceKey, LuxParameter as LP, LuxVisibility as LV, SensorKey
 from .model import LuxtronikNumberDescription
 
 # endregion Imports
@@ -19,8 +19,8 @@ from .model import LuxtronikNumberDescription
 NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     # region Main heatpump
     LuxtronikNumberDescription(
-        key="release_second_heat_generator",
-        luxtronik_key=LuxParameter.P0090_RELEASE_SECOND_HEAT_GENERATOR,
+        key=SensorKey.RELEASE_SECOND_HEAT_GENERATOR,
+        luxtronik_key=LP.P0090_RELEASE_SECOND_HEAT_GENERATOR,
         icon="mdi:download-lock",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
@@ -30,11 +30,11 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
         factor=0.1,
-        visibility=LuxVisibility.V0061_SECOND_HEAT_GENERATOR,
+        visibility=LV.V0061_SECOND_HEAT_GENERATOR,
     ),
     LuxtronikNumberDescription(
-        key="release_time_second_heat_generator",
-        luxtronik_key=LuxParameter.P0992_RELEASE_TIME_SECOND_HEAT_GENERATOR,
+        key=SensorKey.RELEASE_TIME_SECOND_HEAT_GENERATOR,
+        luxtronik_key=LP.P0992_RELEASE_TIME_SECOND_HEAT_GENERATOR,
         translation_key_name="release_second_heat_generator",
         icon="mdi:timer-play",
         device_class=SensorDeviceClass.DURATION,
@@ -44,13 +44,13 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=5,
         entity_category=EntityCategory.CONFIG,
         factor=1,
-        visibility=LuxVisibility.V0061_SECOND_HEAT_GENERATOR,
+        visibility=LV.V0061_SECOND_HEAT_GENERATOR,
     ),
     # endregion Main heatpump
     # region Heating
     LuxtronikNumberDescription(
-        key="heating_target_correction",
-        luxtronik_key=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
+        key=SensorKey.HEATING_TARGET_CORRECTION,
+        luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
         device_key=DeviceKey.heating,
         icon="mdi:plus-minus-variant",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -61,8 +61,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
     ),
     LuxtronikNumberDescription(
-        key="pump_optimization_time",
-        luxtronik_key=LuxParameter.P0864_PUMP_OPTIMIZATION_TIME,
+        key=SensorKey.PUMP_OPTIMIZATION_TIME,
+        luxtronik_key=LP.P0864_PUMP_OPTIMIZATION_TIME,
         translation_key_name="pump_optimization",
         device_key=DeviceKey.heating,
         icon="mdi:timer-settings",
@@ -74,11 +74,11 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         factor=1,
-        visibility=LuxVisibility.V0144_PUMP_OPTIMIZATION,
+        visibility=LV.V0144_PUMP_OPTIMIZATION,
     ),
     LuxtronikNumberDescription(
-        key="heating_threshold_temperature",
-        luxtronik_key=LuxParameter.P0700_HEATING_THRESHOLD_TEMPERATURE,
+        key=SensorKey.HEATING_THRESHOLD_TEMPERATURE,
+        luxtronik_key=LP.P0700_HEATING_THRESHOLD_TEMPERATURE,
         translation_key_name="heating_threshold",
         device_key=DeviceKey.heating,
         icon="mdi:download-outline",
@@ -91,8 +91,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
     ),
     LuxtronikNumberDescription(
-        key="heating_min_flow_out_temperature",
-        luxtronik_key=LuxParameter.P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE,
+        key=SensorKey.HEATING_MIN_FLOW_OUT_TEMPERATURE,
+        luxtronik_key=LP.P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE,
         device_key=DeviceKey.heating,
         icon="mdi:waves-arrow-left",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -105,8 +105,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         factor=0.1,
     ),
     LuxtronikNumberDescription(
-        key="heating_circuit_curve1_temperature",
-        luxtronik_key=LuxParameter.P0011_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
+        key=SensorKey.HEATING_CIRCUIT_CURVE1_TEMPERATURE,
+        luxtronik_key=LP.P0011_HEATING_CIRCUIT_CURVE1_TEMPERATURE,
         device_key=DeviceKey.heating,
         icon="mdi:chart-bell-curve",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -118,8 +118,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
     ),
     LuxtronikNumberDescription(
-        key="heating_circuit_curve2_temperature",
-        luxtronik_key=LuxParameter.P0012_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
+        key=SensorKey.HEATING_CIRCUIT_CURVE2_TEMPERATURE,
+        luxtronik_key=LP.P0012_HEATING_CIRCUIT_CURVE2_TEMPERATURE,
         device_key=DeviceKey.heating,
         icon="mdi:chart-bell-curve",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -131,8 +131,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
     ),
     LuxtronikNumberDescription(
-        key="heating_circuit_curve_night_temperature",
-        luxtronik_key=LuxParameter.P0013_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
+        key=SensorKey.HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
+        luxtronik_key=LP.P0013_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
         device_key=DeviceKey.heating,
         icon="mdi:chart-bell-curve",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -144,8 +144,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
     ),
     LuxtronikNumberDescription(
-        key="heating_night_lowering_to_temperature",
-        luxtronik_key=LuxParameter.P0111_HEATING_NIGHT_LOWERING_TO_TEMPERATURE,
+        key=SensorKey.HEATING_NIGHT_LOWERING_TO_TEMPERATURE,
+        luxtronik_key=LP.P0111_HEATING_NIGHT_LOWERING_TO_TEMPERATURE,
         device_key=DeviceKey.heating,
         icon="mdi:thermometer-low",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -158,8 +158,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         factor=0.1,
     ),
     LuxtronikNumberDescription(
-        key="heating_hysteresis",
-        luxtronik_key=LuxParameter.P0088_HEATING_HYSTERESIS,
+        key=SensorKey.HEATING_HYSTERESIS,
+        luxtronik_key=LP.P0088_HEATING_HYSTERESIS,
         device_key=DeviceKey.heating,
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -172,8 +172,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         factor=0.1,
     ),
     LuxtronikNumberDescription(
-        key="heating_max_flow_out_increase_temperature",
-        luxtronik_key=LuxParameter.P0089_HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE,
+        key=SensorKey.HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE,
+        luxtronik_key=LP.P0089_HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE,
         device_key=DeviceKey.heating,
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -186,8 +186,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         factor=0.1,
     ),
     LuxtronikNumberDescription(
-        key="heating_maximum_circulation_pump_speed",
-        luxtronik_key=LuxParameter.P1032_HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
+        key=SensorKey.HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
+        luxtronik_key=LP.P1032_HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
         device_key=DeviceKey.heating,
         icon="mdi:speedometer",
         device_class=SensorDeviceClass.SPEED,
@@ -202,8 +202,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     # 100% 1K Temperaturdifferenz im Raum führt zu 1K Anpassung der Rücklauf-Solltemperatur <-- empf. Fussbodenheizung
     # 200% 1K Temperaturdifferenz im Raum führt zu 2K Anpassung der Rücklauf-Solltemperatur <-- empf. Radiatoren / Gebläsekonvektoren
     LuxtronikNumberDescription(
-        key="heating_room_temperature_impact_factor",
-        luxtronik_key=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+        key=SensorKey.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+        luxtronik_key=LP.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
         device_key=DeviceKey.heating,
         icon="mdi:thermometer-chevron-up",
         device_class=None,
@@ -214,13 +214,13 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
-        visibility=LuxVisibility.V0122_ROOM_THERMOSTAT,
+        visibility=LV.V0122_ROOM_THERMOSTAT,
     ),
     # endregion Heating
     # region Domestic water
     LuxtronikNumberDescription(
-        key="domestic_water_target_temperature",
-        luxtronik_key=LuxParameter.P0002_DOMESTIC_WATER_TARGET_TEMPERATURE,
+        key=SensorKey.DOMESTIC_WATER_TARGET_TEMPERATURE,
+        luxtronik_key=LP.P0002_DOMESTIC_WATER_TARGET_TEMPERATURE,
         device_key=DeviceKey.domestic_water,
         mode=NumberMode.BOX,
         icon="mdi:thermometer-water",
@@ -231,8 +231,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=1.0,
     ),
     LuxtronikNumberDescription(
-        key="domestic_water_hysteresis",
-        luxtronik_key=LuxParameter.P0074_DOMESTIC_WATER_HYSTERESIS,
+        key=SensorKey.DOMESTIC_WATER_HYSTERESIS,
+        luxtronik_key=LP.P0074_DOMESTIC_WATER_HYSTERESIS,
         device_key=DeviceKey.domestic_water,
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -244,8 +244,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.1,
     ),
     LuxtronikNumberDescription(
-        key="domestic_water_thermal_desinfection_target",
-        luxtronik_key=LuxParameter.P0047_DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET,
+        key=SensorKey.DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET,
+        luxtronik_key=LP.P0047_DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET,
         device_key=DeviceKey.domestic_water,
         icon="mdi:thermometer-high",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -259,8 +259,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     ),
     # region Solar
     LuxtronikNumberDescription(
-        key="solar_pump_on_difference_temperature",
-        luxtronik_key=LuxParameter.P0122_SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE,
+        key=SensorKey.SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE,
+        luxtronik_key=LP.P0122_SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE,
         device_key=DeviceKey.domestic_water,
         icon="mdi:pump",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -270,11 +270,11 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LuxVisibility.V0250_SOLAR,
+        visibility=LV.V0250_SOLAR,
     ),
     LuxtronikNumberDescription(
-        key="solar_pump_off_difference_temperature",
-        luxtronik_key=LuxParameter.P0123_SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE,
+        key=SensorKey.SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE,
+        luxtronik_key=LP.P0123_SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE,
         device_key=DeviceKey.domestic_water,
         icon="mdi:pump-off",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -284,11 +284,11 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LuxVisibility.V0250_SOLAR,
+        visibility=LV.V0250_SOLAR,
     ),
     LuxtronikNumberDescription(
-        key="solar_pump_off_max_difference_temperature_boiler",
-        luxtronik_key=LuxParameter.P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER,
+        key=SensorKey.SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER,
+        luxtronik_key=LP.P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER,
         device_key=DeviceKey.domestic_water,
         icon="mdi:water-boiler-alert",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -298,11 +298,11 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=1,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LuxVisibility.V0250_SOLAR,
+        visibility=LV.V0250_SOLAR,
     ),
     LuxtronikNumberDescription(
-        key="solar_pump_max_temperature_collector",
-        luxtronik_key=LuxParameter.P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR,
+        key=SensorKey.SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR,
+        luxtronik_key=LP.P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR,
         device_key=DeviceKey.domestic_water,
         icon="mdi:solar-panel-large",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -312,14 +312,14 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=1,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LuxVisibility.V0038_SOLAR_COLLECTOR,
+        visibility=LV.V0038_SOLAR_COLLECTOR,
     ),
     # endregion Solar
     # endregion Domestic water
     # region Cooling
     # LuxtronikNumberDescription(
     #     device_key=DeviceKey.cooling,
-    #     luxtronik_key=LuxParameter.P0108_MODE_COOLING,
+    #     luxtronik_key=LP.P0108_MODE_COOLING,
     #     key="cooling",
     #     icon="mdi:snowflake",
     #     entity_category=EntityCategory.CONFIG,

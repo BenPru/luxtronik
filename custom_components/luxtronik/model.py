@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from homeassistant.components.binary_sensor import BinarySensorEntityDescription
 from homeassistant.components.climate import (
     ClimateEntityDescription,
     ClimateEntityFeature,
@@ -28,9 +29,21 @@ from .const import (
     LuxOperationMode,
     LuxParameter,
     LuxVisibility,
+    SensorAttrFormat,
+    SensorAttrKey,
 )
 
 # endregion Imports
+
+
+@dataclass
+class LuxtronikEntityAttributeDescription:
+    """A class that describes Home Assistant Luxtronik entity attributes."""
+
+    # This is the key identifier for this entity
+    key: SensorAttrKey
+    luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
+    format: SensorAttrFormat | None = None
 
 
 @dataclass
@@ -48,6 +61,10 @@ class LuxtronikEntityDescription(EntityDescription):
     invisible_if_value: Any | None = None
     min_firmware_version_minor: FirmwareVersionMinor | None = None
 
+    extra_attributes: list[LuxtronikEntityAttributeDescription] = field(
+        default_factory=list
+    )
+
 
 @dataclass
 class LuxtronikSensorDescription(
@@ -57,7 +74,6 @@ class LuxtronikSensorDescription(
     """Class describing Luxtronik sensor entities."""
 
     factor: float | None = None
-    decimal_places: int | None = None
 
 
 @dataclass
@@ -68,8 +84,23 @@ class LuxtronikNumberDescription(
     """Class describing Luxtronik number sensor entities."""
 
     factor: float | None = None
-    decimal_places: int | None = None
+    native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO
+
+
+@dataclass
+class LuxtronikBinarySensorEntityDescription(
+    LuxtronikEntityDescription,
+    BinarySensorEntityDescription,
+):
+    """Class describing Luxtronik binary sensor entities."""
+
+    on_state: str | bool = True
+    on_states: list[str] | None = None
+    off_state: str | bool = False
+    icon_on: str | None = None
+    icon_off: str | None = None
+    inverted = False
 
 
 @dataclass
@@ -99,7 +130,7 @@ class LuxtronikClimateDescription(
     supported_features: ClimateEntityFeature = ClimateEntityFeature(0)
     luxtronik_key_current_temperature: LuxCalculation | str = LuxCalculation.UNSET
     luxtronik_key_current_action: LuxCalculation = LuxCalculation.UNSET
-    luxtronik_action_heating: str | None = None
+    luxtronik_action_active: str | None = None
     luxtronik_key_target_temperature: LuxParameter | LuxCalculation = LuxParameter.UNSET
     luxtronik_key_correction_factor: LuxParameter = LuxParameter.UNSET
     luxtronik_key_correction_target: LuxParameter = LuxParameter.UNSET

@@ -2,6 +2,7 @@
 # region Imports
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from dataclasses import dataclass
 from datetime import timedelta
@@ -11,9 +12,9 @@ import os.path
 import re
 import threading
 from types import MappingProxyType
-from typing import Any, Concatenate, Final, TypeVar
+from typing import Any, Concatenate, Final, TypeVar, cast
 
-from luxtronik import Calculations, Luxtronik, Parameters, Visibilities
+from luxtronik import Calculations, Parameters, Visibilities
 from typing_extensions import ParamSpec
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
@@ -31,12 +32,12 @@ from .const import (
     LUX_PARAMETER_MK_SENSORS,
     PLATFORMS,
     DeviceKey,
-    LuxCalculation,
+    LuxCalculation as LC,
     LuxMkTypes,
-    LuxParameter,
-    LuxVisibility,
+    LuxParameter as LP,
+    LuxVisibility as LV,
 )
-from .lux_helper import get_manufacturer_by_model
+from .lux_helper import Luxtronik, get_manufacturer_by_model
 from .model import LuxtronikEntityDescription
 
 # endregion Imports
@@ -81,8 +82,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
     device_infos = dict[str, DeviceInfo]()
-    __content_locale__ = dict[Any, Any]()  # dict[str, str | dict]()
-    __content_sensors_locale__ = dict[str, str]()
+    __content_locale__ = dict[Any, Any]()
+    __content_locale_texts__ = dict[Any, Any]()
+    __content_sensors_locale__ = dict[Any, Any]()
 
     def __init__(
         self,
@@ -111,6 +113,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     async def _async_read_data(self) -> LuxtronikCoordinatorData:
         return await self._async_read_or_write(False, None, None)
+
+    async def write(self, parameter, value) -> LuxtronikCoordinatorData:
+        """Write a parameter to the Luxtronik heatpump."""
+        return asyncio.run_coroutine_threadsafe(
+            self.async_write(parameter, value), self.hass.loop
+        ).result()
 
     async def async_write(self, parameter, value) -> LuxtronikCoordinatorData:
         """Write a parameter to the Luxtronik heatpump."""
@@ -202,6 +210,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Load translations from file for device and entity names."""
         lang = self._normalize_lang(hass.config.language)
         self.__content_locale__ = self._load_lang_from_file(f"translations/{lang}.json")
+        self.__content_locale_texts__ = self._load_lang_from_file(
+            f"translations/texts.{lang}.json"
+        )
         for platform in PLATFORMS:
             fname = f"translations/{platform}.{LANG_DEFAULT}.json"
             if self._exists_locale_file(self._build_filepath(fname)):
@@ -268,50 +279,60 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             sw_version=self.firmware_version,
         )
 
+    def get_text(self, key: str) -> str:
+        """Get a text in locale language."""
+        result = self._get_value_recursive(self.__content_locale_texts__, [key])
+        if result is not None:
+            return result
+        LOGGER.warning(
+            "Get_text key %s not found in",
+            key,
+        )
+        return key.replace("_", " ").title()
+
     def get_device_entity_title(self, key: str, platform: Platform | str) -> str:
         """Get a device or entity title text in locale language."""
-        if "entity" in self.__content_locale__.keys():
-            entity_node: dict = self.__content_locale__.get("entity")
-            if platform in entity_node.keys():
-                platform_node: dict = entity_node.get(str(platform))
-                if key in platform_node.keys():
-                    key_node: dict = platform_node.get(key)
-                    if "name" in key_node.keys():
-                        return key_node.get("name")
+        result = self._get_value_recursive(
+            self.__content_locale__, ["entity", platform, key, "name"]
+        )
+        if result is not None:
+            return result
         LOGGER.warning(
-            "Get_sensor_text key %s.%s not found in",
+            "Get_device_entity_title key %s.%s not found in",
             platform,
             key,
         )
         return key.replace("_", " ").title()
 
-    # def get_sensor_value_text(self, key: str, value: str, platform="sensor") -> str:
-    #     """Get a sensor value text."""
-    #     content = self.__content_sensors_locale__[platform]
-    #     # if (
-    #     #     "state" in content
-    #     #     # and key in content["state"]
-    #     #     and content["state"].__contains__(key)
-    #     #     # and value in content["state"][key]
-    #     #     and content["state"][key].__contains__(value)
-    #     # ):
-    #     if content["state"][key][value] is not None:
-    #         return content["state"][key][value]
-    #     LOGGER.warning(
-    #         "Get_sensor_value_text key %s / value %s not found in %s",
-    #         key,
-    #         value,
-    #         content,
-    #     )
-    #     return key.replace("_", " ").title()
+    def get_sensor_value_text(
+        self, key: str, value: str, platform: Platform = Platform.SENSOR
+    ) -> str:
+        """Get a sensor value text."""
+        result = self._get_value_recursive(
+            self.__content_locale__, ["entity", platform, key, "state", value]
+        )
+        if result is not None:
+            return result
+        LOGGER.warning(
+            "Get_sensor_value_text key %s / value %s not found",
+            key,
+            value,
+        )
+        return key.replace("_", " ").title()
+
+    def _get_value_recursive(self, content: dict, keys: list[str]) -> str | None:
+        key = keys.pop(0)
+        if key not in content.keys():
+            return None
+        if len(keys) > 0:
+            return self._get_value_recursive(cast(dict, content.get(key)), keys)
+        return str(content.get(key))
 
     @property
     def serial_number(self) -> str:
         """Return the serial number."""
-        serial_number_date = self.get_value(LuxParameter.P0874_SERIAL_NUMBER)
-        serial_number_hex = hex(
-            int(self.get_value(LuxParameter.P0875_SERIAL_NUMBER_MODEL))
-        )
+        serial_number_date = self.get_value(LP.P0874_SERIAL_NUMBER)
+        serial_number_hex = hex(int(self.get_value(LP.P0875_SERIAL_NUMBER_MODEL)))
         return f"{serial_number_date}-{serial_number_hex}".replace("x", "")
 
     @property
@@ -322,7 +343,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def model(self) -> str:
         """Return the heatpump model."""
-        return self.get_value(LuxCalculation.C0078_MODEL_CODE)
+        return self.get_value(LC.C0078_MODEL_CODE)
 
     @property
     def manufacturer(self) -> str | None:
@@ -332,7 +353,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def firmware_version(self) -> str:
         """Return the heatpump firmware version."""
-        return str(self.get_value(LuxCalculation.C0081_FIRMWARE_VERSION))
+        return str(self.get_value(LC.C0081_FIRMWARE_VERSION))
 
     @property
     def firmware_version_minor(self) -> int:
@@ -344,16 +365,20 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
-        if description.visibility is None or description.visibility.value is None:
+        if description.visibility == LV.UNSET:
             return True
         # Detecting some options based on visibilities doesn't work reliably.
         # Use special functions
         if description.visibility in [
-            LuxVisibility.V0038_SOLAR_COLLECTOR,
-            LuxVisibility.V0039_SOLAR_BUFFER,
-            LuxVisibility.V0250_SOLAR,
+            LV.V0038_SOLAR_COLLECTOR,
+            LV.V0039_SOLAR_BUFFER,
+            LV.V0250_SOLAR,
         ]:
             return self.detect_solar_present()
+        if description.visibility == LV.V0059_DOMESTIC_WATER_CIRCULATION_PUMP:
+            return self._detect_domestic_water_circulation_pump_present()
+        if description.visibility == LV.V0059A_DOMESTIC_WATER_CHARGING_PUMP:
+            return not self._detect_domestic_water_circulation_pump_present()
         visibility_result = self.get_value(description.visibility)
         if visibility_result is None:
             LOGGER.warning("Could not load visibility %s", description.visibility)
@@ -364,8 +389,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Is description activated."""
         if (
             description.min_firmware_version_minor is not None
-            and description.min_firmware_version_minor.value
-            > self.firmware_version_minor
+            and description.min_firmware_version_minor.value  # noqa: W503
+            > self.firmware_version_minor  # noqa: W503
         ):
             return False
         if not self.device_key_active(description.device_key):
@@ -391,16 +416,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def has_heating(self) -> bool:
         """Is heating activated."""
-        return bool(self.get_value(LuxVisibility.V0023_FLOW_IN_TEMPERATURE))
+        return bool(self.get_value(LV.V0023_FLOW_IN_TEMPERATURE))
 
     @property
     def has_domestic_water(self) -> bool:
         """Is domestic water activated."""
-        return bool(self.get_value(LuxVisibility.V0029_DOMESTIC_WATER_TEMPERATURE))
+        return bool(self.get_value(LV.V0029_DOMESTIC_WATER_TEMPERATURE))
 
-    def get_value(
-        self, group_sensor_id: str | LuxParameter | LuxCalculation | LuxVisibility
-    ):
+    def get_value(self, group_sensor_id: str | LP | LC | LV):
         """Get a sensor value from Luxtronik."""
         if not isinstance(group_sensor_id, str):
             group_sensor_id = group_sensor_id.value
@@ -445,15 +468,22 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def detect_solar_present(self) -> bool:
         """Detect and returns True if solar is present."""
         return (
-            bool(self.get_value(LuxVisibility.V0250_SOLAR))
-            or self.get_value(LuxParameter.P0882_SOLAR_OPERATION_HOURS) > 0.01
-            or bool(self.get_value(LuxVisibility.V0038_SOLAR_COLLECTOR))
-            or float(self.get_value(LuxCalculation.C0026_SOLAR_COLLECTOR_TEMPERATURE))
-            != 5.0
-            or bool(self.get_value(LuxVisibility.V0039_SOLAR_BUFFER))
-            or float(self.get_value(LuxCalculation.C0027_SOLAR_BUFFER_TEMPERATURE))
-            != 150.0
+            bool(self.get_value(LV.V0250_SOLAR))
+            or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
+            or bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
+            or float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))  # noqa: W503
+            != 5.0  # noqa: W503
+            or bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
+            or float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))  # noqa: W503
+            != 150.0  # noqa: W503
         )
+
+    def _detect_domestic_water_circulation_pump_present(self) -> bool:
+        """Detect and returns True if solar is present."""
+        try:
+            return int(self.get_value(LP.P0085_DOMESTIC_WATER_CHARGING_PUMP)) != 1
+        except Exception:  # pylint: disable=broad-except
+            return False
 
     def detect_cooling_present(self) -> bool:
         """Detect and returns True if Cooling is present."""

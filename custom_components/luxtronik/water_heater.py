@@ -30,6 +30,7 @@ from .const import (
     LuxOperationMode,
     LuxParameter,
     LuxVisibility,
+    SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikWaterHeaterDescription
@@ -47,7 +48,7 @@ OPERATION_MAPPING: dict[str, str] = {
 
 WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
     LuxtronikWaterHeaterDescription(
-        key="domestic_water",
+        key=SensorKey.DOMESTIC_WATER,
         operation_list=[STATE_OFF, STATE_HEAT_PUMP, STATE_ELECTRIC, STATE_PERFORMANCE],
         supported_features=WaterHeaterEntityFeature.OPERATION_MODE
         | WaterHeaterEntityFeature.TARGET_TEMPERATURE

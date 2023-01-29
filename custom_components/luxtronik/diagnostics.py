@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from functools import partial
 from ipaddress import IPv6Address, ip_address
-from typing import Any, cast
+from typing import Any
 
 from async_timeout import timeout
 from getmac import get_mac_address
@@ -30,9 +30,9 @@ async def async_get_config_entry_diagnostics(
     client = coordinator.client
     client.read()
 
-    mac = ""
+    mac: str | None = None
     async with timeout(10):
-        mac = await _async_get_mac_address(hass, cast(entry.data[CONF_HOST], str))
+        mac = await _async_get_mac_address(hass, data[CONF_HOST])
 
     entry_data = async_redact_data(entry.as_dict(), TO_REDACT)
     if "data" not in entry_data:

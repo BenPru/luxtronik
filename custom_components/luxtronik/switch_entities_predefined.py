@@ -1,7 +1,13 @@
-"""All descriptions can be found here. Mostly the Boolean data types in the default instruction set of each category end up being a Switch."""
+"""Luxtronik switch definitions."""
 from homeassistant.helpers.entity import EntityCategory
 
-from .const import DeviceKey, LuxMode, LuxParameter, LuxVisibility
+from .const import (
+    DeviceKey,
+    LuxMode,
+    LuxParameter as LP,
+    LuxVisibility as LV,
+    SensorKey,
+)
 from .model import LuxtronikSwitchDescription
 
 SWITCHES: list[LuxtronikSwitchDescription] = [
@@ -9,28 +15,28 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # ...
     # region Main heatpump
     LuxtronikSwitchDescription(
-        luxtronik_key=LuxParameter.P0860_REMOTE_MAINTENANCE,
-        key="remote_maintenance",
+        luxtronik_key=LP.P0860_REMOTE_MAINTENANCE,
+        key=SensorKey.REMOTE_MAINTENANCE,
         icon="mdi:remote-desktop",
         entity_category=EntityCategory.CONFIG,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LuxParameter.P0869_EFFICIENCY_PUMP,
-        key="efficiency_pump",
+        luxtronik_key=LP.P0869_EFFICIENCY_PUMP,
+        key=SensorKey.EFFICIENCY_PUMP,
         icon="mdi:leaf-circle",
         entity_category=EntityCategory.CONFIG,
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LuxParameter.P1033_PUMP_HEAT_CONTROL,
-        key="pump_heat_control",
+        luxtronik_key=LP.P1033_PUMP_HEAT_CONTROL,
+        key=SensorKey.PUMP_HEAT_CONTROL,
         icon="mdi:pump",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
     # LuxtronikSwitchDescription(
-    #     luxtronik_key=LuxParameter.P0870_AMOUNT_COUNTER_ACTIVE,
+    #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,
     #     key="amount_counter_active",
     #     icon="mdi:counter",
     #     entity_category=EntityCategory.CONFIG,
@@ -39,8 +45,8 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # region Heating
     LuxtronikSwitchDescription(
         device_key=DeviceKey.heating,
-        luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        key="heating",
+        luxtronik_key=LP.P0003_MODE_HEATING,
+        key=SensorKey.HEATING,
         icon="mdi:radiator",
         icon_off="mdi:radiator-off",
         device_class=None,
@@ -49,16 +55,16 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     ),
     LuxtronikSwitchDescription(
         device_key=DeviceKey.heating,
-        luxtronik_key=LuxParameter.P0049_PUMP_OPTIMIZATION,
-        key="pump_optimization",
+        luxtronik_key=LP.P0049_PUMP_OPTIMIZATION,
+        key=SensorKey.PUMP_OPTIMIZATION,
         icon="mdi:tune",
         entity_category=EntityCategory.CONFIG,
-        visibility=LuxVisibility.V0144_PUMP_OPTIMIZATION,
+        visibility=LV.V0144_PUMP_OPTIMIZATION,
     ),
     LuxtronikSwitchDescription(
         device_key=DeviceKey.heating,
-        luxtronik_key=LuxParameter.P0699_HEATING_THRESHOLD,
-        key="heating_threshold",
+        luxtronik_key=LP.P0699_HEATING_THRESHOLD,
+        key=SensorKey.HEATING_THRESHOLD,
         icon="mdi:download-outline",
         entity_category=EntityCategory.CONFIG,
     ),
@@ -66,8 +72,8 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # region Domestic water
     LuxtronikSwitchDescription(
         device_key=DeviceKey.domestic_water,
-        luxtronik_key=LuxParameter.P0004_MODE_DOMESTIC_WATER,
-        key="domestic_water",
+        luxtronik_key=LP.P0004_MODE_DOMESTIC_WATER,
+        key=SensorKey.DOMESTIC_WATER,
         icon="mdi:water-boiler",
         icon_on="mdi:water-boiler-auto",
         icon_off="mdi:water-boiler-off",
@@ -85,8 +91,8 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # region Cooling
     LuxtronikSwitchDescription(
         device_key=DeviceKey.cooling,
-        luxtronik_key=LuxParameter.P0108_MODE_COOLING,
-        key="cooling",
+        luxtronik_key=LP.P0108_MODE_COOLING,
+        key=SensorKey.COOLING,
         icon="mdi:snowflake",
         entity_category=EntityCategory.CONFIG,
         device_class=None,

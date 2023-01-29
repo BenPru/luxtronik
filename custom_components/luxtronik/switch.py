@@ -83,18 +83,16 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         )
         if (
             self.entity_description.on_state is True
-            or self.entity_description.on_state is False
+            or self.entity_description.on_state is False  # noqa: W503
         ) and self._attr_state is not None:
             self._attr_state = bool(self._attr_state)
-        self._attr_is_on = (
-            self._attr_state != self.entity_description.on_state
-            if self.entity_description.inverted
-            else self._attr_state == self.entity_description.on_state
-            or (
+        if self.entity_description.inverted:
+            self._attr_is_on = self._attr_state != self.entity_description.on_state
+        else:
+            self._attr_is_on = self._attr_state == self.entity_description.on_state or (
                 self.entity_description.on_states is not None
-                and self._attr_state in self.entity_description.on_states
+                and self._attr_state in self.entity_description.on_states  # noqa: W503
             )
-        )
         super()._handle_coordinator_update()
 
     # @property
