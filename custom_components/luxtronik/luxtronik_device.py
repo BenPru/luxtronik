@@ -154,13 +154,13 @@ class LuxtronikDevice:
     def detect_solar_present(self) -> bool:
         """Detect and returns True if solar is present."""
         return (
-            bool(self.get_value(LuxVisibility.V0250_SOLAR))
-            or self.get_value(LuxParameter.P0882_SOLAR_OPERATION_HOURS) > 0.01
-            or bool(self.get_value(LuxVisibility.V0038_SOLAR_COLLECTOR))
-            or float(self.get_value(LuxCalculation.C0026_SOLAR_COLLECTOR_TEMPERATURE))
+            bool(self.get_value(LUX_DETECT_SOLAR_SENSOR))
+            or self.get_value("parameters.ID_BSTD_Solar") > 0.01
+            or bool(self.get_value("visibilities.ID_Visi_Temp_Solarkoll"))
+            or float(self.get_value("calculations.ID_WEB_Temperatur_TSK"))
             != 5.0
-            or bool(self.get_value(LuxVisibility.V0039_SOLAR_BUFFER))
-            or float(self.get_value(LuxCalculation.C0027_SOLAR_BUFFER_TEMPERATURE))
+            or bool(self.get_value("visibilities.ID_Visi_Temp_Solarsp"))
+            or float(self.get_value("calculations.ID_WEB_Temperatur_TSS"))
             != 150.0
         )
 
