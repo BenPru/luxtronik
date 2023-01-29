@@ -156,12 +156,16 @@ class LuxtronikDevice:
         return (
             bool(self.get_value(LUX_DETECT_SOLAR_SENSOR))
             or self.get_value("parameters.ID_BSTD_Solar") > 0.01
-            or bool(self.get_value("visibilities.ID_Visi_Temp_Solarkoll"))
-            or float(self.get_value("calculations.ID_WEB_Temperatur_TSK"))
+            or 
+            (bool(self.get_value("visibilities.ID_Visi_Temp_Solarkoll"))
+            and float(self.get_value("calculations.ID_WEB_Temperatur_TSK"))
             != 5.0
-            or bool(self.get_value("visibilities.ID_Visi_Temp_Solarsp"))
-            or float(self.get_value("calculations.ID_WEB_Temperatur_TSS"))
+            )
+            or 
+            (bool(self.get_value("visibilities.ID_Visi_Temp_Solarsp"))
+            and float(self.get_value("calculations.ID_WEB_Temperatur_TSS"))
             != 150.0
+            )
         )
 
         

@@ -737,9 +737,9 @@ async def async_setup_entry(
             )
 
         # Temp. disabled:
-        # solar_present = luxtronik.detect_solar_present()
-        # if solar_present:
-        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarkoll") > 0:
+        solar_present = luxtronik.detect_solar_present()
+        if solar_present:
+        #if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarkoll") > 0:
             entities += [
                 LuxtronikSensor(
                     luxtronik,
@@ -751,7 +751,7 @@ async def async_setup_entry(
                     entity_category=None,
                 ),
             ]
-        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarsp") > 0:
+        #if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarsp") > 0:
             entities += [
                 LuxtronikSensor(
                     luxtronik,
@@ -763,7 +763,7 @@ async def async_setup_entry(
                     entity_category=None,
                 ),
             ]
-        if luxtronik.get_value("parameters.ID_BSTD_Solar") > 0:
+        #if luxtronik.get_value("parameters.ID_BSTD_Solar") > 0:
             text_operation_hours_solar = get_sensor_text(lang, "operation_hours_solar")
             entities += [
                 LuxtronikSensor(
