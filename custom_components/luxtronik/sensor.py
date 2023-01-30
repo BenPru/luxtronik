@@ -75,7 +75,6 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
             coordinator=coordinator,
             description=description,
             device_info_ident=device_info_ident,
-            platform=Platform.SENSOR,
         )
         self._sensor_prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(
@@ -100,8 +99,9 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._attr_native_value = get_sensor_data(
             data, self.entity_description.luxtronik_key.value
         )
-        if self._attr_native_value is not None and isinstance(
-            self._attr_native_value, float
+        if self._attr_native_value is not None and (
+            isinstance(self._attr_native_value, float)
+            or isinstance(self._attr_native_value, int)  # noqa: W503
         ):
             float_value = float(self._attr_native_value)
             if self.entity_description.factor is not None:
@@ -210,12 +210,12 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         if evu_event_minutes is None:
             pass
         elif self.native_value == LuxOperationMode.evu.value:
-            evu_until = self.coordinator.get_sensor_text("evu_until").format(
+            evu_until = self.coordinator.get_text("evu_until").format(
                 evu_time=evu_event_minutes
             )
             return f"{evu_until} {line_1} {line_2} {status_time}."
         elif evu_event_minutes <= 30:
-            evu_in = self.coordinator.get_sensor_text("evu_in").format(
+            evu_in = self.coordinator.get_text("evu_in").format(
                 evu_time=evu_event_minutes
             )
             return f"{line_1} {line_2} {status_time}. {evu_in}"

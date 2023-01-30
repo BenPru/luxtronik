@@ -54,7 +54,6 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             coordinator=coordinator,
             description=description,
             device_info_ident=device_info_ident,
-            platform=Platform.NUMBER,
         )
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")

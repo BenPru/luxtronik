@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
-from .binary_sensors_entities_predefined import BINARY_SENSORS
+from .binary_sensor_entities_predefined import BINARY_SENSORS
 from .common import get_sensor_data
 from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
@@ -54,7 +54,6 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
             coordinator=coordinator,
             description=description,
             device_info_ident=device_info_ident,
-            platform=Platform.SWITCH,
         )
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")

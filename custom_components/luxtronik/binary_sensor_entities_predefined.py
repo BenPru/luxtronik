@@ -35,8 +35,7 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
     LuxtronikBinarySensorEntityDescription(
         key=SensorKey.DEFROST_VALVE,
         luxtronik_key=LC.C0037_DEFROST_VALVE,
-        icon_on="mdi:valve-open",
-        icon_off="mdi:valve-closed",
+        icon_by_state={True: "mdi:valve-open", False: "mdi:valve-closed"},
         device_class=BinarySensorDeviceClass.OPENING,
         visibility=LV.V0049_DEFROST_VALVE,
     ),
@@ -50,8 +49,6 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
     LuxtronikBinarySensorEntityDescription(
         key=SensorKey.DISTURBANCE_OUTPUT,
         luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
-        icon_on="mdi:checkbox-marked-circle",
-        icon_off="mdi:alert-octagon",
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     # endregion Main heatpump

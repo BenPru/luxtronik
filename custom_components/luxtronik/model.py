@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date, datetime
+from decimal import Decimal
 from typing import Any
 
 from homeassistant.components.binary_sensor import BinarySensorEntityDescription
@@ -19,8 +21,9 @@ from homeassistant.components.water_heater import (
     WaterHeaterEntityEntityDescription,
     WaterHeaterEntityFeature,
 )
-from homeassistant.const import UnitOfTemperature
+from homeassistant.const import Platform, UnitOfTemperature
 from homeassistant.helpers.entity import EntityDescription
+from homeassistant.helpers.typing import StateType
 
 from .const import (
     DeviceKey,
@@ -50,10 +53,12 @@ class LuxtronikEntityAttributeDescription:
 class LuxtronikEntityDescription(EntityDescription):
     """Class describing Luxtronik entities."""
 
-    icon_by_state: dict[str, str] | None = None
-
     has_entity_name = True
 
+    # Bug in python: Have to assing something!
+    platform = Platform.AIR_QUALITY
+
+    icon_by_state: dict[StateType | date | datetime | Decimal, str] | None = None
     device_key: DeviceKey = DeviceKey.heatpump
     luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
     translation_key_name: str | None = None
@@ -73,6 +78,7 @@ class LuxtronikSensorDescription(
 ):
     """Class describing Luxtronik sensor entities."""
 
+    platform = Platform.SENSOR
     factor: float | None = None
 
 
@@ -83,6 +89,7 @@ class LuxtronikNumberDescription(
 ):
     """Class describing Luxtronik number sensor entities."""
 
+    platform = Platform.NUMBER
     factor: float | None = None
     native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO
@@ -95,11 +102,10 @@ class LuxtronikBinarySensorEntityDescription(
 ):
     """Class describing Luxtronik binary sensor entities."""
 
+    platform = Platform.BINARY_SENSOR
     on_state: str | bool = True
     on_states: list[str] | None = None
     off_state: str | bool = False
-    icon_on: str | None = None
-    icon_off: str | None = None
     inverted = False
 
 
@@ -110,11 +116,10 @@ class LuxtronikSwitchDescription(
 ):
     """Class describing Luxtronik switch entities."""
 
+    platform = Platform.SWITCH
     on_state: str | bool = True
     on_states: list[str] | None = None
     off_state: str | bool = False
-    icon_on: str | None = None
-    icon_off: str | None = None
     inverted = False
 
 
@@ -125,6 +130,7 @@ class LuxtronikClimateDescription(
 ):
     """Class describing Luxtronik climate entities."""
 
+    platform = Platform.CLIMATE
     hvac_modes: list[HVACMode] = field(default_factory=list)
     preset_modes: list[str] | None = None
     supported_features: ClimateEntityFeature = ClimateEntityFeature(0)
@@ -144,6 +150,7 @@ class LuxtronikWaterHeaterDescription(
 ):
     """Class describing Luxtronik water heater entities."""
 
+    platform = Platform.WATER_HEATER
     operation_list: list[str] = field(default_factory=list)
     supported_features: WaterHeaterEntityFeature = WaterHeaterEntityFeature(0)
     luxtronik_key_current_temperature: LuxCalculation = LuxCalculation.UNSET
@@ -155,8 +162,9 @@ class LuxtronikWaterHeaterDescription(
 
 
 @dataclass
-class LuxtronikUpdateDescription(
+class LuxtronikUpdateEntityDescription(
     LuxtronikEntityDescription,
     UpdateEntityDescription,
 ):
     """Class describing Luxtronik update entities."""
+    platform = Platform.UPDATE

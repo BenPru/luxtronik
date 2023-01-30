@@ -27,7 +27,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         coordinator: LuxtronikCoordinator,
         description: LuxtronikEntityDescription,
         device_info_ident: DeviceKey,
-        platform: Platform,
     ) -> None:
         """Init LuxtronikEntity."""
         super().__init__(coordinator=coordinator)
@@ -55,7 +54,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             if description.translation_key_name is None
             else description.translation_key_name
         )
-        self._attr_name = coordinator.get_device_entity_title(translation_key, platform)
+        self._attr_name = coordinator.get_device_entity_title(
+            translation_key, description.platform
+        )
         self._attr_state = get_sensor_data(
             coordinator.data, description.luxtronik_key.value
         )
@@ -78,9 +79,13 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     def icon(self) -> str | None:
         """Return the icon to be used for this entity."""
         if self.entity_description.icon_by_state is not None:
-            if self._attr_state in self.entity_description.icon_by_state:
-                return self.entity_description.icon_by_state.get(str(self._attr_state))
-            return None
+            value = (
+                self._attr_state
+                if self.entity_description.platform != Platform.SWITCH
+                else self.is_on
+            )
+            if value in self.entity_description.icon_by_state:
+                return self.entity_description.icon_by_state.get(value)
         return super().icon
 
     @callback

@@ -59,6 +59,7 @@ SENSORS: list[descr] = [
         icon="mdi:timer-sand",
         native_unit_of_measurement=UnitOfTime.SECONDS,
         entity_registry_visible_default=False,
+        native_precision=0,
         extra_attributes=[
             attr(SA.STATUS_TEXT, LC.C0120_STATUS_TIME, SensorAttrFormat.HOUR_MINUTE),
             attr(SA.TIMER_HEATPUMP_ON, LC.C0067_TIMER_HEATPUMP_ON),
@@ -177,7 +178,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTime.HOURS,
         visibility=LV.V0080_COMPRESSOR1_OPERATION_HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
     ),
     descr(
         key=SensorKey.COMPRESSOR2_IMPULSES,
@@ -198,7 +199,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTime.HOURS,
         visibility=LV.V0083_COMPRESSOR2_OPERATION_HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
     ),
     descr(
         key=SensorKey.OPERATION_HOURS,
@@ -208,7 +209,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfTime.HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
     ),
     descr(
         key=SensorKey.HEAT_AMOUNT_COUNTER,
@@ -301,7 +302,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTime.HOURS,
         visibility=LV.V0086_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
     ),
     descr(
         key=SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
@@ -445,7 +446,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfTime.HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
     ),
     descr(
         key=SensorKey.HEAT_AMOUNT_HEATING,
@@ -467,7 +468,7 @@ SENSORS: list[descr] = [
         device_class=SensorDeviceClass.ENERGY,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        native_precision=1,
+        native_precision=2,
         factor=0.01,
         min_firmware_version_minor=FirmwareVersionMinor.minor_88,
     ),
@@ -499,9 +500,9 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:timer-sand",
         state_class=SensorStateClass.TOTAL_INCREASING,
-        unit_of_measurement=UnitOfTime.HOURS,
+        native_unit_of_measurement=UnitOfTime.HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
     ),
     descr(
         key=SensorKey.HEAT_AMOUNT_DOMESTIC_WATER,
@@ -523,7 +524,7 @@ SENSORS: list[descr] = [
         device_class=SensorDeviceClass.ENERGY,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        native_precision=1,
+        native_precision=2,
         factor=0.01,
         min_firmware_version_minor=FirmwareVersionMinor.minor_88,
     ),
@@ -556,7 +557,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfTime.HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
         visibility=LV.V0038_SOLAR_COLLECTOR,
     ),
     # endregion Domestic water
@@ -570,7 +571,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfTime.HOURS,
         factor=SECOUND_TO_HOUR_FACTOR,
-        native_precision=0,
+        native_precision=2,
     ),
     # endregion Cooling
 ]

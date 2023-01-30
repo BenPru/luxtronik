@@ -20,7 +20,7 @@ from .const import (
 
 # endregion Imports
 
-WAIT_TIME_WRITE_PARAMETER = 0.2
+WAIT_TIME_WRITE_PARAMETER = 1.0
 
 # List of ports that are known to respond to discovery packets
 LUXTRONIK_DISCOVERY_PORTS = [4444, 47808]
@@ -201,7 +201,8 @@ class Luxtronik:
                     "Connected to Luxtronik heatpump %s:%s", self._host, self._port
                 )
             if write:
-                return self._write()
+                self._write()
+                # Read the new values based on our param changes:
             self._read()
 
     def _read(self):
@@ -226,10 +227,6 @@ class Luxtronik:
         self.parameters.queue = {}
         # Give the heatpump a short time to handle the value changes/calculations:
         time.sleep(WAIT_TIME_WRITE_PARAMETER)
-        # Read the new values based on our param changes:
-        self._read_parameters()
-        self._read_calculations()
-        self._read_visibilities()
 
     def _read_parameters(self):
         data = []

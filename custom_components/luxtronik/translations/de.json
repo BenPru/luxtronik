@@ -305,10 +305,10 @@
                 }
             },
             "heat_source_output": {
-                "name": "Heizquelle Ausgang"
+                "name": "W\u00e4rmequelle Ausgang"
             },
             "heat_source_input_temperature": {
-                "name": "Heizquelle Eingang"
+                "name": "W\u00e4rmequelle Eingang"
             },
             "outdoor_temperature": {
                 "name": "Aussen Temperatur"
@@ -347,7 +347,7 @@
                 "name": "Ansaug Verdampfer Temperatur"
             },
             "compressor_heating_temperature": {
-                "name": "Verdichterheizung"
+                "name": "Verdichter"
             },
             "overheating_temperature": {
                 "name": "\u00dcberhitzung"
@@ -386,7 +386,7 @@
                 "name": "Brauchwasser"
             },
             "domestic_water_temperature": {
-                "name": "Brauchwasser Temperatur"
+                "name": "Brauchwasser"
             },
             "operation_hours_domestic_water": {
                 "name": "Brauchwasser Betriebsstunden"
@@ -419,10 +419,10 @@
                 "name": "R\u00fccklauf Temperatur extern"
             },
             "solar_collector_temperature": {
-                "name": "Solar Kollektor Temperatur"
+                "name": "Solar Kollektor"
             },
             "solar_buffer_temperature": {
-                "name": "Solar Puffer Temperatur"
+                "name": "Solar Puffer"
             },
             "operation_hours_solar": {
                 "name": "Solar Betriebsstunden"

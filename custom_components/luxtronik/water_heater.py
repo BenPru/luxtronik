@@ -110,7 +110,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             coordinator=coordinator,
             description=description,
             device_info_ident=DeviceKey.domestic_water,
-            platform=Platform.WATER_HEATER,
         )
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")

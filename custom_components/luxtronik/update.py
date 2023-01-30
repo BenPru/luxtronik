@@ -1,7 +1,6 @@
 """Luxtronik Update platform."""
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 import re
 import threading
@@ -12,11 +11,10 @@ import requests
 from homeassistant.components.update import (
     ENTITY_ID_FORMAT,
     UpdateEntity,
-    UpdateEntityDescription,
     UpdateEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_UNAVAILABLE, Platform
+from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -35,16 +33,9 @@ from .const import (
 )
 from .coordinator import LuxtronikCoordinator
 from .lux_helper import get_firmware_download_id, get_manufacturer_firmware_url_by_model
-from .model import LuxtronikEntityDescription, LuxtronikUpdateDescription
+from .model import LuxtronikUpdateEntityDescription
 
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(hours=1)
-
-
-@dataclass
-class LuxtronikUpdateEntityDescription(
-    LuxtronikEntityDescription, UpdateEntityDescription
-):
-    """Class describing Luxtronik update entities."""
 
 
 async def async_setup_entry(
@@ -75,7 +66,7 @@ async def async_setup_entry(
 class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
     """Representation of Luxtronik."""
 
-    entity_description: LuxtronikUpdateDescription
+    entity_description: LuxtronikUpdateEntityDescription
 
     _attr_title = "Luxtronik Firmware Version"
     _attr_supported_features: UpdateEntityFeature = UpdateEntityFeature.RELEASE_NOTES
@@ -93,7 +84,6 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             coordinator=coordinator,
             description=description,
             device_info_ident=DeviceKey.heatpump,
-            platform=Platform.UPDATE,
         )
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")

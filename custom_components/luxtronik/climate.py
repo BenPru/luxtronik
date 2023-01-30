@@ -145,7 +145,6 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
             coordinator=coordinator,
             description=description,
             device_info_ident=DeviceKey.heating,
-            platform=Platform.CLIMATE,
         )
         if description.luxtronik_key_current_temperature is None:
             description.luxtronik_key_current_temperature = entry.data.get(
