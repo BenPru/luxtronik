@@ -6,7 +6,6 @@ from typing import Any
 
 from homeassistant.components.switch import ENTITY_ID_FORMAT, SwitchEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -93,6 +92,14 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
                 and self._attr_state in self.entity_description.on_states  # noqa: W503
             )
         super()._handle_coordinator_update()
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon to be used for this entity."""
+        if self.entity_description.icon_by_state is not None:
+            if self.is_on in self.entity_description.icon_by_state:
+                return self.entity_description.icon_by_state.get(self.is_on)
+        return super().icon
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""

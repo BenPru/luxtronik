@@ -19,7 +19,6 @@ from homeassistant.const import (
     ATTR_TEMPERATURE,
     PRECISION_HALVES,
     STATE_UNKNOWN,
-    Platform,
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback

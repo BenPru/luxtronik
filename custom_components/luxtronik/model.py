@@ -55,7 +55,7 @@ class LuxtronikEntityDescription(EntityDescription):
 
     has_entity_name = True
 
-    # Bug in python: Have to assing something!
+    # Bug in python: Have to assign value:
     platform = Platform.AIR_QUALITY
 
     icon_by_state: dict[StateType | date | datetime | Decimal, str] | None = None

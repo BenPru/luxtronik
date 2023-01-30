@@ -1,12 +1,14 @@
 """Constants for the Luxtronik heatpump integration."""
 # region Imports
-from datetime import timedelta
+from datetime import date, datetime, timedelta
+from decimal import Decimal
 from enum import Enum
 import logging
 from typing import Final
 
 from homeassistant.backports.enum import StrEnum
 from homeassistant.const import Platform
+from homeassistant.helpers.typing import StateType
 
 # endregion Imports
 
@@ -136,7 +138,7 @@ class LuxRoomThermostatType(Enum):
 
 
 
-LUX_STATE_ICON_MAP: Final[dict[str, str]] = {
+LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
     LuxOperationMode.heating.value: "mdi:radiator",
     LuxOperationMode.domestic_water.value: "mdi:waves",
     LuxOperationMode.swimming_pool_solar.value: "mdi:pool",
