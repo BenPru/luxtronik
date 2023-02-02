@@ -1,0 +1,509 @@
+{
+    "entity": {
+        "binary_sensor": {
+            "evu_unlocked": {
+                "name": "Locktime"
+            },
+            "compressor": {
+                "name": "Compressor"
+            },
+            "pump_flow": {
+                "name": "Pump flow"
+            },
+            "compressor_heater": {
+                "name": "Compressor heater"
+            },
+            "defrost_valve": {
+                "name": "Defrost valve"
+            },
+            "additional_heat_generator": {
+                "name": "Additional heat generator"
+            },
+            "disturbance_output": {
+                "name": "Systemhealth"
+            },
+            "circulation_pump_heating": {
+                "name": "Circulation pump heating"
+            },
+            "additional_circulation_pump": {
+                "name": "Additional circulation pump"
+            },
+            "domestic_water_recirculation_pump": {
+                "name": "Recirculation pump domestic water"
+            },
+            "domestic_water_circulation_pump": {
+                "name": "Circulation pump domestic water"
+            },
+            "domestic_water_charging_pump": {
+                "name": "Charging pump domestic water"
+            },
+            "solar_pump": {
+                "name": "Solarpump"
+            },
+            "approval_cooling": {
+                "name": "Approval cooling"
+            },
+            "defrost_end_flow_okay": {
+                "name": "Defrost end \u002f Flow okay"
+            },
+            "motor_protection": {
+                "name": "Motor protection"
+            }
+        },
+        "device": {
+            "heatpump": {
+                "name": "Heatpump"
+            },
+            "heating": {
+                "name": "Heating"
+            },
+            "domestic_water": {
+                "name": "Domestic water"
+            },
+            "cooling": {
+                "name": "Cooling"
+            }
+        },
+        "switch": {
+            "remote_maintenance": {
+                "name": "Remote maintenance"
+            },
+            "efficiency_pump": {
+                "name": "Efficiency pump"
+            },
+            "pump_heat_control": {
+                "name": "Pump heat control"
+            },
+            "heating": {
+                "name": "Heating"
+            },
+            "pump_optimization": {
+                "name": "Pump optimization"
+            },
+            "heating_threshold": {
+                "name": "Heating threshold"
+            },
+            "domestic_water": {
+                "name": "Domestic water automatic"
+            },
+            "cooling": {
+                "name": "Cooling"
+            }
+        },
+        "update": {
+            "firmware": {
+                "name": "Firmware"
+            }
+        },
+        "number": {
+            "release_second_heat_generator": {
+                "name": "Release second heat generator"
+            },
+            "pump_optimization": {
+                "name": "Pump optimization"
+            },
+            "heating_threshold": {
+                "name": "Heating threshold"
+            },
+            "heating_target_correction": {
+                "name": "Heating target correction"
+            },
+            "heating_min_flow_out_temperature": {
+                "name": "Min. target flow out"
+            },
+            "heating_circuit_curve1_temperature": {
+                "name": "Heating curve 1"
+            },
+            "heating_circuit_curve2_temperature": {
+                "name": "Heating curve 2"
+            },
+            "heating_circuit_curve_night_temperature": {
+                "name": "Heating curve night"
+            },
+            "domestic_water_target_temperature": {
+                "name": "Domestic water target temperature"
+            },
+            "domestic_water_thermal_desinfection_target": {
+                "name": "Thermal desinfection target temperature"
+            },
+            "solar_pump_max_temperature_collector": {
+                "name": "Max. temperature solar collector"
+            },
+            "solar_pump_off_max_difference_temperature_boiler": {
+                "name": "Switch-off max. differential collector/boiler (solarpump)"
+            },
+            "solar_pump_off_difference_temperature": {
+                "name": "Switch-off differential collector/boiler (solarpump)"
+            },
+            "solar_pump_on_difference_temperature": {
+                "name": "Switch-on differential collector/boiler (solarpump)"
+            },
+            "domestic_water_hysteresis": {
+                "name": "Hysteresis domestic water"
+            },
+            "heating_room_temperature_impact_factor": {
+                "name": "Room temperature impact factor"
+            },
+            "heating_maximum_circulation_pump_speed": {
+                "name": "Maximum circulation pump speed (Heating)"
+            },
+            "heating_max_flow_out_increase_temperature": {
+                "name": "Max. target flow out increase"
+            },
+            "heating_hysteresis": {
+                "name": "Hysteresis heating"
+            },
+            "heating_night_lowering_to_temperature": {
+                "name": "Heating night lowering to temperature"
+            }
+        },
+        "sensor": {
+            "status": {
+                "name": "Heatpump",
+                "state": {
+                    "heating": "Heating",
+                    "hot water": "Domestic water",
+                    "swimming pool/solar": "Pool / Solar",
+                    "evu": "Grid lock - no power",
+                    "defrost": "Defrost",
+                    "heating external source": "Heating external source",
+                    "cooling": "Cooling",
+                    "no request": "Idle (no request)"
+                }
+            },
+            "error_reason": {
+                "name": "Last error",
+                "state": {
+                    "701": "Error low pressure.",
+                    "702": "Low pressure stop\nRESET autom.",
+                    "703": "Antifreeze\nPlease call fitter",
+                    "704": "Error hot gas\nReset in hh:mm",
+                    "705": "Motor protection VEN\nPlease call fitter",
+                    "706": "Motor protection BCP\nPlease call fitter",
+                    "707": "Coding of HP\nPlease call fitter",
+                    "708": "Return sensor\nPlease call fitter",
+                    "709": "Flow sensor\nPlease call fitter",
+                    "710": "Hot gas sensor\nPlease call fitter",
+                    "711": "External temp. sensor\nPlease call fitter",
+                    "712": "Domestic hot water sensor.\nPlease call fitter",
+                    "713": "HS-on sensor\nPlease call fitter",
+                    "714": "Hot gas SW\nReset in hh:mm",
+                    "715": "High-pressure switch-off\nRESET autom.",
+                    "716": "High-pressure fault\nPlease call fitter",
+                    "717": "Flow rate HS\nPlease call fitter",
+                    "718": "Max. outside temp.\nRESET autom. in hh:mm",
+                    "719": "Min. outside temp.\nRESET autom. in hh:mm",
+                    "720": "HS temperature\nRESET autom. in hh:mm",
+                    "721": "Low-pressure switch-off\nRESET autom.",
+                    "722": "Tempdiff HW\nPlease call fitter",
+                    "723": "Tempdiff SW\nPlease call fitter",
+                    "724": "Tempdiff defrosting\nPlease call fitter",
+                    "725": "System error SW\nPlease call fitter",
+                    "726": "Sensor mixing circ 1\nPlease call fitter",
+                    "727": "Brine pressure\nPlease call fitter",
+                    "728": "Sensor HS Off\nPlease call fitter",
+                    "729": "Rotating field error\nPlease call fitter",
+                    "732": "Cooling fault\nPlease call fitter",
+                    "733": "Anode fault\nPlease call fitter",
+                    "734": "Anode fault\nPlease call fitter",
+                    "735": "Error Ext. En\nPlease call fitter",
+                    "736": "Error solar collector\nPlease call fitter",
+                    "737": "Error solar tank\nPlease call fitter",
+                    "738": "Error mixing circle 2\nPlease call fitter",
+                    "750": "Return sensor external\nPlease call fitter",
+                    "751": "Phase monitoring fault",
+                    "752": "Flow error",
+                    "755": "Lost connection to slave\nPlease call fitter",
+                    "756": "Lost connection to master\nPlease call fitter",
+                    "757": "Low-pressure fault in SW-appliance",
+                    "758": "Defrosting malfunction",
+                    "759": "TDI message",
+                    "760": "Defrosting fault",
+                    "761": "LIN timeout/LIN-connection lost",
+                    "762": "sensor (evaporator intake)",
+                    "763": "sensor (compressor intake)",
+                    "764": "Sensor Compressor heater",
+                    "765": "Overheating",
+                    "766": "compressor's functional range",
+                    "767": "STB E-Rod",
+                    "768": "Flow monitoring",
+                    "769": "Pump control",
+                    "770": "Low superheat",
+                    "771": "High superheat",
+                    "776": "limit of application-CP",
+                    "777": "Expansion valve",
+                    "778": "Low pressure sensor",
+                    "779": "High pressure sensor",
+                    "780": "EVI sensor",
+                    "781": "Liquid temp. sensor before EXV",
+                    "782": "Suction gas EVI temp. sensor",
+                    "783": "Communication SEC - Inverter",
+                    "784": "VSS lockdown",
+                    "785": "SEC-Board defective",
+                    "787": "VD alert",
+                    "788": "Major VSS fault",
+                    "789": "LIN/Encoding not found",
+                    "790": "Major VSS fault",
+                    "791": "Lost ModBus communication",
+                    "792": "LIN-connection lost",
+                    "793": "Major VSS fault",
+                    "-1": "Unknown error"
+                }
+            },
+            "switchoff_reason": {
+                "name": "Switchoff reason",
+                "state": {
+                    "0": "Heatpump disturbance",
+                    "1": "Plant disturbance",
+                    "2": "Operating mode second heat generator",
+                    "3": "EVU-Lock",
+                    "4": "",
+                    "5": "Air defrosting",
+                    "6": "Temperature limitation of use maximal",
+                    "7": "Temperature limitation of use minimal",
+                    "8": "Lower limitation of use",
+                    "9": "no request",
+                    "11": "flow rate",
+                    "-1": "Unknown switchoff"
+                }
+            },
+            "status_line_1": {
+                "name": "Status 1",
+                "state": {
+                    "heatpump running": "The heatpump runs",
+                    "heatpump idle": "The heatpump is idle",
+                    "heatpump coming": "The heatpump is coming",
+                    "heatpump shutdown": "The heatpump is shuting down",
+                    "errorcode slot": "Heatpump error code in slot 0",
+                    "pump forerun": "Pump forerun",
+                    "defrost": "Defrost",
+                    "writing on LIN connection": "Writing on LIN connection",
+                    "compressor heating up": "Der Kompressor heizt auf"
+                }
+            },
+            "status_line_2": {
+                "name": "Status 2",
+                "state": {
+                    "since": "since",
+                    "in": "in",
+                    "unknown": "unknown"
+                }
+            },
+            "status_line_3": {
+                "name": "Status 3",
+                "state": {
+                    "heating": "heating",
+                    "defrost": "defrost",
+                    "cooling": "cooling",
+                    "pump forerun": "pump forerun",
+                    "thermal desinfection": "thermal desinfection",
+                    "swimming pool/solar": "swimming pool/solar",
+                    "no request": "no request",
+                    "cycle lock": "cycle lock",
+                    "lock time": "lock time",
+                    "domestic water": "domestic water",
+                    "flow monitoring": "flow monitoring",
+                    "grid switch on delay": "grid switch on delay",
+                    "info bake out program": "info bake out program",
+                    "heating external engery source": "heating external engery source",
+                    "domestic water external energy source": "Domestic water external energy source",
+                    "second heat generator 1 active": "second heat generator 1 active"
+                }
+            },
+            "heat_source_output": {
+                "name": "To heat source"
+            },
+            "heat_source_input_temperature": {
+                "name": "Heat source input"
+            },
+            "outdoor_temperature": {
+                "name": "Outdoor temperature"
+            },
+            "status_time": {
+                "name": "Status time"
+            },
+            "outdoor_temperature_average": {
+                "name": "Avg. outdoor temperature"
+            },
+            "compressor1_impulses": {
+                "name": "Compressor 1 impulses"
+            },
+            "compressor1_operation_hours": {
+                "name": "Compressor 1 operation hours"
+            },
+            "compressor2_impulses": {
+                "name": "Compressor 2 impulses"
+            },
+            "compressor2_operation_hours": {
+                "name": "Compressor 2 operation hours"
+            },
+            "operation_hours": {
+                "name": "Operation hours"
+            },
+            "heat_amount_counter": {
+                "name": "Heat amount counter"
+            },
+            "hot_gas_temperature": {
+                "name": "Hot gas temperature"
+            },
+            "suction_compressor_temperature": {
+                "name": "Suction compressor temperature"
+            },
+            "suction_evaporator_temperature": {
+                "name": "Suction evaporator temperature"
+            },
+            "compressor_heating_temperature": {
+                "name": "Compressor"
+            },
+            "overheating_temperature": {
+                "name": "Overheating"
+            },
+            "overheating_target_temperature": {
+                "name": "Overheating target"
+            },
+            "high_pressure": {
+                "name": "High pressure"
+            },
+            "low_pressure": {
+                "name": "Low pressure"
+            },
+            "additional_heat_generator_operation_hours": {
+                "name": "Additional heat generator operation hours"
+            },
+            "analog_out1": {
+                "name": "Analog out 1"
+            },
+            "analog_out2": {
+                "name": "Analog out 2"
+            },
+            "current_heat_output": {
+                "name": "Current heat output"
+            },
+            "additional_heat_generator_amount_counter": {
+                "name": "Additional heat generator amount counter"
+            },
+            "heat_source_output_temperature": {
+                "name": "Heat source output"
+            },
+            "pump_frequency": {
+                "name": "Pump frequency"
+            },
+            "domestic_water": {
+                "name": "Domestic water"
+            },
+            "domestic_water_temperature": {
+                "name": "Domestic water"
+            },
+            "operation_hours_domestic_water": {
+                "name": "Domestic water operation hours"
+            },
+            "heat_amount_domestic_water": {
+                "name": "Domestic water heat amount"
+            },
+            "domestic_water_energy_input": {
+                "name": "Energy input domestic water"
+            },
+            "flow_in_temperature": {
+                "name": "Flow in temperature"
+            },
+            "flow_out_temperature": {
+                "name": "Flow out temperature"
+            },
+            "flow_out_temperature_target": {
+                "name": "Flow out target temperature"
+            },
+            "operation_hours_heating": {
+                "name":"Heating operation hours"
+            },
+            "heat_amount_heating": {
+                "name":"Heating heat amount"
+            },
+            "heat_energy_input": {
+                "name": "Energy input heating"
+            },
+            "flow_out_temperature_external": {
+                "name": "Flow out temperature external"
+            },
+            "solar_collector_temperature": {
+                "name": "Solar collector"
+            },
+            "solar_buffer_temperature": {
+                "name": "Solar buffer"
+            },
+            "operation_hours_solar": {
+                "name": "Solar operation hours"
+            },
+            "operation_hours_cooling": {
+                "name": "Cooling operation hours"
+            }
+        },
+        "climate": {
+            "heating": {
+                "name": "Heating"
+            }
+        },
+        "water_heater": {
+            "domestic_water": {
+                "name": "Domestic water"
+            }
+        }
+    },
+    "config": {
+        "abort": {
+            "already_configured": "Service is already configured.",
+            "already_in_progress": "The config flow is already running.",
+            "cannot_connect": "Failed to connect to Luxtronik.\nPlease check ip-address/hostname and port.",
+            "no_devices_found": "No devices found on the network",
+            "single_instance_allowed": "Already configured. Only a single configuration possible.",
+            "unknown": "Unknown error"
+        },
+        "error": {
+            "address": "Invalid remote-address insert. The address have to be an ip-address or a resolvable hostname.",
+            "address_in_use": "The choosen listen port is already in use on this system.",
+            "unknown": "Unerwarteter Fehler"
+        },
+        "step": {
+            "user": {
+                "description": "Set up your Luxtronik heatpump controller to allow monitoring and control.",
+                "data": {
+                  "host": "Host",
+                  "port": "Network Port"
+                },
+                "data_description": {
+                    "host": "Hostname or ip address",
+                    "port": "Normally 8889 or 8888"
+                }
+             },
+             "options": {
+                "description": "Einstellungen zur Luxtronik W\u00e4rmepumpe {name}.\nDiese Einstellungen k\u00F6nnen auch sp\u00e4ter unter Integrationen ge\u00e4ndert werden.",
+                "data": {
+                    "ha_sensor_indoor_temperature": "Sensor id for the indoor temperature",
+                    "control_mode_home_assistant": "Experimental!: Control thermostat on/off status by Home Assistant.",
+                    "ha_sensor_prefix": "Prefix entity-ids"
+                },
+                "data_description": {
+                    "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
+                    "control_mode_home_assistant": "When the Home Assistant Thermostat is in the Idle state, the Off state is reported to Luxtronik and Luxtronik cannot start this item.",
+                    "ha_sensor_prefix": "Important if several heat pumps are used.\nIn the case of a single one, 'luxtronik' can simply be used."
+                }
+             }
+        }
+    },
+    "options": {
+        "step": {
+            "user": {
+                "description": "Settings for the Luxtronik heat pump {name}.",
+                "data": {
+                    "ha_sensor_indoor_temperature": "Sensor id for the indoor temperature",
+                    "control_mode_home_assistant": "Experimental!: Control thermostat on/off status by Home Assistant.",
+                    "ha_sensor_prefix": "Prefix entity-ids"
+                },
+                "data_description": {
+                    "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
+                    "control_mode_home_assistant": "When the Home Assistant Thermostat is in the Idle state, the Off state is reported to Luxtronik and Luxtronik cannot start this item.",
+                    "ha_sensor_prefix": "Important if several heat pumps are used.\nIn the case of a single one, 'luxtronik' can simply be used."
+                }
+            }
+        }
+    }
+}

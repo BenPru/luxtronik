@@ -454,23 +454,20 @@
             "already_in_progress": "Der Konfigurationsablauf wird bereits ausgef\u00fchrt.",
             "cannot_connect": "Die Verbindung zu Luxtronik ist fehlgeschlagen.\nBitte IP-Adresse/Hostnamen und Port \u00fcberpr\u00fcfen.",
             "no_devices_found": "Es konnten keine Ger\u00e4te im Netzwerk gefunden werden.",
+            "single_instance_allowed": "Bereits konfiguriert. Es ist nur eine Konfiguration erlaubt.",
             "unknown": "Unerwarteter Fehler"
         },
         "error": {
             "address": "Ung\u00fcltige Remote-Adresse angegeben. Die Adresse muss eine IP-Adresse oder ein aufl\u00f6sbarer Hostname sein.",
             "address_in_use": "Der ausgew\u00e4hlte Listening Port wird auf diesem System bereits verwendet.",
-            "model": "Das ausgew\u00e4hlte Modell scheint MODBUS40 nicht zu unterst\u00fctzen",
-            "read": "Fehler bei Leseanforderung von Pumpe. \u00dcberpr\u00fcfe deinen \u201eRemote-Leseport\u201c oder \u201eRemote-Adresse\u201c.",
-            "unknown": "Unerwarteter Fehler",
-            "url": "Die angegebene URL ist weder wohlgeformt, noch wird sie unterst\u00fctzt.",
-            "write": "Fehler bei Schreibanforderung an Pumpe. \u00dcberpr\u00fcfe deinen \u201eRemote-Schreibport\u201c oder \u201eRemote-Adresse\u201c."
+            "unknown": "Unerwarteter Fehler"
         },
         "step": {
             "user": {
                 "description": "Verbinde eine Luxtronik W\u00e4rmepumpe mit Home Assistant.",
                 "data": {
                     "host": "Host",
-                    "port": "Port"
+                    "port": "Netzwerk Port"
                 },
                 "data_description": {
                     "host": "Netzwerkname oder IP Adresse",
@@ -482,13 +479,11 @@
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor ID f\u00fcr die Innentemperatur",
                     "control_mode_home_assistant": "Experimentell!: Thermostat An/Aus-Status durch Home Assistant steuern.",
-                    "language_sensor_names": "Sprachk\u00fcrzel Sensornamen",
                     "ha_sensor_prefix": "Pr\u00e4fix Entit\u00e4ts-ID"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "In Home Assistant wird ein Thermostat zur Heizungssteuerung erstellt. Die Ist-Temperatur dazu wird von einem Home Assistant Sensor festgelegt.\nWenn Luxtronik mit einem Hardware Raum Thermostat verbunden ist, dann sollte dieses Feld leer gelassen werden.",
                     "control_mode_home_assistant": "Wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
-                    "language_sensor_names": "Die Namen der Sensoren werden in dieser Sprache dargestellt.",
                     "ha_sensor_prefix": "Wichtig wenn mehreren W\u00e4rmepumpen verwendet werden.\nBei einer einzelnen kann einfach 'luxtronik' verwendet werden."
                 }
              }
@@ -496,18 +491,16 @@
     },
     "options": {
         "step": {
-          "user": {
-            "description": "Einstellungen zur Luxtronik W\u00e4rmepumpe {name}.",
+            "user": {
+                "description": "Einstellungen zur Luxtronik W\u00e4rmepumpe {name}.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor ID f\u00fcr die Innentemperatur",
                     "control_mode_home_assistant": "Experimentell!: Thermostat An/Aus-Status durch Home Assistant steuern.",
-                    "language_sensor_names": "Sprachk\u00fcrzel Sensornamen",
                     "ha_sensor_prefix": "Pr\u00e4fix Entit\u00e4ts-ID"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "In Home Assistant wird ein Thermostat zur Heizungssteuerung erstellt. Die Ist-Temperatur dazu wird von einem Home Assistant Sensor festgelegt.\nWenn Luxtronik mit einem Hardware Raum Thermostat verbunden ist, dann sollte dieses Feld leer gelassen werden.",
                     "control_mode_home_assistant": "Wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
-                    "language_sensor_names": "Die Namen der Sensoren werden in dieser Sprache dargestellt.",
                     "ha_sensor_prefix": "Wichtig wenn mehreren W\u00e4rmepumpen verwendet werden.\nBei einer einzelnen kann einfach 'luxtronik' verwendet werden."
                 }
             }
