@@ -47,6 +47,7 @@ class LuxtronikEntityAttributeDescription:
     key: SensorAttrKey
     luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
     format: SensorAttrFormat | None = None
+    restore_on_startup: bool = False
 
 
 @dataclass
@@ -55,7 +56,7 @@ class LuxtronikEntityDescription(EntityDescription):
 
     has_entity_name = True
 
-    # Bug in python: Have to assign value:
+    # Bug in python: Have to assign a value:
     platform = Platform.AIR_QUALITY
 
     icon_by_state: dict[StateType | date | datetime | Decimal, str] | None = None

@@ -109,6 +109,45 @@ class LuxMode(StrEnum):
     holidays: Final = "Holidays"
 
 
+class LuxStatus1Option(StrEnum):
+    """LuxStatus1 option defrost etc."""
+
+    heatpump_running: Final = "heatpump running"
+    heatpump_idle: Final = "heatpump idle"
+    heatpump_coming: Final = "heatpump coming"
+    heatpump_shutdown: Final = "heatpump shutdown"
+    errorcode_slot_zero: Final = "errorcode slot 0"
+    defrost: Final = "defrost"
+    witing_on_LIN_connection: Final = "witing on LIN connection"
+    compressor_heating_up: Final = "compressor heating up"
+    pump_forerun: Final = "pump forerun"
+
+
+class LuxStatus3Option(StrEnum):
+    """LuxStatus3 option heating etc."""
+
+    unknown: Final = ("unknown",)
+    none: Final = ("none",)
+    heating: Final = ("heating",)
+    no_request: Final = ("no request",)
+    grid_switch_on_delay: Final = ("grid switch on delay",)
+    cycle_lock: Final = ("cycle lock",)
+    lock_time: Final = ("lock time",)
+    domestic_water: Final = ("domestic water",)
+    info_bake_out_program: Final = ("info bake out program",)
+    defrost: Final = ("defrost",)
+    pump_forerun: Final = ("pump forerun",)
+    thermal_desinfection: Final = ("thermal desinfection",)
+    cooling: Final = ("cooling",)
+    swimming_pool_solar: Final = ("swimming pool/solar",)
+    heating_external_energy_source: Final = ("heating external energy source",)
+    domestic_water_external_energy_source: Final = (
+        "domestic water external energy source",
+    )
+    flow_monitoring: Final = ("flow monitoring",)
+    second_heat_generator_1_active: Final = ("second heat generator 1 active",)
+
+
 class LuxMkTypes(Enum):
     """LuxMkTypes etc."""
 
@@ -249,7 +288,9 @@ class LuxCalculation(StrEnum):
     C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
     C0026_SOLAR_COLLECTOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSK"
     C0027_SOLAR_BUFFER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSS"
+    C0029_DEFROST_END_FLOW_OKAY: Final = "calculations.ID_WEB_ASDin"
     C0031_EVU_UNLOCKED: Final = "calculations.ID_WEB_EVUin"
+    C0034_MOTOR_PROTECTION: Final = "calculations.ID_WEB_MOTin"
     C0037_DEFROST_VALVE: Final = "calculations.ID_WEB_AVout"
     C0038_DOMESTIC_WATER_RECIRCULATION_PUMP: Final = "calculations.ID_WEB_BUPout"
     C0039_CIRCULATION_PUMP_HEATING: Final = "calculations.ID_WEB_HUPout"
@@ -287,6 +328,8 @@ class LuxCalculation(StrEnum):
     C0078_MODEL_CODE: Final = "calculations.ID_WEB_Code_WP_akt"
     C0080_STATUS: Final = "calculations.ID_WEB_WP_BZ_akt"
     C0081_FIRMWARE_VERSION: Final = "calculations.ID_WEB_SoftStand"
+    C0095_ERROR_TIME: Final = "calculations.ID_WEB_ERROR_Time0"
+    C0100_ERROR_REASON: Final = "calculations.ID_WEB_ERROR_Nr0"
     C0117_STATUS_LINE_1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
     C0118_STATUS_LINE_2: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile2"
     C0119_STATUS_LINE_3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
@@ -331,7 +374,9 @@ class LuxVisibility(StrEnum):
     V0029_DOMESTIC_WATER_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_BW_Ist"
     V0038_SOLAR_COLLECTOR: Final = "visibilities.ID_Visi_Temp_Solarkoll"
     V0039_SOLAR_BUFFER: Final = "visibilities.ID_Visi_Temp_Solarsp"
+    V0041_DEFROST_END_FLOW_OKAY: Final = "visibilities.ID_Visi_IN_ASD"
     V0043_EVU_IN: Final = "visibilities.ID_Visi_IN_EVU"
+    V0045_MOTOR_PROTECTION: Final = "visibilities.ID_Visi_IN_MOT"
     V0049_DEFROST_VALVE: Final = "visibilities.ID_Visi_OUT_Abtauventil"
     V0050_DOMESTIC_WATER_RECIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_BUP"
     V0052_CIRCULATION_PUMP_HEATING: Final = "visibilities.ID_Visi_OUT_HUP"
@@ -405,6 +450,7 @@ class SensorKey(StrEnum):
     CURRENT_HEAT_OUTPUT = "current_heat_output"
     PUMP_FREQUENCY = "pump_frequency"
     HEAT_SOURCE_OUTPUT_TEMPERATURE = "heat_source_output_temperature"
+    ERROR_REASON = "error_reason"
     FLOW_IN_TEMPERATURE = "flow_in_temperature"
     FLOW_OUT_TEMPERATURE = "flow_out_temperature"
     FLOW_OUT_TEMPERATURE_TARGET = "flow_out_temperature_target"
@@ -468,6 +514,8 @@ class SensorKey(StrEnum):
     DEFROST_VALVE = "defrost_valve"
     ADDITIONAL_HEAT_GENERATOR = "additional_heat_generator"
     DISTURBANCE_OUTPUT = "disturbance_output"
+    DEFROST_END_FLOW_OKAY = "defrost_end_flow_okay"
+    MOTOR_PROTECTION = "motor_protection"
     FIRMWARE = "firmware"
     APPROVAL_COOLING = "approval_cooling"
 
@@ -480,6 +528,8 @@ class SensorAttrFormat(Enum):
 
     HOUR_MINUTE = 1
     CELSIUS_TENTH = 2
+    SWITCH_GAP = 3
+    TIMESTAMP_LAST_OVER = 4
 
 
 class SensorAttrKey(StrEnum):
@@ -496,7 +546,7 @@ class SensorAttrKey(StrEnum):
     LUXTRONIK_KEY_TARGET_TEMPERATURE_LOW = "luxtronik_key_target_temperature_low"
 
     STATUS_TEXT = "status_text"
-    LAST_THERMAL_DESINFECTION = ""
+    LAST_THERMAL_DESINFECTION = "last_thermal_desinfection"
     SWITCH_GAP = "switch_gap"
     STATUS_RAW = "status_raw"
     EVU_FIRST_START_TIME = "EVU_first_start_time"

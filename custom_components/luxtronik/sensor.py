@@ -1,4 +1,5 @@
 """Support for Luxtronik sensors."""
+# flake8: noqa: W503
 # region Imports
 from __future__ import annotations
 
@@ -10,7 +11,6 @@ from homeassistant.components.sensor import ENTITY_ID_FORMAT, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
@@ -21,7 +21,10 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     DeviceKey,
+    LuxCalculation as LC,
     LuxOperationMode,
+    LuxStatus1Option,
+    LuxStatus3Option,
     SensorAttrKey as SA,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
@@ -99,8 +102,24 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._attr_native_value = get_sensor_data(
             data, self.entity_description.luxtronik_key.value
         )
-        if self._attr_native_value is not None and isinstance(
-            self._attr_native_value, (float, int)
+
+        if self._attr_native_value is None:
+            pass
+        # region Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
+        elif (
+            self.entity_description.luxtronik_key == LC.C0117_STATUS_LINE_1
+            and self._attr_native_value == LuxStatus1Option.heatpump_coming
+        ):
+            if (
+                int(self._get_value(LC.C0072_TIMER_SCB_ON)) < 10
+                and int(self._get_value(LC.C0071_TIMER_SCB_OFF)) > 0
+            ):
+                self._attr_native_value = LuxStatus1Option.heatpump_shutdown
+        # endregion Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
+
+        elif isinstance(self._attr_native_value, (float, int)) and (
+            self.entity_description.factor is not None
+            or self.entity_description.native_precision is not None
         ):
             float_value = float(self._attr_native_value)
             if self.entity_description.factor is not None:
@@ -121,10 +140,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     _coordinator: LuxtronikCoordinator
     _last_state: StateType | date | datetime | Decimal = None
 
-    _first_evu_start: time = time.min
-    _first_evu_end: time = time.min
-    _second_evu_start: time = time.min
-    _second_evu_end: time = time.min
+    _attr_cache: dict[SA, time] = {}
+    _attr_cache[SA.EVU_FIRST_START_TIME] = time.min
+    _attr_cache[SA.EVU_FIRST_END_TIME] = time.min
+    _attr_cache[SA.EVU_SECOND_START_TIME] = time.min
+    _attr_cache[SA.EVU_SECOND_END_TIME] = time.min
 
     async def _data_update(self, event):
         self._handle_coordinator_update()
@@ -142,30 +162,53 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         elif self._attr_native_value == evu and str(self._last_state) != evu:
             # evu start
             if (
-                self._first_evu_start == time.min
-                or time_now.hour <= self._first_evu_start.hour  # noqa: W503
-                or (  # noqa: W503
-                    self._second_evu_start != time.min
-                    and time_now.hour < self._second_evu_start.hour  # noqa: W503
+                self._attr_cache[SA.EVU_FIRST_START_TIME] == time.min
+                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
+                or (
+                    self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
+                    and time_now.hour < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
                 )
-                or time_now.hour <= self._first_evu_end.hour  # noqa: W503
+                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
             ):
-                self._first_evu_start = time_now
+                self._attr_cache[SA.EVU_FIRST_START_TIME] = time_now
             else:
-                self._second_evu_start = time_now
+                self._attr_cache[SA.EVU_SECOND_START_TIME] = time_now
         elif self._attr_native_value != evu and str(self._last_state) == evu:
             # evu end
             if (
-                self._first_evu_end == time.min
-                or time_now.hour <= self._first_evu_end.hour  # noqa: W503
-                or (  # noqa: W503
-                    self._second_evu_start != time.min
-                    and time_now < self._second_evu_start  # noqa: W503
+                self._attr_cache[SA.EVU_FIRST_END_TIME] == time.min
+                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
+                or (
+                    self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
+                    and time_now < self._attr_cache[SA.EVU_SECOND_START_TIME]
                 )
             ):
-                self._first_evu_end = time_now
+                self._attr_cache[SA.EVU_FIRST_END_TIME] = time_now
             else:
-                self._second_evu_end = time_now
+                self._attr_cache[SA.EVU_SECOND_END_TIME] = time_now
+
+        # region Workaround Luxtronik Bug
+        # Status shows heating but status 3 = no request! - Inverter heater is active but not the heatpump!
+        else:
+            sl1 = self._get_value(LC.C0117_STATUS_LINE_1)
+            sl3 = self._get_value(LC.C0119_STATUS_LINE_3)
+            add_circ_pump = self._get_value(LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
+            s1_workaround: list[str] = [
+                LuxStatus1Option.heatpump_idle,
+                LuxStatus1Option.pump_forerun,
+                LuxStatus1Option.heatpump_coming,
+            ]
+            s3_workaround: list[str | None] = [
+                LuxStatus3Option.no_request,
+                LuxStatus3Option.unknown,
+                LuxStatus3Option.none,
+                LuxStatus3Option.grid_switch_on_delay,
+                None,
+            ]
+            if sl1 in s1_workaround and sl3 in s3_workaround and not add_circ_pump:
+                # ignore pump forerun
+                self._attr_native_value = LuxOperationMode.no_request
+        # endregion Workaround Luxtronik Bug
 
         self._last_state = self._attr_native_value
 
@@ -173,10 +216,18 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         attr[SA.STATUS_RAW] = self._attr_native_value
         attr[SA.STATUS_TEXT] = self._build_status_text()
         attr[SA.EVU_MINUTES_UNTIL_NEXT_EVENT] = self._calc_next_evu_event_minutes_text()
-        attr[SA.EVU_FIRST_START_TIME] = self._tm_txt(self._first_evu_start)
-        attr[SA.EVU_FIRST_END_TIME] = self._tm_txt(self._first_evu_end)
-        attr[SA.EVU_SECOND_START_TIME] = self._tm_txt(self._second_evu_start)
-        attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(self._second_evu_end)
+        attr[SA.EVU_FIRST_START_TIME] = self._tm_txt(
+            self._attr_cache[SA.EVU_FIRST_START_TIME]
+        )
+        attr[SA.EVU_FIRST_END_TIME] = self._tm_txt(
+            self._attr_cache[SA.EVU_FIRST_END_TIME]
+        )
+        attr[SA.EVU_SECOND_START_TIME] = self._tm_txt(
+            self._attr_cache[SA.EVU_SECOND_START_TIME]
+        )
+        attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
+            self._attr_cache[SA.EVU_SECOND_END_TIME]
+        )
 
     def _get_sensor_value(self, sensor_name: str) -> Any:
         sensor = self.hass.states.get(sensor_name)
@@ -236,10 +287,10 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         event: time = time.min
         time_now = time(datetime.now().hour, datetime.now().minute)
         for evu_time in (
-            self._first_evu_start,
-            self._first_evu_end,
-            self._second_evu_start,
-            self._second_evu_end,
+            self._attr_cache[SA.EVU_FIRST_START_TIME],
+            self._attr_cache[SA.EVU_FIRST_END_TIME],
+            self._attr_cache[SA.EVU_SECOND_START_TIME],
+            self._attr_cache[SA.EVU_SECOND_END_TIME],
         ):
             if evu_time == time.min:
                 continue
@@ -247,10 +298,10 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                 event = evu_time
         if event == time.min:
             for evu_time in (
-                self._first_evu_start,
-                self._first_evu_end,
-                self._second_evu_start,
-                self._second_evu_end,
+                self._attr_cache[SA.EVU_FIRST_START_TIME],
+                self._attr_cache[SA.EVU_FIRST_END_TIME],
+                self._attr_cache[SA.EVU_SECOND_START_TIME],
+                self._attr_cache[SA.EVU_SECOND_END_TIME],
             ):
                 if evu_time == time.min:
                     continue
@@ -261,39 +312,8 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     def _tm_txt(self, value: time) -> str:
         return "" if value == time.min else value.strftime("%H:%M")
 
-    def _restore_value(self, value: str | None) -> time:
-        if value is None or ":" not in value:
+    def _restore_attr_value(self, value: Any | None) -> Any:
+        if value is None or ":" not in str(value):
             return time.min
-        vals = value.split(":")
+        vals = str(value).split(":")
         return time(int(vals[0]), int(vals[1]))
-
-    async def async_added_to_hass(self) -> None:
-        """Handle entity which will be added."""
-        await super().async_added_to_hass()
-        state = await self.async_get_last_state()
-        if state is None:
-            return
-        self._attr_native_value = str(state.state)
-
-        if SA.EVU_FIRST_START_TIME in state.attributes:
-            self._first_evu_start = self._restore_value(
-                state.attributes[SA.EVU_FIRST_START_TIME]
-            )
-            self._first_evu_end = self._restore_value(
-                state.attributes[SA.EVU_FIRST_END_TIME]
-            )
-            self._second_evu_start = self._restore_value(
-                state.attributes[SA.EVU_SECOND_START_TIME]
-            )
-            self._second_evu_end = self._restore_value(
-                state.attributes[SA.EVU_SECOND_END_TIME]
-            )
-
-        data_updated = f"{self._sensor_prefix}_data_updated"
-        async_dispatcher_connect(
-            self.hass, data_updated, self._schedule_immediate_update
-        )
-
-    @callback
-    def _schedule_immediate_update(self):
-        self.async_schedule_update_ha_state(True)

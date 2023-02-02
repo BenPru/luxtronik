@@ -51,6 +51,16 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
         luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
+    LuxtronikBinarySensorEntityDescription(
+        key=SensorKey.DEFROST_END_FLOW_OKAY,
+        luxtronik_key=LC.C0029_DEFROST_END_FLOW_OKAY,
+        visibility=LV.V0041_DEFROST_END_FLOW_OKAY,
+    ),
+    LuxtronikBinarySensorEntityDescription(
+        key=SensorKey.MOTOR_PROTECTION,
+        luxtronik_key=LC.C0034_MOTOR_PROTECTION,
+        visibility=LV.V0045_MOTOR_PROTECTION,
+    ),
     # endregion Main heatpump
     # region Heating
     LuxtronikBinarySensorEntityDescription(

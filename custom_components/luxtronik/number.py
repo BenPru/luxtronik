@@ -1,6 +1,9 @@
 """Support for Luxtronik number sensors."""
+# flake8: noqa: W503
 # region Imports
 from __future__ import annotations
+
+from datetime import datetime
 
 from homeassistant.components.number import ENTITY_ID_FORMAT, NumberEntity
 from homeassistant.config_entries import ConfigEntry
@@ -9,9 +12,15 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
-from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
+from .const import (
+    CONF_COORDINATOR,
+    CONF_HA_SENSOR_PREFIX,
+    DOMAIN,
+    DeviceKey,
+    SensorAttrFormat,
+)
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
-from .model import LuxtronikNumberDescription
+from .model import LuxtronikEntityAttributeDescription, LuxtronikNumberDescription
 from .number_entities_predefined import NUMBER_SENSORS
 
 # endregion Imports
@@ -98,3 +107,28 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             self.entity_description.luxtronik_key.value.split(".")[1], value
         )
         self._handle_coordinator_update(data)
+
+    def formatted_data(self, attr: LuxtronikEntityAttributeDescription) -> str:
+        """Calculate the attribute value."""
+        if attr.format != SensorAttrFormat.TIMESTAMP_LAST_OVER:
+            return super().formatted_data(attr)
+        value = self._get_value(attr.luxtronik_key)
+        if value is None:
+            return ""
+        if attr.format is None:
+            return str(value)
+        if (
+            self._attr_state is not None
+            and float(value)
+            >= float(self._attr_state) * float(self.entity_description.factor)
+            and (
+                attr.key not in self._attr_cache
+                or self._attr_cache[attr.key] is None
+                or self._attr_cache[attr.key] == ""
+                or self._attr_cache[attr.key] < datetime.now().date()
+            )
+        ):
+            self._attr_cache[attr.key] = datetime.now().date()
+        value = self._attr_cache[attr.key] if attr.key in self._attr_cache else ""
+
+        return str(value)

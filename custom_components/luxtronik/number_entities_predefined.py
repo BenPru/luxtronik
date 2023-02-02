@@ -5,8 +5,19 @@ from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import PERCENTAGE, UnitOfTemperature, UnitOfTime
 from homeassistant.helpers.entity import EntityCategory
 
-from .const import DeviceKey, LuxParameter as LP, LuxVisibility as LV, SensorKey
-from .model import LuxtronikNumberDescription
+from .const import (
+    DeviceKey,
+    LuxCalculation as LC,
+    LuxParameter as LP,
+    LuxVisibility as LV,
+    SensorAttrFormat,
+    SensorAttrKey as SA,
+    SensorKey,
+)
+from .model import (
+    LuxtronikEntityAttributeDescription as attr,
+    LuxtronikNumberDescription,
+)
 
 # endregion Imports
 
@@ -256,6 +267,14 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         factor=0.1,
+        extra_attributes=[
+            attr(
+                SA.LAST_THERMAL_DESINFECTION,
+                LC.C0017_DOMESTIC_WATER_TEMPERATURE,
+                SensorAttrFormat.TIMESTAMP_LAST_OVER,
+                True,
+            ),
+        ],
     ),
     # region Solar
     LuxtronikNumberDescription(
