@@ -8,7 +8,6 @@ from typing import Any
 
 from async_timeout import timeout
 from getmac import get_mac_address
-
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
@@ -32,7 +31,7 @@ async def async_get_config_entry_diagnostics(
 
     mac: str | None = None
     async with timeout(10):
-        mac = await _async_get_mac_address(hass, data[CONF_HOST])
+        mac = await _async_get_mac_address(hass, entry.data[CONF_HOST])
 
     entry_data = async_redact_data(entry.as_dict(), TO_REDACT)
     if "data" not in entry_data:
