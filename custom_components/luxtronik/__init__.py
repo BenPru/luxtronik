@@ -76,6 +76,17 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         new = {**config_entry.data}
         config_entry.version = 3
         hass.config_entries.async_update_entry(config_entry, data=new)
+    if config_entry.version == 3:
+        # Ensure sensor prefix:
+        if CONF_HA_SENSOR_PREFIX not in config_entry.data and (
+            DOMAIN == "luxtronik2"
+            or len(hass.config_entries.async_entries("luxtronik2")) > 0
+        ):
+            new_data = {**config_entry.data, CONF_HA_SENSOR_PREFIX: "luxtronik2"}
+        else:
+            new_data = {**config_entry.data}
+        config_entry.version = 4
+        hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     LOGGER.info("Migration to version %s successful", config_entry.version)
 

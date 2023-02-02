@@ -81,6 +81,7 @@ class LuxtronikSensorDescription(
 
     platform = Platform.SENSOR
     factor: float | None = None
+    native_precision: int | None = None
 
 
 @dataclass

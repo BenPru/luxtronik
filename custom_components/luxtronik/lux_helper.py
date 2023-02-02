@@ -241,7 +241,7 @@ class Luxtronik:
             except struct.error as err:
                 # not logging this as error as it would be logged on every read cycle
                 LOGGER.debug(err)
-        LOGGER.info("Read %d parameters", length)
+        LOGGER.debug("Read %d parameters", length)
         self.parameters.parse(data)
 
     def _read_calculations(self):
@@ -259,7 +259,7 @@ class Luxtronik:
             except struct.error as err:
                 # not logging this as error as it would be logged on every read cycle
                 LOGGER.debug(err)
-        LOGGER.info("Read %d calculations", length)
+        LOGGER.debug("Read %d calculations", length)
         self.calculations.parse(data)
 
     def _read_visibilities(self):
@@ -275,5 +275,5 @@ class Luxtronik:
             except struct.error as err:
                 # not logging this as error as it would be logged on every read cycle
                 LOGGER.debug(err)
-        LOGGER.info("Read %d visibilities", length)
+        LOGGER.debug("Read %d visibilities", length)
         self.visibilities.parse(data)
