@@ -3,7 +3,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, date
 
 from homeassistant.components.number import ENTITY_ID_FORMAT, NumberEntity
 from homeassistant.config_entries import ConfigEntry
@@ -125,7 +125,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
                 attr.key not in self._attr_cache
                 or self._attr_cache[attr.key] is None
                 or self._attr_cache[attr.key] == ""
-                or self._attr_cache[attr.key] < datetime.now().date()
+                or (isinstance(self._attr_cache[attr.key], date) and self._attr_cache[attr.key] < datetime.now().date())
             )
         ):
             self._attr_cache[attr.key] = datetime.now().date()

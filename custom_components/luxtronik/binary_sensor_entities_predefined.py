@@ -87,7 +87,7 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
         device_key=DeviceKey.domestic_water,
         icon="mdi:pump",
         device_class=BinarySensorDeviceClass.RUNNING,
-        visibility=LV.V0050_DOMESTIC_WATER_RECIRCULATION_PUMP,
+        visibility=LV.V0050_DHW_RECIRCULATION_PUMP,
     ),
     # Special case: Same underlying sensor with different ha sensor!
     LuxtronikBinarySensorEntityDescription(
@@ -100,11 +100,11 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
     ),
     LuxtronikBinarySensorEntityDescription(
         key=SensorKey.DHW_CHARGING_PUMP,
-        luxtronik_key=LC.C0046_DOMESTIC_WATER_CIRCULATION_PUMP,
+        luxtronik_key=LC.C0046_DHW_CIRCULATION_PUMP,
         device_key=DeviceKey.domestic_water,
         icon="mdi:pump",
         device_class=BinarySensorDeviceClass.RUNNING,
-        visibility=LV.V0059A_DOMESTIC_WATER_CHARGING_PUMP,
+        visibility=LV.V0059A_DHW_CHARGING_PUMP,
     ),
     LuxtronikBinarySensorEntityDescription(
         key=SensorKey.SOLAR_PUMP,

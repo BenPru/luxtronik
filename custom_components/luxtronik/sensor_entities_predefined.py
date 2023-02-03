@@ -472,7 +472,7 @@ SENSORS: list[descr] = [
     ),
     descr(
         key=SensorKey.DHW_OPERATION_HOURS,
-        luxtronik_key=LC.C0065_DOMESTIC_WATER_OPERATION_HOURS,
+        luxtronik_key=LC.C0065_DHW_OPERATION_HOURS,
         device_key=DeviceKey.domestic_water,
         entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:timer-sand",
@@ -482,8 +482,8 @@ SENSORS: list[descr] = [
         native_precision=2,
     ),
     descr(
-        key=SensorKey.HEAT_AMOUNT_DHW,
-        luxtronik_key=LC.C0152_HEAT_AMOUNT_DHW,
+        key=SensorKey.DHW_HEAT_AMOUNT,
+        luxtronik_key=LC.C0152_DHW_HEAT_AMOUNT,
         device_key=DeviceKey.domestic_water,
         icon="mdi:lightning-bolt-circle",
         state_class=SensorStateClass.TOTAL_INCREASING,

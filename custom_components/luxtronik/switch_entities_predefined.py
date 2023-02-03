@@ -71,7 +71,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # region Domestic water
     LuxtronikSwitchDescription(
         device_key=DeviceKey.domestic_water,
-        luxtronik_key=LP.P0004_MODE_DOMESTIC_WATER,
+        luxtronik_key=LP.P0004_MODE_DHW,
         key=SensorKey.DOMESTIC_WATER,
         icon_by_state={True: "mdi:water-boiler-auto", False: "mdi:water-boiler-off"},
         device_class=None,

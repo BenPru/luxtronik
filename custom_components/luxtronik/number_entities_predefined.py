@@ -230,7 +230,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     # endregion Heating
     # region Domestic water
     LuxtronikNumberDescription(
-        key=SensorKey.DOMESTIC_WATER_TARGET_TEMPERATURE,
+        key=SensorKey.DHW_TARGET_TEMPERATURE,
         luxtronik_key=LP.P0002_DHW_TARGET_TEMPERATURE,
         device_key=DeviceKey.domestic_water,
         mode=NumberMode.BOX,
@@ -255,7 +255,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.1,
     ),
     LuxtronikNumberDescription(
-        key=SensorKey.DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET,
+        key=SensorKey.DHW_THERMAL_DESINFECTION_TARGET,
         luxtronik_key=LP.P0047_DHW_THERMAL_DESINFECTION_TARGET,
         device_key=DeviceKey.domestic_water,
         icon="mdi:thermometer-high",
