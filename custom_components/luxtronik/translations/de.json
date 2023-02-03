@@ -28,13 +28,13 @@
             "additional_circulation_pump": {
                 "name": "Zusatzumw\u00e4lzpumpe"
             },
-            "domestic_water_recirculation_pump": {
+            "dhw_recirculation_pump": {
                 "name": "Umw\u00e4lzpumpe Brauchwasser"
             },
-            "domestic_water_circulation_pump": {
+            "dhw_circulation_pump": {
                 "name": "Zirkulationspumpe"
             },
-            "domestic_water_charging_pump": {
+            "dhw_charging_pump": {
                 "name": "Boilerladepumpe"
             },
             "solar_pump": {
@@ -120,10 +120,10 @@
             "heating_circuit_curve_night_temperature": {
                 "name": "Heizkurve Nachts"
             },
-            "domestic_water_target_temperature": {
+            "dhw_target_temperature": {
                 "name": "Brauchwasser Soll"
             },
-            "domestic_water_thermal_desinfection_target": {
+            "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
             },
             "solar_pump_max_temperature_collector": {
@@ -138,7 +138,7 @@
             "solar_pump_on_difference_temperature": {
                 "name": "Einschalt Differenz Kollektor/Speicher (Solar Pumpe)"
             },
-            "domestic_water_hysteresis": {
+            "dhw_hysteresis": {
                 "name": "Hysterese Brauchwasser"
             },
             "heating_room_temperature_impact_factor": {
@@ -391,16 +391,16 @@
             "domestic_water": {
                 "name": "Brauchwasser"
             },
-            "domestic_water_temperature": {
+            "dhw_temperature": {
                 "name": "Brauchwasser"
             },
-            "operation_hours_domestic_water": {
+            "dhw_operation_hours": {
                 "name": "Brauchwasser Betriebsstunden"
             },
-            "heat_amount_domestic_water": {
+            "dhw_heat_amount": {
                 "name": "Brauchwasser W\u00e4rmemenge"
             },
-            "domestic_water_energy_input": {
+            "dhw_energy_input": {
                 "name": "Eingesetzte Energie Brauchwasser "
             },
             "flow_in_temperature": {

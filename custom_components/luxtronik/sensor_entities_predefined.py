@@ -72,7 +72,7 @@ SENSORS: list[descr] = [
             attr(SA.TIMER_HC_ADD, LC.C0074_TIMER_HC_ADD),
             attr(SA.TIMER_HC_LESS, LC.C0075_TIMER_HC_LESS),
             attr(SA.TIMER_TDI, LC.C0076_TIMER_TDI),
-            attr(SA.TIMER_BLOCK_DOMESTIC_WATER, LC.C0077_TIMER_BLOCK_DOMESTIC_WATER),
+            attr(SA.TIMER_BLOCK_DHW, LC.C0077_TIMER_BLOCK_DHW),
             attr(SA.TIMER_DEFROST, LC.C0141_TIMER_DEFROST),
             attr(SA.TIMER_HOT_GAS, LC.C0158_TIMER_HOT_GAS),
         ],
@@ -462,8 +462,8 @@ SENSORS: list[descr] = [
     # endregion Heating
     # region Domestic water
     descr(
-        key=SensorKey.DOMESTIC_WATER_TEMPERATURE,
-        luxtronik_key=LC.C0017_DOMESTIC_WATER_TEMPERATURE,
+        key=SensorKey.DHW_TEMPERATURE,
+        luxtronik_key=LC.C0017_DHW_TEMPERATURE,
         device_key=DeviceKey.domestic_water,
         entity_category=None,
         icon="mdi:coolant-temperature",
@@ -471,7 +471,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
     ),
     descr(
-        key=SensorKey.OPERATION_HOURS_DOMESTIC_WATER,
+        key=SensorKey.DHW_OPERATION_HOURS,
         luxtronik_key=LC.C0065_DOMESTIC_WATER_OPERATION_HOURS,
         device_key=DeviceKey.domestic_water,
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -482,8 +482,8 @@ SENSORS: list[descr] = [
         native_precision=2,
     ),
     descr(
-        key=SensorKey.HEAT_AMOUNT_DOMESTIC_WATER,
-        luxtronik_key=LC.C0152_HEAT_AMOUNT_DOMESTIC_WATER,
+        key=SensorKey.HEAT_AMOUNT_DHW,
+        luxtronik_key=LC.C0152_HEAT_AMOUNT_DHW,
         device_key=DeviceKey.domestic_water,
         icon="mdi:lightning-bolt-circle",
         state_class=SensorStateClass.TOTAL_INCREASING,
@@ -493,8 +493,8 @@ SENSORS: list[descr] = [
         native_precision=1,
     ),
     descr(
-        key=SensorKey.DOMESTIC_WATER_ENERGY_INPUT,
-        luxtronik_key=LP.P1137_DOMESTIC_WATER_ENERGY_INPUT,
+        key=SensorKey.DHW_ENERGY_INPUT,
+        luxtronik_key=LP.P1137_DHW_ENERGY_INPUT,
         device_key=DeviceKey.domestic_water,
         icon="mdi:circle-slice-3",
         state_class=SensorStateClass.TOTAL_INCREASING,

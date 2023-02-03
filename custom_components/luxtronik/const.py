@@ -164,6 +164,7 @@ LUX_PARAMETER_MK_SENSORS: Final = [
     "parameters.ID_Einst_MK3Typ_akt",
 ]
 
+
 class LuxRoomThermostatType(Enum):
     """LuxMkTypes etc."""
 
@@ -174,7 +175,6 @@ class LuxRoomThermostatType(Enum):
     # RFV_DK: Final = 3
     # RBE: Final = 4
     # Smart: Final = 5
-
 
 
 LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
@@ -201,21 +201,21 @@ class LuxParameter(StrEnum):
 
     UNSET: Final = "UNSET"
     P0001_HEATING_TARGET_CORRECTION: Final = "parameters.ID_Einst_WK_akt"
-    P0002_DOMESTIC_WATER_TARGET_TEMPERATURE: Final = "parameters.ID_Einst_BWS_akt"
+    P0002_DHW_TARGET_TEMPERATURE: Final = "parameters.ID_Einst_BWS_akt"
     P0003_MODE_HEATING: Final = "parameters.ID_Ba_Hz_akt"
-    P0004_MODE_DOMESTIC_WATER: Final = "parameters.ID_Ba_Bw_akt"
+    P0004_MODE_DHW: Final = "parameters.ID_Ba_Bw_akt"
     P0011_HEATING_CIRCUIT_CURVE1_TEMPERATURE: Final = "parameters.ID_Einst_HzHwHKE_akt"
     P0012_HEATING_CIRCUIT_CURVE2_TEMPERATURE: Final = "parameters.ID_Einst_HzHKRANH_akt"
     P0013_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzHKRABS_akt"
     )
-    P0047_DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET: Final = (
+    P0047_DHW_THERMAL_DESINFECTION_TARGET: Final = (
         "parameters.ID_Einst_LGST_akt"
     )
     P0049_PUMP_OPTIMIZATION: Final = "parameters.ID_Einst_Popt_akt"
     P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"
-    P0074_DOMESTIC_WATER_HYSTERESIS: Final = "parameters.ID_Einst_BWS_Hyst_akt"
-    P0085_DOMESTIC_WATER_CHARGING_PUMP: Final = "parameters.ID_Einst_BWZIP_akt"
+    P0074_DHW_HYSTERESIS: Final = "parameters.ID_Einst_BWS_Hyst_akt"
+    P0085_DHW_CHARGING_PUMP: Final = "parameters.ID_Einst_BWZIP_akt"
     P0088_HEATING_HYSTERESIS: Final = "parameters.ID_Einst_HRHyst_akt"
     P0089_HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE: Final = (
         "parameters.ID_Einst_TRErhmax_akt"
@@ -265,7 +265,7 @@ class LuxParameter(StrEnum):
         "parameters.ID_Waermemenge_ZWE"
     )
     P1136_HEAT_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1136"
-    P1137_DOMESTIC_WATER_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
+    P1137_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
 
 
 # endregion Lux parameters
@@ -284,7 +284,7 @@ class LuxCalculation(StrEnum):
     C0014_HOT_GAS_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_THG"
     C0015_OUTDOOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TA"
     C0016_OUTDOOR_TEMPERATURE_AVERAGE: Final = "calculations.ID_WEB_Mitteltemperatur"
-    C0017_DOMESTIC_WATER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TBW"
+    C0017_DHW_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TBW"
     C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
     C0026_SOLAR_COLLECTOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSK"
     C0027_SOLAR_BUFFER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSS"
@@ -292,11 +292,11 @@ class LuxCalculation(StrEnum):
     C0031_EVU_UNLOCKED: Final = "calculations.ID_WEB_EVUin"
     C0034_MOTOR_PROTECTION: Final = "calculations.ID_WEB_MOTin"
     C0037_DEFROST_VALVE: Final = "calculations.ID_WEB_AVout"
-    C0038_DOMESTIC_WATER_RECIRCULATION_PUMP: Final = "calculations.ID_WEB_BUPout"
+    C0038_DHW_RECIRCULATION_PUMP: Final = "calculations.ID_WEB_BUPout"
     C0039_CIRCULATION_PUMP_HEATING: Final = "calculations.ID_WEB_HUPout"
     C0043_PUMP_FLOW: Final = "calculations.ID_WEB_VBOout"
     C0044_COMPRESSOR: Final = "calculations.ID_WEB_VD1out"
-    C0046_DOMESTIC_WATER_CIRCULATION_PUMP: Final = "calculations.ID_WEB_ZIPout"
+    C0046_DHW_CIRCULATION_PUMP: Final = "calculations.ID_WEB_ZIPout"
     C0047_ADDITIONAL_CIRCULATION_PUMP: Final = "calculations.ID_WEB_ZUPout"
     C0048_ADDITIONAL_HEAT_GENERATOR: Final = "calculations.ID_WEB_ZW1out"
     C0049_DISTURBANCE_OUTPUT: Final = "calculations.ID_WEB_ZW2SSTout"
@@ -310,9 +310,7 @@ class LuxCalculation(StrEnum):
     )
     C0063_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitWP"
     C0064_OPERATION_HOURS_HEATING: Final = "calculations.ID_WEB_Zaehler_BetrZeitHz"
-    C0065_DOMESTIC_WATER_OPERATION_HOURS: Final = (
-        "calculations.ID_WEB_Zaehler_BetrZeitBW"
-    )
+    C0065_DHW_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitBW"
     C0066_OPERATION_HOURS_COOLING: Final = "calculations.ID_WEB_Zaehler_BetrZeitKue"
     C0067_TIMER_HEATPUMP_ON: Final = "calculations.ID_WEB_Time_WPein_akt"
     C0068_TIMER_ADD_HEAT_GENERATOR_ON: Final = "calculations.ID_WEB_Time_ZWE1_akt"
@@ -324,7 +322,7 @@ class LuxCalculation(StrEnum):
     C0074_TIMER_HC_ADD: Final = "calculations.ID_WEB_Time_HRM_akt"
     C0075_TIMER_HC_LESS: Final = "calculations.ID_WEB_Time_HRW_akt"
     C0076_TIMER_TDI: Final = "calculations.ID_WEB_Time_LGS_akt"
-    C0077_TIMER_BLOCK_DOMESTIC_WATER: Final = "calculations.ID_WEB_Time_SBW_akt"
+    C0077_TIMER_BLOCK_DHW: Final = "calculations.ID_WEB_Time_SBW_akt"
     C0078_MODEL_CODE: Final = "calculations.ID_WEB_Code_WP_akt"
     C0080_STATUS: Final = "calculations.ID_WEB_WP_BZ_akt"
     C0081_FIRMWARE_VERSION: Final = "calculations.ID_WEB_SoftStand"
@@ -337,7 +335,7 @@ class LuxCalculation(StrEnum):
     C0141_TIMER_DEFROST: Final = "calculations.ID_WEB_Time_AbtIn"
     C0146_APPROVAL_COOLING: Final = "calculations.ID_WEB_FreigabKuehl"
     C0151_HEAT_AMOUNT_HEATING: Final = "calculations.ID_WEB_WMZ_Heizung"
-    C0152_HEAT_AMOUNT_DOMESTIC_WATER: Final = "calculations.ID_WEB_WMZ_Brauchwasser"
+    C0152_DHW_HEAT_AMOUNT: Final = "calculations.ID_WEB_WMZ_Brauchwasser"
     C0154_HEAT_AMOUNT_COUNTER: Final = "calculations.ID_WEB_WMZ_Seit"
     C0156_ANALOG_OUT1: Final = "calculations.ID_WEB_AnalogOut1"
     C0157_ANALOG_OUT2: Final = "calculations.ID_WEB_AnalogOut2"
@@ -371,17 +369,17 @@ class LuxVisibility(StrEnum):
     V0023_FLOW_IN_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Vorlauf"
     V0024_FLOW_OUT_TEMPERATURE_EXTERNAL: Final = "visibilities.ID_Visi_Temp_Rucklauf"
     V0027_HOT_GAS_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Heissgas"
-    V0029_DOMESTIC_WATER_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_BW_Ist"
+    V0029_DHW_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_BW_Ist"
     V0038_SOLAR_COLLECTOR: Final = "visibilities.ID_Visi_Temp_Solarkoll"
     V0039_SOLAR_BUFFER: Final = "visibilities.ID_Visi_Temp_Solarsp"
     V0041_DEFROST_END_FLOW_OKAY: Final = "visibilities.ID_Visi_IN_ASD"
     V0043_EVU_IN: Final = "visibilities.ID_Visi_IN_EVU"
     V0045_MOTOR_PROTECTION: Final = "visibilities.ID_Visi_IN_MOT"
     V0049_DEFROST_VALVE: Final = "visibilities.ID_Visi_OUT_Abtauventil"
-    V0050_DOMESTIC_WATER_RECIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_BUP"
+    V0050_DHW_RECIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_BUP"
     V0052_CIRCULATION_PUMP_HEATING: Final = "visibilities.ID_Visi_OUT_HUP"
-    V0059_DOMESTIC_WATER_CIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_ZIP"
-    V0059A_DOMESTIC_WATER_CHARGING_PUMP: Final = "v0059a_domestic_water_charging_pump"
+    V0059_DHW_CIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_ZIP"
+    V0059A_DHW_CHARGING_PUMP: Final = "V0059A_DHW_CHARGING_PUMP"
     V0060_ADDITIONAL_CIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_ZUP"
     V0061_SECOND_HEAT_GENERATOR: Final = "visibilities.ID_Visi_OUT_ZWE1"
     V0080_COMPRESSOR1_OPERATION_HOURS: Final = "visibilities.ID_Visi_Bst_BStdVD1"
@@ -458,14 +456,14 @@ class SensorKey(StrEnum):
     OPERATION_HOURS_HEATING = "operation_hours_heating"
     OPERATION_HOURS_COOLING = "operation_hours_cooling"
     HEAT_AMOUNT_HEATING = "heat_amount_heating"
-    HEAT_AMOUNT_DOMESTIC_WATER = "heat_amount_domestic_water"
+    DHW_HEAT_AMOUNT = "dhw_heat_amount"
     HEAT_ENERGY_INPUT = "heat_energy_input"
-    DOMESTIC_WATER_ENERGY_INPUT = "domestic_water_energy_input"
-    DOMESTIC_WATER_TEMPERATURE = "domestic_water_temperature"
+    DHW_ENERGY_INPUT = "dhw_energy_input"
+    DHW_TEMPERATURE = "dhw_temperature"
     SOLAR_COLLECTOR_TEMPERATURE = "solar_collector_temperature"
     SOLAR_BUFFER_TEMPERATURE = "solar_buffer_temperature"
     OPERATION_HOURS_SOLAR = "operation_hours_solar"
-    OPERATION_HOURS_DOMESTIC_WATER = "operation_hours_domestic_water"
+    DHW_OPERATION_HOURS = "dhw_operation_hours"
     REMOTE_MAINTENANCE = "remote_maintenance"
     EFFICIENCY_PUMP = "efficiency_pump"
     PUMP_HEAT_CONTROL = "pump_heat_control"
@@ -490,11 +488,9 @@ class SensorKey(StrEnum):
     )
     HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED = "heating_maximum_circulation_pump_speed"
     HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR = "heating_room_temperature_impact_factor"
-    DOMESTIC_WATER_TARGET_TEMPERATURE = "domestic_water_target_temperature"
-    DOMESTIC_WATER_HYSTERESIS = "domestic_water_hysteresis"
-    DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET = (
-        "domestic_water_thermal_desinfection_target"
-    )
+    DHW_TARGET_TEMPERATURE = "dhw_target_temperature"
+    DHW_HYSTERESIS = "dhw_hysteresis"
+    DHW_THERMAL_DESINFECTION_TARGET = "dhw_thermal_desinfection_target"
     SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE = "solar_pump_on_difference_temperature"
     SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE = "solar_pump_off_difference_temperature"
     SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER = (
@@ -506,9 +502,9 @@ class SensorKey(StrEnum):
     PUMP_FLOW = "pump_flow"
     CIRCULATION_PUMP_HEATING = "circulation_pump_heating"
     ADDITIONAL_CIRCULATION_PUMP = "additional_circulation_pump"
-    DOMESTIC_WATER_RECIRCULATION_PUMP = "domestic_water_recirculation_pump"
-    DOMESTIC_WATER_CIRCULATION_PUMP = "domestic_water_circulation_pump"
-    DOMESTIC_WATER_CHARGING_PUMP = "domestic_water_charging_pump"
+    DHW_RECIRCULATION_PUMP = "dhw_recirculation_pump"
+    DHW_CIRCULATION_PUMP = "dhw_circulation_pump"
+    DHW_CHARGING_PUMP = "dhw_charging_pump"
     SOLAR_PUMP = "solar_pump"
     COMPRESSOR_HEATER = "compressor_heater"
     DEFROST_VALVE = "defrost_valve"
@@ -570,7 +566,7 @@ class SensorAttrKey(StrEnum):
     TIMER_HC_ADD = "Heizungsregler Mehr-Zeit HRM-Zeit (ID_WEB_Time_HRM_akt)"
     TIMER_HC_LESS = "Heizungsregler Weniger-Zeit HRW-Stand (ID_WEB_Time_HRW_akt)"
     TIMER_TDI = "ID_WEB_Time_LGS_akt"
-    TIMER_BLOCK_DOMESTIC_WATER = "Sperre WW? ID_WEB_Time_SBW_akt"
+    TIMER_BLOCK_DHW = "Sperre WW? ID_WEB_Time_SBW_akt"
     TIMER_DEFROST = "Abtauen in ID_WEB_Time_AbtIn"
     TIMER_HOT_GAS = "ID_WEB_Time_Heissgas"
 

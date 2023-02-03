@@ -34,6 +34,7 @@ LUXTRONIK_DISCOVERY_MAGIC_PACKET = "2000;111;1;\x00"
 # Content of response that is contained in responses to discovery broadcast
 LUXTRONIK_DISCOVERY_RESPONSE_PREFIX = "2500;111;"
 
+
 def discover() -> list[tuple[str, int | None]]:
     """Broadcast discovery for Luxtronik heat pumps."""
 

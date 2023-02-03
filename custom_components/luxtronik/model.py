@@ -169,4 +169,5 @@ class LuxtronikUpdateEntityDescription(
     UpdateEntityDescription,
 ):
     """Class describing Luxtronik update entities."""
+
     platform = Platform.UPDATE

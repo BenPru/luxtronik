@@ -375,10 +375,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LV.V0250_SOLAR,
         ]:
             return self.detect_solar_present()
-        if description.visibility == LV.V0059_DOMESTIC_WATER_CIRCULATION_PUMP:
-            return self._detect_domestic_water_circulation_pump_present()
-        if description.visibility == LV.V0059A_DOMESTIC_WATER_CHARGING_PUMP:
-            return not self._detect_domestic_water_circulation_pump_present()
+        if description.visibility == LV.V0059_DHW_CIRCULATION_PUMP:
+            return self._detect_dhw_circulation_pump_present()
+        if description.visibility == LV.V0059A_DHW_CHARGING_PUMP:
+            return not self._detect_dhw_circulation_pump_present()
         visibility_result = self.get_value(description.visibility)
         if visibility_result is None:
             LOGGER.warning("Could not load visibility %s", description.visibility)
@@ -421,7 +421,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def has_domestic_water(self) -> bool:
         """Is domestic water activated."""
-        return bool(self.get_value(LV.V0029_DOMESTIC_WATER_TEMPERATURE))
+        return bool(self.get_value(LV.V0029_DHW_TEMPERATURE))
 
     def get_value(self, group_sensor_id: str | LP | LC | LV):
         """Get a sensor value from Luxtronik."""
@@ -478,10 +478,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             != 150.0  # noqa: W503
         )
 
-    def _detect_domestic_water_circulation_pump_present(self) -> bool:
+    def _detect_dhw_circulation_pump_present(self) -> bool:
         """Detect and returns True if solar is present."""
         try:
-            return int(self.get_value(LP.P0085_DOMESTIC_WATER_CHARGING_PUMP)) != 1
+            return int(self.get_value(LP.P0085_DHW_CHARGING_PUMP)) != 1
         except Exception:  # pylint: disable=broad-except
             return False
 

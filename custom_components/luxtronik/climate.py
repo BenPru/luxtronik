@@ -178,6 +178,11 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
         lux_action = get_sensor_data(
             data, self.entity_description.luxtronik_key_current_action.value
         )
+        if lux_action == LuxOperationMode.heating and not (
+            get_sensor_data(data, LuxCalculation.C0044_COMPRESSOR)
+            or get_sensor_data(data, LuxCalculation.C0048_ADDITIONAL_HEAT_GENERATOR)
+        ):
+            lux_action = LuxOperationMode.no_request
         self._attr_hvac_action = (
             None if lux_action is None else HVAC_ACTION_MAPPING[lux_action]
         )

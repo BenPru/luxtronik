@@ -12,7 +12,6 @@ from .coordinator import LuxtronikCoordinator
 # endregion Imports
 
 
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Luxtronik from a config entry."""
 
@@ -76,6 +75,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         new = {**config_entry.data}
         config_entry.version = 3
         hass.config_entries.async_update_entry(config_entry, data=new)
+
     if config_entry.version == 3:
         # Ensure sensor prefix:
         if CONF_HA_SENSOR_PREFIX not in config_entry.data and (

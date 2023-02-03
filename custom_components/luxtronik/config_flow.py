@@ -6,7 +6,6 @@ from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.components.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
@@ -75,6 +74,7 @@ def _get_options_schema(options, default_sensor_indoor_temperature: str) -> vol.
 
 
 # CONFIG_SCHEMA = STEP_OPTIONS_DATA_SCHEMA
+
 
 async def _async_has_devices(hass: HomeAssistant) -> bool:
     """Return if there are devices that can be discovered."""

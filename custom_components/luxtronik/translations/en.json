@@ -28,14 +28,14 @@
             "additional_circulation_pump": {
                 "name": "Additional circulation pump"
             },
-            "domestic_water_recirculation_pump": {
-                "name": "Recirculation pump domestic water"
+            "dhw_recirculation_pump": {
+                "name": "Recirculation pump domestic hot water"
             },
-            "domestic_water_circulation_pump": {
-                "name": "Circulation pump domestic water"
+            "dhw_circulation_pump": {
+                "name": "Circulation pump domestic hot water"
             },
-            "domestic_water_charging_pump": {
-                "name": "Charging pump domestic water"
+            "dhw_charging_pump": {
+                "name": "Charging pump domestic hot water"
             },
             "solar_pump": {
                 "name": "Solarpump"
@@ -120,10 +120,10 @@
             "heating_circuit_curve_night_temperature": {
                 "name": "Heating curve night"
             },
-            "domestic_water_target_temperature": {
-                "name": "Domestic water target temperature"
+            "dhw_target_temperature": {
+                "name": "Domestic hot water target temperature"
             },
-            "domestic_water_thermal_desinfection_target": {
+            "dhw_thermal_desinfection_target": {
                 "name": "Thermal desinfection target temperature"
             },
             "solar_pump_max_temperature_collector": {
@@ -138,8 +138,8 @@
             "solar_pump_on_difference_temperature": {
                 "name": "Switch-on differential collector/boiler (solarpump)"
             },
-            "domestic_water_hysteresis": {
-                "name": "Hysteresis domestic water"
+            "dhw_hysteresis": {
+                "name": "Hysteresis domestic hot water"
             },
             "heating_room_temperature_impact_factor": {
                 "name": "Room temperature impact factor"
@@ -389,19 +389,19 @@
                 "name": "Pump frequency"
             },
             "domestic_water": {
-                "name": "Domestic water"
+                "name": "Domestic hot water"
             },
-            "domestic_water_temperature": {
-                "name": "Domestic water"
+            "dhw_temperature": {
+                "name": "Domestic hot water"
             },
-            "operation_hours_domestic_water": {
-                "name": "Domestic water operation hours"
+            "dhw_operation_hours": {
+                "name": "Domestic hot water operation hours"
             },
-            "heat_amount_domestic_water": {
-                "name": "Domestic water heat amount"
+            "dhw_heat_amount": {
+                "name": "Domestic hot water heat amount"
             },
-            "domestic_water_energy_input": {
-                "name": "Energy input domestic water"
+            "dhw_energy_input": {
+                "name": "Energy input domestic hot water"
             },
             "flow_in_temperature": {
                 "name": "Flow in temperature"

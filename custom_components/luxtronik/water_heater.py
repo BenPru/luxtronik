@@ -53,16 +53,16 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         supported_features=WaterHeaterEntityFeature.OPERATION_MODE
         | WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.AWAY_MODE,
-        luxtronik_key=LuxParameter.P0004_MODE_DOMESTIC_WATER,
-        luxtronik_key_current_temperature=LuxCalculation.C0017_DOMESTIC_WATER_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0002_DOMESTIC_WATER_TARGET_TEMPERATURE,
+        luxtronik_key=LuxParameter.P0004_MODE_DHW,
+        luxtronik_key_current_temperature=LuxCalculation.C0017_DHW_TEMPERATURE,
+        luxtronik_key_target_temperature=LuxParameter.P0002_DHW_TARGET_TEMPERATURE,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_heating=LuxOperationMode.domestic_water,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon="mdi:water-boiler",
         unit_of_measurement=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0029_DOMESTIC_WATER_TEMPERATURE,
+        visibility=LuxVisibility.V0029_DHW_TEMPERATURE,
     )
 ]
 # endregion Const

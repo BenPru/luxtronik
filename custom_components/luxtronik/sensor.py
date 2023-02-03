@@ -91,8 +91,7 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
-    @callback
-    def _handle_coordinator_update(
+    def _handle_coordinator_update_internal(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
@@ -129,6 +128,13 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
                     float_value, self.entity_description.native_precision
                 )
             self._attr_native_value = float_value
+
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """Handle updated data from the coordinator."""
+        self._handle_coordinator_update_internal(data)
         super()._handle_coordinator_update()
 
 
@@ -154,7 +160,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        super()._handle_coordinator_update()
+        super()._handle_coordinator_update_internal(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
         if self._attr_native_value is None or self._last_state is None:
@@ -207,7 +213,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             ]
             if sl1 in s1_workaround and sl3 in s3_workaround and not add_circ_pump:
                 # ignore pump forerun
-                self._attr_native_value = LuxOperationMode.no_request
+                self._attr_native_value = LuxOperationMode.no_request.value
         # endregion Workaround Luxtronik Bug
 
         self._last_state = self._attr_native_value
@@ -228,6 +234,8 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
             self._attr_cache[SA.EVU_SECOND_END_TIME]
         )
+        self._enrich_extra_attributes()
+        self.async_write_ha_state()
 
     def _get_sensor_value(self, sensor_name: str) -> Any:
         sensor = self.hass.states.get(sensor_name)

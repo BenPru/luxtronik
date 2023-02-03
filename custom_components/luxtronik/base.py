@@ -122,6 +122,10 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._attr_state = value
 
+        self._enrich_extra_attributes()
+
+        super()._handle_coordinator_update()
+    def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:
             if attr.format is None and (
                 attr.luxtronik_key is None or attr.luxtronik_key == LP.UNSET
@@ -131,7 +135,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 attr
             )
 
-        super()._handle_coordinator_update()
 
     @callback
     def _schedule_immediate_update(self):

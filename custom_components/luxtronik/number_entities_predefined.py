@@ -231,7 +231,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     # region Domestic water
     LuxtronikNumberDescription(
         key=SensorKey.DOMESTIC_WATER_TARGET_TEMPERATURE,
-        luxtronik_key=LP.P0002_DOMESTIC_WATER_TARGET_TEMPERATURE,
+        luxtronik_key=LP.P0002_DHW_TARGET_TEMPERATURE,
         device_key=DeviceKey.domestic_water,
         mode=NumberMode.BOX,
         icon="mdi:thermometer-water",
@@ -242,8 +242,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=1.0,
     ),
     LuxtronikNumberDescription(
-        key=SensorKey.DOMESTIC_WATER_HYSTERESIS,
-        luxtronik_key=LP.P0074_DOMESTIC_WATER_HYSTERESIS,
+        key=SensorKey.DHW_HYSTERESIS,
+        luxtronik_key=LP.P0074_DHW_HYSTERESIS,
         device_key=DeviceKey.domestic_water,
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -256,7 +256,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     ),
     LuxtronikNumberDescription(
         key=SensorKey.DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET,
-        luxtronik_key=LP.P0047_DOMESTIC_WATER_THERMAL_DESINFECTION_TARGET,
+        luxtronik_key=LP.P0047_DHW_THERMAL_DESINFECTION_TARGET,
         device_key=DeviceKey.domestic_water,
         icon="mdi:thermometer-high",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -270,7 +270,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         extra_attributes=[
             attr(
                 SA.LAST_THERMAL_DESINFECTION,
-                LC.C0017_DOMESTIC_WATER_TEMPERATURE,
+                LC.C0017_DHW_TEMPERATURE,
                 SensorAttrFormat.TIMESTAMP_LAST_OVER,
                 True,
             ),

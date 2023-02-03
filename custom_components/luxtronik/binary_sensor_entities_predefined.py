@@ -82,8 +82,8 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
     # endregion Heating
     # region Domestic water
     LuxtronikBinarySensorEntityDescription(
-        key=SensorKey.DOMESTIC_WATER_RECIRCULATION_PUMP,
-        luxtronik_key=LC.C0038_DOMESTIC_WATER_RECIRCULATION_PUMP,
+        key=SensorKey.DHW_RECIRCULATION_PUMP,
+        luxtronik_key=LC.C0038_DHW_RECIRCULATION_PUMP,
         device_key=DeviceKey.domestic_water,
         icon="mdi:pump",
         device_class=BinarySensorDeviceClass.RUNNING,
@@ -91,15 +91,15 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
     ),
     # Special case: Same underlying sensor with different ha sensor!
     LuxtronikBinarySensorEntityDescription(
-        key=SensorKey.DOMESTIC_WATER_CIRCULATION_PUMP,
-        luxtronik_key=LC.C0046_DOMESTIC_WATER_CIRCULATION_PUMP,
+        key=SensorKey.DHW_CIRCULATION_PUMP,
+        luxtronik_key=LC.C0046_DHW_CIRCULATION_PUMP,
         device_key=DeviceKey.domestic_water,
         icon="mdi:pump",
         device_class=BinarySensorDeviceClass.RUNNING,
-        visibility=LV.V0059_DOMESTIC_WATER_CIRCULATION_PUMP,
+        visibility=LV.V0059_DHW_CIRCULATION_PUMP,
     ),
     LuxtronikBinarySensorEntityDescription(
-        key=SensorKey.DOMESTIC_WATER_CHARGING_PUMP,
+        key=SensorKey.DHW_CHARGING_PUMP,
         luxtronik_key=LC.C0046_DOMESTIC_WATER_CIRCULATION_PUMP,
         device_key=DeviceKey.domestic_water,
         icon="mdi:pump",
