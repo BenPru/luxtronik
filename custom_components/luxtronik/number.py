@@ -1,7 +1,7 @@
 """Luxtronik heatpump number."""
 # region Imports
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.components.sensor import (ENTITY_ID_FORMAT,
@@ -394,7 +394,7 @@ class LuxtronikNumberThermalDesinfection(LuxtronikNumber, RestoreEntity):
     def update(self):
         LuxtronikNumber.update(self)
         domesticWaterCurrent = float(self._luxtronik.get_value(LUX_SENSOR_DOMESTIC_WATER_CURRENT_TEMPERATURE))
-        if domesticWaterCurrent >= float(self.native_value) and (self._last_thermal_desinfection is None or self._last_thermal_desinfection == "" or self._last_thermal_desinfection < datetime.now().date()):
+        if domesticWaterCurrent >= float(self.native_value) and (self._last_thermal_desinfection is None or self._last_thermal_desinfection == "" or (isinstance(self._last_thermal_desinfection, date) and cast(date, self._last_thermal_desinfection) < datetime.now().date())):
             self._last_thermal_desinfection = datetime.now().date
             self._attr_extra_state_attributes = {
                 ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: self._number_key,
