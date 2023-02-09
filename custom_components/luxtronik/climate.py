@@ -423,7 +423,7 @@ class LuxtronikHeatingThermostat(LuxtronikThermostat):
         return result_icon
 
     def _is__heating_on_special(self) -> bool:
-        return self._luxtronik.get_value(self._status_sensor) in [LUX_STATUS_DEFROST, LUX_STATUS_DOMESTIC_WATER] and self._attr_hvac_mode != HVAC_MODE_OFF and self._luxtronik.get_value(LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING)
+        return self._luxtronik.get_value(self._status_sensor) in [LUX_STATUS_DEFROST] and self._attr_hvac_mode != HVAC_MODE_OFF and self._luxtronik.get_value(LUX_BINARY_SENSOR_CIRCULATION_PUMP_HEATING)
 
 class LuxtronikCoolingThermostat(LuxtronikThermostat):
     _attr_unique_id = 'cooling'
