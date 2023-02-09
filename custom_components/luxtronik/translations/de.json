@@ -278,7 +278,8 @@
                     "pump forerun": "Pumpenvorlauf",
                     "defrost": "Taut ab",
                     "witing on LIN connection": "Schreibt auf LIN Verbindung",
-                    "compressor heating up": "Der Kompressor heizt auf"
+                    "compressor heating up": "Der Verdichter heizt auf",
+                    "compressor heater": "Verdichter-Heizung"
                 }
             },
             "status_line_2": {

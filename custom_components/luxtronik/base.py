@@ -7,12 +7,14 @@ from datetime import datetime
 import locale
 from typing import Any
 
+from homeassistant.backports.enum import StrEnum
 from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
+from homeassistant.util.dt import utcnow
 
 from .common import get_sensor_data
 from .const import (
@@ -34,6 +36,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     """Luxtronik base device."""
 
     entity_description: LuxtronikEntityDescription
+    next_update: datetime | None = None
 
     _attr_cache: dict[SA, Any] = {}
 
@@ -51,10 +54,14 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         for field in description.__dataclass_fields__:
             if field.startswith("luxtronik_key_"):
                 value = description.__getattribute__(field)
-                if value is not None:
+                if value is None:
+                    pass
+                elif isinstance(value, StrEnum):
                     self._attr_extra_state_attributes[
                         field
                     ] = f"{value.name[1:5]} {value.value}"
+                else:
+                    self._attr_extra_state_attributes[field] = value
         if description.translation_key is None:
             description.translation_key = description.key
         if description.entity_registry_enabled_default:
@@ -81,17 +88,24 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         with suppress(locale.Error):
             ha_locale = f"{self.hass.config.language}_{self.hass.config.country}"
             locale.setlocale(locale.LC_ALL, locale.normalize(ha_locale))
-        state = await self.async_get_last_state()
-        if state is None:
+
+        last_state = await self.async_get_last_state()
+        if last_state is None:
             return
-        self._attr_state = state.state
+        self._attr_state = last_state.state
 
         for attr in self.entity_description.extra_attributes:
-            if not attr.restore_on_startup or attr.key not in state.attributes:
+            if not attr.restore_on_startup or attr.key not in last_state.attributes:
                 continue
             self._attr_cache[attr.key] = self._restore_attr_value(
-                state.attributes[attr.key]
+                last_state.attributes[attr.key]
             )
+
+        last_extra_data = await self.async_get_last_extra_data()
+        if last_extra_data is not None:
+            data: dict[str, Any] = last_extra_data.as_dict()
+            for attr in data:
+                setattr(self, attr, data.get(attr))
 
         data_updated = f"{self.entity_id}_data_updated"
         async_dispatcher_connect(
@@ -112,7 +126,8 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        value = self._get_value(self.entity_description.luxtronik_key)
+        descr = self.entity_description
+        value = self._get_value(descr.luxtronik_key)
         if value is None:
             pass
         elif isinstance(value, datetime) and value.tzinfo is None:
@@ -124,7 +139,10 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._enrich_extra_attributes()
 
+        if descr.update_interval is not None:
+            self.next_update = utcnow() + descr.update_interval
         super()._handle_coordinator_update()
+
     def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:
             if attr.format is None and (
@@ -134,7 +152,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             self._attr_extra_state_attributes[attr.key.value] = self.formatted_data(
                 attr
             )
-
 
     @callback
     def _schedule_immediate_update(self):

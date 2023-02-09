@@ -13,6 +13,7 @@ from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
+from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
@@ -95,6 +96,10 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
+        if self.next_update is not None and (
+            not self.coordinator.update_reason_write or self.next_update > utcnow()
+        ):
+            return
         data = self.coordinator.data if data is None else data
         if data is None:
             return
@@ -104,17 +109,6 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
 
         if self._attr_native_value is None:
             pass
-        # region Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
-        elif (
-            self.entity_description.luxtronik_key == LC.C0117_STATUS_LINE_1
-            and self._attr_native_value == LuxStatus1Option.heatpump_coming
-        ):
-            if (
-                int(self._get_value(LC.C0072_TIMER_SCB_ON)) < 10
-                and int(self._get_value(LC.C0071_TIMER_SCB_OFF)) > 0
-            ):
-                self._attr_native_value = LuxStatus1Option.heatpump_shutdown
-        # endregion Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
 
         elif isinstance(self._attr_native_value, (float, int)) and (
             self.entity_description.factor is not None

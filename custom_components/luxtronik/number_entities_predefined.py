@@ -70,6 +70,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=5.0,
         native_step=0.1,
         mode=NumberMode.BOX,
+        update_interval=None,
     ),
     LuxtronikNumberDescription(
         key=SensorKey.PUMP_OPTIMIZATION_TIME,
@@ -240,6 +241,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_min_value=-40.0,
         native_max_value=60.0,
         native_step=1.0,
+        update_interval=None,
     ),
     LuxtronikNumberDescription(
         key=SensorKey.DHW_HYSTERESIS,

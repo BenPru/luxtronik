@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
-from dataclasses import dataclass
 from datetime import timedelta
 from functools import wraps
 import json
@@ -14,14 +13,15 @@ import threading
 from types import MappingProxyType
 from typing import Any, Concatenate, Final, TypeVar, cast
 
-from luxtronik import Calculations, Parameters, Visibilities
 from typing_extensions import ParamSpec
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
+from .common import correct_key_value
 from .const import (
     CONF_CALCULATIONS,
     CONF_PARAMETERS,
@@ -31,6 +31,8 @@ from .const import (
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
     PLATFORMS,
+    UPDATE_INTERVAL_FAST,
+    UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -38,14 +40,12 @@ from .const import (
     LuxVisibility as LV,
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
-from .model import LuxtronikEntityDescription
+from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 
 # endregion Imports
 
 _LuxtronikCoordinatorT = TypeVar("_LuxtronikCoordinatorT", bound="LuxtronikCoordinator")
 _P = ParamSpec("_P")
-
-SCAN_INTERVAL: Final = timedelta(seconds=10)
 
 
 def catch_luxtronik_errors(
@@ -69,19 +69,11 @@ def catch_luxtronik_errors(
     return wrapper
 
 
-@dataclass
-class LuxtronikCoordinatorData:
-    """Data Type of LuxtronikCoordinator's data."""
-
-    parameters: Parameters
-    calculations: Calculations
-    visibilities: Visibilities
-
-
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
     device_infos = dict[str, DeviceInfo]()
+    update_reason_write = False
     __content_locale__ = dict[Any, Any]()
     __content_locale_texts__ = dict[Any, Any]()
     __content_sensors_locale__ = dict[Any, Any]()
@@ -101,7 +93,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LOGGER,
             name=DOMAIN,
             update_method=self._async_update_data,
-            update_interval=SCAN_INTERVAL,
+            update_interval=UPDATE_INTERVAL_FAST,
         )
         self._load_translations(hass)
         self._create_device_infos(config)
@@ -129,20 +121,26 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> LuxtronikCoordinatorData:
         if write:
             data = self._write(parameter, value)
+            self.async_set_updated_data(data)
+            self.async_request_refresh()
+            self.update_interval = UPDATE_INTERVAL_FAST
+            self.update_reason_write = True
         else:
             data = self._read()
-        self.async_set_updated_data(data)
+            self.async_set_updated_data(data)
+            self.update_interval = (
+                UPDATE_INTERVAL_FAST
+                if bool(self.get_value(LC.C0044_COMPRESSOR))
+                else UPDATE_INTERVAL_NORMAL
+            )
+            self.update_reason_write = False
         return data
 
     def _read(self) -> LuxtronikCoordinatorData:
         try:
             with self.lock:
                 self.client.read()
-        except ConnectionRefusedError as err:
-            raise UpdateFailed("Read: Error communicating with device") from err
-        except ConnectionResetError as err:
-            raise UpdateFailed("Read: Error communicating with device") from err
-        except OSError as err:
+        except (OSError, ConnectionRefusedError, ConnectionResetError) as err:
             raise UpdateFailed("Read: Error communicating with device") from err
         except UpdateFailed:
             pass
@@ -160,10 +158,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             self.client.parameters.set(parameter, value)
             with self.lock:
                 self.client.write()
-        except ConnectionRefusedError as err:
-            LOGGER.exception(err)
-            raise UpdateFailed("Read: Error communicating with device") from err
-        except ConnectionResetError as err:
+        except (ConnectionRefusedError, ConnectionResetError) as err:
             LOGGER.exception(err)
             raise UpdateFailed("Read: Error communicating with device") from err
         except UpdateFailed as err:
@@ -425,12 +420,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def get_value(self, group_sensor_id: str | LP | LC | LV):
         """Get a sensor value from Luxtronik."""
-        if not isinstance(group_sensor_id, str):
-            group_sensor_id = group_sensor_id.value
         sensor = self.get_sensor_by_id(str(group_sensor_id))
         if sensor is None:
             return None
-        return sensor.value
+        return correct_key_value(sensor.value, self.data, group_sensor_id)
 
     def get_sensor_by_id(self, group_sensor_id: str):
         """Get a sensor object by id from Luxtronik."""

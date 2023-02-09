@@ -3,10 +3,23 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform as P
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.entity_registry import (
+    EntityRegistry,
+    RegistryEntry,
+    async_get,
+)
 
-from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, LOGGER, PLATFORMS
+from .const import (
+    CONF_COORDINATOR,
+    CONF_HA_SENSOR_PREFIX,
+    DOMAIN,
+    LOGGER,
+    PLATFORMS,
+    SensorKey as SK,
+)
 from .coordinator import LuxtronikCoordinator
 
 # endregion Imports
@@ -86,6 +99,50 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         else:
             new_data = {**config_entry.data}
         config_entry.version = 4
+        hass.config_entries.async_update_entry(config_entry, data=new_data)
+
+    if config_entry.version == 4:
+        # Ensure sensor prefix:
+        ent_reg = async_get(hass)
+        prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
+
+        def _up(ident: str, new_id: SK, platform: P = P.SENSOR) -> None:
+            entity_id = f"{platform}.{prefix}_{ident}"
+            new_ident = f"{platform}.{prefix}_{new_id}"
+            try:
+                ent_reg.async_update_entity(
+                    entity_id, new_entity_id=new_ident, new_unique_id=new_ident
+                )
+            except (KeyError, ValueError) as err:
+                LOGGER.warning(
+                    "Could not rename entity %s->%s", entity_id, new_ident, exc_info=err
+                )
+
+        _up("heat_amount_domestic_water", SK.DHW_HEAT_AMOUNT)
+        _up("domestic_water_energy_input", SK.DHW_ENERGY_INPUT)
+        _up("domestic_water_temperature", SK.DHW_TEMPERATURE)
+        _up("operation_hours_domestic_water", SK.DHW_OPERATION_HOURS)
+        _up("domestic_water_target_temperature", SK.DHW_TARGET_TEMPERATURE, P.NUMBER)
+        _up("domestic_water_hysteresis", SK.DHW_HYSTERESIS, P.NUMBER)
+        _up(
+            "domestic_water_thermal_desinfection_target",
+            SK.DHW_THERMAL_DESINFECTION_TARGET,
+            P.NUMBER,
+        )
+        _up(
+            "domestic_water_recirculation_pump",
+            SK.DHW_RECIRCULATION_PUMP,
+            P.BINARY_SENSOR,
+        )
+        _up(
+            "domestic_water_circulation_pump",
+            SK.DHW_CIRCULATION_PUMP,
+            P.BINARY_SENSOR,
+        )
+        _up("domestic_water_charging_pump", SK.DHW_CHARGING_PUMP, P.BINARY_SENSOR)
+
+        new_data = {**config_entry.data}
+        config_entry.version = 5
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     LOGGER.info("Migration to version %s successful", config_entry.version)

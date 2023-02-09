@@ -3,12 +3,13 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import datetime, date
+from datetime import date, datetime
 
 from homeassistant.components.number import ENTITY_ID_FORMAT, NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
@@ -79,6 +80,10 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
+        if self.next_update is not None and (
+            not self.coordinator.update_reason_write or self.next_update > utcnow()
+        ):
+            return
         data = self.coordinator.data if data is None else data
         if data is None:
             return
@@ -125,7 +130,10 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
                 attr.key not in self._attr_cache
                 or self._attr_cache[attr.key] is None
                 or self._attr_cache[attr.key] == ""
-                or (isinstance(self._attr_cache[attr.key], date) and self._attr_cache[attr.key] < datetime.now().date())
+                or (
+                    isinstance(self._attr_cache[attr.key], date)
+                    and self._attr_cache[attr.key] < datetime.now().date()
+                )
             )
         ):
             self._attr_cache[attr.key] = datetime.now().date()

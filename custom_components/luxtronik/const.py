@@ -1,9 +1,9 @@
 """Constants for the Luxtronik heatpump integration."""
 # region Imports
-import logging
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from enum import Enum
+import logging
 from typing import Final
 
 from homeassistant.backports.enum import StrEnum
@@ -26,6 +26,11 @@ PLATFORMS: list[str] = [
     Platform.SWITCH,
     Platform.UPDATE,
 ]
+UPDATE_INTERVAL_FAST: Final = timedelta(seconds=10)
+UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)
+UPDATE_INTERVAL_SLOW: Final = timedelta(minutes=3)
+UPDATE_INTERVAL_VERY_SLOW: Final = timedelta(minutes=5)
+
 
 SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
 # endregion Constants Main
@@ -38,7 +43,6 @@ CONF_CALCULATIONS: Final = "calculations"
 CONF_VISIBILITIES: Final = "visibilities"
 
 CONF_HA_SENSOR_PREFIX: Final = "ha_sensor_prefix"
-CONF_CONTROL_MODE_HOME_ASSISTANT: Final = "control_mode_home_assistant"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
 
 CONF_LOCK_TIMEOUT: Final = "lock_timeout"
@@ -121,6 +125,7 @@ class LuxStatus1Option(StrEnum):
     witing_on_LIN_connection: Final = "witing on LIN connection"
     compressor_heating_up: Final = "compressor heating up"
     pump_forerun: Final = "pump forerun"
+    compressor_heater: Final = "compressor heater"
 
 
 class LuxStatus3Option(StrEnum):
@@ -209,9 +214,7 @@ class LuxParameter(StrEnum):
     P0013_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzHKRABS_akt"
     )
-    P0047_DHW_THERMAL_DESINFECTION_TARGET: Final = (
-        "parameters.ID_Einst_LGST_akt"
-    )
+    P0047_DHW_THERMAL_DESINFECTION_TARGET: Final = "parameters.ID_Einst_LGST_akt"
     P0049_PUMP_OPTIMIZATION: Final = "parameters.ID_Einst_Popt_akt"
     P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"
     P0074_DHW_HYSTERESIS: Final = "parameters.ID_Einst_BWS_Hyst_akt"

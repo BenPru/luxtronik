@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
+
+from luxtronik import Calculations, Parameters, Visibilities
 
 from homeassistant.components.binary_sensor import BinarySensorEntityDescription
 from homeassistant.components.climate import (
@@ -26,6 +28,8 @@ from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.typing import StateType
 
 from .const import (
+    UPDATE_INTERVAL_NORMAL,
+    UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
     FirmwareVersionMinor,
     LuxCalculation,
@@ -37,6 +41,15 @@ from .const import (
 )
 
 # endregion Imports
+
+
+@dataclass
+class LuxtronikCoordinatorData:
+    """Data Type of LuxtronikCoordinator's data."""
+
+    parameters: Parameters
+    calculations: Calculations
+    visibilities: Visibilities
 
 
 @dataclass
@@ -59,6 +72,7 @@ class LuxtronikEntityDescription(EntityDescription):
     # Bug in python: Have to assign a value:
     platform = Platform.AIR_QUALITY
 
+    update_interval: timedelta | None = None
     icon_by_state: dict[StateType | date | datetime | Decimal, str] | None = None
     device_key: DeviceKey = DeviceKey.heatpump
     luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
@@ -92,6 +106,7 @@ class LuxtronikNumberDescription(
     """Class describing Luxtronik number sensor entities."""
 
     platform = Platform.NUMBER
+    update_interval = UPDATE_INTERVAL_VERY_SLOW
     factor: float | None = None
     native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO
@@ -119,6 +134,7 @@ class LuxtronikSwitchDescription(
     """Class describing Luxtronik switch entities."""
 
     platform = Platform.SWITCH
+    update_interval = UPDATE_INTERVAL_VERY_SLOW
     on_state: str | bool = True
     on_states: list[str] | None = None
     off_state: str | bool = False

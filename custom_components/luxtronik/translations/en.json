@@ -278,7 +278,8 @@
                     "pump forerun": "Pump forerun",
                     "defrost": "Defrost",
                     "writing on LIN connection": "Writing on LIN connection",
-                    "compressor heating up": "Der Kompressor heizt auf"
+                    "compressor heating up": "The Compressor is heating up",
+                    "compressor heater": "Compressor heater"
                 }
             },
             "status_line_2": {

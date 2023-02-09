@@ -154,22 +154,17 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
+        descr = self.entity_description
+        mode = get_sensor_data(data, descr.luxtronik_key.value)
         self._attr_current_operation = None if mode is None else OPERATION_MAPPING[mode]
-        self._current_action = get_sensor_data(
-            data, self.entity_description.luxtronik_key_current_action.value
-        )
+        self._current_action = get_sensor_data(data, descr.luxtronik_key_current_action.value)
         self._attr_is_away_mode_on = (
             None if mode is None else mode == LuxMode.holidays.value
         )
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
-        self._attr_current_temperature = get_sensor_data(
-            data, self.entity_description.luxtronik_key_current_temperature.value
-        )
-        self._attr_target_temperature = get_sensor_data(
-            data, self.entity_description.luxtronik_key_target_temperature.value
-        )
+        self._attr_current_temperature = get_sensor_data(data, descr.luxtronik_key_current_temperature.value)
+        self._attr_target_temperature = get_sensor_data(data, descr.luxtronik_key_target_temperature.value)
         super()._handle_coordinator_update()
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:

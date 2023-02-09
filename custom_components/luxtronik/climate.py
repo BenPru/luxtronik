@@ -2,12 +2,14 @@
 # region Imports
 from __future__ import annotations
 
+from dataclasses import asdict, dataclass
 from typing import Any
 
 from homeassistant.components.climate import (
     ENTITY_ID_FORMAT,
     PRESET_AWAY,
     PRESET_BOOST,
+    PRESET_COMFORT,
     PRESET_NONE,
     ClimateEntity,
     ClimateEntityFeature,
@@ -23,14 +25,16 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
 
 from .base import LuxtronikEntity
-from .common import get_sensor_data
+from .common import get_sensor_data, state_as_number_or_none
 from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    LUX_STATE_ICON_MAP,
     DeviceKey,
     LuxCalculation,
     LuxMode,
@@ -92,7 +96,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         # luxtronik_key_target_temperature_low=LuxParameter,
         luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
-        icon="mdi:radiator",
+        icon_by_state=LUX_STATE_ICON_MAP,
         unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
     )
@@ -115,7 +119,22 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
+@dataclass
+class LuxtronikClimateExtraStoredData(ExtraStoredData):
+    """Object to hold extra stored data."""
+
+    _attr_target_temperature: float | None = None
+    _attr_hvac_mode: HVACMode | str | None = None
+    _attr_preset_mode: str | None = None
+    _attr_is_aux_heat: bool | None = None
+    last_hvac_mode_before_preset: str | None = None
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a dict representation of the text data."""
+        return asdict(self)
+
+
+class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     """The thermostat class for Luxtronik thermostats."""
 
     entity_description: LuxtronikClimateDescription
@@ -145,7 +164,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
             description=description,
             device_info_ident=DeviceKey.heating,
         )
-        if description.luxtronik_key_current_temperature is None:
+        if description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
             description.luxtronik_key_current_temperature = entry.data.get(
                 CONF_HA_SENSOR_INDOOR_TEMPERATURE
             )
@@ -178,11 +197,6 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
         lux_action = get_sensor_data(
             data, self.entity_description.luxtronik_key_current_action.value
         )
-        if lux_action == LuxOperationMode.heating and not (
-            get_sensor_data(data, LuxCalculation.C0044_COMPRESSOR)
-            or get_sensor_data(data, LuxCalculation.C0048_ADDITIONAL_HEAT_GENERATOR)
-        ):
-            lux_action = LuxOperationMode.no_request
         self._attr_hvac_action = (
             None if lux_action is None else HVAC_ACTION_MAPPING[lux_action]
         )
@@ -191,25 +205,15 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
         )
         if self._attr_preset_mode == PRESET_NONE or self._attr_is_aux_heat:
             self._last_hvac_mode_before_preset = None
-        if isinstance(self.entity_description.luxtronik_key_current_temperature, str):
-            temp = self.hass.states.get(
-                self.entity_description.luxtronik_key_current_temperature
-            )
-            self._attr_current_temperature = None if temp is None else float(temp.state)
-        elif (
-            self.entity_description.luxtronik_key_current_temperature
-            != LuxCalculation.UNSET
-        ):
-            self._attr_current_temperature = get_sensor_data(
-                data, self.entity_description.luxtronik_key_current_temperature.value
-            )
-        if (
-            self.entity_description.luxtronik_key_target_temperature
-            != LuxParameter.UNSET
-        ):
-            self._attr_target_temperature = get_sensor_data(
-                data, self.entity_description.luxtronik_key_target_temperature.value
-            )
+        key = self.entity_description.luxtronik_key_current_temperature
+        if isinstance(key, str):
+            temp = self.hass.states.get(key)
+            self._attr_current_temperature = state_as_number_or_none(temp)
+        elif key != LuxCalculation.UNSET:
+            self._attr_current_temperature = get_sensor_data(data, key)
+        key_tar = self.entity_description.luxtronik_key_target_temperature
+        if key_tar != LuxParameter.UNSET:
+            self._attr_target_temperature = get_sensor_data(data, key_tar)
         correction_factor = get_sensor_data(
             data, self.entity_description.luxtronik_key_correction_factor.value
         )
@@ -249,7 +253,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set new preset mode."""
-        if preset_mode != PRESET_NONE:
+        if preset_mode == PRESET_COMFORT:
+            lux_mode = LuxMode.automatic
+        elif preset_mode != PRESET_NONE:
             lux_mode = [k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode][
                 0
             ]
@@ -281,3 +287,14 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity):
                 if v == self._last_hvac_mode_before_preset
             ][0]
             await self._async_set_lux_mode(lux_mode)
+
+    @property
+    def extra_restore_state_data(self) -> LuxtronikClimateExtraStoredData:
+        """Return luxtronik climate specific state data to be restored."""
+        return LuxtronikClimateExtraStoredData(
+            self._attr_target_temperature,
+            self._attr_hvac_mode,
+            self._attr_preset_mode,
+            self._attr_is_aux_heat,
+            self._last_hvac_mode_before_preset,
+        )

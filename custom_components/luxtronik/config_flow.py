@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.components.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
@@ -14,7 +15,6 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
 from .const import (
-    CONF_CONTROL_MODE_HOME_ASSISTANT,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     DEFAULT_HOST,
@@ -86,7 +86,7 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
-    VERSION = 4
+    VERSION = 5
     _hassio_discovery = None
     _discovery_host = None
     _discovery_port = None
@@ -100,11 +100,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_HOST, default=self._discovery_host): str,
                 vol.Required(CONF_PORT, default=self._discovery_port): int,
-                vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
-                vol.Optional(
-                    CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-                    default=f"sensor.{self._sensor_prefix}_room_temperature",
-                ): str,
             }
         )
 
@@ -162,8 +157,13 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if "data" not in self.context:
             self.context["data"] = {}
+            # Merge options from user_input into data
         self.context["data"] |= user_input
         data = self.context["data"]
+
+        if user_input is not None and CONF_HA_SENSOR_INDOOR_TEMPERATURE in user_input:
+            # Store empty options because we have store it in data:
+            return self.async_create_entry(title=self._title, data=data)
 
         try:
             coordinator = LuxtronikCoordinator.connect(self.hass, data)
@@ -185,8 +185,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             CONF_HA_SENSOR_INDOOR_TEMPERATURE
         ] = f"sensor.{self._sensor_prefix}_room_temperature"
         await self._async_migrate_data_from_custom_component_luxtronik2()
-        if user_input is not None and CONF_HA_SENSOR_INDOOR_TEMPERATURE in user_input:
-            return self.async_create_entry(title=title, data=data)
         return self.async_show_form(
             step_id="options",
             data_schema=_get_options_schema(
@@ -284,13 +282,22 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_user(self, user_input=None) -> FlowResult:
         """Handle a flow initialized by the user."""
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            # Merge options from user_input into data
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=self.config_entry.data | user_input,
+                options=self.config_entry.options,
+            )
+            # Store empty options because we have store it in data:
+            return self.async_create_entry(title="", data={})
         coordinator = LuxtronikCoordinator.connect(self.hass, self.config_entry)
         title = f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"
         name = f"{title} ({self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]})"
         return self.async_show_form(
             step_id="user",
-            data_schema=_get_options_schema(None, coordinator.serial_number),
+            data_schema=_get_options_schema(
+                None, self.config_entry.data[CONF_HA_SENSOR_INDOOR_TEMPERATURE]
+            ),
             description_placeholders={"name": name},
         )
 

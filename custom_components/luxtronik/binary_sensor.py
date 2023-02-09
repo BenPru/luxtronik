@@ -6,6 +6,7 @@ from homeassistant.components.binary_sensor import ENTITY_ID_FORMAT, BinarySenso
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
@@ -71,6 +72,10 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
+        if self.next_update is not None and (
+            not self.coordinator.update_reason_write or self.next_update > utcnow()
+        ):
+            return
         data = self.coordinator.data if data is None else data
         if data is None:
             return
