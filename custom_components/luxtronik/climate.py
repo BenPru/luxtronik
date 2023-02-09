@@ -245,10 +245,10 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
             new_hvac_action = CURRENT_HVAC_HEAT
         elif status == LUX_STATUS_COOLING:
             new_hvac_action = CURRENT_HVAC_COOL
-        elif status in [LUX_STATUS_HEATING, LUX_STATUS_NO_REQUEST, LUX_STATUS_EVU] and self.__get_hvac_mode(CURRENT_HVAC_IDLE) != HVAC_MODE_OFF:
-            new_hvac_action = CURRENT_HVAC_IDLE
-        else:
+        elif self.__get_hvac_mode(CURRENT_HVAC_IDLE) == HVAC_MODE_OFF:
             new_hvac_action = CURRENT_HVAC_OFF
+        else:
+            new_hvac_action = CURRENT_HVAC_IDLE
         if new_hvac_action != self._attr_hvac_action:
             self._attr_hvac_action = new_hvac_action
             self._async_control_heating()
@@ -314,8 +314,6 @@ class LuxtronikThermostat(ClimateEntity, RestoreEntity):
         if luxmode != self._last_lux_mode:
             self._last_lux_mode = luxmode
         if luxmode in [LuxMode.holidays, LuxMode.party, LuxMode.second_heatsource]:
-            return self._attr_hvac_mode
-        elif luxmode == LuxMode.off and self._control_mode_home_assistant and hvac_action == CURRENT_HVAC_IDLE:
             return self._attr_hvac_mode
         elif luxmode == LuxMode.off:
             return HVAC_MODE_OFF
