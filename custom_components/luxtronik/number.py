@@ -1,6 +1,6 @@
 """Luxtronik heatpump number."""
 # region Imports
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal, cast
 
 from homeassistant.components.number import NumberEntity, NumberMode
