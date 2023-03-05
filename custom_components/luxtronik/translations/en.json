@@ -12,7 +12,7 @@
         "data": {
           "host": "Hostname or ip address",
           "port": "Network Port (Usually 8888 or 8889)",
-          "control_mode_home_assistant": "Experimental!: Control thermostat on / off status through Home Assistant. - I.e. if the Home Assistant thermostat is in the idle status, the status off is transmitted to Luxtronik and Luxtronik cannot start this element.",
+          "control_mode_home_assistant": "[BETA] HomeAssistant Heating Thermostat. The thermostat will continously set 'luxtronik.target_correction' based on (T_thermostat - T_room). So if the (T_room < T_Thermostat), it will set a higher target temperature for the Heatpump to reduce the difference. Define the sensor to use for T_room in the next field.",
           "use_legacy_sensor_ids": "Create legacy sensor names. (luxtronik.\u002a)",
           "ha_sensor_indoor_temperature": "Home Assistant sensor id for the current indoor temperature",
           "language_sensor_names": "Language key Sensor Names"
@@ -25,7 +25,7 @@
     "step": {
       "user": {
         "data": {
-          "control_mode_home_assistant": "Control thermostat on / off status through Home Assistant. - I.e. if the Home Assistant thermostat is in the idle status, the status off is transmitted to Luxtronik and Luxtronik cannot start this element.",
+          "control_mode_home_assistant": "[BETA] HomeAssistant Heating Thermostat. The thermostat will continously set 'luxtronik.target_correction' based on (T_thermostat - T_room). So if the (T_room < T_Thermostat), it will set a higher target temperature for the Heatpump to reduce the difference. Define the sensor to use for T_room in the next field.",
           "use_legacy_sensor_ids": "Create legacy sensor names. (luxtronik.\u002a)",
           "ha_sensor_indoor_temperature": "Home Assistant sensor id for the current indoor temperature",
           "language_sensor_names": "Language key Sensor Names"
