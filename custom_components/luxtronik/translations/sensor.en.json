@@ -117,7 +117,7 @@
       "790": "Major VSS fault",
       "791": "Lost ModBus communication",
       "792": "LIN-connection lost",
-      "793": "Major VSS fault"    }
+      "793": "Major VSS fault"
     },
     "luxtronik2__switchoff_reason": {
       "9": "no request",

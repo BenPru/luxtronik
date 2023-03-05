@@ -11,7 +11,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (CONF_FRIENDLY_NAME, CONF_ICON, CONF_ID,
                                  CONF_SENSORS, DEVICE_CLASS_ENERGY,
                                  DEVICE_CLASS_POWER, DEVICE_CLASS_TEMPERATURE,
-                                 ELECTRIC_POTENTIAL_VOLT,
+                                 ELECTRIC_POTENTIAL_VOLT, UnitOfTemperature, UnitOfElectricPotential,
                                  ENERGY_KILO_WATT_HOUR, ENTITY_CATEGORIES,
                                  EVENT_HOMEASSISTANT_STOP, POWER_WATT,
                                  STATE_UNAVAILABLE, TEMP_CELSIUS, TEMP_KELVIN,
@@ -415,7 +415,8 @@ async def async_setup_entry(
             "overheating_target_temperature",
             f"{text_overheating_target}",
             entity_category=None,
-            unit_of_measurement=TEMP_KELVIN,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.KELVIN,
             entity_registry_enabled_default=False,
         ),
         LuxtronikSensor(
@@ -428,6 +429,7 @@ async def async_setup_entry(
             unit_of_measurement=UnitOfPressure.BAR,
             entity_registry_enabled_default=False,
             device_class=SensorDeviceClass.PRESSURE,
+            icon="mdi:gauge-full",
         ),
         LuxtronikSensor(
             luxtronik,
@@ -439,6 +441,7 @@ async def async_setup_entry(
             unit_of_measurement=UnitOfPressure.BAR,
             entity_registry_enabled_default=False,
             device_class=SensorDeviceClass.PRESSURE,
+            icon="mdi:gauge-low",
         ),
         LuxtronikSensor(
             luxtronik,
@@ -460,8 +463,8 @@ async def async_setup_entry(
             unique_id="analog_out1",
             name=f"{text_analog_out} 1",
             icon="mdi:alpha-v-circle-outline",
-            device_class=DEVICE_CLASS_ENERGY,
-            unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,
+            device_class=SensorDeviceClass.VOLTAGE,
+            unit_of_measurement=UnitOfElectricPotential.VOLT,
             entity_registry_enabled_default=False,
             factor=0.1,
         ),
@@ -472,8 +475,8 @@ async def async_setup_entry(
             unique_id="analog_out2",
             name=f"{text_analog_out} 2",
             icon="mdi:alpha-v-circle-outline",
-            device_class=DEVICE_CLASS_ENERGY,
-            unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,
+            device_class=SensorDeviceClass.VOLTAGE,
+            unit_of_measurement=UnitOfElectricPotential.VOLT,
             entity_registry_enabled_default=False,
             factor=0.1,
         ),
@@ -735,9 +738,9 @@ async def async_setup_entry(
             )
 
         # Temp. disabled:
-        # solar_present = luxtronik.detect_solar_present()
-        # if solar_present:
-        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarkoll") > 0:
+        solar_present = luxtronik.detect_solar_present()
+        if solar_present:
+        #if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarkoll") > 0:
             entities += [
                 LuxtronikSensor(
                     luxtronik,
@@ -749,7 +752,7 @@ async def async_setup_entry(
                     entity_category=None,
                 ),
             ]
-        if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarsp") > 0:
+        #if luxtronik.get_value("visibilities.ID_Visi_Temp_Solarsp") > 0:
             entities += [
                 LuxtronikSensor(
                     luxtronik,
@@ -761,7 +764,7 @@ async def async_setup_entry(
                     entity_category=None,
                 ),
             ]
-        if luxtronik.get_value("parameters.ID_BSTD_Solar") > 0:
+        #if luxtronik.get_value("parameters.ID_BSTD_Solar") > 0:
             text_operation_hours_solar = get_sensor_text(lang, "operation_hours_solar")
             entities += [
                 LuxtronikSensor(
@@ -866,6 +869,9 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         self._attr_entity_registry_enabled_default = entity_registry_enabled_default
         self._attr_extra_state_attributes = { ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY: sensor_key }
         self._extra_attributes = extra_attributes
+
+    def disable_by_default(self):
+        self._attr_entity_registry_enabled_default = False
 
     @property
     def icon(self):  # -> str | None:
@@ -1184,8 +1190,9 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
         self.async_schedule_update_ha_state(True)
 
 def add_sensor_if_active(luxtronik, entities, check_key: str, sensor: LuxtronikSensor):
-    if luxtronik.get_value(check_key) > 0:
-        entities += [sensor]
+    if luxtronik.get_value(check_key) <= 0:
+        sensor.disable_by_default()
+    entities += [sensor]
 
 def add_sensor_if_min_minor_version(luxtronik, entities, min_minor: int, sensor: LuxtronikSensor):
     if luxtronik.firmware_version_minor >= min_minor:
