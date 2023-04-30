@@ -292,23 +292,23 @@ async def async_setup_entry(
             unit_of_measurement="Anzahl",
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
+        LuxtronikSensor(
+            luxtronik,
+            device_info,
+            sensor_key="calculations.ID_WEB_Zaehler_BetrZeitVD1",
+            unique_id="operation_hours_compressor1",
+            name=f"{text_operation_hours} {text_compressor} 1",
+            icon="mdi:timer-sand",
+            device_class=None,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            unit_of_measurement=TIME_HOURS,
+            entity_category=EntityCategory.DIAGNOSTIC,
+            factor=SECOUND_TO_HOUR_FACTOR,
+        ),
     ]
     has_second_compressor = luxtronik.get_value("calculations.ID_WEB_Zaehler_BetrZeitImpVD2") > 0
     if has_second_compressor:
         entities += [
-            LuxtronikSensor(
-                luxtronik,
-                device_info,
-                sensor_key="calculations.ID_WEB_Zaehler_BetrZeitVD1",
-                unique_id="operation_hours_compressor1",
-                name=f"{text_operation_hours} {text_compressor} 1",
-                icon="mdi:timer-sand",
-                device_class=None,
-                state_class=STATE_CLASS_TOTAL_INCREASING,
-                unit_of_measurement=TIME_HOURS,
-                entity_category=EntityCategory.DIAGNOSTIC,
-                factor=SECOUND_TO_HOUR_FACTOR,
-            ),
             LuxtronikSensor(
                 luxtronik,
                 device_info,
