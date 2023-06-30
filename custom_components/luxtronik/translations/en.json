@@ -50,6 +50,7 @@
             "8": "Lower limitation of use",
             "9": "no request",
             "11": "flow rate",
+            "18": "Switching cycle lock",
             "-1": "Unknown switchoff"
         }
       },
