@@ -121,7 +121,8 @@
     },
     "luxtronik2__switchoff_reason": {
       "9": "no request",
-      "11": "flow rate"
+      "11": "flow rate",
+      "18": "Switching cycle lock"
     }
   }
 }
