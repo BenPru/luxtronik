@@ -137,26 +137,39 @@ def setup_internal(hass, data, conf):
     hass.data[f"{DOMAIN}_DeviceInfo_Domestic_Water"] = DeviceInfo(
         identifiers={(DOMAIN, f"{luxtronik.unique_id}_domestic_water")},
         configuration_url="https://www.heatpump24.com/",
-        default_name=text_domestic_water,
         name=text_domestic_water,
         manufacturer=luxtronik.manufacturer,
         model=luxtronik.model,
+        entry_type = None,
+        hw_version=None,
+        sw_version=None,
+        connections=None,
+        via_device=None,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Heating"] = DeviceInfo(
         identifiers={(DOMAIN, f"{luxtronik.unique_id}_heating")},
         configuration_url=get_manufacturer_firmware_url_by_model(luxtronik.model),
-        default_name=text_heating,
         name=text_heating,
         manufacturer=luxtronik.manufacturer,
         model=luxtronik.model,
+        entry_type = None,
+        hw_version=None,
+        sw_version=None,
+        connections=None,
+        via_device=None,
     )
     hass.data[f"{DOMAIN}_DeviceInfo_Cooling"] = (
         DeviceInfo(
             identifiers={(DOMAIN, f"{luxtronik.unique_id}_cooling")},
-            default_name=text_cooling,
+            configuration_url=get_manufacturer_firmware_url_by_model(luxtronik.model),
             name=text_cooling,
             manufacturer=luxtronik.manufacturer,
             model=luxtronik.model,
+            entry_type = None,
+            hw_version=None,
+            sw_version=None,
+            connections=None,
+            via_device=None,
         )
         if luxtronik.detect_cooling_present()
         else None
@@ -202,23 +215,29 @@ def build_device_info(
 ) -> DeviceInfo:
     """Build luxtronik device info."""
     device_info = DeviceInfo(
-        identifiers={
-            (
-                DOMAIN,
-                f"{luxtronik.unique_id}_heatpump",
-            )
-        },
         configuration_url=f"http://{ip_host}/",
-        name=f"{name} {luxtronik.serial_number}",
-        default_name=name,
-        default_manufacturer="Alpha Innotec",
+        connections=None,
+
+        #default_manufacturer="Alpha Innotec",
+        #default_model="",
+        #default_name=name,
+        
+        entry_type = None,
+        hw_version=None,
+        identifiers={
+            (  DOMAIN, f"{luxtronik.unique_id}_heatpump"  )
+        },        
         manufacturer=luxtronik.manufacturer,
-        default_model="",
         model=luxtronik.model,
+        name=f"{name} {luxtronik.serial_number}",        
+
         suggested_area="Utility room",
         sw_version=luxtronik.get_value("calculations.ID_WEB_SoftStand"),
+
+        via_device=None,
     )
     LOGGER.debug("build_device_info '%s'", device_info)
+    LOGGER.debug("set_device_info '%s'", set(device_info))
     return device_info
 
 
