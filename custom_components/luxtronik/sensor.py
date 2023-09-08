@@ -34,6 +34,7 @@ from .const import (ATTR_EXTRA_STATE_ATTRIBUTE_LUXTRONIK_KEY, ATTR_STATUS_TEXT,
                     LUX_STATUS1_HEATPUMP_SHUTDOWN, LUX_STATUS1_WORKAROUND,
                     LUX_STATUS3_WORKAROUND, LUX_STATUS_DOMESTIC_WATER,
                     LUX_STATUS_EVU, LUX_STATUS_HEATING, LUX_STATUS_NO_REQUEST,
+                    LUX_STATUS_COOLING, LUX_SENSOR_COOLING_THRESHOLD,
                     LUX_STATUS_THERMAL_DESINFECTION, SECOUND_TO_HOUR_FACTOR,
                     UNITS, LuxMode)
 from .helpers.helper import get_sensor_text, get_sensor_value_text
@@ -915,6 +916,22 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
                 return LUX_STATUS1_HEATPUMP_SHUTDOWN
             # endregion Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
 
+        
+        # workaround to detect (passive) cooling active
+        if (self._sensor_key == LUX_SENSOR_STATUS) and (value == LUX_STATUS_NO_REQUEST):     
+            if self._luxtronik.detect_cooling_present():
+                T_in       = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TVL")
+                T_out      = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TRL")
+                T_heat_in  = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TWE") 
+                T_heat_out = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TWA") 
+                Flow_WQ    = self._luxtronik.get_value("calculations.ID_WEB_Durchfluss_WQ")     
+                
+                #LOGGER.info(f"T_in: {T_in}; T_out: {T_out}")
+                #LOGGER.info(f"T_heat_in: {T_heat_in}; T_heat_out: {T_heat_out}")
+                
+                if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0):
+                    #LOGGER.info(f"Cooling mode detected!!!")
+                    return LUX_STATUS_COOLING
         return value if value is None or self._factor is None else round(value * self._factor, 2)
 
     @property
