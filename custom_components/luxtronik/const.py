@@ -128,23 +128,23 @@ class LuxMode(Enum):
 
 
 # region Lux Status
-LUX_STATUS_HEATING: Final = "heating"  # 0
-LUX_STATUS_DOMESTIC_WATER: Final = "hot water"  # 1
-LUX_STATUS_SWIMMING_POOL_SOLAR: Final = "swimming pool/solar"  # 2
-LUX_STATUS_EVU: Final = "evu"  # 3
-LUX_STATUS_DEFROST: Final = "defrost"  # 4
-LUX_STATUS_NO_REQUEST: Final = "no request"  # 5
-LUX_STATUS_HEATING_EXTERNAL_SOURCE: Final = "heating external source"  # 6
-LUX_STATUS_COOLING: Final = "cooling"  # 7
-LUX_STATUS_THERMAL_DESINFECTION: Final = "thermal desinfection"  
+LUX_STATUS_HEATING: Final = "Heating"  # 0
+LUX_STATUS_DOMESTIC_WATER: Final = "Hot water"  # 1
+LUX_STATUS_SWIMMING_POOL_SOLAR: Final = "Swimming pool/solar"  # 2
+LUX_STATUS_EVU: Final = "EVU"  # 3
+LUX_STATUS_DEFROST: Final = "Defrost"  # 4
+LUX_STATUS_NO_REQUEST: Final = "No request"  # 5
+LUX_STATUS_HEATING_EXTERNAL_SOURCE: Final = "Heating external source"  # 6
+LUX_STATUS_COOLING: Final = "Cooling"  # 7
+LUX_STATUS_THERMAL_DESINFECTION: Final = "Thermal desinfection"  
 
 LUX_STATUS_NONE: Final = "None"
-LUX_STATUS_UNKNOWN: Final = "unknown"
+LUX_STATUS_UNKNOWN: Final = "Unknown"
 
-LUX_STATUS1_HEATPUMP_IDLE: Final = "heatpump idle"
-LUX_STATUS1_PUMP_FORERUN: Final = "pump forerun"
-LUX_STATUS1_HEATPUMP_COMING: Final = "heatpump coming"
-LUX_STATUS1_HEATPUMP_SHUTDOWN: Final = "heatpump shutdown"
+LUX_STATUS1_HEATPUMP_IDLE: Final = "Heatpump idle"
+LUX_STATUS1_PUMP_FORERUN: Final = "Pump forerun"
+LUX_STATUS1_HEATPUMP_COMING: Final = "Heatpump startup"
+LUX_STATUS1_HEATPUMP_SHUTDOWN: Final = "Heatpump shutdown"
 
 LUX_STATUS3_GRID_SWITCH_ON_DELAY: Final = "grid switch on delay"
 
@@ -181,7 +181,7 @@ LUX_STATE_ICON_MAP: Final[dict[str, str]] = {
     LUX_STATUS_DEFROST: "mdi:car-defrost-rear",
     LUX_STATUS_NO_REQUEST: "mdi:heat-pump-outline", #"mdi:radiator-disabled",
     LUX_STATUS_HEATING_EXTERNAL_SOURCE: "mdi:patio-heater",
-    LUX_STATUS_COOLING: "mdi:air-conditioner",
+    LUX_STATUS_COOLING: "mdi:snowflake",
 }
 
 ICON_ON = "mdi:check-circle-outline"
