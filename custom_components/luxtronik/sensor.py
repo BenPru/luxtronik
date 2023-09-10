@@ -920,17 +920,13 @@ class LuxtronikSensor(SensorEntity, RestoreEntity):
         # workaround to detect (passive) cooling active
         if (self._sensor_key == LUX_SENSOR_STATUS) and (value == LUX_STATUS_NO_REQUEST):     
             if self._luxtronik.detect_cooling_present():
-                T_in       = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TVL")
-                T_out      = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TRL")
-                T_heat_in  = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TWE") 
-                T_heat_out = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TWA") 
-                Flow_WQ    = self._luxtronik.get_value("calculations.ID_WEB_Durchfluss_WQ")     
+                temp_in          = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TVL")
+                temp_out         = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TRL")
+                temp_heat_in     = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TWE") 
+                temp_heat_out    = self._luxtronik.get_value("calculations.ID_WEB_Temperatur_TWA") 
+                flow_heat_source = self._luxtronik.get_value("calculations.ID_WEB_Durchfluss_WQ")     
                 
-                #LOGGER.info(f"T_in: {T_in}; T_out: {T_out}")
-                #LOGGER.info(f"T_heat_in: {T_heat_in}; T_heat_out: {T_heat_out}")
-                
-                if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0):
-                    #LOGGER.info(f"Cooling mode detected!!!")
+                if (temp_out > temp_in) and (temp_heat_out > temp_heat_in) and (flow_heat_source > 0):
                     return LUX_STATUS_COOLING
         return value if value is None or self._factor is None else round(value * self._factor, 2)
 
