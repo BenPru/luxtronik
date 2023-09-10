@@ -117,7 +117,7 @@ class LuxtronikDevice:
         ver = self.firmware_version
         if ver is None:
             return 0
-        return int(ver.split('.')[1])
+        return int(re.search(r'\d+', ver.split('.')[1]).group(0))
 
     @property
     def has_second_heat_generator(self) -> bool:
