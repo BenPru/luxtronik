@@ -2,13 +2,13 @@
 
 This component has been created to be used with Home Assistant.
 
-# ${{\color{red}Use\ it\ at\ your\ own\ risk!}}\$
-# ${{\color{red}You\ can\ write\ config\ parameters\ to\ your\ heatpump.}}\$
-# ${{\color{red}Please\ be\ careful.}}\$
+> :warning: **Use at your own risk!** :warning:  
+> You can write config parameters to your heatpump, altering it's efficiency and functionality.  
+> Please be careful.
 
-Based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik) / [Bouni/python-luxtronik](https://github.com/Bouni/python-luxtronik). This component extends the original luxtronik component with automatic discovery of the heatpump und home assistant climate thermostat.
+Based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik) / [Bouni/python-luxtronik](https://github.com/Bouni/python-luxtronik). ❤️   
 
-The `Luxtronik` integration lets you monitor and control heat pump units containing a Luxtronik controller. It is used by various manufacturers such as:
+This component extends the original luxtronik component with automatic discovery of the heatpump und home assistant climate thermostat. The `Luxtronik` integration lets you monitor and control heat pump units containing a Luxtronik controller. It is used by various manufacturers such as:
 
 - Alpha Innotec
 - Siemens Novelan
@@ -20,13 +20,17 @@ The `Luxtronik` integration lets you monitor and control heat pump units contain
 
 This integration works locally. It's only necessary to connect the Luxtronik controller to your network using an ethernet cable. No additional hard- or software is needed.
 
-# Installation
+1. [Installation  ](#1-installation)  
+1.1 [HACS (Recommended)  ](#11-hacs-recommended)  
+1.2 [Manual installation  ](#12-manual-installation)  
+2. [Adding Luxtronik  ](#2-adding-luxtronik)  
+3. [Tips for using Luxtronik  ](#3-tips-for-using-luxtronik)  
+3.1 [Energy use  ](#31-energy-use)  
+3.2 [Additional sensors (advanced)  ](#32-additional-sensors-advanced)  
 
-1a. Install via HACS (recommended).  
-1b. Install manually.  
-2. Configuration.  
+## 1. Installation
 
-## 1a. Install via HACS (recommended)
+### 1.1 HACS (recommended)
 
 Add the custom repo to HACS
 1. Go to 'HACS > Integration'
@@ -41,7 +45,7 @@ Install the integration
 2. Select 'download' at the bottom right.
 3. Restart Home Assistant
 
-## 1b. Install manually
+### 1.2 Manual installation
 
 Add the integration to Home Assistant
 1. Download the latest release of the Luxtronik integration from this repository
@@ -50,25 +54,47 @@ Add the integration to Home Assistant
 4. Restart Home Assistant;
 
 Install the integration
-1. Add the Luxtronik integration to Home Assistant ('menu: settings -> devices & services -> add integration');
-2. Restart Home Assistant and clear the browser cache (optional).
+1. Add the Luxtronik integration to Home Assistant (`Settings -> Devices & services -> Add integration`);
+2. Restart Home Assistant;
 
-## 2. Configuration
-Your heatpump should be autodiscovered by home assistant.
-![image](https://user-images.githubusercontent.com/5879533/178813978-bd8f13ff-ed27-4fa8-bfd0-6ff86a6e9786.png)
+## 2. Adding Luxtronik
 
-'If auto discovery does not work, please give feedback with the first six chars of your luxtronik heatpump mac address, the original hostname, the manufacturer and model. To add the heatpump manually go to Settings => Devices and Services => Add Integration and add a new luxtronik device.'
+#### Autodiscovery 
 
-Select Configure and review the settings 
-![image](https://user-images.githubusercontent.com/5879533/178814105-1dfc9445-1591-417b-9162-0b9f341cd0b2.png)
+Your heatpump should be autodiscovered by home assistant.  
+<img src="https://user-images.githubusercontent.com/5879533/178813978-bd8f13ff-ed27-4fa8-bfd0-6ff86a6e9786.png" width="300" />
 
-'Tip: Ensure the IP address is static. This can be configured in your router.'
+Press `Configure` and follow the steps to the end. 
 
-## 2a. Additional sensors
+#### Manual
+
+'If auto discovery does not work, please give feedback with the first six chars of your luxtronik heatpump mac address, the original hostname, the manufacturer and model. 
+
+To add the heatpump manually go to `Settings -> Devices & services -> Add integration` and add a new Luxtronik device.'
+
+Select Configure and review the settings.  
+<img src="https://user-images.githubusercontent.com/5879533/178814105-1dfc9445-1591-417b-9162-0b9f341cd0b2.png" width="500" />
+
+> ℹ️ Ensure the IP address is static. This can be configured in your router.'
+
+## 3. Tips for using Luxtronik
+
+It's not always clear from the name alone what an entity exactly means and how it effects your heatpump. The main source of information is ofcourse the [Luxtronik Operating Manual](https://www.alpha-innotec.cz/wp-content/uploads/2019/03/controller2-1.pdf). 
+
+Another great source is [FHEM - Luxtronik 2.0](https://wiki.fhem.de/wiki/Luxtronik_2.0). It's in German so use Google Translate.  
+It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carfully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information. 
+
+### 3.1 Energy use
+
+Not all heatpumps have build in electrical energy metering and instead only show the energy produced in heat, not the energy consumed in electricity. Adding a (strong) energy meter is a nice addition to measure the SCOP of your device. Shelly energy meters are recommended since they offer offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) and a [variety of in-line or clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) with various protection mechanisms. 
+
+### 3.2 Additional aensors (advanced)
 
 The most usefull sensors and parameters are created automaticly. But if you miss a sensor you can add it manually via yaml configuration like the original module from [Bouni/luxtronik](https://github.com/Bouni/luxtronik).
 
-### Parameter IDs
+A short description of many of the available sensors can be found here [Loxwiki - Luxtronik Java Web Interface](https://loxwiki.atlassian.net/wiki/spaces/LOX/pages/1533935933/Java+Webinterface)
+
+#### Parameter IDs
 
 Take these files as a reference to figure ot which IDs to use:
 
@@ -76,7 +102,7 @@ Take these files as a reference to figure ot which IDs to use:
 - https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/calculations.py
 - https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/visibilities.py
 
-### Service
+#### Service
 
 In order to change parameters on the Luxtronik conroller, you can use the following service:
 
@@ -114,12 +140,10 @@ Only a small number of the over 1100 parameters have a known funtion and only th
 - `ID_Sollwert_KuCft3_akt` Cooling set point for mixer circuit 3, for example 20.0
 - `ID_Sollwert_AtDif3_akt` Cooling working temperature difference 3, for example 5.0
 
-**Note:**
-
-Before changing a parameter it smart to first read the current value and note it somewhere in case you want to set it back to its original value.
+> ℹ️ Before changing a parameter it smart to first read the current value and note it somewhere in case you want to set it back to its original value.
 All parameters can be configured as sensors and read that way.
 
-### Sensor
+#### Sensor
 
 The Luxtronik sensor platform allows you to monitor the status values of a heat pump unit controlled by a Luxtronik controller.
 
@@ -153,7 +177,7 @@ sensor:
   - required: false
   - type: string
 
-## Full example
+#### Full example
 
 ```yaml
 # Example configuration.yaml entry
@@ -167,7 +191,7 @@ sensor:
         icon: mdi:thermometer
 ```
 
-## Binary Sensor
+#### Binary Sensor
 
 The Luxtronik binary sensor platform allows you to monitor the status values of a heat pump unit controlled by a Luxtronik controller.
 
@@ -206,7 +230,7 @@ binary_sensor:
   - type: boolean
   - default: false
 
-## Full example
+#### Full example
 
 ```yaml
 # Example configuration.yaml entry
@@ -220,7 +244,7 @@ binary_sensor:
         icon: mdi:lock
 ```
 
-# Some Screenshots
+## Some Screenshots
 ![image](https://user-images.githubusercontent.com/32298537/178588098-09e960f0-f849-475c-9afa-cf4a78e5d76d.png)
 ![image](https://user-images.githubusercontent.com/32298537/178588218-56f914f0-1ec5-4851-84ff-1d53bf8d4c1d.png)
 ![image](https://user-images.githubusercontent.com/32298537/178588500-2ec97e7f-c542-492c-9db0-3fcb68e1fe5c.png)
