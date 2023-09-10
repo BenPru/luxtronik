@@ -1203,7 +1203,8 @@ class LuxtronikStatusSensor(LuxtronikSensor, RestoreEntity):
         self.async_schedule_update_ha_state(True)
 
 def add_sensor_if_active(luxtronik, entities, check_key: str, sensor: LuxtronikSensor):
-    if luxtronik.get_value(check_key) <= 0:
+    value = luxtronik.get_value(check_key)
+    if value is None or value <= 0:
         sensor.disable_by_default()
     entities += [sensor]
 
