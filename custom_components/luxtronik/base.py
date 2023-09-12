@@ -139,7 +139,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._enrich_extra_attributes()
 
-        if descr.update_interval is not None:
+        if descr.update_interval is not None and (self.next_update is None or self.next_update < utcnow()):
             self.next_update = utcnow() + descr.update_interval
         super()._handle_coordinator_update()
 
