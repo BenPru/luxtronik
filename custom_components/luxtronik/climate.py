@@ -35,6 +35,7 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     LUX_STATE_ICON_MAP,
+    LOGGER,
     DeviceKey,
     LuxCalculation,
     LuxMode,
@@ -82,7 +83,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
     LuxtronikClimateDescription(
         key=SensorKey.HEATING,
         hvac_modes=[HVACMode.HEAT, HVACMode.OFF],
-        preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
+        preset_modes=[PRESET_NONE, PRESET_COMFORT, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.AUX_HEAT
         | ClimateEntityFeature.PRESET_MODE  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
@@ -151,6 +152,8 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     _attr_hvac_mode: HVACMode | str | None = None
     _attr_preset_mode: str | None = None
 
+    _attr_current_lux_operation = LuxOperationMode.no_request
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -194,7 +197,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
         self._attr_hvac_mode = None if mode is None else HVAC_MODE_MAPPING[mode]
         self._attr_preset_mode = None if mode is None else HVAC_PRESET_MAPPING[mode]
-        lux_action = get_sensor_data(
+        self._attr_current_lux_operation = lux_action = get_sensor_data(
             data, self.entity_description.luxtronik_key_current_action.value
         )
         self._attr_hvac_action = (
@@ -208,7 +211,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         key = self.entity_description.luxtronik_key_current_temperature
         if isinstance(key, str):
             temp = self.hass.states.get(key)
-            self._attr_current_temperature = state_as_number_or_none(temp)
+            self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
         elif key != LuxCalculation.UNSET:
             self._attr_current_temperature = get_sensor_data(data, key)
         key_tar = self.entity_description.luxtronik_key_target_temperature

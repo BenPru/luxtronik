@@ -24,6 +24,11 @@ def get_sensor_data(
     luxtronik_key: str | LP | LC | LV,
 ) -> Any:
     """Get sensor data."""
+    if luxtronik_key is None or "." not in luxtronik_key:
+        LOGGER.warning(
+            "Function get_sensor_data luxtronik_key %s is None", luxtronik_key
+        )
+        return None
     key = luxtronik_key.split(".")
     group: str = key[0]
     sensor_id: str = key[1]
@@ -80,13 +85,14 @@ def correct_key_value(
     return value
 
 
-def state_as_number_or_none(state: State) -> float | None:
+def state_as_number_or_none(state: State, default: float | None = None) -> float | None:
     """Try to coerce our state to a number.
 
     Raises ValueError if this is not possible.
     """
     if state is None:
-        return None
+        return default
     if state.state in (STATE_UNAVAILABLE):
-        return state.state
-    return state_as_number(state)
+        return default # state.state
+    result = state_as_number(state)
+    return default if not isinstance(result, float) or result is None else result

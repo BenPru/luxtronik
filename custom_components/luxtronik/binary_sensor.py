@@ -72,8 +72,10 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if self.next_update is not None and (
-            not self.coordinator.update_reason_write or self.next_update > utcnow()
+        if (
+            not self.coordinator.update_reason_write
+            and self.next_update is not None
+            and self.next_update > utcnow()
         ):
             return
         data = self.coordinator.data if data is None else data

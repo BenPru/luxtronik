@@ -8,7 +8,8 @@ import locale
 from typing import Any
 
 from homeassistant.backports.enum import StrEnum
-from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.components.water_heater import STATE_HEAT_PUMP
+from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -115,13 +116,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     def _restore_attr_value(self, value: Any | None) -> Any:
         return value
 
-    @property
-    def icon(self) -> str | None:
-        """Return the icon to be used for this entity."""
-        if self.entity_description.icon_by_state is not None:
-            if self._attr_state in self.entity_description.icon_by_state:
-                return self.entity_description.icon_by_state.get(self._attr_state)
-        return super().icon
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -136,6 +130,21 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             value = value.replace(tzinfo=time_zone)
 
         self._attr_state = value
+        # Calc icon:
+        icon_state = self._attr_state
+        if hasattr(self, "_attr_is_on"):
+            icon_state = self._attr_is_on
+        elif hasattr(self, "_attr_current_lux_operation"):
+            icon_state = self._attr_current_lux_operation
+        if descr.icon_by_state is not None and icon_state in descr.icon_by_state:
+            self._attr_icon = descr.icon_by_state.get(icon_state)
+        else:
+            self._attr_icon = descr.icon
+        if hasattr(self, "_attr_current_operation"):
+            if self._attr_current_operation == STATE_OFF:
+                self._attr_icon += "-off"
+            elif self._attr_current_operation == STATE_HEAT_PUMP:
+                self._attr_icon += "-auto"
 
         self._enrich_extra_attributes()
 

@@ -96,8 +96,10 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if self.next_update is not None and (
-            not self.coordinator.update_reason_write or self.next_update > utcnow()
+        if (
+            not self.coordinator.update_reason_write
+            and self.next_update is not None
+            and self.next_update > utcnow()
         ):
             return
         data = self.coordinator.data if data is None else data
@@ -154,7 +156,8 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        super()._handle_coordinator_update_internal(data)
+        # super()._handle_coordinator_update_internal(data)
+        super()._handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
         if self._attr_native_value is None or self._last_state is None:

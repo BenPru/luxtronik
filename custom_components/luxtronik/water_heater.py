@@ -133,16 +133,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             return HVACAction.HEATING
         return HVACAction.OFF
 
-    @property
-    def icon(self) -> str | None:
-        """Return the icon to use in the frontend, if any."""
-        result_icon = str(self.entity_description.icon)
-        if self._attr_current_operation == STATE_OFF:
-            result_icon += "-off"
-        elif self._attr_current_operation == STATE_HEAT_PUMP:
-            result_icon += "-auto"
-        return result_icon
-
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
@@ -157,14 +147,20 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         descr = self.entity_description
         mode = get_sensor_data(data, descr.luxtronik_key.value)
         self._attr_current_operation = None if mode is None else OPERATION_MAPPING[mode]
-        self._current_action = get_sensor_data(data, descr.luxtronik_key_current_action.value)
+        self._current_action = get_sensor_data(
+            data, descr.luxtronik_key_current_action.value
+        )
         self._attr_is_away_mode_on = (
             None if mode is None else mode == LuxMode.holidays.value
         )
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
-        self._attr_current_temperature = get_sensor_data(data, descr.luxtronik_key_current_temperature.value)
-        self._attr_target_temperature = get_sensor_data(data, descr.luxtronik_key_target_temperature.value)
+        self._attr_current_temperature = get_sensor_data(
+            data, descr.luxtronik_key_current_temperature.value
+        )
+        self._attr_target_temperature = get_sensor_data(
+            data, descr.luxtronik_key_target_temperature.value
+        )
         super()._handle_coordinator_update()
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:

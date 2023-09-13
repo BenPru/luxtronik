@@ -74,37 +74,28 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if self.next_update is not None and (
-            not self.coordinator.update_reason_write or self.next_update > utcnow()
+        if (
+            not self.coordinator.update_reason_write
+            and self.next_update is not None
+            and self.next_update > utcnow()
         ):
             return
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        self._attr_state = get_sensor_data(
-            data, self.entity_description.luxtronik_key.value
-        )
-        if (
-            self.entity_description.on_state is True
-            or self.entity_description.on_state is False  # noqa: W503
-        ) and self._attr_state is not None:
-            self._attr_state = bool(self._attr_state)
-        if self.entity_description.inverted:
-            self._attr_is_on = self._attr_state != self.entity_description.on_state
+        descr = self.entity_description
+        self._attr_state = get_sensor_data(data, descr.luxtronik_key.value)
+        if descr.on_state is True or descr.on_state is False:
+            if self._attr_state is not None:
+                self._attr_state = bool(self._attr_state)
+        if descr.inverted:
+            self._attr_is_on = self._attr_state != descr.on_state
         else:
-            self._attr_is_on = self._attr_state == self.entity_description.on_state or (
-                self.entity_description.on_states is not None
-                and self._attr_state in self.entity_description.on_states  # noqa: W503
+            self._attr_is_on = self._attr_state == descr.on_state or (
+                descr.on_states is not None and self._attr_state in descr.on_states
             )
         super()._handle_coordinator_update()
 
-    @property
-    def icon(self) -> str | None:
-        """Return the icon to be used for this entity."""
-        if self.entity_description.icon_by_state is not None:
-            if self.is_on in self.entity_description.icon_by_state:
-                return self.entity_description.icon_by_state.get(self.is_on)
-        return super().icon
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""

@@ -18,7 +18,7 @@ from homeassistant.components.climate import (
 from homeassistant.components.number import NumberEntityDescription, NumberMode
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
-from homeassistant.components.update import UpdateEntityDescription
+from homeassistant.components.update import UpdateEntityDescription, UpdateDeviceClass
 from homeassistant.components.water_heater import (
     WaterHeaterEntityEntityDescription,
     WaterHeaterEntityFeature,
@@ -186,4 +186,6 @@ class LuxtronikUpdateEntityDescription(
 ):
     """Class describing Luxtronik update entities."""
 
+    device_class = UpdateDeviceClass.FIRMWARE
     platform = Platform.UPDATE
+    
