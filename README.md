@@ -94,6 +94,8 @@ Not all heatpumps have build in electrical energy metering and instead only show
 
 ### 3.2 Additional aensors (advanced)
 
+If you miss a sensor please have a look in the devices under "+n entities not shown". Not all entities can autodetect by the integration. You can enable the entities by your self.
+
 The most usefull sensors and parameters are created automaticly. But if you miss a sensor you can add it manually via yaml configuration like the original module from [Bouni/luxtronik](https://github.com/Bouni/luxtronik).
 
 A short description of many of the available sensors can be found here [Loxwiki - Luxtronik Java Web Interface](https://loxwiki.atlassian.net/wiki/spaces/LOX/pages/1533935933/Java+Webinterface)
