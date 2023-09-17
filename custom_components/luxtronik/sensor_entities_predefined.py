@@ -333,7 +333,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         entity_category=EntityCategory.DIAGNOSTIC,
-        native_unit_of_measurement=UnitOfPower.WATT,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_registry_enabled_default=False,
         native_precision=0,
     ),
