@@ -83,7 +83,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         hass.config_entries.async_update_entry(config_entry, data=new)
 
     if config_entry.version == 2:
-        _delete_legacy_devices(hass, config_entry)
+        await _async_delete_legacy_devices(hass, config_entry)
 
         new = {**config_entry.data}
         config_entry.version = 3
@@ -159,7 +159,7 @@ def _identifiers_exists(
     return False
 
 
-def _delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):
+async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):
     coordinator = LuxtronikCoordinator.connect(hass, config_entry)
     dr_instance = dr.async_get(hass)
     devices: list[dr.DeviceEntry] = dr.async_entries_for_config_entry(

@@ -419,6 +419,12 @@
             "heat_amount_heating": {
                 "name":"Z\u00e4hler W\u00e4rmemenge Heizung"
             },
+            "heat_amount_flow_rate": {
+                "name":"Z\u00e4hler W\u00e4rmemenge Durchfluss"
+            },
+            "heat_source_flow_rate": {
+                "name":"Z\u00e4hler W\u00e4rmequelle Durchfluss"
+            },
             "heat_energy_input": {
                 "name": "Eingesetzte Energie Heizung"
             },

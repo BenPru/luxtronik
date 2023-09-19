@@ -74,6 +74,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     device_infos = dict[str, DeviceInfo]()
     update_reason_write = False
+    client: Luxtronik = None
     __content_locale__ = dict[Any, Any]()
     __content_locale_texts__ = dict[Any, Any]()
     __content_sensors_locale__ = dict[Any, Any]()
@@ -96,7 +97,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             update_interval=UPDATE_INTERVAL_FAST,
         )
         self._load_translations(hass)
-        self._create_device_infos(config)
+        self._create_device_infos(hass, config)
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
         """Connect and fetch data."""
@@ -242,22 +243,32 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         with open(fname, encoding="utf8") as locale_file:
             return json.load(locale_file)
 
-    def _create_device_infos(self, config: Mapping[str, Any]):
+    def _create_device_infos(
+        self,
+        hass: HomeAssistant,
+        config: Mapping[str, Any],
+    ):
         host = config[CONF_HOST]
-        self.device_infos[DeviceKey.heatpump.value] = self._build_device_info(
-            DeviceKey.heatpump, f"http://{host}/"
+        dev = self.device_infos[DeviceKey.heatpump.value] = self._build_device_info(
+            DeviceKey.heatpump, host
+        )
+        via = (
+            DOMAIN,
+            f"{self.unique_id}_{DeviceKey.heatpump.value}".lower(),
         )
         self.device_infos[DeviceKey.heating.value] = self._build_device_info(
-            DeviceKey.heating, f"http://{host}/"
+            DeviceKey.heating, host, via
         )
         self.device_infos[DeviceKey.domestic_water.value] = self._build_device_info(
-            DeviceKey.domestic_water, f"http://{host}/"
+            DeviceKey.domestic_water, host, via
         )
         self.device_infos[DeviceKey.cooling.value] = self._build_device_info(
-            DeviceKey.cooling, f"http://{host}/"
+            DeviceKey.cooling, host, via
         )
 
-    def _build_device_info(self, key: DeviceKey, configuration_url: str) -> DeviceInfo:
+    def _build_device_info(
+        self, key: DeviceKey, host: str, via_device=None
+    ) -> DeviceInfo:
         text = self.get_device_entity_title(key.value, "device")
         return DeviceInfo(
             identifiers={
@@ -266,12 +277,24 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     f"{self.unique_id}_{key.value}".lower(),
                 )
             },
-            configuration_url=configuration_url,
+            entry_type=None,
             name=f"{text}",
-            manufacturer=self.manufacturer,
+            via_device=via_device,
+            configuration_url=f"http://{host}/",
+            connections={
+                (
+                    DOMAIN,
+                    f"{self.unique_id}_{key.value}".lower(),
+                )
+            },
+            sw_version=self.firmware_version,
             model=self.model,
             suggested_area="Utility room",
-            sw_version=self.firmware_version,
+            hw_version=None,
+            manufacturer=self.manufacturer,
+            # default_name=f"{text}",
+            # default_manufacturer=self.manufacturer,
+            # default_model=self.model,
         )
 
     def get_text(self, key: str) -> str:
@@ -499,7 +522,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             cooling_target_temperature_sensor = None
         return cooling_target_temperature_sensor
 
-    async def async_shutdown(self):
+    async def async_shutdown(self) -> None:
         """Make sure a coordinator is shut down as well as it's connection."""
+        await super().async_shutdown()
         if self.client is not None:
+            # await self.client.disconnect()
             del self.client

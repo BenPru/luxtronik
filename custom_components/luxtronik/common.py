@@ -1,8 +1,14 @@
 """Support for Luxtronik classes."""
+# region Imports
 from typing import Any
 
+from functools import partial
+from ipaddress import IPv6Address, ip_address
+from getmac import get_mac_address
+
 from homeassistant.const import STATE_UNAVAILABLE
-from homeassistant.core import State
+from homeassistant.core import HomeAssistant, State
+from homeassistant.helpers import device_registry
 from homeassistant.helpers.state import state_as_number
 
 from .const import (
@@ -17,6 +23,8 @@ from .const import (
     LuxVisibility as LV,
 )
 from .model import LuxtronikCoordinatorData
+
+# endregion Imports
 
 
 def get_sensor_data(
@@ -93,6 +101,36 @@ def state_as_number_or_none(state: State, default: float | None = None) -> float
     if state is None:
         return default
     if state.state in (STATE_UNAVAILABLE):
-        return default # state.state
+        return default  # state.state
     result = state_as_number(state)
     return default if not isinstance(result, float) or result is None else result
+
+
+async def _async_get_mac_address(hass: HomeAssistant, host: str) -> str | None:
+    """Get mac address from host name, IPv4 address, or IPv6 address."""
+    # Help mypy, which has trouble with the async_add_executor_job + partial call
+    mac_address: str | None
+    # getmac has trouble using IPv6 addresses as the "hostname" parameter so
+    # assume host is an IP address, then handle the case it's not.
+    try:
+        ip_addr = ip_address(host)
+    except ValueError:
+        mac_address = await hass.async_add_executor_job(
+            partial(get_mac_address, hostname=host)
+        )
+    else:
+        if ip_addr.version == 4:
+            mac_address = await hass.async_add_executor_job(
+                partial(get_mac_address, ip=host)
+            )
+        else:
+            # Drop scope_id from IPv6 address by converting via int
+            ip_addr = IPv6Address(int(ip_addr))
+            mac_address = await hass.async_add_executor_job(
+                partial(get_mac_address, ip6=str(ip_addr))
+            )
+
+    if not mac_address:
+        return None
+
+    return device_registry.format_mac(mac_address)

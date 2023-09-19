@@ -94,8 +94,8 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
             self._attr_is_on = self._attr_state == descr.on_state or (
                 descr.on_states is not None and self._attr_state in descr.on_states
             )
-        super()._handle_coordinator_update()
 
+        super()._handle_coordinator_update()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""

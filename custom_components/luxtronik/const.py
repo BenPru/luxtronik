@@ -55,6 +55,12 @@ DEFAULT_PORT: Final = 8889
 # region Lux Definitions
 
 
+class UnitOfVolumeFlowRateExt(StrEnum):
+    """Volume flow rate units."""
+
+    LITER_PER_HOUR = "l/h"
+
+
 class DeviceKey(StrEnum):
     """Device keys."""
 
@@ -273,6 +279,7 @@ class LuxParameter(StrEnum):
 
 # endregion Lux parameters
 
+
 # region Lux calculations
 class LuxCalculation(StrEnum):
     """Luxtronik calculation ids."""
@@ -340,9 +347,11 @@ class LuxCalculation(StrEnum):
     C0151_HEAT_AMOUNT_HEATING: Final = "calculations.ID_WEB_WMZ_Heizung"
     C0152_DHW_HEAT_AMOUNT: Final = "calculations.ID_WEB_WMZ_Brauchwasser"
     C0154_HEAT_AMOUNT_COUNTER: Final = "calculations.ID_WEB_WMZ_Seit"
+    C0155_HEAT_AMOUNT_FLOW_RATE: Final = "calculations.ID_WEB_WMZ_Durchfluss"
     C0156_ANALOG_OUT1: Final = "calculations.ID_WEB_AnalogOut1"
     C0157_ANALOG_OUT2: Final = "calculations.ID_WEB_AnalogOut2"
     C0158_TIMER_HOT_GAS: Final = "calculations.ID_WEB_Time_Heissgas"
+    C0173_HEAT_SOURCE_FLOW_RATE: Final = "calculations.ID_WEB_Durchfluss_WQ"
     C0175_SUCTION_EVAPORATOR_TEMPERATURE: Final = (
         "calculations.ID_WEB_LIN_ANSAUG_VERDAMPFER"
     )
@@ -363,6 +372,7 @@ class LuxCalculation(StrEnum):
 
 
 # endregion Lux calculations
+
 
 # region visibilities
 class LuxVisibility(StrEnum):
@@ -414,6 +424,7 @@ class LuxVisibility(StrEnum):
 
 # endregion visibilities
 
+
 # region Keys
 class SensorKey(StrEnum):
     """Sensor keys."""
@@ -459,6 +470,8 @@ class SensorKey(StrEnum):
     OPERATION_HOURS_HEATING = "operation_hours_heating"
     OPERATION_HOURS_COOLING = "operation_hours_cooling"
     HEAT_AMOUNT_HEATING = "heat_amount_heating"
+    HEAT_AMOUNT_FLOW_RATE = "heat_amount_flow_rate"
+    HEAT_SOURCE_FLOW_RATE = "heat_source_flow_rate"
     DHW_HEAT_AMOUNT = "dhw_heat_amount"
     HEAT_ENERGY_INPUT = "heat_energy_input"
     DHW_ENERGY_INPUT = "dhw_energy_input"
@@ -520,6 +533,7 @@ class SensorKey(StrEnum):
 
 
 # endregion Keys
+
 
 # region Attr Keys
 class SensorAttrFormat(Enum):

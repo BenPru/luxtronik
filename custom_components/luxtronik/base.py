@@ -116,7 +116,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     def _restore_attr_value(self, value: Any | None) -> Any:
         return value
 
-
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
@@ -130,6 +129,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             value = value.replace(tzinfo=time_zone)
 
         self._attr_state = value
+
         # Calc icon:
         icon_state = self._attr_state
         if hasattr(self, "_attr_is_on"):

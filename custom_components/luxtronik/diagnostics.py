@@ -1,9 +1,8 @@
 """Diagnostics support for Luxtronik."""
+# region Imports
 from __future__ import annotations
 
 from collections.abc import Mapping
-from functools import partial
-from ipaddress import IPv6Address, ip_address
 from typing import Any
 
 from async_timeout import timeout
@@ -16,6 +15,9 @@ from homeassistant.helpers import device_registry
 
 from .const import CONF_COORDINATOR, DOMAIN
 from .coordinator import LuxtronikCoordinator
+from .common import _async_get_mac_address
+
+# endregion Imports
 
 TO_REDACT = {CONF_USERNAME, CONF_PASSWORD}
 

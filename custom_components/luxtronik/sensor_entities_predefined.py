@@ -29,6 +29,7 @@ from .const import (
     SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
+    UnitOfVolumeFlowRateExt,
 )
 from .model import (
     LuxtronikEntityAttributeDescription as attr,
@@ -205,6 +206,30 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=1,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
+    ),
+    descr(
+        key=SensorKey.HEAT_AMOUNT_FLOW_RATE,
+        luxtronik_key=LC.C0155_HEAT_AMOUNT_FLOW_RATE,
+        device_key=DeviceKey.heating,
+        icon="mdi:water-sync",
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.WATER,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfVolumeFlowRateExt.LITER_PER_HOUR,
+        native_precision=1,
+        update_interval=UPDATE_INTERVAL_NORMAL,
+    ),
+    descr(
+        key=SensorKey.HEAT_SOURCE_FLOW_RATE,
+        luxtronik_key=LC.C0173_HEAT_SOURCE_FLOW_RATE,
+        device_key=DeviceKey.heating,
+        icon="mdi:water-sync",
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.WATER,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfVolumeFlowRateExt.LITER_PER_HOUR,
+        native_precision=1,
+        update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     descr(
         key=SensorKey.HOT_GAS_TEMPERATURE,

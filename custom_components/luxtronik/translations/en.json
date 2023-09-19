@@ -419,6 +419,12 @@
             "heat_amount_heating": {
                 "name":"Heating heat amount"
             },
+            "heat_amount_flow_rate": {
+                "name":"Heating heat amount flow rate"
+            },
+            "heat_source_flow_rate": {
+                "name":"Heating heat source flow rate"
+            },
             "heat_energy_input": {
                 "name": "Energy input heating"
             },
