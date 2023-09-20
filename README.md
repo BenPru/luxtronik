@@ -6,6 +6,7 @@
 
 > :warning: **Known Issues** :warning:  
 * Runtime warning "untimeWarning: coroutine ... was never awaited ...". [#116](https://github.com/BenPru/luxtronik/issues/116) [#138](https://github.com/BenPru/luxtronik/issues/138) [#108](https://github.com/BenPru/luxtronik/issues/108) Please don't create tickets for this!
+* Cooling is not full implemented! [#128]([url](https://github.com/BenPru/luxtronik/issues/128))
 * Firmware Update sensor is not "ringing".
 
 
