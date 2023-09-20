@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from typing_extensions import override
+
 from homeassistant.components.climate import HVACAction
 from homeassistant.components.water_heater import (
     ENTITY_ID_FORMAT,
@@ -136,6 +138,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
+    @override
     @callback
     def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None

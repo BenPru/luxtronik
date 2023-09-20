@@ -232,6 +232,7 @@ class LuxParameter(StrEnum):
     P0090_RELEASE_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWEFreig_akt"
     # MODE_COOLING: Automatic or Off
     P0108_MODE_COOLING: Final = "parameters.ID_Einst_BA_Kuehl_akt"
+    P0110_CURRENT_COOL_TARGET: Final = "parameters.ID_Einst_KuehlFreig_akt"
     P0111_HEATING_NIGHT_LOWERING_TO_TEMPERATURE: Final = (
         "parameters.ID_Einst_TAbsMin_akt"
     )
@@ -379,6 +380,7 @@ class LuxVisibility(StrEnum):
     """Luxtronik visibility ids."""
 
     UNSET: Final = "UNSET"
+    V0005_COOLING: Final = "visibilities.ID_Visi_Kuhlung"
     V0023_FLOW_IN_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Vorlauf"
     V0024_FLOW_OUT_TEMPERATURE_EXTERNAL: Final = "visibilities.ID_Visi_Temp_Rucklauf"
     V0027_HOT_GAS_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Heissgas"

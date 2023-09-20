@@ -392,11 +392,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LV.V0039_SOLAR_BUFFER,
             LV.V0250_SOLAR,
         ]:
-            return self.detect_solar_present()
+            return self._detect_solar_present()
         if description.visibility == LV.V0059_DHW_CIRCULATION_PUMP:
             return self._detect_dhw_circulation_pump_present()
         if description.visibility == LV.V0059A_DHW_CHARGING_PUMP:
             return not self._detect_dhw_circulation_pump_present()
+        if description.visibility == LV.V0005_COOLING:
+            return not self.detect_cooling_present()
         visibility_result = self.get_value(description.visibility)
         if visibility_result is None:
             LOGGER.warning("Could not load visibility %s", description.visibility)
@@ -468,7 +470,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             sensor = self.client.visibilities.get(sensor_id)
         return sensor
 
-    def detect_cooling_mk(self):
+    def _detect_cooling_mk(self):
         """We iterate over the mk sensors, detect cooling and return a list of parameters that are may show cooling is enabled."""
         cooling_mk = []
         for mk_sensor in LUX_PARAMETER_MK_SENSORS:
@@ -481,7 +483,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         return cooling_mk
 
-    def detect_solar_present(self) -> bool:
+    def _detect_solar_present(self) -> bool:
         """Detect and returns True if solar is present."""
         return (
             bool(self.get_value(LV.V0250_SOLAR))
@@ -503,7 +505,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def detect_cooling_present(self) -> bool:
         """Detect and returns True if Cooling is present."""
-        cooling_present = len(self.detect_cooling_mk()) > 0
+        cooling_present = len(self._detect_cooling_mk()) > 0
         return cooling_present
 
     def detect_cooling_target_temperature_sensor(self):
@@ -512,7 +514,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         The corresponding cooling_target_temperature sensor is returned.
         """
-        mk_param = self.detect_cooling_mk()
+        mk_param = self._detect_cooling_mk()
         if len(mk_param) == 1:
             mk_number = re.findall("[0-9]+", mk_param[0])[0]
             cooling_target_temperature_sensor = (

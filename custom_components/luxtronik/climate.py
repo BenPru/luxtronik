@@ -100,7 +100,26 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         icon_by_state=LUX_STATE_ICON_MAP,
         unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
-    )
+    ),
+    LuxtronikClimateDescription(
+        key=SensorKey.COOLING,
+        hvac_modes=[HVACMode.COOL, HVACMode.OFF],
+        preset_modes=[PRESET_NONE],
+        supported_features=ClimateEntityFeature.TARGET_TEMPERATURE,
+        luxtronik_key=LuxParameter.P0108_MODE_COOLING,
+        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
+        luxtronik_key_target_temperature=LuxParameter.P0110_CURRENT_COOL_TARGET,
+        # luxtronik_key_has_target_temperature=LuxParameter
+        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_action_active=LuxOperationMode.cooling.value,
+        # luxtronik_key_target_temperature_high=LuxParameter,
+        # luxtronik_key_target_temperature_low=LuxParameter,
+        # luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+        # luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
+        icon_by_state=LUX_STATE_ICON_MAP,
+        unit_of_measurement=UnitOfTemperature.CELSIUS,
+        visibility=LuxVisibility.V0005_COOLING,
+    ),
 ]
 # endregion Const
 
