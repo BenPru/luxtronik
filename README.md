@@ -1,4 +1,4 @@
-# Luxtronikeat
+# Luxtronik
 
 > :warning: **New Code-Base - PLEASE READ!** :warning:  
 * Backup your data before update (different config structure!) and don't use in productive environment. If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
