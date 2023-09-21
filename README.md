@@ -1,8 +1,11 @@
-# Luxtronik
+# Luxtronikeat
 
 > :warning: **New Code-Base - PLEASE READ!** :warning:  
 * Backup your data before update (different config structure!) and don't use in productive environment. If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
 * This release has no more language selection. The HA backend language is used.
+* Some entities which can not detected automaticly are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
+* The RBE Room Temperature Sensor is currently not implemented.
+* In the integration configuration you can set a ha sensor id for the indoor temperature value.
 
 > :warning: **Known Issues** :warning:  
 * Runtime warning "untimeWarning: coroutine ... was never awaited ...". [#116](https://github.com/BenPru/luxtronik/issues/116) [#138](https://github.com/BenPru/luxtronik/issues/138) [#108](https://github.com/BenPru/luxtronik/issues/108) Please don't create tickets for this!
