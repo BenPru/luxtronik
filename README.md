@@ -44,7 +44,8 @@ This integration works locally. It's only necessary to connect the Luxtronik con
 2. [Adding Luxtronik](#2-adding-luxtronik)  
 3. [Tips for using Luxtronik](#3-tips-for-using-luxtronik)  
 3.1 [Energy use](#31-energy-use)  
-3.2 [Additional sensors (advanced)](#32-additional-sensors-advanced)  
+3.2 [Additional sensors (advanced)](#32-additional-sensors-advanced)
+4. [Support / Creating tickets](#4-support-tickets)
 
 ## 1. Installation
 
@@ -110,7 +111,7 @@ It contains details about the various parameters and how to use them to optimize
 
 Not all heatpumps have build in electrical energy metering and instead only show the energy produced in heat, not the energy consumed in electricity. Adding a (strong) energy meter is a nice addition to measure the SCOP of your device. Shelly energy meters are recommended since they offer offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) and a [variety of in-line or clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) with various protection mechanisms.
 
-### 3.2 Additional aensors (advanced)
+### 3.2 Additional sensors (advanced)
 
 If you miss a sensor please have a look in the devices under "+n entities not shown". Not all entities can autodetect by the integration. You can enable the entities by your self.
 
@@ -166,6 +167,11 @@ Only a small number of the over 1100 parameters have a known funtion and only th
 
 > ℹ️ Before changing a parameter it smart to first read the current value and note it somewhere in case you want to set it back to its original value.
 All parameters can be configured as sensors and read that way.
+
+
+### Support Tickets
+If you create a ticket please provide always a diagnostic file as issue attachment:
+![image](https://github.com/BenPru/luxtronik/assets/32298537/89c26414-0304-438f-9204-79cf0a338db3)
 
 
 ## Some Screenshots
