@@ -154,7 +154,7 @@ def _is_socket_closed(sock: socket.socket) -> bool:
         LOGGER.exception(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
-        return False
+        return True
     return False
 
 
