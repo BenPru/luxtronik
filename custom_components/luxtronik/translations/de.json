@@ -29,7 +29,7 @@
                 "name": "Zusatzumw\u00e4lzpumpe"
             },
             "dhw_recirculation_pump": {
-                "name": "Umw\u00e4lzpumpe Brauchwasser"
+                "name": "Umw\u00e4lzpumpe"
             },
             "dhw_circulation_pump": {
                 "name": "Zirkulationspumpe"
@@ -41,7 +41,7 @@
                 "name": "Solar Pumpe"
             },
             "approval_cooling": {
-                "name": "K\u00fchlung Freigabe"
+                "name": "Freigabe"
             },
             "defrost_end_flow_okay": {
                 "name": "Abtauung wird beendet \u002f Durchfluss in Ordnung"
@@ -52,16 +52,16 @@
         },
         "device": {
             "heatpump": {
-                "name": "W\u00e4rmepumpe"
+                "name": "WP"
             },
             "heating": {
-                "name": "Heizung"
+                "name": "Heiz"
             },
             "domestic_water": {
-                "name": "Brauchwasser"
+                "name": "BW"
             },
             "cooling": {
-                "name": "K\u00fchlung"
+                "name": "K\u00fchl"
             }
         },
         "switch": {
@@ -84,7 +84,7 @@
                 "name": "Heizgrenze"
             },
             "domestic_water": {
-                "name": "Brauchwassermodus Automatik"
+                "name": "Modus Automatik"
             },
             "cooling": {
                 "name": "K\u00fchlung"
@@ -121,7 +121,7 @@
                 "name": "Heizkurve Nachts"
             },
             "dhw_target_temperature": {
-                "name": "Brauchwasser Soll"
+                "name": "Soll"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
@@ -139,7 +139,7 @@
                 "name": "Einschalt Differenz Kollektor/Speicher (Solar Pumpe)"
             },
             "dhw_hysteresis": {
-                "name": "Hysterese Brauchwasser"
+                "name": "Hysterese"
             },
             "heating_room_temperature_impact_factor": {
                 "name": "Raum Temperatur Einflussfaktor"
@@ -159,7 +159,7 @@
         },
         "sensor": {
             "status": {
-                "name": "W\u00e4rmepumpe",
+                "name": "Status",
                 "state": {
                     "heating": "Heizt",
                     "hot water": "Brauchwasser",
@@ -396,13 +396,13 @@
                 "name": "Brauchwasser"
             },
             "dhw_operation_hours": {
-                "name": "Brauchwasser Betriebsstunden"
+                "name": "Betriebsstunden"
             },
             "dhw_heat_amount": {
-                "name": "Brauchwasser W\u00e4rmemenge"
+                "name": "W\u00e4rmemenge"
             },
             "dhw_energy_input": {
-                "name": "Eingesetzte Energie Brauchwasser "
+                "name": "Eingesetzte Energie"
             },
             "flow_in_temperature": {
                 "name": "Vorlauf Temperatur"
@@ -414,7 +414,7 @@
                 "name": "R\u00fccklauf Soll Temperatur"
             },
             "operation_hours_heating": {
-                "name":"Heizung Betriebsstunden"
+                "name":"Betriebsstunden"
             },
             "heat_amount_heating": {
                 "name":"Z\u00e4hler W\u00e4rmemenge Heizung"
@@ -441,12 +441,15 @@
                 "name": "Solar Betriebsstunden"
             },
             "operation_hours_cooling": {
-                "name": "K\u00fchlung Betriebsstunden"
+                "name": "Betriebsstunden"
             }
         },
         "climate": {
             "heating": {
                 "name": "Heizung"
+            },
+            "cooling": {
+                "name": "K\u00fchlung"
             }
         },
         "water_heater": {

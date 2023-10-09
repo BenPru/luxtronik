@@ -29,19 +29,19 @@
                 "name": "Additional circulation pump"
             },
             "dhw_recirculation_pump": {
-                "name": "Recirculation pump domestic hot water"
+                "name": "Recirculation pump"
             },
             "dhw_circulation_pump": {
-                "name": "Circulation pump domestic hot water"
+                "name": "Circulation pump"
             },
             "dhw_charging_pump": {
-                "name": "Charging pump domestic hot water"
+                "name": "Charging pump"
             },
             "solar_pump": {
                 "name": "Solarpump"
             },
             "approval_cooling": {
-                "name": "Approval cooling"
+                "name": "Approval"
             },
             "defrost_end_flow_okay": {
                 "name": "Defrost end \u002f Flow okay"
@@ -52,16 +52,16 @@
         },
         "device": {
             "heatpump": {
-                "name": "Heatpump"
+                "name": "HP"
             },
             "heating": {
-                "name": "Heating"
+                "name": "Heat"
             },
             "domestic_water": {
-                "name": "Domestic water"
+                "name": "DHW"
             },
             "cooling": {
-                "name": "Cooling"
+                "name": "Cool"
             }
         },
         "switch": {
@@ -75,7 +75,7 @@
                 "name": "Pump heat control"
             },
             "heating": {
-                "name": "Heating"
+                "name": "Heatingmode automatic"
             },
             "pump_optimization": {
                 "name": "Pump optimization"
@@ -84,7 +84,7 @@
                 "name": "Heating threshold"
             },
             "domestic_water": {
-                "name": "Domestic water automatic"
+                "name": "Mode automatic"
             },
             "cooling": {
                 "name": "Cooling"
@@ -106,7 +106,7 @@
                 "name": "Heating threshold"
             },
             "heating_target_correction": {
-                "name": "Heating target correction"
+                "name": "Target correction"
             },
             "heating_min_flow_out_temperature": {
                 "name": "Min. target flow out"
@@ -121,7 +121,7 @@
                 "name": "Heating curve night"
             },
             "dhw_target_temperature": {
-                "name": "Domestic hot water target temperature"
+                "name": "Target"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermal desinfection target temperature"
@@ -139,7 +139,7 @@
                 "name": "Switch-on differential collector/boiler (solarpump)"
             },
             "dhw_hysteresis": {
-                "name": "Hysteresis domestic hot water"
+                "name": "Hysteresis"
             },
             "heating_room_temperature_impact_factor": {
                 "name": "Room temperature impact factor"
@@ -159,7 +159,7 @@
         },
         "sensor": {
             "status": {
-                "name": "Heatpump",
+                "name": "Status",
                 "state": {
                     "heating": "Heating",
                     "hot water": "Domestic water",
@@ -396,13 +396,13 @@
                 "name": "Domestic hot water"
             },
             "dhw_operation_hours": {
-                "name": "Domestic hot water operation hours"
+                "name": "Operation hours"
             },
             "dhw_heat_amount": {
-                "name": "Domestic hot water heat amount"
+                "name": "Heat amount"
             },
             "dhw_energy_input": {
-                "name": "Energy input domestic hot water"
+                "name": "Energy input"
             },
             "flow_in_temperature": {
                 "name": "Flow in temperature"
@@ -414,7 +414,7 @@
                 "name": "Flow out target temperature"
             },
             "operation_hours_heating": {
-                "name":"Heating operation hours"
+                "name":"Operation hours"
             },
             "heat_amount_heating": {
                 "name":"Heating heat amount"
@@ -441,12 +441,15 @@
                 "name": "Solar operation hours"
             },
             "operation_hours_cooling": {
-                "name": "Cooling operation hours"
+                "name": "Operation hours"
             }
         },
         "climate": {
             "heating": {
                 "name": "Heating"
+            },
+            "cooling": {
+                "name": "Cooling"
             }
         },
         "water_heater": {

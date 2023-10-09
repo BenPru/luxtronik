@@ -11,6 +11,7 @@ from homeassistant.backports.enum import StrEnum
 from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
+from homeassistant.helpers.typing import UndefinedType
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -64,7 +65,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 else:
                     self._attr_extra_state_attributes[field] = value
         if description.translation_key is None:
-            description.translation_key = description.key
+            description.translation_key = description.key.value
         if description.entity_registry_enabled_default:
             description.entity_registry_enabled_default = coordinator.entity_visible(
                 description
@@ -73,13 +74,12 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         self._attr_device_info = coordinator.device_infos[device_info_ident.value]
 
         translation_key = (
-            description.key
+            description.key.value
             if description.translation_key_name is None
             else description.translation_key_name
         )
-        self._attr_name = coordinator.get_device_entity_title(
-            translation_key, description.platform
-        )
+        description.translation_key = translation_key
+        description.has_entity_name = True
         self._attr_state = self._get_value(description.luxtronik_key)
 
     async def async_added_to_hass(self) -> None:

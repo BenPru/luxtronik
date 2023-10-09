@@ -30,12 +30,14 @@ from .model import LuxtronikCoordinatorData
 def get_sensor_data(
     sensors: LuxtronikCoordinatorData,
     luxtronik_key: str | LP | LC | LV,
+    warn_unset = True,
 ) -> Any:
     """Get sensor data."""
     if luxtronik_key is None or "." not in luxtronik_key:
-        LOGGER.warning(
-            "Function get_sensor_data luxtronik_key %s is None", luxtronik_key
-        )
+        if warn_unset:
+            LOGGER.warning(
+                "Function get_sensor_data luxtronik_key %s is None", luxtronik_key
+            )
         return None
     key = luxtronik_key.split(".")
     group: str = key[0]

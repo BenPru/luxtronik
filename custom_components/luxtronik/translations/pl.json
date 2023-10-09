@@ -447,6 +447,9 @@
         "climate": {
             "heating": {
                 "name": "Ogrzewanie"
+            },
+            "cooling": {
+                "name": "Ch\u0142odzenie"
             }
         },
         "water_heater": {

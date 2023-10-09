@@ -100,6 +100,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         icon_by_state=LUX_STATE_ICON_MAP,
         unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
+        device_key=DeviceKey.heating,
     ),
     LuxtronikClimateDescription(
         key=SensorKey.COOLING,
@@ -119,6 +120,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         icon_by_state=LUX_STATE_ICON_MAP,
         unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0005_COOLING,
+        device_key=DeviceKey.cooling,
     ),
 ]
 # endregion Const
@@ -184,7 +186,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         super().__init__(
             coordinator=coordinator,
             description=description,
-            device_info_ident=DeviceKey.heating,
+            device_info_ident=description.device_key,
         )
         if description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
             description.luxtronik_key_current_temperature = entry.data.get(
@@ -237,7 +239,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if key_tar != LuxParameter.UNSET:
             self._attr_target_temperature = get_sensor_data(data, key_tar)
         correction_factor = get_sensor_data(
-            data, self.entity_description.luxtronik_key_correction_factor.value
+            data, self.entity_description.luxtronik_key_correction_factor.value, False
         )
         if (
             self._attr_target_temperature is not None

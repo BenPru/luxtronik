@@ -113,8 +113,19 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
                 ent_reg.async_update_entity(
                     entity_id, new_entity_id=new_ident, new_unique_id=new_ident
                 )
-            except (KeyError, ValueError) as err:
+            except KeyError as err:
+                LOGGER.info(
+                    "Skip rename entity - Not existing: %s->%s",
+                    entity_id,
+                    new_ident,
+                    exc_info=err,
+                )
+            except ValueError as err:
                 LOGGER.warning(
+                    "Could not rename entity %s->%s", entity_id, new_ident, exc_info=err
+                )
+            except Exception as err:
+                LOGGER.error(
                     "Could not rename entity %s->%s", entity_id, new_ident, exc_info=err
                 )
 
