@@ -462,7 +462,7 @@
         "abort": {
             "already_configured": "Dieses Ger\u00e4t ist bereits konfiguriert.",
             "already_in_progress": "Der Konfigurationsablauf wird bereits ausgef\u00fchrt.",
-            "cannot_connect": "Die Verbindung zu Luxtronik ist fehlgeschlagen.\nBitte IP-Adresse/Hostnamen und Port \u00fcberpr\u00fcfen.",
+            "cannot_connect": "Die Verbindung zu Luxtronik ist fehlgeschlagen.\nBitte IP-Adresse/Hostnamen und Port \u00fcberpr\u00fcfen.\n\nFehler:\n{connect_error}",
             "no_devices_found": "Es konnten keine Ger\u00e4te im Netzwerk gefunden werden.",
             "single_instance_allowed": "Bereits konfiguriert. Es ist nur eine Konfiguration erlaubt.",
             "unknown": "Unerwarteter Fehler"

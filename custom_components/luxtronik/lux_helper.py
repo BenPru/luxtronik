@@ -21,6 +21,8 @@ from .const import (
 # endregion Imports
 
 WAIT_TIME_WRITE_PARAMETER = 1.0
+SOCKET_TIMEOUT = 10.0
+MAX_DATA_LENGTH = 10000
 
 # List of ports that are known to respond to discovery packets
 LUXTRONIK_DISCOVERY_PORTS = [4444, 47808]
@@ -161,7 +163,7 @@ def _is_socket_closed(sock: socket.socket) -> bool:
 class Luxtronik:
     """Main luxtronik class."""
 
-    def __init__(self, host, port, safe=True):
+    def __init__(self, host, port, safe=True) -> None:
         """Init Luxtronik helper."""
         self._lock = threading.Lock()
         self._socket = None
@@ -195,11 +197,18 @@ class Luxtronik:
         with self._lock:
             is_none = self._socket is None
             if is_none:
-                self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._socket = socket.socket(
+                    socket.AF_INET,
+                    socket.SOCK_STREAM,
+                )
             if is_none or _is_socket_closed(self._socket):
                 self._socket.connect((self._host, self._port))
+                self._socket.settimeout(SOCKET_TIMEOUT)
                 LOGGER.info(
-                    "Connected to Luxtronik heatpump %s:%s", self._host, self._port
+                    "Connected to Luxtronik heatpump %s:%s with timeout %ss",
+                    self._host,
+                    self._port,
+                    SOCKET_TIMEOUT,
                 )
             if write:
                 self._write()
@@ -235,6 +244,9 @@ class Luxtronik:
         cmd = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Command %s", cmd)
         length = struct.unpack(">i", self._socket.recv(4))[0]
+        if length > MAX_DATA_LENGTH:
+            LOGGER.warning("Skip reading! Length oversized! %s", length)
+            return
         LOGGER.debug("Length %s", length)
         for _ in range(0, length):
             try:
@@ -253,6 +265,9 @@ class Luxtronik:
         stat = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Stat %s", stat)
         length = struct.unpack(">i", self._socket.recv(4))[0]
+        if length > MAX_DATA_LENGTH:
+            LOGGER.warning("Skip reading! Length oversized! %s", length)
+            return
         LOGGER.debug("Length %s", length)
         for _ in range(0, length):
             try:
@@ -269,6 +284,9 @@ class Luxtronik:
         cmd = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Command %s", cmd)
         length = struct.unpack(">i", self._socket.recv(4))[0]
+        if length > MAX_DATA_LENGTH:
+            LOGGER.warning("Skip reading! Length oversized! %s", length)
+            return
         LOGGER.debug("Length %s", length)
         for _ in range(0, length):
             try:
