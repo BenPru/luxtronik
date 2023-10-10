@@ -154,6 +154,8 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
 
         # [sensor]
         _up("pump_frequency", SK.PUMP_FREQUENCY, P.SENSOR)
+        _up("room_thermostat_temperature", SK.ROOM_THERMOSTAT_TEMPERATURE, P.SENSOR)
+        _up("room_thermostat_temperature_target", SK.ROOM_THERMOSTAT_TEMPERATURE_TARGET , P.SENSOR)
 
         # [binary sensor]
         _up("evu_unlocked", SK.EVU_UNLOCKED, P.BINARY_SENSOR)
