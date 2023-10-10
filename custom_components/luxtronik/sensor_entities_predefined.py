@@ -500,6 +500,26 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL,
     ),
+    descr(
+        key=SensorKey.ROOM_THERMOSTAT_TEMPERATURE,
+        luxtronik_key=LC.C0227_ROOM_THERMOSTAT_TEMPERATURE,
+        device_key=DeviceKey.heating,
+        entity_category=None,
+        icon="mdi:thermometer",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        visibility=LV.V0122_ROOM_THERMOSTAT,
+    ),   
+    descr(
+        key=SensorKey.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
+        luxtronik_key=LC.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
+        device_key=DeviceKey.heating,
+        entity_category=None,
+        icon="mdi:thermometer",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        visibility=LV.V0122_ROOM_THERMOSTAT,
+    ),     
     # endregion Heating
     # region Domestic water
     descr(
