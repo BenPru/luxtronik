@@ -21,8 +21,8 @@ from .const import (
 # endregion Imports
 
 WAIT_TIME_WRITE_PARAMETER = 1.0
-SOCKET_TIMEOUT = 10.0
-MAX_DATA_LENGTH = 10000
+SOCKET_TIMEOUT = 100.0
+MAX_DATA_LENGTH = 100000
 
 # List of ports that are known to respond to discovery packets
 LUXTRONIK_DISCOVERY_PORTS = [4444, 47808]
@@ -156,7 +156,7 @@ def _is_socket_closed(sock: socket.socket) -> bool:
         LOGGER.exception(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
-        return True
+        return False
     return False
 
 
