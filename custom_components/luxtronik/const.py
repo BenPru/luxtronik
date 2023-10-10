@@ -532,6 +532,8 @@ class SensorKey(StrEnum):
     MOTOR_PROTECTION = "motor_protection"
     FIRMWARE = "firmware"
     APPROVAL_COOLING = "approval_cooling"
+    ROOM_THERMOSTAT_TEMPERATURE = "room_thermostat_temperature"
+    ROOM_THERMOSTAT_TEMPERATURE_TARGET = "room_thermostat_temperature_target"
 
 
 # endregion Keys
