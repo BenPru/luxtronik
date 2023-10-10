@@ -442,6 +442,12 @@
             },
             "operation_hours_cooling": {
                 "name": "Godziny pracy ch\u0142odzenia"
+            },
+            "room_thermostat_temperature": {
+                "name": "termostat pokojowy"
+            },
+            "room_thermostat_temperature_target": {
+                "name": "cel termostatu pokojowego"
             }
         },
         "climate": {
