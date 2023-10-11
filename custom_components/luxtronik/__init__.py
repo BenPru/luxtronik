@@ -152,6 +152,53 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         )
         _up("domestic_water_charging_pump", SK.DHW_CHARGING_PUMP, P.BINARY_SENSOR)
 
+        # [sensor]
+        _up("pump_frequency", SK.PUMP_FREQUENCY, P.SENSOR)
+        _up("room_thermostat_temperature", SK.ROOM_THERMOSTAT_TEMPERATURE, P.SENSOR)
+        _up("room_thermostat_temperature_target", SK.ROOM_THERMOSTAT_TEMPERATURE_TARGET , P.SENSOR)
+
+        # [binary sensor]
+        _up("evu_unlocked", SK.EVU_UNLOCKED, P.BINARY_SENSOR)
+        _up("compressor", SK.COMPRESSOR, P.BINARY_SENSOR)
+        _up("pump_flow", SK.PUMP_FLOW, P.BINARY_SENSOR)
+        _up("compressor_heater", SK.COMPRESSOR_HEATER, P.BINARY_SENSOR)
+        _up("defrost_valve", SK.DEFROST_VALVE, P.BINARY_SENSOR)
+        _up("additional_heat_generator", SK.ADDITIONAL_HEAT_GENERATOR, P.BINARY_SENSOR)
+        _up("disturbance_output", SK.DISTURBANCE_OUTPUT, P.BINARY_SENSOR)
+        _up("circulation_pump_heating", SK.CIRCULATION_PUMP_HEATING, P.BINARY_SENSOR)
+        _up("additional_circulation_pump", SK.ADDITIONAL_CIRCULATION_PUMP, P.BINARY_SENSOR)
+        _up("approval_cooling", SK.APPROVAL_COOLING, P.BINARY_SENSOR)
+
+        # [number]
+        _up("release_second_heat_generator", SK.RELEASE_SECOND_HEAT_GENERATOR, P.NUMBER)
+        _up("release_time_second_heat_generator", SK.RELEASE_TIME_SECOND_HEAT_GENERATOR, P.NUMBER)
+        _up("heating_target_correction", SK.HEATING_TARGET_CORRECTION, P.NUMBER)
+        _up("pump_optimization_time", SK.PUMP_OPTIMIZATION_TIME, P.NUMBER)
+        _up("heating_threshold_temperature", SK.HEATING_THRESHOLD_TEMPERATURE, P.NUMBER)
+        _up("heating_min_flow_out_temperature", SK.HEATING_MIN_FLOW_OUT_TEMPERATURE, P.NUMBER)
+        _up("heating_circuit_curve1_temperature", SK.HEATING_CIRCUIT_CURVE1_TEMPERATURE, P.NUMBER)
+        _up("heating_circuit_curve2_temperature", SK.HEATING_CIRCUIT_CURVE2_TEMPERATURE, P.NUMBER)
+        _up("heating_circuit_curve_night_temperature", SK.HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE, P.NUMBER)
+        _up("heating_night_lowering_to_temperature", SK.HEATING_NIGHT_LOWERING_TO_TEMPERATURE, P.NUMBER)
+        _up("heating_hysteresis", SK.HEATING_HYSTERESIS, P.NUMBER)
+        _up("heating_max_flow_out_increase_temperature", SK.HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE, P.NUMBER)
+        _up("heating_maximum_circulation_pump_speed", SK.HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED, P.NUMBER)
+        _up("heating_room_temperature_impact_factor", SK.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR, P.NUMBER)
+
+        # [switch]
+        _up("remote_maintenance", SK.REMOTE_MAINTENANCE, P.SWITCH)
+        _up("efficiency_pump", SK.EFFICIENCY_PUMP, P.SWITCH)
+        _up("pump_heat_control", SK.PUMP_HEAT_CONTROL, P.SWITCH)
+        _up("heating", SK.HEATING, P.SWITCH)
+        _up("pump_optimization", SK.PUMP_OPTIMIZATION, P.SWITCH)
+        _up("heating_threshold", SK.HEATING_THRESHOLD, P.SWITCH)
+        _up("domestic_water", SK.DOMESTIC_WATER, P.SWITCH)
+        _up("cooling", SK.COOLING, P.SWITCH)
+
+        # [climate]
+        _up("heating", SK.HEATING, P.CLIMATE)
+        _up("cooling", SK.COOLING, P.CLIMATE)
+        
         new_data = {**config_entry.data}
         config_entry.version = 5
         hass.config_entries.async_update_entry(config_entry, data=new_data)

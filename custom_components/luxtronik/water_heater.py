@@ -63,7 +63,7 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon="mdi:water-boiler",
-        unit_of_measurement=UnitOfTemperature.CELSIUS,
+        temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0029_DHW_TEMPERATURE,
     )
 ]
@@ -116,7 +116,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        self._attr_temperature_unit = str(description.unit_of_measurement)
+        self._attr_temperature_unit = description.temperature_unit
         self._attr_operation_list = description.operation_list
         self._attr_supported_features = description.supported_features
 

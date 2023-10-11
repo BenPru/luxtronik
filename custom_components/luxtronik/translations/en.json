@@ -445,6 +445,12 @@
             },
             "operation_hours_cooling": {
                 "name": "Operation hours"
+            },
+            "room_thermostat_temperature": {
+                "name": "Room thermostat"
+            },
+            "room_thermostat_temperature_target": {
+                "name": "Room thermostat target"
             }
         },
         "climate": {

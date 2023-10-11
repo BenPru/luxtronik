@@ -104,7 +104,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
-        unit_of_measurement=UnitOfTemperature.CELSIUS,
+        temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
     ),
@@ -125,7 +125,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         # luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
         # luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
-        unit_of_measurement=UnitOfTemperature.CELSIUS,
+        temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0005_COOLING,
         device_key=DeviceKey.cooling,
     ),
@@ -202,7 +202,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        self._attr_temperature_unit = description.unit_of_measurement
+        self._attr_temperature_unit = description.temperature_unit
         self._attr_hvac_modes = description.hvac_modes
         self._attr_preset_modes = description.preset_modes
         self._attr_supported_features = description.supported_features
