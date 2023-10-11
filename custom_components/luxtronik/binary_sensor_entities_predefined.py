@@ -20,6 +20,12 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
     LuxtronikBinarySensorEntityDescription(
+        key=SensorKey.COMPRESSOR2,
+        luxtronik_key=LC.C0045_COMPRESSOR2,
+        icon="mdi:arrow-collapse-all",
+        device_class=BinarySensorDeviceClass.RUNNING,
+    ),
+    LuxtronikBinarySensorEntityDescription(
         key=SensorKey.PUMP_FLOW,
         luxtronik_key=LC.C0043_PUMP_FLOW,
         icon="mdi:pump",

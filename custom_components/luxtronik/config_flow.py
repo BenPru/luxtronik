@@ -9,7 +9,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.components.dhcp import DhcpServiceInfo
-from homeassistant.const import CONF_HOST, CONF_PORT, Platform
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
@@ -17,8 +17,11 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
+    CONF_MAX_DATA_LENGTH,
     DEFAULT_HOST,
+    DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
+    DEFAULT_TIMEOUT,
     DOMAIN,
     LOGGER,
 )
@@ -40,6 +43,8 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST, default=DEFAULT_HOST): str,
         vol.Required(CONF_PORT, default=DEFAULT_PORT): PORT_SELECTOR,
+        vol.Required(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
+        vol.Required(CONF_MAX_DATA_LENGTH, default=DEFAULT_MAX_DATA_LENGTH): int,
     }
 )
 
@@ -100,6 +105,10 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_HOST, default=self._discovery_host): str,
                 vol.Required(CONF_PORT, default=self._discovery_port): int,
+                vol.Required(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
+                vol.Required(
+                    CONF_MAX_DATA_LENGTH, default=DEFAULT_MAX_DATA_LENGTH
+                ): int,
             }
         )
 
@@ -250,6 +259,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             config = dict[str, Any]()
             config[CONF_HOST] = broadcast_discover_ip
             config[CONF_PORT] = broadcast_discover_port
+            config[CONF_TIMEOUT] = DEFAULT_TIMEOUT
+            config[CONF_MAX_DATA_LENGTH] = DEFAULT_MAX_DATA_LENGTH
             try:
                 coordinator = LuxtronikCoordinator.connect(self.hass, config)
             except Exception:  # pylint: disable=broad-except

@@ -7,6 +7,9 @@
             "compressor": {
                 "name": "Compressor"
             },
+            "compressor2": {
+                "name": "Compressor 2"
+            },
             "pump_flow": {
                 "name": "Pump flow"
             },
@@ -477,11 +480,15 @@
                 "description": "Set up your Luxtronik heatpump controller to allow monitoring and control.",
                 "data": {
                   "host": "Host",
-                  "port": "Network Port"
+                  "port": "Network Port",
+                    "timeout": "Network socket timeout (Sec.)",
+                    "max_data_length": "Max data package length"
                 },
                 "data_description": {
                     "host": "Hostname or ip address",
-                    "port": "Normally 8889 or 8888"
+                    "port": "Normally 8889 or 8888",
+                    "timeout": "If the network or the heatpump is slow, you can fine tune the timeout.",
+                    "max_data_length": "If the network or the heatpump is slow, you can fine tune the date package length."
                 }
              },
              "options": {

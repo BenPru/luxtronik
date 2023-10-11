@@ -16,7 +16,7 @@ from typing import Any, Concatenate, Final, TypeVar, cast
 from typing_extensions import ParamSpec
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_PORT, Platform
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -24,6 +24,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .common import correct_key_value
 from .const import (
     CONF_CALCULATIONS,
+    CONF_MAX_DATA_LENGTH,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     DOMAIN,
@@ -187,15 +188,22 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Connect to heatpump."""
         config: dict[Any, Any] | MappingProxyType[str, Any] | None = None
         if isinstance(config_entry, ConfigEntry):
-            host = config_entry.data[CONF_HOST]
-            port = config_entry.data[CONF_PORT]
             config = config_entry.data
         else:
-            host = config_entry[CONF_HOST]
-            port = config_entry[CONF_PORT]
             config = config_entry
 
-        client = Luxtronik(host=host, port=port, safe=False)
+        host = config[CONF_HOST]
+        port = config[CONF_PORT]
+        timeout = config[CONF_TIMEOUT]
+        max_data_length = config[CONF_MAX_DATA_LENGTH]
+
+        client = Luxtronik(
+            host=host,
+            port=port,
+            socket_timeout=timeout,
+            max_data_length=max_data_length,
+            safe=False,
+        )
         return LuxtronikCoordinator(
             hass=hass,
             client=client,

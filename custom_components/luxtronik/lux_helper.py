@@ -7,6 +7,8 @@ import struct
 import threading
 import time
 
+from async_timeout import timeout
+
 from luxtronik.calculations import Calculations
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
@@ -21,8 +23,6 @@ from .const import (
 # endregion Imports
 
 WAIT_TIME_WRITE_PARAMETER = 1.0
-SOCKET_TIMEOUT = 100.0
-MAX_DATA_LENGTH = 100000
 
 # List of ports that are known to respond to discovery packets
 LUXTRONIK_DISCOVERY_PORTS = [4444, 47808]
@@ -145,6 +145,8 @@ def get_manufacturer_firmware_url_by_model(model: str) -> str:
 def _is_socket_closed(sock: socket.socket) -> bool:
     try:
         # this will try to read bytes without blocking and also without removing them from buffer (peek only)
+        last_timeout = sock.gettimeout()
+        sock.settimeout(None)
         data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
         if len(data) == 0:
             return True
@@ -157,18 +159,29 @@ def _is_socket_closed(sock: socket.socket) -> bool:
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
         return False
+    finally:
+        sock.settimeout(last_timeout)
     return False
 
 
 class Luxtronik:
     """Main luxtronik class."""
 
-    def __init__(self, host, port, safe=True) -> None:
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        socket_timeout: float,
+        max_data_length: int,
+        safe=True,
+    ) -> None:
         """Init Luxtronik helper."""
         self._lock = threading.Lock()
         self._socket = None
         self._host = host
         self._port = port
+        self._socket_timeout = socket_timeout
+        self._max_data_length = max_data_length
         self.calculations = Calculations()
         self.parameters = Parameters(safe=safe)
         self.visibilities = Visibilities()
@@ -203,12 +216,12 @@ class Luxtronik:
                 )
             if is_none or _is_socket_closed(self._socket):
                 self._socket.connect((self._host, self._port))
-                self._socket.settimeout(SOCKET_TIMEOUT)
+                self._socket.settimeout(self._socket_timeout)
                 LOGGER.info(
                     "Connected to Luxtronik heatpump %s:%s with timeout %ss",
                     self._host,
                     self._port,
-                    SOCKET_TIMEOUT,
+                    self._socket_timeout,
                 )
             if write:
                 self._write()
@@ -244,8 +257,12 @@ class Luxtronik:
         cmd = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Command %s", cmd)
         length = struct.unpack(">i", self._socket.recv(4))[0]
-        if length > MAX_DATA_LENGTH:
-            LOGGER.warning("Skip reading! Length oversized! %s", length)
+        if length > self._max_data_length:
+            LOGGER.warning(
+                "Skip reading parameters! Length oversized! %s>%s",
+                length,
+                self._max_data_length,
+            )
             return
         LOGGER.debug("Length %s", length)
         for _ in range(0, length):
@@ -265,8 +282,12 @@ class Luxtronik:
         stat = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Stat %s", stat)
         length = struct.unpack(">i", self._socket.recv(4))[0]
-        if length > MAX_DATA_LENGTH:
-            LOGGER.warning("Skip reading! Length oversized! %s", length)
+        if length > self._max_data_length:
+            LOGGER.warning(
+                "Skip reading calculations! Length oversized! %s>%s",
+                length,
+                self._max_data_length,
+            )
             return
         LOGGER.debug("Length %s", length)
         for _ in range(0, length):
@@ -284,8 +305,12 @@ class Luxtronik:
         cmd = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Command %s", cmd)
         length = struct.unpack(">i", self._socket.recv(4))[0]
-        if length > MAX_DATA_LENGTH:
-            LOGGER.warning("Skip reading! Length oversized! %s", length)
+        if length > self._max_data_length:
+            LOGGER.warning(
+                "Skip reading visibilities! Length oversized! %s>%s",
+                length,
+                self._max_data_length,
+            )
             return
         LOGGER.debug("Length %s", length)
         for _ in range(0, length):

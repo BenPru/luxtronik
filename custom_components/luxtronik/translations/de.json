@@ -7,6 +7,9 @@
             "compressor": {
                 "name": "Verdichter"
             },
+            "compressor2": {
+                "name": "Verdichter 2"
+            },
             "pump_flow": {
                 "name": "Soleumw\u00e4lzpumpe"
             },
@@ -477,11 +480,15 @@
                 "description": "Verbinde eine Luxtronik W\u00e4rmepumpe mit Home Assistant.",
                 "data": {
                     "host": "Host",
-                    "port": "Netzwerk Port"
+                    "port": "Netzwerk Port",
+                    "timeout": "Netzwerk Socket Zeit\u00fcberschreitung (Sek.)",
+                    "max_data_length": "Maximale L\u00e4nge Datenpakete"
                 },
                 "data_description": {
                     "host": "Netzwerkname oder IP Adresse",
-                    "port": "Meist 8889 oder 8888"
+                    "port": "Meist 8889 oder 8888",
+                    "timeout": "Wenn das Netzwerk oder die W\u00e4rmepumpe tr\u00e4ge sind, kann man hier fein einstellen.",
+                    "max_data_length": "Wenn das Netzwerk oder die W\u00e4rmepumpe tr\u00e4ge sind, kann man hier fein einstellen."
                 }
              },
              "options": {
