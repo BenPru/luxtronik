@@ -27,6 +27,8 @@ from .const import (
     CONF_MAX_DATA_LENGTH,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
+    DEFAULT_MAX_DATA_LENGTH,
+    DEFAULT_TIMEOUT,
     DOMAIN,
     LANG_DEFAULT,
     LOGGER,
@@ -194,8 +196,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         host = config[CONF_HOST]
         port = config[CONF_PORT]
-        timeout = config[CONF_TIMEOUT]
-        max_data_length = config[CONF_MAX_DATA_LENGTH]
+        timeout = config[CONF_TIMEOUT] if CONF_TIMEOUT in config else DEFAULT_TIMEOUT
+        max_data_length = (
+            config[CONF_MAX_DATA_LENGTH]
+            if CONF_MAX_DATA_LENGTH in config
+            else DEFAULT_MAX_DATA_LENGTH
+        )
 
         client = Luxtronik(
             host=host,

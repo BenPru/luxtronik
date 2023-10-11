@@ -197,8 +197,16 @@ LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
     LuxOperationMode.swimming_pool_solar.value: "mdi:pool",
     LuxOperationMode.evu.value: "mdi:power-plug-off",
     LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
-    LuxOperationMode.no_request.value: "mdi:heat-pump-outline",  # "mdi:radiator-disabled",
+    LuxOperationMode.no_request.value: "mdi:hvac-off",  # "mdi:heat-pump-outline",  # "mdi:radiator-disabled",
     LuxOperationMode.heating_external_source.value: "mdi:patio-heater",
+    LuxOperationMode.cooling.value: "mdi:air-conditioner",
+}
+
+LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]] = {
+    LuxOperationMode.swimming_pool_solar.value: "mdi:pool",
+    LuxOperationMode.evu.value: "mdi:power-plug-off",
+    LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
+    LuxOperationMode.no_request.value: "mdi:snowflake-off",
     LuxOperationMode.cooling.value: "mdi:air-conditioner",
 }
 
