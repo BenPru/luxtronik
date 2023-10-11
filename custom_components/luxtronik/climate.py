@@ -64,12 +64,17 @@ HVAC_ACTION_MAPPING: dict[str, str] = {
     LuxOperationMode.cooling.value: HVACAction.COOLING.value,
 }
 
-HVAC_MODE_MAPPING: dict[str, str] = {
+HVAC_MODE_MAPPING_HEAT: dict[str, str] = {
     LuxMode.off.value: HVACMode.OFF.value,
     LuxMode.automatic.value: HVACMode.HEAT.value,
     LuxMode.second_heatsource.value: HVACMode.HEAT.value,
     LuxMode.party.value: HVACMode.HEAT.value,
     LuxMode.holidays.value: HVACMode.HEAT.value,
+}
+
+HVAC_MODE_MAPPING_COOL: dict[str, str] = {
+    LuxMode.off.value: HVACMode.OFF.value,
+    LuxMode.automatic.value: HVACMode.COOL.value,
 }
 
 HVAC_PRESET_MAPPING: dict[str, str] = {
@@ -83,6 +88,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
     LuxtronikClimateDescription(
         key=SensorKey.HEATING,
         hvac_modes=[HVACMode.HEAT, HVACMode.OFF],
+        hvac_mode_mapping=HVAC_MODE_MAPPING_HEAT,
         preset_modes=[PRESET_NONE, PRESET_COMFORT, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.AUX_HEAT
         | ClimateEntityFeature.PRESET_MODE  # noqa: W503
@@ -105,6 +111,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
     LuxtronikClimateDescription(
         key=SensorKey.COOLING,
         hvac_modes=[HVACMode.COOL, HVACMode.OFF],
+        hvac_mode_mapping=HVAC_MODE_MAPPING_COOL,
         preset_modes=[PRESET_NONE],
         supported_features=ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
@@ -216,7 +223,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if data is None:
             return
         mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
-        self._attr_hvac_mode = None if mode is None else HVAC_MODE_MAPPING[mode]
+        self._attr_hvac_mode = (
+            None if mode is None else self.entity_description.hvac_mode_mapping[mode]
+        )
         self._attr_preset_mode = None if mode is None else HVAC_PRESET_MAPPING[mode]
         self._attr_current_lux_operation = lux_action = get_sensor_data(
             data, self.entity_description.luxtronik_key_current_action.value
@@ -272,7 +281,11 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode."""
-        lux_mode = [k for k, v in HVAC_MODE_MAPPING.items() if v == hvac_mode.value][0]
+        lux_mode = [
+            k
+            for k, v in self.entity_description.hvac_mode_mapping.items()
+            if v == hvac_mode.value
+        ][0]
         await self._async_set_lux_mode(lux_mode)
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
