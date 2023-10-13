@@ -69,7 +69,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
     entity_description: LuxtronikUpdateEntityDescription
 
     _attr_title = "Luxtronik Firmware Version"
-    _attr_supported_features: UpdateEntityFeature = UpdateEntityFeature.RELEASE_NOTES
+    _attr_supported_features: UpdateEntityFeature = UpdateEntityFeature.INSTALL | UpdateEntityFeature.RELEASE_NOTES
     __firmware_version_available = None
     __firmware_version_available_last_request = None
 
