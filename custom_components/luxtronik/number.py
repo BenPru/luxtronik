@@ -130,15 +130,20 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             >= float(self._attr_state) * float(self.entity_description.factor)
             and (
                 attr.key not in self._attr_cache
-                or self._attr_cache[attr.key] is None
-                or self._attr_cache[attr.key] == ""
-                or (
-                    isinstance(self._attr_cache[attr.key], date)
-                    and self._attr_cache[attr.key] < datetime.now().date()
-                )
+                or self._is_past(self._attr_cache[attr.key])
             )
         ):
             self._attr_cache[attr.key] = datetime.now().date()
-        value = self._attr_cache[attr.key] if attr.key in self._attr_cache else ""
+        result = self._attr_cache[attr.key] if attr.key in self._attr_cache else ""
 
-        return str(value)
+        return str(result)
+
+    def _is_past(self, value: str | date) -> bool:
+        if value is None or value == "":
+            return True
+        if isinstance(value, str):
+            try:
+                value = datetime.strptime(value, "%Y-%m-%d").date()
+            except:
+                return True
+        return value < datetime.now().date()
