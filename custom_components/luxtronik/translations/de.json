@@ -158,6 +158,12 @@
             },
             "heating_night_lowering_to_temperature": {
                 "name": "Absenkung bis Aussentemperatur"
+            },
+            "efficiency_pump_nominal": {
+                "name": "Effizienzpumpe Nominal"
+            },
+            "efficiency_pump_minimal": {
+                "name": "Effizienzpumpe Minimal"
             }
         },
         "sensor": {

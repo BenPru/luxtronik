@@ -2,7 +2,12 @@
 # region Imports
 from homeassistant.components.number import NumberMode
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import PERCENTAGE, UnitOfTemperature, UnitOfTime
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfElectricPotential,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
@@ -56,6 +61,36 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         factor=1,
         visibility=LV.V0061_SECOND_HEAT_GENERATOR,
+    ),
+    LuxtronikNumberDescription(
+        key=SensorKey.EFFICIENCY_PUMP_NOMINAL,
+        luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+        translation_key_name=SensorKey.EFFICIENCY_PUMP_NOMINAL,
+        icon="mdi:leaf-circle-outline",
+        device_class=SensorDeviceClass.VOLTAGE,
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        native_min_value=3.0,
+        native_max_value=10.0,
+        native_step=0.5,
+        entity_category=EntityCategory.CONFIG,
+        factor=0.01,
+        entity_registry_enabled_default=False,
+        visibility=LV.V0239_EFFICIENCY_PUMP_NOMINAL,
+    ),
+    LuxtronikNumberDescription(
+        key=SensorKey.EFFICIENCY_PUMP_MINIMAL,
+        luxtronik_key=LP.P0868_EFFICIENCY_PUMP_MINIMAL,
+        translation_key_name=SensorKey.EFFICIENCY_PUMP_MINIMAL,
+        icon="mdi:leaf",
+        device_class=SensorDeviceClass.VOLTAGE,
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        native_min_value=3.0,
+        native_max_value=10.0,
+        native_step=0.5,
+        entity_category=EntityCategory.CONFIG,
+        factor=0.01,
+        entity_registry_enabled_default=False,
+        visibility=LV.V0240_EFFICIENCY_PUMP_MINIMAL,
     ),
     # endregion Main heatpump
     # region Heating

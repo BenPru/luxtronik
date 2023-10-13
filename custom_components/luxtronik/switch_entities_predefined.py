@@ -26,6 +26,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         key=SensorKey.EFFICIENCY_PUMP,
         icon="mdi:leaf-circle",
         entity_category=EntityCategory.CONFIG,
+        entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
