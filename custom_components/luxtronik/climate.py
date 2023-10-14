@@ -116,7 +116,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         supported_features=ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
         # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0110_CURRENT_COOL_TARGET,
+        luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.cooling.value,
@@ -256,7 +256,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             and correction_factor is not None  # noqa: W503
         ):
             delta_temp = self._attr_target_temperature - self._attr_current_temperature
-            correction = delta_temp * correction_factor
+            correction = round(delta_temp * (correction_factor/100.0), 1)  # correction_factor is in %, so need to divide by 100
             key_correction_target = (
                 self.entity_description.luxtronik_key_correction_target.value
             )
