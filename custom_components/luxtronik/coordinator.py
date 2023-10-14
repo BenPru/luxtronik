@@ -433,7 +433,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LP.P0780_MK3_TYPE,
         ]:
             sensor_value = self.get_value(description.visibility)
-            LOGGER.info(f"{description.visibility} = {sensor_value}")
             return sensor_value in [
                 LuxMkTypes.cooling.value,
                 LuxMkTypes.heating_cooling.value,
