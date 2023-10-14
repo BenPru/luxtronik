@@ -231,6 +231,16 @@ class LuxParameter(StrEnum):
     P0013_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzHKRABS_akt"
     )
+    # luxtronik*_heating_circuit2_curve*
+    P0014_HEATING_CIRCUIT2_CURVE1_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK1E_akt"  # 260
+    )
+    P0015_HEATING_CIRCUIT2_CURVE2_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK1ANH_akt"  # 290
+    )
+    P0016_HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK1ABS_akt"  # 0
+    )
     P0047_DHW_THERMAL_DESINFECTION_TARGET: Final = "parameters.ID_Einst_LGST_akt"
     P0049_PUMP_OPTIMIZATION: Final = "parameters.ID_Einst_Popt_akt"
     P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"
@@ -259,10 +269,24 @@ class LuxParameter(StrEnum):
     )
     P0699_HEATING_THRESHOLD: Final = "parameters.ID_Einst_Heizgrenze"
     P0700_HEATING_THRESHOLD_TEMPERATURE: Final = "parameters.ID_Einst_Heizgrenze_Temp"
+    # luxtronik*_heating_circuit3_curve*
+    P0774_HEATING_CIRCUIT3_CURVE1_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK3E_akt"  # 270
+    )
+    P0775_HEATING_CIRCUIT3_CURVE2_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK3ANH_akt"  # 290
+    )
+    P0776_HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK3ABS_akt"  # 0
+    )
     P0860_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
     P0864_PUMP_OPTIMIZATION_TIME: Final = "parameters.ID_Einst_Popt_Nachlauf_akt"
-    P0867_EFFICIENCY_PUMP_NOMINAL: Final = "parameters.ID_Einst_Effizienzpumpe_Nominal_akt"
-    P0868_EFFICIENCY_PUMP_MINIMAL: Final = "parameters.ID_Einst_Effizienzpumpe_Minimal_akt"
+    P0867_EFFICIENCY_PUMP_NOMINAL: Final = (
+        "parameters.ID_Einst_Effizienzpumpe_Nominal_akt"
+    )
+    P0868_EFFICIENCY_PUMP_MINIMAL: Final = (
+        "parameters.ID_Einst_Effizienzpumpe_Minimal_akt"
+    )
     P0869_EFFICIENCY_PUMP: Final = "parameters.ID_Einst_Effizienzpumpe_akt"
     P0870_AMOUNT_COUNTER_ACTIVE: Final = "parameters.ID_Einst_Waermemenge_akt"
     P0874_SERIAL_NUMBER: Final = "parameters.ID_WP_SerienNummer_DATUM"
@@ -383,6 +407,11 @@ class LuxCalculation(StrEnum):
     C0227_ROOM_THERMOSTAT_TEMPERATURE: Final = "calculations.ID_WEB_RBE_RT_Ist"
     C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET: Final = "calculations.ID_WEB_RBE_RT_Soll"
     C0231_PUMP_FREQUENCY: Final = "calculations.ID_WEB_Freq_VD"
+    # 239: Kelvin("VBO_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_vbo_calculated
+    # 240: Kelvin("VBO_Temp_Spread_Ist"), / 10, measurement, delta - ait_vbo_delta
+    # 241: Percent2("HUP_PWM"),
+    # 242: Kelvin("HUP_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_delta_calculated
+    # 243: Kelvin("HUP_Temp_Spread_Ist"), / 10, measurement, delta - ait_hup_delta
     C0257_CURRENT_HEAT_OUTPUT: Final = "calculations.Heat_Output"
 
 
@@ -395,6 +424,7 @@ class LuxVisibility(StrEnum):
 
     UNSET: Final = "UNSET"
     V0005_COOLING: Final = "visibilities.ID_Visi_Kuhlung"
+    V0008_MK2: Final = "visibilities.ID_Visi_MK2"
     V0023_FLOW_IN_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Vorlauf"
     V0024_FLOW_OUT_TEMPERATURE_EXTERNAL: Final = "visibilities.ID_Visi_Temp_Rucklauf"
     V0027_HOT_GAS_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Heissgas"
@@ -421,8 +451,13 @@ class LuxVisibility(StrEnum):
     V0121_EVU_LOCKED: Final = "visibilities.ID_Visi_SysEin_EVUSperre"
     V0122_ROOM_THERMOSTAT: Final = "visibilities.ID_Visi_SysEin_Raumstation"
     V0144_PUMP_OPTIMIZATION: Final = "visibilities.ID_Visi_SysEin_Pumpenoptim"
-    V0239_EFFICIENCY_PUMP_NOMINAL: Final = "visibilities.ID_Visi_SysEin_EffizienzpumpeNom"
-    V0240_EFFICIENCY_PUMP_MINIMAL: Final = "visibilities.ID_Visi_SysEin_EffizienzpumpeMin"
+    V0211_MK3: Final = "visibilities.ID_Visi_MK3"
+    V0239_EFFICIENCY_PUMP_NOMINAL: Final = (
+        "visibilities.ID_Visi_SysEin_EffizienzpumpeNom"
+    )
+    V0240_EFFICIENCY_PUMP_MINIMAL: Final = (
+        "visibilities.ID_Visi_SysEin_EffizienzpumpeMin"
+    )
     V0248_ANALOG_OUT1: Final = "visibilities.ID_Visi_OUT_Analog_1"
     V0249_ANALOG_OUT2: Final = "visibilities.ID_Visi_OUT_Analog_2"
     V0250_SOLAR: Final = "visibilities.ID_Visi_Solar"
@@ -517,6 +552,16 @@ class SensorKey(StrEnum):
     HEATING_CIRCUIT_CURVE1_TEMPERATURE = "heating_circuit_curve1_temperature"
     HEATING_CIRCUIT_CURVE2_TEMPERATURE = "heating_circuit_curve2_temperature"
     HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE = "heating_circuit_curve_night_temperature"
+    HEATING_CIRCUIT2_CURVE1_TEMPERATURE = "heating_circuit2_curve1_temperature"
+    HEATING_CIRCUIT2_CURVE2_TEMPERATURE = "heating_circuit2_curve2_temperature"
+    HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE = (
+        "heating_circuit2_curve_night_temperature"
+    )
+    HEATING_CIRCUIT3_CURVE1_TEMPERATURE = "heating_circuit3_curve1_temperature"
+    HEATING_CIRCUIT3_CURVE2_TEMPERATURE = "heating_circuit3_curve2_temperature"
+    HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE = (
+        "heating_circuit3_curve_night_temperature"
+    )
     HEATING_NIGHT_LOWERING_TO_TEMPERATURE = "heating_night_lowering_to_temperature"
     HEATING_HYSTERESIS = "heating_hysteresis"
     HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE = (

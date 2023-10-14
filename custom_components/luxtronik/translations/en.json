@@ -123,6 +123,24 @@
             "heating_circuit_curve_night_temperature": {
                 "name": "Heating curve night"
             },
+            "heating_circuit2_curve1_temperature": {
+                "name": "HC2 Heating curve 1"
+            },
+            "heating_circuit2_curve2_temperature": {
+                "name": "HC2 Heating curve 2"
+            },
+            "heating_circuit2_curve_night_temperature": {
+                "name": "HC2 Heating curve night"
+            },
+            "heating_circuit3_curve1_temperature": {
+                "name": "HC3 Heating curve 1"
+            },
+            "heating_circuit3_curve2_temperature": {
+                "name": "HC3 Heating curve 2"
+            },
+            "heating_circuit3_curve_night_temperature": {
+                "name": "HC3 Heating curve night"
+            },
             "dhw_target_temperature": {
                 "name": "Target"
             },
