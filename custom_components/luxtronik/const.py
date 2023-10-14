@@ -241,6 +241,7 @@ class LuxParameter(StrEnum):
     P0016_HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK1ABS_akt"  # 0
     )
+    P0042_MK1_TYPE: Final = "parameters.ID_Einst_MK1Typ_akt"
     P0047_DHW_THERMAL_DESINFECTION_TARGET: Final = "parameters.ID_Einst_LGST_akt"
     P0049_PUMP_OPTIMIZATION: Final = "parameters.ID_Einst_Popt_akt"
     P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"
@@ -253,7 +254,7 @@ class LuxParameter(StrEnum):
     P0090_RELEASE_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWEFreig_akt"
     # MODE_COOLING: Automatic or Off
     P0108_MODE_COOLING: Final = "parameters.ID_Einst_BA_Kuehl_akt"
-    P0110_CURRENT_COOL_TARGET: Final = "parameters.ID_Einst_KuehlFreig_akt"
+    P0110_COOLING_OUTDOOR_TEMP_THRESHOLD: Final = "parameters.ID_Einst_KuehlFreig_akt"
     P0111_HEATING_NIGHT_LOWERING_TO_TEMPERATURE: Final = (
         "parameters.ID_Einst_TAbsMin_akt"
     )
@@ -263,6 +264,10 @@ class LuxParameter(StrEnum):
     P0123_SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE: Final = (
         "parameters.ID_Einst_TDC_Aus_akt"
     )
+    P0130_MK2_TYPE: Final = "parameters.ID_Einst_MK2Typ_akt"
+    P0132_COOLING_TARGET_TEMPERATURE_MK1: Final = "parameters.ID_Sollwert_KuCft1_akt"
+    P0133_COOLING_TARGET_TEMPERATURE_MK2: Final = "parameters.ID_Sollwert_KuCft2_akt"
+    P0780_MK3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"
     P0149_FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = "parameters.ID_Einst_TVLmax_akt"
     P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
         "parameters.ID_Einst_TDC_Max_akt"
@@ -295,6 +300,7 @@ class LuxParameter(StrEnum):
     P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = (
         "parameters.ID_Einst_TDC_Koll_Max_akt"
     )
+    P0966_COOLING_TARGET_TEMPERATURE_MK3: Final = "parameters.ID_Sollwert_KuCft3_akt"
     P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = (
         "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
     )
@@ -598,7 +604,12 @@ class SensorKey(StrEnum):
     APPROVAL_COOLING = "approval_cooling"
     ROOM_THERMOSTAT_TEMPERATURE = "room_thermostat_temperature"
     ROOM_THERMOSTAT_TEMPERATURE_TARGET = "room_thermostat_temperature_target"
-
+    COOLING_START_DELAY_HOURS = "cooling_start_delay_hours"
+    COOLING_STOP_DELAY_HOURS = "cooling_stop_delay_hours"
+    COOLING_OUTDOOR_TEMP_THRESHOLD = "cooling_threshold_temperature"
+    COOLING_TARGET_TEMPERATURE_MK1 = "cooling_target_temperature_mk1"
+    COOLING_TARGET_TEMPERATURE_MK2 = "cooling_target_temperature_mk2"
+    COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
 
 # endregion Keys
 
