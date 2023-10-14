@@ -155,6 +155,24 @@
             },
             "heating_night_lowering_to_temperature": {
                 "name": "Ogrzewanie nocne obni\u017Caj\u0105ce temp"
+            },
+            "cooling_threshold_temperature": {
+                "name": "T_outside >"
+            },
+            "cooling_start_delay_hours": {
+                "name": "Start delay"
+            },
+            "cooling_stop_delay_hours": {
+                "name": "Stop delay"
+            },
+			"cooling_target_temperature_mk1": {
+				"name": "Cooling target temperature"
+            },
+			"cooling_target_temperature_mk2": {
+				"name": "Cooling target temperature"
+            },
+			"cooling_target_temperature_mk3": {
+				"name": "Cooling target temperature"
             }
         },
         "sensor": {
