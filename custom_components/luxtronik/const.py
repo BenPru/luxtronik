@@ -284,6 +284,8 @@ class LuxParameter(StrEnum):
     P0776_HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
+    P0850_COOLING_START_DELAY_HOURS: Final = "parameters.ID_Einst_Kuhl_Zeit_Ein_akt"
+    P0851_COOLING_STOP_DELAY_HOURS: Final = "parameters.ID_Einst_Kuhl_Zeit_Aus_akt"
     P0860_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
     P0864_PUMP_OPTIMIZATION_TIME: Final = "parameters.ID_Einst_Popt_Nachlauf_akt"
     P0867_EFFICIENCY_PUMP_NOMINAL: Final = (
