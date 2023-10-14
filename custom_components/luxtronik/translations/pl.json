@@ -413,6 +413,9 @@
             "dhw_temperature": {
                 "name": "Ciep\u0142a woda u\u017Cytkowa"
             },
+            "dhw_target_temperature": {
+                "name": "Docelowa ciep\u0142a woda u\u017Cytkowa"
+            },
             "dhw_operation_hours": {
                 "name": "Godziny pracy ciep\u0142ej wody u\u017Cytkowej"
             },

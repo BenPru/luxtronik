@@ -440,6 +440,9 @@
             "dhw_temperature": {
                 "name": "Brauchwasser"
             },
+            "dhw_target_temperature": {
+                "name": "Brauchwasser Soll"
+            },
             "dhw_operation_hours": {
                 "name": "Betriebsstunden"
             },
@@ -492,7 +495,7 @@
                 "name": "Raum Thermostat"
             },
             "room_thermostat_temperature_target": {
-                "name": "Raum Thermostat Ziel"
+                "name": "Raum Thermostat Soll"
             }
         },
         "climate": {
