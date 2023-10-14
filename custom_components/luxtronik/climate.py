@@ -89,7 +89,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         key=SensorKey.HEATING,
         hvac_modes=[HVACMode.HEAT, HVACMode.OFF],
         hvac_mode_mapping=HVAC_MODE_MAPPING_HEAT,
-        preset_modes=[PRESET_NONE, PRESET_COMFORT, PRESET_AWAY, PRESET_BOOST],
+        preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.AUX_HEAT
         | ClimateEntityFeature.PRESET_MODE  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
