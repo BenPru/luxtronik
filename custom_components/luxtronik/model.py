@@ -151,6 +151,7 @@ class LuxtronikClimateDescription(
     platform = Platform.CLIMATE
     hvac_modes: list[HVACMode] = field(default_factory=list)
     hvac_mode_mapping: dict[str, str] = field(default_factory=dict[str, str])
+    hvac_action_mapping: dict[str, str] = field(default_factory=dict[str, str])
     preset_modes: list[str] | None = None
     supported_features: ClimateEntityFeature = ClimateEntityFeature(0)
     luxtronik_key_current_temperature: LuxCalculation | str = LuxCalculation.UNSET
