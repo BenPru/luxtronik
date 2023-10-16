@@ -428,9 +428,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         ):
             return False
         if description.visibility in [
-            LP.P0042_MK1_TYPE,
-            LP.P0130_MK2_TYPE,
-            LP.P0780_MK3_TYPE,
+            LP.P0042_MIXING_CIRCUIT1_TYPE,
+            LP.P0130_MIXING_CIRCUIT2_TYPE,
+            LP.P0780_MIXING_CIRCUIT3_TYPE,
         ]:
             sensor_value = self.get_value(description.visibility)
             return sensor_value in [
