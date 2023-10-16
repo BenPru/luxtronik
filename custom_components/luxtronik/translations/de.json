@@ -475,6 +475,18 @@
             },
             "room_thermostat_temperature_target": {
                 "name": "Raum Thermostat Ziel"
+            },
+            "pump_flow_delta_target": {
+                "name": "Soleumw\u00e4lzpumpe Delta Ziel"
+            },
+            "pump_flow_delta": {
+                "name": "Soleumw\u00e4lzpumpe Delta"
+            },
+            "circulation_pump_delta_target": {
+                "name": "Umw\u00e4lzpumpe Delta Ziel"
+            },
+            "circulation_pump_delta": {
+                "name": "Umw\u00e4lzpumpe Delta"
             }
         },
         "climate": {

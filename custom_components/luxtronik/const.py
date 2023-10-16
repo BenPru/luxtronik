@@ -407,10 +407,14 @@ class LuxCalculation(StrEnum):
     C0227_ROOM_THERMOSTAT_TEMPERATURE: Final = "calculations.ID_WEB_RBE_RT_Ist"
     C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET: Final = "calculations.ID_WEB_RBE_RT_Soll"
     C0231_PUMP_FREQUENCY: Final = "calculations.ID_WEB_Freq_VD"
+    C0239_PUMP_FLOW_DELTA_TARGET: Final = "calculations.Unknown_Calculation_239"
     # 239: Kelvin("VBO_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_vbo_calculated
+    C0240_PUMP_FLOW_DELTA: Final = "calculations.Unknown_Calculation_240"
     # 240: Kelvin("VBO_Temp_Spread_Ist"), / 10, measurement, delta - ait_vbo_delta
     # 241: Percent2("HUP_PWM"),
+    C0242_CIRCULATION_PUMP_DELTA_TARGET: Final = "calculations.Unknown_Calculation_242"
     # 242: Kelvin("HUP_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_delta_calculated
+    C0243_CIRCULATION_PUMP_DELTA: Final = "calculations.Unknown_Calculation_243"
     # 243: Kelvin("HUP_Temp_Spread_Ist"), / 10, measurement, delta - ait_hup_delta
     C0257_CURRENT_HEAT_OUTPUT: Final = "calculations.Heat_Output"
 
@@ -514,6 +518,10 @@ class SensorKey(StrEnum):
     ANALOG_OUT2 = "analog_out2"
     CURRENT_HEAT_OUTPUT = "current_heat_output"
     PUMP_FREQUENCY = "pump_frequency"
+    PUMP_FLOW_DELTA_TARGET = "pump_flow_delta_target"
+    PUMP_FLOW_DELTA = "pump_flow_delta"
+    CIRCULATION_PUMP_DELTA_TARGET = "circulation_pump_delta_target"
+    CIRCULATION_PUMP_DELTA = "circulation_pump_delta"
     HEAT_SOURCE_OUTPUT_TEMPERATURE = "heat_source_output_temperature"
     ERROR_REASON = "error_reason"
     FLOW_IN_TEMPERATURE = "flow_in_temperature"
