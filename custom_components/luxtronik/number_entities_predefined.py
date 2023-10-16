@@ -515,7 +515,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LP.P0042_MK1_TYPE,
+        visibility=LP.P0042_MIXING_CIRCUIT1_TYPE,
     ), 
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK2,
@@ -529,7 +529,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LP.P0130_MK2_TYPE,
+        visibility=LP.P0130_MIXING_CIRCUIT2_TYPE,
     ), 
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK3,
@@ -543,7 +543,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LP.P0780_MK3_TYPE,
+        visibility=LP.P0780_MIXING_CIRCUIT3_TYPE,
     ), 
     # endregion Cooling
 ]
