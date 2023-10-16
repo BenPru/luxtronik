@@ -496,6 +496,18 @@
             },
             "room_thermostat_temperature_target": {
                 "name": "Room thermostat target"
+            },
+            "pump_flow_delta_target": {
+                "name": "Pump flow delta target"
+            },
+            "pump_flow_delta": {
+                "name": "Pump flow delta"
+            },
+            "circulation_pump_delta_target": {
+                "name": "Circulation pump delta target"
+            },
+            "circulation_pump_delta": {
+                "name": "Circulation pump delta"
             }
         },
         "climate": {
