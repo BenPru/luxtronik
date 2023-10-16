@@ -10,13 +10,12 @@ The latest integration version supports Home Assistant 2023.9.*, but is only a p
 * This release has no more language selection. The HA backend language is used.
 * Some entities which can not detected automaticly are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
 * The RBE Room Temperature Sensor is currently not implemented.
+* The update sensor "rings" for new firmware versions, but the "Install"-Button has no function. The Firmware has to be installed manually. An the Install-Button is necessary to get notified.
 * In the integration configuration you can set a ha sensor id for the indoor temperature value.
 
 > :warning: **Known Issues** :warning:  
 * Runtime warning "untimeWarning: coroutine ... was never awaited ...". [#116](https://github.com/BenPru/luxtronik/issues/116) [#138](https://github.com/BenPru/luxtronik/issues/138) [#108](https://github.com/BenPru/luxtronik/issues/108) Please don't create tickets for this!
 * Cooling is not full implemented! [#128]([url](https://github.com/BenPru/luxtronik/issues/128))
-* Firmware Update sensor is not "ringing".
-
 
 This component has been created to be used with Home Assistant.
 
