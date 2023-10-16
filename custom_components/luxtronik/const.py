@@ -241,7 +241,7 @@ class LuxParameter(StrEnum):
     P0016_HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK1ABS_akt"  # 0
     )
-    P0042_MK1_TYPE: Final = "parameters.ID_Einst_MK1Typ_akt"
+    P0042_MIXING_CIRCUIT1_TYPE: Final = "parameters.ID_Einst_MK1Typ_akt"
     P0047_DHW_THERMAL_DESINFECTION_TARGET: Final = "parameters.ID_Einst_LGST_akt"
     P0049_PUMP_OPTIMIZATION: Final = "parameters.ID_Einst_Popt_akt"
     P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"
@@ -264,10 +264,10 @@ class LuxParameter(StrEnum):
     P0123_SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE: Final = (
         "parameters.ID_Einst_TDC_Aus_akt"
     )
-    P0130_MK2_TYPE: Final = "parameters.ID_Einst_MK2Typ_akt"
+    P0130_MIXING_CIRCUIT2_TYPE: Final = "parameters.ID_Einst_MK2Typ_akt"
     P0132_COOLING_TARGET_TEMPERATURE_MK1: Final = "parameters.ID_Sollwert_KuCft1_akt"
     P0133_COOLING_TARGET_TEMPERATURE_MK2: Final = "parameters.ID_Sollwert_KuCft2_akt"
-    P0780_MK3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"
+    P0780_MIXING_CIRCUIT3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"
     P0149_FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = "parameters.ID_Einst_TVLmax_akt"
     P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
         "parameters.ID_Einst_TDC_Max_akt"
