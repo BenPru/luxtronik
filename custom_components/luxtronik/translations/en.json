@@ -184,7 +184,7 @@
                 "name": "Efficiency pump minimal"
             },
             "cooling_threshold_temperature": {
-                "name": "T_outside >"
+                "name": "Minimal outdoor temperature for cooling mode"
             },
             "cooling_start_delay_hours": {
                 "name": "Start delay"
