@@ -142,7 +142,7 @@
                 "name": "HC3 Heating curve night"
             },
             "dhw_target_temperature": {
-                "name": "Target"
+                "name": "Domestic hot water target"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermal desinfection target temperature"
@@ -439,9 +439,6 @@
             },
             "dhw_temperature": {
                 "name": "Domestic hot water"
-            },
-            "dhw_target_temperature": {
-                "name": "Domestic hot water target"
             },
             "dhw_operation_hours": {
                 "name": "Operation hours"
