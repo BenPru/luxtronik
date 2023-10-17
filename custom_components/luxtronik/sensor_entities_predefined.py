@@ -379,7 +379,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTemperature.KELVIN,
         factor=0.1,
         entity_registry_enabled_default=False,
-        invisible_if_value=0.0,
     ),
     descr(
         key=SensorKey.PUMP_FLOW_DELTA,
@@ -389,7 +388,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTemperature.KELVIN,
         factor=0.1,
         entity_registry_enabled_default=False,
-        invisible_if_value=0.0,
     ),
     descr(
         key=SensorKey.CIRCULATION_PUMP_DELTA_TARGET,
@@ -399,7 +397,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTemperature.KELVIN,
         factor=0.1,
         entity_registry_enabled_default=False,
-        invisible_if_value=0.0,
     ),
     descr(
         key=SensorKey.CIRCULATION_PUMP_DELTA,
@@ -409,7 +406,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTemperature.KELVIN,
         factor=0.1,
         entity_registry_enabled_default=False,
-        invisible_if_value=0.0,
     ),
     descr(
         key=SensorKey.HEAT_SOURCE_OUTPUT_TEMPERATURE,
