@@ -184,7 +184,7 @@
                 "name": "Effizienzpumpe Minimal"
             },
             "cooling_threshold_temperature": {
-                "name": "T_aussen >"
+                "name": "minimale Au\u00dfentemperatur f\u00fcr den K\u00fchlbetrieb"
             },
             "cooling_start_delay_hours": {
                 "name": "Start Verz\u00f6gerung"
