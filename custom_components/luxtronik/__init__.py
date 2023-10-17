@@ -102,7 +102,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         config_entry.version = 4
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
-    if config_entry.version == 4 or config_entry.version == 5:
+    if config_entry.version >= 4:
         # Ensure sensor prefix:
         prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
         ent_reg = async_get(hass)
@@ -256,6 +256,15 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         new_data[CONF_MAX_DATA_LENGTH] = DEFAULT_MAX_DATA_LENGTH
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
+    if config_entry.version == 6:
+        _up("cooling_threshold_temperature", SK.COOLING_OUTDOOR_TEMP_THRESHOLD, P.NUMBER)
+        _up("cooling_start_delay_hours", SK.COOLING_START_DELAY_HOURS, P.NUMBER)
+        _up("cooling_stop_delay_hours", SK.COOLING_STOP_DELAY_HOURS, P.NUMBER)
+        
+        new_data = {**config_entry.data}
+        config_entry.version = 7
+        hass.config_entries.async_update_entry(config_entry, data=new_data)
+        
     LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True

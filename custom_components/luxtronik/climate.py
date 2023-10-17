@@ -53,14 +53,25 @@ from .model import LuxtronikClimateDescription
 MIN_TEMPERATURE = 8
 MAX_TEMPERATURE = 28
 
-HVAC_ACTION_MAPPING: dict[str, str] = {
+HVAC_ACTION_MAPPING_HEAT: dict[str, str] = {
     LuxOperationMode.heating.value: HVACAction.HEATING.value,
-    LuxOperationMode.domestic_water.value: HVACAction.HEATING.value,
+    LuxOperationMode.domestic_water.value: HVACAction.IDLE.value,
     LuxOperationMode.swimming_pool_solar.value: STATE_UNKNOWN,
     LuxOperationMode.evu.value: HVACAction.IDLE.value,
     LuxOperationMode.defrost.value: HVACAction.IDLE.value,
     LuxOperationMode.no_request.value: HVACAction.IDLE.value,
     LuxOperationMode.heating_external_source.value: HVACAction.HEATING.value,
+    LuxOperationMode.cooling.value: HVACAction.IDLE.value,
+}
+
+HVAC_ACTION_MAPPING_COOL: dict[str, str] = {
+    LuxOperationMode.heating.value: HVACAction.IDLE.value,
+    LuxOperationMode.domestic_water.value: HVACAction.IDLE.value,
+    LuxOperationMode.swimming_pool_solar.value: STATE_UNKNOWN,
+    LuxOperationMode.evu.value: HVACAction.IDLE.value,
+    LuxOperationMode.defrost.value: HVACAction.IDLE.value,
+    LuxOperationMode.no_request.value: HVACAction.IDLE.value,
+    LuxOperationMode.heating_external_source.value: HVACAction.IDLE.value,
     LuxOperationMode.cooling.value: HVACAction.COOLING.value,
 }
 
@@ -89,7 +100,8 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         key=SensorKey.HEATING,
         hvac_modes=[HVACMode.HEAT, HVACMode.OFF],
         hvac_mode_mapping=HVAC_MODE_MAPPING_HEAT,
-        preset_modes=[PRESET_NONE, PRESET_COMFORT, PRESET_AWAY, PRESET_BOOST],
+        hvac_action_mapping=HVAC_ACTION_MAPPING_HEAT,
+        preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.AUX_HEAT
         | ClimateEntityFeature.PRESET_MODE  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
@@ -112,11 +124,12 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         key=SensorKey.COOLING,
         hvac_modes=[HVACMode.COOL, HVACMode.OFF],
         hvac_mode_mapping=HVAC_MODE_MAPPING_COOL,
+        hvac_action_mapping=HVAC_ACTION_MAPPING_COOL,
         preset_modes=[PRESET_NONE],
         supported_features=ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
         # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0110_CURRENT_COOL_TARGET,
+        luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.cooling.value,
@@ -231,7 +244,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             data, self.entity_description.luxtronik_key_current_action.value
         )
         self._attr_hvac_action = (
-            None if lux_action is None else HVAC_ACTION_MAPPING[lux_action]
+            None if lux_action is None else self.entity_description.hvac_action_mapping[lux_action]
         )
         self._attr_is_aux_heat = (
             None if mode is None else mode == LuxMode.second_heatsource.value
@@ -250,18 +263,26 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         correction_factor = get_sensor_data(
             data, self.entity_description.luxtronik_key_correction_factor.value, False
         )
+        #LOGGER.info(f"self._attr_target_temperature={self._attr_target_temperature}")
+        #LOGGER.info(f"self._attr_current_temperature={self._attr_current_temperature}")
+        #LOGGER.info(f"correction_factor={correction_factor}")
+        #LOGGER.info(f"lux_action={lux_action}")
+        #LOGGER.info(f"_attr_hvac_action={self._attr_hvac_action}")
         if (
             self._attr_target_temperature is not None
             and self._attr_current_temperature is not None  # noqa: W503
             and correction_factor is not None  # noqa: W503
         ):
             delta_temp = self._attr_target_temperature - self._attr_current_temperature
-            correction = delta_temp * correction_factor
+            correction = round(delta_temp * (correction_factor/100.0), 1)  # correction_factor is in %, so need to divide by 100
             key_correction_target = (
                 self.entity_description.luxtronik_key_correction_target.value
             )
             correction_current = get_sensor_data(data, key_correction_target)
+            #LOGGER.info(f"correction_current={correction_current}")
+            #LOGGER.info(f"correction={correction}")
             if correction_current is None or correction_current != correction:
+                #LOGGER.info(f'key_correction_target={key_correction_target.split(".")[1]}')
                 _ = self.coordinator.write(
                     key_correction_target.split(".")[1], correction
                 )  # mypy: allow-unused-coroutine

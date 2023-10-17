@@ -142,7 +142,7 @@
                 "name": "MK3 Heizkurve Nachts"
             },
             "dhw_target_temperature": {
-                "name": "Soll"
+                "name": "Brauchwasser soll"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
@@ -182,6 +182,24 @@
             },
             "efficiency_pump_minimal": {
                 "name": "Effizienzpumpe Minimal"
+            },
+            "cooling_threshold_temperature": {
+                "name": "minimale Au\u00dfentemperatur f\u00fcr den K\u00fchlbetrieb"
+            },
+            "cooling_start_delay_hours": {
+                "name": "Start Verz\u00f6gerung"
+            },
+            "cooling_stop_delay_hours": {
+                "name": "Ende Verz\u00f6gerung"
+            },
+			"cooling_target_temperature_mk1": {
+				"name": "K\u00fchlung Ziel"
+            },
+			"cooling_target_temperature_mk2": {
+				"name": "K\u00fchlung Ziel"
+            },
+			"cooling_target_temperature_mk3": {
+				"name": "K\u00fchlung Ziel"
             }
         },
         "sensor": {
@@ -474,7 +492,7 @@
                 "name": "Raum Thermostat"
             },
             "room_thermostat_temperature_target": {
-                "name": "Raum Thermostat Ziel"
+                "name": "Raum Thermostat Soll"
             },
             "pump_flow_delta_target": {
                 "name": "Soleumw\u00e4lzpumpe Delta Ziel"

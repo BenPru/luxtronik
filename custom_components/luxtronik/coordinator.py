@@ -412,7 +412,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if description.visibility == LV.V0059A_DHW_CHARGING_PUMP:
             return not self._detect_dhw_circulation_pump_present()
         if description.visibility == LV.V0005_COOLING:
-            return not self.detect_cooling_present()
+            return  self.detect_cooling_present()
         visibility_result = self.get_value(description.visibility)
         if visibility_result is None:
             LOGGER.warning("Could not load visibility %s", description.visibility)
@@ -427,6 +427,23 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             > self.firmware_version_minor  # noqa: W503
         ):
             return False
+        if description.visibility in [
+            LP.P0042_MIXING_CIRCUIT1_TYPE,
+            LP.P0130_MIXING_CIRCUIT2_TYPE,
+            LP.P0780_MIXING_CIRCUIT3_TYPE,
+        ]:
+            sensor_value = self.get_value(description.visibility)
+            return sensor_value in [
+                LuxMkTypes.cooling.value,
+                LuxMkTypes.heating_cooling.value,
+            ]
+        if description.visibility in [
+            LV.V0038_SOLAR_COLLECTOR,
+            LV.V0039_SOLAR_BUFFER,
+            LV.V0250_SOLAR,
+        ]:
+            return self._detect_solar_present()        
+        
         if not self.device_key_active(description.device_key):
             return False
         if description.invisible_if_value is not None:
@@ -502,12 +519,17 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return (
             bool(self.get_value(LV.V0250_SOLAR))
             or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
-            or bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
-            or float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))  # noqa: W503
-            != 5.0  # noqa: W503
-            or bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
-            or float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))  # noqa: W503
-            != 150.0  # noqa: W503
+            or 
+            ( bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
+              and 
+              float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))  # noqa: W503
+              != 5.0  # noqa: W503
+            )
+            or 
+            ( bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
+              and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))  # noqa: W503
+              != 150.0  # noqa: W503
+            )
         )
 
     def _detect_dhw_circulation_pump_present(self) -> bool:
@@ -521,22 +543,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Detect and returns True if Cooling is present."""
         cooling_present = len(self._detect_cooling_mk()) > 0
         return cooling_present
-
-    def detect_cooling_target_temperature_sensor(self):
-        """
-        If only 1 MK parameter related to cooling is returned.
-
-        The corresponding cooling_target_temperature sensor is returned.
-        """
-        mk_param = self._detect_cooling_mk()
-        if len(mk_param) == 1:
-            mk_number = re.findall("[0-9]+", mk_param[0])[0]
-            cooling_target_temperature_sensor = (
-                f"parameters.ID_Sollwert_KuCft{mk_number}_akt"
-            )
-        else:
-            cooling_target_temperature_sensor = None
-        return cooling_target_temperature_sensor
 
     async def async_shutdown(self) -> None:
         """Make sure a coordinator is shut down as well as it's connection."""
