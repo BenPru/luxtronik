@@ -142,7 +142,7 @@
                 "name": "MK3 Heizkurve Nachts"
             },
             "dhw_target_temperature": {
-                "name": "Soll"
+                "name": "Brauchwasser soll"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
@@ -439,9 +439,6 @@
             },
             "dhw_temperature": {
                 "name": "Brauchwasser"
-            },
-            "dhw_target_temperature": {
-                "name": "Brauchwasser Soll"
             },
             "dhw_operation_hours": {
                 "name": "Betriebsstunden"
