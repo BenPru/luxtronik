@@ -21,6 +21,7 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    LOGGER,
     DeviceKey,
     LuxCalculation as LC,
     LuxOperationMode,
@@ -191,8 +192,8 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                 self._attr_cache[SA.EVU_SECOND_END_TIME] = time_now
 
         # region Workaround Luxtronik Bug
-        # Status shows heating but status 3 = no request! - Inverter heater is active but not the heatpump!
         else:
+            # Status shows heating but status 3 = no request! - Inverter heater is active but not the heatpump!
             sl1 = self._get_value(LC.C0117_STATUS_LINE_1)
             sl3 = self._get_value(LC.C0119_STATUS_LINE_3)
             add_circ_pump = self._get_value(LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
@@ -211,6 +212,39 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             if sl1 in s1_workaround and sl3 in s3_workaround and not add_circ_pump:
                 # ignore pump forerun
                 self._attr_native_value = LuxOperationMode.no_request.value
+            
+            # Status shows heating or no_request, but actual status is thermal_desinfection
+            # Fixing the part where the heatpump is running
+            if sl3 == LuxStatus3Option.thermal_desinfection:
+                # map thermal desinfection to Domestic Water iso Heating
+                self._attr_native_value = LuxOperationMode.domestic_water.value
+            
+            # Status shows heating or no_request, but actual status is thermal_desinfection
+            # Fixing the part where the heatpump is not running; (only) using 2nd heatsource
+            s3_workaround: list[str | None] = [
+                LuxStatus3Option.no_request,
+                LuxStatus3Option.cycle_lock,
+            ]
+            if sl3 in s3_workaround:
+                DHW_recirculation = self._get_value(LC.C0038_DHW_RECIRCULATION_PUMP)
+                AddHeat           = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
+                if AddHeat and DHW_recirculation:
+                    # more fixes to detect thermal desinfection sequences 
+                    self._attr_native_value = LuxOperationMode.domestic_water.value
+             
+            # Workaround to detect passive cooling operation mode
+            if self._attr_native_value == LuxOperationMode.no_request.value:
+                # detect passive cooling
+                if self.coordinator.detect_cooling_present():
+                    T_in       = self._get_value(LC.C0010_FLOW_IN_TEMPERATURE)
+                    T_out      = self._get_value(LC.C0011_FLOW_OUT_TEMPERATURE)
+                    T_heat_in  = self._get_value(LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
+                    T_heat_out = self._get_value(LC.C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE)
+                    Flow_WQ    = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
+                    if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0):
+                        #LOGGER.info(f"Cooling mode detected!!!")
+                        self._attr_native_value = LuxOperationMode.cooling.value
+                    
         # endregion Workaround Luxtronik Bug
 
         self._last_state = self._attr_native_value
