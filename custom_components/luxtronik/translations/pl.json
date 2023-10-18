@@ -411,7 +411,7 @@
                 "name": "Ciep\u0142a woda u\u017Cytkowa"
             },
             "dhw_temperature": {
-                "name": "Ciep\u0142a woda u\u017Cytkowa"
+                "name": "Temperatura ciep\u0142ej wody u\u017Cytkowej"
             },
             "dhw_operation_hours": {
                 "name": "Godziny pracy ciep\u0142ej wody u\u017Cytkowej"
