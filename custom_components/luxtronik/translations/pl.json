@@ -58,7 +58,7 @@
                 "name": "Ogrzewanie"
             },
             "domestic_water": {
-                "name": "Woda bie\u017C\u0105ca"
+                "name": "Ciep\u0142a woda"
             },
             "cooling": {
                 "name": "Ch\u0142odzenie"
@@ -401,7 +401,7 @@
                 "name": "Ciep\u0142a woda u\u017Cytkowa"
             },
             "dhw_temperature": {
-                "name": "Ciep\u0142a woda u\u017Cytkowa"
+                "name": "Temperatura ciep\u0142ej wody u\u017Cytkowej"
             },
             "dhw_operation_hours": {
                 "name": "Godziny pracy ciep\u0142ej wody u\u017Cytkowej"
