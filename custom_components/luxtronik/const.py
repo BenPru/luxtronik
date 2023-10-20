@@ -638,14 +638,6 @@ class SensorAttrKey(StrEnum):
     """Luxtronik sensor attribute keys."""
 
     LUXTRONIK_KEY = "Luxtronik_Key"
-    LUXTRONIK_KEY_CURRENT_ACTION = "luxtronik_key_current_action"
-    LUXTRONIK_KEY_TARGET_TEMPERATURE = "luxtronik_key_target_temperature"
-    LUXTRONIK_KEY_CORRECTION_FACTOR = "luxtronik_key_correction_factor"
-    LUXTRONIK_KEY_CORRECTION_TARGET = "luxtronik_key_correction_target"
-    LUXTRONIK_KEY_CURRENT_TEMPERATURE = "luxtronik_key_current_temperature"
-    LUXTRONIK_ACTION_HEATING = "luxtronik_action_heating"
-    LUXTRONIK_KEY_TARGET_TEMPERATURE_HIGH = "luxtronik_key_target_temperature_high"
-    LUXTRONIK_KEY_TARGET_TEMPERATURE_LOW = "luxtronik_key_target_temperature_low"
 
     STATUS_TEXT = "status_text"
     LAST_THERMAL_DESINFECTION = "last_thermal_desinfection"
@@ -675,6 +667,5 @@ class SensorAttrKey(StrEnum):
     TIMER_BLOCK_DHW = "Sperre WW? ID_WEB_Time_SBW_akt"
     TIMER_DEFROST = "Abtauen in ID_WEB_Time_AbtIn"
     TIMER_HOT_GAS = "ID_WEB_Time_Heissgas"
-
 
 # endregion Attr Keys

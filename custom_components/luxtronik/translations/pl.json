@@ -155,24 +155,6 @@
             },
             "heating_night_lowering_to_temperature": {
                 "name": "Ogrzewanie nocne obni\u017Caj\u0105ce temp"
-            },
-            "cooling_threshold_temperature": {
-                "name": "T_outside >"
-            },
-            "cooling_start_delay_hours": {
-                "name": "Start delay"
-            },
-            "cooling_stop_delay_hours": {
-                "name": "Stop delay"
-            },
-			"cooling_target_temperature_mk1": {
-				"name": "Cooling target temperature"
-            },
-			"cooling_target_temperature_mk2": {
-				"name": "Cooling target temperature"
-            },
-			"cooling_target_temperature_mk3": {
-				"name": "Cooling target temperature"
             }
         },
         "sensor": {
@@ -187,6 +169,14 @@
                     "heating external source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o ogrzewania",
                     "cooling": "Ch\u0142odzenie",
                     "no request": "Bezczynny (brak \u017C\u0105dania)"
+                },
+                "state_attributes": {
+                    "evu_text": {
+                        "state": {
+                            "evu_until": "Czas blokady d\u0142u\u017Cszy o {evu_time} minut.2",
+                            "evu_in": "Czas blokady za {evu_time} minut."
+                        }
+                    }
                 }
             },
             "error_reason": {

@@ -66,6 +66,28 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
     entity_description: LuxtronikSensorDescription
     _coordinator: LuxtronikCoordinator
 
+    _unrecorded_attributes = frozenset(
+        {
+            SA.SWITCH_GAP,
+            SA.CODE,
+            SA.CAUSE,
+            SA.REMEDY,
+            SA.TIMER_HEATPUMP_ON,
+            SA.TIMER_ADD_HEAT_GENERATOR_ON,
+            SA.TIMER_SEC_HEAT_GENERATOR_ON,
+            SA.TIMER_NET_INPUT_DELAY,
+            SA.TIMER_SCB_OFF,
+            SA.TIMER_SCB_ON,
+            SA.TIMER_COMPRESSOR_OFF,
+            SA.TIMER_HC_ADD,
+            SA.TIMER_HC_LESS,
+            SA.TIMER_TDI,
+            SA.TIMER_BLOCK_DHW,
+            SA.TIMER_DEFROST,
+            SA.TIMER_HOT_GAS,
+        }
+    )
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -148,6 +170,19 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     _attr_cache[SA.EVU_SECOND_START_TIME] = time.min
     _attr_cache[SA.EVU_SECOND_END_TIME] = time.min
 
+    _unrecorded_attributes = frozenset(
+        LuxtronikSensorEntity._unrecorded_attributes
+        | {
+            SA.STATUS_TEXT,
+            SA.STATUS_RAW,
+            SA.EVU_FIRST_START_TIME,
+            SA.EVU_FIRST_END_TIME,
+            SA.EVU_SECOND_START_TIME,
+            SA.EVU_SECOND_END_TIME,
+            SA.EVU_MINUTES_UNTIL_NEXT_EVENT,
+        }
+    )
+
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
@@ -156,7 +191,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        # super()._handle_coordinator_update_internal(data)
         super()._handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
@@ -250,29 +284,39 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         status_time = self._get_sensor_attr(
             f"sensor.{self._sensor_prefix}_status_time", SA.STATUS_TEXT
         )
-        line_1 = self._get_sensor_value(f"sensor.{self._sensor_prefix}_status_line_1")
-        line_2 = self._get_sensor_value(f"sensor.{self._sensor_prefix}_status_line_2")
+        line_1_state = self._get_sensor_value(
+            f"sensor.{self._sensor_prefix}_status_line_1"
+        )
+        line_2_state = self._get_sensor_value(
+            f"sensor.{self._sensor_prefix}_status_line_2"
+        )
         if status_time is None or status_time == STATE_UNAVAILABLE:
             return ""
-        if line_1 is None or line_1 == STATE_UNAVAILABLE:
+        if line_1_state is None or line_1_state == STATE_UNAVAILABLE:
             return ""
-        if line_2 is None or line_2 == STATE_UNAVAILABLE:
+        if line_2_state is None or line_2_state == STATE_UNAVAILABLE:
             return ""
-        line_1 = self.coordinator.get_sensor_value_text("status_line_1", line_1)
-        line_2 = self.coordinator.get_sensor_value_text("status_line_2", line_2)
+        line_1 = self.platform.platform_translations.get(
+            f"component.{DOMAIN}.entity.sensor.status_line_1.state.{line_1_state}"
+        )
+        line_2 = self.platform.platform_translations.get(
+            f"component.{DOMAIN}.entity.sensor.status_line_2.state.{line_2_state}"
+        )
         # Show evu end time if available
         evu_event_minutes = self._calc_next_evu_event_minutes()
         if evu_event_minutes is None:
             pass
         elif self.native_value == LuxOperationMode.evu.value:
-            evu_until = self.coordinator.get_text("evu_until").format(
-                evu_time=evu_event_minutes
+            text_locale = self.platform.platform_translations.get(
+                f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_until"
             )
+            evu_until = text_locale.format(evu_time=evu_event_minutes)
             return f"{evu_until} {line_1} {line_2} {status_time}."
         elif evu_event_minutes <= 30:
-            evu_in = self.coordinator.get_text("evu_in").format(
-                evu_time=evu_event_minutes
+            text_locale = self.platform.platform_translations.get(
+                f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_in"
             )
+            evu_in = text_locale.format(evu_time=evu_event_minutes)
             return f"{line_1} {line_2} {status_time}. {evu_in}"
         return f"{line_1} {line_2} {status_time}."
 

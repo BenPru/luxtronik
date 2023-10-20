@@ -26,7 +26,7 @@
                 "name": "Systemzustand"
             },
             "circulation_pump_heating": {
-                "name": "Umw\u00e4lzpumpe Heizung"
+                "name": "Umw\u00e4lzpumpe"
             },
             "additional_circulation_pump": {
                 "name": "Zusatzumw\u00e4lzpumpe"
@@ -142,7 +142,7 @@
                 "name": "MK3 Heizkurve Nachts"
             },
             "dhw_target_temperature": {
-                "name": "Brauchwasser soll"
+                "name": "Soll"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
@@ -184,7 +184,7 @@
                 "name": "Effizienzpumpe Minimal"
             },
             "cooling_threshold_temperature": {
-                "name": "minimale Au\u00dfentemperatur f\u00fcr den K\u00fchlbetrieb"
+                "name": "minimale Au\u00dfentemperatur"
             },
             "cooling_start_delay_hours": {
                 "name": "Start Verz\u00f6gerung"
@@ -192,14 +192,14 @@
             "cooling_stop_delay_hours": {
                 "name": "Ende Verz\u00f6gerung"
             },
-			"cooling_target_temperature_mk1": {
-				"name": "K\u00fchlung Ziel"
+	    "cooling_target_temperature_mk1": {
+                "name": "K\u00fchlung Ziel"
             },
-			"cooling_target_temperature_mk2": {
-				"name": "K\u00fchlung Ziel"
+	    "cooling_target_temperature_mk2": {
+                "name": "K\u00fchlung Ziel"
             },
-			"cooling_target_temperature_mk3": {
-				"name": "K\u00fchlung Ziel"
+	    "cooling_target_temperature_mk3": {
+                "name": "K\u00fchlung Ziel"
             }
         },
         "sensor": {
@@ -214,6 +214,14 @@
                     "heating external source": "Heizt aus externer Quelle",
                     "cooling": "K\u00fchlen",
                     "no request": "Leerlauf (keine Anforderung)"
+                },
+                "state_attributes": {
+                    "evu_text": {
+                        "state": {
+                            "evu_until": "Noch {evu_time} Minuten Netzsperre.",
+                            "evu_in": "Netzsperre in {evu_time} Minuten."
+                        }
+                    }
                 }
             },
             "error_reason": {

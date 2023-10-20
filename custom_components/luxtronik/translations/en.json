@@ -142,7 +142,7 @@
                 "name": "HC3 Heating curve night"
             },
             "dhw_target_temperature": {
-                "name": "Domestic hot water target"
+                "name": "Target"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermal desinfection target temperature"
@@ -184,7 +184,7 @@
                 "name": "Efficiency pump minimal"
             },
             "cooling_threshold_temperature": {
-                "name": "Minimal outdoor temperature for cooling mode"
+                "name": "Minimal outdoor temperature"
             },
             "cooling_start_delay_hours": {
                 "name": "Start delay"
@@ -192,14 +192,14 @@
             "cooling_stop_delay_hours": {
                 "name": "Stop delay"
             },
-			"cooling_target_temperature_mk1": {
-				"name": "Cooling target temperature"
+	    "cooling_target_temperature_mk1": {
+                "name": "Cooling target temperature"
             },
-			"cooling_target_temperature_mk2": {
-				"name": "Cooling target temperature"
+	    "cooling_target_temperature_mk2": {
+                "name": "Cooling target temperature"
             },
-			"cooling_target_temperature_mk3": {
-				"name": "Cooling target temperature"
+	    "cooling_target_temperature_mk3": {
+                "name": "Cooling target temperature"
             }
         },
         "sensor": {
@@ -214,6 +214,14 @@
                     "heating external source": "Heating external source",
                     "cooling": "Cooling",
                     "no request": "Idle (no request)"
+                },
+                "state_attributes": {
+                    "evu_text": {
+                        "state": {
+                            "evu_until": "{evu_time} minutes more locktime.",
+                            "evu_in": "Locktime in {evu_time} minutes."
+                        }
+                    }
                 }
             },
             "error_reason": {
