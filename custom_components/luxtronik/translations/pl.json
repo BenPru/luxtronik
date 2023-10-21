@@ -121,7 +121,7 @@
                 "name": "Krzywa grzewcza noc"
             },
             "dhw_target_temperature": {
-                "name": "Docelowa temperatura ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Docelowa temperatura ciep\u0142ej wody"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Docelowa temperatura dezynfekcji termicznej"
@@ -342,7 +342,7 @@
                 "name": "Czas stanu"
             },
             "outdoor_temperature_average": {
-                "name": "\u015Br. temperatura zewn\u0119trzna"
+                "name": "\u015Arednia temp. zewn\u0119trzna"
             },
             "compressor1_impulses": {
                 "name": "Impulsy spr\u0119\u017Carki 1"
