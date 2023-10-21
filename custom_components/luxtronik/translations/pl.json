@@ -186,7 +186,7 @@
                     "defrost": "Rozmra\u017Canie",
                     "heating external source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o ogrzewania",
                     "cooling": "Ch\u0142odzenie",
-                    "no request": "Bezczynny (brak \u017C\u0105dania)"
+                    "no request": "Brak zapotrzebowania"
                 }
             },
             "error_reason": {
