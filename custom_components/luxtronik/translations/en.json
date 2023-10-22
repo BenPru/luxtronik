@@ -301,8 +301,14 @@
                     "792": "LIN-connection lost",
                     "793": "Major VSS fault",
                     "-1": "Unknown error"
+                },
+                "cause": {
+                    "name": "Cause"
+                },
+                "remedy": {
+                    "name": "Remedy"
                 }
-            },
+        },
             "switchoff_reason": {
                 "name": "Switchoff reason",
                 "state": {
