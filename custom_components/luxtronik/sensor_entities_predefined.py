@@ -52,6 +52,7 @@ SENSORS_STATUS: list[descr] = [
         ],
         options=[e.value for e in LuxOperationMode],
         update_interval=UPDATE_INTERVAL_NORMAL,
+        translation_key="status",
     ),
 ]
 
@@ -89,7 +90,7 @@ SENSORS: list[descr] = [
         icon="mdi:numeric-1-circle",
         entity_registry_visible_default=False,
         device_class=SensorDeviceClass.ENUM,
-        options=[e.value for e in LuxStatus1Option]
+        options=[e.value for e in LuxStatus1Option],
         translation_key="status_line_1",
     ),
     descr(
