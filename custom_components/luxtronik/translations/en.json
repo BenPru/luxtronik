@@ -208,7 +208,7 @@
                 "state": {
                     "heating": "Heating",
                     "hot_water": "Domestic water",
-                    "swimming_pool/solar": "Pool / Solar",
+                    "swimming_pool_solar": "Pool / Solar",
                     "evu": "Grid lock - no power",
                     "defrost": "Defrost",
                     "heating external source": "Heating external source",
@@ -273,9 +273,9 @@
                     "759": "TDI message",
                     "760": "Defrosting fault",
                     "761": "LIN timeout/LIN-connection lost",
-                    "762": "sensor (evaporator intake)",
-                    "763": "sensor (compressor intake)",
-                    "764": "Sensor Compressor heater",
+                    "762": "sensor (compressor intake)",
+                    "763": "sensor (evaporator intake)",
+                    "764": "sensor (compressor heater)",
                     "765": "Overheating",
                     "766": "compressor's functional range",
                     "767": "STB E-Rod",
@@ -299,8 +299,29 @@
                     "790": "Major VSS fault",
                     "791": "Lost ModBus communication",
                     "792": "LIN-connection lost",
-                    "793": "Major VSS fault",
-                    "-1": "Unknown error"
+                    "793": "Inverter Temperature",
+                    "794": "Overvoltage",
+                    "795": "Undervoltage",
+                    "796": "Safety switch off",
+                    "797": "MLRH is not supported",
+                    "798": "ModBus connection lost Fan",
+                    "799": "ModBus connection lost ASB",
+                    "800": "Desuperheater-error",
+                    "801": "Heatpump no internet connection",
+                    "802": "Temperature electrical switch box",
+                    "803": "Temperature electrical switch box BLOCK",
+                    "804": "Sensor temperature electrical switch box",
+                    "805": "Sensor desuperheater",
+                    "806": "ModBus connection lost SEC",
+                    "807": "Lost ModBus communication",
+                    "808": "Hardware not supported, update Firmware",  
+		    "809": "Overheating hot gas (DSH)",
+                    "810": "Firmware versions parallel mode do not match",
+                    "811": "Check condensate pan. Call installer.",
+                    "812": "Maximum flow rate exceeded",
+                    "813": "Inverter not compatible. Call installer.",
+                    "814": "Defrosting sensor defect",
+                    "99999": "Unknown error"
                 },
                 "cause": {
                     "name": "Cause"
@@ -323,7 +344,7 @@
                     "8": "Lower limitation of use",
                     "9": "no request",
                     "11": "flow rate",
-                    "-1": "Unknown switchoff"
+                    "99999": "Unknown switchoff"
                 }
             },
             "status_line_1": {
@@ -336,7 +357,7 @@
                     "errorcode_slot": "Heatpump error code in slot 0",
                     "pump_forerun": "Pump forerun",
                     "defrost": "Defrost",
-                    "writing_on_LIN_connection": "Writing on LIN connection",
+                    "writing_on_lin_connection": "Writing on LIN connection",
                     "compressor_heating_up": "The Compressor is heating up",
                     "compressor_heater": "Compressor heater"
                 }
@@ -357,7 +378,7 @@
                     "cooling": "cooling",
                     "pump_forerun": "pump forerun",
                     "thermal_desinfection": "thermal desinfection",
-                    "swimming_pool/solar": "swimming pool/solar",
+                    "swimming_pool_solar": "swimming pool/solar",
                     "no_request": "no request",
                     "cycle_lock": "cycle lock",
                     "lock_time": "lock time",
