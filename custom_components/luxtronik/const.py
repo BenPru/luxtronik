@@ -413,6 +413,8 @@ class LuxCalculation(StrEnum):
     C0100_ERROR_REASON: Final = "calculations.ID_WEB_ERROR_Nr0"
     # TODO: !
     # C0105_ERROR_COUNTER: Final = "calculations.ID_WEB_AnzahlFehlerInSpeicher"
+    C0106_SWITCHOFF_REASON: Final = "calculations.ID_WEB_Switchoff_file_Nr0"
+    C0111_SWITCHOFF_TIME: Final = "calculations.ID_WEB_Switchoff_file_Time0"
     C0117_STATUS_LINE_1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
     C0118_STATUS_LINE_2: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile2"
     C0119_STATUS_LINE_3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
@@ -560,6 +562,7 @@ class SensorKey(StrEnum):
     CIRCULATION_PUMP_DELTA = "circulation_pump_delta"
     HEAT_SOURCE_OUTPUT_TEMPERATURE = "heat_source_output_temperature"
     ERROR_REASON = "error_reason"
+    SWITCHOFF_REASON = "switchoff_reason"
     FLOW_IN_TEMPERATURE = "flow_in_temperature"
     FLOW_OUT_TEMPERATURE = "flow_out_temperature"
     FLOW_OUT_TEMPERATURE_TARGET = "flow_out_temperature_target"
