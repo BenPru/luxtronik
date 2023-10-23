@@ -108,7 +108,7 @@ def state_as_number_or_none(state: State, default: float | None = None) -> float
     return default if not isinstance(result, float) or result is None else result
 
 
-async def _async_get_mac_address(hass: HomeAssistant, host: str) -> str | None:
+async def async_get_mac_address(hass: HomeAssistant, host: str) -> str | None:
     """Get mac address from host name, IPv4 address, or IPv6 address."""
     # Help mypy, which has trouble with the async_add_executor_job + partial call
     mac_address: str | None

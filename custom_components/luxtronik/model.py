@@ -28,7 +28,6 @@ from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.typing import StateType
 
 from .const import (
-    UPDATE_INTERVAL_NORMAL,
     UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
     FirmwareVersionMinor,
@@ -160,7 +159,7 @@ class LuxtronikClimateDescription(
     luxtronik_key_target_temperature: LuxParameter | LuxCalculation = LuxParameter.UNSET
     luxtronik_key_correction_factor: LuxParameter = LuxParameter.UNSET
     luxtronik_key_correction_target: LuxParameter = LuxParameter.UNSET
-    temperature_unit: str = UnitOfTemperature.CELSIUS   
+    temperature_unit: str = UnitOfTemperature.CELSIUS
 
 
 @dataclass

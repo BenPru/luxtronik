@@ -2,16 +2,13 @@
 # region Imports
 from __future__ import annotations
 
-from contextlib import suppress
 from datetime import datetime
-import locale
 from typing import Any
 
 from homeassistant.backports.enum import StrEnum
 from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
-from homeassistant.helpers.typing import UndefinedType
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -21,6 +18,7 @@ from homeassistant.util.dt import utcnow
 from .common import get_sensor_data
 from .const import (
     DeviceKey,
+    LOGGER,
     LuxCalculation as LC,
     LuxMode,
     LuxOperationMode,
@@ -41,6 +39,11 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     next_update: datetime | None = None
 
     _attr_cache: dict[SA, Any] = {}
+    _entity_component_unrecorded_attributes = frozenset(
+        {
+            SA.LUXTRONIK_KEY,
+        }
+    )
 
     def __init__(
         self,
@@ -50,6 +53,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     ) -> None:
         """Init LuxtronikEntity."""
         super().__init__(coordinator=coordinator)
+        self._device_info_ident = device_info_ident
         self._attr_extra_state_attributes = {
             SA.LUXTRONIK_KEY: f"{description.luxtronik_key.name[1:5]} {description.luxtronik_key.value}"
         }
@@ -71,7 +75,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 description
             )
         self.entity_description = description
-        self._attr_device_info = coordinator.device_infos[device_info_ident.value]
+        self._attr_device_info = coordinator.get_device(device_info_ident)
 
         translation_key = (
             description.key.value
@@ -85,33 +89,39 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
         await super().async_added_to_hass()
-        # try set locale for local formatting
-        with suppress(locale.Error):
-            ha_locale = f"{self.hass.config.language}_{self.hass.config.country}"
-            locale.setlocale(locale.LC_ALL, locale.normalize(ha_locale))
-
-        last_state = await self.async_get_last_state()
-        if last_state is None:
-            return
-        self._attr_state = last_state.state
-
-        for attr in self.entity_description.extra_attributes:
-            if not attr.restore_on_startup or attr.key not in last_state.attributes:
-                continue
-            self._attr_cache[attr.key] = self._restore_attr_value(
-                last_state.attributes[attr.key]
-            )
-
-        last_extra_data = await self.async_get_last_extra_data()
-        if last_extra_data is not None:
-            data: dict[str, Any] = last_extra_data.as_dict()
-            for attr in data:
-                setattr(self, attr, data.get(attr))
-
-        data_updated = f"{self.entity_id}_data_updated"
-        async_dispatcher_connect(
-            self.hass, data_updated, self._schedule_immediate_update
+        # Force device name:
+        self._attr_device_info = self.coordinator.get_device(
+            self._device_info_ident, self.platform
         )
+
+        try:
+            last_state = await self.async_get_last_state()
+            if last_state is None:
+                return
+            self._attr_state = last_state.state
+
+            for attr in self.entity_description.extra_attributes:
+                if not attr.restore_on_startup or attr.key not in last_state.attributes:
+                    continue
+                self._attr_cache[attr.key] = self._restore_attr_value(
+                    last_state.attributes[attr.key]
+                )
+
+            last_extra_data = await self.async_get_last_extra_data()
+            if last_extra_data is not None:
+                data: dict[str, Any] = last_extra_data.as_dict()
+                for attr in data:
+                    setattr(self, attr, data.get(attr))
+
+            data_updated = f"{self.entity_id}_data_updated"
+            async_dispatcher_connect(
+                self.hass, data_updated, self._schedule_immediate_update
+            )
+        except Exception as err:
+            LOGGER.error(
+                "Could not restore latest data (async_added_to_hass)",
+                exc_info=err,
+            )
 
     def _restore_attr_value(self, value: Any | None) -> Any:
         return value

@@ -102,33 +102,36 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         config_entry.version = 4
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
-    if config_entry.version >= 4:
-        # Ensure sensor prefix:
+    # Ensure sensor prefix:
+    prefix = None
+    ent_reg = None
+
+    def _prepare_up() -> None:
         prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
         ent_reg = async_get(hass)
 
-        def _up(ident: str, new_id: SK, platform: P = P.SENSOR) -> None:
-            entity_id = f"{platform}.{prefix}_{ident}"
-            new_ident = f"{platform}.{prefix}_{new_id}"
-            try:
-                ent_reg.async_update_entity(
-                    entity_id, new_entity_id=new_ident, new_unique_id=new_ident
-                )
-            except KeyError as err:
-                LOGGER.info(
-                    "Skip rename entity - Not existing: %s->%s",
-                    entity_id,
-                    new_ident,
-                    exc_info=err,
-                )
-            except ValueError as err:
-                LOGGER.warning(
-                    "Could not rename entity %s->%s", entity_id, new_ident, exc_info=err
-                )
-            except Exception as err:
-                LOGGER.error(
-                    "Could not rename entity %s->%s", entity_id, new_ident, exc_info=err
-                )
+    def _up(ident: str, new_id: SK, platform: P = P.SENSOR) -> None:
+        entity_id = f"{platform}.{prefix}_{ident}"
+        new_ident = f"{platform}.{prefix}_{new_id}"
+        try:
+            ent_reg.async_update_entity(
+                entity_id, new_entity_id=new_ident, new_unique_id=new_ident
+            )
+        except KeyError as err:
+            LOGGER.info(
+                "Skip rename entity - Not existing: %s->%s",
+                entity_id,
+                new_ident,
+                exc_info=err,
+            )
+        except ValueError as err:
+            LOGGER.warning(
+                "Could not rename entity %s->%s", entity_id, new_ident, exc_info=err
+            )
+        except Exception as err:
+            LOGGER.error(
+                "Could not rename entity %s->%s", entity_id, new_ident, exc_info=err
+            )
 
     if config_entry.version == 4:
         new_data = {**config_entry.data}
@@ -136,6 +139,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     if config_entry.version == 5:
+        _prepare_up()
         _up("heat_amount_domestic_water", SK.DHW_HEAT_AMOUNT)
         _up("domestic_water_energy_input", SK.DHW_ENERGY_INPUT)
         _up("domestic_water_temperature", SK.DHW_TEMPERATURE)
@@ -257,14 +261,17 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     if config_entry.version == 6:
-        _up("cooling_threshold_temperature", SK.COOLING_OUTDOOR_TEMP_THRESHOLD, P.NUMBER)
+        _prepare_up()
+        _up(
+            "cooling_threshold_temperature", SK.COOLING_OUTDOOR_TEMP_THRESHOLD, P.NUMBER
+        )
         _up("cooling_start_delay_hours", SK.COOLING_START_DELAY_HOURS, P.NUMBER)
         _up("cooling_stop_delay_hours", SK.COOLING_STOP_DELAY_HOURS, P.NUMBER)
-        
+
         new_data = {**config_entry.data}
         config_entry.version = 7
         hass.config_entries.async_update_entry(config_entry, data=new_data)
-        
+
     LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True

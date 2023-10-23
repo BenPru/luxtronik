@@ -4,21 +4,18 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
-from datetime import timedelta
 from functools import wraps
-import json
-import os.path
-import re
 import threading
 from types import MappingProxyType
-from typing import Any, Concatenate, Final, TypeVar, cast
+from typing import Any, Concatenate, TypeVar
 
 from typing_extensions import ParamSpec
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .common import correct_key_value
@@ -30,10 +27,8 @@ from .const import (
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_TIMEOUT,
     DOMAIN,
-    LANG_DEFAULT,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
-    PLATFORMS,
     UPDATE_INTERVAL_FAST,
     UPDATE_INTERVAL_NORMAL,
     DeviceKey,
@@ -78,9 +73,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     device_infos = dict[str, DeviceInfo]()
     update_reason_write = False
     client: Luxtronik = None
-    __content_locale__ = dict[Any, Any]()
-    __content_locale_texts__ = dict[Any, Any]()
-    __content_sensors_locale__ = dict[Any, Any]()
 
     def __init__(
         self,
@@ -92,6 +84,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         self.lock = threading.Lock()
         self.client = client
+        self._config = config
         super().__init__(
             hass,
             LOGGER,
@@ -99,8 +92,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             update_method=self._async_update_data,
             update_interval=UPDATE_INTERVAL_FAST,
         )
-        self._load_translations(hass)
-        self._create_device_infos(hass, config)
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
         """Connect and fetch data."""
@@ -216,74 +207,58 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             config=config,
         )
 
-    def _load_translations(self, hass: HomeAssistant):
-        """Load translations from file for device and entity names."""
-        lang = self._normalize_lang(hass.config.language)
-        self.__content_locale__ = self._load_lang_from_file(f"translations/{lang}.json")
-        self.__content_locale_texts__ = self._load_lang_from_file(
-            f"translations/texts.{lang}.json"
-        )
-        for platform in PLATFORMS:
-            fname = f"translations/{platform}.{LANG_DEFAULT}.json"
-            if self._exists_locale_file(self._build_filepath(fname)):
-                self.__content_sensors_locale__[platform] = self._load_lang_from_file(
-                    fname
-                )
-
-    def _normalize_lang(self, lang: str) -> str:
-        if lang is None:
-            return LANG_DEFAULT
-        lang = lang.lower()
-        if "-" in lang:
-            lang = lang.split("-")[0]
-        fname = self._build_filepath(f"translations/{lang}.json")
-        if not self._exists_locale_file(fname):
-            return LANG_DEFAULT
-        return lang
-
-    def _build_filepath(self, fname: str) -> str:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        return os.path.join(dir_path, fname)
-
-    def _exists_locale_file(self, fname: str) -> bool:
-        return os.path.isfile(fname)
-
-    def _load_lang_from_file(self, fname: str, log_warning=True) -> dict:
-        fname = self._build_filepath(fname)
-        if not self._exists_locale_file(fname):
-            if log_warning:
-                LOGGER.warning("_load_lang_from_file - file not found %s", fname)
-            return {}
-        with open(fname, encoding="utf8") as locale_file:
-            return json.load(locale_file)
+    def get_device(
+        self,
+        key: DeviceKey = DeviceKey.heatpump,
+        platform: EntityPlatform | None = None,
+    ) -> DeviceInfo:
+        if key not in self.device_infos:
+            self._create_device_infos(self.hass, self._config, platform)
+        device_info: DeviceInfo = self.device_infos.get(key)
+        if device_info["name"] == key:
+            device_info["name"] = self._build_device_name(key, platform)
+        return device_info
 
     def _create_device_infos(
         self,
         hass: HomeAssistant,
         config: Mapping[str, Any],
+        platform: EntityPlatform | None = None,
     ):
         host = config[CONF_HOST]
         dev = self.device_infos[DeviceKey.heatpump.value] = self._build_device_info(
-            DeviceKey.heatpump, host
+            DeviceKey.heatpump, host, platform
         )
         via = (
             DOMAIN,
             f"{self.unique_id}_{DeviceKey.heatpump.value}".lower(),
         )
         self.device_infos[DeviceKey.heating.value] = self._build_device_info(
-            DeviceKey.heating, host, via
+            DeviceKey.heating, host, platform, via
         )
         self.device_infos[DeviceKey.domestic_water.value] = self._build_device_info(
-            DeviceKey.domestic_water, host, via
+            DeviceKey.domestic_water, host, platform, via
         )
         self.device_infos[DeviceKey.cooling.value] = self._build_device_info(
-            DeviceKey.cooling, host, via
+            DeviceKey.cooling, host, platform, via
+        )
+
+    def _build_device_name(
+        self, key: DeviceKey, platform: EntityPlatform | None = None
+    ) -> str:
+        if platform is None:
+            return str(key.value)
+        return platform.platform_translations.get(
+            f"component.{DOMAIN}.entity.device.{key.value}.name"
         )
 
     def _build_device_info(
-        self, key: DeviceKey, host: str, via_device=None
+        self,
+        key: DeviceKey,
+        host: str,
+        platform: EntityPlatform | None = None,
+        via_device=None,
     ) -> DeviceInfo:
-        text = self.get_device_entity_title(key.value, "device")
         return DeviceInfo(
             identifiers={
                 (
@@ -292,7 +267,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 )
             },
             entry_type=None,
-            name=f"{text}",
+            name=self._build_device_name(key, platform),
             via_device=via_device,
             configuration_url=f"http://{host}/",
             connections={
@@ -310,55 +285,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             # default_manufacturer=self.manufacturer,
             # default_model=self.model,
         )
-
-    def get_text(self, key: str) -> str:
-        """Get a text in locale language."""
-        result = self._get_value_recursive(self.__content_locale_texts__, [key])
-        if result is not None:
-            return result
-        LOGGER.warning(
-            "Get_text key %s not found in",
-            key,
-        )
-        return key.replace("_", " ").title()
-
-    def get_device_entity_title(self, key: str, platform: Platform | str) -> str:
-        """Get a device or entity title text in locale language."""
-        result = self._get_value_recursive(
-            self.__content_locale__, ["entity", platform, key, "name"]
-        )
-        if result is not None:
-            return result
-        LOGGER.warning(
-            "Get_device_entity_title key %s.%s not found in",
-            platform,
-            key,
-        )
-        return key.replace("_", " ").title()
-
-    def get_sensor_value_text(
-        self, key: str, value: str, platform: Platform = Platform.SENSOR
-    ) -> str:
-        """Get a sensor value text."""
-        result = self._get_value_recursive(
-            self.__content_locale__, ["entity", platform, key, "state", value]
-        )
-        if result is not None:
-            return result
-        LOGGER.warning(
-            "Get_sensor_value_text key %s / value %s not found",
-            key,
-            value,
-        )
-        return key.replace("_", " ").title()
-
-    def _get_value_recursive(self, content: dict, keys: list[str]) -> str | None:
-        key = keys.pop(0)
-        if key not in content.keys():
-            return None
-        if len(keys) > 0:
-            return self._get_value_recursive(cast(dict, content.get(key)), keys)
-        return str(content.get(key))
 
     @property
     def serial_number(self) -> str:
@@ -519,16 +445,19 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return (
             bool(self.get_value(LV.V0250_SOLAR))
             or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
-            or 
-            ( bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
-              and 
-              float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))  # noqa: W503
-              != 5.0  # noqa: W503
+            or (
+                bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
+                and float(
+                    self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE)
+                )  # noqa: W503
+                != 5.0  # noqa: W503
             )
-            or 
-            ( bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
-              and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))  # noqa: W503
-              != 150.0  # noqa: W503
+            or (
+                bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
+                and float(
+                    self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE)
+                )  # noqa: W503
+                != 150.0  # noqa: W503
             )
         )
 

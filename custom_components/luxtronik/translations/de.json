@@ -26,7 +26,7 @@
                 "name": "Systemzustand"
             },
             "circulation_pump_heating": {
-                "name": "Umw\u00e4lzpumpe Heizung"
+                "name": "Umw\u00e4lzpumpe"
             },
             "additional_circulation_pump": {
                 "name": "Zusatzumw\u00e4lzpumpe"
@@ -142,7 +142,7 @@
                 "name": "MK3 Heizkurve Nachts"
             },
             "dhw_target_temperature": {
-                "name": "Brauchwasser soll"
+                "name": "Soll"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
@@ -184,7 +184,7 @@
                 "name": "Effizienzpumpe Minimal"
             },
             "cooling_threshold_temperature": {
-                "name": "minimale Au\u00dfentemperatur f\u00fcr den K\u00fchlbetrieb"
+                "name": "minimale Au\u00dfentemperatur"
             },
             "cooling_start_delay_hours": {
                 "name": "Start Verz\u00f6gerung"
@@ -192,14 +192,14 @@
             "cooling_stop_delay_hours": {
                 "name": "Ende Verz\u00f6gerung"
             },
-			"cooling_target_temperature_mk1": {
-				"name": "K\u00fchlung Ziel"
+            "cooling_target_temperature_mk1": {
+                "name": "K\u00fchlung Ziel"
             },
-			"cooling_target_temperature_mk2": {
-				"name": "K\u00fchlung Ziel"
+            "cooling_target_temperature_mk2": {
+                "name": "K\u00fchlung Ziel"
             },
-			"cooling_target_temperature_mk3": {
-				"name": "K\u00fchlung Ziel"
+            "cooling_target_temperature_mk3": {
+                "name": "K\u00fchlung Ziel"
             }
         },
         "sensor": {
@@ -214,6 +214,14 @@
                     "heating external source": "Heizt aus externer Quelle",
                     "cooling": "K\u00fchlen",
                     "no request": "Leerlauf (keine Anforderung)"
+                },
+                "state_attributes": {
+                    "evu_text": {
+                        "state": {
+                            "evu_until": "Noch {evu_time} Minuten Netzsperre.",
+                            "evu_in": "Netzsperre in {evu_time} Minuten."
+                        }
+                    }
                 }
             },
             "error_reason": {
@@ -293,6 +301,168 @@
                     "792": "LIN-Verbindung unterbrochen",
                     "793": "Schwerw. Inverter Fehler",
                     "-1": "Unbekannter Fehler"
+                },
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Zeitpunkt"
+                    },
+                    "cause": {
+                        "name": "Ursache",
+                        "state": {
+                            "701": "Niederdruckpressostat im K\u00e4ltekreis hat mehrmals angesprochen \u0028LW\u0029 oder l\u00e4nger als 20 Sekunden \u0028SW\u0029.",
+                            "702": "Nur bei L\u002fW-Ger\u00e4ten m\u00f6glich\u003a Niederdruck im K\u00e4ltekreis hat angesprochen. Nach einiger Zeit automatischer WP-Neuanlauf.",
+                            "703": "Nur bei L\u002fW-Ger\u00e4ten m\u00f6glich\u003a L\u00e4uft die W\u00e4rmepumpe und wird die Temperatur im Vorlauf \u003c 5 \u00b0C, wird auf Frostschutz erkannt.",
+                            "704": "Maximale Temperatur im Heissgas-K\u00e4ltekreis \u00fcberschritten. Automatischer WP-Neuanlauf nach hh\u003amm.",
+                            "705": "Nur bei L\u002fW-Ger\u00e4ten m\u00f6glich\u003a Motorschutz des Ventilators hat angesprochen.",
+                            "706": "Nur bei S\u002fW- und W\u002fW-Ger\u00e4ten m\u00f6glich\u003a Motorschutz der Sole- oder Brunnenwasserumw\u00e4lzpumpe oder des Verdichters hat angesprochen.",
+                            "707": "Bruch oder Kurzschluss der Kodierungsbr\u00fccke in WP nach der Ersteinschaltung.",
+                            "708": "Bruch oder Kurzschluss des R\u00fccklauff\u00fchlers.",
+                            "709": "Bruch oder Kurzschluss des Vorlauff\u00fchlers.\nKeine St\u00f6rabschaltung bei S\u002fW- und W\u002fW-Ger\u00e4ten.",
+                            "710": "Bruch oder Kurzschluss des Heissgasf\u00fchlers im K\u00e4ltekreis.",
+                            "711": "Bruch oder Kurzschluss des Aussentemperaturf\u00fchlers.\nKeine St\u00f6rabschaltung. Festwert auf -5 \u00b0C.",
+                            "712": "Bruch oder Kurzschluss des Warmwasserf\u00fchlers.\nKeine St\u00f6rabschaltung.",
+                            "713": "Bruch oder Kurzschluss des W\u00e4rmequellenf\u00fchlers \u0028Eintritt\u0029.",
+                            "714": "Thermische Einsatzgrenze der WP \u00fcberschritten.\nWarmwasserbereitung gesperrt f\u00fcr hh\u003amm.",
+                            "715": "Hochdruckpressostat im K\u00e4ltekreis hat angesprochen. Nach einiger Zeit automatischer WP-Neuanlauf.",
+                            "716": "Hochdruckpressostat im K\u00e4ltekreis hat mehrfach angesprochen.",
+                            "717": "Durchflussschalter bei W\u002fW-Ger\u00e4ten hat w\u00e4hrend der Vorsp\u00fclzeit oder des Betriebs angesprochen.",
+                            "718": "Nur bei L\u002fW-Ger\u00e4ten m\u00f6glich\u003a Aussentemperatur hat zul\u00e4ssigen Maximalwert \u00fcberschritten.",
+                            "719": "Nur bei L\u002fW-Ger\u00e4ten m\u00f6glich\u003a Aussentemperatur hat zul\u00e4ssigen Minimalwert unterschritten.",
+                            "720": "Nur bei S\u002fW- und W\u002fW-Ger\u00e4ten m\u00f6glich\u003a Temperatur am Verdampferaustritt ist auf WQ-Seite mehrfach unter den Sicherheitswert gefallen. Automatischer WP-Neuanlauf nach hh\u003amm.",
+                            "721": "Niederdruckpressostat im K\u00e4ltekreis hat angesprochen. Nach einiger Zeit automatischer WP-Neuanlauf \u0028SW und WW\u0029.",
+                            "722": "Temperaturspreizung im Heizbetrieb ist negativ \u0028\u003dfehlerhaft\u0029.",
+                            "723": "Temperaturspreizung im Warmwasserbetrieb ist negativ \u0028\u003dfehlerhaft\u0029.",
+                            "724": "Temperaturspreizung im Heizkreis ist w\u00e4hrend des Abtauens \u003e 15 K \u0028\u003dFrostgefahr\u0029.",
+                            "725": "Warmwasserbetrieb gest\u00f6rt, gew\u00fcnschte Speichertemperatur ist weit unterschritten.",
+                            "726": "Bruch oder Kurzschluss des Mischkreisf\u00fchlers.",
+                            "727": "Soledruckpressostat hat w\u00e4hrend Vorsp\u00fclzeit oder w\u00e4hrend des Betriebs angesprochen.",
+                            "728": "Bruch oder Kurzschluss des W\u00e4rmequellenf\u00fchlers am WQ-Austritt.",
+                            "729": "Verdichter nach dem Einschalten ohne Leistung.",
+                            "730": "Das Ausheizprogramm konnte eine VL-Temperaturstufe nicht im vorgegebenen Zeitintervall erreichen. Ausheizprogramm l\u00e4uft weiter.",
+                            "732": "Die Heizwassertemperatur von 16 \u00b0C wurde mehrfach unterschritten.",
+                            "733": "St\u00f6rmeldeeingang der Fremdstromanode hat angesprochen.",
+                            "734": "Fehler 733 liegt seit mehr als zwei Wochen an und Warmwasserbereitung ist gesperrt.",
+                            "735": "Nur bei eingebauter Comfort-\u002fErweiterungs-Platine m\u00f6glich\u003a Bruch oder Kurzschluss des F\u00fchlers Externe Energiequelle.",
+                            "736": "Nur bei eingebauter Comfort-\u002fErweiterungs-Platine m\u00f6glich\u003a Bruch oder Kurzschluss des F\u00fchlers Solarkollektor.",
+                            "737": "Nur bei eingebauter Comfort-\u002fErweiterungs-Platine m\u00f6glich\u003a Bruch oder Kurzschluss des F\u00fchlers Solarspeicher.",
+                            "738": "Nur bei eingebauter Comfort-\u002fErweiterungs-Platine m\u00f6glich\u003a Bruch oder Kurzschluss des F\u00fchlers Mischkreis2.",
+                            "750": "Bruch oder Kurzschluss des externen R\u00fccklauff\u00fchlers.",
+                            "751": "Phasenfolgerelais hat angesprochen.",
+                            "752": "Phasenfolgerelais oder Durchflussschalter hat angesprochen.",
+                            "755": "Ein Slave hat f\u00fcr mehr als 5 Minuten nicht geantwortet.",
+                            "756": "Ein Master hat f\u00fcr mehr als 5 Minuten nicht geantwortet.",
+                            "757": "Niederdruckpressostat bei WW-Ger\u00e4t hat mehrmals oder l\u00e4nger als 20 Sekunden angesprochen.",
+                            "758": "Die Abtauung wurde 5mal in Folge \u00fcber zu niedrige Vorlauftemperatur beendet.",
+                            "759": "Thermische Desinfektion konnte 3mal in Folge nicht korrekt durchgef\u00fchrt werden.",
+                            "760": "Abtauung wurde 5mal in Folge \u00fcber Maximalzeit beendet \u0028starker Wind trifft auf Verdampfer\u0029.",
+                            "761": "LIN-Timeout",
+                            "762": "F\u00fchlerfehler T\u00fc \u0028Ansaug Verdichter\u0029.",
+                            "763": "F\u00fchlerfehler T\u00fc1 \u0028Ansaug Verdampfer\u0029.",
+                            "764": "F\u00fchlerfehler Verdichterheizung.",
+                            "765": "\u00dcberhitzung l\u00e4nger als 5 Minuten unter 2K.",
+                            "766": "Betrieb 5 Minuten außerhalb des Einsatzbereichs des Verdichters.",
+                            "767": "STB des Heizstabs am SEC wurde aktiviert.",
+                            "770": "\u00dcberhitzung liegt \u00fcber einen l\u00e4ngeren Zeitraum unter dem Grenzwert.",
+                            "771": "\u00dcberhitzung liegt \u00fcber einen l\u00e4ngeren Zeitraum \u00fcber dem Grenzwert.",
+                            "776": "Verdichter arbeitet \u00fcber l\u00e4ngeren Zeitraum außerhalb seiner Einsatzgrenzen.",
+                            "777": "Expansionsventil defekt.",
+                            "778": "Niederdruckf\u00fchler defekt.",
+                            "779": "Hochdruckf\u00fchler defekt.",
+                            "780": "EVI-F\u00fchler defekt.",
+                            "781": "Temperaturf\u00fchler Fl\u00fcssig vor Ex-Ventil defekt.",
+                            "782": "Temperaturf\u00fchler EVI Sauggas defekt.",
+                            "783": "Kommunikation zwischen SEC u. Inverter gest\u00f6rt",
+                            "784": "Inverter gesperrt",
+                            "785": "Fehler im SEC Board festgestellt.",
+                            "786": "St\u00f6rung der Kommunikation zwischen SEC und HZIO von SEC festgestellt.",
+                            "787": "Verdichter meldet Fehler.",
+                            "788": "Fehler im Inverter",
+                            "789": "Bedienteil konnte keine Kodierung feststellen. Entweder ist die LIN-Verbindung unterbrochen oder der Kodierungswiderstand wird nicht erkannt.",
+                            "790": "Fehler in der Stromversorgung des Inverters \u002f Verdichters.",
+                            "791": "SEC-Board seit einiger Zeit nicht mehr erreichbar. 791 wird ausgel\u00f6st, wenn zwar eine HZIO-Platine gefunden worden ist \u0028ohne separate Kodierung\u0029, allerdings kein SEC-Board daran erkannt werden kann.",
+                            "792": "Es konnte keine Grundplatine und auch sonst keine Konfiguration gefunden werden.",
+                            "793": "Temperaturfehler im Inverter",
+                            "-1": "Unbekannter Fehler"
+                        }
+                    },
+                    "remedy": {
+                        "name": "Abhilfe",
+                        "state": {
+                            "701": "WP auf Leckage, Schaltpunkt Pressostat, Abtauung und TA-min \u00fcberpr\u00fcfen.",
+                            "702": "WP auf Leckage, Schaltpunkt Pressostat, Abtauung und TA-min \u00fcberpr\u00fcfen.",
+                            "703": "WP-Leistung, Abtauventil und Heizanlage \u00fcberpr\u00fcfen.",
+                            "704": "K\u00e4ltemittelmenge, Verdampfung, \u00dcberhitzung Vorlauf, R\u00fccklauf und WQ-min \u00fcberpr\u00fcfen.",
+                            "705": "Ventilator \u00fcberpr\u00fcfen.",
+                            "706": "Eingestellte Werte, Verdichter, BOSUP \u00fcberpr\u00fcfen.",
+                            "707": "Kodierungswiderstand in WP, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "708": "R\u00fccklauff\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "709": "Vorlauff\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "710": "Heissgasf\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "711": "Aussentemperaturf\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "712": "Warmwasserf\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "713": "W\u00e4rmequellenf\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen",
+                            "714": "Durchfluss Warmwasser, W\u00e4rmetauscher, Warmwasser-Temperatur und Umw\u00e4lzpumpe Warmwasser \u00fcberpr\u00fcfen.",
+                            "715": "Durchfluss HW, \u00fcberstr\u00f6mer, Temperatur und Kondensation \u00fcberpr\u00fcfen.",
+                            "716": "Durchfluss HW, \u00fcberstr\u00f6mer, Temperatur und Kondensation \u00fcberpr\u00fcfen.",
+                            "717": "Durchfluss, Schaltpunkt DFS, Filter, Luftfreiheit \u00fcberpr\u00fcfen",
+                            "718": "Aussentemperatur und eingestellten Wert \u00fcberpr\u00fcfen.",
+                            "719": "Aussentemperatur und eingestellten Wert \u00fcberpr\u00fcfen.",
+                            "720": "Durchfluss, Filter, Luftfreiheit, Temperatur \u00fcberpr\u00fcfen.",
+                            "721": "Schaltpunkt Pressostat, Durchfluss WQ-Seite \u00fcberpr\u00fcfen.",
+                            "722": "Funktion und Platzierung der Vor- und R\u00fccklauff\u00fchler \u00fcberpr\u00fcfen.",
+                            "723": "Funktion und Platzierung der Vor- und R\u00fccklauff\u00fchler \u00fcberpr\u00fcfen.",
+                            "724": "Funktion und Platzierung der Vor- und R\u00fccklauff\u00fchler, F\u00f6rderleistung HUP, \u00fcberstr\u00f6mer und Heizkreise \u00fcberpr\u00fcfen.",
+                            "725": "Umw\u00e4lzpumpe WW, Speicherf\u00fcllung, Absperrschieber und 3-Wege-Ventil \u00fcberpr\u00fcfen. Heizwasser und WW entl\u00fcften.",
+                            "726": "Mischkreisf\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "727": "Soledruck und Soledruckpressostat \u00fcberpr\u00fcfen.",
+                            "728": "W\u00e4rmequellenf\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "729": "Drehfeld und Verdichter \u00fcberpr\u00fcfen.",
+                            "730": "Leistungsbedarf w\u00e4hrend des Ausheizens \u00fcberpr\u00fcfen.",
+                            "732": "Mischer und Heizungsumw\u00e4lzpumpe \u00fcberpr\u00fcfen.",
+                            "733": "Verbindungsleitung Anode und Potenziostat \u00fcberpr\u00fcfen. WW-Speicher f\u00fcllen.",
+                            "734": "Fehler vor\u00fcbergehend quittieren, um Warmwasserbereitung wieder freizugeben. Fehler 733 beheben.",
+                            "735": "F\u00fchler Externe Energiequelle, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "736": "F\u00fchler Solarkollektor, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "737": "F\u00fchler Solarspeicher, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "738": "F\u00fchler Mischkreis2, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "750": "Externer R\u00fccklauff\u00fchler, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "751": "\u00fcberpr\u00fcfung Drehfeld und Phasenfolgerelais.",
+                            "752": "siehe Fehler Nr. 751 und Nr. 717",
+                            "755": "Netzwerkverbindung, Switch und IPAdressen pr\u00fcfen. Gegebenenfalls WP-Suche erneut ausf\u00fchren.",
+                            "756": "Netzwerkverbindung, Switch und IPAdressen pr\u00fcfen. Gegebenenfalls WP-Suche erneut ausf\u00fchren.",
+                            "757": "Bei 3maligem Auftreten dieser St\u00f6rung kann die Anlage nur vom authorisierten Servicepersonal freigeschaltet werden!",
+                            "758": "Durchfluss und Vorlaufsensor pr\u00fcfen",
+                            "759": "Einstellung Zweiter W\u00e4rmeerzeuger und Sicherheitstemperaturbegrenzer pr\u00fcfen",
+                            "760": "Ventilator und Verdampfer vor starkem Wind sch\u00fctzen",
+                            "761": "Kabel\u002fKontakt pr\u00fcfen",
+                            "762": "F\u00fchler pr\u00fcfen, evtl. tauschen",
+                            "763": "F\u00fchler pr\u00fcfen, evtl. tauschen",
+                            "764": "F\u00fchler pr\u00fcfen, evtl. tauschen",
+                            "765": "Bei Ersteinschaltung. Drehfeld pr\u00fcfen, sonst Kundendienst rufen",
+                            "766": "Drehfeld pr\u00fcfen",
+                            "767": "Heizstab \u00fcberpr\u00fcfen und Sicherung wieder reindr\u00fccken",
+                            "770": "Temperaturf\u00fchler, Drucksensor und Expansionsventil pr\u00fcfen",
+                            "771": "Temperaturf\u00fchler, Drucksensor, F\u00fcllmenge und Expansionsventil pr\u00fcfen",
+                            "776": "Thermodynamik pr\u00fcfen",
+                            "777": "Expansionsventil, Verbindungskabel und ggf. SEC-Board pr\u00fcfen",
+                            "778": "Sensor, Stecker und Verbindungsleitung pr\u00fcfen",
+                            "779": "Sensor, Stecker und Verbindungsleitung pr\u00fcfen",
+                            "780": "Sensor, Stecker und Verbindungsleitung pr\u00fcfen",
+                            "781": "Sensor, Stecker und Verbindungsleitung pr\u00fcfen",
+                            "782": "Sensor, Stecker und Verbindungsleitung pr\u00fcfen",
+                            "783": "Verbindungskabel, Entst\u00f6rkondensatoren und Verkabelung pr\u00fcfen",
+                            "784": "Komplette Anlage 2 Minuten lang spannungslos schalten. Bei wiederholtem Auftreten Inverter und Verdichter pr\u00fcfen",
+                            "785": "SEC Board austauschen",
+                            "786": "Kabelverbindung HZ\u002fIO SEC-Board pr\u00fcfen",
+                            "787": "St\u00f6rung quittieren. Falls Fehler mehrfach auftritt, autorisiertes Servicepersonal \u0028\u003d Kundendienst\u0029 rufen",
+                            "788": "Inverter pr\u00fcfen",
+                            "789": "Verbindungskabel LIN \u002f Kodierwiderstand pr\u00fcfen",
+                            "790": "Verkabelung, Inverter und Verdichter pr\u00fcfen",
+                            "791": "Sofern es sich um die SECKonfiguration handelt, das ModBus-Kabel zwischen HZIO und SEC Board pr\u00fcfen. Ebenso das SEC-Board pr\u00fcfen, ob alles blinkt, wie es soll. Falls es KEINE Konfiguration mit SEC-Board ist \u0028z.B., weil es sich um ein P184-Ger\u00e4t handelt\u0029, dann den Kodierungswiderstand der HZIO pr\u00fcfen.",
+                            "792": "Kodierungsstecker auf LINPlatine\u0028n\u0029 pr\u00fcfen",
+                            "793": "Fehler behebt sich selbst"
+                        }
+                    }
                 }
             },
             "switchoff_reason": {
@@ -459,16 +629,16 @@
                 "name": "R\u00fccklauf Soll Temperatur"
             },
             "operation_hours_heating": {
-                "name":"Betriebsstunden"
+                "name": "Betriebsstunden"
             },
             "heat_amount_heating": {
-                "name":"Z\u00e4hler W\u00e4rmemenge Heizung"
+                "name": "Z\u00e4hler W\u00e4rmemenge Heizung"
             },
             "heat_amount_flow_rate": {
-                "name":"Z\u00e4hler W\u00e4rmemenge Durchfluss"
+                "name": "Z\u00e4hler W\u00e4rmemenge Durchfluss"
             },
             "heat_source_flow_rate": {
-                "name":"Z\u00e4hler W\u00e4rmequelle Durchfluss"
+                "name": "Z\u00e4hler W\u00e4rmequelle Durchfluss"
             },
             "heat_energy_input": {
                 "name": "Eingesetzte Energie Heizung"
@@ -550,8 +720,8 @@
                     "timeout": "Wenn das Netzwerk oder die W\u00e4rmepumpe tr\u00e4ge sind, kann man hier fein einstellen.",
                     "max_data_length": "Wenn das Netzwerk oder die W\u00e4rmepumpe tr\u00e4ge sind, kann man hier fein einstellen."
                 }
-             },
-             "options": {
+            },
+            "options": {
                 "description": "Einstellungen zur Luxtronik W\u00e4rmepumpe {name}.\nDiese Einstellungen k\u00F6nnen auch sp\u00e4ter unter Integrationen ge\u00e4ndert werden.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor ID f\u00fcr die Innentemperatur",
@@ -563,7 +733,7 @@
                     "control_mode_home_assistant": "Wenn das Home Assistant Thermostat im Status Leerlauf ist, wird Luxtronik der Status Aus \u00fcbermittelt und Luxtronik kann dieses Element nicht starten.",
                     "ha_sensor_prefix": "Wichtig wenn mehreren W\u00e4rmepumpen verwendet werden.\nBei einer einzelnen kann einfach 'luxtronik' verwendet werden."
                 }
-             }
+            }
         }
     },
     "options": {
