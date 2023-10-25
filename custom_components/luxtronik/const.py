@@ -326,6 +326,9 @@ class LuxParameter(StrEnum):
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "parameters.ID_Waermemenge_ZWE"
     )
+    P1119_LAST_DEFROST_TIMESTAMP: Final = (
+        "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
+    )
     P1136_HEAT_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1136"
     P1137_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
