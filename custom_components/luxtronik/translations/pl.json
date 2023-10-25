@@ -162,13 +162,13 @@
                 "name": "Pompa ciep\u0142a",
                 "state": {
                     "heating": "Ogrzewanie",
-                    "hot water": "Ciep\u0142a woda",
-                    "swimming pool/solar": "Basen / Solar",
+                    "hot_water": "Ciep\u0142a woda",
+                    "swimming_pool_solar": "Basen / Solar",
                     "evu": "Blokada sieci - brak zasilania",
                     "defrost": "Rozmra\u017Canie",
-                    "heating external source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o ogrzewania",
+                    "heating_external_source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o ogrzewania",
                     "cooling": "Ch\u0142odzenie",
-                    "no request": "Brak zapotrzebowania"
+                    "no_request": "Brak zapotrzebowania"
                 },
                 "state_attributes": {
                     "evu_text": {
@@ -255,8 +255,95 @@
                     "791": "Utracono komunikacj\u0119 ModBus",
                     "792": "Utracono po\u0142\u0105czenie LIN",
                     "793": "Powa\u017Cna usterka VSS",
-                    "-1": "Nieznany b\u0142\u0105d"
-                }
+                    "99999": "Nieznany b\u0142\u0105d"
+                },
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Timestamp"
+                    },
+                    "cause": {
+                        "name": "Cause",
+                        "state": {
+                            "701": "B\u0142\u0105d niskiego ci\u015Bnienia.",
+                            "702": "Zatrzymanie przy niskim ci\u015Bnieniu\nRESETUJ automat.",
+                            "703": "\u015Brodek przeciw zamarzaniu\nProsz\u0119 wezwa\u0107 montera",
+                            "704": "B\u0142\u0105d gor\u0105cego gazu\nZresetuj w gg:mm",
+                            "705": "Zabezpieczenie silnika VEN\nProsz\u0119 wezwa\u0107 instalatora",
+                            "706": "Zabezpieczenie silnika BCP\nProsz\u0119 wezwa\u0107 instalatora",
+                            "707": "Kodowanie HP\nProsz\u0119 wezwa\u0107 instalatora",
+                            "708": "Czujnik powrotu\nProsz\u0119 wezwa\u0107 instalatora",
+                            "709": "Czujnik przep\u0142ywu\nProsz\u0119 wezwa\u0107 instalatora",
+                            "710": "Czujnik gor\u0105cego gazu\nProsz\u0119 wezwa\u0107 instalatora",
+                            "711": "Temperatura zewn\u0119trzna czujnik\nProsz\u0119 wezwa\u0107 instalatora",
+                            "712": "Czujnik ciep\u0142ej wody u\u017Cytkowej.\nProsz\u0119 wezwa\u0107 instalatora",
+                            "713": "Czujnik HS-on\nProsz\u0119 wezwa\u0107 instalatora",
+                            "714": "Gor\u0105cy gaz SW\nResetuj w gg:mm",
+                            "715": "Wy\u0142\u0105czenie wysokiego ci\u015Bnienia\nRESET auto.",
+                            "716": "Usterka wysokiego ci\u015Bnienia\nProsz\u0119 wezwa\u0107 instalatora",
+                            "717": "Przep\u0142yw HS\nProsz\u0119 wezwa\u0107 instalatora",
+                            "718": "Maks. temp. zew.\nRESET auto. w gg:mm",
+                            "719": "Min. temp. zew.\nRESET auto. w gg:mm",
+                            "720": "Temperatura HS\nRESET AUTO. w gg:mm",
+                            "721": "Wy\u0142\u0105czenie przy niskim ci\u015Bnieniu\nRESET auto.",
+                            "722": "Tempdiff HW\nProsz\u0119 wezwa\u0107 instalatora",
+                            "723": "Tempdiff SW\nProsz\u0119 wezwa\u0107 instalatora",
+                            "724": "Rozmra\u017Canie Tempdiff\nProsz\u0119 wezwa\u0107 instalatora",
+                            "725": "B\u0142\u0105d systemowy SW\nProsz\u0119 wezwa\u0107 instalatora",
+                            "726": "Czujnik obiegu mieszania 1\nProsz\u0119 wezwa\u0107 instalatora",
+                            "727": "Ci\u015Bnienie solanki\nProsz\u0119 wezwa\u0107 instalatora",
+                            "728": "Czujnik HS wy\u0142\u0105czony\nProsz\u0119 wezwa\u0107 instalatora",
+                            "729": "B\u0142\u0105d pola wiruj\u0105cego\nProsz\u0119 wezwa\u0107 instalatora",
+                            "732": "Usterka ch\u0142odzenia\nProsz\u0119 wezwa\u0107 instalatora",
+                            "733": "Usterka anody\nProsz\u0119 wezwa\u0107 instalatora",
+                            "734": "Usterka anody\nProsz\u0119 wezwa\u0107 instalatora",
+                            "735": "B\u0142\u0105d zew. Pl\nProsz\u0119 zadzwoni\u0107 do montera",
+                            "736": "B\u0142\u0105d kolektora s\u0142onecznego\nProsz\u0119 wezwa\u0107 instalatora",
+                            "737": "B\u0142\u0105d zasobnika solarnego\nProsz\u0119 wezwa\u0107 instalatora",
+                            "738": "B\u0142\u0105d mieszania ko\u0142a 2\nProsz\u0119 wezwa\u0107 instalatora",
+                            "750": "Czujnik powrotu zewn\u0119trzny\nProsz\u0119 wezwa\u0107 instalatora",
+                            "751": "B\u0142\u0105d monitorowania fazy",
+                            "752": "B\u0142\u0105d przep\u0142ywu",
+                            "755": "Utracono po\u0142\u0105czenie z modu\u0142em slave\nZadzwo\u0144 do instalatora",
+                            "756": "Utracono po\u0142\u0105czenie z masterem\nZadzwo\u0144 do instalatora",
+                            "757": "Usterka niskiego ci\u015Bnienia w urz\u0105dzeniu SW",
+                            "758": "Usterka rozmra\u017Cania",
+                            "759": "Komunikat TDI",
+                            "760": "B\u0142\u0105d rozmra\u017Cania",
+                            "761": "Przekroczenie limitu czasu LIN/utracono po\u0142\u0105czenie LIN",
+                            "762": "czujnik (wlot parownika)",
+                            "763": "czujnik (wlot spr\u0119\u017Carki)",
+                            "764": "Czujnik Grza\u0142ka spr\u0119\u017Carki",
+                            "765": "Przegrzanie",
+                            "766": "zakres funkcjonalny spr\u0119\u017Carki",
+                            "767": "STB E-Rod",
+                            "768": "Monitorowanie przep\u0142ywu",
+                            "769": "Sterowanie pomp\u0105",
+                            "770": "Niskie przegrzanie",
+                            "771": "Wysokie przegrzanie",
+                            "776": "granica zastosowania-CP",
+                            "777": "Zaw\u00F3r rozpr\u0119\u017Cny",
+                            "778": "Czujnik niskiego ci\u015Bnienia",
+                            "779": "Czujnik wysokiego ci\u015Bnienia",
+                            "780": "Czujnik EVI",
+                            "781": "Temperatura cieczy czujnik przed EXV",
+                            "782": "Temp. gazu zasysanego EVI czujnik",
+                            "783": "Komunikacja SEC – Falownik",
+                            "784": "Blokada VSS",
+                            "785": "Uszkodzona p\u0142yta SEC",
+                            "787": "Alarm VD",
+                            "788": "Powa\u017Cna usterka VSS",
+                            "789": "Nie znaleziono LIN/kodowania",
+                            "790": "Powa\u017Cna usterka VSS",
+                            "791": "Utracono komunikacj\u0119 ModBus",
+                            "792": "Utracono po\u0142\u0105czenie LIN",
+                            "793": "Powa\u017Cna usterka VSS",
+                            "99999": "Nieznany b\u0142\u0105d"
+                        }
+                    },
+                    "remedy": {
+                        "name": "Remedy"
+                    }
+		        } 
             },
             "switchoff_reason": {
                 "name": "Pow\u00F3d wy\u0142\u0105czenia",
@@ -272,22 +359,22 @@
                     "8": "Ni\u017Csze ograniczenie u\u017Cytkowania",
                     "9": "nieaktywny",
                     "11": "Przep\u0142yw",
-                    "-1": "Nieznane wy\u0142\u0105czenie"
+                    "99999": "Nieznane wy\u0142\u0105czenie"
                 }
             },
             "status_line_1": {
                 "name": "Stan 1",
                 "state": {
-                    "heatpump running": "Pompa ciep\u0142a jest aktywna",
-                    "heatpump idle": "Pompa ciep\u0142a jest nieaktywna",
-                    "heatpump coming": "Pompa ciep\u0142a jest uruchamiana",
-                    "heatpump shutdown": "Pompa ciep\u0142a wy\u0142\u0105cza si\u0119",
-                    "errorcode slot": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017Adzie 0",
-                    "pump forerun": "Rozbieg pompy",
+                    "heatpump_running": "Pompa ciep\u0142a jest aktywna",
+                    "heatpump_idle": "Pompa ciep\u0142a jest nieaktywna",
+                    "heatpump_coming": "Pompa ciep\u0142a jest uruchamiana",
+                    "heatpump_shutdown": "Pompa ciep\u0142a wy\u0142\u0105cza si\u0119",
+                    "errorcode_slot": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017Adzie 0",
+                    "pump_forerun": "Rozbieg pompy",
                     "defrost": "Rozmra\u017Canie",
-                    "writing on LIN connection": "Zapis na po\u0142\u0105czeniu LIN",
-                    "compressor heating up": "Spr\u0119\u017Carka nagrzewa si\u0119",
-                    "compressor heater": "Grza\u0142ka spr\u0119\u017Carki"
+                    "writing_on_lin_connection": "Zapis na po\u0142\u0105czeniu LIN",
+                    "compressor_heating_up": "Spr\u0119\u017Carka nagrzewa si\u0119",
+                    "compressor_heater": "Grza\u0142ka spr\u0119\u017Carki"
                 }
             },
             "status_line_2": {
@@ -304,19 +391,19 @@
                     "heating": "ogrzewanie",
                     "defrost": "rozmra\u017Canie",
                     "cooling": "ch\u0142odzenie",
-                    "pump forerun": "rozbieg pompy",
-                    "thermal desinfection": "dezynfekcja termiczna",
-                    "swimming pool/solar": "basen/solar",
-                    "no request": "brak zapotrzebowania",
-                    "cycle lock": "blokada cyklu",
-                    "lock time": "czas blokady",
-                    "domestic water": "ciep\u0142a woda",
-                    "flow monitoring": "monitorowanie przep\u0142ywu",
-                    "grid switch on delay": "op\u00F3\u017Anienie w\u0142\u0105czenia sieci",
-                    "info bake out program": "Informacje o programie pieczenia",
-                    "heating external engery source": "ogrzewanie z zewn\u0119trznego \u017Ar\u00F3d\u0142a energii",
-                    "domestic water external energy source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o energii ciep\u0142ej wody",
-                    "second heat generator 1 active": "drugi generator ciep\u0142a 1 aktywny"
+                    "pump_forerun": "rozbieg pompy",
+                    "thermal_desinfection": "dezynfekcja termiczna",
+                    "swimming_pool_solar": "basen/solar",
+                    "no_request": "brak zapotrzebowania",
+                    "cycle_lock": "blokada cyklu",
+                    "lock_time": "czas blokady",
+                    "domestic_water": "ciep\u0142a woda",
+                    "flow_monitoring": "monitorowanie przep\u0142ywu",
+                    "grid_switch_on_delay": "op\u00F3\u017Anienie w\u0142\u0105czenia sieci",
+                    "info_bake_out_program": "Informacje o programie pieczenia",
+                    "heating_external_energy_source": "ogrzewanie z zewn\u0119trznego \u017Ar\u00F3d\u0142a energii",
+                    "domestic_water_external_energy_source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o energii ciep\u0142ej wody",
+                    "second_heat_generator_1_active": "drugi generator ciep\u0142a 1 aktywny"
                 }
             },
             "heat_source_output": {
