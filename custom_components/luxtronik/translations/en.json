@@ -456,7 +456,7 @@
                     "heatpump_idle": "The heatpump is idle",
                     "heatpump_coming": "The heatpump is coming",
                     "heatpump_shutdown": "The heatpump is shuting down",
-                    "errorcode_slot": "Heatpump error code in slot 0",
+                    "errorcode_slot_0": "Heatpump error code in slot 0",
                     "pump_forerun": "Pump forerun",
                     "defrost": "Defrost",
                     "writing_on_lin_connection": "Writing on LIN connection",
