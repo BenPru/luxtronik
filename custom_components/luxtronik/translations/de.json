@@ -489,7 +489,7 @@
                     "heatpump_idle": "Die W\u00e4rmepumpe ist im Leerlauf",
                     "heatpump_coming": "Die W\u00e4rmepumpe startet",
                     "heatpump_shutdown": "Die W\u00e4rmepumpe schaltet ab",
-                    "errorcode_slot": "W\u00e4rmepumpe Fehlercode in Schacht 0",
+                    "errorcode_slot_0": "W\u00e4rmepumpe Fehlercode in Schacht 0",
                     "pump_forerun": "Pumpenvorlauf",
                     "defrost": "Taut ab",
                     "writing_on_lin_connection": "Schreibt auf LIN Verbindung",
