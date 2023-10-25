@@ -323,12 +323,14 @@
                     "814": "Defrosting sensor defect",
                     "99999": "Unknown error"
                 },
-                "cause": {
-                    "name": "Cause"
-                },
-                "remedy": {
-                    "name": "Remedy"
-                }
+                "state_attributes": {
+		    "cause": {
+                        "name": "Cause"
+                    },
+                    "remedy": {
+                        "name": "Remedy"
+                    }
+		} 
         },
             "switchoff_reason": {
                 "name": "Switchoff reason",
