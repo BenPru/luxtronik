@@ -369,7 +369,7 @@
                     "heatpump_idle": "Pompa ciep\u0142a jest nieaktywna",
                     "heatpump_coming": "Pompa ciep\u0142a jest uruchamiana",
                     "heatpump_shutdown": "Pompa ciep\u0142a wy\u0142\u0105cza si\u0119",
-                    "errorcode_slot": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017Adzie 0",
+                    "errorcode_slot_0": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017Adzie 0",
                     "pump_forerun": "Rozbieg pompy",
                     "defrost": "Rozmra\u017Canie",
                     "writing_on_lin_connection": "Zapis na po\u0142\u0105czeniu LIN",
