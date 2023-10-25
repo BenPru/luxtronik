@@ -207,13 +207,13 @@
                 "name": "Status",
                 "state": {
                     "heating": "Heizt",
-                    "hot water": "Brauchwasser",
-                    "swimming pool/solar": "Pool / Solar",
+                    "hot_water": "Brauchwasser",
+                    "swimming_pool_solar": "Pool / Solar",
                     "evu": "Netzsperre",
                     "defrost": "Abtauen",
-                    "heating external source": "Heizt aus externer Quelle",
+                    "heating_external_source": "Heizt aus externer Quelle",
                     "cooling": "K\u00fchlen",
-                    "no request": "Leerlauf (keine Anforderung)"
+                    "no_request": "Leerlauf (keine Anforderung)"
                 },
                 "state_attributes": {
                     "evu_text": {
@@ -300,7 +300,7 @@
                     "791": "ModBus Verbindung verloren",
                     "792": "LIN-Verbindung unterbrochen",
                     "793": "Schwerw. Inverter Fehler",
-                    "-1": "Unbekannter Fehler"
+                    "99999": "Unbekannter Fehler"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -382,7 +382,7 @@
                             "791": "SEC-Board seit einiger Zeit nicht mehr erreichbar. 791 wird ausgel\u00f6st, wenn zwar eine HZIO-Platine gefunden worden ist \u0028ohne separate Kodierung\u0029, allerdings kein SEC-Board daran erkannt werden kann.",
                             "792": "Es konnte keine Grundplatine und auch sonst keine Konfiguration gefunden werden.",
                             "793": "Temperaturfehler im Inverter",
-                            "-1": "Unbekannter Fehler"
+                            "99999": "Unbekannter Fehler"
                         }
                     },
                     "remedy": {
@@ -479,22 +479,22 @@
                     "8": "Untere Einsatzgrenze",
                     "9": "Keine Anforderung",
                     "11": "Durchfluss-W\u00e4rmequelle",
-                    "-1": "Unbekannte Abschaltung"
+                    "99999": "Unbekannte Abschaltung"
                 }
             },
             "status_line_1": {
                 "name": "Status 1",
                 "state": {
-                    "heatpump running": "Die W\u00e4rmepumpe l\u00e4uft",
-                    "heatpump idle": "Die W\u00e4rmepumpe ist im Leerlauf",
-                    "heatpump coming": "Die W\u00e4rmepumpe startet",
-                    "heatpump shutdown": "Die W\u00e4rmepumpe schaltet ab",
-                    "errorcode slot": "W\u00e4rmepumpe Fehlercode in Schacht 0",
-                    "pump forerun": "Pumpenvorlauf",
+                    "heatpump_running": "Die W\u00e4rmepumpe l\u00e4uft",
+                    "heatpump_idle": "Die W\u00e4rmepumpe ist im Leerlauf",
+                    "heatpump_coming": "Die W\u00e4rmepumpe startet",
+                    "heatpump_shutdown": "Die W\u00e4rmepumpe schaltet ab",
+                    "errorcode_slot": "W\u00e4rmepumpe Fehlercode in Schacht 0",
+                    "pump_forerun": "Pumpenvorlauf",
                     "defrost": "Taut ab",
-                    "witing on LIN connection": "Schreibt auf LIN Verbindung",
-                    "compressor heating up": "Der Verdichter heizt auf",
-                    "compressor heater": "Verdichter-Heizung"
+                    "writing_on_lin_connection": "Schreibt auf LIN Verbindung",
+                    "compressor_heating_up": "Der Verdichter heizt auf",
+                    "compressor_heater": "Verdichter-Heizung"
                 }
             },
             "status_line_2": {
@@ -511,19 +511,19 @@
                     "heating": "heizt",
                     "defrost": "abtauen",
                     "cooling": "k\u00fchlen",
-                    "pump forerun": "Pumpenvorlauf",
-                    "thermal desinfection": "thermische Desinfektion",
-                    "swimming pool/solar": "Pool / Solar",
-                    "no request": "keine Anforderung",
-                    "cycle lock": "Einschaltsperre",
-                    "lock time": "Sperrzeit",
-                    "domestic water": "Brauchwasser",
-                    "flow monitoring": "Durchfluss\u00fcberwachung",
-                    "grid switch on delay": "Verz\u00f6gerung beim Einschalten des Netzes",
-                    "info bake out program": "Information aus Aufheizprogramm",
-                    "heating external engery source": "heizen aus externer Energiequelle",
-                    "domestic water external energy source": "Brauchwasser aus externer Energiequelle",
-                    "second heat generator 1 active": "zweiter W\u00e4rmeerzeuger 1 aktiv"
+                    "pump_forerun": "Pumpenvorlauf",
+                    "thermal_desinfection": "thermische Desinfektion",
+                    "swimming_pool_solar": "Pool / Solar",
+                    "no_request": "keine Anforderung",
+                    "cycle_lock": "Einschaltsperre",
+                    "lock_time": "Sperrzeit",
+                    "domestic_water": "Brauchwasser",
+                    "flow_monitoring": "Durchfluss\u00fcberwachung",
+                    "grid_switch_on_delay": "Verz\u00f6gerung beim Einschalten des Netzes",
+                    "info_bake_out_program": "Information aus Aufheizprogramm",
+                    "heating_external_energy_source": "heizen aus externer Energiequelle",
+                    "domestic_water_external_energy_source": "Brauchwasser aus externer Energiequelle",
+                    "second_heat_generator_1_active": "zweiter W\u00e4rmeerzeuger 1 aktiv"
                 }
             },
             "heat_source_output": {
