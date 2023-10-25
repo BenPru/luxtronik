@@ -29,13 +29,13 @@
                 "name": "Dodatkowa pompa obiegowa"
             },
             "dhw_recirculation_pump": {
-                "name": "Pompa obiegowa ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Pompa obiegowa ciep\u0142ej wody"
             },
             "dhw_circulation_pump": {
-                "name": "Pompa obiegowa ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Pompa obiegowa ciep\u0142ej wody"
             },
             "dhw_charging_pump": {
-                "name": "Pompa \u0142aduj\u0105ca ciep\u0142\u0105 wod\u0119 u\u017Cytkow\u0105"
+                "name": "Pompa \u0142aduj\u0105ca ciep\u0142\u0105 wod\u0119"
             },
             "solar_pump": {
                 "name": "Pompa solarna"
@@ -84,7 +84,7 @@
                 "name": "Pr\u00F3g ogrzewania"
             },
             "domestic_water": {
-                "name": "Automat do wody u\u017Cytkowej"
+                "name": "Tryb AUTO ciep\u0142ej wody"
             },
             "cooling": {
                 "name": "Ch\u0142odzenie"
@@ -121,10 +121,10 @@
                 "name": "Krzywa grzewcza noc"
             },
             "dhw_target_temperature": {
-                "name": "Docelowa temperatura ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Temperatura docelowa ciep\u0142ej wody"
             },
             "dhw_thermal_desinfection_target": {
-                "name": "Docelowa temperatura dezynfekcji termicznej"
+                "name": "Temperatura docelowa dezynfekcji termicznej"
             },
             "solar_pump_max_temperature_collector": {
                 "name": "Maks. temperatura kolektora s\u0142onecznego"
@@ -139,7 +139,7 @@
                 "name": "R\u00F3\u017Cnica w\u0142\u0105czania kolektora/kot\u0142a (pompa solarna)"
             },
             "dhw_hysteresis": {
-                "name": "Histereza ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Histereza ciep\u0142ej wody"
             },
             "heating_room_temperature_impact_factor": {
                 "name": "Wsp\u00F3\u0142czynnik wp\u0142ywu temperatury pokojowej"
@@ -154,7 +154,7 @@
                 "name": "Ogrzewanie histerezy"
             },
             "heating_night_lowering_to_temperature": {
-                "name": "Ogrzewanie nocne obni\u017Caj\u0105ce temp"
+                "name": "Obni\u017Cenie temperatury ogrzewania w nocy"
             }
         },
         "sensor": {
@@ -162,13 +162,13 @@
                 "name": "Pompa ciep\u0142a",
                 "state": {
                     "heating": "Ogrzewanie",
-                    "hot water": "Woda bie\u017C\u0105ca",
+                    "hot water": "Ciep\u0142a woda",
                     "swimming pool/solar": "Basen / Solar",
                     "evu": "Blokada sieci - brak zasilania",
                     "defrost": "Rozmra\u017Canie",
                     "heating external source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o ogrzewania",
                     "cooling": "Ch\u0142odzenie",
-                    "no request": "Bezczynny (brak \u017C\u0105dania)"
+                    "no request": "Brak zapotrzebowania"
                 },
                 "state_attributes": {
                     "evu_text": {
@@ -278,7 +278,7 @@
             "status_line_1": {
                 "name": "Stan 1",
                 "state": {
-                    "heatpump running": "Pompa ciep\u0142a dzia\u0142a",
+                    "heatpump running": "Pompa ciep\u0142a jest aktywna",
                     "heatpump idle": "Pompa ciep\u0142a jest nieaktywna",
                     "heatpump coming": "Pompa ciep\u0142a jest uruchamiana",
                     "heatpump shutdown": "Pompa ciep\u0142a wy\u0142\u0105cza si\u0119",
@@ -310,12 +310,12 @@
                     "no request": "brak zapotrzebowania",
                     "cycle lock": "blokada cyklu",
                     "lock time": "czas blokady",
-                    "domestic water": "woda bie\u017C\u0105ca",
+                    "domestic water": "ciep\u0142a woda",
                     "flow monitoring": "monitorowanie przep\u0142ywu",
                     "grid switch on delay": "op\u00F3\u017Anienie w\u0142\u0105czenia sieci",
                     "info bake out program": "Informacje o programie pieczenia",
                     "heating external engery source": "ogrzewanie z zewn\u0119trznego \u017Ar\u00F3d\u0142a energii",
-                    "domestic water external energy source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o energii wody u\u017Cytkowej",
+                    "domestic water external energy source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o energii ciep\u0142ej wody",
                     "second heat generator 1 active": "drugi generator ciep\u0142a 1 aktywny"
                 }
             },
@@ -332,7 +332,7 @@
                 "name": "Czas stanu"
             },
             "outdoor_temperature_average": {
-                "name": "\u015Br. temperatura zewn\u0119trzna"
+                "name": "\u015Arednia temperatura zewn\u0119trzna"
             },
             "compressor1_impulses": {
                 "name": "Impulsy spr\u0119\u017Carki 1"
@@ -377,7 +377,7 @@
                 "name": "Niskie ci\u015Bnienie"
             },
             "additional_heat_generator_operation_hours": {
-                "name": "Dodatkowe godziny pracy kot\u0142a"
+                "name": "Dodatkowe godziny pracy \u017Ar\u00F3d\u0142a ciep\u0142a"
             },
             "analog_out1": {
                 "name": "Wyj\u015Bcie analogowe 1"
@@ -398,19 +398,19 @@
                 "name": "Cz\u0119stotliwo\u015B\u0107 pompy"
             },
             "domestic_water": {
-                "name": "Ciep\u0142a woda u\u017Cytkowa"
+                "name": "Ciep\u0142a woda"
             },
             "dhw_temperature": {
-                "name": "Temperatura ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Temperatura ciep\u0142ej wody"
             },
             "dhw_operation_hours": {
-                "name": "Godziny pracy ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Godziny pracy ciep\u0142ej wody"
             },
             "dhw_heat_amount": {
-                "name": "Ilo\u015B\u0107 ciep\u0142a ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Ilo\u015B\u0107 ciep\u0142a ciep\u0142ej wody"
             },
             "dhw_energy_input": {
-                "name": "Pob\u00F3r energii ciep\u0142ej wody u\u017Cytkowej"
+                "name": "Pob\u00F3r energii ciep\u0142ej wody"
             },
             "flow_in_temperature": {
                 "name": "Temperatura na wej\u015Bciu"
@@ -440,22 +440,22 @@
                 "name": "Zewn\u0119trzna temperatura na wyj\u015Bciu"
             },
             "solar_collector_temperature": {
-                "name": "Kolektor s\u0142oneczny"
+                "name": "Kolektor solarny"
             },
             "solar_buffer_temperature": {
-                "name": "Bufor s\u0142oneczny"
+                "name": "Bufor solarny"
             },
             "operation_hours_solar": {
-                "name": "Godziny pracy solarnej"
+                "name": "Godziny pracy trybu solarnego"
             },
             "operation_hours_cooling": {
                 "name": "Godziny pracy ch\u0142odzenia"
             },
             "room_thermostat_temperature": {
-                "name": "termostat pokojowy"
+                "name": "Temperatura termostatu pokojowego"
             },
             "room_thermostat_temperature_target": {
-                "name": "cel termostatu pokojowego"
+                "name": "Temperatura docelowa termostatu pokojowego"
             }
         },
         "climate": {
@@ -468,7 +468,7 @@
         },
         "water_heater": {
             "domestic_water": {
-                "name": "Woda bie\u017C\u0105ca"
+                "name": "Ciep\u0142a woda"
             }
         }
     },
@@ -476,13 +476,13 @@
         "abort": {
             "already_configured": "Us\u0142uga jest ju\u017C skonfigurowana.",
             "already_in_progress": "Przep\u0142yw konfiguracji jest ju\u017C uruchomiony.",
-            "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 z Luxtronik.\nSprawd\u017A adres IP/nazw\u0119 hosta i port.",
-            "no_devices_found": "Nie znaleziono urz\u0105dze\u0144 w sieci",
-            "single_instance_allowed": "Ju\u017C skonfigurowane. Mo\u017Cliwa tylko jedna konfiguracja.",
+            "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 ze sterownikiem Luxtronik.\nSprawd\u017A adres IP/nazw\u0119 hosta i numer portu.",
+            "no_devices_found": "Nie znaleziono urz\u0105dze\u0144 w sieci LAN",
+            "single_instance_allowed": "Sterownik jest ju\u017C skonfigurowany. Mo\u017Cliwa jest tylko jedna instancja.",
             "unknown": "Nieznany b\u0142\u0105d"
         },
         "error": {
-            "address": "Nieprawid\u0142owe wstawienie adresu zdalnego. Adres musi by\u0107 adresem IP lub rozpoznawaln\u0105 nazw\u0105 hosta.",
+            "address": "Nieprawid\u0142owy adres zdalny. Adres musi by\u0107 adresem IP lub rozpoznawaln\u0105 nazw\u0105 hosta.",
             "address_in_use": "Wybrany port nas\u0142uchiwania jest ju\u017C u\u017Cywany w tym systemie.",
             "unknown": "Niespodziewany b\u0142\u0105d"
         },
