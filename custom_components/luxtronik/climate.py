@@ -244,7 +244,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             data, self.entity_description.luxtronik_key_current_action.value
         )
         self._attr_hvac_action = (
-            None if lux_action is None else self.entity_description.hvac_action_mapping[lux_action]
+            None
+            if lux_action is None
+            else self.entity_description.hvac_action_mapping[lux_action]
         )
         self._attr_is_aux_heat = (
             None if mode is None else mode == LuxMode.second_heatsource.value
@@ -271,10 +273,13 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if (
             self._attr_target_temperature is not None
             and self._attr_current_temperature is not None  # noqa: W503
+            and self._attr_current_temperature > 0.0
             and correction_factor is not None  # noqa: W503
         ):
             delta_temp = self._attr_target_temperature - self._attr_current_temperature
-            correction = round(delta_temp * (correction_factor/100.0), 1)  # correction_factor is in %, so need to divide by 100
+            correction = round(
+                delta_temp * (correction_factor / 100.0), 1
+            )  # correction_factor is in %, so need to divide by 100
             key_correction_target = (
                 self.entity_description.luxtronik_key_correction_target.value
             )
