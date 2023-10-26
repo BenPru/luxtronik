@@ -1,4 +1,5 @@
 """Luxtronik Update platform."""
+# region Imports
 from __future__ import annotations
 
 from datetime import datetime, timedelta
@@ -35,6 +36,8 @@ from .coordinator import LuxtronikCoordinator
 from .lux_helper import get_firmware_download_id, get_manufacturer_firmware_url_by_model
 from .model import LuxtronikUpdateEntityDescription
 
+# endregion Imports
+
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(hours=1)
 
 
@@ -69,7 +72,10 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
     entity_description: LuxtronikUpdateEntityDescription
 
     _attr_title = "Luxtronik Firmware Version"
-    _attr_supported_features: UpdateEntityFeature = UpdateEntityFeature.INSTALL | UpdateEntityFeature.RELEASE_NOTES
+    # INSTALL --> is needed to get a notification!!!
+    _attr_supported_features: UpdateEntityFeature = (
+        UpdateEntityFeature.INSTALL | UpdateEntityFeature.RELEASE_NOTES
+    )
     __firmware_version_available = None
     __firmware_version_available_last_request = None
 
@@ -107,7 +113,13 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         release_url = get_manufacturer_firmware_url_by_model(self.coordinator.model)
         download_id = get_firmware_download_id(self.installed_version)
         download_url = f"{DOWNLOAD_PORTAL_URL}{download_id}"
-        return f'<a href="{release_url}" target="_blank" rel="noreferrer noopener">Firmware Download Portal</a>&emsp;<a href="{download_url}" target="_blank" rel="noreferrer noopener">Direct Download</a><br><br>alpha innotec doesn\'t provide a changelog.<br>Please contact support for more information.'
+        if self.state:
+            upgrade_text = f"For your {self.coordinator.manufacturer} {self.coordinator.model} (Download ID {download_id}) is Firmware Version {self.__firmware_version_available} available.<br><br>"
+        return (
+            f'{upgrade_text}<a href="{release_url}" target="_blank" rel="noreferrer noopener">Firmware Download Portal</a>&emsp;'
+            + f'<a href="{download_url}" target="_blank" rel="noreferrer noopener">Direct Download</a><br><br>'
+            + "alpha innotec doesn't provide a changelog.<br>Please contact support for more information."
+        )
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self) -> None:
@@ -134,7 +146,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                     datetime.utcnow().timestamp()
                 )
                 # Filename e.g.: wp2reg-V2.88.1-9086
-                # Extract 'V2.88.1' from 'wp2reg-V2.88.1-9086'.
+                # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'.
                 self.__firmware_version_available = filename.split("-", 1)[1]
             except Exception:  # pylint: disable=broad-except
                 LOGGER.warning(
