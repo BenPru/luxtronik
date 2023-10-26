@@ -69,6 +69,23 @@ def correct_key_value(
 ) -> Any:
     """Handle special value corrections."""
     if (
+        sensor_id in [
+        LC.C0080_STATUS,
+        LC.C0117_STATUS_LINE_1,
+        LC.C0119_STATUS_LINE_3,
+        ]
+    ):
+        value = value.replace(' ','_').replace('/','_').lower()  
+    if (
+        sensor_id in [
+        LC.C0100_ERROR_REASON,
+        LC.C0106_SWITCHOFF_REASON,
+        ]
+        and value == -1
+    ):
+        value = 99999
+        
+    if (
         sensor_id == LC.C0080_STATUS
         and value == LuxOperationMode.heating
         and not get_sensor_data(sensors, LC.C0044_COMPRESSOR)

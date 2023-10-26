@@ -103,12 +103,12 @@ class LuxOperationMode(StrEnum):
     """Lux Operation modes heating, hot water etc."""
 
     heating: Final = "heating"  # 0
-    domestic_water: Final = "hot water"  # 1
-    swimming_pool_solar: Final = "swimming pool/solar"  # 2
+    domestic_water: Final = "hot_water"  # 1
+    swimming_pool_solar: Final = "swimming_pool_solar"  # 2
     evu: Final = "evu"  # 3
     defrost: Final = "defrost"  # 4
-    no_request: Final = "no request"  # 5
-    heating_external_source: Final = "heating external source"  # 6
+    no_request: Final = "no_request"  # 5
+    heating_external_source: Final = "heating_external_source"  # 6
     cooling: Final = "cooling"  # 7
 
 
@@ -125,16 +125,16 @@ class LuxMode(StrEnum):
 class LuxStatus1Option(StrEnum):
     """LuxStatus1 option defrost etc."""
 
-    heatpump_running: Final = "heatpump running"
-    heatpump_idle: Final = "heatpump idle"
-    heatpump_coming: Final = "heatpump coming"
-    heatpump_shutdown: Final = "heatpump shutdown"
-    errorcode_slot_zero: Final = "errorcode slot 0"
+    heatpump_running: Final = "heatpump_running"
+    heatpump_idle: Final = "heatpump_idle"
+    heatpump_coming: Final = "heatpump_coming"
+    heatpump_shutdown: Final = "heatpump_shutdown"
+    errorcode_slot_zero: Final = "errorcode_slot_0"
     defrost: Final = "defrost"
-    witing_on_LIN_connection: Final = "witing on LIN connection"
-    compressor_heating_up: Final = "compressor heating up"
-    pump_forerun: Final = "pump forerun"
-    compressor_heater: Final = "compressor heater"
+    writing_on_lin_connection: Final = "writing_on_lin_connection"
+    compressor_heating_up: Final = "compressor_heating_up"
+    pump_forerun: Final = "pump_forerun"
+    compressor_heater: Final = "compressor_heater"
 
 
 class LuxStatus3Option(StrEnum):
@@ -143,23 +143,23 @@ class LuxStatus3Option(StrEnum):
     unknown: Final = ("unknown",)
     none: Final = ("none",)
     heating: Final = ("heating",)
-    no_request: Final = ("no request",)
-    grid_switch_on_delay: Final = ("grid switch on delay",)
-    cycle_lock: Final = ("cycle lock",)
-    lock_time: Final = ("lock time",)
-    domestic_water: Final = ("domestic water",)
-    info_bake_out_program: Final = ("info bake out program",)
+    no_request: Final = ("no_request",)
+    grid_switch_on_delay: Final = ("grid_switch_on_delay",)
+    cycle_lock: Final = ("cycle_lock",)
+    lock_time: Final = ("lock_time",)
+    domestic_water: Final = ("domestic_water",)
+    info_bake_out_program: Final = ("info_bake_out_program",)
     defrost: Final = ("defrost",)
-    pump_forerun: Final = ("pump forerun",)
-    thermal_desinfection: Final = ("thermal desinfection",)
+    pump_forerun: Final = ("pump_forerun",)
+    thermal_desinfection: Final = ("thermal_desinfection",)
     cooling: Final = ("cooling",)
-    swimming_pool_solar: Final = ("swimming pool/solar",)
-    heating_external_energy_source: Final = ("heating external energy source",)
+    swimming_pool_solar: Final = ("swimming_pool_solar",)
+    heating_external_energy_source: Final = ("heating_external_energy_source",)
     domestic_water_external_energy_source: Final = (
-        "domestic water external energy source",
+        "domestic_water_external_energy_source",
     )
-    flow_monitoring: Final = ("flow monitoring",)
-    second_heat_generator_1_active: Final = ("second heat generator 1 active",)
+    flow_monitoring: Final = ("flow_monitoring",)
+    second_heat_generator_1_active: Final = ("second_heat_generator_1_active",)
 
 
 class LuxMkTypes(Enum):
@@ -412,6 +412,8 @@ class LuxCalculation(StrEnum):
     C0100_ERROR_REASON: Final = "calculations.ID_WEB_ERROR_Nr0"
     # TODO: !
     # C0105_ERROR_COUNTER: Final = "calculations.ID_WEB_AnzahlFehlerInSpeicher"
+    C0106_SWITCHOFF_REASON: Final = "calculations.ID_WEB_Switchoff_file_Nr0"
+    C0111_SWITCHOFF_TIME: Final = "calculations.ID_WEB_Switchoff_file_Time0"
     C0117_STATUS_LINE_1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
     C0118_STATUS_LINE_2: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile2"
     C0119_STATUS_LINE_3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
@@ -559,6 +561,7 @@ class SensorKey(StrEnum):
     CIRCULATION_PUMP_DELTA = "circulation_pump_delta"
     HEAT_SOURCE_OUTPUT_TEMPERATURE = "heat_source_output_temperature"
     ERROR_REASON = "error_reason"
+    SWITCHOFF_REASON = "switchoff_reason"
     FLOW_IN_TEMPERATURE = "flow_in_temperature"
     FLOW_OUT_TEMPERATURE = "flow_out_temperature"
     FLOW_OUT_TEMPERATURE_TARGET = "flow_out_temperature_target"
