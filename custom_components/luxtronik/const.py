@@ -301,12 +301,8 @@ class LuxParameter(StrEnum):
     #  "879  ID_Waermemenge_SW                                           ": "0",
     #  "880  ID_Waermemenge_Datum                                        ": "1483648906", <-- Unix timestamp!  5.1.2017
 
-    #    "1059 ID_Waermemenge_ZWE                                          ": "0",
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
-
-    # Calc
-    #       "154  ID_WEB_WMZ_Seit                                             ": "25668.9",
 
     P0882_SOLAR_OPERATION_HOURS: Final = "parameters.ID_BSTD_Solar"
     P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = (
@@ -329,6 +325,9 @@ class LuxParameter(StrEnum):
     P1033_PUMP_HEAT_CONTROL: Final = "parameters.ID_Einst_P155_PumpHeatCtrl"
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "parameters.ID_Waermemenge_ZWE"
+    )
+    P1119_LAST_DEFROST_TIMESTAMP: Final = (
+        "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
     )
     P1136_HEAT_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1136"
     P1137_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
@@ -423,7 +422,7 @@ class LuxCalculation(StrEnum):
     C0146_APPROVAL_COOLING: Final = "calculations.ID_WEB_FreigabKuehl"
     C0151_HEAT_AMOUNT_HEATING: Final = "calculations.ID_WEB_WMZ_Heizung"
     C0152_DHW_HEAT_AMOUNT: Final = "calculations.ID_WEB_WMZ_Brauchwasser"
-    C0154_HEAT_AMOUNT_COUNTER: Final = "calculations.ID_WEB_WMZ_Seit"
+    C0154_HEAT_AMOUNT_COUNTER: Final = "calculations.ID_WEB_WMZ_Seit"  # 25668.9
     C0155_HEAT_AMOUNT_FLOW_RATE: Final = "calculations.ID_WEB_WMZ_Durchfluss"
     C0156_ANALOG_OUT1: Final = "calculations.ID_WEB_AnalogOut1"
     C0157_ANALOG_OUT2: Final = "calculations.ID_WEB_AnalogOut2"
