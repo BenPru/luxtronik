@@ -83,6 +83,7 @@ class LuxtronikEntityDescription(EntityDescription):
     extra_attributes: list[LuxtronikEntityAttributeDescription] = field(
         default_factory=list
     )
+    state_class: str | None = None
 
 
 @dataclass
