@@ -1,0 +1,841 @@
+{
+    "entity": {
+        "binary_sensor": {
+            "evu_unlocked": {
+                "name": "Tijdvrijgave blokkeren"
+            },
+            "compressor": {
+                "naam": "Compressor"
+            },
+            "compressor2": {
+                "naam": "Compressor 2"
+            },
+            "pump_flow": {
+                "name": "Brijncirculatiepomp"
+            },
+            "compressor_heater": {
+                "name": "Compressorverwarming"
+            },
+            "defrost_valve": {
+                "name": "Ontdooiklep"
+            },
+            "additional_heat_generator": {
+                "name": "Extra warmtegenerator"
+            },
+            "disturbance_output": {
+                "name": "Systeemstatus"
+            },
+            "circulation_pump_heating": {
+                "name": "Circulatiepomp"
+            },
+            "additional_circulation_pump": {
+                "name": "Extra circulatiepomp"
+            },
+            "dhw_recirculation_pump": {
+                "name": "Circulatiepomp"
+            },
+            "dhw_circulation_pump": {
+                "name": "Circulatiepomp"
+            },
+            "dhw_charging_pump": {
+                "name": "Ketellaadpomp"
+            },
+            "solar_pump": {
+                "name": "Zonnepomp"
+            },
+            "approval_cooling": {
+                "naam": "Delen"
+            },
+            "defrost_end_flow_okay": {
+                "name": "Ontdooien is voltooid \u002f stroom OK"
+            },
+            "motor_protection": {
+                "name": "Motorbeveiliging"
+            }
+        },
+        "device": {
+            "heatpump": {
+                "name": "WP"
+            },
+            "heating": {
+                "name": "VW"
+            },
+            "domestic_water": {
+                "name": "HW"
+            },
+            "cooling": {
+                "name": "Koel"
+            }
+        },
+        "switch": {
+            "remote_maintenance": {
+                "name": "Dienst op afstand"
+            },
+            "efficiency_pump": {
+                "name": "Efficiëntie Pomp"
+            },
+            "pump_heat_control": {
+                "name": "Controle pompverwarming"
+            },
+            "heating": {
+                "name": "Verwarmingsmodus automatisch"
+            },
+            "pump_optimization": {
+                "name": "Pompoptimalisatie"
+            },
+            "heating_threshold": {
+                "name": "Verwarmingslimiet"
+            },
+            "domestic_water": {
+                "name": "Automatische modus"
+            },
+            "cooling": {
+                "name": "Koeling"
+            }
+        },
+        "update": {
+            "firmware": {
+                "name": "Firmware"
+            }
+        },
+        "number": {
+            "release_second_heat_generator": {
+                "name": "Vrijgave van tweede warmtegenerator"
+            },
+            "pump_optimization": {
+                "name": "Pompoptimalisatie"
+            },
+            "heating_threshold": {
+                "name": "Verwarmingslimiet"
+            },
+            "heating_target_correction": {
+                "name": "Doelcorrectie"
+            },
+            "heating_min_flow_out_temperature": {
+                "name": "Minimaal doelrendement"
+            },
+            "heating_circuit_curve1_temperature": {
+                "name": "Verwarmingscurve 1"
+            },
+            "heating_circuit_curve2_temperature": {
+                "name": "Verwarmingscurve 2"
+            },
+            "heating_circuit_curve_night_temperature": {
+                "name": "Verwarmingscurve 's Nachts"
+            },
+            "heating_circuit2_curve1_temperature": {
+                "name": "VC2 Verwarmingscurve 1"
+            },
+            "heating_circuit2_curve2_temperature": {
+                "name": "VC2 Verwarmingscurve 2"
+            },
+            "heating_circuit2_curve_night_temperature": {
+                "name": "VC2 Verwarmingscurve 's Nachts"
+            },
+            "heating_circuit3_curve1_temperature": {
+                "name": "VC3 Verwarmingscurve 1"
+            },
+            "heating_circuit3_curve2_temperature": {
+                "name": "VC3 Verwarmingscurve 2"
+            },
+            "heating_circuit3_curve_night_temperature": {
+                "name": "VC3 Verwarmingscurve 's Nachts"
+            },
+            "dhw_target_temperature": {
+                "name": "Zou moeten"
+            },
+            "dhw_thermal_desinfection_target": {
+                "name": "Doeltemperatuur thermische desinfectie"
+            },
+            "solar_pump_max_temperature_collector": {
+                "name": "Maximale temperatuur zonnecollector"
+            },
+            "solar_pump_off_max_difference_temperature_boiler": {
+                "name": "Uitschakeling max. verschil collector/boiler (zonnepomp)"
+            },
+            "solar_pump_off_difference_temperature": {
+                "name": "Uitschakelverschil collector/boiler (zonnepomp)"
+            },
+            "solar_pump_on_difference_temperature": {
+                "name": "Inschakelverschil collector/boiler (zonnepomp)"
+            },
+            "dhw_hysteresis": {
+                "name": "Hysterese"
+            },
+            "heating_room_temperature_impact_factor": {
+                "name": "Be\u00efnvloedende factor voor de kamertemperatuur"
+            },
+            "heating_maximum_circulation_pump_speed": {
+                "name": "Maximale pompcirculatiesnelheid (verwarmen)"
+            },
+            "heating_max_flow_out_increase_temperature": {
+                "name": "Maximale verhoging van het doelrendement"
+            },
+            "heating_hysteresis": {
+                "name": "Hysteresis verwarmingsregelaar"
+            },
+            "heating_night_lowering_to_temperature": {
+                "name": "Verlagen naar buitentemperatuur"
+            },
+            "efficiency_pump_nominal": {
+                "name": "Rendement pomp nominaal"
+            },
+            "efficiency_pump_minimal": {
+                "name": "Effici\u00ebntie pomp minimaal"
+            },
+            "cooling_threshold_temperature": {
+                "name": "Minimale buitentemperatuur"
+            },
+            "cooling_start_delay_hours": {
+                "name": "Start vertraging"
+            },
+            "cooling_stop_delay_hours": {
+                "name": "Einde van de vertraging"
+            },
+            "cooling_target_temperature_mk1": {
+                "name": "Verkoelend doel"
+            },
+            "cooling_target_temperature_mk2": {
+                "name": "Verkoelend doel"
+            },
+            "cooling_target_temperature_mk3": {
+                "name": "Verkoelend doel"
+            }
+        },
+        "sensor": {
+            "status": {
+                "name": "Status",
+                "state": {
+                    "heating": "Verwarmt",
+                    "hot water": "Industrieel water",
+                    "swimming pool/solar": "Zwembad/zonne-energie",
+                    "evu": "Netwerkblokkering",
+                    "defrost": "Ontdooien",
+                    "heating external source": "Warmte van externe bron",
+                    "cooling": "K\u000bkhlen",
+                    "no request": "Inactief (geen verzoek)"
+                },
+                "state_attributes": {
+                    "evu_text": {
+                        "state": {
+                            "evu_until": "Er zijn nog {evu_time} minuten netwerksluiting.",
+                            "evu_in": "Netwerksluiting over {evu_time} minuten."
+                        }
+                    }
+                }
+            },
+            "error_reason": {
+                "name": "Laatste fout",
+                "state": {
+                    "701": "Lagedrukfout",
+                    "702": "Lagedrukblokkering - automatisch RESET",
+                    "703": "Vorstbeveiliging",
+                    "704": "Storing heetgas - automatisch resetten na time-out",
+                    "705": "Motorbeveiligingsventilator",
+                    "706": "Motorbeveiliging pekel- of bronwatercirculatiepomp",
+                    "707": "Warmtepompcodering",
+                    "708": "Vals terugspoelen",
+                    "709": "Verkeerd vooruit",
+                    "710": "F\u00fchler Heet Gas",
+                    "711": "Vrees buitentemperatuur.",
+                    "712": "F\u00fchler warm water",
+                    "713": "Volle warmtebron aan",
+                    "714": "Warm gas voor huishoudelijk gebruik - automatisch resetten na time-out",
+                    "715": "Hogedrukuitschakeling - RESET automatisch",
+                    "716": "Hogedrukprobleem - bel installateur",
+                    "717": "Doorstroomwarmtebron",
+                    "718": "Max. buitentemperatuur - automatisch RESET",
+                    "719": "Min. buitentemperatuur - RESET automatisch",
+                    "720": "Warmtebrontemperatuur - automatisch RESET na time-out",
+                    "721": "Lagedrukuitschakeling - RESET automatisch",
+                    "722": "Temp.verschil verwarmingswater",
+                    "723": "Temp.verschil warm water",
+                    "724": "Tempdiff ontdooien",
+                    "725": "Fout SWW-systeem",
+                    "726": "F\u00fchler mengcircuit 1",
+                    "727": "Pekeldruk",
+                    "728": "Warmtebron uit",
+                    "729": "Roterend veldfout",
+                    "730": "Vermogen uitbakken",
+                    "732": "Koelingsstoring",
+                    "733": "Anodefout",
+                    "734": "Anodestoring",
+                    "735": "F\u00fchler externe energiebron",
+                    "736": "F\u00fchler zonnecollector",
+                    "737": "F\u00fchler zonne-opslag",
+                    "738": "F\u00fchler Mischkreis2",
+                    "750": "Fout retourneert extern",
+                    "751": "Fasebewakingsfout",
+                    "752": "Fasebewaking / stroomfout",
+                    "755": "Verbinding met slaaf verloren",
+                    "756": "Verbinding met master verbroken",
+                    "757": "Lagedrukstoring in apparaat voor warm water voor huishoudelijk gebruik",
+                    "758": "Fout ontdooien",
+                    "759": "Bericht over thermische desinfectie",
+                    "760": "Fout ontdooien",
+                    "761": "LIN-verbinding onderbroken",
+                    "762": "F\u00fchler-inlaatcompressor",
+                    "763": "F\u00fchler-inlaatverdamper",
+                    "764": "F\u00fchler compressorverwarming",
+                    "765": "oververhitting",
+                    "766": "Bedrijfslimieten compressor",
+                    "767": "Veiligheidstemperatuurbegrenzer verwarmingselement",
+                    "770": "Lage oververhitting",
+                    "771": "Hoge oververhitting",
+                    "776": "Bedrijfslimieten compressor",
+                    "777": "Expansieklep",
+                    "778": "Vrees lage druk",
+                    "779": "Angstaanjagende hoge druk",
+                    "780": "F\u00fchler EVI",
+                    "781": "Vloeistofdetector, voor Ex-klep",
+                    "782": "F\u00fchler EVI (Enhanced Vapor Injection) zuiggas",
+                    "783": "Communicatie SEC-omvormer",
+                    "784": "VSS geblokkeerd",
+                    "785": "SEC-kaart defect",
+                    "786": "Communicatie SEC-omvormer",
+                    "787": "VD-alarm",
+                    "788": "Grote omvormerfout",
+                    "789": "LIN/codering niet beschikbaar",
+                    "790": "Grote omvormerfout",
+                    "791": "ModBus-verbinding verbroken",
+                    "792": "LIN-verbinding onderbroken",
+                    "793": "Fatale omvormerfout",
+                    "-1": "Onbekende fout"
+                },
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Tijd"
+                    },
+                    "cause": {
+                        "name": "Veroorzaakt",
+                        "state": {
+                            "701": "Lagedrukpressostaat in het koelcircuit heeft \u0028LW\u0029 meerdere keren of \u0028SW\u0029 langer dan 20 seconden geactiveerd.",
+                            "702": "Alleen mogelijk met L\u002fW-apparaten\u003a Lage druk in het koelcircuit heeft gereageerd. Automatische HP-herstart na enige tijd.",
+                            "703": "Alleen mogelijk met L\u002fW-apparaten\u003a Als de warmtepomp draait en de temperatuur in de aanvoer \u003c 5 \u00b0C is, wordt vorstbeveiliging gedetecteerd.",
+                            "704": "Maximumtemperatuur in het heetgaskoelcircuit overschreden. Automatische HD-herstart na hh\u003amm.",
+                            "705": "Alleen mogelijk met L\u002fW-apparaten\u003a Motorbeveiliging van de ventilator heeft gereageerd.",
+                            "706": "Alleen mogelijk met S\u002fW- en W\u002fW-apparaten\u003a Motorbeveiliging van de pekel- of bronwatercirculatiepomp of de compressor heeft gereageerd.",
+                            "707": "Breek of kortsluiting van de codeerbrug in WP na de eerste inschakeling.",
+                            "708": "Breek of kortsluiting van de retoursensor.",
+                            "709": "Breek of kortsluiting van de flowsensor.\nGeen storingsuitschakeling voor S\u002fW- en W\u002fW-apparaten.",
+                            "710": "Breek of kortsluiting van de heetgassensor in het koelcircuit.",
+                            "711": "Buiten- of kortsluiting van de buitentemperatuursensor.\nGeen storingsuitschakeling. Vaste waarde op -5 \u00b0C.",
+                            "712": "Breek of kortsluiting van de warmwatersensor.\nGeen storingsuitschakeling.",
+                            "713": "Breek of kortsluiting van de warmtebronsensor \u0028Entry\u0029.",
+                            "714": "Thermische bedrijfslimiet van de HP overschreden.\nWaterverwarming geblokkeerd voor hh\u003amm.",
+                            "715": "Hochdruckpressostat im K\u00e4ltekreis hat angesprochen. Nach einiger Zeit automatischer WP-Neuanlauf.",
+                            "716": "Hogedrukpressostaat in het koelcircuit is meerdere keren geactiveerd.",
+                            "717": "Debietschakelaar op W\u002fW-apparaten is geactiveerd tijdens de voorwastijd of werking.",
+                            "718": "Alleen mogelijk met L\u002fW-apparaten\u003a Buitentemperatuur heeft de toegestane maximale waarde overschreden.",
+                            "719": "Alleen mogelijk met L\u002fW-apparaten\u003a Buitentemperatuur is gedaald tot onder de toegestane minimumwaarde.",
+                            "720": "Alleen mogelijk met S\u002fW- en W\u002fW-apparaten\u003a De temperatuur aan de verdamperuitlaat aan de WQ-zijde is meerdere keren onder de veiligheidswaarde gedaald. Automatische HP-herstart na hh\u003amm.",
+                            "721": "Lagedrukpressostaat in het koelcircuit heeft gereageerd. Na enige tijd wordt de HP automatisch opnieuw opgestart \u0028SW en WW\u0029.",
+                            "722": "Temperatuurspreiding in verwarmingsmodus is negatief - onjuist.",
+                            "723": "Temperatuurspreiding in warmwatermodus is negatief - niet correct.",
+                            "724": "Temperatuurspreiding in het verwarmingscircuit tijdens ontdooien is \u003e 15 K \u0028\u003dGevaar voor vorst\u0029.",
+                            "725": "Warmwaterbedrijf verstoord, de gewenste boilertemperatuur ligt ver onder de gewenste temperatuur.",
+                            "726": "Breek of kortsluiting van de mengcircuitsensor.",
+                            "727": "Pekeldrukpressostaat heeft gereageerd tijdens de aanlooptijd of tijdens bedrijf.",
+                            "728": "Breek of kortsluiting van de warmtebronsensor bij de WQ-uitlaat.",
+                            "729": "Compressor zonder stroom na inschakelen.",
+                            "730": "Het uitbakprogramma kon een VL-temperatuurniveau niet bereiken binnen het opgegeven tijdsinterval. Het uitbakprogramma gaat door.",
+                            "732": "De verwarmingswatertemperatuur is meerdere malen onder de 16 °C gedaald.",
+                            "733": "Storingssignaalingang van de externe stroomanode heeft gereageerd.",
+                            "734": "Fout 733 is al meer dan twee weken aanwezig en de warmwaterproductie is geblokkeerd.",
+                            "735": "Alleen mogelijk als de Comfort-uitbreidingskaart is geïnstalleerd. Breuk of kortsluiting van de externe energiebronsensor.",
+                            "736": "Alleen mogelijk als de Comfort-uitbreidingskaart is geïnstalleerd. Breuk of kortsluiting van de zonnecollectorsensor.",
+                            "737": "Alleen mogelijk als de Comfort-uitbreidingskaart is geïnstalleerd. Breuk of kortsluiting van de zonneboilersensor.",
+                            "738": "Alleen mogelijk als de Comfort-uitbreidingskaart is geïnstalleerd\u003a Breuk of kortsluiting van de mengcircuitsensor 2.",
+                            "750": "Breek of kortsluiting van de externe retoursensor.",
+                            "751": "Fasevolgorderelais heeft gereageerd.",
+                            "752": "Fasevolgorderelais of stromingsschakelaar heeft gereageerd.",
+                            "755": "Een slaaf heeft langer dan 5 minuten niet gereageerd.",
+                            "756": "Een master heeft langer dan 5 minuten niet gereageerd.",
+                            "757": "Lagedrukpressostaat op tapwaterapparaat heeft meerdere keren of langer dan 20 seconden gereageerd.",
+                            "758": "De ontdooiing werd 5 keer achter elkaar beëindigd omdat de aanvoertemperatuur te laag was.",
+                            "759": "Thermische desinfectie kon 3 keer achter elkaar niet correct worden uitgevoerd.",
+                            "760": "Het ontdooien werd 5 keer achter elkaar voltooid gedurende de maximale tijd dat sterke wind de verdamper treft.",
+                            "761": "LIN time-out",
+                            "762": "Volledige fout T\u00fc \u0028Inlaatcompressor\u0029.",
+                            "763": "Brandstoffout T\u00fc1 \u0028Inlaatverdamper\u0029.",
+                            "764": "Fout sensor verwarming compressor.",
+                            "765": "Oververhitting onder 2K gedurende meer dan 5 minuten.",
+                            "766": "Bedien 5 minuten buiten het bedrijfsbereik van de compressor.",
+                            "767": "STB van het verwarmingselement op de SEC is geactiveerd.",
+                            "770": "Oververhitting is al langere tijd onder de limiet.",
+                            "771": "Oververhitting is al langere tijd boven de limiet.",
+                            "776": "De compressor werkt gedurende langere tijd buiten zijn bedrijfslimieten.",
+                            "777": "Expansieklep defect.",
+                            "778": "Lagedruksensor defect.",
+                            "779": "Hogedruksensor defect.",
+                            "780": "EVI-sensor defect.",
+                            "781": "Temperatuursensor vloeistof voor Ex-klep defect.",
+                            "782": "Temperatuursensor EVI zuiggas defect.",
+                            "783": "Communicatie tussen SEC en omvormer verstoord",
+                            "784": "Omvormer vergrendeld",
+                            "785": "Fout gedetecteerd in SEC-bord.",
+                            "786": "Verstoring in de communicatie tussen SEC en HZIO gedetecteerd door SEC.",
+                            "787": "Compressor rapporteert fout.",
+                            "788": "Fout in de omvormer",
+                            "789": "De centrale kon geen codering detecteren. De LIN-verbinding is onderbroken of de codeerweerstand wordt niet herkend.",
+                            "790": "Fout in de voeding van de inverter \u002f compressor.",
+                            "791": "SEC-bord is al enige tijd niet toegankelijk. 791 wordt geactiveerd wanneer een HZIO-bord is gevonden \u0028zonder aparte codering\u0029 maar er kan geen SEC-bord op worden herkend.",
+                            "792": "Er kon geen moederbord of andere configuratie worden gevonden.",
+                            "793": "Temperatuurfout in omvormer",
+                            "-1": "Onbekende fout"
+                        }
+                    },
+                    "remedy": {
+                        "name": "Remedie",
+                        "state": {
+                            "701": "Controleer HD op lekkage, schakelpunt drukschakelaar, ontdooiing en TA-min.",
+                            "702": "Controleer HD op lekkage, schakelpunt drukschakelaar, ontdooiing en TA-min.",
+                            "703": "Controleer HD-prestaties, ontdooiklep en verwarmingssysteem.",
+                            "704": "Controleer hoeveelheid koudemiddel, verdamping, oververhittingsstroom, retour en WQ-min.",
+                            "705": "Controleer ventilator.",
+                            "706": "Controleer ingestelde waarden, compressor, BOSUP.",
+                            "707": "Codeerweerstand in WP, stekker en aansluitkabel controleren.",
+                            "708": "Retourvoeler, stekker en aansluitkabel controleren.",
+                            "709": "Doorstroomsensor, stekker en aansluitkabel controleren.",
+                            "710": "Controleer heetgassensor, stekker en aansluitkabel.",
+                            "711": "Buitentemperatuursensor, stekker en aansluitkabel controleren.",
+                            "712": "Warmwatersensor, stekker en aansluitkabel controleren.",
+                            "713": "Warmtebronsensor, stekker en aansluitkabel controleren",
+                            "714": "Controleer de warmwaterstroom, warmtewisselaar, warmwatertemperatuur en warmwatercirculatiepomp.",
+                            "715": "Controleer HW-debiet, superflow, temperatuur en condensatie.",
+                            "716": "Controleer HW-debiet, superflow, temperatuur en condensatie.",
+                            "717": "Doorstroom, schakelpunt DFS, filter, luchtspeling controleren",
+                            "718": "Controleer de buitentemperatuur en stel de waarde in.",
+                            "719": "Controleer de buitentemperatuur en stel de waarde in.",
+                            "720": "Controleer debiet, filter, luchtspeling, temperatuur.",
+                            "721": "Controleer schakelpuntpressostaat aanvoer WQ-zijde.",
+                            "722": "Controleer de werking en plaatsing van de voorwaartse en retoursensoren.",
+                            "723": "Controleer de werking en plaatsing van de voorwaartse en retoursensoren.",
+                            "724": "Controleer de werking en plaatsing van de aanvoer- en retourbanden, aanvoercapaciteit HUP, overloop- en verwarmingscircuits.",
+                            "725": "Controleer de warmwatercirculatiepomp, boilervulling, schuifafsluiter en 3-wegklep. Ontlucht verwarmingswater en warm water.",
+                            "726": "Controleer mengcircuitsensor, stekker en aansluitkabel.",
+                            "727": "Controleer pekeldruk en pekeldrukpressostaat.",
+                            "728": "Controleer warmtebronsensor, stekker en aansluitkabel.",
+                            "729": "Controleer draaiveld en compressor.",
+                            "730": "Controleer de stroombehoefte tijdens het uitwarmen.",
+                            "732": "Meneerklep en CV-circulatiepomp controleren.",
+                            "733": "Controleer de verbindingskabel tussen anode en potentiostaat. Vul de warmwatertank.",
+                            "734": "Bevestig de fout tijdelijk om de warmwaterbereiding weer in te schakelen. Fout 733 oplossen.",
+                            "735": "Foutcontrole externe energiebron, stekker en verbindingskabel.",
+                            "736": "Controleer defecte zonnecollector, stekker en aansluitkabel.",
+                            "737": "Controleer defecte zonneboiler, stekker en aansluitkabel.",
+                            "738": "Defect mengcircuit2, controleer stekker en aansluitkabel.",
+                            "750": "Externe retoursensor, stekker en aansluitkabel controleren.",
+                            "751": "Het draaiveld- en fasevolgorderelais controleren.",
+                            "752": "zie fouten #751 en #717",
+                            "755": "Controleer de netwerkverbinding, switch en IP-adressen. Voer indien nodig de WP-zoekopdracht opnieuw uit.",
+                            "756": "Controleer de netwerkverbinding, switch en IP-adressen. Voer indien nodig de WP-zoekopdracht opnieuw uit.",
+                            "757": "Als deze fout drie keer optreedt, kan het systeem alleen worden geactiveerd door bevoegd servicepersoneel!",
+                            "758": "Controleer flow en flowsensor",
+                            "759": "Instelling tweede warmteopwekker en veiligheidstemperatuurbegrenzer controleren",
+                            "760": "Bescherm ventilator en verdamper tegen harde wind",
+                            "761": "Controleer kabelcontact",
+                            "762": "Storing controleren, indien nodig vervangen",
+                            "763": "Storing controleren, indien nodig vervangen",
+                            "764": "Storing controleren, indien nodig vervangen",
+                            "765": "Bij de eerste keer inschakelen. Draaiveld controleren, anders klantenservice bellen",
+                            "766": "Rotatieveld controleren",
+                            "767": "Verwarmingselement controleren en zekering er weer in schuiven",
+                            "770": "Controleer temperatuursensor, druksensor en expansieventiel",
+                            "771": "Temperatuursensor, druksensor, vulhoeveelheid en expansieventiel controleren",
+                            "776": "Controleer de thermodynamica",
+                            "777": "Expansieventiel, aansluitkabel en eventueel SEC-bord controleren",
+                            "778": "Sensor, stekker en aansluitkabel controleren",
+                            "779": "Sensor, stekker en aansluitkabel controleren",
+                            "780": "Sensor, stekker en aansluitkabel controleren",
+                            "781": "Sensor, stekker en aansluitkabel controleren",
+                            "782": "Sensor, stekker en aansluitkabel controleren",
+                            "783": "Verbindingskabels, ontstoringscondensatoren en bekabeling controleren",
+                            "784": "Schakel het gehele systeem gedurende 2 minuten spanningsvrij. Als dit herhaaldelijk voorkomt, controleer dan de omvormer en de compressor",
+                            "785": "SEC-kaart vervangen",
+                            "786": "Controleer kabelverbinding HZ\u002fIO SEC-kaart",
+                            "787": "Bevestig de fout. Als de fout meerdere keren optreedt, neem dan contact op met bevoegd onderhoudspersoneel \u0028\u003d klantenservice\u0029",
+                            "788": "Controleer omvormer",
+                            "789": "LIN-verbindingskabel \u002f controleer coderingsweerstand",
+                            "790": "Controleer bekabeling, omvormer en compressor",
+                            "791": "Als het de SEC-configuratie is, controleer dan de ModBus-kabel tussen HZIO en SEC-bord. Controleer ook het SEC-bord om te zien of alles knippert zoals het zou moeten. Als er GEEN configuratie is met SEC-bord is \u0028b.v. omdat het een P184-apparaat is\u0029, controleer dan de coderingsweerstand van de HZIO.",
+                            "792": "Controleer codeerstekker op LIN-kaart",
+                            "793": "Fout corrigeert zichzelf"
+                        }
+                    }
+                }
+            },
+            "switchoff_reason": {
+                "name": "Afsluiten",
+                "state": {
+                    "0": "Storing warmtepomp",
+                    "1": "Systeemstoring",
+                    "2": "Bedrijfsmodus tweede warmteopwekker",
+                    "3": "EVU-blok",
+                    "4": "",
+                    "5": "Ontdooiing actief (alleen LW-apparaten)",
+                    "6": "Maximale toepassingslimiet temperatuur",
+                    "7": "Minimale toepassingsgrens temperatuur",
+                    "8": "Onderste toepassingslimiet",
+                    "9": "Geen vereiste",
+                    "11": "Doorstroomwarmtebron",
+                    "-1": "Onbekende afsluiting"
+                },
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Tijd"
+                    },
+                    "code_1": {
+                        "name": "Voorlaatste afsluiting",
+                        "state": {
+                            "0": "Storing warmtepomp",
+                            "1": "Systeemstoring",
+                            "2": "Bedrijfsmodus tweede warmteopwekker",
+                            "3": "EVU-blok",
+                            "4": "",
+                            "5": "Ontdooiing actief (alleen LW-apparaten)",
+                            "6": "Maximale toepassingslimiet temperatuur",
+                            "7": "Minimale toepassingsgrens temperatuur",
+                            "8": "Onderste toepassingslimiet",
+                            "9": "Geen vereiste",
+                            "11": "Doorstroomwarmtebron",
+                            "-1": "Onbekende afsluiting"
+                        }
+                    },
+                    "timestamp_1": {
+                        "name": "Voorlaatste tijdstip"
+                    },
+                    "code_2": {
+                        "name": "Voorlaatste afsluiting",
+                        "state": {
+                            "0": "Storing warmtepomp",
+                            "1": "Systeemstoring",
+                            "2": "Bedrijfsmodus tweede warmteopwekker",
+                            "3": "EVU-blok",
+                            "4": "",
+                            "5": "Ontdooiing actief (alleen LW-apparaten)",
+                            "6": "Maximale toepassingslimiet temperatuur",
+                            "7": "Minimale toepassingsgrens temperatuur",
+                            "8": "Onderste toepassingslimiet",
+                            "9": "Geen vereiste",
+                            "11": "Doorstroomwarmtebron",
+                            "-1": "Onbekende afsluiting"
+                        }
+                    },
+                    "timestamp_2": {
+                        "name": "Voorlaatste tijdstip"
+                    },
+                    "code_3": {
+                        "name": "Vierde tot laatste afsluiting",
+                        "state": {
+                            "0": "Storing warmtepomp",
+                            "1": "Systeemstoring",
+                            "2": "Bedrijfsmodus tweede warmteopwekker",
+                            "3": "EVU-blok",
+                            "4": "",
+                            "5": "Ontdooiing actief (alleen LW-apparaten)",
+                            "6": "Maximale toepassingslimiet temperatuur",
+                            "7": "Minimale toepassingsgrens temperatuur",
+                            "8": "Onderste toepassingslimiet",
+                            "9": "Geen vereiste",
+                            "11": "Doorstroomwarmtebron",
+                            "-1": "Onbekende afsluiting"
+                        }
+                    },
+                    "timestamp_3": {
+                        "name": "Vierde en laatste keer"
+                    },
+                    "code_4": {
+                        "name": "Vijfde definitieve afsluiting",
+                        "state": {
+                            "0": "Storing warmtepomp",
+                            "1": "Systeemstoring",
+                            "2": "Bedrijfsmodus tweede warmteopwekker",
+                            "3": "EVU-blok",
+                            "4": "",
+                            "5": "Ontdooiing actief (alleen LW-apparaten)",
+                            "6": "Maximale toepassingslimiet temperatuur",
+                            "7": "Minimale toepassingsgrens temperatuur",
+                            "8": "Onderste toepassingslimiet",
+                            "9": "Geen vereiste",
+                            "11": "Doorstroomwarmtebron",
+                            "-1": "Onbekende afsluiting"
+                        }
+                    },
+                    "timestamp_4": {
+                        "name": "Vijfde meest recente keer"
+                    }
+                }
+            },
+            "status_line_1": {
+                "name": "Status 1",
+                "state": {
+                    "warmtepomp draait": "De warmtepomp draait",
+                    "warmtepomp inactief": "De warmtepomp is inactief",
+                    "warmtepomp komt eraan": "De warmtepomp start",
+                    "warmtepompuitschakeling": "De warmtepomp schakelt uit",
+                    "errorcode slot": "Foutcode warmtepomp in slot 0",
+                    "pompvoorloop": "Pompvoorloop",
+                    "ontdooien": "Ontdooien",
+                    "witing on LIN-verbinding": "Schrijven op LIN-verbinding",
+                    "compressor warmt op": "De compressor is aan het opwarmen",
+                    "compressorverwarmer": "Compressorverwarmer"
+                }
+            },
+            "status_line_2": {
+                "name": "Status 2",
+                "state": {
+                    "since": "Sinds",
+                    "in": "In",
+                    "unknown": "Onbekend"
+                }
+            },
+            "status_line_3": {
+                "name": "Status 3",
+                "state": {
+                    "heating": "verwarmt",
+                    "defrost": "ontdooien",
+                    "cooling": "koelen",
+                    "pump forerun": "Pompvoorloop",
+                    "thermal desinfection": "thermische desinfectie",
+                    "swimming pool/solar": "Zwembad / zonne-energie",
+                    "no request": "geen verzoek",
+                    "cycle lock": "inschakelslot",
+                    "lock time": "vergrendeltijd",
+                    "domestic water": "huishoudelijk water",
+                    "flow monitoring": "flowmonitoring",
+                    "grid switch on delay": "Vertraging bij inschakelen net",
+                    "info bake out program": "Informatie uit opwarmprogramma",
+                    "heating external engery source": "verwarming uit een externe energiebron",
+                    "domestic water external energy source": "Huishoudelijk water uit externe energiebron",
+                    "second heat generator 1 active": "tweede warmteopwekker 1 actief"
+                }
+            },
+            "heat_source_output": {
+                "name": "Uitgang warmtebron"
+            },
+            "heat_source_input_temperature": {
+                "name": "Ingang warmtebron"
+            },
+            "outdoor_temperature": {
+                "name": "Buitentemperatuur"
+            },
+            "status_time": {
+                "name": "Statustijd"
+            },
+            "outdoor_temperature_average": {
+                "name": "Gemiddelde buitentemperatuur"
+            },
+            "compressor1_impulses": {
+                "name": "Pulseert compressor 1"
+            },
+            "compressor1_operation_hours": {
+                "name": "Bedrijfsuren compressor 1"
+            },
+            "compressor2_impulses": {
+                "name": "Pulseert compressor 2"
+            },
+            "compressor2_operation_hours": {
+                "name": "Bedrijfsuren compressor 2"
+            },
+            "operation_hours": {
+                "name": "Totaal bedrijfsuren"
+            },
+            "heat_amount_counter": {
+                "name": "Warmtehoeveelheidsmeter"
+            },
+            "hot_gas_temperature": {
+                "name": "Heetgastemperatuur"
+            },
+            "suction_compressor_temperature": {
+                "name": "Temperatuur zuigcompressor"
+            },
+            "suction_evaporator_temperature": {
+                "name": "Temperatuur van de inlaatverdamper"
+            },
+            "compressor_heating_temperature": {
+                "name": "Compressor"
+            },
+            "overheating_temperature": {
+                "name": "Oververhitting"
+            },
+            "overheating_target_temperature": {
+                "name": "Oververhittingsdoel"
+            },
+            "high_pressure": {
+                "name": "Hoge druk"
+            },
+            "low_pressure": {
+                "name": "Lage druk"
+            },
+            "additional_heat_generator_operation_hours": {
+                "name": "Extra bedrijfsuren warmteopwekker"
+            },
+            "analog_out1": {
+                "name": "Analoge uitgang 1"
+            },
+            "analog_out2": {
+                "name": "Analoge uitgang 2"
+            },
+            "current_heat_output": {
+                "name": "Prestaties wel"
+            },
+            "additional_heat_generator_amount_counter": {
+                "name": "Warmtehoeveelheid extra warmtegenerator"
+            },
+            "heat_source_output_temperature": {
+                "name": "Uitgang warmtebron"
+            },
+            "pump_frequency": {
+                "name": "Pomp frequentie"
+            },
+            "domestic_water": {
+                "name": "Industrieel water"
+            },
+            "dhw_temperature": {
+                "name": "Industrieel water"
+            },
+            "dhw_operation_hours": {
+                "name": "Werk uren"
+            },
+            "dhw_heat_amount": {
+                "name": "Hoeveelheid warmte"
+            },
+            "dhw_energy_input": {
+                "name": "Energie gebruikt"
+            },
+            "flow_in_temperature": {
+                "name": "Aanvoertemperatuur"
+            },
+            "flow_out_temperature": {
+                "name": "Retourtemperatuur"
+            },
+            "flow_out_temperature_target": {
+                "name": "Doeltemperatuur retourneren"
+            },
+            "operation_hours_heating": {
+                "name": "Werk uren"
+            },
+            "heat_amount_heating": {
+                "name": "Meter warmtehoeveelheid verwarming"
+            },
+            "heat_amount_flow_rate": {
+                "name": "Meter warmtehoeveelheidsstroom"
+            },
+            "heat_source_flow_rate": {
+                "name": "Meter warmtebrondebiet"
+            },
+            "heat_energy_input": {
+                "name": "Energieverbruikte verwarming"
+            },
+            "flow_out_temperature_external": {
+                "name": "Retourtemperatuur extern"
+            },
+            "solar_collector_temperature": {
+                "name": "Zonnepaneel"
+            },
+            "solar_buffer_temperature": {
+                "name": "Zonne-buffer"
+            },
+            "operation_hours_solar": {
+                "name": "Bedrijfsuren zonne-energie"
+            },
+            "operation_hours_cooling": {
+                "name": "Werk uren"
+            },
+            "room_thermostat_temperature": {
+                "name": "Kamerthermostaat"
+            },
+            "room_thermostat_temperature_target": {
+                "name": "Doel kamerthermostaat"
+            },
+            "pump_flow_delta_target": {
+                "name": "Pekelcirculatiepomp Delta Target"
+            },
+            "pump_flow_delta": {
+                "name": "Pekelcirculatiepomp Delta"
+            },
+            "circulation_pump_delta_target": {
+                "name": "Circulatiepomp Delta doel"
+            },
+            "circulation_pump_delta": {
+                "name": "Circulatiepomp Delta"
+            }
+        },
+        "climate": {
+            "heating": {
+                "name": "Verwarming"
+            },
+            "cooling": {
+                "name": "Koeling"
+            }
+        },
+        "water_heater": {
+            "domestic_water": {
+                "name": "Industrieel water"
+            }
+        }
+    },
+    "config": {
+        "abort": {
+            "already_configured": "Dit apparaat is al geconfigureerd.",
+            "already_in_progress": "Het configuratieproces is al bezig.",
+            "cannot_connect": "De verbinding met Luxtronik is mislukt.\nControleer het IP-adres/hostnaam en de poort.\n\nFout:\n{connect_error}",
+            "no_devices_found": "Er konden geen apparaten gevonden worden op het netwerk.",
+            "single_instance_allowed": "Al geconfigureerd. Er is slechts één configuratie toegestaan.",
+            "unknown": "Onverwachte fout"
+        },
+        "error": {
+            "address": "Ongeldig extern adres opgegeven. Het adres moet een IP-adres of een oplosbare hostnaam zijn.",
+            "address_in_use": "De geselecteerde luisterpoort is al in gebruik op dit systeem.",
+            "unknown": "Onverwachte fout"
+        },
+        "step": {
+            "user": {
+                "description": "Verbind een Luxtronik warmtepomp met Home Assistant.",
+                "data": {
+                    "host": "Host",
+                    "poort": "Netwerkpoort",
+                    "timeout": "Time-out netwerksocket (sec)",
+                    "max_data_length": "Maximale lengte van datapakketten"
+                },
+                "data_description": {
+                    "host": "Netwerknaam of IP-adres",
+                    "port": "Meestal 8889 of 8888",
+                    "timeout": "Als het netwerk of de warmtepomp traag is, kunt u hier fijne aanpassingen maken.",
+                    "max_data_length": "Als het netwerk of de warmtepomp traag is, kunt u hier fijne aanpassingen maken."
+                }
+            },
+            "options": {
+                "description": "Instellingen voor de Luxtronik warmtepomp {name}.\nDeze instellingen kunnen later ook worden gewijzigd onder Integraties.",
+                "data": {
+                    "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
+                    "control_mode_home_assistant": "Experimenteel!: Regel de aan/uit-status van de thermostaat via Home Assistant.",
+                    "ha_sensor_prefix": "Entiteits-ID voorvoegsel"
+                },
+                "data_description": {
+                    "ha_sensor_indoor_temperature": "Er wordt een thermostaat voor verwarmingsregeling aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is aangesloten op een hardware kamerthermostaat, moet dit veld leeg worden gelaten.",
+                    "control_mode_home_assistant": "Als de Home Assistant-thermostaat in de inactieve status staat, krijgt Luxtronik de status Uit en kan Luxtronik dit item niet starten.",
+                    "ha_sensor_prefix": "Belangrijk als er meerdere warmtepompen worden gebruikt.\nVoor één warmtepomp kunt u eenvoudigweg 'luxtronik' gebruiken."
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "user": {
+                "description": "Instellingen voor de Luxtronik warmtepomp {name}.",
+                "data": {
+                    "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
+                    "control_mode_home_assistant": "Experimenteel!: Regel de aan/uit-status van de thermostaat via Home Assistant.",
+                    "ha_sensor_prefix": "Entiteits-ID voorvoegsel"
+                },
+                "data_description": {
+                    "ha_sensor_indoor_temperature": "Er wordt een thermostaat voor verwarmingsregeling aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is aangesloten op een hardware kamerthermostaat, moet dit veld leeg worden gelaten.",
+                    "control_mode_home_assistant": "Als de Home Assistant-thermostaat in de inactieve status staat, krijgt Luxtronik de status Uit en kan Luxtronik dit item niet starten.",
+                    "ha_sensor_prefix": "Belangrijk als er meerdere warmtepompen worden gebruikt.\nVoor één warmtepomp kunt u eenvoudigweg 'luxtronik' gebruiken."
+                }
+            }
+        }
+    }
+}

@@ -3,7 +3,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 from decimal import Decimal
 from typing import Any
 
@@ -13,7 +13,7 @@ from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
-from homeassistant.util.dt import utcnow
+from homeassistant.util.dt import utcnow, dt as dt_util
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
@@ -30,8 +30,8 @@ from .const import (
     SensorAttrKey as SA,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
-from .model import LuxtronikSensorDescription
-from .sensor_entities_predefined import SENSORS, SENSORS_STATUS
+from .model import LuxtronikIndexSensorDescription, LuxtronikSensorDescription
+from .sensor_entities_predefined import SENSORS, SENSORS_INDEX, SENSORS_STATUS
 
 # endregion Imports
 
@@ -57,6 +57,14 @@ async def async_setup_entry(
             hass, entry, coordinator, description, description.device_key
         )
         for description in SENSORS_STATUS
+        if coordinator.entity_active(description)
+    )
+
+    async_add_entities(
+        LuxtronikIndexSensor(
+            hass, entry, coordinator, description, description.device_key
+        )
+        for description in SENSORS_INDEX
         if coordinator.entity_active(description)
     )
 
@@ -116,7 +124,7 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._handle_coordinator_update()
 
     def _handle_coordinator_update_internal(
-        self, data: LuxtronikCoordinatorData | None = None
+        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
         if (
@@ -129,7 +137,7 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         if data is None:
             return
         self._attr_native_value = get_sensor_data(
-            data, self.entity_description.luxtronik_key.value
+            data, use_key or self.entity_description.luxtronik_key.value
         )
 
         if self._attr_native_value is None:
@@ -150,10 +158,10 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
 
     @callback
     def _handle_coordinator_update(
-        self, data: LuxtronikCoordinatorData | None = None
+        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        self._handle_coordinator_update_internal(data)
+        self._handle_coordinator_update_internal(data, use_key)
         super()._handle_coordinator_update()
 
 
@@ -228,7 +236,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         # region Workaround Luxtronik Bug
         else:
             # region Workaround: Inverter heater is active but not the heatpump!
-            # Status shows heating but status 3 = no request! 
+            # Status shows heating but status 3 = no request!
             sl1 = self._get_value(LC.C0117_STATUS_LINE_1)
             sl3 = self._get_value(LC.C0119_STATUS_LINE_3)
             add_circ_pump = self._get_value(LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
@@ -248,13 +256,13 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                 # ignore pump forerun
                 self._attr_native_value = LuxOperationMode.no_request.value
             # endregion Workaround: Inverter heater is active but not the heatpump!
-            
+
             # region Workaround Thermal desinfection with heatpump running
             if sl3 == LuxStatus3Option.thermal_desinfection:
                 # map thermal desinfection to Domestic Water iso Heating
                 self._attr_native_value = LuxOperationMode.domestic_water.value
             # endregion Workaround Thermal desinfection with heatpump running
-            
+
             # region Workaround Thermal desinfection with (only) using 2nd heatsource
             s3_workaround: list[str | None] = [
                 LuxStatus3Option.no_request,
@@ -264,10 +272,10 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                 DHW_recirculation = self._get_value(LC.C0038_DHW_RECIRCULATION_PUMP)
                 AddHeat           = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
                 if AddHeat and DHW_recirculation:
-                    # more fixes to detect thermal desinfection sequences 
+                    # more fixes to detect thermal desinfection sequences
                     self._attr_native_value = LuxOperationMode.domestic_water.value
             # endregion Workaround Thermal desinfection with (only) using 2nd heatsource
-             
+
             # region Workaround Detect passive cooling operation mode
             if self._attr_native_value == LuxOperationMode.no_request.value:
                 # detect passive cooling
@@ -278,9 +286,9 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                     T_heat_out = self._get_value(LC.C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE)
                     Flow_WQ    = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
                     if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0):
-                        #LOGGER.info(f"Cooling mode detected!!!")
+                        # LOGGER.info(f"Cooling mode detected!!!")
                         self._attr_native_value = LuxOperationMode.cooling.value
-            # endregion Workaround Detect passive cooling operation mode                  
+            # endregion Workaround Detect passive cooling operation mode
         # endregion Workaround Luxtronik Bug
 
         self._last_state = self._attr_native_value
@@ -402,3 +410,55 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             return time.min
         vals = str(value).split(":")
         return time(int(vals[0]), int(vals[1]))
+
+
+class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
+    _min_index = 0
+    _max_index = 4
+
+    entity_description: LuxtronikIndexSensorDescription
+
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """Handle updated data from the coordinator."""
+
+        values = dict()
+        for i in range(self._min_index, self._max_index + 1):
+            luxtronik_key_timestamp = str(
+                self.entity_description.luxtronik_key_timestamp
+            ).format(ID=i)
+            luxtronik_key = str(self.entity_description.luxtronik_key).format(ID=i)
+            key = self.coordinator.get_value(luxtronik_key_timestamp)
+            values[key] = self.coordinator.get_value(luxtronik_key)
+
+        values = dict(sorted(values.items()))
+        attr = self._attr_extra_state_attributes
+
+        item = values.popitem()
+        self._attr_native_value = attr[SA.CODE] = item[1]
+        attr[SA.TIMESTAMP] = self.format_time(item[0])
+
+        i = 1
+        while len(values) > 0:
+            item = values.popitem()
+            attr[SA.CODE + f"_{i}"] = item[1]
+            attr[SA.TIMESTAMP + f"_{i}"] = self.format_time(item[0])
+            i += 1
+
+        super()._handle_coordinator_update(
+            data, self.entity_description.luxtronik_key.format(ID=0)
+        )
+
+    def format_time(self, value_timestamp: int | None) -> datetime | None:
+        if value_timestamp is not None and isinstance(value_timestamp, int):
+            value_timestamp = datetime.fromtimestamp(value_timestamp, timezone.utc)
+        if (
+            value_timestamp is not None
+            and isinstance(value_timestamp, datetime)
+            and value_timestamp.tzinfo is None
+        ):
+            time_zone = dt_util.get_time_zone(self.hass.config.time_zone)
+            value_timestamp = value_timestamp.replace(tzinfo=time_zone)
+        return value_timestamp

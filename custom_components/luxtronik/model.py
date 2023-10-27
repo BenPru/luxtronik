@@ -98,6 +98,16 @@ class LuxtronikSensorDescription(
 
 
 @dataclass
+class LuxtronikIndexSensorDescription(
+    LuxtronikSensorDescription,
+    SensorEntityDescription,
+):
+    """Class describing Luxtronik index sensor entities."""
+
+    luxtronik_key_timestamp: LuxParameter | LuxCalculation = LuxParameter.UNSET
+
+
+@dataclass
 class LuxtronikNumberDescription(
     LuxtronikEntityDescription,
     NumberEntityDescription,

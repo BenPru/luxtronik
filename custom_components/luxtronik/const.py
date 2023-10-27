@@ -184,6 +184,22 @@ class LuxRoomThermostatType(Enum):
     # Smart: Final = 5
 
 
+class LuxSwitchoffReason(Enum):
+    """LuxSwitchoff reason etc."""
+
+    heatpump_error: Final = 1
+    system_error: Final = 2
+    evu_lock: Final = 3
+    operation_mode_second_heat_generator: Final = 4
+    air_defrost: Final = 5
+    maximal_usage_temperature: Final = 6
+    minimal_usage_temperature: Final = 7
+    lower_usage_limit: Final = 8
+    no_request: Final = 9
+    flow_rate: Final = 11  # Durchfluss
+    PV_max: Final = 19
+
+
 LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
     LuxOperationMode.heating.value: "mdi:radiator",
     LuxOperationMode.domestic_water.value: "mdi:waves",
@@ -268,6 +284,8 @@ class LuxParameter(StrEnum):
     )
     P0699_HEATING_THRESHOLD: Final = "parameters.ID_Einst_Heizgrenze"
     P0700_HEATING_THRESHOLD_TEMPERATURE: Final = "parameters.ID_Einst_Heizgrenze_Temp"
+    P0716_0720_SWITCHOFF_REASON: Final = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
+    P0721_0725_SWITCHOFF_TIMESTAMP: Final = "parameters.ID_Switchoff_file_{ID}_1"  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
     # luxtronik*_heating_circuit3_curve*
     P0774_HEATING_CIRCUIT3_CURVE1_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK3E_akt"  # 270
@@ -647,6 +665,7 @@ class SensorKey(StrEnum):
     COOLING_TARGET_TEMPERATURE_MK1 = "cooling_target_temperature_mk1"
     COOLING_TARGET_TEMPERATURE_MK2 = "cooling_target_temperature_mk2"
     COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
+    SWITCHOFF_REASON = "switchoff_reason"
 
 
 # endregion Keys

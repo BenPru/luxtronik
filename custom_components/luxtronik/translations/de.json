@@ -480,6 +480,91 @@
                     "9": "Keine Anforderung",
                     "11": "Durchfluss-W\u00e4rmequelle",
                     "-1": "Unbekannte Abschaltung"
+                },
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Zeitpunkt"
+                    },
+                    "code_1": {
+                        "name": "Vorletze Abschaltung",
+                        "state": {
+                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "1": "Anlagen St\u00f6rung",
+                            "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
+                            "3": "EVU-Sperre",
+                            "4": "",
+                            "5": "Lauftabtau (nur LW-Ger\u00e4te)",
+                            "6": "Temperatur Einsatzgrenze maximal",
+                            "7": "Temperatur Einsatzgrenze minimal",
+                            "8": "Untere Einsatzgrenze",
+                            "9": "Keine Anforderung",
+                            "11": "Durchfluss-W\u00e4rmequelle",
+                            "-1": "Unbekannte Abschaltung"
+                        }
+                    },
+                    "timestamp_1": {
+                        "name": "Vorletzter Zeitpunkt"
+                    },
+                    "code_2": {
+                        "name": "Vorvorletze Abschaltung",
+                        "state": {
+                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "1": "Anlagen St\u00f6rung",
+                            "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
+                            "3": "EVU-Sperre",
+                            "4": "",
+                            "5": "Lauftabtau (nur LW-Ger\u00e4te)",
+                            "6": "Temperatur Einsatzgrenze maximal",
+                            "7": "Temperatur Einsatzgrenze minimal",
+                            "8": "Untere Einsatzgrenze",
+                            "9": "Keine Anforderung",
+                            "11": "Durchfluss-W\u00e4rmequelle",
+                            "-1": "Unbekannte Abschaltung"
+                        }
+                    },
+                    "timestamp_2": {
+                        "name": "Vorvorletzter Zeitpunkt"
+                    },
+                    "code_3": {
+                        "name": "Viertletzte Abschaltung",
+                        "state": {
+                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "1": "Anlagen St\u00f6rung",
+                            "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
+                            "3": "EVU-Sperre",
+                            "4": "",
+                            "5": "Lauftabtau (nur LW-Ger\u00e4te)",
+                            "6": "Temperatur Einsatzgrenze maximal",
+                            "7": "Temperatur Einsatzgrenze minimal",
+                            "8": "Untere Einsatzgrenze",
+                            "9": "Keine Anforderung",
+                            "11": "Durchfluss-W\u00e4rmequelle",
+                            "-1": "Unbekannte Abschaltung"
+                        }
+                    },
+                    "timestamp_3": {
+                        "name": "Viertletzter Zeitpunkt"
+                    },
+                    "code_4": {
+                        "name": "F\u00fcnftletzte Abschaltung",
+                        "state": {
+                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "1": "Anlagen St\u00f6rung",
+                            "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
+                            "3": "EVU-Sperre",
+                            "4": "",
+                            "5": "Lauftabtau (nur LW-Ger\u00e4te)",
+                            "6": "Temperatur Einsatzgrenze maximal",
+                            "7": "Temperatur Einsatzgrenze minimal",
+                            "8": "Untere Einsatzgrenze",
+                            "9": "Keine Anforderung",
+                            "11": "Durchfluss-W\u00e4rmequelle",
+                            "-1": "Unbekannte Abschaltung"
+                        }
+                    },
+                    "timestamp_4": {
+                        "name": "F\u00fcnftletzter Zeitpunkt"
+                    }
                 }
             },
             "status_line_1": {
