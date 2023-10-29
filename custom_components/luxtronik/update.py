@@ -27,6 +27,9 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     DOWNLOAD_PORTAL_URL,
+    FIRMWARE_UPDATE_MANUAL_DE,
+    FIRMWARE_UPDATE_MANUAL_EN,
+    LANG_DE,
     LOGGER,
     DeviceKey,
     LuxCalculation,
@@ -113,12 +116,18 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         release_url = get_manufacturer_firmware_url_by_model(self.coordinator.model)
         download_id = get_firmware_download_id(self.installed_version)
         download_url = f"{DOWNLOAD_PORTAL_URL}{download_id}"
-        if self.state:
-            upgrade_text = f"For your {self.coordinator.manufacturer} {self.coordinator.model} (Download ID {download_id}) is Firmware Version {self.__firmware_version_available} available.<br><br>"
+        manual_url = (
+            FIRMWARE_UPDATE_MANUAL_DE
+            if self.hass.config.language == LANG_DE
+            else FIRMWARE_UPDATE_MANUAL_EN
+        )
         return (
-            f'{upgrade_text}<a href="{release_url}" target="_blank" rel="noreferrer noopener">Firmware Download Portal</a>&emsp;'
-            + f'<a href="{download_url}" target="_blank" rel="noreferrer noopener">Direct Download</a><br><br>'
-            + "alpha innotec doesn't provide a changelog.<br>Please contact support for more information."
+            f'For your <a href="{release_url}" target="_blank" rel="noreferrer noopener">'
+            f"{self.coordinator.manufacturer} {self.coordinator.model} (Download ID {download_id})</a> is "
+            f'<a href="{download_url}" target="_blank" rel="noreferrer noopener">Firmware Version {self.__firmware_version_available}</a> available.<br>'
+            f'<a href="{manual_url}" target="_blank" rel="noreferrer noopener">Firmware Update Instructions</a><br><br>'
+            "The Install-Button downside has no function. It is only needed to notify in Home Assistant.<br><br>"
+            "alpha innotec doesn't provide a changelog.<br>Please contact support for more information."
         )
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)

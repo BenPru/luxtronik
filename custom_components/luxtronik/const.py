@@ -86,14 +86,13 @@ MIN_TIME_BETWEEN_UPDATES_DOWNLOAD_PORTAL: Final = timedelta(hours=1)
 DOWNLOAD_PORTAL_URL: Final = (
     "https://www.heatpump24.com/software/fetchSoftware.php?softwareID="
 )
+FIRMWARE_UPDATE_MANUAL_EN = "https://www.alpha-innotec.com/en/services/customer-support/software-center"
+FIRMWARE_UPDATE_MANUAL_DE = "https://www.alpha-innotec.com/de/services/kundendienst/software-center"
 # endregion Constants Main
 
 # region Conf
 LANG_EN: Final = "en"
 LANG_DE: Final = "de"
-LANG_DEFAULT: Final = LANG_EN
-LANGUAGES: Final = Enum("en", "de")
-LANGUAGES_SENSOR_NAMES: Final = [LANG_EN, LANG_DE]
 
 
 PRESET_SECOND_HEATSOURCE: Final = "second_heatsource"

@@ -33,7 +33,7 @@ from .model import LuxtronikEntityAttributeDescription, LuxtronikEntityDescripti
 # endregion Imports
 
 
-class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreSensor):
+class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     """Luxtronik base device."""
 
     entity_description: LuxtronikEntityDescription
