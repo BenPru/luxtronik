@@ -443,22 +443,6 @@ SENSORS: list[descr] = [
             attr(SA.REMEDY, LC.C0100_ERROR_REASON),
         ],
     ),
-    # TODO:
-    # LuxtronikIndexStatusSensor(
-    #     key_index=None,
-    #     key_timestamp_template=None,
-    #     luxtronik=luxtronik,
-    #     device_info=device_info,
-    #     sensor_key="Switchoff",
-    #     unique_id="switchoff_reason",
-    #     name="Switchoff Reason",
-    #     icon="mdi:electric-switch",
-    #     translation_key="switchoff_reason",
-    #     unit_of_measurement=None,
-    #     state_class=None,
-    #     device_class=None,
-    #     extra_value_attributes=["code"],
-    # ),
     # endregion Main heatpump
     # region Heating
     descr(

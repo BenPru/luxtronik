@@ -447,9 +447,7 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
             attr[SA.TIMESTAMP + f"_{i}"] = self.format_time(item[0])
             i += 1
 
-        super()._handle_coordinator_update(
-            data, self.entity_description.luxtronik_key.format(ID=0)
-        )
+        self.async_write_ha_state()
 
     def format_time(self, value_timestamp: int | None) -> datetime | None:
         if value_timestamp is not None and isinstance(value_timestamp, int):

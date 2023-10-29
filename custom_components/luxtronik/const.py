@@ -86,8 +86,12 @@ MIN_TIME_BETWEEN_UPDATES_DOWNLOAD_PORTAL: Final = timedelta(hours=1)
 DOWNLOAD_PORTAL_URL: Final = (
     "https://www.heatpump24.com/software/fetchSoftware.php?softwareID="
 )
-FIRMWARE_UPDATE_MANUAL_EN = "https://www.alpha-innotec.com/en/services/customer-support/software-center"
-FIRMWARE_UPDATE_MANUAL_DE = "https://www.alpha-innotec.com/de/services/kundendienst/software-center"
+FIRMWARE_UPDATE_MANUAL_EN = (
+    "https://www.alpha-innotec.com/en/services/customer-support/software-center"
+)
+FIRMWARE_UPDATE_MANUAL_DE = (
+    "https://www.alpha-innotec.com/de/services/kundendienst/software-center"
+)
 # endregion Constants Main
 
 # region Conf
@@ -195,7 +199,15 @@ class LuxSwitchoffReason(Enum):
     minimal_usage_temperature: Final = 7
     lower_usage_limit: Final = 8
     no_request: Final = 9
+    undefined_10: Final = 10  # ???
     flow_rate: Final = 11  # Durchfluss
+    undefined_12: Final = 12  # ???
+    undefined_13: Final = 13  # ???
+    undefined_14: Final = 14  # ???
+    undefined_15: Final = 15  # ???
+    undefined_16: Final = 16  # ???
+    undefined_17: Final = 17  # ???
+    undefined_18: Final = 18  # ???
     PV_max: Final = 19
 
 
@@ -455,6 +467,8 @@ class LuxCalculation(StrEnum):
     C0180_HIGH_PRESSURE: Final = "calculations.ID_WEB_LIN_HD"
     C0181_LOW_PRESSURE: Final = "calculations.ID_WEB_LIN_ND"
     C0182_COMPRESSOR_HEATER: Final = "calculations.ID_WEB_LIN_VDH_out"
+    # C0187_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Soll"
+    # C0188_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Ist"
     C0204_HEAT_SOURCE_INPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWE"
     C0227_ROOM_THERMOSTAT_TEMPERATURE: Final = "calculations.ID_WEB_RBE_RT_Ist"
     C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET: Final = "calculations.ID_WEB_RBE_RT_Soll"
@@ -468,7 +482,9 @@ class LuxCalculation(StrEnum):
     # 242: Kelvin("HUP_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_delta_calculated
     C0243_CIRCULATION_PUMP_DELTA: Final = "calculations.Unknown_Calculation_243"
     # 243: Kelvin("HUP_Temp_Spread_Ist"), / 10, measurement, delta - ait_hup_delta
+    # 254 Flow Rate
     C0257_CURRENT_HEAT_OUTPUT: Final = "calculations.Heat_Output"
+    # 258 RBE Version
 
 
 # endregion Lux calculations
