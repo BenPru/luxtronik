@@ -45,27 +45,36 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
-        LuxtronikSensorEntity(
-            hass, entry, coordinator, description, description.device_key
-        )
-        for description in SENSORS
-        if coordinator.entity_active(description)
+        (
+            LuxtronikSensorEntity(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in SENSORS
+            if coordinator.entity_active(description)
+        ),
+        True,
     )
 
     async_add_entities(
-        LuxtronikStatusSensorEntity(
-            hass, entry, coordinator, description, description.device_key
-        )
-        for description in SENSORS_STATUS
-        if coordinator.entity_active(description)
+        (
+            LuxtronikStatusSensorEntity(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in SENSORS_STATUS
+            if coordinator.entity_active(description)
+        ),
+        True,
     )
 
     async_add_entities(
-        LuxtronikIndexSensor(
-            hass, entry, coordinator, description, description.device_key
-        )
-        for description in SENSORS_INDEX
-        if coordinator.entity_active(description)
+        (
+            LuxtronikIndexSensor(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in SENSORS_INDEX
+            if coordinator.entity_active(description)
+        ),
+        True,
     )
 
 

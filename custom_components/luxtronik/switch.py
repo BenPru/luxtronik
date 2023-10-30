@@ -29,11 +29,14 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
-        LuxtronikSwitchEntity(
-            hass, entry, coordinator, description, description.device_key
-        )
-        for description in SWITCHES
-        if coordinator.entity_active(description)
+        (
+            LuxtronikSwitchEntity(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in SWITCHES
+            if coordinator.entity_active(description)
+        ),
+        True,
     )
 
 

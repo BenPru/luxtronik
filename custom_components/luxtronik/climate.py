@@ -155,9 +155,12 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
-        LuxtronikThermostat(hass, entry, coordinator, description)
-        for description in THERMOSTATS
-        if coordinator.entity_active(description)
+        (
+            LuxtronikThermostat(hass, entry, coordinator, description)
+            for description in THERMOSTATS
+            if coordinator.entity_active(description)
+        ),
+        True,
     )
 
 
@@ -179,6 +182,7 @@ class LuxtronikClimateExtraStoredData(ExtraStoredData):
 class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     """The thermostat class for Luxtronik thermostats."""
 
+    # region Attributes
     entity_description: LuxtronikClimateDescription
 
     _last_hvac_mode_before_preset: str | None = None
@@ -194,6 +198,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     _attr_preset_mode: str | None = None
 
     _attr_current_lux_operation = LuxOperationMode.no_request
+    # endregion Attributes
 
     def __init__(
         self,
@@ -265,11 +270,11 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         correction_factor = get_sensor_data(
             data, self.entity_description.luxtronik_key_correction_factor.value, False
         )
-        #LOGGER.info(f"self._attr_target_temperature={self._attr_target_temperature}")
-        #LOGGER.info(f"self._attr_current_temperature={self._attr_current_temperature}")
-        #LOGGER.info(f"correction_factor={correction_factor}")
-        #LOGGER.info(f"lux_action={lux_action}")
-        #LOGGER.info(f"_attr_hvac_action={self._attr_hvac_action}")
+        # LOGGER.info(f"self._attr_target_temperature={self._attr_target_temperature}")
+        # LOGGER.info(f"self._attr_current_temperature={self._attr_current_temperature}")
+        # LOGGER.info(f"correction_factor={correction_factor}")
+        # LOGGER.info(f"lux_action={lux_action}")
+        # LOGGER.info(f"_attr_hvac_action={self._attr_hvac_action}")
         if (
             self._attr_target_temperature is not None
             and self._attr_current_temperature is not None  # noqa: W503
@@ -284,10 +289,10 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
                 self.entity_description.luxtronik_key_correction_target.value
             )
             correction_current = get_sensor_data(data, key_correction_target)
-            #LOGGER.info(f"correction_current={correction_current}")
-            #LOGGER.info(f"correction={correction}")
+            # LOGGER.info(f"correction_current={correction_current}")
+            # LOGGER.info(f"correction={correction}")
             if correction_current is None or correction_current != correction:
-                #LOGGER.info(f'key_correction_target={key_correction_target.split(".")[1]}')
+                # LOGGER.info(f'key_correction_target={key_correction_target.split(".")[1]}')
                 _ = self.coordinator.write(
                     key_correction_target.split(".")[1], correction
                 )  # mypy: allow-unused-coroutine
@@ -307,6 +312,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode."""
+        self._attr_hvac_mode = hvac_mode
         lux_mode = [
             k
             for k, v in self.entity_description.hvac_mode_mapping.items()
@@ -316,7 +322,8 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set new preset mode."""
-        if preset_mode == PRESET_COMFORT:
+        self._attr_preset_mode = preset_mode
+        if preset_mode in [PRESET_COMFORT]:
             lux_mode = LuxMode.automatic
         elif preset_mode != PRESET_NONE:
             lux_mode = [k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode][
@@ -333,12 +340,14 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
 
     async def async_turn_aux_heat_on(self) -> None:
         """Turn auxiliary heater on."""
+        self._attr_is_aux_heat = True
         if self._last_hvac_mode_before_preset is None:
             self._last_hvac_mode_before_preset = self._attr_hvac_mode
         await self._async_set_lux_mode(LuxMode.second_heatsource.value)
 
     async def async_turn_aux_heat_off(self) -> None:
         """Turn auxiliary heater off."""
+        self._attr_is_aux_heat = False
         if (self._last_hvac_mode_before_preset is None) or (
             not self._last_hvac_mode_before_preset in HVAC_PRESET_MAPPING
         ):

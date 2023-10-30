@@ -36,11 +36,14 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
-        LuxtronikNumberEntity(
-            hass, entry, coordinator, description, description.device_key
-        )
-        for description in NUMBER_SENSORS
-        if coordinator.entity_active(description)
+        (
+            LuxtronikNumberEntity(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in NUMBER_SENSORS
+            if coordinator.entity_active(description)
+        ),
+        True,
     )
 
 

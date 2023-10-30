@@ -144,6 +144,13 @@ def get_manufacturer_firmware_url_by_model(model: str) -> str:
 
 def _is_socket_closed(sock: socket.socket) -> bool:
     try:
+        if sock.fileno() < 0:
+            return True
+    except Exception as err:  # pylint: disable=broad-except
+        LOGGER.exception(
+            "Unexpected exception when checking if a socket is closed", exc_info=err
+        )
+    try:
         # this will try to read bytes without blocking and also without removing them from buffer (peek only)
         last_timeout = sock.gettimeout()
         sock.settimeout(None)
@@ -189,6 +196,9 @@ class Luxtronik:
 
     def __del__(self):
         """Luxtronik helper descructor."""
+        self._disconnect()
+
+    def _disconnect(self):
         if self._socket is not None:
             if not _is_socket_closed(self._socket):
                 self._socket.close()
@@ -215,7 +225,17 @@ class Luxtronik:
                     socket.SOCK_STREAM,
                 )
             if is_none or _is_socket_closed(self._socket):
-                self._socket.connect((self._host, self._port))
+                try:
+                    self._socket.connect((self._host, self._port))
+                except OSError as err:
+                    if err.errno == 9:  # Bad file descr.
+                        self._disconnect()
+                        return
+                    elif err.errno == 106:
+                        self._socket.close()
+                        self._socket.connect((self._host, self._port))
+                    else:
+                        raise err
                 self._socket.settimeout(self._socket_timeout)
                 LOGGER.info(
                     "Connected to Luxtronik heatpump %s:%s with timeout %ss",
@@ -312,6 +332,9 @@ class Luxtronik:
                 self._max_data_length,
             )
             return
+        elif length <= 0:
+            # Force reconnect for the next readout
+            self._disconnect()
         LOGGER.debug("Length %s", length)
         for _ in range(0, length):
             try:

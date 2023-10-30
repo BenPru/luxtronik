@@ -81,9 +81,12 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
-        LuxtronikWaterHeater(hass, config_entry, coordinator, description)
-        for description in WATER_HEATERS
-        if coordinator.entity_active(description)
+        (
+            LuxtronikWaterHeater(hass, config_entry, coordinator, description)
+            for description in WATER_HEATERS
+            if coordinator.entity_active(description)
+        ),
+        True,
     )
 
 
