@@ -66,7 +66,7 @@ async def async_setup_entry(
     )
     entities = [update_entity]
 
-    async_add_entities(entities)
+    async_add_entities(entities, True)
 
 
 class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):

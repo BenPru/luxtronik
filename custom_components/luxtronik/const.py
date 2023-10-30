@@ -6,7 +6,7 @@ from enum import Enum
 import logging
 from typing import Final
 
-from homeassistant.backports.enum import StrEnum
+from enum import StrEnum
 from homeassistant.const import Platform
 from homeassistant.helpers.typing import StateType
 

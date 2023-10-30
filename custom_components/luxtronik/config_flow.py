@@ -91,7 +91,7 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
-    VERSION = 5
+    VERSION = 7
     _hassio_discovery = None
     _discovery_host = None
     _discovery_port = None
@@ -307,20 +307,14 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return LuxtronikOptionsFlowHandler(config_entry)
 
 
-class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
+class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
     """Handle a Luxtronik options flow."""
 
     _sensor_prefix = DOMAIN
 
-    def __init__(self, config_entry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
     def _get_value(self, key: str, default=None):
         """Return a value from Luxtronik."""
-        return self.config_entry.options.get(
-            key, self.config_entry.data.get(key, default)
-        )
+        return self.options.get(key, self.config_entry.data.get(key, default))
 
     # def _get_options_schema(self):
     #     """Return a schema for Luxtronik configuration options."""
@@ -354,7 +348,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                 self.hass.config_entries.async_update_entry(
                     self.config_entry,
                     data=self.config_entry.data | user_input,
-                    options=self.config_entry.options,
+                    options=self.options,
                 )
                 # Store empty options because we have store it in data:
                 return self.async_create_entry(title="", data={})
