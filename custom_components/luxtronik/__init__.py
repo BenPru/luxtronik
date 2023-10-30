@@ -106,11 +106,10 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     prefix = None
     ent_reg = None
 
-    def _prepare_up() -> None:
-        prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
-        ent_reg = async_get(hass)
-
     def _up(ident: str, new_id: SK, platform: P = P.SENSOR) -> None:
+        if prefix is None or ent_reg is None:
+            prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
+            ent_reg = async_get(hass)
         entity_id = f"{platform}.{prefix}_{ident}"
         new_ident = f"{platform}.{prefix}_{new_id}"
         try:
@@ -139,7 +138,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     if config_entry.version == 5:
-        _prepare_up()
         _up("heat_amount_domestic_water", SK.DHW_HEAT_AMOUNT)
         _up("domestic_water_energy_input", SK.DHW_ENERGY_INPUT)
         _up("domestic_water_temperature", SK.DHW_TEMPERATURE)
@@ -261,7 +259,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     if config_entry.version == 6:
-        _prepare_up()
         _up(
             "cooling_threshold_temperature", SK.COOLING_OUTDOOR_TEMP_THRESHOLD, P.NUMBER
         )

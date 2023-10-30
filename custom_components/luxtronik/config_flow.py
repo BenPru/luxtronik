@@ -312,10 +312,6 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
 
     _sensor_prefix = DOMAIN
 
-    def __init__(self, config_entry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
     def _get_value(self, key: str, default=None):
         """Return a value from Luxtronik."""
         return self.options.get(key, self.config_entry.data.get(key, default))
