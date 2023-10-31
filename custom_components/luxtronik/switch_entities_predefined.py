@@ -37,6 +37,13 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
+    LuxtronikSwitchDescription(
+        luxtronik_key=LP.P1087_SILENT_MODE,
+        key=SensorKey.SILENT_MODE,
+        icon="mdi:volume-minus",
+        entity_category=EntityCategory.CONFIG,
+        visibility=LV.V0357_SILENT_MODE_TIME_MENU,
+    ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,
     #     key="amount_counter_active",

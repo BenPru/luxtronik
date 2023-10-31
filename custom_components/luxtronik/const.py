@@ -53,6 +53,18 @@ DEFAULT_HOST: Final = "wp-novelan"
 DEFAULT_PORT: Final = 8889
 DEFAULT_TIMEOUT: Final = 60.0
 DEFAULT_MAX_DATA_LENGTH: Final = 10000
+
+
+SERVICE_WRITE: Final = "write"
+ATTR_PARAMETER: Final = "parameter"
+ATTR_VALUE: Final = "value"
+
+SERVICE_WRITE_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_PARAMETER): cv.string,
+        vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),
+    }
+)
 # endregion Conf
 
 # region Lux Definitions
@@ -330,9 +342,6 @@ class LuxParameter(StrEnum):
     #  "879  ID_Waermemenge_SW                                           ": "0",
     #  "880  ID_Waermemenge_Datum                                        ": "1483648906", <-- Unix timestamp!  5.1.2017
 
-    # "1060 ID_Waermemenge_Reset                                        ": "535051",
-    # "1061 ID_Waermemenge_Reset_2                                      ": "0",
-
     P0882_SOLAR_OPERATION_HOURS: Final = "parameters.ID_BSTD_Solar"
     P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = (
         "parameters.ID_Einst_TDC_Koll_Max_akt"
@@ -355,6 +364,9 @@ class LuxParameter(StrEnum):
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "parameters.ID_Waermemenge_ZWE"
     )
+    # "1060 ID_Waermemenge_Reset                                        ": "535051",
+    # "1061 ID_Waermemenge_Reset_2                                      ": "0",
+    P1087_SILENT_MODE: Final = "parameters.Unknown_Parameter_1087"  # Silent mode On/Off
     P1119_LAST_DEFROST_TIMESTAMP: Final = (
         "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
     )
@@ -545,6 +557,7 @@ class LuxVisibility(StrEnum):
     V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "visibilities.ID_Visi_Waermemenge_ZWE"
     )
+    V0357_SILENT_MODE_TIME_MENU: Final = "visibilities.Unknown_Parameter_357"
 
 
 # endregion visibilities
@@ -681,6 +694,7 @@ class SensorKey(StrEnum):
     COOLING_TARGET_TEMPERATURE_MK2 = "cooling_target_temperature_mk2"
     COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
     SWITCHOFF_REASON = "switchoff_reason"
+    SILENT_MODE = "silent_mode"
 
 
 # endregion Keys

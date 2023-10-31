@@ -91,6 +91,9 @@
             },
             "cooling": {
                 "name": "Cooling"
+            },
+            "silent_mode": {
+                "name": "Silent mode"
             }
         },
         "update": {

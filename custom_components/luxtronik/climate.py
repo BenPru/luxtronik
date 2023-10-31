@@ -91,7 +91,8 @@ HVAC_MODE_MAPPING_COOL: dict[str, str] = {
 HVAC_PRESET_MAPPING: dict[str, str] = {
     LuxMode.off.value: PRESET_NONE,
     LuxMode.automatic.value: PRESET_NONE,
-    LuxMode.party.value: PRESET_BOOST,
+    LuxMode.party.value: PRESET_COMFORT,
+    LuxMode.second_heatsource.value: PRESET_BOOST,
     LuxMode.holidays.value: PRESET_AWAY,
 }
 

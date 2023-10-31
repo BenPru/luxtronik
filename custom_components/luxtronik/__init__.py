@@ -11,6 +11,8 @@ from homeassistant.helpers.entity_registry import (
 )
 
 from .const import (
+    ATTR_PARAMETER,
+    ATTR_VALUE,
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
@@ -19,6 +21,8 @@ from .const import (
     DOMAIN,
     LOGGER,
     PLATFORMS,
+    SERVICE_WRITE,
+    SERVICE_WRITE_SCHEMA,
     SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator
@@ -48,7 +52,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
+    await hass.async_add_executor_job(setup_hass_services, hass, entry)
+
     return True
+
+
+def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
+    """Home Assistant services."""
+
+    def write_parameter(service):
+        """Write a parameter to the Luxtronik heatpump."""
+        parameter = service.data.get(ATTR_PARAMETER)
+        value = service.data.get(ATTR_VALUE)
+        coordinator = LuxtronikCoordinator.connect(hass, entry)
+        coordinator.write(parameter, value)
+
+    hass.services.register(
+        DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
+    )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -107,6 +128,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     ent_reg = None
 
     def _up(ident: str, new_id: SK, platform: P = P.SENSOR) -> None:
+        nonlocal prefix, ent_reg
         if prefix is None or ent_reg is None:
             prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
             ent_reg = async_get(hass)
