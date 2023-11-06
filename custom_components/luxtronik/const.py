@@ -205,6 +205,7 @@ class LuxRoomThermostatType(Enum):
 class LuxSwitchoffReason(Enum):
     """LuxSwitchoff reason etc."""
 
+    undefined_0: Final = 0  # ???
     heatpump_error: Final = 1
     system_error: Final = 2
     evu_lock: Final = 3
