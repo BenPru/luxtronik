@@ -32,8 +32,7 @@ from .const import (
     LANG_DE,
     LOGGER,
     DeviceKey,
-    LuxCalculation,
-    SensorKey,
+    Calculation_SensorKey,
 )
 from .coordinator import LuxtronikCoordinator
 from .lux_helper import get_firmware_download_id, get_manufacturer_firmware_url_by_model
@@ -57,8 +56,8 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     description = LuxtronikUpdateEntityDescription(
-        luxtronik_key=LuxCalculation.C0081_FIRMWARE_VERSION,
-        key=SensorKey.FIRMWARE,
+        key="firmware",
+        luxtronik_key=Calculation_SensorKey.FIRMWARE_VERSION,
         entity_category=EntityCategory.CONFIG,
     )
     update_entity = LuxtronikUpdateEntity(

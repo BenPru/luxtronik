@@ -62,7 +62,7 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
         self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+            coordinator.data, description.luxtronik_key
         )
 
         hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
@@ -85,7 +85,7 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         if data is None:
             return
         self._attr_state = get_sensor_data(
-            data, self.entity_description.luxtronik_key.value
+            data, self.entity_description.luxtronik_key
         )
         if (
             self.entity_description.on_state is True
@@ -100,3 +100,12 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
                 and self._attr_state in self.entity_description.on_states  # noqa: W503
             )
         super()._handle_coordinator_update()
+
+    def handle_value_change(self, value, last_value):
+        super().handle_value_change(value, last_value)
+        if value == True:
+            self.fire_event(self.entity_description.event_id_on_true, value, last_value)
+        elif value == False:
+            self.fire_event(
+                self.entity_description.event_id_on_false, value, last_value
+            )

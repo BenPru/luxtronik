@@ -6,7 +6,8 @@ from datetime import datetime
 from typing import Any
 
 from homeassistant.backports.enum import StrEnum
-from homeassistant.components.sensor import RestoreSensor
+from homeassistant.components.sensor import RestoreSensor, SensorEntityDescription
+from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
 from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
@@ -18,12 +19,16 @@ from homeassistant.util.dt import utcnow
 
 from .common import get_sensor_data
 from .const import (
+    UNIT_DEVICE_CLASS_MAP,
+    DOMAIN,
+    UNIT_ICON_MAP,
+    UNIT_STATE_CLASS_MAP,
     DeviceKey,
     LOGGER,
-    LuxCalculation as LC,
+    Calculation_SensorKey as LC,
     LuxMode,
     LuxOperationMode,
-    LuxParameter as LP,
+    Parameter_SensorKey as LP,
     SensorAttrFormat,
     SensorAttrKey as SA,
 )
@@ -55,8 +60,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         """Init LuxtronikEntity."""
         super().__init__(coordinator=coordinator)
         self._device_info_ident = device_info_ident
+        self.enrich_description(description)
         self._attr_extra_state_attributes = {
-            SA.LUXTRONIK_KEY: f"{description.luxtronik_key.name[1:5]} {description.luxtronik_key.value}"
+            SA.LUXTRONIK_KEY: f"{str(description.luxtronik_key.__class__)[7:].split('_')[0]} {description.luxtronik_key.value}"
         }
         for field in description.__dataclass_fields__:
             if field.startswith("luxtronik_key_"):
@@ -70,7 +76,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 else:
                     self._attr_extra_state_attributes[field] = value
         if description.translation_key is None:
-            description.translation_key = description.key.value
+            description.translation_key = description.key
         if description.entity_registry_enabled_default:
             description.entity_registry_enabled_default = coordinator.entity_visible(
                 description
@@ -79,13 +85,19 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         self._attr_device_info = coordinator.get_device(device_info_ident)
 
         translation_key = (
-            description.key.value
+            description.key
             if description.translation_key_name is None
             else description.translation_key_name
         )
         description.translation_key = translation_key
         description.has_entity_name = True
         self._attr_state = self._get_value(description.luxtronik_key)
+
+    def enrich_description(self, d: LuxtronikEntityDescription) -> None:
+        d.key = d.luxtronik_key.name.lower()
+        d.icon = d.icon or UNIT_ICON_MAP.get(d.native_unit_of_measurement)
+        d.state_class = d.state_class or UNIT_STATE_CLASS_MAP.get(d.native_unit_of_measurement)
+        d.device_class = d.device_class or UNIT_DEVICE_CLASS_MAP.get(d.native_unit_of_measurement)
 
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
@@ -118,6 +130,11 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             async_dispatcher_connect(
                 self.hass, data_updated, self._schedule_immediate_update
             )
+        except AttributeError as err:
+            LOGGER.warning(
+                "Could not restore latest data (async_added_to_hass)",
+                exc_info=err,
+            )
         except Exception as err:
             LOGGER.error(
                 "Could not restore latest data (async_added_to_hass)",
@@ -138,7 +155,10 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             # Ensure timezone:
             time_zone = dt_util.get_time_zone(self.hass.config.time_zone)
             value = value.replace(tzinfo=time_zone)
+        elif isinstance(descr, SensorEntityDescription):
+            value = descr.options[value]
 
+        last_state = self._attr_state
         self._attr_state = value
 
         # Calc icon:
@@ -164,16 +184,34 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         ):
             self.next_update = utcnow() + descr.update_interval
         super()._handle_coordinator_update()
+        if last_state != self._attr_state:
+            self.handle_value_change(self._attr_state, last_state)
+
+    def handle_value_change(self, value, last_value):
+        self.fire_event(self.entity_description.event_id_on_change, value, last_value)
+
+    def fire_event(self, event: str | None, value, last_value):
+        if event is None:
+            return
+        _event = f"{DOMAIN}_{event}"
+        data = {
+            "unique_id": self.unique_id,
+            "value": value,
+            "last_value": last_value,
+        }
+        self.hass.bus.fire(_event, data)
 
     def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:
             if attr.format is None and (
                 attr.luxtronik_key is None or attr.luxtronik_key == LP.UNSET
             ):
-                continue
-            self._attr_extra_state_attributes[attr.key.value] = self.formatted_data(
-                attr
-            )
+                if attr.default_value is not None:
+                    self._attr_extra_state_attributes[attr.key.value] = "_"
+            else:
+                self._attr_extra_state_attributes[attr.key.value] = self.formatted_data(
+                    attr
+                )
 
     @callback
     def _schedule_immediate_update(self):
@@ -199,14 +237,14 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             return f"{value/10:.1f} {UnitOfTemperature.CELSIUS}"
         if attr.format == SensorAttrFormat.SWITCH_GAP:
             flow_out_target = float(
-                self._get_value(LC.C0012_FLOW_OUT_TEMPERATURE_TARGET)
+                self._get_value(LC.FLOW_OUT_TEMPERATURE_TARGET)
             )
             flow_out = float(value)
-            hyst = float(self._get_value(LP.P0088_HEATING_HYSTERESIS)) * 0.1
+            hyst = float(self._get_value(LP.HEATING_HYSTERESIS)) * 0.1
 
-            if self._get_value(LC.C0080_STATUS) == LuxOperationMode.heating:
+            if self._get_value(LC.STATUS) == LuxOperationMode.heating:
                 return f"{flow_out + hyst - flow_out_target:.1f} {UnitOfTemperature.KELVIN}"
-            if self._get_value(LP.P0003_MODE_HEATING) != LuxMode.off:
+            if self._get_value(LP.MODE_HEATING) != LuxMode.off:
                 return f"{flow_out - hyst - flow_out_target:.1f} {UnitOfTemperature.KELVIN}"
             return ""
 

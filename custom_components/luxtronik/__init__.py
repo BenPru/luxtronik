@@ -23,7 +23,8 @@ from .const import (
     PLATFORMS,
     SERVICE_WRITE,
     SERVICE_WRITE_SCHEMA,
-    SensorKey as SK,
+    Parameter_SensorKey as LP,
+    Calculation_SensorKey as LC,
 )
 from .coordinator import LuxtronikCoordinator
 
@@ -127,13 +128,13 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     prefix = None
     ent_reg = None
 
-    def _up(ident: str, new_id: SK, platform: P = P.SENSOR) -> None:
+    def _up(ident: str, new_id: LC | LP, platform: P = P.SENSOR) -> None:
         nonlocal prefix, ent_reg
         if prefix is None or ent_reg is None:
             prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
             ent_reg = async_get(hass)
         entity_id = f"{platform}.{prefix}_{ident}"
-        new_ident = f"{platform}.{prefix}_{new_id}"
+        new_ident = f"{platform}.{prefix}_{new_id.name.lower()}"
         try:
             ent_reg.async_update_entity(
                 entity_id, new_entity_id=new_ident, new_unique_id=new_ident
@@ -160,119 +161,119 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     if config_entry.version == 5:
-        _up("heat_amount_domestic_water", SK.DHW_HEAT_AMOUNT)
-        _up("domestic_water_energy_input", SK.DHW_ENERGY_INPUT)
-        _up("domestic_water_temperature", SK.DHW_TEMPERATURE)
-        _up("operation_hours_domestic_water", SK.DHW_OPERATION_HOURS)
-        _up("domestic_water_target_temperature", SK.DHW_TARGET_TEMPERATURE, P.NUMBER)
-        _up("domestic_water_hysteresis", SK.DHW_HYSTERESIS, P.NUMBER)
+        _up("heat_amount_domestic_water", LC.DHW_HEAT_AMOUNT)
+        _up("domestic_water_energy_input", LP.DHW_ENERGY_INPUT)
+        _up("domestic_water_temperature", LC.DHW_TEMPERATURE)
+        _up("operation_hours_domestic_water", LC.DHW_OPERATION_HOURS)
+        _up("domestic_water_target_temperature", LP.DHW_TARGET_TEMPERATURE, P.NUMBER)
+        _up("domestic_water_hysteresis", LP.DHW_HYSTERESIS, P.NUMBER)
         _up(
             "domestic_water_thermal_desinfection_target",
-            SK.DHW_THERMAL_DESINFECTION_TARGET,
+            LP.DHW_THERMAL_DESINFECTION_TARGET,
             P.NUMBER,
         )
         _up(
             "domestic_water_recirculation_pump",
-            SK.DHW_RECIRCULATION_PUMP,
+            LC.DHW_RECIRCULATION_PUMP,
             P.BINARY_SENSOR,
         )
         _up(
             "domestic_water_circulation_pump",
-            SK.DHW_CIRCULATION_PUMP,
+            LC.DHW_CIRCULATION_PUMP,
             P.BINARY_SENSOR,
         )
-        _up("domestic_water_charging_pump", SK.DHW_CHARGING_PUMP, P.BINARY_SENSOR)
+        _up("domestic_water_charging_pump", LP.DHW_CHARGING_PUMP, P.BINARY_SENSOR)
 
         # [sensor]
-        _up("pump_frequency", SK.PUMP_FREQUENCY, P.SENSOR)
-        _up("room_thermostat_temperature", SK.ROOM_THERMOSTAT_TEMPERATURE, P.SENSOR)
+        _up("pump_frequency", LC.PUMP_FREQUENCY, P.SENSOR)
+        _up("room_thermostat_temperature", LC.ROOM_THERMOSTAT_TEMPERATURE, P.SENSOR)
         _up(
             "room_thermostat_temperature_target",
-            SK.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
+            LC.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
             P.SENSOR,
         )
 
         # [binary sensor]
-        _up("evu_unlocked", SK.EVU_UNLOCKED, P.BINARY_SENSOR)
-        _up("compressor", SK.COMPRESSOR, P.BINARY_SENSOR)
-        _up("pump_flow", SK.PUMP_FLOW, P.BINARY_SENSOR)
-        _up("compressor_heater", SK.COMPRESSOR_HEATER, P.BINARY_SENSOR)
-        _up("defrost_valve", SK.DEFROST_VALVE, P.BINARY_SENSOR)
-        _up("additional_heat_generator", SK.ADDITIONAL_HEAT_GENERATOR, P.BINARY_SENSOR)
-        _up("disturbance_output", SK.DISTURBANCE_OUTPUT, P.BINARY_SENSOR)
-        _up("circulation_pump_heating", SK.CIRCULATION_PUMP_HEATING, P.BINARY_SENSOR)
+        _up("evu_unlocked", LC.EVU_UNLOCKED, P.BINARY_SENSOR)
+        _up("compressor", LC.COMPRESSOR, P.BINARY_SENSOR)
+        _up("pump_flow", LC.PUMP_FLOW, P.BINARY_SENSOR)
+        _up("compressor_heater", LC.COMPRESSOR_HEATER, P.BINARY_SENSOR)
+        _up("defrost_valve", LC.DEFROST_VALVE, P.BINARY_SENSOR)
+        _up("additional_heat_generator", LC.ADDITIONAL_HEAT_GENERATOR, P.BINARY_SENSOR)
+        _up("disturbance_output", LC.DISTURBANCE_OUTPUT, P.BINARY_SENSOR)
+        _up("circulation_pump_heating", LC.CIRCULATION_PUMP_HEATING, P.BINARY_SENSOR)
         _up(
             "additional_circulation_pump",
-            SK.ADDITIONAL_CIRCULATION_PUMP,
+            LC.ADDITIONAL_CIRCULATION_PUMP,
             P.BINARY_SENSOR,
         )
-        _up("approval_cooling", SK.APPROVAL_COOLING, P.BINARY_SENSOR)
+        _up("approval_cooling", LC.APPROVAL_COOLING, P.BINARY_SENSOR)
 
         # [number]
-        _up("release_second_heat_generator", SK.RELEASE_SECOND_HEAT_GENERATOR, P.NUMBER)
+        _up("release_second_heat_generator", LP.RELEASE_SECOND_HEAT_GENERATOR, P.NUMBER)
         _up(
             "release_time_second_heat_generator",
-            SK.RELEASE_TIME_SECOND_HEAT_GENERATOR,
+            LP.RELEASE_TIME_SECOND_HEAT_GENERATOR,
             P.NUMBER,
         )
-        _up("heating_target_correction", SK.HEATING_TARGET_CORRECTION, P.NUMBER)
-        _up("pump_optimization_time", SK.PUMP_OPTIMIZATION_TIME, P.NUMBER)
-        _up("heating_threshold_temperature", SK.HEATING_THRESHOLD_TEMPERATURE, P.NUMBER)
+        _up("heating_target_correction", LP.HEATING_TARGET_CORRECTION, P.NUMBER)
+        _up("pump_optimization_time", LP.PUMP_OPTIMIZATION_TIME, P.NUMBER)
+        _up("heating_threshold_temperature", LP.HEATING_THRESHOLD_TEMPERATURE, P.NUMBER)
         _up(
             "heating_min_flow_out_temperature",
-            SK.HEATING_MIN_FLOW_OUT_TEMPERATURE,
+            LP.HEATING_MIN_FLOW_OUT_TEMPERATURE,
             P.NUMBER,
         )
         _up(
             "heating_circuit_curve1_temperature",
-            SK.HEATING_CIRCUIT_CURVE1_TEMPERATURE,
+            LP.HEATING_CIRCUIT_CURVE1_TEMPERATURE,
             P.NUMBER,
         )
         _up(
             "heating_circuit_curve2_temperature",
-            SK.HEATING_CIRCUIT_CURVE2_TEMPERATURE,
+            LP.HEATING_CIRCUIT_CURVE2_TEMPERATURE,
             P.NUMBER,
         )
         _up(
             "heating_circuit_curve_night_temperature",
-            SK.HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
+            LP.HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
             P.NUMBER,
         )
         _up(
             "heating_night_lowering_to_temperature",
-            SK.HEATING_NIGHT_LOWERING_TO_TEMPERATURE,
+            LP.HEATING_NIGHT_LOWERING_TO_TEMPERATURE,
             P.NUMBER,
         )
-        _up("heating_hysteresis", SK.HEATING_HYSTERESIS, P.NUMBER)
+        _up("heating_hysteresis", LP.HEATING_HYSTERESIS, P.NUMBER)
         _up(
             "heating_max_flow_out_increase_temperature",
-            SK.HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE,
+            LP.HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE,
             P.NUMBER,
         )
         _up(
             "heating_maximum_circulation_pump_speed",
-            SK.HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
+            LP.HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
             P.NUMBER,
         )
         _up(
             "heating_room_temperature_impact_factor",
-            SK.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+            LP.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
             P.NUMBER,
         )
 
         # [switch]
-        _up("remote_maintenance", SK.REMOTE_MAINTENANCE, P.SWITCH)
-        _up("efficiency_pump", SK.EFFICIENCY_PUMP, P.SWITCH)
-        _up("pump_heat_control", SK.PUMP_HEAT_CONTROL, P.SWITCH)
-        _up("heating", SK.HEATING, P.SWITCH)
-        _up("pump_optimization", SK.PUMP_OPTIMIZATION, P.SWITCH)
-        _up("heating_threshold", SK.HEATING_THRESHOLD, P.SWITCH)
-        _up("domestic_water", SK.DOMESTIC_WATER, P.SWITCH)
-        _up("cooling", SK.COOLING, P.SWITCH)
+        _up("remote_maintenance", LP.REMOTE_MAINTENANCE, P.SWITCH)
+        _up("efficiency_pump", LP.EFFICIENCY_PUMP, P.SWITCH)
+        _up("pump_heat_control", LP.PUMP_HEAT_CONTROL, P.SWITCH)
+        _up("heating", LP.HEATING, P.SWITCH)
+        _up("pump_optimization", LP.PUMP_OPTIMIZATION, P.SWITCH)
+        _up("heating_threshold", LP.HEATING_THRESHOLD, P.SWITCH)
+        _up("domestic_water", LP.DOMESTIC_WATER, P.SWITCH)
+        _up("cooling", LP.COOLING, P.SWITCH)
 
         # [climate]
-        _up("heating", SK.HEATING, P.CLIMATE)
-        _up("cooling", SK.COOLING, P.CLIMATE)
+        _up("heating", LP.HEATING, P.CLIMATE)
+        _up("cooling", LP.COOLING, P.CLIMATE)
 
         new_data = {**config_entry.data}
         config_entry.version = 6
@@ -282,10 +283,10 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
 
     if config_entry.version == 6:
         _up(
-            "cooling_threshold_temperature", SK.COOLING_OUTDOOR_TEMP_THRESHOLD, P.NUMBER
+            "cooling_threshold_temperature", LP.COOLING_OUTDOOR_TEMP_THRESHOLD, P.NUMBER
         )
-        _up("cooling_start_delay_hours", SK.COOLING_START_DELAY_HOURS, P.NUMBER)
-        _up("cooling_stop_delay_hours", SK.COOLING_STOP_DELAY_HOURS, P.NUMBER)
+        _up("cooling_start_delay_hours", LP.COOLING_START_DELAY_HOURS, P.NUMBER)
+        _up("cooling_stop_delay_hours", LP.COOLING_STOP_DELAY_HOURS, P.NUMBER)
 
         new_data = {**config_entry.data}
         config_entry.version = 7

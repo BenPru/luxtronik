@@ -27,12 +27,11 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     DeviceKey,
-    LuxCalculation,
+    Calculation_SensorKey,
     LuxMode,
     LuxOperationMode,
-    LuxParameter,
-    LuxVisibility,
-    SensorKey,
+    Parameter_SensorKey,
+    Visibility_SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikWaterHeaterDescription
@@ -50,21 +49,21 @@ OPERATION_MAPPING: dict[str, str] = {
 
 WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
     LuxtronikWaterHeaterDescription(
-        key=SensorKey.DOMESTIC_WATER,
+        key="domestic_water",
+        luxtronik_key=Parameter_SensorKey.MODE_DHW,
         operation_list=[STATE_OFF, STATE_HEAT_PUMP, STATE_ELECTRIC, STATE_PERFORMANCE],
         supported_features=WaterHeaterEntityFeature.OPERATION_MODE
         | WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.AWAY_MODE,
-        luxtronik_key=LuxParameter.P0004_MODE_DHW,
-        luxtronik_key_current_temperature=LuxCalculation.C0017_DHW_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0002_DHW_TARGET_TEMPERATURE,
-        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_key_current_temperature=Calculation_SensorKey.DHW_TEMPERATURE,
+        luxtronik_key_target_temperature=Parameter_SensorKey.DHW_TARGET_TEMPERATURE,
+        luxtronik_key_current_action=Calculation_SensorKey.STATUS,
         luxtronik_action_heating=LuxOperationMode.domestic_water,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon="mdi:water-boiler",
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0029_DHW_TEMPERATURE,
+        visibility=Visibility_SensorKey.DHW_TEMPERATURE,
     )
 ]
 # endregion Const
@@ -124,7 +123,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self._attr_supported_features = description.supported_features
 
         self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+            coordinator.data, description.luxtronik_key
         )
 
     @property
@@ -151,7 +150,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         if data is None:
             return
         descr = self.entity_description
-        mode = get_sensor_data(data, descr.luxtronik_key.value)
+        mode = get_sensor_data(data, descr.luxtronik_key)
         self._attr_current_operation = None if mode is None else OPERATION_MAPPING[mode]
         self._current_action = get_sensor_data(
             data, descr.luxtronik_key_current_action.value

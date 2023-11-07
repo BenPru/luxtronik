@@ -64,7 +64,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
         self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+            coordinator.data, description.luxtronik_key
         )
 
         hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
@@ -87,7 +87,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         if data is None:
             return
         descr = self.entity_description
-        self._attr_state = get_sensor_data(data, descr.luxtronik_key.value)
+        self._attr_state = get_sensor_data(data, descr.luxtronik_key)
         if descr.on_state is True or descr.on_state is False:
             if self._attr_state is not None:
                 self._attr_state = bool(self._attr_state)
@@ -112,7 +112,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         data = await self.coordinator.async_write(
             self.entity_description.luxtronik_key.value.split(".")[1], state
         )
-        value = get_sensor_data(data, self.entity_description.luxtronik_key.value)
+        value = get_sensor_data(data, self.entity_description.luxtronik_key)
         if (
             self.entity_description.on_state is True
             or self.entity_description.on_state is False

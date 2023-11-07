@@ -5,9 +5,8 @@ from .const import (
     UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxMode,
-    LuxParameter as LP,
-    LuxVisibility as LV,
-    SensorKey,
+    Parameter_SensorKey as LP,
+    Visibility_SensorKey as LV,
 )
 from .model import LuxtronikSwitchDescription
 
@@ -16,36 +15,32 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # ...
     # region Main heatpump
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.P0860_REMOTE_MAINTENANCE,
-        key=SensorKey.REMOTE_MAINTENANCE,
+        luxtronik_key=LP.REMOTE_MAINTENANCE,
         icon="mdi:remote-desktop",
         entity_category=EntityCategory.CONFIG,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.P0869_EFFICIENCY_PUMP,
-        key=SensorKey.EFFICIENCY_PUMP,
+        luxtronik_key=LP.EFFICIENCY_PUMP,
         icon="mdi:leaf-circle",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.P1033_PUMP_HEAT_CONTROL,
-        key=SensorKey.PUMP_HEAT_CONTROL,
+        luxtronik_key=LP.PUMP_HEAT_CONTROL,
         icon="mdi:pump",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.P1087_SILENT_MODE,
-        key=SensorKey.SILENT_MODE,
+        luxtronik_key=LP.SILENT_MODE,
         icon="mdi:volume-minus",
         entity_category=EntityCategory.CONFIG,
-        visibility=LV.V0357_SILENT_MODE_TIME_MENU,
+        visibility=LV.SILENT_MODE_TIME_MENU,
     ),
     # LuxtronikSwitchDescription(
-    #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,
+    #     luxtronik_key=LP.AMOUNT_COUNTER_ACTIVE,
     #     key="amount_counter_active",
     #     icon="mdi:counter",
     #     entity_category=EntityCategory.CONFIG,
@@ -53,9 +48,9 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # endregion Main heatpump
     # region Heating
     LuxtronikSwitchDescription(
+        key="heating",
+        luxtronik_key=LP.MODE_HEATING,
         device_key=DeviceKey.heating,
-        luxtronik_key=LP.P0003_MODE_HEATING,
-        key=SensorKey.HEATING,
         icon_by_state={True: "mdi:radiator", False: "mdi:radiator-off"},
         device_class=None,
         on_state=LuxMode.automatic.value,
@@ -63,26 +58,24 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     LuxtronikSwitchDescription(
+        luxtronik_key=LP.PUMP_OPTIMIZATION,
         device_key=DeviceKey.heating,
-        luxtronik_key=LP.P0049_PUMP_OPTIMIZATION,
-        key=SensorKey.PUMP_OPTIMIZATION,
         icon="mdi:tune",
         entity_category=EntityCategory.CONFIG,
-        visibility=LV.V0144_PUMP_OPTIMIZATION,
+        visibility=LV.PUMP_OPTIMIZATION,
     ),
     LuxtronikSwitchDescription(
+        luxtronik_key=LP.HEATING_THRESHOLD,
         device_key=DeviceKey.heating,
-        luxtronik_key=LP.P0699_HEATING_THRESHOLD,
-        key=SensorKey.HEATING_THRESHOLD,
         icon="mdi:download-outline",
         entity_category=EntityCategory.CONFIG,
     ),
     # endregion Heating
     # region Domestic water
     LuxtronikSwitchDescription(
+        key="domestic_water",
+        luxtronik_key=LP.MODE_DHW,
         device_key=DeviceKey.domestic_water,
-        luxtronik_key=LP.P0004_MODE_DHW,
-        key=SensorKey.DOMESTIC_WATER,
         icon_by_state={True: "mdi:water-boiler-auto", False: "mdi:water-boiler-off"},
         device_class=None,
         on_state=LuxMode.automatic.value,
@@ -98,9 +91,9 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # endregion Domestic water
     # region Cooling
     LuxtronikSwitchDescription(
+        key="cooling",
+        luxtronik_key=LP.MODE_COOLING,
         device_key=DeviceKey.cooling,
-        luxtronik_key=LP.P0108_MODE_COOLING,
-        key=SensorKey.COOLING,
         icon="mdi:snowflake",
         entity_category=EntityCategory.CONFIG,
         device_class=None,

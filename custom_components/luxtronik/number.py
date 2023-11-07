@@ -17,6 +17,7 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    UNIT_FACTOR_MAP,
     DeviceKey,
     SensorAttrFormat,
 )
@@ -72,8 +73,12 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         self._attr_unique_id = self.entity_id
         self._attr_mode = description.mode
         self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+            coordinator.data, description.luxtronik_key
         )
+
+    def enrich_description(self, d: LuxtronikNumberDescription) -> None:
+        super().enrich_description(d)
+        d.factor = d.factor or UNIT_FACTOR_MAP.get(d.native_unit_of_measurement)
 
     async def _data_update(self, event):
         self._handle_coordinator_update()
@@ -93,7 +98,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         if data is None:
             return
         self._attr_native_value = get_sensor_data(
-            data, self.entity_description.luxtronik_key.value
+            data, self.entity_description.luxtronik_key
         )
         if self._attr_native_value is not None:
             if self.entity_description.factor is not None:

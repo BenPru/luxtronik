@@ -8,9 +8,10 @@ from typing import Final
 
 from enum import StrEnum
 import voluptuous as vol
+from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.const import Platform
+from homeassistant.const import Platform, UnitOfElectricPotential, UnitOfEnergy, UnitOfFrequency, UnitOfPower, UnitOfPressure, UnitOfTemperature, UnitOfTime
 from homeassistant.helpers.typing import StateType
 
 # endregion Imports
@@ -117,67 +118,65 @@ LANG_DE: Final = "de"
 PRESET_SECOND_HEATSOURCE: Final = "second_heatsource"
 
 
-class LuxOperationMode(StrEnum):
+class LuxOperationMode(Enum):
     """Lux Operation modes heating, hot water etc."""
 
-    heating: Final = "heating"  # 0
-    domestic_water: Final = "hot water"  # 1
-    swimming_pool_solar: Final = "swimming pool/solar"  # 2
-    evu: Final = "evu"  # 3
-    defrost: Final = "defrost"  # 4
-    no_request: Final = "no request"  # 5
-    heating_external_source: Final = "heating external source"  # 6
-    cooling: Final = "cooling"  # 7
+    heating: Final = 0
+    domestic_water: Final = 1  # "hot water"
+    swimming_pool_solar: Final = 2  # "swimming pool/solar"
+    evu: Final = 3
+    defrost: Final = 4
+    no_request: Final = 5
+    heating_external_source: Final = 6
+    cooling: Final = 7
 
 
-class LuxMode(StrEnum):
+class LuxMode(Enum):
     """Luxmodes off etc."""
 
-    off: Final = "Off"
-    automatic: Final = "Automatic"
-    second_heatsource: Final = "Second heatsource"
-    party: Final = "Party"
-    holidays: Final = "Holidays"
+    automatic: Final = 0
+    second_heatsource: Final = 1
+    party: Final = 2
+    holidays: Final = 3
+    off: Final = 4
 
 
-class LuxStatus1Option(StrEnum):
+class LuxStatus1Option(Enum):
     """LuxStatus1 option defrost etc."""
 
-    heatpump_running: Final = "heatpump running"
-    heatpump_idle: Final = "heatpump idle"
-    heatpump_coming: Final = "heatpump coming"
-    heatpump_shutdown: Final = "heatpump shutdown"
-    errorcode_slot_zero: Final = "errorcode slot 0"
-    defrost: Final = "defrost"
-    witing_on_LIN_connection: Final = "witing on LIN connection"
-    compressor_heating_up: Final = "compressor heating up"
-    pump_forerun: Final = "pump forerun"
-    compressor_heater: Final = "compressor heater"
+    heatpump_running: Final = 0
+    heatpump_idle: Final = 1
+    heatpump_coming: Final = 2
+    heatpump_shutdown: Final = 101
+    errorcode_slot_zero: Final = 3  # "errorcode slot 0"
+    defrost: Final = 4
+    witing_on_LIN_connection: Final = 5  # "witing on LIN connection"
+    compressor_heating_up: Final = 6
+    pump_forerun: Final = 7
+    compressor_heater: Final = 102
 
 
-class LuxStatus3Option(StrEnum):
+class LuxStatus3Option(Enum):
     """LuxStatus3 option heating etc."""
 
-    unknown: Final = ("unknown",)
-    none: Final = ("none",)
-    heating: Final = ("heating",)
-    no_request: Final = ("no request",)
-    grid_switch_on_delay: Final = ("grid switch on delay",)
-    cycle_lock: Final = ("cycle lock",)
-    lock_time: Final = ("lock time",)
-    domestic_water: Final = ("domestic water",)
-    info_bake_out_program: Final = ("info bake out program",)
-    defrost: Final = ("defrost",)
-    pump_forerun: Final = ("pump forerun",)
-    thermal_desinfection: Final = ("thermal desinfection",)
-    cooling: Final = ("cooling",)
-    swimming_pool_solar: Final = ("swimming pool/solar",)
-    heating_external_energy_source: Final = ("heating external energy source",)
-    domestic_water_external_energy_source: Final = (
-        "domestic water external energy source",
-    )
-    flow_monitoring: Final = ("flow monitoring",)
-    second_heat_generator_1_active: Final = ("second heat generator 1 active",)
+    unknown: Final = 101
+    none: Final = 102
+    heating: Final = 0
+    no_request: Final = 1
+    grid_switch_on_delay: Final = 2
+    cycle_lock: Final = 3
+    lock_time: Final = 4
+    domestic_water: Final = 5
+    info_bake_out_program: Final = 6
+    defrost: Final = 7
+    pump_forerun: Final = 8
+    thermal_desinfection: Final = 9
+    cooling: Final = 10
+    swimming_pool_solar: Final = 12  # "swimming pool/solar"
+    heating_external_energy_source: Final = 13
+    domestic_water_external_energy_source: Final = 14
+    flow_monitoring: Final = 16
+    second_heat_generator_1_active: Final = 17
 
 
 class LuxMkTypes(Enum):
@@ -251,92 +250,197 @@ LUX_MODELS_NOVELAN = ["BW", "LA", "LD", "LI", "SI", "ZLW"]
 LUX_MODELS_OTHER = ["CB", "CI", "CN", "CS"]
 # endregion Lux Definitions
 
+# region Mappings
+HEATPUMP_CODE_TYPE_MAP: Final[dict[int, str]] = {
+    0: "ERC",
+    1: "SW1",
+    2: "SW2",
+    3: "WW1",
+    4: "WW2",
+    5: "L1I",
+    6: "L2I",
+    7: "L1A",
+    8: "L2A",
+    9: "KSW",
+    10: "KLW",
+    11: "SWC",
+    12: "LWC",
+    13: "L2G",
+    14: "WZS",
+    15: "L1I407",
+    16: "L2I407",
+    17: "L1A407",
+    18: "L2A407",
+    19: "L2G407",
+    20: "LWC407",
+    21: "L1AREV",
+    22: "L2AREV",
+    23: "WWC1",
+    24: "WWC2",
+    25: "L2G404",
+    26: "WZW",
+    27: "L1S",
+    28: "L1H",
+    29: "L2H",
+    30: "WZWD",
+    31: "ERC",
+    40: "WWB_20",
+    41: "LD5",
+    42: "LD7",
+    43: "SW 37_45",
+    44: "SW 58_69",
+    45: "SW 29_56",
+    46: "LD5 (230V)",
+    47: "LD7 (230 V)",
+    48: "LD9",
+    49: "LD5 REV",
+    50: "LD7 REV",
+    51: "LD5 REV 230V",
+    52: "LD7 REV 230V",
+    53: "LD9 REV 230V",
+    54: "SW 291",
+    55: "LW SEC",
+    56: "HMD 2",
+    57: "MSW 4",
+    58: "MSW 6",
+    59: "MSW 8",
+    60: "MSW 10",
+    61: "MSW 12",
+    62: "MSW 14",
+    63: "MSW 17",
+    64: "MSW 19",
+    65: "MSW 23",
+    66: "MSW 26",
+    67: "MSW 30",
+    68: "MSW 4S",
+    69: "MSW 6S",
+    70: "MSW 8S",
+    71: "MSW 10S",
+    72: "MSW 13S",
+    73: "MSW 16S",
+    74: "MSW2-6S",
+    75: "MSW4-16",
+}
+UNIT_STATE_CLASS_MAP: Final[dict[UnitOfTemperature|UnitOfPressure|UnitOfEnergy|UnitOfElectricPotential|UnitOfPower|UnitOfFrequency, SensorStateClass]] = {
+    UnitOfTemperature.CELSIUS: SensorStateClass.MEASUREMENT,
+    UnitOfElectricPotential.VOLT: SensorStateClass.MEASUREMENT,
+    UnitOfPressure.BAR: SensorStateClass.MEASUREMENT,
+    UnitOfEnergy.KILO_WATT_HOUR: SensorStateClass.TOTAL_INCREASING,
+    UnitOfPower.WATT: SensorStateClass.MEASUREMENT,
+    UnitOfFrequency.HERTZ: SensorStateClass.MEASUREMENT,
+}
+UNIT_DEVICE_CLASS_MAP: Final[dict[UnitOfTemperature|UnitOfTime|UnitOfElectricPotential|UnitOfPressure|UnitOfEnergy|UnitOfPower|UnitOfFrequency, SensorDeviceClass]] = {
+    UnitOfTemperature.CELSIUS: SensorDeviceClass.TEMPERATURE,
+    UnitOfTemperature.KELVIN: SensorDeviceClass.TEMPERATURE,
+    UnitOfTime.MINUTES: SensorDeviceClass.DURATION,
+    UnitOfElectricPotential.VOLT: SensorDeviceClass.VOLTAGE,
+    UnitOfPressure.BAR: SensorDeviceClass.PRESSURE,
+    UnitOfEnergy.KILO_WATT_HOUR: SensorDeviceClass.ENERGY,
+    UnitOfPower.WATT: SensorDeviceClass.POWER,
+    UnitOfFrequency.HERTZ: SensorDeviceClass.FREQUENCY,
+}
+UNIT_ICON_MAP: Final[dict[UnitOfTemperature|UnitOfEnergy, str]] = {
+    UnitOfTemperature.CELSIUS: 'mdi:thermometer',
+    UnitOfTemperature.KELVIN: 'mdi:thermometer',
+    UnitOfEnergy.KILO_WATT_HOUR: 'mdi:lightning-bolt-circle',
+}
+UNIT_FACTOR_MAP: Final[dict[UnitOfTemperature|UnitOfTime|UnitOfElectricPotential|UnitOfEnergy, float]] = {
+    UnitOfTemperature.CELSIUS: 0.1,
+    UnitOfTemperature.KELVIN: 0.1,
+    UnitOfTime.MINUTES: 1,
+    UnitOfElectricPotential.VOLT: 0.01,
+    UnitOfEnergy.KILO_WATT_HOUR: 0.1,
+}
+# endregion Mappings
+
+
 # region Lux parameters
 
 
-class LuxParameter(StrEnum):
-    """Luxtronik parameter ids."""
-
-    UNSET: Final = "UNSET"
-    P0001_HEATING_TARGET_CORRECTION: Final = "parameters.ID_Einst_WK_akt"
-    P0002_DHW_TARGET_TEMPERATURE: Final = "parameters.ID_Einst_BWS_akt"
-    P0003_MODE_HEATING: Final = "parameters.ID_Ba_Hz_akt"
-    P0004_MODE_DHW: Final = "parameters.ID_Ba_Bw_akt"
-    P0011_HEATING_CIRCUIT_CURVE1_TEMPERATURE: Final = "parameters.ID_Einst_HzHwHKE_akt"
-    P0012_HEATING_CIRCUIT_CURVE2_TEMPERATURE: Final = "parameters.ID_Einst_HzHKRANH_akt"
-    P0013_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzHKRABS_akt"
-    )
+# region Keys
+class Parameter_SensorKey(Enum):
+    UNSET: Final = -1
+    HEATING_TARGET_CORRECTION: Final = 1  # ID_Einst_WK_akt
+    DHW_TARGET_TEMPERATURE: Final = 2  # ID_Einst_BWS_akt
+    MODE_HEATING: Final = 3  # ID_Ba_Hz_akt
+    MODE_DHW: Final = 4  # ID_Ba_Bw_akt
+    HEATING_CIRCUIT_CURVE1_TEMPERATURE: Final = 11  # ID_Einst_HzHwHKE_akt
+    HEATING_CIRCUIT_CURVE2_TEMPERATURE: Final = 12  # ID_Einst_HzHKRANH_akt
+    HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = 13  # ID_Einst_HzHKRABS_akt
     # luxtronik*_heating_circuit2_curve*
-    P0014_HEATING_CIRCUIT2_CURVE1_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK1E_akt"  # 260
-    )
-    P0015_HEATING_CIRCUIT2_CURVE2_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK1ANH_akt"  # 290
-    )
-    P0016_HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK1ABS_akt"  # 0
-    )
+    HEATING_CIRCUIT2_CURVE1_TEMPERATURE: Final = 14  # ID_Einst_HzMK1E_akt 260
+    HEATING_CIRCUIT2_CURVE2_TEMPERATURE: Final = 15  # ID_Einst_HzMK1ANH_akt 290
+    HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = 16  # ID_Einst_HzMK1ABS_akt 0
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
-    P0042_MIXING_CIRCUIT1_TYPE: Final = "parameters.ID_Einst_MK1Typ_akt"
-    P0047_DHW_THERMAL_DESINFECTION_TARGET: Final = "parameters.ID_Einst_LGST_akt"
-    P0049_PUMP_OPTIMIZATION: Final = "parameters.ID_Einst_Popt_akt"
+    MIXING_CIRCUIT1_TYPE: Final = 42  # ID_Einst_MK1Typ_akt
+    AIR_DEFROST_TEMPERATURE: Final = (
+        44  # ID_Einst_TLAbt_akt"  # "temp. air defrost"  7.0 C°
+    )
+    DHW_THERMAL_DESINFECTION_TARGET: Final = 47  # ID_Einst_LGST_akt
+    PUMP_OPTIMIZATION: Final = 49  # ID_Einst_Popt_akt
     # P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"  # != 0 --> Has_Room_Temp
-    P0074_DHW_HYSTERESIS: Final = "parameters.ID_Einst_BWS_Hyst_akt"
-    P0085_DHW_CHARGING_PUMP: Final = "parameters.ID_Einst_BWZIP_akt"  # has_domestic_water_circulation_pump int() != 1
-    P0088_HEATING_HYSTERESIS: Final = "parameters.ID_Einst_HRHyst_akt"
-    P0089_HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE: Final = (
-        "parameters.ID_Einst_TRErhmax_akt"
+    DHW_HYSTERESIS: Final = 74  # ID_Einst_BWS_Hyst_akt
+    DHW_CHARGING_PUMP: Final = (
+        85  # ID_Einst_BWZIP_akt  # has_domestic_water_circulation_pump int() != 1
     )
-    P0090_RELEASE_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWEFreig_akt"
+    #  "Return temperature limit" / "Rückl.-Begr." 50 35-70 C° step 1 -> Setting the maximum return setpoint temperatures in heating mode.
+    HEATING_RETURN_TEMPERATURE_LIMIT: Final = 87  # ID_Einst_TRBegr_akt
+    HEATING_HYSTERESIS: Final = 88  # ID_Einst_HRHyst_akt
+    HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE: Final = 89  # ID_Einst_TRErhmax_akt
+    RELEASE_SECOND_HEAT_GENERATOR: Final = 90  # ID_Einst_ZWEFreig_akt
+    # P0091_ "max. outdoor temp." 35 20-45
+    # P0092  "min. outdoor temp." -20-10
+    AIR_DEFROST_STOP_TEMPERATURE: Final = 98  # ID_Einst_TAbtEnd_akt
     # MODE_COOLING: Automatic or Off
-    P0108_MODE_COOLING: Final = "parameters.ID_Einst_BA_Kuehl_akt"
-    P0110_COOLING_OUTDOOR_TEMP_THRESHOLD: Final = "parameters.ID_Einst_KuehlFreig_akt"
-    P0111_HEATING_NIGHT_LOWERING_TO_TEMPERATURE: Final = (
-        "parameters.ID_Einst_TAbsMin_akt"
+    MODE_COOLING: Final = 108  # ID_Einst_BA_Kuehl_akt
+    COOLING_OUTDOOR_TEMP_THRESHOLD: Final = 110  # ID_Einst_KuehlFreig_akt
+    HEATING_NIGHT_LOWERING_TO_TEMPERATURE: Final = 111  # ID_Einst_TAbsMin_akt
+    SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE: Final = 122  # ID_Einst_TDC_Ein_akt
+    SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE: Final = 123  # ID_Einst_TDC_Aus_akt
+    SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
+        124  # ID_Einst_TDC_Max_akt
     )
-    P0122_SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE: Final = (
-        "parameters.ID_Einst_TDC_Ein_akt"
-    )
-    P0123_SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE: Final = (
-        "parameters.ID_Einst_TDC_Aus_akt"
-    )
-    P0130_MIXING_CIRCUIT2_TYPE: Final = "parameters.ID_Einst_MK2Typ_akt"
-    P0132_COOLING_TARGET_TEMPERATURE_MK1: Final = "parameters.ID_Sollwert_KuCft1_akt"
-    P0133_COOLING_TARGET_TEMPERATURE_MK2: Final = "parameters.ID_Sollwert_KuCft2_akt"
-    P0780_MIXING_CIRCUIT3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"
-    P0149_FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = "parameters.ID_Einst_TVLmax_akt"
-    P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
-        "parameters.ID_Einst_TDC_Max_akt"
-    )
-    P0699_HEATING_THRESHOLD: Final = "parameters.ID_Einst_Heizgrenze"
-    P0700_HEATING_THRESHOLD_TEMPERATURE: Final = "parameters.ID_Einst_Heizgrenze_Temp"
-    P0716_0720_SWITCHOFF_REASON: Final = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
-    P0721_0725_SWITCHOFF_TIMESTAMP: Final = "parameters.ID_Switchoff_file_{ID}_1"  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
+    # P0125_HEATING_EXTERNAL_ENERGY_SOURCE TEE heating External energy source  10k 1.0-15.0  0.5
+    # P0126_DHW_EXTERNAL_ENERGY_SOURCE TEE DHW External energy source  5k 1.0-15.0  0.5
+    MIXING_CIRCUIT2_TYPE: Final = 130  # ID_Einst_MK2Typ_akt
+    COOLING_TARGET_TEMPERATURE_MK1: Final = 132  # ID_Sollwert_KuCft1_akt
+    COOLING_TARGET_TEMPERATURE_MK2: Final = 133  # ID_Sollwert_KuCft2_akt
+    FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = 149  # ID_Einst_TVLmax_akt
+    HEATING_THRESHOLD: Final = 699  # ID_Einst_Heizgrenze
+    HEATING_THRESHOLD_TEMPERATURE: Final = 700  # ID_Einst_Heizgrenze_Temp
+    # P0716_0720_SWITCHOFF_REASON: Final = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
+    SWITCHOFF_REASON: Final = 716  # ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
+    SWITCHOFF_REASON_2: Final = 717
+    SWITCHOFF_REASON_3: Final = 718
+    SWITCHOFF_REASON_4: Final = 719
+    SWITCHOFF_REASON_5: Final = 720
+    # P0721_0725_SWITCHOFF_TIMESTAMP: Final = "parameters.ID_Switchoff_file_{ID}_1"  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
+    SWITCHOFF_TIMESTAMP: Final = 721  # ID_Switchoff_file_{ID}_1  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
+    SWITCHOFF_TIMESTAMP_2: Final = 722
+    SWITCHOFF_TIMESTAMP_3: Final = 723
+    SWITCHOFF_TIMESTAMP_4: Final = 724
+    SWITCHOFF_TIMESTAMP_5: Final = 725
     # luxtronik*_heating_circuit3_curve*
-    P0774_HEATING_CIRCUIT3_CURVE1_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK3E_akt"  # 270
-    )
-    P0775_HEATING_CIRCUIT3_CURVE2_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK3ANH_akt"  # 290
-    )
-    P0776_HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK3ABS_akt"  # 0
-    )
-    P0850_COOLING_START_DELAY_HOURS: Final = "parameters.ID_Einst_Kuhl_Zeit_Ein_akt"
-    P0851_COOLING_STOP_DELAY_HOURS: Final = "parameters.ID_Einst_Kuhl_Zeit_Aus_akt"
-    P0860_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
-    P0864_PUMP_OPTIMIZATION_TIME: Final = "parameters.ID_Einst_Popt_Nachlauf_akt"
-    P0867_EFFICIENCY_PUMP_NOMINAL: Final = (
-        "parameters.ID_Einst_Effizienzpumpe_Nominal_akt"
-    )
-    P0868_EFFICIENCY_PUMP_MINIMAL: Final = (
-        "parameters.ID_Einst_Effizienzpumpe_Minimal_akt"
-    )
-    P0869_EFFICIENCY_PUMP: Final = "parameters.ID_Einst_Effizienzpumpe_akt"
+    HEATING_CIRCUIT3_CURVE1_TEMPERATURE: Final = 774  # ID_Einst_HzMK3E_akt  # 270
+    HEATING_CIRCUIT3_CURVE2_TEMPERATURE: Final = 775  # ID_Einst_HzMK3ANH_akt  # 290
+    HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE: Final = 776  # ID_Einst_HzMK3ABS_akt  # 0
+    MIXING_CIRCUIT3_TYPE: Final = 780  # ID_Einst_MK3Typ_akt
+    COOLING_START_DELAY_HOURS: Final = 850  # ID_Einst_Kuhl_Zeit_Ein_akt
+    COOLING_STOP_DELAY_HOURS: Final = 851  # ID_Einst_Kuhl_Zeit_Aus_akt
+    REMOTE_MAINTENANCE: Final = 860  # ID_Einst_Fernwartung_akt
+    # "min OT flow max": Heat source temperature-dependent adjustment of the flow temperature. The outside temperature, up to which the flow max.
+    # temperature with the heat pump may be increased, is adjusted here. Below this outside temperature, the actual VL maximum
+    # temperature of the heat pump will fall linearally to the value “low limit of applic.“.
+    # P0862_ "min OT flow max" -2C° -20-5  1
+    # "flow operation limit": Heat source temperature-dependent adjustment of the flow temperature. Here, the maximum forward flow temperature of the heat pump is set at an outside temperature of -20°C.
+    # P0863_ "flow operation limit"  58C° 35-75  1
+    PUMP_OPTIMIZATION_TIME: Final = 864  # ID_Einst_Popt_Nachlauf_akt
+    EFFICIENCY_PUMP_NOMINAL: Final = 867  # ID_Einst_Effizienzpumpe_Nominal_akt
+    EFFICIENCY_PUMP_MINIMAL: Final = 868  # ID_Einst_Effizienzpumpe_Minimal_akt
+    EFFICIENCY_PUMP: Final = 869  # ID_Einst_Effizienzpumpe_akt
     # P0870_AMOUNT_COUNTER_ACTIVE: Final = "parameters.ID_Einst_Waermemenge_akt"
-    P0874_SERIAL_NUMBER: Final = "parameters.ID_WP_SerienNummer_DATUM"
-    P0875_SERIAL_NUMBER_MODEL: Final = "parameters.ID_WP_SerienNummer_HEX"
+    SERIAL_NUMBER: Final = 874  # ID_WP_SerienNummer_DATUM
+    SERIAL_NUMBER_MODEL: Final = 875  # ID_WP_SerienNummer_HEX
 
     # "852  ID_Waermemenge_Seit                                         ": "2566896",
     # "853  ID_Waermemenge_WQ                                           ": "0",
@@ -346,360 +450,182 @@ class LuxParameter(StrEnum):
     #  "879  ID_Waermemenge_SW                                           ": "0",
     #  "880  ID_Waermemenge_Datum                                        ": "1483648906", <-- Unix timestamp!  5.1.2017
 
-    P0882_SOLAR_OPERATION_HOURS: Final = "parameters.ID_BSTD_Solar"
-    P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = (
-        "parameters.ID_Einst_TDC_Koll_Max_akt"
-    )
+    SOLAR_OPERATION_HOURS: Final = 882  # ID_BSTD_Solar
+    SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = 883  # ID_Einst_TDC_Koll_Max_akt
     # P0894_VENTILATION_MODE: Final = "parameters.ID_Einst_BA_Lueftung_akt" # "Automatic", "Party", "Holidays", "Off"
-    P0966_COOLING_TARGET_TEMPERATURE_MK3: Final = "parameters.ID_Sollwert_KuCft3_akt"
-    P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = (
-        "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
+    COOLING_TARGET_TEMPERATURE_MK3: Final = 966  # ID_Sollwert_KuCft3_akt
+    # P0973_ "DHW temp. max." 65C° 30-65 0.5
+    HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = (
+        979  # ID_Einst_Minimale_Ruecklaufsolltemperatur
     )
-    P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR: Final = (
-        "parameters.ID_RBE_Einflussfaktor_RT_akt"
-    )
-    P0992_RELEASE_TIME_SECOND_HEAT_GENERATOR: Final = (
-        "parameters.ID_Einst_Freigabe_Zeit_ZWE"
-    )
-    P1032_HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED: Final = (
-        "parameters.ID_Einst_P155_PumpHeat_Max"
-    )
-    P1033_PUMP_HEAT_CONTROL: Final = "parameters.ID_Einst_P155_PumpHeatCtrl"
-    P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
-        "parameters.ID_Waermemenge_ZWE"
-    )
+    HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR: Final = 980  # ID_RBE_Einflussfaktor_RT_akt
+    RELEASE_TIME_SECOND_HEAT_GENERATOR: Final = 992  # ID_Einst_Freigabe_Zeit_ZWE
+    HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED: Final = 1032  # ID_Einst_P155_PumpHeat_Max
+    PUMP_HEAT_CONTROL: Final = 1033  # ID_Einst_P155_PumpHeatCtrl
+    ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = 1059  # ID_Waermemenge_ZWE
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
-    P1087_SILENT_MODE: Final = "parameters.Unknown_Parameter_1087"  # Silent mode On/Off
-    P1119_LAST_DEFROST_TIMESTAMP: Final = (
-        "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
+    SILENT_MODE: Final = 1087  # Unknown_Parameter_1087  # Silent mode On/Off
+    LAST_DEFROST_TIMESTAMP: Final = (
+        1119  # Unknown_Parameter_1119  # 1685073431 -> 26.5.23 05:57
     )
-    P1136_HEAT_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1136"
-    P1137_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
+    HEAT_ENERGY_INPUT: Final = 1136  # Unknown_Parameter_1136
+    DHW_ENERGY_INPUT: Final = 1137  # Unknown_Parameter_1137
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
     # ? P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
     # ? P1140_SECOND_HEAT_SOURCE_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1140"
 
 
-# endregion Lux parameters
-
-LUX_PARAMETER_MK_SENSORS: Final = [
-    LuxParameter.P0042_MIXING_CIRCUIT1_TYPE,
-    LuxParameter.P0130_MIXING_CIRCUIT2_TYPE,
-    LuxParameter.P0780_MIXING_CIRCUIT3_TYPE,
-]
-
-
-# region Lux calculations
-class LuxCalculation(StrEnum):
-    """Luxtronik calculation ids."""
-
-    UNSET: Final = "UNSET"
-    C0010_FLOW_IN_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TVL"
-    C0011_FLOW_OUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TRL"
-    C0012_FLOW_OUT_TEMPERATURE_TARGET: Final = "calculations.ID_WEB_Sollwert_TRL_HZ"
-    C0013_FLOW_OUT_TEMPERATURE_EXTERNAL: Final = (
-        "calculations.ID_WEB_Temperatur_TRL_ext"
-    )
-    C0014_HOT_GAS_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_THG"
-    C0015_OUTDOOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TA"
-    C0016_OUTDOOR_TEMPERATURE_AVERAGE: Final = "calculations.ID_WEB_Mitteltemperatur"
-    C0017_DHW_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TBW"
-    C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
-    C0026_SOLAR_COLLECTOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSK"
-    C0027_SOLAR_BUFFER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSS"
-    C0029_DEFROST_END_FLOW_OKAY: Final = "calculations.ID_WEB_ASDin"
-    C0031_EVU_UNLOCKED: Final = "calculations.ID_WEB_EVUin"
+class Calculation_SensorKey(Enum):
+    UNSET: Final = -1
+    FLOW_IN_TEMPERATURE: Final = 10  # ID_WEB_Temperatur_TVL
+    FLOW_OUT_TEMPERATURE: Final = 11  # ID_WEB_Temperatur_TRL
+    FLOW_OUT_TEMPERATURE_TARGET: Final = 12  # ID_WEB_Sollwert_TRL_HZ
+    FLOW_OUT_TEMPERATURE_EXTERNAL: Final = 13  # ID_WEB_Temperatur_TRL_ext
+    HOT_GAS_TEMPERATURE: Final = 14  # ID_WEB_Temperatur_THG
+    OUTDOOR_TEMPERATURE: Final = 15  # ID_WEB_Temperatur_TA
+    OUTDOOR_TEMPERATURE_AVERAGE: Final = 16  # ID_WEB_Mitteltemperatur
+    DHW_TEMPERATURE: Final = 17  # ID_WEB_Temperatur_TBW
+    HEAT_SOURCE_INPUT_TEMPERATURE: Final = 19  # ID_WEB_Temperatur_TWE
+    HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = 20  # ID_WEB_Temperatur_TWA
+    SOLAR_COLLECTOR_TEMPERATURE: Final = 26  # ID_WEB_Temperatur_TSK
+    SOLAR_BUFFER_TEMPERATURE: Final = 27  # ID_WEB_Temperatur_TSS
+    DEFROST_END_FLOW_OKAY: Final = 29  # ID_WEB_ASDin
+    EVU_UNLOCKED: Final = 31  # ID_WEB_EVUin
     # C0032_HIGH_PRESSURE_OKAY: Final = "calculations.ID_WEB_HDin"  # True/False -> Hochdruck OK
-    C0034_MOTOR_PROTECTION: Final = "calculations.ID_WEB_MOTin"
-    C0037_DEFROST_VALVE: Final = "calculations.ID_WEB_AVout"
-    C0038_DHW_RECIRCULATION_PUMP: Final = "calculations.ID_WEB_BUPout"
-    C0039_CIRCULATION_PUMP_HEATING: Final = "calculations.ID_WEB_HUPout"
+    MOTOR_PROTECTION: Final = 34  # ID_WEB_MOTin
+    DEFROST_VALVE: Final = 37  # ID_WEB_AVout
+    DHW_RECIRCULATION_PUMP: Final = 38  # ID_WEB_BUPout
+    CIRCULATION_PUMP_HEATING: Final = 39  # ID_WEB_HUPout
     # C0040_MIXER1_OPENED: Final = "calculations.ID_WEB_MA1out"  # True/False -> Mischer 1 auf
     # C0041_MIXER1_CLOSED: Final = "calculations.ID_WEB_MZ1out"  # True/False -> Mischer 1 zu
-    C0043_PUMP_FLOW: Final = "calculations.ID_WEB_VBOout"
-    C0044_COMPRESSOR: Final = "calculations.ID_WEB_VD1out"
-    C0045_COMPRESSOR2: Final = "calculations.ID_WEB_VD2out"
-    C0046_DHW_CIRCULATION_PUMP: Final = "calculations.ID_WEB_ZIPout"
-    C0047_ADDITIONAL_CIRCULATION_PUMP: Final = "calculations.ID_WEB_ZUPout"
-    C0048_ADDITIONAL_HEAT_GENERATOR: Final = "calculations.ID_WEB_ZW1out"
-    C0049_DISTURBANCE_OUTPUT: Final = "calculations.ID_WEB_ZW2SSTout"
+    PUMP_FLOW: Final = 43  # ID_WEB_VBOout
+    COMPRESSOR: Final = 44  # ID_WEB_VD1out
+    COMPRESSOR2: Final = 45  # ID_WEB_VD2out
+    DHW_CIRCULATION_PUMP: Final = 46  # ID_WEB_ZIPout
+    ADDITIONAL_CIRCULATION_PUMP: Final = 47  # ID_WEB_ZUPout
+    ADDITIONAL_HEAT_GENERATOR: Final = 48  # ID_WEB_ZW1out
+    DISTURBANCE_OUTPUT: Final = 49  # ID_WEB_ZW2SSTout
     # C0051: Final = "calculations.ID_WEB_FP2out"  # True/False -> FBH Umwälzpumpe 2
-    C0052_SOLAR_PUMP: Final = "calculations.ID_WEB_SLPout"
+    SOLAR_PUMP: Final = 52  # ID_WEB_SLPout
     # C0054_MIXER2_CLOSED: Final = "calculations.ID_WEB_MZ2out"  # True/False -> Mischer 2 zu
     # C0055_MIXER2_OPENED: Final = "calculations.ID_WEB_MA2out"  # True/False -> Mischer 2 auf
-    C0056_COMPRESSOR1_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitVD1"
-    C0057_COMPRESSOR1_IMPULSES: Final = "calculations.ID_WEB_Zaehler_BetrZeitImpVD1"
-    C0058_COMPRESSOR2_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitVD2"
-    C0059_COMPRESSOR2_IMPULSES: Final = "calculations.ID_WEB_Zaehler_BetrZeitImpVD2"
-    C0060_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
-        "calculations.ID_WEB_Zaehler_BetrZeitZWE1"
-    )
-    C0063_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitWP"
-    C0064_OPERATION_HOURS_HEATING: Final = "calculations.ID_WEB_Zaehler_BetrZeitHz"
-    C0065_DHW_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitBW"
-    C0066_OPERATION_HOURS_COOLING: Final = "calculations.ID_WEB_Zaehler_BetrZeitKue"
-    C0067_TIMER_HEATPUMP_ON: Final = "calculations.ID_WEB_Time_WPein_akt"
-    C0068_TIMER_ADD_HEAT_GENERATOR_ON: Final = "calculations.ID_WEB_Time_ZWE1_akt"
-    C0069_TIMER_SEC_HEAT_GENERATOR_ON: Final = "calculations.ID_WEB_Time_ZWE2_akt"
-    C0070_TIMER_NET_INPUT_DELAY: Final = "calculations.ID_WEB_Timer_EinschVerz"
-    C0071_TIMER_SCB_OFF: Final = "calculations.ID_WEB_Time_SSPAUS_akt"
-    C0072_TIMER_SCB_ON: Final = "calculations.ID_WEB_Time_SSPEIN_akt"
-    C0073_TIMER_COMPRESSOR_OFF: Final = "calculations.ID_WEB_Time_VDStd_akt"
-    C0074_TIMER_HC_ADD: Final = "calculations.ID_WEB_Time_HRM_akt"
-    C0075_TIMER_HC_LESS: Final = "calculations.ID_WEB_Time_HRW_akt"
-    C0076_TIMER_TDI: Final = "calculations.ID_WEB_Time_LGS_akt"
-    C0077_TIMER_BLOCK_DHW: Final = "calculations.ID_WEB_Time_SBW_akt"
-    C0078_MODEL_CODE: Final = "calculations.ID_WEB_Code_WP_akt"
-    C0080_STATUS: Final = "calculations.ID_WEB_WP_BZ_akt"
-    C0081_FIRMWARE_VERSION: Final = "calculations.ID_WEB_SoftStand"
-    C0095_ERROR_TIME: Final = "calculations.ID_WEB_ERROR_Time0"
-    C0100_ERROR_REASON: Final = "calculations.ID_WEB_ERROR_Nr0"
+    COMPRESSOR1_OPERATION_HOURS: Final = 56  # ID_WEB_Zaehler_BetrZeitVD1
+    COMPRESSOR1_IMPULSES: Final = 57  # ID_WEB_Zaehler_BetrZeitImpVD1
+    COMPRESSOR2_OPERATION_HOURS: Final = 58  # ID_WEB_Zaehler_BetrZeitVD2
+    COMPRESSOR2_IMPULSES: Final = 59  # ID_WEB_Zaehler_BetrZeitImpVD2
+    ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = 60  # ID_WEB_Zaehler_BetrZeitZWE1
+    OPERATION_HOURS: Final = 63  # ID_WEB_Zaehler_BetrZeitWP
+    OPERATION_HOURS_HEATING: Final = 64  # ID_WEB_Zaehler_BetrZeitHz
+    DHW_OPERATION_HOURS: Final = 65  # ID_WEB_Zaehler_BetrZeitBW
+    OPERATION_HOURS_COOLING: Final = 66  # ID_WEB_Zaehler_BetrZeitKue
+    TIMER_HEATPUMP_ON: Final = 67  # ID_WEB_Time_WPein_akt
+    TIMER_ADD_HEAT_GENERATOR_ON: Final = 68  # ID_WEB_Time_ZWE1_akt
+    TIMER_SEC_HEAT_GENERATOR_ON: Final = 69  # ID_WEB_Time_ZWE2_akt
+    TIMER_NET_INPUT_DELAY: Final = 70  # ID_WEB_Timer_EinschVerz
+    TIMER_SCB_OFF: Final = 71  # ID_WEB_Time_SSPAUS_akt
+    TIMER_SCB_ON: Final = 72  # ID_WEB_Time_SSPEIN_akt
+    TIMER_COMPRESSOR_OFF: Final = 73  # ID_WEB_Time_VDStd_akt
+    TIMER_HC_ADD: Final = 74  # ID_WEB_Time_HRM_akt
+    TIMER_HC_LESS: Final = 75  # ID_WEB_Time_HRW_akt
+    TIMER_TDI: Final = 76  # ID_WEB_Time_LGS_akt
+    TIMER_BLOCK_DHW: Final = 77  # ID_WEB_Time_SBW_akt
+    MODEL_CODE: Final = 78  # ID_WEB_Code_WP_akt
+    STATUS: Final = 80  # ID_WEB_WP_BZ_akt
+    FIRMWARE_VERSION: Final = 81  # ID_WEB_SoftStand
+    ERROR_TIME: Final = 95  # ID_WEB_ERROR_Time0
+    ERROR_REASON: Final = 100  # ID_WEB_ERROR_Nr0
     # TODO: !
     # C0105_ERROR_COUNTER: Final = "calculations.ID_WEB_AnzahlFehlerInSpeicher"
-    C0117_STATUS_LINE_1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
-    C0118_STATUS_LINE_2: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile2"
-    C0119_STATUS_LINE_3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
-    C0120_STATUS_TIME: Final = "calculations.ID_WEB_HauptMenuStatus_Zeit"
-    C0141_TIMER_DEFROST: Final = "calculations.ID_WEB_Time_AbtIn"
-    C0146_APPROVAL_COOLING: Final = "calculations.ID_WEB_FreigabKuehl"
-    C0151_HEAT_AMOUNT_HEATING: Final = "calculations.ID_WEB_WMZ_Heizung"
-    C0152_DHW_HEAT_AMOUNT: Final = "calculations.ID_WEB_WMZ_Brauchwasser"
-    C0154_HEAT_AMOUNT_COUNTER: Final = "calculations.ID_WEB_WMZ_Seit"  # 25668.9
-    C0155_HEAT_AMOUNT_FLOW_RATE: Final = "calculations.ID_WEB_WMZ_Durchfluss"
-    C0156_ANALOG_OUT1: Final = "calculations.ID_WEB_AnalogOut1"
-    C0157_ANALOG_OUT2: Final = "calculations.ID_WEB_AnalogOut2"
-    C0158_TIMER_HOT_GAS: Final = "calculations.ID_WEB_Time_Heissgas"
-    C0173_HEAT_SOURCE_FLOW_RATE: Final = "calculations.ID_WEB_Durchfluss_WQ"
-    C0175_SUCTION_EVAPORATOR_TEMPERATURE: Final = (
-        "calculations.ID_WEB_LIN_ANSAUG_VERDAMPFER"
-    )
-    C0176_SUCTION_COMPRESSOR_TEMPERATURE: Final = (
-        "calculations.ID_WEB_LIN_ANSAUG_VERDICHTER"
-    )
-    C0177_COMPRESSOR_HEATING_TEMPERATURE: Final = "calculations.ID_WEB_LIN_VDH"
-    C0178_OVERHEATING_TEMPERATURE: Final = "calculations.ID_WEB_LIN_UH"
-    C0179_OVERHEATING_TARGET_TEMPERATURE: Final = "calculations.ID_WEB_LIN_UH_Soll"
-    C0180_HIGH_PRESSURE: Final = "calculations.ID_WEB_LIN_HD"
-    C0181_LOW_PRESSURE: Final = "calculations.ID_WEB_LIN_ND"
-    C0182_COMPRESSOR_HEATER: Final = "calculations.ID_WEB_LIN_VDH_out"
+    STATUS_LINE_1: Final = 117  # ID_WEB_HauptMenuStatus_Zeile1
+    STATUS_LINE_2: Final = 118  # ID_WEB_HauptMenuStatus_Zeile2
+    STATUS_LINE_3: Final = 119  # ID_WEB_HauptMenuStatus_Zeile3
+    STATUS_TIME: Final = 120  # ID_WEB_HauptMenuStatus_Zeit
+    TIMER_DEFROST: Final = 141  # ID_WEB_Time_AbtIn
+    APPROVAL_COOLING: Final = 146  # ID_WEB_FreigabKuehl
+    HEAT_AMOUNT_HEATING: Final = 151  # ID_WEB_WMZ_Heizung
+    DHW_HEAT_AMOUNT: Final = 152  # ID_WEB_WMZ_Brauchwasser
+    HEAT_AMOUNT_COUNTER: Final = 154  # ID_WEB_WMZ_Seit"  # 25668.
+    HEAT_AMOUNT_FLOW_RATE: Final = 155  # ID_WEB_WMZ_Durchfluss
+    ANALOG_OUT1: Final = 156  # ID_WEB_AnalogOut1
+    ANALOG_OUT2: Final = 157  # ID_WEB_AnalogOut2
+    TIMER_HOT_GAS: Final = 158  # ID_WEB_Time_Heissgas
+    HEAT_SOURCE_FLOW_RATE: Final = 173  # ID_WEB_Durchfluss_WQ
+    SUCTION_EVAPORATOR_TEMPERATURE: Final = 175  # ID_WEB_LIN_ANSAUG_VERDAMPFER
+    SUCTION_COMPRESSOR_TEMPERATURE: Final = 176  # ID_WEB_LIN_ANSAUG_VERDICHTER
+    COMPRESSOR_HEATING_TEMPERATURE: Final = 177  # ID_WEB_LIN_VDH
+    OVERHEATING_TEMPERATURE: Final = 178  # ID_WEB_LIN_UH
+    OVERHEATING_TARGET_TEMPERATURE: Final = 179  # ID_WEB_LIN_UH_Soll
+    HIGH_PRESSURE: Final = 180  # ID_WEB_LIN_HD
+    LOW_PRESSURE: Final = 181  # ID_WEB_LIN_ND
+    COMPRESSOR_HEATER: Final = 182  # ID_WEB_LIN_VDH_out
     # C0187_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Soll"
     # C0188_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Ist"
-    C0204_HEAT_SOURCE_INPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWE"
-    C0227_ROOM_THERMOSTAT_TEMPERATURE: Final = "calculations.ID_WEB_RBE_RT_Ist"
-    C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET: Final = "calculations.ID_WEB_RBE_RT_Soll"
-    C0231_PUMP_FREQUENCY: Final = "calculations.ID_WEB_Freq_VD"
-    C0239_PUMP_FLOW_DELTA_TARGET: Final = "calculations.Unknown_Calculation_239"
+    HEAT_SOURCE_INPUT_TEMPERATURE_2: Final = 204  # ID_WEB_Temperatur_TWE_2
+    ROOM_THERMOSTAT_TEMPERATURE: Final = 227  # ID_WEB_RBE_RT_Ist
+    ROOM_THERMOSTAT_TEMPERATURE_TARGET: Final = 228  # ID_WEB_RBE_RT_Soll
+    PUMP_FREQUENCY: Final = 231  # ID_WEB_Freq_VD
+    PUMP_FLOW_DELTA_TARGET: Final = 239  # Unknown_Calculation_239
     # 239: Kelvin("VBO_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_vbo_calculated
-    C0240_PUMP_FLOW_DELTA: Final = "calculations.Unknown_Calculation_240"
+    PUMP_FLOW_DELTA: Final = 240  # Unknown_Calculation_240
     # 240: Kelvin("VBO_Temp_Spread_Ist"), / 10, measurement, delta - ait_vbo_delta
     # 241: Percent2("HUP_PWM"),
-    C0242_CIRCULATION_PUMP_DELTA_TARGET: Final = "calculations.Unknown_Calculation_242"
+    CIRCULATION_PUMP_DELTA_TARGET: Final = 242  # Unknown_Calculation_242
     # 242: Kelvin("HUP_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_delta_calculated
-    C0243_CIRCULATION_PUMP_DELTA: Final = "calculations.Unknown_Calculation_243"
+    CIRCULATION_PUMP_DELTA: Final = 243  # Unknown_Calculation_243
     # 243: Kelvin("HUP_Temp_Spread_Ist"), / 10, measurement, delta - ait_hup_delta
     # 254 Flow Rate
-    C0257_CURRENT_HEAT_OUTPUT: Final = "calculations.Heat_Output"
+    CURRENT_HEAT_OUTPUT: Final = 257  # Heat_Output
     # 258 RBE Version
 
 
-# endregion Lux calculations
+class Visibility_SensorKey(Enum):
+    UNSET: Final = -1
+    COOLING: Final = 5  # ID_Visi_Kuhlung
+    MK2: Final = 8  # ID_Visi_MK2
+    FLOW_IN_TEMPERATURE: Final = 23  # ID_Visi_Temp_Vorlauf
+    FLOW_OUT_TEMPERATURE_EXTERNAL: Final = 24  # ID_Visi_Temp_Rucklauf
+    HOT_GAS_TEMPERATURE: Final = 27  # ID_Visi_Temp_Heissgas
+    DHW_TEMPERATURE: Final = 29  # ID_Visi_Temp_BW_Ist
+    SOLAR_COLLECTOR: Final = 38  # ID_Visi_Temp_Solarkoll
+    SOLAR_BUFFER: Final = 39  # ID_Visi_Temp_Solarsp
+    DEFROST_END_FLOW_OKAY: Final = 41  # ID_Visi_IN_ASD
+    EVU_IN: Final = 43  # ID_Visi_IN_EVU
+    MOTOR_PROTECTION: Final = 45  # ID_Visi_IN_MOT
+    DEFROST_VALVE: Final = 49  # ID_Visi_OUT_Abtauventil
+    DHW_RECIRCULATION_PUMP: Final = 50  # ID_Visi_OUT_BUP
+    CIRCULATION_PUMP_HEATING: Final = 52  # ID_Visi_OUT_HUP
+    DHW_CIRCULATION_PUMP: Final = 59  # ID_Visi_OUT_ZIP
+    DHW_CHARGING_PUMP: Final = -1  # V0059A_DHW_CHARGING_PUMP
+    ADDITIONAL_CIRCULATION_PUMP: Final = 60  # ID_Visi_OUT_ZUP
+    SECOND_HEAT_GENERATOR: Final = 61  # ID_Visi_OUT_ZWE1
+    COMPRESSOR1_OPERATION_HOURS: Final = 80  # ID_Visi_Bst_BStdVD1
+    COMPRESSOR1_IMPULSES: Final = 81  # ID_Visi_Bst_ImpVD1
+    COMPRESSOR2_OPERATION_HOURS: Final = 83  # ID_Visi_Bst_BStdVD2
+    COMPRESSOR2_IMPULSES: Final = 84  # ID_Visi_Bst_ImpVD2
+    ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = 86  # ID_Visi_Bst_BStdZWE1
+    EVU_LOCKED: Final = 121  # ID_Visi_SysEin_EVUSperre
+    ROOM_THERMOSTAT: Final = 122  # ID_Visi_SysEin_Raumstation
+    PUMP_OPTIMIZATION: Final = 144  # ID_Visi_SysEin_Pumpenoptim
+    MK3: Final = 211  # ID_Visi_MK3
+    EFFICIENCY_PUMP_NOMINAL: Final = 239  # ID_Visi_SysEin_EffizienzpumpeNom
+    EFFICIENCY_PUMP_MINIMAL: Final = 240  # ID_Visi_SysEin_EffizienzpumpeMin
+    ANALOG_OUT1: Final = 248  # ID_Visi_OUT_Analog_1
+    ANALOG_OUT2: Final = 249  # ID_Visi_OUT_Analog_2
+    SOLAR: Final = 250  # ID_Visi_Solar
+    SUCTION_COMPRESSOR_TEMPERATURE: Final = 289  # ID_Visi_LIN_ANSAUG_VERDICHTER
+    COMPRESSOR_HEATING: Final = 290  # ID_Visi_LIN_VDH
+    OVERHEATING_TEMPERATURE: Final = 291  # ID_Visi_LIN_UH
+    LIN_PRESSURE: Final = 292  # ID_Visi_LIN_Druck
+    SUCTION_EVAPORATOR_TEMPERATURE: Final = 310  # ID_Visi_LIN_ANSAUG_VERDAMPFER
+    ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = 324  # ID_Visi_Waermemenge_ZWE
+    SILENT_MODE_TIME_MENU: Final = 357  # Unknown_Parameter_357
 
-
-# region visibilities
-class LuxVisibility(StrEnum):
-    """Luxtronik visibility ids."""
-
-    UNSET: Final = "UNSET"
-    V0005_COOLING: Final = "visibilities.ID_Visi_Kuhlung"
-    V0008_MK2: Final = "visibilities.ID_Visi_MK2"
-    V0023_FLOW_IN_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Vorlauf"
-    V0024_FLOW_OUT_TEMPERATURE_EXTERNAL: Final = "visibilities.ID_Visi_Temp_Rucklauf"
-    V0027_HOT_GAS_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Heissgas"
-    V0029_DHW_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_BW_Ist"
-    V0038_SOLAR_COLLECTOR: Final = "visibilities.ID_Visi_Temp_Solarkoll"
-    V0039_SOLAR_BUFFER: Final = "visibilities.ID_Visi_Temp_Solarsp"
-    V0041_DEFROST_END_FLOW_OKAY: Final = "visibilities.ID_Visi_IN_ASD"
-    V0043_EVU_IN: Final = "visibilities.ID_Visi_IN_EVU"
-    V0045_MOTOR_PROTECTION: Final = "visibilities.ID_Visi_IN_MOT"
-    V0049_DEFROST_VALVE: Final = "visibilities.ID_Visi_OUT_Abtauventil"
-    V0050_DHW_RECIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_BUP"
-    V0052_CIRCULATION_PUMP_HEATING: Final = "visibilities.ID_Visi_OUT_HUP"
-    V0059_DHW_CIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_ZIP"
-    V0059A_DHW_CHARGING_PUMP: Final = "V0059A_DHW_CHARGING_PUMP"
-    V0060_ADDITIONAL_CIRCULATION_PUMP: Final = "visibilities.ID_Visi_OUT_ZUP"
-    V0061_SECOND_HEAT_GENERATOR: Final = "visibilities.ID_Visi_OUT_ZWE1"
-    V0080_COMPRESSOR1_OPERATION_HOURS: Final = "visibilities.ID_Visi_Bst_BStdVD1"
-    V0081_COMPRESSOR1_IMPULSES: Final = "visibilities.ID_Visi_Bst_ImpVD1"
-    V0083_COMPRESSOR2_OPERATION_HOURS: Final = "visibilities.ID_Visi_Bst_BStdVD2"
-    V0084_COMPRESSOR2_IMPULSES: Final = "visibilities.ID_Visi_Bst_ImpVD2"
-    V0086_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
-        "visibilities.ID_Visi_Bst_BStdZWE1"
-    )
-    V0121_EVU_LOCKED: Final = "visibilities.ID_Visi_SysEin_EVUSperre"
-    V0122_ROOM_THERMOSTAT: Final = "visibilities.ID_Visi_SysEin_Raumstation"
-    V0144_PUMP_OPTIMIZATION: Final = "visibilities.ID_Visi_SysEin_Pumpenoptim"
-    V0211_MK3: Final = "visibilities.ID_Visi_MK3"
-    V0239_EFFICIENCY_PUMP_NOMINAL: Final = (
-        "visibilities.ID_Visi_SysEin_EffizienzpumpeNom"
-    )
-    V0240_EFFICIENCY_PUMP_MINIMAL: Final = (
-        "visibilities.ID_Visi_SysEin_EffizienzpumpeMin"
-    )
-    V0248_ANALOG_OUT1: Final = "visibilities.ID_Visi_OUT_Analog_1"
-    V0249_ANALOG_OUT2: Final = "visibilities.ID_Visi_OUT_Analog_2"
-    V0250_SOLAR: Final = "visibilities.ID_Visi_Solar"
-    V0289_SUCTION_COMPRESSOR_TEMPERATURE: Final = (
-        "visibilities.ID_Visi_LIN_ANSAUG_VERDICHTER"
-    )
-    V0290_COMPRESSOR_HEATING: Final = "visibilities.ID_Visi_LIN_VDH"
-    V0291_OVERHEATING_TEMPERATURE: Final = "visibilities.ID_Visi_LIN_UH"
-    V0292_LIN_PRESSURE: Final = "visibilities.ID_Visi_LIN_Druck"
-    V0310_SUCTION_EVAPORATOR_TEMPERATURE: Final = (
-        "visibilities.ID_Visi_LIN_ANSAUG_VERDAMPFER"
-    )
-    V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
-        "visibilities.ID_Visi_Waermemenge_ZWE"
-    )
-    V0357_SILENT_MODE_TIME_MENU: Final = "visibilities.Unknown_Parameter_357"
-
-
-# endregion visibilities
-
-
-# region Keys
-class SensorKey(StrEnum):
-    """Sensor keys."""
-
-    STATUS = "status"
-    STATUS_TIME = "status_time"
-    STATUS_LINE_1 = "status_line_1"
-    STATUS_LINE_2 = "status_line_2"
-    STATUS_LINE_3 = "status_line_3"
-    HEAT_SOURCE_INPUT_TEMPERATURE = "heat_source_input_temperature"
-    OUTDOOR_TEMPERATURE = "outdoor_temperature"
-    OUTDOOR_TEMPERATURE_AVERAGE = "outdoor_temperature_average"
-    COMPRESSOR1_IMPULSES = "compressor1_impulses"
-    COMPRESSOR1_OPERATION_HOURS = "compressor1_operation_hours"
-    COMPRESSOR2_IMPULSES = "compressor2_impulses"
-    COMPRESSOR2_OPERATION_HOURS = "compressor2_operation_hours"
-    OPERATION_HOURS = "operation_hours"
-    HEAT_AMOUNT_COUNTER = "heat_amount_counter"
-    HOT_GAS_TEMPERATURE = "hot_gas_temperature"
-    SUCTION_COMPRESSOR_TEMPERATURE = "suction_compressor_temperature"
-    SUCTION_EVAPORATOR_TEMPERATURE = "suction_evaporator_temperature"
-    COMPRESSOR_HEATING_TEMPERATURE = "compressor_heating_temperature"
-    OVERHEATING_TEMPERATURE = "overheating_temperature"
-    OVERHEATING_TARGET_TEMPERATURE = "overheating_target_temperature"
-    HIGH_PRESSURE = "high_pressure"
-    LOW_PRESSURE = "low_pressure"
-    ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS = (
-        "additional_heat_generator_operation_hours"
-    )
-    ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = (
-        "additional_heat_generator_amount_counter"
-    )
-    ANALOG_OUT1 = "analog_out1"
-    ANALOG_OUT2 = "analog_out2"
-    CURRENT_HEAT_OUTPUT = "current_heat_output"
-    PUMP_FREQUENCY = "pump_frequency"
-    PUMP_FLOW_DELTA_TARGET = "pump_flow_delta_target"
-    PUMP_FLOW_DELTA = "pump_flow_delta"
-    CIRCULATION_PUMP_DELTA_TARGET = "circulation_pump_delta_target"
-    CIRCULATION_PUMP_DELTA = "circulation_pump_delta"
-    HEAT_SOURCE_OUTPUT_TEMPERATURE = "heat_source_output_temperature"
-    ERROR_REASON = "error_reason"
-    FLOW_IN_TEMPERATURE = "flow_in_temperature"
-    FLOW_OUT_TEMPERATURE = "flow_out_temperature"
-    FLOW_OUT_TEMPERATURE_TARGET = "flow_out_temperature_target"
-    FLOW_OUT_TEMPERATURE_EXTERNAL = "flow_out_temperature_external"
-    OPERATION_HOURS_HEATING = "operation_hours_heating"
-    OPERATION_HOURS_COOLING = "operation_hours_cooling"
-    HEAT_AMOUNT_HEATING = "heat_amount_heating"
-    HEAT_AMOUNT_FLOW_RATE = "heat_amount_flow_rate"
-    HEAT_SOURCE_FLOW_RATE = "heat_source_flow_rate"
-    DHW_HEAT_AMOUNT = "dhw_heat_amount"
-    HEAT_ENERGY_INPUT = "heat_energy_input"
-    DHW_ENERGY_INPUT = "dhw_energy_input"
-    DHW_TEMPERATURE = "dhw_temperature"
-    SOLAR_COLLECTOR_TEMPERATURE = "solar_collector_temperature"
-    SOLAR_BUFFER_TEMPERATURE = "solar_buffer_temperature"
-    OPERATION_HOURS_SOLAR = "operation_hours_solar"
-    DHW_OPERATION_HOURS = "dhw_operation_hours"
-    REMOTE_MAINTENANCE = "remote_maintenance"
-    EFFICIENCY_PUMP = "efficiency_pump"
-    EFFICIENCY_PUMP_NOMINAL = "efficiency_pump_nominal"
-    EFFICIENCY_PUMP_MINIMAL = "efficiency_pump_minimal"
-    PUMP_HEAT_CONTROL = "pump_heat_control"
-    HEATING = "heating"
-    PUMP_OPTIMIZATION = "pump_optimization"
-    HEATING_THRESHOLD = "heating_threshold"
-    DOMESTIC_WATER = "domestic_water"
-    COOLING = "cooling"
-    RELEASE_SECOND_HEAT_GENERATOR = "release_second_heat_generator"
-    RELEASE_TIME_SECOND_HEAT_GENERATOR = "release_time_second_heat_generator"
-    HEATING_TARGET_CORRECTION = "heating_target_correction"
-    PUMP_OPTIMIZATION_TIME = "pump_optimization_time"
-    HEATING_THRESHOLD_TEMPERATURE = "heating_threshold_temperature"
-    HEATING_MIN_FLOW_OUT_TEMPERATURE = "heating_min_flow_out_temperature"
-    HEATING_CIRCUIT_CURVE1_TEMPERATURE = "heating_circuit_curve1_temperature"
-    HEATING_CIRCUIT_CURVE2_TEMPERATURE = "heating_circuit_curve2_temperature"
-    HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE = "heating_circuit_curve_night_temperature"
-    HEATING_CIRCUIT2_CURVE1_TEMPERATURE = "heating_circuit2_curve1_temperature"
-    HEATING_CIRCUIT2_CURVE2_TEMPERATURE = "heating_circuit2_curve2_temperature"
-    HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE = (
-        "heating_circuit2_curve_night_temperature"
-    )
-    HEATING_CIRCUIT3_CURVE1_TEMPERATURE = "heating_circuit3_curve1_temperature"
-    HEATING_CIRCUIT3_CURVE2_TEMPERATURE = "heating_circuit3_curve2_temperature"
-    HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE = (
-        "heating_circuit3_curve_night_temperature"
-    )
-    HEATING_NIGHT_LOWERING_TO_TEMPERATURE = "heating_night_lowering_to_temperature"
-    HEATING_HYSTERESIS = "heating_hysteresis"
-    HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE = (
-        "heating_max_flow_out_increase_temperature"
-    )
-    HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED = "heating_maximum_circulation_pump_speed"
-    HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR = "heating_room_temperature_impact_factor"
-    DHW_TARGET_TEMPERATURE = "dhw_target_temperature"
-    DHW_HYSTERESIS = "dhw_hysteresis"
-    DHW_THERMAL_DESINFECTION_TARGET = "dhw_thermal_desinfection_target"
-    SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE = "solar_pump_on_difference_temperature"
-    SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE = "solar_pump_off_difference_temperature"
-    SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER = (
-        "solar_pump_off_max_difference_temperature_boiler"
-    )
-    SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR = "solar_pump_max_temperature_collector"
-    EVU_UNLOCKED = "evu_unlocked"
-    COMPRESSOR = "compressor"
-    COMPRESSOR2 = "compressor2"
-    PUMP_FLOW = "pump_flow"
-    CIRCULATION_PUMP_HEATING = "circulation_pump_heating"
-    ADDITIONAL_CIRCULATION_PUMP = "additional_circulation_pump"
-    DHW_RECIRCULATION_PUMP = "dhw_recirculation_pump"
-    DHW_CIRCULATION_PUMP = "dhw_circulation_pump"
-    DHW_CHARGING_PUMP = "dhw_charging_pump"
-    SOLAR_PUMP = "solar_pump"
-    COMPRESSOR_HEATER = "compressor_heater"
-    DEFROST_VALVE = "defrost_valve"
-    ADDITIONAL_HEAT_GENERATOR = "additional_heat_generator"
-    DISTURBANCE_OUTPUT = "disturbance_output"
-    DEFROST_END_FLOW_OKAY = "defrost_end_flow_okay"
-    MOTOR_PROTECTION = "motor_protection"
-    FIRMWARE = "firmware"
-    APPROVAL_COOLING = "approval_cooling"
-    ROOM_THERMOSTAT_TEMPERATURE = "room_thermostat_temperature"
-    ROOM_THERMOSTAT_TEMPERATURE_TARGET = "room_thermostat_temperature_target"
-    COOLING_START_DELAY_HOURS = "cooling_start_delay_hours"
-    COOLING_STOP_DELAY_HOURS = "cooling_stop_delay_hours"
-    COOLING_OUTDOOR_TEMP_THRESHOLD = "cooling_threshold_temperature"
-    COOLING_TARGET_TEMPERATURE_MK1 = "cooling_target_temperature_mk1"
-    COOLING_TARGET_TEMPERATURE_MK2 = "cooling_target_temperature_mk2"
-    COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
-    SWITCHOFF_REASON = "switchoff_reason"
-    SILENT_MODE = "silent_mode"
-
+LUX_PARAMETER_MK_SENSORS: Final = [
+    Parameter_SensorKey.MIXING_CIRCUIT1_TYPE,
+    Parameter_SensorKey.MIXING_CIRCUIT2_TYPE,
+    Parameter_SensorKey.MIXING_CIRCUIT3_TYPE,
+]
 
 # endregion Keys
 
@@ -718,6 +644,7 @@ class SensorAttrKey(StrEnum):
     """Luxtronik sensor attribute keys."""
 
     LUXTRONIK_KEY = "Luxtronik_Key"
+    DESCRIPTION = "description"
 
     STATUS_TEXT = "status_text"
     LAST_THERMAL_DESINFECTION = "last_thermal_desinfection"

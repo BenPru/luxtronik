@@ -30,6 +30,9 @@ from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
 from .base import LuxtronikEntity
 from .common import get_sensor_data, state_as_number_or_none
 from .const import (
+    Calculation_SensorKey as LC,
+    Parameter_SensorKey as LP,
+    Visibility_SensorKey as LV,
     CONF_COORDINATOR,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
@@ -37,12 +40,8 @@ from .const import (
     LUX_STATE_ICON_MAP,
     LUX_STATE_ICON_MAP_COOL,
     DeviceKey,
-    LuxCalculation,
     LuxMode,
     LuxOperationMode,
-    LuxParameter,
-    LuxVisibility,
-    SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikClimateDescription
@@ -106,19 +105,19 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         supported_features=ClimateEntityFeature.AUX_HEAT
         | ClimateEntityFeature.PRESET_MODE  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
-        luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
-        # luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
-        # luxtronik_key_has_target_temperature=LuxParameter
-        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_key=LP.MODE_HEATING,
+        # luxtronik_key_current_temperature=LC.C0227_ROOM_THERMOSTAT_TEMPERATURE,
+        # luxtronik_key_target_temperature=LC.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
+        # luxtronik_key_has_target_temperature=LP
+        luxtronik_key_current_action=LC.STATUS,
         luxtronik_action_active=LuxOperationMode.heating.value,
-        # luxtronik_key_target_temperature_high=LuxParameter,
-        # luxtronik_key_target_temperature_low=LuxParameter,
-        luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
-        luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
+        # luxtronik_key_target_temperature_high=LP,
+        # luxtronik_key_target_temperature_low=LP,
+        luxtronik_key_correction_factor=LP.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+        luxtronik_key_correction_target=LP.HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
+        visibility=LV.FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
     ),
     LuxtronikClimateDescription(
@@ -128,19 +127,19 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_COOL,
         preset_modes=[PRESET_NONE],
         supported_features=ClimateEntityFeature.TARGET_TEMPERATURE,
-        luxtronik_key=LuxParameter.P0108_MODE_COOLING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
-        # luxtronik_key_has_target_temperature=LuxParameter
-        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_key=LP.MODE_COOLING,
+        # luxtronik_key_current_temperature=LC.C0227_ROOM_THERMOSTAT_TEMPERATURE,
+        luxtronik_key_target_temperature=LP.COOLING_OUTDOOR_TEMP_THRESHOLD,
+        # luxtronik_key_has_target_temperature=LP
+        luxtronik_key_current_action=LC.STATUS,
         luxtronik_action_active=LuxOperationMode.cooling.value,
-        # luxtronik_key_target_temperature_high=LuxParameter,
-        # luxtronik_key_target_temperature_low=LuxParameter,
-        # luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
-        # luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
+        # luxtronik_key_target_temperature_high=LP,
+        # luxtronik_key_target_temperature_low=LP,
+        # luxtronik_key_correction_factor=LP.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+        # luxtronik_key_correction_target=LP.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0005_COOLING,
+        visibility=LV.COOLING,
         device_key=DeviceKey.cooling,
     ),
 ]
@@ -214,7 +213,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             description=description,
             device_info_ident=description.device_key,
         )
-        if description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
+        if description.luxtronik_key_current_temperature == LC.UNSET:
             description.luxtronik_key_current_temperature = entry.data.get(
                 CONF_HA_SENSOR_INDOOR_TEMPERATURE
             )
@@ -227,7 +226,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self._attr_supported_features = description.supported_features
 
         self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+            coordinator.data, description.luxtronik_key
         )
 
     async def _data_update(self, event):
@@ -241,7 +240,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
+        mode = get_sensor_data(data, self.entity_description.luxtronik_key)
         self._attr_hvac_mode = (
             None if mode is None else self.entity_description.hvac_mode_mapping[mode]
         )
@@ -263,10 +262,10 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if isinstance(key, str):
             temp = self.hass.states.get(key)
             self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
-        elif key != LuxCalculation.UNSET:
+        elif key != LC.UNSET:
             self._attr_current_temperature = get_sensor_data(data, key)
         key_tar = self.entity_description.luxtronik_key_target_temperature
-        if key_tar != LuxParameter.UNSET:
+        if key_tar != LP.UNSET:
             self._attr_target_temperature = get_sensor_data(data, key_tar)
         correction_factor = get_sensor_data(
             data, self.entity_description.luxtronik_key_correction_factor.value, False

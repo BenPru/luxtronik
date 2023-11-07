@@ -29,14 +29,14 @@ from homeassistant.helpers.typing import StateType
 
 from .const import (
     UPDATE_INTERVAL_VERY_SLOW,
+    Calculation_SensorKey,
     DeviceKey,
     FirmwareVersionMinor,
-    LuxCalculation,
     LuxOperationMode,
-    LuxParameter,
-    LuxVisibility,
+    Parameter_SensorKey,
     SensorAttrFormat,
     SensorAttrKey,
+    Visibility_SensorKey,
 )
 
 # endregion Imports
@@ -57,26 +57,38 @@ class LuxtronikEntityAttributeDescription:
 
     # This is the key identifier for this entity
     key: SensorAttrKey
-    luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
+    luxtronik_key: Calculation_SensorKey | Parameter_SensorKey = Parameter_SensorKey.UNSET
     format: SensorAttrFormat | None = None
     restore_on_startup: bool = False
+    default_value: Any | None = None
+
+
+ATTR_DESCRIPTION = LuxtronikEntityAttributeDescription(
+    key=SensorAttrKey.DESCRIPTION, default_value="_"
+)
 
 
 @dataclass
 class LuxtronikEntityDescription(EntityDescription):
     """Class describing Luxtronik entities."""
 
+    key: str = 'PLACEHOLDER'
+
     has_entity_name = True
+    state_mapping: enumerate|None = None
 
     # Bug in python: Have to assign a value:
     platform = Platform.AIR_QUALITY
 
+    luxtronik_key: Calculation_SensorKey | Parameter_SensorKey = (
+        Parameter_SensorKey.UNSET
+    )
+
     update_interval: timedelta | None = None
     icon_by_state: dict[StateType | date | datetime | Decimal, str] | None = None
     device_key: DeviceKey = DeviceKey.heatpump
-    luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
     translation_key_name: str | None = None
-    visibility: LuxVisibility = LuxVisibility.UNSET
+    visibility: Visibility_SensorKey = Visibility_SensorKey.UNSET
     invisible_if_value: Any | None = None
     min_firmware_version_minor: FirmwareVersionMinor | None = None
 
@@ -84,6 +96,7 @@ class LuxtronikEntityDescription(EntityDescription):
         default_factory=list
     )
     state_class: str | None = None
+    event_id_on_change: str | None = None
 
 
 @dataclass
@@ -99,13 +112,24 @@ class LuxtronikSensorDescription(
 
 
 @dataclass
+class LuxtronikPeriodStatSensorDescription(
+    LuxtronikSensorDescription,
+    SensorEntityDescription,
+):
+    """Class describing Luxtronik PeriodStat sensor entities."""
+
+    event_id_impulse_active: str | None = "IMPULSE_START"
+    event_id_impulse_inactive: str | None = "IMPULSE_END"
+
+
+@dataclass
 class LuxtronikIndexSensorDescription(
     LuxtronikSensorDescription,
     SensorEntityDescription,
 ):
     """Class describing Luxtronik index sensor entities."""
 
-    luxtronik_key_timestamp: LuxParameter | LuxCalculation = LuxParameter.UNSET
+    luxtronik_key_timestamp: Parameter_SensorKey | Calculation_SensorKey = Parameter_SensorKey.UNSET
 
 
 @dataclass
@@ -134,6 +158,8 @@ class LuxtronikBinarySensorEntityDescription(
     on_states: list[str] | None = None
     off_state: str | bool = False
     inverted = False
+    event_id_on_true: str | None = None
+    event_id_on_false: str | None = None
 
 
 @dataclass
@@ -164,12 +190,12 @@ class LuxtronikClimateDescription(
     hvac_action_mapping: dict[str, str] = field(default_factory=dict[str, str])
     preset_modes: list[str] | None = None
     supported_features: ClimateEntityFeature = ClimateEntityFeature(0)
-    luxtronik_key_current_temperature: LuxCalculation | str = LuxCalculation.UNSET
-    luxtronik_key_current_action: LuxCalculation = LuxCalculation.UNSET
+    luxtronik_key_current_temperature: Calculation_SensorKey | str = Calculation_SensorKey.UNSET
+    luxtronik_key_current_action: Calculation_SensorKey = Calculation_SensorKey.UNSET
     luxtronik_action_active: str | None = None
-    luxtronik_key_target_temperature: LuxParameter | LuxCalculation = LuxParameter.UNSET
-    luxtronik_key_correction_factor: LuxParameter = LuxParameter.UNSET
-    luxtronik_key_correction_target: LuxParameter = LuxParameter.UNSET
+    luxtronik_key_target_temperature: Parameter_SensorKey | Calculation_SensorKey = Parameter_SensorKey.UNSET
+    luxtronik_key_correction_factor: Parameter_SensorKey = Parameter_SensorKey.UNSET
+    luxtronik_key_correction_target: Parameter_SensorKey = Parameter_SensorKey.UNSET
     temperature_unit: str = UnitOfTemperature.CELSIUS
 
 
@@ -183,12 +209,12 @@ class LuxtronikWaterHeaterDescription(
     platform = Platform.WATER_HEATER
     operation_list: list[str] = field(default_factory=list)
     supported_features: WaterHeaterEntityFeature = WaterHeaterEntityFeature(0)
-    luxtronik_key_current_temperature: LuxCalculation = LuxCalculation.UNSET
-    luxtronik_key_current_action: LuxCalculation = LuxCalculation.UNSET
+    luxtronik_key_current_temperature: Calculation_SensorKey = Calculation_SensorKey.UNSET
+    luxtronik_key_current_action: Calculation_SensorKey = Calculation_SensorKey.UNSET
     luxtronik_action_heating: LuxOperationMode | None = None
-    luxtronik_key_target_temperature: LuxParameter = LuxParameter.UNSET
-    luxtronik_key_target_temperature_high: LuxParameter = LuxParameter.UNSET
-    luxtronik_key_target_temperature_low: LuxParameter = LuxParameter.UNSET
+    luxtronik_key_target_temperature: Parameter_SensorKey = Parameter_SensorKey.UNSET
+    luxtronik_key_target_temperature_high: Parameter_SensorKey = Parameter_SensorKey.UNSET
+    luxtronik_key_target_temperature_low: Parameter_SensorKey = Parameter_SensorKey.UNSET
     temperature_unit: str = UnitOfTemperature.CELSIUS
 
 

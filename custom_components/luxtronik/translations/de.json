@@ -216,6 +216,12 @@
                     "no request": "Leerlauf (keine Anforderung)"
                 },
                 "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Status der W\u00e4rmepumpe."
+                        }
+                    },
                     "evu_text": {
                         "state": {
                             "evu_until": "Noch {evu_time} Minuten Netzsperre.",
