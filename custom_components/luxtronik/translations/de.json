@@ -91,6 +91,9 @@
             },
             "cooling": {
                 "name": "K\u00fchlung"
+            },
+            "dhw_recirculation_pump_deaerate": {
+                "name": "Entlüftungsmodus der Zirkulationspumpe"
             }
         },
         "update": {
@@ -474,7 +477,7 @@
             "switchoff_reason": {
                 "name": "Abschaltung",
                 "state": {
-                    "0": "W\u00e4rmepumpe St\u00f6rung",
+                    "0": "Einschaltsperre",
                     "1": "Anlagen St\u00f6rung",
                     "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
                     "3": "EVU-Sperre",
@@ -494,7 +497,7 @@
                     "code_1": {
                         "name": "Vorletze Abschaltung",
                         "state": {
-                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "0": "Einschaltsperre",
                             "1": "Anlagen St\u00f6rung",
                             "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
                             "3": "EVU-Sperre",
@@ -514,7 +517,7 @@
                     "code_2": {
                         "name": "Vorvorletze Abschaltung",
                         "state": {
-                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "0": "Einschaltsperre",
                             "1": "Anlagen St\u00f6rung",
                             "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
                             "3": "EVU-Sperre",
@@ -534,7 +537,7 @@
                     "code_3": {
                         "name": "Viertletzte Abschaltung",
                         "state": {
-                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "0": "Einschaltsperre",
                             "1": "Anlagen St\u00f6rung",
                             "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
                             "3": "EVU-Sperre",
@@ -554,7 +557,7 @@
                     "code_4": {
                         "name": "F\u00fcnftletzte Abschaltung",
                         "state": {
-                            "0": "W\u00e4rmepumpe St\u00f6rung",
+                            "0": "Einschaltsperre",
                             "1": "Anlagen St\u00f6rung",
                             "2": "Betriebsart Zweiter W\u00e4rmeerzeuger",
                             "3": "EVU-Sperre",

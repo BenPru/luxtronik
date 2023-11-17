@@ -88,6 +88,12 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         off_state=LuxMode.off.value,
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
+    LuxtronikSwitchDescription(
+        luxtronik_key=LP.DHW_RECIRCULATION_PUMP_DEAERATE,
+        device_key=DeviceKey.domestic_water,
+        icon_by_state={True: "mdi:pump", False: "mdi:pump-off"},
+        device_class=None,
+    ),
     # endregion Domestic water
     # region Cooling
     LuxtronikSwitchDescription(

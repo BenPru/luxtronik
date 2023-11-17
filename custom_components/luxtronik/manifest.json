@@ -1,5 +1,5 @@
 {
-  "domain": "luxtronik2",
+  "domain": "luxtronik",
   "name": "Luxtronik",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/luxtronik",

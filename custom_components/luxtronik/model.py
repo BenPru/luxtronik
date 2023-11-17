@@ -33,6 +33,7 @@ from .const import (
     DeviceKey,
     FirmwareVersionMinor,
     LuxOperationMode,
+    Parameter_All_SensorKey,
     Parameter_SensorKey,
     SensorAttrFormat,
     SensorAttrKey,
@@ -80,7 +81,7 @@ class LuxtronikEntityDescription(EntityDescription):
     # Bug in python: Have to assign a value:
     platform = Platform.AIR_QUALITY
 
-    luxtronik_key: Calculation_SensorKey | Parameter_SensorKey = (
+    luxtronik_key: Calculation_SensorKey | Parameter_All_SensorKey = (
         Parameter_SensorKey.UNSET
     )
 
@@ -129,7 +130,7 @@ class LuxtronikIndexSensorDescription(
 ):
     """Class describing Luxtronik index sensor entities."""
 
-    luxtronik_key_timestamp: Parameter_SensorKey | Calculation_SensorKey = Parameter_SensorKey.UNSET
+    luxtronik_key_timestamp: Parameter_All_SensorKey | Calculation_SensorKey = Parameter_SensorKey.UNSET
 
 
 @dataclass
@@ -227,4 +228,4 @@ class LuxtronikUpdateEntityDescription(
 
     device_class = UpdateDeviceClass.FIRMWARE
     platform = Platform.UPDATE
-    
+

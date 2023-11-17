@@ -22,7 +22,7 @@ from .const import (
     FirmwareVersionMinor,
     Calculation_SensorKey as LC,
     LuxOperationMode,
-    Parameter_SensorKey as LP,
+    Parameter_All_SensorKey as LP,
     LuxStatus1Option,
     LuxStatus3Option,
     LuxSwitchoffReason,

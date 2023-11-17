@@ -97,7 +97,7 @@ HVAC_PRESET_MAPPING: dict[str, str] = {
 
 THERMOSTATS: list[LuxtronikClimateDescription] = [
     LuxtronikClimateDescription(
-        key=SensorKey.HEATING,
+        key='heating',
         hvac_modes=[HVACMode.HEAT, HVACMode.OFF],
         hvac_mode_mapping=HVAC_MODE_MAPPING_HEAT,
         hvac_action_mapping=HVAC_ACTION_MAPPING_HEAT,

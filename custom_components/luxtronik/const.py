@@ -2,9 +2,9 @@
 # region Imports
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, IntEnum, IntFlag
 import logging
-from typing import Final
+from typing import Final, Union
 
 from enum import StrEnum
 import voluptuous as vol
@@ -17,7 +17,7 @@ from homeassistant.helpers.typing import StateType
 # endregion Imports
 
 # region Constants Main
-DOMAIN: Final = "luxtronik2"
+DOMAIN: Final = "luxtronik"
 NICKNAME_PREFIX: Final = "Home Assistant"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
@@ -354,16 +354,68 @@ UNIT_FACTOR_MAP: Final[dict[UnitOfTemperature|UnitOfTime|UnitOfElectricPotential
 # endregion Mappings
 
 
-# region Lux parameters
-
-
 # region Keys
-class Parameter_SensorKey(Enum):
-    UNSET: Final = -1
-    HEATING_TARGET_CORRECTION: Final = 1  # ID_Einst_WK_akt
-    DHW_TARGET_TEMPERATURE: Final = 2  # ID_Einst_BWS_akt
-    MODE_HEATING: Final = 3  # ID_Ba_Hz_akt
-    MODE_DHW: Final = 4  # ID_Ba_Bw_akt
+# Write permissions
+#
+class Parameter_Static_SensorKey(IntEnum):
+    SERIAL_NUMBER: Final = 874  # ID_WP_SerienNummer_DATUM
+    SERIAL_NUMBER_MODEL: Final = 875  # ID_WP_SerienNummer_HEX
+    MIXING_CIRCUIT1_TYPE: Final = 42  # ID_Einst_MK1Typ_akt
+    MIXING_CIRCUIT2_TYPE: Final = 130  # ID_Einst_MK2Typ_akt
+    MIXING_CIRCUIT3_TYPE: Final = 780  # ID_Einst_MK3Typ_akt
+
+class Parameter_Calc_SensorKey(IntEnum):
+    OPERATION_HOURS: Final = 668  # ID_Zaehler_BetrZeitWP                                       ": "16434619",
+    OPERATION_HOURS_COMPRESSOR1: Final = 669  # ID_Zaehler_BetrZeitVD1                                      ": "16434619",
+    OPERATION_HOURS_COMPRESSOR2: Final = 670  # ID_Zaehler_BetrZeitVD2                                      ": "0",
+    OPERATION_HOURS_ADDITIONAL_HEAT_GENERATOR1: Final = 671  # ID_Zaehler_BetrZeitZWE1                                     ": "31051",
+    OPERATION_HOURS_ADDITIONAL_HEAT_GENERATOR2: Final = 672  # ID_Zaehler_BetrZeitZWE2                                     ": "0",
+    OPERATION_HOURS_ADDITIONAL_HEAT_GENERATOR3: Final = 673  # ID_Zaehler_BetrZeitZWE3                                     ": "0",
+    IMPULSES_COMPRESSOR1: Final = 674  # ID_Zaehler_BetrZeitImpVD1                                   ": "12704",
+    IMPULSES_COMPRESSOR2: Final = 675  # ID_Zaehler_BetrZeitImpVD2                                   ": "0",
+    EZM_COMPRESSOR1: Final = 676  # ID_Zaehler_BetrZeitEZMVD1                                   ": "0",
+    EZM_COMPRESSOR2: Final = 677  # ID_Zaehler_BetrZeitEZMVD2                                   ": "0",
+    # P0716_0720_SWITCHOFF_REASON: Final = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
+    SWITCHOFF_REASON: Final = 716  # ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
+    SWITCHOFF_REASON_2: Final = 717
+    SWITCHOFF_REASON_3: Final = 718
+    SWITCHOFF_REASON_4: Final = 719
+    SWITCHOFF_REASON_5: Final = 720
+    # P0721_0725_SWITCHOFF_TIMESTAMP: Final = "parameters.ID_Switchoff_file_{ID}_1"  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
+    SWITCHOFF_TIMESTAMP: Final = 721  # ID_Switchoff_file_{ID}_1  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
+    SWITCHOFF_TIMESTAMP_2: Final = 722
+    SWITCHOFF_TIMESTAMP_3: Final = 723
+    SWITCHOFF_TIMESTAMP_4: Final = 724
+    SWITCHOFF_TIMESTAMP_5: Final = 725
+    OPERATION_HOURS_HEATING: Final = 728  # ID_Zaehler_BetrZeitHz                                       ": "14655095",
+    OPERATION_HOURS_DHW: Final = 729  # ID_Zaehler_BetrZeitBW                                       ": "1779392",
+    OPERATION_HOURS_COOLING: Final = 730  # ID_Zaehler_BetrZeitKue                                      ": "0",
+    SU_FSTD_HEATING: Final = 731
+    SU_FSTD_DHW: Final = 732
+    SU_FSTD_SWIMMING_POOL: Final = 733
+    SU_FSTD_MIXING_CIRCUIT1: Final = 734
+    SU_FSTD_MIXING_CIRCUIT2: Final = 735
+    IP_ADDRESS: Final = 750
+    # Todo: Test reset --> can we write it?
+    # "852  ID_Waermemenge_Seit                                         ": "2566896",
+    # "853  ID_Waermemenge_WQ                                           ": "0",
+    # "854  ID_Waermemenge_Hz                                           ": "3317260",
+    # "855  ID_Waermemenge_WQ_ges                                       ": "0",
+    #  "878  ID_Waermemenge_BW                                           ": "448200",
+    #  "879  ID_Waermemenge_SW                                           ": "0",
+    #  "880  ID_Waermemenge_Datum                                        ": "1483648906", <-- Unix timestamp!  5.1.2017
+    SOLAR_OPERATION_HOURS: Final = 882  # ID_BSTD_Solar
+    ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = 1059  # ID_Waermemenge_ZWE
+    LAST_DEFROST_TIMESTAMP: Final = (
+        1119  # Unknown_Parameter_1119  # 1685073431 -> 26.5.23 05:57
+    )
+    HEAT_ENERGY_INPUT: Final = 1136  # Unknown_Parameter_1136
+    DHW_ENERGY_INPUT: Final = 1137  # Unknown_Parameter_1137
+    # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
+    # ? P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
+    # ? P1140_SECOND_HEAT_SOURCE_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1140"
+
+class Parameter_Config_SensorKey(IntEnum):
     HEATING_CIRCUIT_CURVE1_TEMPERATURE: Final = 11  # ID_Einst_HzHwHKE_akt
     HEATING_CIRCUIT_CURVE2_TEMPERATURE: Final = 12  # ID_Einst_HzHKRANH_akt
     HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = 13  # ID_Einst_HzHKRABS_akt
@@ -371,8 +423,6 @@ class Parameter_SensorKey(Enum):
     HEATING_CIRCUIT2_CURVE1_TEMPERATURE: Final = 14  # ID_Einst_HzMK1E_akt 260
     HEATING_CIRCUIT2_CURVE2_TEMPERATURE: Final = 15  # ID_Einst_HzMK1ANH_akt 290
     HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = 16  # ID_Einst_HzMK1ABS_akt 0
-    # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
-    MIXING_CIRCUIT1_TYPE: Final = 42  # ID_Einst_MK1Typ_akt
     AIR_DEFROST_TEMPERATURE: Final = (
         44  # ID_Einst_TLAbt_akt"  # "temp. air defrost"  7.0 C°
     )
@@ -388,11 +438,7 @@ class Parameter_SensorKey(Enum):
     HEATING_HYSTERESIS: Final = 88  # ID_Einst_HRHyst_akt
     HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE: Final = 89  # ID_Einst_TRErhmax_akt
     RELEASE_SECOND_HEAT_GENERATOR: Final = 90  # ID_Einst_ZWEFreig_akt
-    # P0091_ "max. outdoor temp." 35 20-45
-    # P0092  "min. outdoor temp." -20-10
     AIR_DEFROST_STOP_TEMPERATURE: Final = 98  # ID_Einst_TAbtEnd_akt
-    # MODE_COOLING: Automatic or Off
-    MODE_COOLING: Final = 108  # ID_Einst_BA_Kuehl_akt
     COOLING_OUTDOOR_TEMP_THRESHOLD: Final = 110  # ID_Einst_KuehlFreig_akt
     HEATING_NIGHT_LOWERING_TO_TEMPERATURE: Final = 111  # ID_Einst_TAbsMin_akt
     SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE: Final = 122  # ID_Einst_TDC_Ein_akt
@@ -400,81 +446,76 @@ class Parameter_SensorKey(Enum):
     SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
         124  # ID_Einst_TDC_Max_akt
     )
-    # P0125_HEATING_EXTERNAL_ENERGY_SOURCE TEE heating External energy source  10k 1.0-15.0  0.5
-    # P0126_DHW_EXTERNAL_ENERGY_SOURCE TEE DHW External energy source  5k 1.0-15.0  0.5
-    MIXING_CIRCUIT2_TYPE: Final = 130  # ID_Einst_MK2Typ_akt
     COOLING_TARGET_TEMPERATURE_MK1: Final = 132  # ID_Sollwert_KuCft1_akt
     COOLING_TARGET_TEMPERATURE_MK2: Final = 133  # ID_Sollwert_KuCft2_akt
     FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = 149  # ID_Einst_TVLmax_akt
+    DHW_RECIRCULATION_PUMP_DEAERATE: Final = 158  # ID_Einst_Entl_akt
     HEATING_THRESHOLD: Final = 699  # ID_Einst_Heizgrenze
     HEATING_THRESHOLD_TEMPERATURE: Final = 700  # ID_Einst_Heizgrenze_Temp
-    # P0716_0720_SWITCHOFF_REASON: Final = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
-    SWITCHOFF_REASON: Final = 716  # ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
-    SWITCHOFF_REASON_2: Final = 717
-    SWITCHOFF_REASON_3: Final = 718
-    SWITCHOFF_REASON_4: Final = 719
-    SWITCHOFF_REASON_5: Final = 720
-    # P0721_0725_SWITCHOFF_TIMESTAMP: Final = "parameters.ID_Switchoff_file_{ID}_1"  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
-    SWITCHOFF_TIMESTAMP: Final = 721  # ID_Switchoff_file_{ID}_1  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
-    SWITCHOFF_TIMESTAMP_2: Final = 722
-    SWITCHOFF_TIMESTAMP_3: Final = 723
-    SWITCHOFF_TIMESTAMP_4: Final = 724
-    SWITCHOFF_TIMESTAMP_5: Final = 725
     # luxtronik*_heating_circuit3_curve*
     HEATING_CIRCUIT3_CURVE1_TEMPERATURE: Final = 774  # ID_Einst_HzMK3E_akt  # 270
     HEATING_CIRCUIT3_CURVE2_TEMPERATURE: Final = 775  # ID_Einst_HzMK3ANH_akt  # 290
     HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE: Final = 776  # ID_Einst_HzMK3ABS_akt  # 0
-    MIXING_CIRCUIT3_TYPE: Final = 780  # ID_Einst_MK3Typ_akt
     COOLING_START_DELAY_HOURS: Final = 850  # ID_Einst_Kuhl_Zeit_Ein_akt
     COOLING_STOP_DELAY_HOURS: Final = 851  # ID_Einst_Kuhl_Zeit_Aus_akt
     REMOTE_MAINTENANCE: Final = 860  # ID_Einst_Fernwartung_akt
+    PUMP_OPTIMIZATION_TIME: Final = 864  # ID_Einst_Popt_Nachlauf_akt
+    EFFICIENCY_PUMP_NOMINAL: Final = 867  # ID_Einst_Effizienzpumpe_Nominal_akt
+    EFFICIENCY_PUMP_MINIMAL: Final = 868  # ID_Einst_Effizienzpumpe_Minimal_akt
+    EFFICIENCY_PUMP: Final = 869  # ID_Einst_Effizienzpumpe_akt
+    # P0870_AMOUNT_COUNTER_ACTIVE: Final = "parameters.ID_Einst_Waermemenge_akt"
+    SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = 883  # ID_Einst_TDC_Koll_Max_akt
+    COOLING_TARGET_TEMPERATURE_MK3: Final = 966  # ID_Sollwert_KuCft3_akt
+    HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR: Final = 980  # ID_RBE_Einflussfaktor_RT_akt
+    HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = (
+        979  # ID_Einst_Minimale_Ruecklaufsolltemperatur
+    )
+    RELEASE_TIME_SECOND_HEAT_GENERATOR: Final = 992  # ID_Einst_Freigabe_Zeit_ZWE
+    HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED: Final = 1032  # ID_Einst_P155_PumpHeat_Max
+    PUMP_HEAT_CONTROL: Final = 1033  # ID_Einst_P155_PumpHeatCtrl
+
+class Parameter_SensorKey(IntEnum):
+    UNSET: Final = -1
+    HEATING_TARGET_CORRECTION: Final = 1  # ID_Einst_WK_akt
+    DHW_TARGET_TEMPERATURE: Final = 2  # ID_Einst_BWS_akt
+    MODE_HEATING: Final = 3  # ID_Ba_Hz_akt
+    MODE_DHW: Final = 4  # ID_Ba_Bw_akt
+    # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
+    # P0091_ "max. outdoor temp." 35 20-45
+    # P0092  "min. outdoor temp." -20-10
+    # MODE_COOLING: Automatic or Off
+    MODE_COOLING: Final = 108  # ID_Einst_BA_Kuehl_akt
+    # P0125_HEATING_EXTERNAL_ENERGY_SOURCE TEE heating External energy source  10k 1.0-15.0  0.5
+    # P0126_DHW_EXTERNAL_ENERGY_SOURCE TEE DHW External energy source  5k 1.0-15.0  0.5
     # "min OT flow max": Heat source temperature-dependent adjustment of the flow temperature. The outside temperature, up to which the flow max.
     # temperature with the heat pump may be increased, is adjusted here. Below this outside temperature, the actual VL maximum
     # temperature of the heat pump will fall linearally to the value “low limit of applic.“.
     # P0862_ "min OT flow max" -2C° -20-5  1
     # "flow operation limit": Heat source temperature-dependent adjustment of the flow temperature. Here, the maximum forward flow temperature of the heat pump is set at an outside temperature of -20°C.
     # P0863_ "flow operation limit"  58C° 35-75  1
-    PUMP_OPTIMIZATION_TIME: Final = 864  # ID_Einst_Popt_Nachlauf_akt
-    EFFICIENCY_PUMP_NOMINAL: Final = 867  # ID_Einst_Effizienzpumpe_Nominal_akt
-    EFFICIENCY_PUMP_MINIMAL: Final = 868  # ID_Einst_Effizienzpumpe_Minimal_akt
-    EFFICIENCY_PUMP: Final = 869  # ID_Einst_Effizienzpumpe_akt
-    # P0870_AMOUNT_COUNTER_ACTIVE: Final = "parameters.ID_Einst_Waermemenge_akt"
-    SERIAL_NUMBER: Final = 874  # ID_WP_SerienNummer_DATUM
-    SERIAL_NUMBER_MODEL: Final = 875  # ID_WP_SerienNummer_HEX
 
-    # "852  ID_Waermemenge_Seit                                         ": "2566896",
-    # "853  ID_Waermemenge_WQ                                           ": "0",
-    # "854  ID_Waermemenge_Hz                                           ": "3317260",
-    # "855  ID_Waermemenge_WQ_ges                                       ": "0",
-    #  "878  ID_Waermemenge_BW                                           ": "448200",
-    #  "879  ID_Waermemenge_SW                                           ": "0",
-    #  "880  ID_Waermemenge_Datum                                        ": "1483648906", <-- Unix timestamp!  5.1.2017
-
-    SOLAR_OPERATION_HOURS: Final = 882  # ID_BSTD_Solar
-    SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = 883  # ID_Einst_TDC_Koll_Max_akt
     # P0894_VENTILATION_MODE: Final = "parameters.ID_Einst_BA_Lueftung_akt" # "Automatic", "Party", "Holidays", "Off"
-    COOLING_TARGET_TEMPERATURE_MK3: Final = 966  # ID_Sollwert_KuCft3_akt
     # P0973_ "DHW temp. max." 65C° 30-65 0.5
-    HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = (
-        979  # ID_Einst_Minimale_Ruecklaufsolltemperatur
-    )
-    HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR: Final = 980  # ID_RBE_Einflussfaktor_RT_akt
-    RELEASE_TIME_SECOND_HEAT_GENERATOR: Final = 992  # ID_Einst_Freigabe_Zeit_ZWE
-    HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED: Final = 1032  # ID_Einst_P155_PumpHeat_Max
-    PUMP_HEAT_CONTROL: Final = 1033  # ID_Einst_P155_PumpHeatCtrl
-    ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = 1059  # ID_Waermemenge_ZWE
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
     SILENT_MODE: Final = 1087  # Unknown_Parameter_1087  # Silent mode On/Off
-    LAST_DEFROST_TIMESTAMP: Final = (
-        1119  # Unknown_Parameter_1119  # 1685073431 -> 26.5.23 05:57
-    )
-    HEAT_ENERGY_INPUT: Final = 1136  # Unknown_Parameter_1136
-    DHW_ENERGY_INPUT: Final = 1137  # Unknown_Parameter_1137
-    # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
-    # ? P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
-    # ? P1140_SECOND_HEAT_SOURCE_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1140"
 
+# class Parameter_All_SensorKey(Parameter_Static_SensorKey, Parameter_Config_SensorKey, Parameter_Calc_SensorKey, Parameter_SensorKey):
+#     pass
+
+# Parameter_All_SensorKey = Union[Parameter_Static_SensorKey, Parameter_Config_SensorKey, Parameter_Calc_SensorKey, Parameter_SensorKey]
+
+# class Parameter_All_SensorKey(Parameter_Static_SensorKey, IntEnum):
+class Parameter_All_SensorKey(Parameter_Calc_SensorKey, IntEnum):
+    pass
+
+class Parameter_Write_Permission(IntFlag):
+    READ_ONLY = 0
+    OPERATION = 1  # -> Parameter_SensorKey
+    CONFIG = 2  # -> Parameter_Config_SensorKey
+    CALCULATION = 4  # -> Parameter_Calc_SensorKey
+    STATIC = 8  # -> Parameter_Static_SensorKey
+    UNKNOWN_PARAMS = 2^31  # Not in enum!
 
 class Calculation_SensorKey(Enum):
     UNSET: Final = -1
@@ -582,6 +623,7 @@ class Calculation_SensorKey(Enum):
 class Visibility_SensorKey(Enum):
     UNSET: Final = -1
     COOLING: Final = 5  # ID_Visi_Kuhlung
+    MK1: Final = 7  # ID_Visi_MK1
     MK2: Final = 8  # ID_Visi_MK2
     FLOW_IN_TEMPERATURE: Final = 23  # ID_Visi_Temp_Vorlauf
     FLOW_OUT_TEMPERATURE_EXTERNAL: Final = 24  # ID_Visi_Temp_Rucklauf
@@ -622,9 +664,9 @@ class Visibility_SensorKey(Enum):
     SILENT_MODE_TIME_MENU: Final = 357  # Unknown_Parameter_357
 
 LUX_PARAMETER_MK_SENSORS: Final = [
-    Parameter_SensorKey.MIXING_CIRCUIT1_TYPE,
-    Parameter_SensorKey.MIXING_CIRCUIT2_TYPE,
-    Parameter_SensorKey.MIXING_CIRCUIT3_TYPE,
+    Visibility_SensorKey.MK1,
+    Visibility_SensorKey.MK2,
+    Visibility_SensorKey.MK3,
 ]
 
 # endregion Keys

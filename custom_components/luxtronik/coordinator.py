@@ -373,9 +373,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         ):
             return False
         if description.visibility in [
-            LP.MIXING_CIRCUIT1_TYPE,
-            LP.MIXING_CIRCUIT2_TYPE,
-            LP.MIXING_CIRCUIT3_TYPE,
+            LV.MK1,
+            LV.MK2,
+            LV.MK3
         ]:
             sensor_value = self.get_value(description.visibility)
             return sensor_value in [
@@ -431,29 +431,27 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     # def get_sensor_by_id(self, group_sensor_id: str):
     def get_sensor_by_id(self, sensor_id: LP | LC | LV | int):
         """Get a sensor object by id from Luxtronik."""
-        try:
-            group = group_sensor_id.split(".")[0]
-            sensor_id = group_sensor_id.split(".")[1]
-            return self.get_sensor(group, sensor_id)
-        except IndexError as error:
-            LOGGER.critical(group_sensor_id, error, exc_info=True)
+    #     try:
+    #         group = group_sensor_id.split(".")[0]
+    #         sensor_id = group_sensor_id.split(".")[1]
+    #         return self.get_sensor(group, sensor_id)
+    #     except IndexError as error:
+    #         LOGGER.critical(group_sensor_id, error, exc_info=True)
 
-    def get_sensor(self, group, sensor_id):
+    # def get_sensor(self, group, sensor_id):
         """Get sensor by configured sensor ID."""
-        sensor = None
         if isinstance(sensor_id, LP): # == CONF_PARAMETERS:
             # sensor = self.client.parameters[sensor_id.value]
-            sensor = self.client.parameters.get(sensor_id.value)
+            return self.client.parameters.get(sensor_id.value)
         elif isinstance(sensor_id, LV): #group == CONF_VISIBILITIES:
             # sensor = self.client.visibilities[sensor_id.value]
-            sensor = self.client.calculations.get(sensor_id.value)
+            return self.client.calculations.get(sensor_id.value)
         elif isinstance(sensor_id, LC): #group == CONF_CALCULATIONS:
             # sensor = self.client.calculations[sensor_id.value]
-            sensor = self.client.visibilities.get(sensor_id.value)
+            return self.client.visibilities.get(sensor_id.value)
         elif isinstance(sensor_id, int):
             # sensor = self.client.calculations[sensor_id]
-            sensor = self.client.calculations.get(sensor_id.value)
-        return sensor
+            return self.client.calculations.get(sensor_id.value)
 
     def _detect_cooling_mk(self):
         """We iterate over the mk sensors, detect cooling and return a list of parameters that are may show cooling is enabled."""
