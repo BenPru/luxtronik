@@ -61,7 +61,8 @@ The new integration will appear as a new integration and under 'Explore & Downlo
 
 Install the integration
 
-1. Click on the new integration or find it under 'Explore & Download Repositories' in the bottom right
+1. Click on the new integration or find it under 'Explore & Download Repositories' in the bottom right with the search word 'luxtronik'.
+  * Choose the one with the blue download button: ![image](https://github.com/BenPru/luxtronik/assets/32298537/84a7e17f-1ae2-471b-8f79-ca9cdab1d249)
 2. Select 'download' at the bottom right.
 3. Restart Home Assistant
 
