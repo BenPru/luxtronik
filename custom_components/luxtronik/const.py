@@ -2,11 +2,11 @@
 # region Imports
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from enum import Enum, IntEnum, IntFlag
+from enum import Enum, IntEnum, IntFlag, StrEnum
+from itertools import chain
 import logging
-from typing import Final, Union
+from typing import Final
 
-from enum import StrEnum
 import voluptuous as vol
 from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
 
@@ -119,7 +119,7 @@ PRESET_SECOND_HEATSOURCE: Final = "second_heatsource"
 
 
 class LuxOperationMode(Enum):
-    """Lux Operation modes heating, hot water etc."""
+    """Lux Operation modes heating, hot water, ventilation etc."""
 
     heating: Final = 0
     domestic_water: Final = 1  # "hot water"
@@ -130,8 +130,10 @@ class LuxOperationMode(Enum):
     heating_external_source: Final = 6
     cooling: Final = 7
 
+    defrost_air: Final = 99  # "Luftabtauen"
 
-class LuxMode(Enum):
+
+class LuxMode(IntEnum):
     """Luxmodes off etc."""
 
     automatic: Final = 0
@@ -139,6 +141,15 @@ class LuxMode(Enum):
     party: Final = 2
     holidays: Final = 3
     off: Final = 4
+
+
+class LuxModeVentilation(IntEnum):
+    """Luxmodes off etc."""
+
+    automatic: Final = 0
+    party: Final = 1
+    moisture_protection: Final = 2
+    off: Final = 3
 
 
 class LuxStatus1Option(Enum):
@@ -175,7 +186,7 @@ class LuxStatus3Option(Enum):
     swimming_pool_solar: Final = 12  # "swimming pool/solar"
     heating_external_energy_source: Final = 13
     domestic_water_external_energy_source: Final = 14
-    flow_monitoring: Final = 16
+    flow_monitoring: Final = 16  # if affected write: heatSourceDefrostLastTimeout - Umgebungs- und Wärmequellen-Temperaturen bei denen die Luftabtauung die maximale Dauer überschritten hat.
     second_heat_generator_1_active: Final = 17
 
 
@@ -235,6 +246,7 @@ LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
     LuxOperationMode.no_request.value: "mdi:hvac-off",  # "mdi:heat-pump-outline",  # "mdi:radiator-disabled",
     LuxOperationMode.heating_external_source.value: "mdi:patio-heater",
     LuxOperationMode.cooling.value: "mdi:air-conditioner",
+    LuxOperationMode.defrost_air.value: "mdi:car-defrost-rear",
 }
 
 LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]] = {
@@ -243,6 +255,7 @@ LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]]
     LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
     LuxOperationMode.no_request.value: "mdi:snowflake-off",
     LuxOperationMode.cooling.value: "mdi:air-conditioner",
+    LuxOperationMode.defrost_air.value: "mdi:car-defrost-rear",
 }
 
 LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]
@@ -423,8 +436,8 @@ class Parameter_Config_SensorKey(IntEnum):
     HEATING_CIRCUIT2_CURVE1_TEMPERATURE: Final = 14  # ID_Einst_HzMK1E_akt 260
     HEATING_CIRCUIT2_CURVE2_TEMPERATURE: Final = 15  # ID_Einst_HzMK1ANH_akt 290
     HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = 16  # ID_Einst_HzMK1ABS_akt 0
-    AIR_DEFROST_TEMPERATURE: Final = (
-        44  # ID_Einst_TLAbt_akt"  # "temp. air defrost"  7.0 C°
+    HEATSOURCE_DEFROST_AIR_THRESHOLD_TEMPERATURE: Final = (
+        44  # ID_Einst_TLAbt_akt" heatSourceDefrostAirThreshold  # "temp. air defrost"  7.0 C°
     )
     DHW_THERMAL_DESINFECTION_TARGET: Final = 47  # ID_Einst_LGST_akt
     PUMP_OPTIMIZATION: Final = 49  # ID_Einst_Popt_akt
@@ -438,9 +451,9 @@ class Parameter_Config_SensorKey(IntEnum):
     HEATING_HYSTERESIS: Final = 88  # ID_Einst_HRHyst_akt
     HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE: Final = 89  # ID_Einst_TRErhmax_akt
     RELEASE_SECOND_HEAT_GENERATOR: Final = 90  # ID_Einst_ZWEFreig_akt
-    AIR_DEFROST_STOP_TEMPERATURE: Final = 98  # ID_Einst_TAbtEnd_akt
+    HEATSOURCE_DEFROST_AIR_END_TEMPERATURE: Final = 98  # ID_Einst_TAbtEnd_akt heatSourceDefrostAirEnd
     COOLING_OUTDOOR_TEMP_THRESHOLD: Final = 110  # ID_Einst_KuehlFreig_akt
-    HEATING_NIGHT_LOWERING_TO_TEMPERATURE: Final = 111  # ID_Einst_TAbsMin_akt
+    HEATING_NIGHT_LOWERING_TO_TEMPERATURE: Final = 111  # ID_Einst_TAbsMin_akt thresholdTemperatureSetBack
     SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE: Final = 122  # ID_Einst_TDC_Ein_akt
     SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE: Final = 123  # ID_Einst_TDC_Aus_akt
     SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
@@ -449,9 +462,10 @@ class Parameter_Config_SensorKey(IntEnum):
     COOLING_TARGET_TEMPERATURE_MK1: Final = 132  # ID_Sollwert_KuCft1_akt
     COOLING_TARGET_TEMPERATURE_MK2: Final = 133  # ID_Sollwert_KuCft2_akt
     FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = 149  # ID_Einst_TVLmax_akt
-    DHW_RECIRCULATION_PUMP_DEAERATE: Final = 158  # ID_Einst_Entl_akt
+    HEATING_CIRCULATION_PUMP_DEAERATE: Final = 678  # ID_Einst_Entl_Typ_0 <- Name correct?
+    DHW_CIRCULATION_PUMP_DEAERATE: Final = 684  # ID_Einst_Entl_Typ_6 hotWaterCircPumpDeaerate
     HEATING_THRESHOLD: Final = 699  # ID_Einst_Heizgrenze
-    HEATING_THRESHOLD_TEMPERATURE: Final = 700  # ID_Einst_Heizgrenze_Temp
+    HEATING_THRESHOLD_TEMPERATURE: Final = 700  # ID_Einst_Heizgrenze_Temp thresholdHeatingLimit
     # luxtronik*_heating_circuit3_curve*
     HEATING_CIRCUIT3_CURVE1_TEMPERATURE: Final = 774  # ID_Einst_HzMK3E_akt  # 270
     HEATING_CIRCUIT3_CURVE2_TEMPERATURE: Final = 775  # ID_Einst_HzMK3ANH_akt  # 290
@@ -463,7 +477,7 @@ class Parameter_Config_SensorKey(IntEnum):
     EFFICIENCY_PUMP_NOMINAL: Final = 867  # ID_Einst_Effizienzpumpe_Nominal_akt
     EFFICIENCY_PUMP_MINIMAL: Final = 868  # ID_Einst_Effizienzpumpe_Minimal_akt
     EFFICIENCY_PUMP: Final = 869  # ID_Einst_Effizienzpumpe_akt
-    # P0870_AMOUNT_COUNTER_ACTIVE: Final = "parameters.ID_Einst_Waermemenge_akt"
+    # P0870_AMOUNT_COUNTER_ACTIVE: Final = "parameters.ID_Einst_Waermemenge_akt" --> flowRate
     SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR: Final = 883  # ID_Einst_TDC_Koll_Max_akt
     COOLING_TARGET_TEMPERATURE_MK3: Final = 966  # ID_Sollwert_KuCft3_akt
     HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR: Final = 980  # ID_RBE_Einflussfaktor_RT_akt
@@ -476,10 +490,10 @@ class Parameter_Config_SensorKey(IntEnum):
 
 class Parameter_SensorKey(IntEnum):
     UNSET: Final = -1
-    HEATING_TARGET_CORRECTION: Final = 1  # ID_Einst_WK_akt
-    DHW_TARGET_TEMPERATURE: Final = 2  # ID_Einst_BWS_akt
+    HEATING_TARGET_CORRECTION: Final = 1  # ID_Einst_WK_akt returnTemperatureSetBack
+    DHW_TARGET_TEMPERATURE: Final = 2  # ID_Einst_BWS_akt hotWaterTemperatureTarget
     MODE_HEATING: Final = 3  # ID_Ba_Hz_akt
-    MODE_DHW: Final = 4  # ID_Ba_Bw_akt
+    MODE_DHW: Final = 4  # ID_Ba_Bw_akt opModeHotWater
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
     # P0091_ "max. outdoor temp." 35 20-45
     # P0092  "min. outdoor temp." -20-10
@@ -494,20 +508,13 @@ class Parameter_SensorKey(IntEnum):
     # "flow operation limit": Heat source temperature-dependent adjustment of the flow temperature. Here, the maximum forward flow temperature of the heat pump is set at an outside temperature of -20°C.
     # P0863_ "flow operation limit"  58C° 35-75  1
 
-    # P0894_VENTILATION_MODE: Final = "parameters.ID_Einst_BA_Lueftung_akt" # "Automatic", "Party", "Holidays", "Off"
+    MODE_VENTILATION: Final = 894  # ID_Einst_BA_Lueftung_akt opModeVentilation  "Automatic", "Party", "Holidays", "Off"
     # P0973_ "DHW temp. max." 65C° 30-65 0.5
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
     SILENT_MODE: Final = 1087  # Unknown_Parameter_1087  # Silent mode On/Off
 
-# class Parameter_All_SensorKey(Parameter_Static_SensorKey, Parameter_Config_SensorKey, Parameter_Calc_SensorKey, Parameter_SensorKey):
-#     pass
-
-# Parameter_All_SensorKey = Union[Parameter_Static_SensorKey, Parameter_Config_SensorKey, Parameter_Calc_SensorKey, Parameter_SensorKey]
-
-# class Parameter_All_SensorKey(Parameter_Static_SensorKey, IntEnum):
-class Parameter_All_SensorKey(Parameter_Calc_SensorKey, IntEnum):
-    pass
+Parameter_All_SensorKey = IntEnum('Parameter_All_SensorKey', [(i.name, i.value) for i in chain(Parameter_Static_SensorKey, Parameter_Calc_SensorKey, Parameter_Config_SensorKey, Parameter_SensorKey)])
 
 class Parameter_Write_Permission(IntFlag):
     READ_ONLY = 0
@@ -519,16 +526,16 @@ class Parameter_Write_Permission(IntFlag):
 
 class Calculation_SensorKey(Enum):
     UNSET: Final = -1
-    FLOW_IN_TEMPERATURE: Final = 10  # ID_WEB_Temperatur_TVL
-    FLOW_OUT_TEMPERATURE: Final = 11  # ID_WEB_Temperatur_TRL
-    FLOW_OUT_TEMPERATURE_TARGET: Final = 12  # ID_WEB_Sollwert_TRL_HZ
-    FLOW_OUT_TEMPERATURE_EXTERNAL: Final = 13  # ID_WEB_Temperatur_TRL_ext
-    HOT_GAS_TEMPERATURE: Final = 14  # ID_WEB_Temperatur_THG
-    OUTDOOR_TEMPERATURE: Final = 15  # ID_WEB_Temperatur_TA
-    OUTDOOR_TEMPERATURE_AVERAGE: Final = 16  # ID_WEB_Mitteltemperatur
-    DHW_TEMPERATURE: Final = 17  # ID_WEB_Temperatur_TBW
-    HEAT_SOURCE_INPUT_TEMPERATURE: Final = 19  # ID_WEB_Temperatur_TWE
-    HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = 20  # ID_WEB_Temperatur_TWA
+    FLOW_IN_TEMPERATURE: Final = 10  # ID_WEB_Temperatur_TVL flowTemperature
+    FLOW_OUT_TEMPERATURE: Final = 11  # ID_WEB_Temperatur_TRL returnTemperature
+    FLOW_OUT_TEMPERATURE_TARGET: Final = 12  # ID_WEB_Sollwert_TRL_HZ returnTemperatureTarget
+    FLOW_OUT_TEMPERATURE_EXTERNAL: Final = 13  # ID_WEB_Temperatur_TRL_ext returnTemperatureExtern
+    HOT_GAS_TEMPERATURE: Final = 14  # ID_WEB_Temperatur_THG / hotGasTemperature
+    OUTDOOR_TEMPERATURE: Final = 15  # ID_WEB_Temperatur_TA / ambientTemperature
+    OUTDOOR_TEMPERATURE_AVERAGE: Final = 16  # ID_WEB_Mitteltemperatur / averageAmbientTemperature
+    DHW_TEMPERATURE: Final = 17  # ID_WEB_Temperatur_TBW hotWaterTemperature
+    HEAT_SOURCE_INPUT_TEMPERATURE: Final = 19  # ID_WEB_Temperatur_TWE heatSourceIN
+    HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = 20  # ID_WEB_Temperatur_TWA heatSourceOUT
     SOLAR_COLLECTOR_TEMPERATURE: Final = 26  # ID_WEB_Temperatur_TSK
     SOLAR_BUFFER_TEMPERATURE: Final = 27  # ID_WEB_Temperatur_TSS
     DEFROST_END_FLOW_OKAY: Final = 29  # ID_WEB_ASDin
@@ -572,25 +579,28 @@ class Calculation_SensorKey(Enum):
     TIMER_TDI: Final = 76  # ID_WEB_Time_LGS_akt
     TIMER_BLOCK_DHW: Final = 77  # ID_WEB_Time_SBW_akt
     MODEL_CODE: Final = 78  # ID_WEB_Code_WP_akt
-    STATUS: Final = 80  # ID_WEB_WP_BZ_akt
+    # 79 bivalentLevel
+    STATUS: Final = 80  # ID_WEB_WP_BZ_akt opStateHotWater opStateHeating
     FIRMWARE_VERSION: Final = 81  # ID_WEB_SoftStand
     ERROR_TIME: Final = 95  # ID_WEB_ERROR_Time0
     ERROR_REASON: Final = 100  # ID_WEB_ERROR_Nr0
     # TODO: !
     # C0105_ERROR_COUNTER: Final = "calculations.ID_WEB_AnzahlFehlerInSpeicher"
-    STATUS_LINE_1: Final = 117  # ID_WEB_HauptMenuStatus_Zeile1
-    STATUS_LINE_2: Final = 118  # ID_WEB_HauptMenuStatus_Zeile2
-    STATUS_LINE_3: Final = 119  # ID_WEB_HauptMenuStatus_Zeile3
+    STATUS_LINE_1: Final = 117  # ID_WEB_HauptMenuStatus_Zeile1 opStateHeatPump1
+    STATUS_LINE_2: Final = 118  # ID_WEB_HauptMenuStatus_Zeile2 opStateHeatPump2
+    STATUS_LINE_3: Final = 119  # ID_WEB_HauptMenuStatus_Zeile3 opStateHeatPump3
     STATUS_TIME: Final = 120  # ID_WEB_HauptMenuStatus_Zeit
     TIMER_DEFROST: Final = 141  # ID_WEB_Time_AbtIn
     APPROVAL_COOLING: Final = 146  # ID_WEB_FreigabKuehl
     HEAT_AMOUNT_HEATING: Final = 151  # ID_WEB_WMZ_Heizung
     DHW_HEAT_AMOUNT: Final = 152  # ID_WEB_WMZ_Brauchwasser
     HEAT_AMOUNT_COUNTER: Final = 154  # ID_WEB_WMZ_Seit"  # 25668.
-    HEAT_AMOUNT_FLOW_RATE: Final = 155  # ID_WEB_WMZ_Durchfluss
+    HEAT_AMOUNT_FLOW_RATE: Final = 155  # ID_WEB_WMZ_Durchfluss / flowRate --> param 870 != 0
     ANALOG_OUT1: Final = 156  # ID_WEB_AnalogOut1
     ANALOG_OUT2: Final = 157  # ID_WEB_AnalogOut2
     TIMER_HOT_GAS: Final = 158  # ID_WEB_Time_Heissgas
+    VENTILATION_SUPPLY_AIR_TEMPERATURE: Final = 159  # ID_WEB_Temp_Lueftung_Zuluft VentSupplyAirTemperature
+    VENTILATION_EXHAUST_AIR_TEMPERATURE: Final = 160  # ID_WEB_Temp_Lueftung_Abluft VentExhaustAirTemperature
     HEAT_SOURCE_FLOW_RATE: Final = 173  # ID_WEB_Durchfluss_WQ
     SUCTION_EVAPORATOR_TEMPERATURE: Final = 175  # ID_WEB_LIN_ANSAUG_VERDAMPFER
     SUCTION_COMPRESSOR_TEMPERATURE: Final = 176  # ID_WEB_LIN_ANSAUG_VERDICHTER
@@ -622,6 +632,8 @@ class Calculation_SensorKey(Enum):
 
 class Visibility_SensorKey(Enum):
     UNSET: Final = -1
+    VENTILATION: Final = 4  # ID_Visi_Schwimmbad <-- correct?
+    # 6    ID_Visi_Lueftung
     COOLING: Final = 5  # ID_Visi_Kuhlung
     MK1: Final = 7  # ID_Visi_MK1
     MK2: Final = 8  # ID_Visi_MK2
@@ -646,15 +658,23 @@ class Visibility_SensorKey(Enum):
     COMPRESSOR2_OPERATION_HOURS: Final = 83  # ID_Visi_Bst_BStdVD2
     COMPRESSOR2_IMPULSES: Final = 84  # ID_Visi_Bst_ImpVD2
     ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = 86  # ID_Visi_Bst_BStdZWE1
+    HEATING_HYSTERESIS: Final = 93  # returnTemperatureHyst ID_Visi_Text_Abtauen <- correct?
+    HEATSOURCE_DEFROST_AIR_THRESHOLD_TEMPERATURE: Final = 97  # ID_Visi_EinstTemp_Freig2VD <-- Bouni Luxtronik Name is wrong!
+    HEATSOURCE_DEFROST_AIR_END_TEMPERATURE: Final = 105  # ID_Visi_EinstTemp_TWQmin
     EVU_LOCKED: Final = 121  # ID_Visi_SysEin_EVUSperre
     ROOM_THERMOSTAT: Final = 122  # ID_Visi_SysEin_Raumstation
     PUMP_OPTIMIZATION: Final = 144  # ID_Visi_SysEin_Pumpenoptim
+    HEATING_CIRCULATION_PUMP_DEAERATE: Final = 161  # ID_Visi_SysEin_LaufzeitMk2 <-- Name correct?
+    DHW_CIRCULATION_PUMP_DEAERATE: Final = 167  # ID_Visi_Enlt_MA1
     MK3: Final = 211  # ID_Visi_MK3
+    TIMER_DEFROST: Final = 219  # ID_Visi_SysEin_Kuhl_Zeit_Ein <-- Bouni Luxtronik Name is wrong?
     EFFICIENCY_PUMP_NOMINAL: Final = 239  # ID_Visi_SysEin_EffizienzpumpeNom
     EFFICIENCY_PUMP_MINIMAL: Final = 240  # ID_Visi_SysEin_EffizienzpumpeMin
     ANALOG_OUT1: Final = 248  # ID_Visi_OUT_Analog_1
     ANALOG_OUT2: Final = 249  # ID_Visi_OUT_Analog_2
     SOLAR: Final = 250  # ID_Visi_Solar
+    VENTILATION_SUPPLY_AIR_TEMPERATURE: Final = 264  # ID_Visi_Einst_Luf_Nennlueftung_akt VentSupplyAirTemperature
+    VENTILATION_EXHAUST_AIR_TEMPERATURE: Final = 265  # ID_Visi_Einst_Luf_Intensivlueftung_akt VentExhaustAirTemperature
     SUCTION_COMPRESSOR_TEMPERATURE: Final = 289  # ID_Visi_LIN_ANSAUG_VERDICHTER
     COMPRESSOR_HEATING: Final = 290  # ID_Visi_LIN_VDH
     OVERHEATING_TEMPERATURE: Final = 291  # ID_Visi_LIN_UH
@@ -680,6 +700,8 @@ class SensorAttrFormat(Enum):
     CELSIUS_TENTH = 2
     SWITCH_GAP = 3
     TIMESTAMP_LAST_OVER = 4
+
+    DURATION = 11
 
 
 class SensorAttrKey(StrEnum):
@@ -716,6 +738,11 @@ class SensorAttrKey(StrEnum):
     TIMER_BLOCK_DHW = "Sperre WW? ID_WEB_Time_SBW_akt"
     TIMER_DEFROST = "Abtauen in ID_WEB_Time_AbtIn"
     TIMER_HOT_GAS = "ID_WEB_Time_Heissgas"
+
+    # Defrost attributes
+    DURATION = "DURATION"
+    AMBIENT_TEMPERATURE = "AMBIENT_TEMPERATURE"
+    HEAT_SOURCE_INPUT_TEMPERATURE = "HEAT_SOURCE_INPUT_TEMPERATURE"
 
 
 # endregion Attr Keys

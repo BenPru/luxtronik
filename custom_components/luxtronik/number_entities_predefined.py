@@ -48,7 +48,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         visibility=LV.SECOND_HEAT_GENERATOR,
     ),
     LuxtronikNumberDescription(
-        luxtronik_key=LCP.AIR_DEFROST_TEMPERATURE,
+        luxtronik_key=LCP.HEATSOURCE_DEFROST_AIR_THRESHOLD_TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=6.0,
         native_max_value=20.0,
@@ -57,6 +57,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         extra_attributes=[ATTR_DESCRIPTION],
+        visibility=LV.HEATSOURCE_DEFROST_AIR_THRESHOLD_TEMPERATURE,
     ),
     LuxtronikNumberDescription(
         luxtronik_key=LCP.AIR_DEFROST_STOP_TEMPERATURE,
@@ -68,6 +69,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         extra_attributes=[ATTR_DESCRIPTION],
+        visibility=LV.HEATSOURCE_DEFROST_AIR_END_TEMPERATURE,
     ),
     LuxtronikNumberDescription(
         luxtronik_key=LCP.RELEASE_TIME_SECOND_HEAT_GENERATOR,
@@ -134,7 +136,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     ),
     LuxtronikNumberDescription(
         luxtronik_key=LCP.HEATING_THRESHOLD_TEMPERATURE,
-        translation_key_name="heating_threshold",
         device_key=DeviceKey.heating,
         icon="mdi:download-outline",
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
@@ -299,8 +300,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=6.0,
         native_step=0.1,
         entity_category=EntityCategory.CONFIG,
-        mode=NumberMode.BOX,
         factor=0.1,  # TODO: Check
+        visibility=LV.HEATING_HYSTERESIS,
     ),
     LuxtronikNumberDescription(
         luxtronik_key=LCP.HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE,

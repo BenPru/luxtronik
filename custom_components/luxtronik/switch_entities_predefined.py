@@ -70,6 +70,13 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         icon="mdi:download-outline",
         entity_category=EntityCategory.CONFIG,
     ),
+    LuxtronikSwitchDescription(
+        luxtronik_key=LP.HEATING_CIRCULATION_PUMP_DEAERATE,
+        device_key=DeviceKey.heating,
+        icon_by_state={True: "mdi:pump", False: "mdi:pump-off"},
+        device_class=None,
+        visibility=LV.HEATING_CIRCULATION_PUMP_DEAERATE,
+    ),
     # endregion Heating
     # region Domestic water
     LuxtronikSwitchDescription(
@@ -89,10 +96,11 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.DHW_RECIRCULATION_PUMP_DEAERATE,
+        luxtronik_key=LP.DHW_CIRCULATION_PUMP_DEAERATE,
         device_key=DeviceKey.domestic_water,
         icon_by_state={True: "mdi:pump", False: "mdi:pump-off"},
         device_class=None,
+        visibility=LV.DHW_CIRCULATION_PUMP_DEAERATE,
     ),
     # endregion Domestic water
     # region Cooling

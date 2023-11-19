@@ -85,6 +85,14 @@ def correct_key_value(
         and not get_sensor_data(sensors, LC.ADDITIONAL_HEAT_GENERATOR)
     ):
         return LuxOperationMode.no_request
+    # region
+    if (
+        sensor_id == LC.STATUS
+        and value == LuxOperationMode.defrost
+        and not get_sensor_data(sensors, LC.COMPRESSOR)
+    ):
+        return LuxOperationMode.defrost_air
+    # endregion
     # region Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
     if (
         sensor_id == LC.STATUS_LINE_1

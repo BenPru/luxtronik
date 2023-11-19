@@ -386,6 +386,28 @@ SENSORS: list[descr] = [
             attr(SA.REMEDY, LC.ERROR_REASON),
         ],
     ),
+    descr(
+        luxtronik_key=LP.LAST_DEFROST_TIMESTAMP,
+        icon="mdi:car-defrost-rear",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        # TODO: Extend with Duration, Ambient- + Air-In-Temperatures, at the Start and end attributes of defrost!
+        # extra_attributes=[
+        #     attr(
+        #         SA.DURATION,
+        #         format=SensorAttrFormat.DURATION,
+        #     ),
+        #     attr(
+        #         SA.AMBIENT_TEMPERATURE,
+        #         LC.OUTDOOR_TEMPERATURE,
+        #     ),
+        #     attr(
+        #         SA.HEAT_SOURCE_INPUT_TEMPERATURE,
+        #         LC.HEAT_SOURCE_INPUT_TEMPERATURE,
+        #     ),
+        # ],
+    ),
+
     # endregion Main heatpump
     # region Heating
     descr(

@@ -87,13 +87,40 @@
                 "name": "Heizgrenze"
             },
             "domestic_water": {
-                "name": "Modus Automatik"
+                "name": "Modus Automatik",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Schaltet den Betriebsmodus der Warmwasserbereitung auf Automatik oder Aus."
+                        }
+                    }
+                }
             },
             "cooling": {
                 "name": "K\u00fchlung"
             },
-            "dhw_recirculation_pump_deaerate": {
-                "name": "Entlüftungsmodus der Zirkulationspumpe"
+            "heating_circulation_pump_deaerate": {
+                "name": "Entl\u00fcftungsmodus der Heizkreisumw\u00e4lzpumpe",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Kann zum gezielten Einschalten der Pumpe genutzt werden."
+                        }
+                    }
+                }
+            },
+            "dhw_circulation_pump_deaerate": {
+                "name": "Entl\u00fcftungsmodus der Zirkulationspumpe",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Kann zum gezielten Einschalten der Pumpe genutzt werden."
+                        }
+                    }
+                }
             }
         },
         "update": {
@@ -108,8 +135,16 @@
             "pump_optimization": {
                 "name": "Pumpenoptimierung"
             },
-            "heating_threshold": {
-                "name": "Heizgrenze"
+            "heating_threshold_temperature": {
+                "name": "Heizgrenze",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "\u00dcberschreitet die gemittelte Au\u00dfentemperatur diesen Wert, wird nicht mehr geheizt."
+                        }
+                    }
+                }
             },
             "heating_target_correction": {
                 "name": "Ziel Korrektur"
@@ -145,7 +180,15 @@
                 "name": "MK3 Heizkurve Nachts"
             },
             "dhw_target_temperature": {
-                "name": "Soll"
+                "name": "Soll",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Obere Solltemperatur des Boilers."
+                        }
+                    }
+                }
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
@@ -175,10 +218,26 @@
                 "name": "Max. Soll R\u00fccklauferh\u00f6hung"
             },
             "heating_hysteresis": {
-                "name": "Hysterese Heizungsregler"
+                "name": "Hysterese Heizungsregler",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Regel-Hysterese der R\u00fccklauf-Solltemperatur."
+                        }
+                    }
+                }
             },
             "heating_night_lowering_to_temperature": {
-                "name": "Absenkung bis Aussentemperatur"
+                "name": "Absenkung bis Au\u00dfentemperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Unterschreitet die Au\u00dfentemperatur diesen Wert wird die R\u00fccklauf-Solltemperatur nicht mehr (zeitgesteuert) abgesenkt."
+                        }
+                    }
+                }
             },
             "efficiency_pump_nominal": {
                 "name": "Effizienzpumpe Nominal"
@@ -203,6 +262,28 @@
             },
             "cooling_target_temperature_mk3": {
                 "name": "K\u00fchlung Ziel"
+            },
+            "heatsource_defrost_air_threshold_temperature": {
+                "name": "Luftabtauung Eingangstemperatur Schwelle",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Luft-Eingangstemperatur oberhalb der der Verdampfer (energiesparend) mit Luft abgetaut wird."
+                        }
+                    }
+                }
+            },
+            "heatsource_defrost_air_end_temperature": {
+                "name": "Luftabtauung Ausgangstemperatur Ende",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Luft-Ausgangstemperatur in bei der die Luftabtauung des Verdampfers beendet wird."
+                        }
+                    }
+                }
             }
         },
         "sensor": {
@@ -213,10 +294,11 @@
                     "hot water": "Brauchwasser",
                     "swimming pool/solar": "Pool / Solar",
                     "evu": "Netzsperre",
-                    "defrost": "Abtauen",
+                    "defrost": "Abtauen (Kreisumkehr)",
                     "heating external source": "Heizt aus externer Quelle",
                     "cooling": "K\u00fchlen",
-                    "no request": "Leerlauf (keine Anforderung)"
+                    "no request": "Leerlauf (keine Anforderung)",
+                    "defrost_air": "Luftabtauen"
                 },
                 "state_attributes": {
                     "description": {
@@ -624,16 +706,32 @@
                 "name": "W\u00e4rmequelle Ausgang"
             },
             "heat_source_input_temperature": {
-                "name": "W\u00e4rmequelle Eingang"
+                "name": "W\u00e4rmequelle Eingangstemperatur"
             },
             "outdoor_temperature": {
-                "name": "Aussen Temperatur"
+                "name": "Au\u00dfentemperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Temperatur des Au\u00dfensensors"
+                        }
+                    }
+                }
             },
             "status_time": {
                 "name": "Status Zeit"
             },
             "outdoor_temperature_average": {
-                "name": "Mittel Aussen Temperatur"
+                "name": "Mittel Au\u00dfen Temperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Gemittelte Au\u00dfentemperatur"
+                        }
+                    }
+                }
             },
             "compressor1_impulses": {
                 "name": "Impulse Verdichter 1"
@@ -654,7 +752,15 @@
                 "name": "Z\u00e4hler W\u00e4rmemenge"
             },
             "hot_gas_temperature": {
-                "name": "Heissgas Temperatur"
+                "name": "Hei\u00dfgastemperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Temperatur, die hinter dem Kompressor der W\u00e4rmepumpe anf\u00e4llt."
+                        }
+                    }
+                }
             },
             "suction_compressor_temperature": {
                 "name": "Ansaug Verdichter Temperatur"
@@ -693,7 +799,15 @@
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge"
             },
             "heat_source_output_temperature": {
-                "name": "Heizquelle Ausgang"
+                "name": "W\u00e4rmequelle Ausgangstemperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Sitzt bei Luft-Wasser-WPs im Verdampfer."
+                        }
+                    }
+                }
             },
             "pump_frequency": {
                 "name": "Pumpenfrequenz"
@@ -702,7 +816,15 @@
                 "name": "Brauchwasser"
             },
             "dhw_temperature": {
-                "name": "Brauchwasser"
+                "name": "Brauchwasser",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Aktuelle Warmwasser-Boiler-Temperatur. Achtung, die Temperatur im Boiler ist sehr unterschiedlich, es wird also nur die Temperatur am Sensor angezeigt. Typischerweise sackt die Temperaturkurve beim Aufheizen des Boilers etwas ab, weil es durch den W\u00e4rmeeintrag zu Str\u00f6mungen kommt."
+                        }
+                    }
+                }
             },
             "dhw_operation_hours": {
                 "name": "Betriebsstunden"
@@ -714,13 +836,37 @@
                 "name": "Eingesetzte Energie"
             },
             "flow_in_temperature": {
-                "name": "Vorlauf Temperatur"
+                "name": "Vorlauftemperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Normalerweise direkt hinter der Heizungsumw\u00e4lzpumpe gemessen und vor einer eventuell installierten Heizpatrone."
+                        }
+                    }
+                }
             },
             "flow_out_temperature": {
-                "name": "R\u00fccklauf Temperatur"
+                "name": "R\u00fccklauftemperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Normalerweise vor dem Eingang zum W\u00e4rmetauscher des Verdichterkreislaufes gemessen."
+                        }
+                    }
+                }
             },
             "flow_out_temperature_target": {
-                "name": "R\u00fccklauf Soll Temperatur"
+                "name": "R\u00fccklauf Soll Temperatur",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Sollwert R\u00fccklauftemperatur. Wird durch Heizkurve und Au\u00dfensensor bestimmt, kann \u00fcber in der Steuerung eingegebene Zeiten und auch manuell gezielt abgesenkt."
+                        }
+                    }
+                }
             },
             "operation_hours_heating": {
                 "name": "Betriebsstunden"
@@ -769,6 +915,17 @@
             },
             "circulation_pump_delta": {
                 "name": "Umw\u00e4lzpumpe Delta"
+            },
+            "last_defrost_timestamp": {
+                "name": "Letzte Abtauung",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Dauer sowie Umgebungs- und Luft-Eingangs-Temperaturen zum Beginn und am Ende der letzten Abtauung."
+                        }
+                    }
+                }
             }
         },
         "climate": {
@@ -781,7 +938,15 @@
         },
         "water_heater": {
             "domestic_water": {
-                "name": "Brauchwasser"
+                "name": "Brauchwasser",
+                "state_attributes": {
+                    "description": {
+                        "name": "Beschreibung",
+                        "state": {
+                            "_": "Betriebsmodus der Warmwasserbereitung"
+                        }
+                    }
+                }
             }
         }
     },
