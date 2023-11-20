@@ -1,6 +1,6 @@
 # Luxtronik
 
-## Home Assistant 2023.9.*
+## Home Assistant 2023.8.* >=
 
 Home Assistant 2023.9.* and higher is not supported by the last stable integration version!
 The latest integration version supports Home Assistant 2023.9.*, but is only a pre-release with some limitations!
