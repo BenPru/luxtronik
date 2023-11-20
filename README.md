@@ -2,8 +2,8 @@
 
 ## Home Assistant 2023.8.* >=
 
-Home Assistant 2023.9.* and higher is not supported by the last stable integration version!
-The latest integration version supports Home Assistant 2023.9.*, but is only a pre-release with some limitations!
+Home Assistant 2023.8.* and higher is not supported by the last stable integration version!
+The latest integration version supports Home Assistant 2023.8.*, but is only a pre-release with some limitations!
 
 > :warning: **New Code-Base - PLEASE READ!** :warning:  
 * Backup your data before update (different config structure!) and don't use in productive environment. If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
