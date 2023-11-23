@@ -562,6 +562,7 @@ SENSORS: list[descr] = [
         device_key=DeviceKey.domestic_water,
         entity_category=None,
         icon="mdi:coolant-temperature",
+        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
     ),
