@@ -16,6 +16,7 @@
     { "macaddress": "001999*" },
     { "macaddress": "000982*" },
     { "macaddress": "04D16E*" },
+    { "macaddress": "40ECF8*" },
     { "hostname": "wp-novelan" }
   ],
   "integration_type": "hub",
