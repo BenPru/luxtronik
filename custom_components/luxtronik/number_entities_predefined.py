@@ -92,6 +92,20 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_registry_enabled_default=False,
         visibility=LV.V0240_EFFICIENCY_PUMP_MINIMAL,
     ),
+    LuxtronikNumberDescription(
+        key=SensorKey.HEAT_SOURCE_INPUT_TEMPERATURE_MIN,
+        luxtronik_key=LP.P0093_HEAT_SOURCE_INPUT_TEMPERATURE_MIN,
+        icon="mdi:download-lock",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_min_value=-20.0, # -9.0
+        native_max_value=0.0,
+        native_step=0.5,
+        entity_category=EntityCategory.CONFIG,
+        factor=0.1,
+        entity_registry_enabled_default=False,
+        visibility=LV.V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN,
+    ),
     # endregion Main heatpump
     # region Heating
     LuxtronikNumberDescription(

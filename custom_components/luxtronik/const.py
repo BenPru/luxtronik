@@ -289,6 +289,7 @@ class LuxParameter(StrEnum):
         "parameters.ID_Einst_TRErhmax_akt"
     )
     P0090_RELEASE_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWEFreig_akt"
+    P0093_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = "parameters.ID_Einst_TWQmin_akt"
     # MODE_COOLING: Automatic or Off
     P0108_MODE_COOLING: Final = "parameters.ID_Einst_BA_Kuehl_akt"
     P0110_COOLING_OUTDOOR_TEMP_THRESHOLD: Final = "parameters.ID_Einst_KuehlFreig_akt"
@@ -536,6 +537,7 @@ class LuxVisibility(StrEnum):
     V0086_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
         "visibilities.ID_Visi_Bst_BStdZWE1"
     )
+    V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = "visibilities.ID_Visi_EinstTemp_TWQmin"
     V0121_EVU_LOCKED: Final = "visibilities.ID_Visi_SysEin_EVUSperre"
     V0122_ROOM_THERMOSTAT: Final = "visibilities.ID_Visi_SysEin_Raumstation"
     V0144_PUMP_OPTIMIZATION: Final = "visibilities.ID_Visi_SysEin_Pumpenoptim"
@@ -577,6 +579,7 @@ class SensorKey(StrEnum):
     STATUS_LINE_2 = "status_line_2"
     STATUS_LINE_3 = "status_line_3"
     HEAT_SOURCE_INPUT_TEMPERATURE = "heat_source_input_temperature"
+    HEAT_SOURCE_INPUT_TEMPERATURE_MIN = "heat_source_input_temperature_min"
     OUTDOOR_TEMPERATURE = "outdoor_temperature"
     OUTDOOR_TEMPERATURE_AVERAGE = "outdoor_temperature_average"
     COMPRESSOR1_IMPULSES = "compressor1_impulses"

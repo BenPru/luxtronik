@@ -195,14 +195,17 @@
             "cooling_stop_delay_hours": {
                 "name": "Stop delay"
             },
-	    "cooling_target_temperature_mk1": {
+	        "cooling_target_temperature_mk1": {
                 "name": "Cooling target temperature"
             },
-	    "cooling_target_temperature_mk2": {
+	        "cooling_target_temperature_mk2": {
                 "name": "Cooling target temperature"
             },
-	    "cooling_target_temperature_mk3": {
+    	    "cooling_target_temperature_mk3": {
                 "name": "Cooling target temperature"
+            },
+            "heat_source_input_temperature_min": {
+                "name": "Heat source input minimum"
             }
         },
         "sensor": {
