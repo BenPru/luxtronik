@@ -29,6 +29,7 @@ from .const import (
     LuxMode,
     LuxOperationMode,
     Parameter_SensorKey as LP,
+    Visibility_SensorKey as LV,
     SensorAttrFormat,
     SensorAttrKey as SA,
 )
@@ -78,6 +79,8 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         if description.translation_key is None:
             description.translation_key = description.key
         if description.entity_registry_enabled_default:
+            # description.
+            # if description.visibility == LV.UNSET:
             description.entity_registry_enabled_default = coordinator.entity_visible(
                 description
             )

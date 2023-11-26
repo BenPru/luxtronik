@@ -168,6 +168,7 @@ SENSORS: list[descr] = [
         luxtronik_key=LC.OUTDOOR_TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         update_interval=UPDATE_INTERVAL_SLOW,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     descr(
         luxtronik_key=LC.OUTDOOR_TEMPERATURE_AVERAGE,
@@ -267,6 +268,7 @@ SENSORS: list[descr] = [
         luxtronik_key=LC.COMPRESSOR_HEATING_TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LV.COMPRESSOR_HEATING,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     descr(
         luxtronik_key=LC.OVERHEATING_TEMPERATURE,
@@ -416,6 +418,7 @@ SENSORS: list[descr] = [
         entity_category=None,
         icon="mdi:waves-arrow-right",
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
         extra_attributes=[
             attr(
                 SA.MAX_ALLOWED,
@@ -430,12 +433,14 @@ SENSORS: list[descr] = [
         entity_category=None,
         icon="mdi:waves-arrow-left",
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     descr(
         luxtronik_key=LC.FLOW_OUT_TEMPERATURE_TARGET,
         device_key=DeviceKey.heating,
         entity_category=None,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
         extra_attributes=[
             attr(
                 SA.SWITCH_GAP,
@@ -504,6 +509,7 @@ SENSORS: list[descr] = [
         entity_category=None,
         icon="mdi:coolant-temperature",
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     descr(
         luxtronik_key=LC.DHW_OPERATION_HOURS,

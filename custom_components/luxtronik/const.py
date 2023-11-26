@@ -378,6 +378,9 @@ class Parameter_Static_SensorKey(IntEnum):
     MIXING_CIRCUIT3_TYPE: Final = 780  # ID_Einst_MK3Typ_akt
 
 class Parameter_Calc_SensorKey(IntEnum):
+    # ID_SU_* <-- Unix Timestamp
+    #       Frkd ? Hz=Heizung, Bw=Brauchwasser, Al=?, Swb=?, MK1, Mk2, Mk3, Lueftung | * = 1.1.2007
+    #       Fstd ? ^ Hz,Bw, Mk1, Mk2, Mk3 <-- echter Timestamp vorhanden!
     OPERATION_HOURS: Final = 668  # ID_Zaehler_BetrZeitWP                                       ": "16434619",
     OPERATION_HOURS_COMPRESSOR1: Final = 669  # ID_Zaehler_BetrZeitVD1                                      ": "16434619",
     OPERATION_HOURS_COMPRESSOR2: Final = 670  # ID_Zaehler_BetrZeitVD2                                      ": "0",
@@ -525,97 +528,132 @@ class Parameter_Write_Permission(IntFlag):
     UNKNOWN_PARAMS = 2^31  # Not in enum!
 
 class Calculation_SensorKey(Enum):
+    # FUP1 Fussbodenheizungs-Umwälzpumpe
     UNSET: Final = -1
+    # region °C
     FLOW_IN_TEMPERATURE: Final = 10  # ID_WEB_Temperatur_TVL flowTemperature
     FLOW_OUT_TEMPERATURE: Final = 11  # ID_WEB_Temperatur_TRL returnTemperature
     FLOW_OUT_TEMPERATURE_TARGET: Final = 12  # ID_WEB_Sollwert_TRL_HZ returnTemperatureTarget
-    FLOW_OUT_TEMPERATURE_EXTERNAL: Final = 13  # ID_WEB_Temperatur_TRL_ext returnTemperatureExtern
+    FLOW_OUT_TEMPERATURE_EXTERNAL: Final = 13  # ID_WEB_Temperatur_TRL_ext returnTemperatureExtern Rücklauftemperatur im Trennspeicher.
     HOT_GAS_TEMPERATURE: Final = 14  # ID_WEB_Temperatur_THG / hotGasTemperature
     OUTDOOR_TEMPERATURE: Final = 15  # ID_WEB_Temperatur_TA / ambientTemperature
-    OUTDOOR_TEMPERATURE_AVERAGE: Final = 16  # ID_WEB_Mitteltemperatur / averageAmbientTemperature
+    OUTDOOR_TEMPERATURE_AVERAGE: Final = 16  # ID_WEB_Mitteltemperatur / averageAmbientTemperature Durchschnittstemperatur Aussen über 24 h (Funktion Heizgrenze)
     DHW_TEMPERATURE: Final = 17  # ID_WEB_Temperatur_TBW hotWaterTemperature
-    HEAT_SOURCE_INPUT_TEMPERATURE: Final = 19  # ID_WEB_Temperatur_TWE heatSourceIN
-    HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = 20  # ID_WEB_Temperatur_TWA heatSourceOUT
+    HEAT_SOURCE_INPUT_TEMPERATURE: Final = 19  # ID_WEB_Temperatur_TWE heatSourceIN Wärmequellen-Eintrittstemperatur
+    HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = 20  # ID_WEB_Temperatur_TWA heatSourceOUT Wärmequellen-Austrittstemperatur
+    # 21 ID_WEB_Temperatur_TFB1 Mischkreis 1 Vorlauftemperatur
+    # 22	ID_WEB_Sollwert_TVL_MK1	Mischkreis 1 Vorlauf-Soll-Temperatur
+    # 23	ID_WEB_Temperatur_RFV  	Raumtemperatur Raumstation 1
+    # 24	ID_WEB_Temperatur_TFB2	Mischkreis 2 Vorlauftemperatur
+    # 25	ID_WEB_Sollwert_TVL_MK2	Mischkreis 2 Vorlauf-Soll-Temperatur
     SOLAR_COLLECTOR_TEMPERATURE: Final = 26  # ID_WEB_Temperatur_TSK
     SOLAR_BUFFER_TEMPERATURE: Final = 27  # ID_WEB_Temperatur_TSS
-    DEFROST_END_FLOW_OKAY: Final = 29  # ID_WEB_ASDin
+    # 28	ID_WEB_Temperatur_TEE	Fühler externe Energiequelle
+    # endregion °C
+    # region Boolean
+    DEFROST_END_FLOW_OKAY: Final = 29  # ID_WEB_ASDin Eingang "Abtauende, Soledruck, Durchfluss"
+    # 30	ID_WEB_BWTin	Eingang "Brauchwarmwasserthermostat"
     EVU_UNLOCKED: Final = 31  # ID_WEB_EVUin
-    # C0032_HIGH_PRESSURE_OKAY: Final = "calculations.ID_WEB_HDin"  # True/False -> Hochdruck OK
-    MOTOR_PROTECTION: Final = 34  # ID_WEB_MOTin
-    DEFROST_VALVE: Final = 37  # ID_WEB_AVout
-    DHW_RECIRCULATION_PUMP: Final = 38  # ID_WEB_BUPout
-    CIRCULATION_PUMP_HEATING: Final = 39  # ID_WEB_HUPout
-    # C0040_MIXER1_OPENED: Final = "calculations.ID_WEB_MA1out"  # True/False -> Mischer 1 auf
-    # C0041_MIXER1_CLOSED: Final = "calculations.ID_WEB_MZ1out"  # True/False -> Mischer 1 zu
-    PUMP_FLOW: Final = 43  # ID_WEB_VBOout
-    COMPRESSOR: Final = 44  # ID_WEB_VD1out
-    COMPRESSOR2: Final = 45  # ID_WEB_VD2out
-    DHW_CIRCULATION_PUMP: Final = 46  # ID_WEB_ZIPout
-    ADDITIONAL_CIRCULATION_PUMP: Final = 47  # ID_WEB_ZUPout
-    ADDITIONAL_HEAT_GENERATOR: Final = 48  # ID_WEB_ZW1out
-    DISTURBANCE_OUTPUT: Final = 49  # ID_WEB_ZW2SSTout
-    # C0051: Final = "calculations.ID_WEB_FP2out"  # True/False -> FBH Umwälzpumpe 2
-    SOLAR_PUMP: Final = 52  # ID_WEB_SLPout
-    # C0054_MIXER2_CLOSED: Final = "calculations.ID_WEB_MZ2out"  # True/False -> Mischer 2 zu
-    # C0055_MIXER2_OPENED: Final = "calculations.ID_WEB_MA2out"  # True/False -> Mischer 2 auf
+    # C0032_HIGH_PRESSURE_OKAY: Final = 32  # ID_WEB_HDin Eingang "Hochdruck Kältekreis"  # True/False -> Hochdruck OK
+    MOTOR_PROTECTION: Final = 33  # ID_WEB_MOTin Eingang "Motorschutz OK"
+    # 34	ID_WEB_NDin	Eingang "Niederdruck"
+    # 35	ID_WEB_PEXin	Eingang "Überwachungskontakt für Potentiostat"
+    # 36	ID_WEB_SWTin	Eingang "Schwimmbadthermostat"
+    DEFROST_VALVE: Final = 37  # ID_WEB_AVout Ausgang "Abtauventil"
+    DHW_RECIRCULATION_PUMP: Final = 38  # ID_WEB_BUPout Ausgang "Brauchwasserpumpe/Umstellventil"
+    CIRCULATION_PUMP_HEATING: Final = 39  # ID_WEB_HUPout Ausgang "Heizungsumwälzpumpe"
+    # MIXER1_OPENED: Final = 40  # ID_WEB_MA1out Ausgang "Mischkreis 1 Auf"  # True/False -> Mischer 1 auf
+    # MIXER1_CLOSED: Final = 41  # ID_WEB_MZ1out Ausgang "Mischkreis 1 Zu" # True/False -> Mischer 1 zu
+    # 42	ID_WEB_VENout	Ausgang "Ventilation (Lüftung)"
+    PUMP_FLOW: Final = 43  # ID_WEB_VBOout 	Ausgang "Solepumpe/Ventilator"
+    COMPRESSOR: Final = 44  # ID_WEB_VD1out Ausgang "Verdichter 1"
+    COMPRESSOR2: Final = 45  # ID_WEB_VD2out Ausgang "Verdichter 2"
+    DHW_CIRCULATION_PUMP: Final = 46  # ID_WEB_ZIPout Ausgang "Zirkulationspumpe"
+    ADDITIONAL_CIRCULATION_PUMP: Final = 47  # ID_WEB_ZUPout Ausgang "Zusatzumwälzpumpe"
+    ADDITIONAL_HEAT_GENERATOR: Final = 48  # ID_WEB_ZW1out Ausgang "Steuersignal Zusatzheizung v. Heizung"
+    DISTURBANCE_OUTPUT: Final = 49  # ID_WEB_ZW2SSTout Ausgang "Steuersignal Zusatzheizung/Störsignal"
+    # 50	ID_WEB_ZW3SSTout	Ausgang "Zusatzheizung 3"
+    # : Final = 51  # ID_WEB_FP2out Ausgang "Pumpe Mischkreis 2" # True/False -> FBH Umwälzpumpe 2
+    SOLAR_PUMP: Final = 52  # ID_WEB_SLPout 	Ausgang "Solarladepumpe"
+    # 53	ID_WEB_SUPout	Ausgang "Schwimmbadpumpe"
+    # MIXER2_CLOSED: Final = 54  # ID_WEB_MZ2out Ausgang "Mischkreis 2 Zu"  # True/False -> Mischer 2 zu
+    # MIXER2_OPENED: Final = 55  # ID_WEB_MA2out Ausgang "Mischkreis 2 Auf" # True/False -> Mischer 2 auf
+    # endregion Boolean
+    # region Seconds/Impulses
     COMPRESSOR1_OPERATION_HOURS: Final = 56  # ID_WEB_Zaehler_BetrZeitVD1
     COMPRESSOR1_IMPULSES: Final = 57  # ID_WEB_Zaehler_BetrZeitImpVD1
     COMPRESSOR2_OPERATION_HOURS: Final = 58  # ID_WEB_Zaehler_BetrZeitVD2
     COMPRESSOR2_IMPULSES: Final = 59  # ID_WEB_Zaehler_BetrZeitImpVD2
     ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = 60  # ID_WEB_Zaehler_BetrZeitZWE1
+    # ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS: Final = 61  # ID_WEB_Zaehler_BetrZeitZWE2
+    # ADDITIONAL_HEAT_GENERATOR3_OPERATION_HOURS: Final = 62  # ID_WEB_Zaehler_BetrZeitZWE3
     OPERATION_HOURS: Final = 63  # ID_WEB_Zaehler_BetrZeitWP
     OPERATION_HOURS_HEATING: Final = 64  # ID_WEB_Zaehler_BetrZeitHz
     DHW_OPERATION_HOURS: Final = 65  # ID_WEB_Zaehler_BetrZeitBW
     OPERATION_HOURS_COOLING: Final = 66  # ID_WEB_Zaehler_BetrZeitKue
-    TIMER_HEATPUMP_ON: Final = 67  # ID_WEB_Time_WPein_akt
-    TIMER_ADD_HEAT_GENERATOR_ON: Final = 68  # ID_WEB_Time_ZWE1_akt
-    TIMER_SEC_HEAT_GENERATOR_ON: Final = 69  # ID_WEB_Time_ZWE2_akt
-    TIMER_NET_INPUT_DELAY: Final = 70  # ID_WEB_Timer_EinschVerz
-    TIMER_SCB_OFF: Final = 71  # ID_WEB_Time_SSPAUS_akt
-    TIMER_SCB_ON: Final = 72  # ID_WEB_Time_SSPEIN_akt
-    TIMER_COMPRESSOR_OFF: Final = 73  # ID_WEB_Time_VDStd_akt
-    TIMER_HC_ADD: Final = 74  # ID_WEB_Time_HRM_akt
-    TIMER_HC_LESS: Final = 75  # ID_WEB_Time_HRW_akt
-    TIMER_TDI: Final = 76  # ID_WEB_Time_LGS_akt
-    TIMER_BLOCK_DHW: Final = 77  # ID_WEB_Time_SBW_akt
+    TIMER_HEATPUMP_ON: Final = 67  # ID_WEB_Time_WPein_akt Wärmepumpe läuft seit
+    TIMER_ADD_HEAT_GENERATOR_ON: Final = 68  # ID_WEB_Time_ZWE1_akt Zweiter Wärmeerzeuger 1 läuft seit
+    TIMER_SEC_HEAT_GENERATOR_ON: Final = 69  # ID_WEB_Time_ZWE2_akt Zweiter Wärmeerzeuger 2 läuft seit
+    TIMER_NET_INPUT_DELAY: Final = 70  # ID_WEB_Timer_EinschVerz Netzeinschaltverzögerung
+    TIMER_SCB_OFF: Final = 71  # ID_WEB_Time_SSPAUS_akt Schaltspielsperre Aus
+    TIMER_SCB_ON: Final = 72  # ID_WEB_Time_SSPEIN_akt Schaltspielsperre Ein
+    TIMER_COMPRESSOR_OFF: Final = 73  # ID_WEB_Time_VDStd_akt Verdichter-Standzeit
+    TIMER_HC_ADD: Final = 74  # ID_WEB_Time_HRM_akt Heizungsregler Mehr-Zeit
+    TIMER_HC_LESS: Final = 75  # ID_WEB_Time_HRW_akt Heizungsregler Weniger-Zeit
+    TIMER_TDI: Final = 76  # ID_WEB_Time_LGS_akt Thermische Desinfektion läuft seit
+    TIMER_BLOCK_DHW: Final = 77  # ID_WEB_Time_SBW_akt Sperre Warmwasser
+    # endregion Seconds/Impulses
+    # region Enums, ASCII, IP
     MODEL_CODE: Final = 78  # ID_WEB_Code_WP_akt
     # 79 bivalentLevel
     STATUS: Final = 80  # ID_WEB_WP_BZ_akt opStateHotWater opStateHeating
     FIRMWARE_VERSION: Final = 81  # ID_WEB_SoftStand
-    ERROR_TIME: Final = 95  # ID_WEB_ERROR_Time0
+    # endregion Enums, ASCII, IP
+    # region Unix Timestamps
+    ERROR_TIME: Final = 95  # ID_WEB_ERROR_Time0 95-99
+    # endregion Unix Timestamps
+    # region Enums
     ERROR_REASON: Final = 100  # ID_WEB_ERROR_Nr0
     # TODO: !
     # C0105_ERROR_COUNTER: Final = "calculations.ID_WEB_AnzahlFehlerInSpeicher"
+    # endregion Enums
+    # bool 116	ID_WEB_Comfort_exists	Comfort Platine installiert
+    # region Enums
     STATUS_LINE_1: Final = 117  # ID_WEB_HauptMenuStatus_Zeile1 opStateHeatPump1
     STATUS_LINE_2: Final = 118  # ID_WEB_HauptMenuStatus_Zeile2 opStateHeatPump2
     STATUS_LINE_3: Final = 119  # ID_WEB_HauptMenuStatus_Zeile3 opStateHeatPump3
-    STATUS_TIME: Final = 120  # ID_WEB_HauptMenuStatus_Zeit
-    TIMER_DEFROST: Final = 141  # ID_WEB_Time_AbtIn
-    APPROVAL_COOLING: Final = 146  # ID_WEB_FreigabKuehl
+    # endregion Enums
+    STATUS_TIME: Final = 120  # ID_WEB_HauptMenuStatus_Zeit Seconds
+    TIMER_DEFROST: Final = 141  # ID_WEB_Time_AbtIn Seconds
+    APPROVAL_COOLING: Final = 146  # ID_WEB_FreigabKuehl bool
+    # region kWh
     HEAT_AMOUNT_HEATING: Final = 151  # ID_WEB_WMZ_Heizung
     DHW_HEAT_AMOUNT: Final = 152  # ID_WEB_WMZ_Brauchwasser
     HEAT_AMOUNT_COUNTER: Final = 154  # ID_WEB_WMZ_Seit"  # 25668.
     HEAT_AMOUNT_FLOW_RATE: Final = 155  # ID_WEB_WMZ_Durchfluss / flowRate --> param 870 != 0
-    ANALOG_OUT1: Final = 156  # ID_WEB_AnalogOut1
-    ANALOG_OUT2: Final = 157  # ID_WEB_AnalogOut2
-    TIMER_HOT_GAS: Final = 158  # ID_WEB_Time_Heissgas
-    VENTILATION_SUPPLY_AIR_TEMPERATURE: Final = 159  # ID_WEB_Temp_Lueftung_Zuluft VentSupplyAirTemperature
-    VENTILATION_EXHAUST_AIR_TEMPERATURE: Final = 160  # ID_WEB_Temp_Lueftung_Abluft VentExhaustAirTemperature
-    HEAT_SOURCE_FLOW_RATE: Final = 173  # ID_WEB_Durchfluss_WQ
-    SUCTION_EVAPORATOR_TEMPERATURE: Final = 175  # ID_WEB_LIN_ANSAUG_VERDAMPFER
-    SUCTION_COMPRESSOR_TEMPERATURE: Final = 176  # ID_WEB_LIN_ANSAUG_VERDICHTER
-    COMPRESSOR_HEATING_TEMPERATURE: Final = 177  # ID_WEB_LIN_VDH
-    OVERHEATING_TEMPERATURE: Final = 178  # ID_WEB_LIN_UH
-    OVERHEATING_TARGET_TEMPERATURE: Final = 179  # ID_WEB_LIN_UH_Soll
-    HIGH_PRESSURE: Final = 180  # ID_WEB_LIN_HD
-    LOW_PRESSURE: Final = 181  # ID_WEB_LIN_ND
-    COMPRESSOR_HEATER: Final = 182  # ID_WEB_LIN_VDH_out
-    # C0187_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Soll"
-    # C0188_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Ist"
+    # endregion kWh
+    ANALOG_OUT1: Final = 156  # ID_WEB_AnalogOut1 Volt
+    ANALOG_OUT2: Final = 157  # ID_WEB_AnalogOut2 Volt
+    TIMER_HOT_GAS: Final = 158  # ID_WEB_Time_Heissgas Sperre zweiter Verdichter Heissgas
+    VENTILATION_SUPPLY_AIR_TEMPERATURE: Final = 159  # ID_WEB_Temp_Lueftung_Zuluft VentSupplyAirTemperature °C
+    VENTILATION_EXHAUST_AIR_TEMPERATURE: Final = 160  # ID_WEB_Temp_Lueftung_Abluft VentExhaustAirTemperature °C
+    # 164	ID_WEB_Out_VZU	Zuluft Ventilator (Abtaufunktion) Volt
+    # 165	ID_WEB_Out_VAB	Abluft Ventilator Volt
+    HEAT_SOURCE_FLOW_RATE: Final = 173  # ID_WEB_Durchfluss_WQ Durchfluss Wärmequelle l/h
+    SUCTION_EVAPORATOR_TEMPERATURE: Final = 175  # ID_WEB_LIN_ANSAUG_VERDAMPFER °C
+    SUCTION_COMPRESSOR_TEMPERATURE: Final = 176  # ID_WEB_LIN_ANSAUG_VERDICHTER °C
+    COMPRESSOR_HEATING_TEMPERATURE: Final = 177  # ID_WEB_LIN_VDH °C
+    OVERHEATING_TEMPERATURE: Final = 178  # ID_WEB_LIN_UH Überhitzung K
+    OVERHEATING_TARGET_TEMPERATURE: Final = 179  # ID_WEB_LIN_UH_Soll Überhitzung Soll K
+    HIGH_PRESSURE: Final = 180  # ID_WEB_LIN_HD bar
+    LOW_PRESSURE: Final = 181  # ID_WEB_LIN_ND bar
+    COMPRESSOR_HEATER: Final = 182  # ID_WEB_LIN_VDH_out Ausgang Verdichterheizung bool
+    # C0187_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Soll" Leistung Sollwert kWh
+    # C0188_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Ist" Leistung Istwert kWh
     HEAT_SOURCE_INPUT_TEMPERATURE_2: Final = 204  # ID_WEB_Temperatur_TWE_2
     ROOM_THERMOSTAT_TEMPERATURE: Final = 227  # ID_WEB_RBE_RT_Ist
     ROOM_THERMOSTAT_TEMPERATURE_TARGET: Final = 228  # ID_WEB_RBE_RT_Soll
-    PUMP_FREQUENCY: Final = 231  # ID_WEB_Freq_VD
+    PUMP_FREQUENCY: Final = 231  # ID_WEB_Freq_VD Hz
     PUMP_FLOW_DELTA_TARGET: Final = 239  # Unknown_Calculation_239
     # 239: Kelvin("VBO_Temp_Spread_Soll"), / 10, measurement, delta - ait_hup_vbo_calculated
     PUMP_FLOW_DELTA: Final = 240  # Unknown_Calculation_240
