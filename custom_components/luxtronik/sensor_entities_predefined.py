@@ -22,7 +22,7 @@ from .const import (
     FirmwareVersionMinor,
     Calculation_SensorKey as LC,
     LuxOperationMode,
-    Parameter_All_SensorKey as LP,
+    Parameter_All_SensorKey as LPA,
     LuxStatus1Option,
     LuxStatus3Option,
     LuxSwitchoffReason,
@@ -60,8 +60,8 @@ SENSORS_STATUS: list[descr] = [
 
 SENSORS_INDEX: list[descr_index] = [
     descr_index(
-        luxtronik_key=LP.SWITCHOFF_REASON,
-        luxtronik_key_timestamp=LP.SWITCHOFF_TIMESTAMP,
+        luxtronik_key=LPA.SWITCHOFF_REASON,
+        luxtronik_key_timestamp=LPA.SWITCHOFF_TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:electric-switch",
         device_class=SensorDeviceClass.ENUM,
@@ -304,7 +304,7 @@ SENSORS: list[descr] = [
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
-        luxtronik_key=LP.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
+        luxtronik_key=LPA.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         invisible_if_value=0.0,
@@ -389,7 +389,7 @@ SENSORS: list[descr] = [
         ],
     ),
     descr(
-        luxtronik_key=LP.LAST_DEFROST_TIMESTAMP,
+        luxtronik_key=LPA.LAST_DEFROST_TIMESTAMP,
         icon="mdi:car-defrost-rear",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
@@ -422,7 +422,7 @@ SENSORS: list[descr] = [
         extra_attributes=[
             attr(
                 SA.MAX_ALLOWED,
-                LP.FLOW_IN_TEMPERATURE_MAX_ALLOWED,
+                LPA.FLOW_IN_TEMPERATURE_MAX_ALLOWED,
                 SensorAttrFormat.CELSIUS_TENTH,
             ),
         ],
@@ -469,7 +469,7 @@ SENSORS: list[descr] = [
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
-        luxtronik_key=LP.HEAT_ENERGY_INPUT,
+        luxtronik_key=LPA.HEAT_ENERGY_INPUT,
         device_key=DeviceKey.heating,
         icon="mdi:circle-slice-3",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -531,7 +531,7 @@ SENSORS: list[descr] = [
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
-        luxtronik_key=LP.DHW_ENERGY_INPUT,
+        luxtronik_key=LPA.DHW_ENERGY_INPUT,
         device_key=DeviceKey.domestic_water,
         icon="mdi:circle-slice-3",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -558,7 +558,7 @@ SENSORS: list[descr] = [
         visibility=LV.SOLAR_BUFFER,
     ),
     descr(
-        luxtronik_key=LP.SOLAR_OPERATION_HOURS,
+        luxtronik_key=LPA.SOLAR_OPERATION_HOURS,
         device_key=DeviceKey.domestic_water,
         icon="mdi:timer-sand",
         state_class=SensorStateClass.TOTAL_INCREASING,

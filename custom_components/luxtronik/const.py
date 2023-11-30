@@ -439,9 +439,11 @@ class Parameter_Config_SensorKey(IntEnum):
     HEATING_CIRCUIT2_CURVE1_TEMPERATURE: Final = 14  # ID_Einst_HzMK1E_akt 260
     HEATING_CIRCUIT2_CURVE2_TEMPERATURE: Final = 15  # ID_Einst_HzMK1ANH_akt 290
     HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = 16  # ID_Einst_HzMK1ABS_akt 0
-    HEATSOURCE_DEFROST_AIR_THRESHOLD_TEMPERATURE: Final = (
+    # OutdoorTemp > 15 C° -> no defrost
+    HEATSOURCE_DEFROST_AIR_THRESHOLD_TEMPERATURE: Final = (  # 70 -> 7.0 C° - Über 7 C° Luftabtauung erlaubt, Unter 7 C° Abtauung nur über Kreisumkehr?
         44  # ID_Einst_TLAbt_akt" heatSourceDefrostAirThreshold  # "temp. air defrost"  7.0 C°
     )
+    #  "45   ID_Einst_LAbtTime_akt": "10",
     DHW_THERMAL_DESINFECTION_TARGET: Final = 47  # ID_Einst_LGST_akt
     PUMP_OPTIMIZATION: Final = 49  # ID_Einst_Popt_akt
     # P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"  # != 0 --> Has_Room_Temp

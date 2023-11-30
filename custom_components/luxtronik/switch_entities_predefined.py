@@ -5,6 +5,7 @@ from .const import (
     UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxMode,
+    Parameter_Config_SensorKey as LPC,
     Parameter_SensorKey as LP,
     Visibility_SensorKey as LV,
 )
@@ -15,19 +16,19 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     # ...
     # region Main heatpump
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.REMOTE_MAINTENANCE,
+        luxtronik_key=LPC.REMOTE_MAINTENANCE,
         icon="mdi:remote-desktop",
         entity_category=EntityCategory.CONFIG,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.EFFICIENCY_PUMP,
+        luxtronik_key=LPC.EFFICIENCY_PUMP,
         icon="mdi:leaf-circle",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.PUMP_HEAT_CONTROL,
+        luxtronik_key=LPC.PUMP_HEAT_CONTROL,
         icon="mdi:pump",
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
@@ -58,20 +59,20 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.PUMP_OPTIMIZATION,
+        luxtronik_key=LPC.PUMP_OPTIMIZATION,
         device_key=DeviceKey.heating,
         icon="mdi:tune",
         entity_category=EntityCategory.CONFIG,
         visibility=LV.PUMP_OPTIMIZATION,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.HEATING_THRESHOLD,
+        luxtronik_key=LPC.HEATING_THRESHOLD,
         device_key=DeviceKey.heating,
         icon="mdi:download-outline",
         entity_category=EntityCategory.CONFIG,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.HEATING_CIRCULATION_PUMP_DEAERATE,
+        luxtronik_key=LPC.HEATING_CIRCULATION_PUMP_DEAERATE,
         device_key=DeviceKey.heating,
         icon_by_state={True: "mdi:pump", False: "mdi:pump-off"},
         device_class=None,
@@ -96,7 +97,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.DHW_CIRCULATION_PUMP_DEAERATE,
+        luxtronik_key=LPC.DHW_CIRCULATION_PUMP_DEAERATE,
         device_key=DeviceKey.domestic_water,
         icon_by_state={True: "mdi:pump", False: "mdi:pump-off"},
         device_class=None,

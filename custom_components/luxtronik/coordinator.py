@@ -35,6 +35,10 @@ from .const import (
     DeviceKey,
     Calculation_SensorKey as LC,
     LuxMkTypes,
+    Parameter_All_SensorKey as LPA,
+    Parameter_Static_SensorKey as LPS,
+    Parameter_Calc_SensorKey as LPCalc,
+    Parameter_Config_SensorKey as LPC,
     Parameter_SensorKey as LP,
     Visibility_SensorKey as LV,
 )
@@ -303,8 +307,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def serial_number(self) -> str:
         """Return the serial number."""
-        serial_number_date = self.get_value(LP.SERIAL_NUMBER)
-        serial_number_hex = hex(int(self.get_value(LP.SERIAL_NUMBER_MODEL)))
+        serial_number_date = self.get_value(LPS.SERIAL_NUMBER)
+        serial_number_hex = hex(int(self.get_value(LPS.SERIAL_NUMBER_MODEL)))
         return f"{serial_number_date}-{serial_number_hex}".replace("x", "")
 
     @property
@@ -326,11 +330,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def firmware_version(self) -> str:
         """Return the heatpump firmware version."""
-        # return str(self.get_value(LC.FIRMWARE_VERSION))
-        value = []
-        for i in range(LC.FIRMWARE_VERSION.value, LC.FIRMWARE_VERSION.value + 9):
-            value.append(self.get_value(i))
-        return "".join([chr(c) for c in value]).strip("\x00")
+        return str(self.get_value(LC.FIRMWARE_VERSION))
+        # value = []
+        # for i in range(LC.FIRMWARE_VERSION.value, LC.FIRMWARE_VERSION.value + 9):
+        #     value.append(self.get_value(i))
+        # return "".join([chr(c) for c in value]).strip("\x00")
 
     @property
     def firmware_version_minor(self) -> int:
@@ -419,7 +423,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Is domestic water activated."""
         return bool(self.get_value(LV.DHW_TEMPERATURE))
 
-    def get_value(self, sensor_id: LP | LC | LV | int):
+    def get_value(self, sensor_id: LPA | LC | LV | int):
         """Get a sensor value from Luxtronik."""
         # sensor = self.get_sensor_by_id(str(group_sensor_id))
         sensor = self.get_sensor_by_id(sensor_id)
@@ -429,7 +433,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         # return correct_key_value(sensor.value, self.data, group_sensor_id)
 
     # def get_sensor_by_id(self, group_sensor_id: str):
-    def get_sensor_by_id(self, sensor_id: LP | LC | LV | int):
+    def get_sensor_by_id(self, sensor_id: LPA | LC | LV | int):
         """Get a sensor object by id from Luxtronik."""
     #     try:
     #         group = group_sensor_id.split(".")[0]
@@ -440,7 +444,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     # def get_sensor(self, group, sensor_id):
         """Get sensor by configured sensor ID."""
-        if isinstance(sensor_id, LP): # == CONF_PARAMETERS:
+        if isinstance(sensor_id, LPA) or isinstance(sensor_id, LPS) or isinstance(sensor_id, LP) or isinstance(sensor_id, LPC) or isinstance(sensor_id, LPCalc): # == CONF_PARAMETERS:
             # sensor = self.client.parameters[sensor_id.value]
             return self.client.parameters.get(sensor_id.value)
         elif isinstance(sensor_id, LV): #group == CONF_VISIBILITIES:
@@ -451,7 +455,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.client.visibilities.get(sensor_id.value)
         elif isinstance(sensor_id, int):
             # sensor = self.client.calculations[sensor_id]
-            return self.client.calculations.get(sensor_id.value)
+            return self.client.calculations.get(sensor_id)
 
     def _detect_cooling_mk(self):
         """We iterate over the mk sensors, detect cooling and return a list of parameters that are may show cooling is enabled."""
@@ -470,7 +474,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Detect and returns True if solar is present."""
         return (
             bool(self.get_value(LV.SOLAR))
-            or self.get_value(LP.SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
+            or self.get_value(LPCalc.SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
             or (
                 bool(self.get_value(LV.SOLAR_COLLECTOR))  # noqa: W503
                 and float(
@@ -490,7 +494,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def _detect_dhw_circulation_pump_present(self) -> bool:
         """Detect and returns True if solar is present."""
         try:
-            return int(self.get_value(LP.DHW_CHARGING_PUMP)) != 1
+            return int(self.get_value(LPCalc.DHW_CHARGING_PUMP)) != 1
         except Exception:  # pylint: disable=broad-except
             return False
 

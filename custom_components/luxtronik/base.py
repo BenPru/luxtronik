@@ -6,12 +6,14 @@ from datetime import datetime
 from typing import Any
 
 from homeassistant.backports.enum import StrEnum
+from homeassistant.components.number import NumberEntityDescription
 from homeassistant.components.sensor import RestoreSensor, SensorEntityDescription
 from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
 from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
@@ -98,9 +100,10 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
     def enrich_description(self, d: LuxtronikEntityDescription) -> None:
         d.key = d.luxtronik_key.name.lower()
-        d.icon = d.icon or UNIT_ICON_MAP.get(d.native_unit_of_measurement)
-        d.state_class = d.state_class or UNIT_STATE_CLASS_MAP.get(d.native_unit_of_measurement)
-        d.device_class = d.device_class or UNIT_DEVICE_CLASS_MAP.get(d.native_unit_of_measurement)
+        if isinstance(d, NumberEntityDescription) or isinstance(d, SensorEntityDescription):
+            d.icon = d.icon or UNIT_ICON_MAP.get(d.native_unit_of_measurement)
+            d.state_class = d.state_class or UNIT_STATE_CLASS_MAP.get(d.native_unit_of_measurement)
+            d.device_class = d.device_class or UNIT_DEVICE_CLASS_MAP.get(d.native_unit_of_measurement)
 
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
