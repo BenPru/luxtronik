@@ -9,7 +9,7 @@
   "after_dependencies": [],
   "codeowners": ["@BenPru"],
   "iot_class": "local_polling",
-  "version": "2023.10.31",
+  "version": "2023.11.29",
   "homeassistant": "2023.1.0",
   "dhcp": [
     { "macaddress": "000E8C*" },
