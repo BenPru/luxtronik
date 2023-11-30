@@ -60,12 +60,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
     """Home Assistant services."""
 
-    def write_parameter(service):
+    async def write_parameter(service):
         """Write a parameter to the Luxtronik heatpump."""
         parameter = service.data.get(ATTR_PARAMETER)
         value = service.data.get(ATTR_VALUE)
-        coordinator = LuxtronikCoordinator.connect(hass, entry)
-        coordinator.write(parameter, value)
+        data = hass.data[DOMAIN].get(entry.entry_id)
+        coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
+        await coordinator.async_write(parameter, value)
 
     hass.services.register(
         DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
