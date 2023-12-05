@@ -1,0 +1,844 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "evu_unlocked": {
+        "name": "HDO"
+      },
+      "compressor": {
+        "name": "Kompresor"
+      },
+      "compressor2": {
+        "name": "Kompresor 2"
+      },
+      "pump_flow": {
+        "name": "Čerpadlo"
+      },
+      "compressor_heater": {
+        "name": "Ohřev kompresoru"
+      },
+      "defrost_valve": {
+        "name": "Ventil odmrazování"
+      },
+      "additional_heat_generator": {
+        "name": "Přídavný zdroj tepla"
+      },
+      "disturbance_output": {
+        "name": "Stav systému"
+      },
+      "circulation_pump_heating": {
+        "name": "Oběhové čerpadlo vytápění"
+      },
+      "additional_circulation_pump": {
+        "name": "Přídavné oběhové čerpadlo"
+      },
+      "dhw_recirculation_pump": {
+        "name": "Recirkulace TUV"
+      },
+      "dhw_circulation_pump": {
+        "name": "Cirkulace TUV"
+      },
+      "dhw_charging_pump": {
+        "name": "Čerpadlo pro dobíjení ohřívače vody"
+      },
+      "solar_pump": {
+        "name": "Solární čerpadlo"
+      },
+      "approval_cooling": {
+        "name": "Ověření chladicího systému"
+      },
+      "defrost_end_flow_okay": {
+        "name": "Odtok odmrazování"
+      },
+      "motor_protection": {
+        "name": "Ochrana motoru"
+      }
+    },
+    "device": {
+      "heatpump": {
+        "name": "TČ"
+      },
+      "heating": {
+        "name": "Topení"
+      },
+      "domestic_water": {
+        "name": "TUV"
+      },
+      "cooling": {
+        "name": "Chlazení"
+      }
+    },
+    "switch": {
+      "remote_maintenance": {
+        "name": "Vzdálená údržba"
+      },
+      "efficiency_pump": {
+        "name": "Účinnost čerpadla"
+      },
+      "pump_heat_control": {
+        "name": "Ovládání čerpadla pro ohřev"
+      },
+      "heating": {
+        "name": "Automatický režim vytápění"
+      },
+      "pump_optimization": {
+        "name": "Optimalizace čerpadla"
+      },
+      "heating_threshold": {
+        "name": "Teplotní mez pro vytápění"
+      },
+      "domestic_water": {
+        "name": "Automatický režim ohřevu TUV"
+      },
+      "cooling": {
+        "name": "Chlazení"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Aktualizace firmware"
+      }
+    },
+    "number": {
+      "release_second_heat_generator": {
+        "name": "Odemčení druhého generátoru tepla"
+      },
+      "pump_optimization": {
+        "name": "Optimalizace čerpadla"
+      },
+      "heating_threshold": {
+        "name": "Teplotní mez pro vytápění"
+      },
+      "heating_target_correction": {
+        "name": "Korekce cílové teploty vytápění"
+      },
+      "heating_min_flow_out_temperature": {
+        "name": "Minimální teplota zpátečky vytápění"
+      },
+      "heating_circuit_curve1_temperature": {
+        "name": "Topná křivka 1"
+      },
+      "heating_circuit_curve2_temperature": {
+        "name": "Topná křivka 2"
+      },
+      "heating_circuit_curve_night_temperature": {
+        "name": "Noční topná křivka"
+      },
+      "heating_circuit2_curve1_temperature": {
+        "name": "Topná křivka 1 pro okruh 2"
+      },
+      "heating_circuit2_curve2_temperature": {
+        "name": "Topná křivka 2 pro okruh 2"
+      },
+      "heating_circuit2_curve_night_temperature": {
+        "name": "Noční topná křivka pro okruh 2"
+      },
+      "heating_circuit3_curve1_temperature": {
+        "name": "Topná křivka 1 pro okruh 3"
+      },
+      "heating_circuit3_curve2_temperature": {
+        "name": "Topná křivka 2 pro okruh 3"
+      },
+      "heating_circuit3_curve_night_temperature": {
+        "name": "Noční topná křivka pro okruh 3"
+      },
+      "dhw_target_temperature": {
+        "name": "Cílová teplota TUV"
+      },
+      "dhw_thermal_desinfection_target": {
+        "name": "Cílová teplota termální dezinfekce TUV"
+      },
+      "solar_pump_max_temperature_collector": {
+        "name": "Maximální teplota solárního kolektoru čerpadla"
+      },
+      "solar_pump_off_max_difference_temperature_boiler": {
+        "name": "Max. rozdíl teploty vypnutí solárního čerpadla kolektor/bojler"
+      },
+      "solar_pump_off_difference_temperature": {
+        "name": "Rozdíl teploty vypnutí solárního čerpadla kolektor/bojler"
+      },
+      "solar_pump_on_difference_temperature": {
+        "name": "Rozdíl teploty zapnutí solárního čerpadla kolektor/bojler"
+      },
+      "dhw_hysteresis": {
+        "name": "Hystereze TUV"
+      },
+      "heating_room_temperature_impact_factor": {
+        "name": "Faktor vlivu teploty místnosti na vytápění"
+      },
+      "heating_maximum_circulation_pump_speed": {
+        "name": "Maximální rychlost oběhového čerpadla při vytápění"
+      },
+      "heating_max_flow_out_increase_temperature": {
+        "name": "Maximální zvýšení teploty zpátečky vytápění"
+      },
+      "heating_hysteresis": {
+        "name": "Hystereze regulátoru vytápění"
+      },
+      "heating_night_lowering_to_temperature": {
+        "name": "Snížení teploty na noc"
+      },
+      "efficiency_pump_nominal": {
+        "name": "Nominální účinnost čerpadla"
+      },
+      "efficiency_pump_minimal": {
+        "name": "Minimální účinnost čerpadla"
+      },
+      "cooling_threshold_temperature": {
+        "name": "Minimální teplota pro chlazení"
+      },
+      "cooling_start_delay_hours": {
+        "name": "Zpoždění začátku chlazení"
+      },
+      "cooling_stop_delay_hours": {
+        "name": "Zpoždění konce chlazení"
+      },
+      "cooling_target_temperature_mk1": {
+        "name": "Cílová teplota chlazení MK1"
+      },
+      "cooling_target_temperature_mk2": {
+        "name": "Cílová teplota chlazení MK2"
+      },
+      "cooling_target_temperature_mk3": {
+        "name": "Cílová teplota chlazení MK3"
+      },
+      "heat_source_input_temperature_min": {
+        "name": "Minimální vstupní teplota zdroje tepla"
+      }
+    },
+    "sensor": {
+      "status": {
+        "name": "Stav",
+        "state": {
+          "heating": "Vytápění",
+          "hot water": "TUV",
+          "swimming pool/solar": "Bazén / Solární",
+          "evu": "Síťová blokáda",
+          "defrost": "Odmrazování",
+          "heating external source": "Vytápění z externího zdroje",
+          "cooling": "Chlazení",
+          "no request": "Prázdný chod (žádný požadavek)"
+        },
+        "state_attributes": {
+          "evu_text": {
+            "state": {
+              "evu_until": "Zbývá {evu_time} minut do konce blokování EVU.",
+              "evu_in": "EVU blokování za {evu_time} minut."
+            }
+          }
+        }
+      },
+      "error_reason": {
+        "name": "Poslední chyba",
+        "state": {
+          "701": "Nízkotlaková porucha",
+          "702": "Nízkotlakový zámek - RESET automaticky",
+          "703": "Ochrana proti mrazu\nProsím, volejte technika",
+          "704": "Porucha horkého plynu\n Reset automaticky za hh:mm",
+          "705": "Ochrana ventilátoru motoru\nProsím, volejte technika",
+          "706": "Ochrana motoru oběhového čerpadla\nProsím, volejte technika",
+          "707": "Kódování tepelného čerpadla\nProsím, volejte technika",
+          "708": "Snímač zpátečky\nProsím, volejte technika",
+          "709": "Snímač průtoku\nProsím, volejte technika",
+          "710": "Snímač horkého plynu\nProsím, volejte technika",
+          "711": "Snímač venkovní teploty\nProsím, volejte technika",
+          "712": "Snímač TUV\nProsím, volejte technika",
+          "713": "Snímač zdroje tepla - Zapnuto\nProsím, volejte technika",
+          "714": "Horký plyn pro ohřev vody - Reset automaticky za hh:mm",
+          "715": "Vypnutí vysokého tlaku - RESET automaticky",
+          "716": "Porucha vysokého tlaku\nProsím, volejte technika",
+          "717": "Průtokový snímač tepla\nProsím, volejte technika",
+          "718": "Max. venkovní teplota - RESET automaticky za hh:mm",
+          "719": "Min. venkovní teplota - RESET automaticky za hh:mm",
+          "720": "Teplota zdroje tepla - RESET automaticky za hh:mm",
+          "721": "Vypnutí nízkého tlaku - RESET automaticky",
+          "722": "Rozdíl teploty topné vody\nProsím, volejte technika",
+          "723": "Rozdíl teploty TUV\nProsím, volejte technika",
+          "724": "Rozdíl teploty odmrazování\nProsím, volejte technika",
+          "725": "Chyba v systému ohřevu vody\nProsím, volejte technika",
+          "726": "Snímač směšovacího okruhu 1\nProsím, volejte technika",
+          "727": "Tlak roztoku\nProsím, volejte technika",
+          "728": "Snímač vypnutí zdroje tepla\nProsím, volejte technika",
+          "729": "Chyba fáze\nProsím, volejte technika",
+          "730": "Výkon vytápění\nProsím, volejte technika",
+          "732": "Porucha chlazení\nProsím, volejte technika",
+          "733": "Porucha anody\nProsím, volejte technika",
+          "734": "Porucha anody\nProsím, volejte technika",
+          "735": "Snímač externího zdroje energie\nProsím, volejte technika",
+          "736": "Snímač solárního kolektoru\nProsím, volejte technika",
+          "737": "Snímač solární nádrže\nProsím, volejte technika",
+          "738": "Snímač směšovacího okruhu 2\nProsím, volejte technika",
+          "750": "Snímač externí zpátečky\nProsím, volejte technika",
+          "751": "Chyba monitorování fáze",
+          "752": "Chyba monitorování průtoku",
+          "755": "Ztráta spojení se Slave čerpadlem\nProsím, volejte technika",
+          "756": "Ztráta spojení s Master čerpadlem\nProsím, volejte technika",
+          "757": "Porucha nízkého tlaku u ohřívače vody",
+          "758": "Porucha odmrazování",
+          "759": "Zpráva o termální dezinfekci",
+          "760": "Porucha odmrazování",
+          "761": "Přerušené LIN spojení",
+          "762": "Snímač sacího kompresoru",
+          "763": "Snímač sacího výparníku",
+          "764": "Snímač ohřevu kompresoru",
+          "765": "Přehřátí",
+          "766": "Hranice použití kompresoru",
+          "767": "Omezovač teploty topného tělesa",
+          "770": "Nízké přehřátí",
+          "771": "Vysoké přehřátí",
+          "776": "Meze použití kompresoru",
+          "777": "Expanzní ventil",
+          "778": "Snímač nízkého tlaku",
+          "779": "Snímač vysokého tlaku",
+          "780": "Snímač EVI (Enhanced Vapour Injection)",
+          "781": "Snímač kapaliny před expanzním ventilem",
+          "782": "Snímač EVI (Enhanced Vapour Injection) sacího plynu",
+          "783": "Komunikace SEC-Inverter",
+          "784": "VSS uzamčeno",
+          "785": "Porucha desky SEC",
+          "786": "Komunikace SEC-Inverter",
+          "787": "Výstraha VD",
+          "788": "Závažná chyba měniče",
+          "789": "LIN/Kódování není k dispozici",
+          "790": "Závažná chyba měniče",
+          "791": "Ztráta ModBus spojení",
+          "792": "Přerušené LIN spojení",
+          "793": "Závažná chyba měniče",
+          "-1": "Neznámá chyba"
+        },
+        "state_attributes": {
+          "timestamp": {
+            "name": "Čas"
+          },
+          "cause": {
+            "name": "Příčina",
+            "state": {
+              "701": "Nízkotlakový přepínač v chladicím okruhu reagoval vícekrát (LW) nebo déle než 20 sekund (SW).",
+              "702": "Pouze u L\u002fW zařízení možné: Nízký tlak v chladicím okruhu reagoval. Po určité době automatický restart tepelného čerpadla.",
+              "703": "Pouze u L\u002fW zařízení možné: Pokud tepelné čerpadlo běží a teplota v předstihu je menší než 5 \u00b0C, rozpoznáno jako ochrana proti mrazu.",
+              "704": "Překročena maximální teplota v horkém plynovém okruhu. Automatický restart tepelného čerpadla po hh:mm.",
+              "705": "Pouze u L\u002fW zařízení možné: Spuštěn ochranný ventilátoru motoru.",
+              "706": "Pouze u S\u002fW a W\u002fW zařízení možné: Spuštěna ochrana čerpadla solanky nebo studené vody nebo kompresoru.",
+              "707": "Přerušení nebo zkrat v kódovacím mostu v tepelném čerpadle po prvním spuštění.",
+              "708": "Přerušení nebo zkrat v snímači zpátečky.",
+              "709": "Přerušení nebo zkrat v snímači předehřátí.\nŽádné vypnutí poruchy u S\u002fW a W\u002fW zařízení.",
+              "710": "Přerušení nebo zkrat v snímači horkého plynu v chladicím okruhu.",
+              "711": "Přerušení nebo zkrat v snímači venkovní teploty.\nŽádné vypnutí poruchy. Konstantní hodnota na -5 \u00b0C.",
+              "712": "Přerušení nebo zkrat v snímači teplé vody.\nŽádné vypnutí poruchy.",
+              "713": "Přerušení nebo zkrat v snímači teplého zdroje (Vstup).",
+              "714": "Tepelná hranice použití tepelného čerpadla překročena.\nPříprava teplé vody je uzamčena po hh:mm.",
+              "715": "Vysokotlakový přepínač v chladicím okruhu reagoval. Po určité době automatický restart tepelného čerpadla.",
+              "716": "Vysokotlakový přepínač v chladicím okruhu reagoval opakovaně.",
+              "717": "Průtokový spínač u W\u002fW zařízení reagoval během předplachovací doby nebo provozu.",
+              "718": "Pouze u L\u002fW zařízení možné: Venkovní teplota překročila povolenou maximální hodnotu.",
+              "719": "Pouze u L\u002fW zařízení možné: Venkovní teplota klesla pod povolenou minimální hodnotu.",
+              "720": "Pouze u S\u002fW a W\u002fW zařízení možné: Teplota na výstupu z parníku několikrát klesla pod bezpečnostní hodnotu. Automatický restart tepelného čerpadla po hh:mm.",
+              "721": "Nízkotlakový přepínač v chladicím okruhu reagoval. Po určité době automatický restart tepelného čerpadla (SW a WW).",
+              "722": "Teplotní diference při topné činnosti je negativní (=chybné).",
+              "723": "Teplotní diference při ohřevu teplé vody je negativní (=chybné).",
+              "724": "Teplotní diference v topné smyčce během odmrazování \u003e 15 K (nebezpečí mrazu).",
+              "725": "Porucha ohřevu teplé vody, požadovaná teplota zásobníku je podstatně nižší.",
+              "726": "Přerušení nebo zkrat v snímači směšovací smyčky 1.",
+              "727": "Nízkotlakový přepínač solanky reagoval během předplachovací doby nebo provozu.",
+              "728": "Přerušení nebo zkrat v snímači vypnutí teplého zdroje.",
+              "729": "Kompresor bez výkonu po zapnutí.",
+              "730": "Program vyhřívání nedokázal dosáhnout teplotní úrovně VZ v daném časovém intervalu. Program vyhřívání pokračuje.",
+              "732": "Topná voda byla několikrát pod 16 \u00b0C.",
+              "733": "Vstupní signál zámku cizího proudu reagoval.",
+              "734": "Chyba 733 trvá déle než dva týdny a ohřev teplé vody je uzamčen.",
+              "735": "Pouze s vestavěnou deskou Comfort-\u002frozšířením možné: Přerušení nebo zkrat ve snímači externího zdroje energie.",
+              "736": "Pouze s vestavěnou deskou Comfort-\u002frozšířením možné: Přerušení nebo zkrat ve snímači solárního kolektoru.",
+              "737": "Pouze s vestavěnou deskou Comfort-\u002frozšířením možné: Přerušení nebo zkrat ve snímači solární nádrže.",
+              "738": "Pouze s vestavěnou deskou Comfort-\u002frozšířením možné: Přerušení nebo zkrat ve snímači směšovací smyčky 2.",
+              "750": "Přerušení nebo zkrat ve snímači externího zpátečky.",
+              "751": "Fázové relé reagovalo.",
+              "752": "Fázové relé nebo průtokový spínač reagoval.",
+              "755": "Slave neodpovídá déle než 5 minut.",
+              "756": "Master neodpovídá déle než 5 minut.",
+              "757": "Nízkotlakový přepínač u zařízení s ohřevem vody reagoval vícekrát nebo déle než 20 sekund.",
+              "758": "Odmrazování bylo 5krát v řadě ukončeno kvůli příliš nízké teplotě předstihu.",
+              "759": "Termální dezinfekce nemohla být provedena správně 3krát v řadě.",
+              "760": "Odmrazování bylo 5krát v řadě ukončeno po maximální době (silný vítr narazil na výparník).",
+              "761": "LIN-Time out",
+              "762": "Chyba snímače sacího kompresoru.",
+              "763": "Chyba snímače sacího výparníku.",
+              "764": "Chyba snímače ohřevu kompresoru.",
+              "765": "Přehřátí trvající déle než 5 minut pod 2K.",
+              "766": "Provoz 5 minut mimo rozsah použití kompresoru.",
+              "767": "STB ohřívače na SEC bylo aktivováno.",
+              "770": "Přehřátí trvající déle než dlouhou dobu pod mezní hodnotou.",
+              "771": "Přehřátí trvající déle než dlouhou dobu nad mezní hodnotou.",
+              "776": "Kompresor pracuje déle než dlouhou dobu mimo své meze použití.",
+              "777": "Expanzní ventil je vadný.",
+              "778": "Snímač nízkého tlaku je vadný.",
+              "779": "Snímač vysokého tlaku je vadný.",
+              "780": "Snímač EVI je vadný.",
+              "781": "Snímač kapaliny před expanzním ventilem je vadný.",
+              "782": "Snímač EVI (Enhanced Vapour Injection) sacího plynu je vadný.",
+              "783": "Komunikace mezi SEC a Inverterem je narušena.",
+              "784": "Inverter je uzamčen.",
+              "785": "Chyba na desce SEC.",
+              "786": "Narušení komunikace mezi SEC a HZIO od SEC.",
+              "787": "Kompresor hlásí chybu.",
+              "788": "Chyba v Inverteru.",
+              "789": "Ovládací panel nemohl detekovat žádné kódování. Buď je přerušeno LIN spojení, nebo odpor kódování není rozpoznán.",
+              "790": "Chyba ve zdroji napájení Inverteru \u002f Kompresoru.",
+              "791": "Deska SEC není delší dobu dostupná. 791 se spustí, pokud byla nalezena deska HZIO (bez samostatného kódování), ale není na ní rozpoznána žádná deska SEC.",
+              "792": "Nelze najít žádný základní panel a žádná konfigurace.",
+              "793": "Chyba teploty v Inverteru.",
+              "-1": "Neznámá chyba"
+            }
+          },
+          "remedy": {
+            "name": "Oprava",
+            "state": {
+              "701": "Kontrola tepelného čerpadla na únik, spínače tlaku, odmrazování a minimální teplotu vzduchu.",
+              "702": "Kontrola tepelného čerpadla na únik, spínače tlaku, odmrazování a minimální teplotu vzduchu.",
+              "703": "Kontrola výkonu tepelného čerpadla, odmrazovacího ventilu a topného systému.",
+              "704": "Kontrola množství chladiva, výparu, přehřátí předehřátého, návratového proudu a minimální teploty vody.",
+              "705": "Kontrola ventilátoru.",
+              "706": "Kontrola nastavených hodnot, kompresoru, BOSUP.",
+              "707": "Kontrola odporu kódování v tepelném čerpadle, konektoru a připojovacím vedení.",
+              "708": "Kontrola zpětného chladiče, konektoru a připojovacím vedení.",
+              "709": "Kontrola předehřívače, konektoru a připojovacím vedení.",
+              "710": "Kontrola čidla horkého plynu, konektoru a připojovacím vedení.",
+              "711": "Kontrola čidla venkovní teploty, konektoru a připojovacím vedení.",
+              "712": "Kontrola čidla teplé vody, konektoru a připojovacím vedení.",
+              "713": "Kontrola čidla zdroje tepla, konektoru a připojovacím vedení.",
+              "714": "Kontrola průtoku teplé vody, výměníku tepla, teploty teplé vody a oběhového čerpadla teplé vody.",
+              "715": "Kontrola průtoku teplé vody, odtokového potrubí, teploty a kondenzace.",
+              "716": "Kontrola průtoku teplé vody, odtokového potrubí, teploty a kondenzace.",
+              "717": "Kontrola průtoku, spínače bodu rosy, filtru, volného vzduchu.",
+              "718": "Kontrola venkovní teploty a nastavené hodnoty.",
+              "719": "Kontrola venkovní teploty a nastavené hodnoty.",
+              "720": "Kontrola průtoku, filtru, volného vzduchu, teploty.",
+              "721": "Kontrola spínače tlaku, průtoku strany WQ.",
+              "722": "Kontrola funkce a umístění čidel před a za odběrem.",
+              "723": "Kontrola funkce a umístění čidel před a za odběrem.",
+              "724": "Kontrola funkce a umístění čidel před a za odběrem, výkonu HUP, přepadu a topných okruhů.",
+              "725": "Kontrola oběhového čerpadla teplé vody, plnění zásobníku, uzávěrky a trojcestného ventilu. Odvzdušnění topné vody a teplé vody.",
+              "726": "Kontrola čidla míchacího okruhu, konektoru a připojovacím vedení.",
+              "727": "Kontrola tlaku solárního kolektoru a tlakového spínače solárního kolektoru.",
+              "728": "Kontrola čidla zdroje tepla, konektoru a připojovacím vedení.",
+              "729": "Kontrola otáček a kompresoru.",
+              "730": "Kontrola spotřeby výkonu během ohřevu.",
+              "731": "Kontrola čidla zdroje tepla, výparu a bodu rosy.",
+              "732": "Kontrola směšovače a oběhového čerpadla pro vytápění.",
+              "733": "Kontrola připojovacího vedení anody a potenciostatu. Naplnění zásobníku teplé vody.",
+              "734": "Dočasné potvrzení chyby pro obnovení přípravy teplé vody. Opravte chybu 733.",
+              "735": "Kontrola čidla externího zdroje energie, konektoru a připojovacího vedení.",
+              "736": "Kontrola čidla solárního kolektoru, konektoru a připojovacího vedení.",
+              "737": "Kontrola čidla solárního zásobníku, konektoru a připojovacího vedení.",
+              "738": "Kontrola čidla směšovacího okruhu 2, konektoru a připojovacího vedení.",
+              "750": "Kontrola externího zpětného chladiče, konektoru a připojovacího vedení.",
+              "751": "Kontrola otáček a relé pořadí fází.",
+              "752": "Viz chyby č. 751 a č. 717.",
+              "755": "Kontrola síťového připojení, přepínače a IP adres. Případně znovu spusťte hledání tepelného čerpadla.",
+              "756": "Kontrola síťového připojení, přepínače a IP adres. Případně znovu spusťte hledání tepelného čerpadla.",
+              "757": "Při třikrát opakovaném výskytu této poruchy může být zařízení odemčeno pouze autorizovaným servisním personálem!",
+              "758": "Kontrola průtoku a čidla předehřátého.",
+              "759": "Kontrola nastavení druhého zdroje tepla a bezpečnostního teplotního omezovače.",
+              "760": "Ochrana ventilátoru a výparníku před silným větrem.",
+              "761": "Kontrola kabelu/kontaktu.",
+              "762": "Kontrola čidla, případně jeho výměna.",
+              "763": "Kontrola čidla, případně jeho výměna.",
+              "764": "Kontrola čidla, případně jeho výměna.",
+              "765": "Při prvním zapnutí. Kontrola otáček, jinak kontaktujte servis.",
+              "766": "Kontrola otáček.",
+              "767": "Kontrola topného tělesa a znovu zasunutí pojistky.",
+              "770": "Kontrola teplotního čidla, tlakového snímače a expanzního ventilu.",
+              "771": "Kontrola teplotního čidla, tlakového snímače, naplnění a expanzního ventilu.",
+              "776": "Kontrola termodynamiky.",
+              "777": "Kontrola expanzního ventilu, připojovacího kabelu a případně desky SEC.",
+              "778": "Kontrola čidla, konektoru a připojovacího vedení.",
+              "779": "Kontrola čidla, konektoru a připojovacího vedení.",
+              "780": "Kontrola čidla, konektoru a připojovacího vedení.",
+              "781": "Kontrola čidla, konektoru a připojovacího vedení.",
+              "782": "Kontrola čidla, konektoru a připojovacího vedení.",
+              "783": "Kontrola připojovacího kabelu, kondenzátorů proti rušení a kabelování.",
+              "784": "Kompletní odpojení zařízení na 2 minuty od napájení. Při opakovaném výskytu zkontrolujte invertor a kompresor.",
+              "785": "Výměna desky SEC.",
+              "786": "Kontrola kabelového spojení HZ/IO SEC-Board.",
+              "787": "Potvrzení poruchy. Pokud chyba opakovaně nastane, kontaktujte autorizovaný servis (tj. zákaznický servis).",
+              "788": "Kontrola invertoru.",
+              "789": "Kontrola připojovacího kabelu LIN/kodovacího odporu.",
+              "790": "Kontrola kabelování, invertoru a kompresoru.",
+              "791": "Pokud jde o konfiguraci SEC, zkontrolujte ModBus kabel mezi HZ/IO a deskou SEC. Stejně tak zkontrolujte DESKU SEC, zda vše bliká, jak má. Pokud to není konfigurace s deskou SEC (například u zařízení P184), pak zkontrolujte kodovací odpor HZ/IO.",
+              "792": "Kontrola kódovacího konektoru na desce LIN.",
+              "793": "Chyba se opraví automaticky."
+            }
+          }
+        }
+      },
+      "switchoff_reason": {
+        "name": "Vypnutí",
+        "state": {
+          "0": "Porucha tepelného čerpadla",
+          "1": "Porucha zařízení",
+          "2": "Režim druhého zdroje tepla",
+          "3": "Blokováno distribučním subjektem",
+          "4": "",
+          "5": "Běh odmrazování (pouze u nízkoteplotních zařízení)",
+          "6": "Teplota dosáhla maximální povolené úrovně",
+          "7": "Teplota dosáhla minimální povolené úrovně",
+          "8": "Nízká úroveň povolené teploty",
+          "9": "Žádný požadavek",
+          "11": "Průtok v tepelném zdroji",
+          "-1": "Neznámé vypnutí"
+        },
+        "state_attributes": {
+          "timestamp": {
+            "name": "Časová známka"
+          },
+          "code_1": {
+            "name": "Předposlední vypnutí",
+            "state": {
+              "0": "Porucha tepelného čerpadla",
+              "1": "Porucha zařízení",
+              "2": "Režim druhého zdroje tepla",
+              "3": "Blokováno distribučním subjektem",
+              "4": "",
+              "5": "Běh odmrazování (pouze u nízkoteplotních zařízení)",
+              "6": "Teplota dosáhla maximální povolené úrovně",
+              "7": "Teplota dosáhla minimální povolené úrovně",
+              "8": "Nízká úroveň povolené teploty",
+              "9": "Žádný požadavek",
+              "11": "Průtok v tepelném zdroji",
+              "-1": "Neznámé vypnutí"
+            }
+          },
+          "timestamp_1": {
+            "name": "Předposlední časový okamžik"
+          },
+          "code_2": {
+            "name": "Předpředposlední důvod vypnutí",
+            "state": {
+              "0": "Porucha tepelného čerpadla",
+              "1": "Porucha zařízení",
+              "2": "Režim druhého topného zařízení",
+              "3": "Blokáda distribuční sítě",
+              "4": "",
+              "5": "Automatické odmrazování (pouze u vzduchovodních zařízení s chlazením)",
+              "6": "Maximální teplotní limit provozu",
+              "7": "Minimální teplotní limit provozu",
+              "8": "Nižší limit provozu",
+              "9": "Žádný požadavek na vytápění",
+              "11": "Průtok teplého média tepelnou čerpadlem",
+              "-1": "Neznámé vypnutí"
+            },
+            "timestamp_2": {
+              "name": "Předpředposlední časový okamžik"
+            }
+          },
+          "code_3": {
+            "name": "Třetí předposlední důvod vypnutí",
+            "state": {
+              "0": "Porucha tepelného čerpadla",
+              "1": "Porucha zařízení",
+              "2": "Režim druhého topného zařízení",
+              "3": "Blokáda distribuční sítě",
+              "4": "",
+              "5": "Automatické odmrazování (pouze u vzduchovodních zařízení s chlazením)",
+              "6": "Maximální teplotní limit provozu",
+              "7": "Minimální teplotní limit provozu",
+              "8": "Nižší limit provozu",
+              "9": "Žádný požadavek na vytápění",
+              "11": "Průtok teplého média tepelnou čerpadlem",
+              "-1": "Neznámé vypnutí"
+            }
+          },
+          "timestamp_3": {
+            "name": "Čtvrtý předposlední časový okamžik"
+          },
+          "code_4": {
+            "name": "Páté předposlední vypnutí",
+            "state": {
+              "0": "Porucha tepelného čerpadla",
+              "1": "Porucha zařízení",
+              "2": "Režim druhého topného zařízení",
+              "3": "Blokáda distribuční sítě",
+              "4": "",
+              "5": "Automatické odmrazování (pouze u vzduchovodních zařízení s chlazením)",
+              "6": "Maximální teplotní limit provozu",
+              "7": "Minimální teplotní limit provozu",
+              "8": "Nižší limit provozu",
+              "9": "Žádný požadavek na vytápění",
+              "11": "Průtok teplého média tepelnou čerpadlem",
+              "-1": "Neznámé vypnutí"
+            }
+          },
+          "timestamp_4": {
+            "name": "Pátý předposlední časový okamžik"
+          }
+        }
+      },
+      "status_line_1": {
+        "name": "Stav 1",
+        "state": {
+          "heatpump running": "Tepelné čerpadlo běží",
+          "heatpump idle": "Tepelné čerpadlo je v klidovém režimu",
+          "heatpump coming": "Tepelné čerpadlo se spouští",
+          "heatpump shutdown": "Tepelné čerpadlo vypíná",
+          "errorcode slot": "Chybový kód tepelného čerpadla ve slotu 0",
+          "pump forerun": "Předehřev čerpadla",
+          "defrost": "Odmrazování",
+          "waiting on LIN connection": "Čeká na LIN připojení",
+          "compressor heating up": "Kompresor se zahřívá",
+          "compressor heater": "Ohřev kompresoru"
+        }
+      },
+      "status_line_2": {
+        "name": "Stav 2",
+        "state": {
+          "since": "od",
+          "in": "za",
+          "unknown": "neznámo"
+        }
+      },
+      "status_line_3": {
+        "name": "Stav 3",
+        "state": {
+          "heating": "ohřívá",
+          "defrost": "odmrazuje",
+          "cooling": "chladí",
+          "pump forerun": "předehřev čerpadla",
+          "thermal desinfection": "tepelná dezinfekce",
+          "swimming pool/solar": "bazén/soláry",
+          "no request": "žádný požadavek",
+          "cycle lock": "blokování cyklu",
+          "lock time": "dobadání",
+          "domestic water": "teplá voda",
+          "flow monitoring": "monitorování průtoku",
+          "grid switch on delay": "zpoždění při zapnutí sítě",
+          "info bake out program": "informace z programu pečení",
+          "heating external engery source": "ohřev z externího zdroje energie",
+          "domestic water external energy source": "teplá voda z externího zdroje energie",
+          "second heat generator 1 active": "druhý generátor tepla 1 aktivní"
+        }
+      },
+      "heat_source_output": {
+        "name": "Výstup tepla"
+      },
+      "heat_source_input_temperature": {
+        "name": "Vstup tepla"
+      },
+      "outdoor_temperature": {
+        "name": "Venkovní teplota"
+      },
+      "status_time": {
+        "name": "Čas stavu"
+      },
+      "outdoor_temperature_average": {
+        "name": "Průměrná venkovní teplota"
+      },
+      "compressor1_impulses": {
+        "name": "Impulsů kompresoru 1"
+      },
+      "compressor1_operation_hours": {
+        "name": "Hodiny provozu kompresoru 1"
+      },
+      "compressor2_impulses": {
+        "name": "Impulsů kompresoru 2"
+      },
+      "compressor2_operation_hours": {
+        "name": "Hodiny provozu kompresoru 2"
+      },
+      "operation_hours": {
+        "name": "Celkové hodiny provozu"
+      },
+      "heat_amount_counter": {
+        "name": "Množství tepla"
+      },
+      "hot_gas_temperature": {
+        "name": "Teplota horkého plynu"
+      },
+      "suction_compressor_temperature": {
+        "name": "Teplota sacího kompresoru"
+      },
+      "suction_evaporator_temperature": {
+        "name": "Teplota sacího vypařovače"
+      },
+      "compressor_heating_temperature": {
+        "name": "Teplota ohřevu kompresoru"
+      },
+      "overheating_temperature": {
+        "name": "Přetápěcí teplota"
+      },
+      "overheating_target_temperature": {
+        "name": "Cílová přetápěcí teplota"
+      },
+      "high_pressure": {
+        "name": "Vysoký tlak"
+      },
+      "low_pressure": {
+        "name": "Nízký tlak"
+      },
+      "additional_heat_generator_operation_hours": {
+        "name": "Hodiny provozu dodatečného zdroje tepla"
+      },
+      "analog_out1": {
+        "name": "Analogový výstup 1"
+      },
+      "analog_out2": {
+        "name": "Analogový výstup 2"
+      },
+      "current_heat_output": {
+        "name": "Aktuální výkon"
+      },
+      "additional_heat_generator_amount_counter": {
+        "name": "Množství tepla dodatečného zdroje"
+      },
+      "heat_source_output_temperature": {
+        "name": "Teplota výstupu tepla"
+      },
+      "pump_frequency": {
+        "name": "Frekvence čerpadla"
+      },
+      "domestic_water": {
+        "name": "TUV"
+      },
+      "dhw_temperature": {
+        "name": "Teplota TUV"
+      },
+      "dhw_operation_hours": {
+        "name": "Hodiny provozu TUV"
+      },
+      "dhw_heat_amount": {
+        "name": "Množství tepla pro TUV"
+      },
+      "dhw_energy_input": {
+        "name": "Spotřebovaná energie pro TUV"
+      },
+      "flow_in_temperature": {
+        "name": "Teplota přívodu"
+      },
+      "flow_out_temperature": {
+        "name": "Teplota zpátečky"
+      },
+      "flow_out_temperature_target": {
+        "name": "Cílová teplota zpátečky"
+      },
+      "operation_hours_heating": {
+        "name": "Hodiny provozu topení"
+      },
+      "heat_amount_heating": {
+        "name": "Množství tepla pro topení"
+      },
+      "heat_amount_flow_rate": {
+        "name": "Množství tepla"
+      },
+      "heat_source_flow_rate": {
+        "name": "Průtok zdroje vytápění"
+      },
+      "heat_energy_input": {
+        "name": "Spotřebovaná energie pro topení"
+      },
+      "flow_out_temperature_external": {
+        "name": "Teplota vnějšího zpátečky"
+      },
+      "solar_collector_temperature": {
+        "name": "Teplota solárního kolektoru"
+      },
+      "solar_buffer_temperature": {
+        "name": "Teplota solárního zásobníku"
+      },
+      "operation_hours_solar": {
+        "name": "Hodiny provozu solárního zařízení"
+      },
+      "operation_hours_cooling": {
+        "name": "Hodiny provozu chlazení"
+      },
+      "room_thermostat_temperature": {
+        "name": "Teplota termostatu místnosti"
+      },
+      "room_thermostat_temperature_target": {
+        "name": "Cílová teplota termostatu místnosti"
+      },
+      "pump_flow_delta_target": {
+        "name": "Cílový rozdíl průtoku čerpadla"
+      },
+      "pump_flow_delta": {
+        "name": "Rozdíl průtoku čerpadla"
+      },
+      "circulation_pump_delta_target": {
+        "name": "Cílový rozdíl průtoku oběhového čerpadla"
+      },
+      "circulation_pump_delta": {
+        "name": "Rozdíl průtoku oběhového čerpadla"
+      }
+    },
+    "climate": {
+      "heating": {
+        "name": "Topení"
+      },
+      "cooling": {
+        "name": "Chlazení"
+      }
+    },
+    "water_heater": {
+      "domestic_water": {
+        "name": "TUV"
+      }
+    }
+  },
+  "config": {
+    "abort": {
+      "already_configured": "Toto zařízení je již nakonfigurováno.",
+      "already_in_progress": "Konfigurační proces již probíhá.",
+      "cannot_connect": "Připojení k Luxtronik selhalo.\nZkontrolujte prosím IP adresu/hostname a port.\n\nChyba:\n{connect_error}",
+      "no_devices_found": "V síti nebyla nalezena žádná zařízení.",
+      "single_instance_allowed": "Již nakonfigurováno. Pouze jedna konfigurace je povolena.",
+      "unknown": "Neočekávaná chyba"
+    },
+    "error": {
+      "address": "Zadána neplatná vzdálená adresa. Adresa musí být IP adresa nebo platný hostname.",
+      "address_in_use": "Vybraný port je na tomto systému již používán.",
+      "unknown": "Neočekávaná chyba"
+    },
+    "step": {
+      "user": {
+        "description": "Připojení tepelného čerpadla s Luxtronik controllerem k Home Assistantu.",
+        "data": {
+          "host": "Hostitel",
+          "port": "Síťový port",
+          "timeout": "Časový limit síťového socketu (sekundy)",
+          "max_data_length": "Maximální délka datového balíčku"
+        },
+        "data_description": {
+          "host": "Název hostitele, nebo IP adresa",
+          "port": "Obvykle 8889 nebo 8888",
+          "timeout": "Pokud je síť nebo tepelné čerpadlo pomalé, můžete zde jemně nastavit časový limit.",
+          "max_data_length": "Pokud je síť nebo tepelné čerpadlo pomalé, můžete zde jemně nastavit maximální délku datového balíčku."
+        }
+      },
+      "options": {
+        "description": "Nastavení pro Luxtronik tepelné čerpadlo {name}.\nTato nastavení lze později změnit v rámci integrací.",
+        "data": {
+          "ha_sensor_indoor_temperature": "ID senzoru pro vnitřní teplotu",
+          "control_mode_home_assistant": "Experimentální!: Řídit stav termostatu Zap/Vyp pomocí Home Assistant.",
+          "ha_sensor_prefix": "Předpona ID entity"
+        },
+        "data_description": {
+          "ha_sensor_indoor_temperature": "V Home Assistantu bude vytvořen termostat pro řízení vytápění. Skutečná teplota bude určena senzorem v Home Assistantu.\nPokud je Luxtronik připojena k hardwarovému termostatu místnosti, toto pole by mělo zůstat prázdné.",
+          "control_mode_home_assistant": "Pokud je termostat Home Assistant v režimu nečinnosti, stav Vypnutí bude odeslán Luxtronikem a Luxtronik nebude moci toto zařízení spustit.",
+          "ha_sensor_prefix": "Důležité, pokud jsou použity více tepelných čerpadel.\nPři použití jednoho lze použít jednoduše 'luxtronik'."
+        }
+      }
+    }
+  },"options": {
+    "step": {
+      "user": {
+        "description": "Nastavení pro tepelné čerpadlo Luxtronik {name}.",
+        "data": {
+          "ha_sensor_indoor_temperature": "ID senzoru pro vnitřní teplotu",
+          "control_mode_home_assistant": "Experimentální!: Řídit stav termostatu Zap/Vyp pomocí Home Assistant.",
+          "ha_sensor_prefix": "Předpona ID entity"
+        },
+        "data_description": {
+          "ha_sensor_indoor_temperature": "V Home Assistantu bude vytvořen termostat pro řízení vytápění. Skutečná teplota bude určena senzorem v Home Assistantu.\nPokud je Luxtronik připojena k hardwarovému termostatu místnosti, toto pole by mělo zůstat prázdné.",
+          "control_mode_home_assistant": "Pokud je termostat Home Assistant v režimu nečinnosti, stav Vypnutí bude odeslán Luxtronikem a Luxtronik nebude moci toto zařízení spustit.",
+          "ha_sensor_prefix": "Důležité, pokud jsou použity více tepelných čerpadel.\nPři použití jednoho lze použít jednoduše 'luxtronik'."
+        }
+      }
+    }
+  }  
+}
