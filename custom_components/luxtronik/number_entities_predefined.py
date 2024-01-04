@@ -408,14 +408,14 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         factor=0.1,
-        extra_attributes=[
+        extra_attributes=(
             attr(
                 SA.LAST_THERMAL_DESINFECTION,
                 LC.C0017_DHW_TEMPERATURE,
                 SensorAttrFormat.TIMESTAMP_LAST_OVER,
                 True,
             ),
-        ],
+        ),
     ),
     # region Solar
     LuxtronikNumberDescription(
