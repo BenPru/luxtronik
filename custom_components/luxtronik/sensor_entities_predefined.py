@@ -46,12 +46,12 @@ SENSORS_STATUS: list[descr] = [
         luxtronik_key=LC.C0080_STATUS,
         icon_by_state=LUX_STATE_ICON_MAP,
         device_class=SensorDeviceClass.ENUM,
-        extra_attributes=[
+        extra_attributes=(
             attr(SA.EVU_FIRST_START_TIME, LC.UNSET, None, True),
             attr(SA.EVU_FIRST_END_TIME, LC.UNSET, None, True),
             attr(SA.EVU_SECOND_START_TIME, LC.UNSET, None, True),
             attr(SA.EVU_SECOND_END_TIME, LC.UNSET, None, True),
-        ],
+        ),
         options=[e.value for e in LuxOperationMode],
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
@@ -79,7 +79,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfTime.SECONDS,
         entity_registry_visible_default=False,
         native_precision=0,
-        extra_attributes=[
+        extra_attributes=(
             attr(SA.STATUS_TEXT, LC.C0120_STATUS_TIME, SensorAttrFormat.HOUR_MINUTE),
             attr(SA.TIMER_HEATPUMP_ON, LC.C0067_TIMER_HEATPUMP_ON),
             attr(SA.TIMER_ADD_HEAT_GENERATOR_ON, LC.C0068_TIMER_ADD_HEAT_GENERATOR_ON),
@@ -94,7 +94,7 @@ SENSORS: list[descr] = [
             attr(SA.TIMER_BLOCK_DHW, LC.C0077_TIMER_BLOCK_DHW),
             attr(SA.TIMER_DEFROST, LC.C0141_TIMER_DEFROST),
             attr(SA.TIMER_HOT_GAS, LC.C0158_TIMER_HOT_GAS),
-        ],
+        ),
     ),
     descr(
         key=SensorKey.STATUS_LINE_1,
@@ -436,12 +436,12 @@ SENSORS: list[descr] = [
         key=SensorKey.ERROR_REASON,
         luxtronik_key=LC.C0100_ERROR_REASON,
         icon="mdi:alert",
-        extra_attributes=[
+        extra_attributes=(
             attr(SA.TIMESTAMP, LC.C0095_ERROR_TIME),
             attr(SA.CODE, LC.C0100_ERROR_REASON),
             attr(SA.CAUSE, LC.C0100_ERROR_REASON),
             attr(SA.REMEDY, LC.C0100_ERROR_REASON),
-        ],
+        ),
     ),
     # endregion Main heatpump
     # region Heating
@@ -454,13 +454,13 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        extra_attributes=[
+        extra_attributes=(
             attr(
                 SA.MAX_ALLOWED,
                 LP.P0149_FLOW_IN_TEMPERATURE_MAX_ALLOWED,
                 SensorAttrFormat.CELSIUS_TENTH,
             ),
-        ],
+        ),
     ),
     descr(
         key=SensorKey.FLOW_OUT_TEMPERATURE,
@@ -481,13 +481,13 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        extra_attributes=[
+        extra_attributes=(
             attr(
                 SA.SWITCH_GAP,
                 LC.C0011_FLOW_OUT_TEMPERATURE,
                 SensorAttrFormat.SWITCH_GAP,
             ),
-        ],
+        ),
     ),
     descr(
         key=SensorKey.OPERATION_HOURS_HEATING,
