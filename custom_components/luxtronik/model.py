@@ -80,9 +80,7 @@ class LuxtronikEntityDescription(EntityDescription):
     invisible_if_value: Any | None = None
     min_firmware_version_minor: FirmwareVersionMinor | None = None
 
-    extra_attributes: list[LuxtronikEntityAttributeDescription] = field(
-        default_factory=list
-    )
+    extra_attributes: tuple(LuxtronikEntityAttributeDescription) = ()
     state_class: str | None = None
 
 
