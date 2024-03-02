@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 import threading
@@ -319,7 +320,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         ver = self.firmware_version
         if ver is None:
             return 0
-        return int(ver.split(".")[1])
+        return int(re.sub('[^0-9]','', ver.split(".")[1]))
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
