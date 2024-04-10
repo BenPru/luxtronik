@@ -392,7 +392,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         weekday = datetime.today().weekday()
         evu_pause = 0
         if not self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
-                evu_pause += 1440
+                evu_pause += (24 - datetime.now().hour)*60 - datetime.now().minute
                 for i in range(1, 7):
                     if weekday+i > 6:
                         i = -7+i
