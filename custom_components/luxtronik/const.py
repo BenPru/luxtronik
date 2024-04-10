@@ -731,6 +731,7 @@ class SensorAttrKey(StrEnum):
     EVU_SECOND_START_TIME = "EVU_second_start_time"
     EVU_SECOND_END_TIME = "EVU_second_end_time"
     EVU_MINUTES_UNTIL_NEXT_EVENT = "EVU_minutes_until_next_event"
+    EVU_DAYS = "EVU_days"
     TIMESTAMP = "timestamp"
     CODE = "code"
     CAUSE = "cause"
