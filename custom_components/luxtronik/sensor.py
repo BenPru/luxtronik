@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time, timezone
+import calendar
 from decimal import Decimal
 from typing import Any
 
@@ -182,12 +183,12 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     _coordinator: LuxtronikCoordinator
     _last_state: StateType | date | datetime | Decimal = None
 
-    _attr_cache: dict[SA, time] = {}
+    _attr_cache: dict[SA, object] = {}
     _attr_cache[SA.EVU_FIRST_START_TIME] = time.min
     _attr_cache[SA.EVU_FIRST_END_TIME] = time.min
     _attr_cache[SA.EVU_SECOND_START_TIME] = time.min
     _attr_cache[SA.EVU_SECOND_END_TIME] = time.min
-    _attr_cache[SA.EVU_DAYS] = []
+    _attr_cache[SA.EVU_DAYS] = list()
 
     _unrecorded_attributes = frozenset(
         LuxtronikSensorEntity._unrecorded_attributes
@@ -324,6 +325,9 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
             self._attr_cache[SA.EVU_SECOND_END_TIME]
         )
+        attr[SA.EVU_DAYS] = self._wd_txt(
+            self._attr_cache[SA.EVU_DAYS]
+        )
         self._enrich_extra_attributes()
         self.async_write_ha_state()
 
@@ -431,6 +435,14 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
 
     def _tm_txt(self, value: time) -> str:
         return "" if value == time.min else value.strftime("%H:%M")
+
+    def _wd_txt(self, value: list) -> str:
+        if not value:
+            return ""
+        days = []
+        for i in value:
+            days.append(calendar.day_name[i])
+        return ','.join(days)
 
     def _restore_attr_value(self, value: Any | None) -> Any:
         if value is None or ":" not in str(value):
