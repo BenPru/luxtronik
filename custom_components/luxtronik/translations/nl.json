@@ -212,7 +212,7 @@
                     "evu": "Netwerkblokkering",
                     "defrost": "Ontdooien",
                     "heating external source": "Warmte van externe bron",
-                    "cooling": "K\u000bkhlen",
+                    "cooling": "Koelen",
                     "no request": "Inactief (geen verzoek)"
                 },
                 "state_attributes": {
