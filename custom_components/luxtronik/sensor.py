@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time, timezone
+import calendar
 from decimal import Decimal
 from typing import Any
 
@@ -182,11 +183,12 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     _coordinator: LuxtronikCoordinator
     _last_state: StateType | date | datetime | Decimal = None
 
-    _attr_cache: dict[SA, time] = {}
+    _attr_cache: dict[SA, object] = {}
     _attr_cache[SA.EVU_FIRST_START_TIME] = time.min
     _attr_cache[SA.EVU_FIRST_END_TIME] = time.min
     _attr_cache[SA.EVU_SECOND_START_TIME] = time.min
     _attr_cache[SA.EVU_SECOND_END_TIME] = time.min
+    _attr_cache[SA.EVU_DAYS] = list()
 
     _unrecorded_attributes = frozenset(
         LuxtronikSensorEntity._unrecorded_attributes
@@ -198,6 +200,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             SA.EVU_SECOND_START_TIME,
             SA.EVU_SECOND_END_TIME,
             SA.EVU_MINUTES_UNTIL_NEXT_EVENT,
+            SA.EVU_DAYS,
         }
     )
 
@@ -212,6 +215,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         super()._handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
+        weekday = datetime.today().weekday()
         if self._attr_native_value is None or self._last_state is None:
             pass
         elif self._attr_native_value == evu and str(self._last_state) != evu:
@@ -228,6 +232,8 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                 self._attr_cache[SA.EVU_FIRST_START_TIME] = time_now
             else:
                 self._attr_cache[SA.EVU_SECOND_START_TIME] = time_now
+                if weekday not in self._attr_cache[SA.EVU_DAYS]:
+                    self._attr_cache[SA.EVU_DAYS].append(weekday)
         elif self._attr_native_value != evu and str(self._last_state) == evu:
             # evu end
             if (
@@ -319,6 +325,9 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
             self._attr_cache[SA.EVU_SECOND_END_TIME]
         )
+        attr[SA.EVU_DAYS] = self._wd_txt(
+            self._attr_cache[SA.EVU_DAYS]
+        )
         self._enrich_extra_attributes()
         self.async_write_ha_state()
 
@@ -384,7 +393,19 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         if evu_time == time.min:
             return None
         evu_hours = (24 if evu_time < time_now else 0) + evu_time.hour
-        return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute
+        weekday = datetime.today().weekday()
+        evu_pause = 0
+        if not self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
+                evu_pause += (24 - datetime.now().hour)*60 - datetime.now().minute
+                for i in range(1, 7):
+                    if weekday+i > 6:
+                        i = -7+i
+                    if weekday+i in self._attr_cache[SA.EVU_DAYS]:
+                        return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute + evu_pause
+                    else:
+                        evu_pause += 1440
+        else:
+            return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute
 
     def _get_next_evu_event_time(self) -> time:
         event: time = time.min
@@ -414,6 +435,14 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
 
     def _tm_txt(self, value: time) -> str:
         return "" if value == time.min else value.strftime("%H:%M")
+
+    def _wd_txt(self, value: list) -> str:
+        if not value:
+            return ""
+        days = []
+        for i in value:
+            days.append(calendar.day_name[i])
+        return ','.join(days)
 
     def _restore_attr_value(self, value: Any | None) -> Any:
         if value is None or ":" not in str(value):

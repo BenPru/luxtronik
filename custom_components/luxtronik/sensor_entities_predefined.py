@@ -51,6 +51,7 @@ SENSORS_STATUS: list[descr] = [
             attr(SA.EVU_FIRST_END_TIME, LC.UNSET, None, True),
             attr(SA.EVU_SECOND_START_TIME, LC.UNSET, None, True),
             attr(SA.EVU_SECOND_END_TIME, LC.UNSET, None, True),
+            attr(SA.EVU_DAYS, LC.UNSET, None, True),
         ),
         options=[e.value for e in LuxOperationMode],
         update_interval=UPDATE_INTERVAL_NORMAL,
