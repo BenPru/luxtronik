@@ -379,8 +379,8 @@ class LuxParameter(StrEnum):
     P1136_HEAT_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1136"
     P1137_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
-    # ? P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
-    # ? P1140_SECOND_HEAT_SOURCE_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1140"
+    P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
+    P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER: Final = "parameters.Unknown_Parameter_1140"
 
 
 # endregion Lux parameters
@@ -603,6 +603,7 @@ class SensorKey(StrEnum):
     ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = (
         "additional_heat_generator_amount_counter"
     )
+    SECOND_HEAT_GENERATOR_AMOUNT_COUNTER= "second_heat_generator_amount_counter"
     ANALOG_OUT1 = "analog_out1"
     ANALOG_OUT2 = "analog_out2"
     CURRENT_HEAT_OUTPUT = "current_heat_output"
@@ -625,6 +626,7 @@ class SensorKey(StrEnum):
     DHW_HEAT_AMOUNT = "dhw_heat_amount"
     HEAT_ENERGY_INPUT = "heat_energy_input"
     DHW_ENERGY_INPUT = "dhw_energy_input"
+    COOLING_ENERGY_INPUT = "cooling_energy_input"
     DHW_TEMPERATURE = "dhw_temperature"
     SOLAR_COLLECTOR_TEMPERATURE = "solar_collector_temperature"
     SOLAR_BUFFER_TEMPERATURE = "solar_buffer_temperature"
