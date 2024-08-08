@@ -210,19 +210,19 @@
         "name": "Stav",
         "state": {
           "heating": "Vyt\u00e1p\u011bn\u00ed",
-          "hot water": "Nah\u0159\u00edv\u00e1n\u00ed TUV",
+          "hot water": "Oh\u0159ev TUV",
           "swimming pool/solar": "Baz\u00e9n / Sol\u00e1rn\u00ed",
-          "evu": "HDO s\u00ed\u0165ov\u00e1 blok\u00e1da",
+          "evu": "Blokace HDO",
           "defrost": "Odmrazov\u00e1n\u00ed",
           "heating external source": "Vyt\u00e1p\u011bn\u00ed z extern\u00edho zdroje",
           "cooling": "Chlazen\u00ed",
-          "no request": "Pr\u00e1zdn\u00fd chod (\u017e\u00e1dn\u00fd po\u017eadavek)"
+          "no request": "Klidov\u00fd re\u017eim"
         },
         "state_attributes": {
           "evu_text": {
             "state": {
-              "evu_until": "Zb\u00fdv\u00e1 {evu_time} minut do konce blokov\u00e1n\u00ed pomoc\u00ed HDO.",
-              "evu_in": "HDO blokov\u00e1n\u00ed za {evu_time} minut."
+              "evu_until": "Zb\u00fdv\u00e1 {evu_time} minut do konce HDO blokace.",
+              "evu_in": "HDO blokovace za {evu_time} minut."
             }
           }
         }
@@ -315,7 +315,7 @@
               "701": "N\u00edzkotlakov\u00fd p\u0159ep\u00edna\u010d v chladic\u00edm okruhu reagoval v\u00edcekr\u00e1t (LW) nebo d\u00e9le ne\u017e 20 sekund (SW).",
               "702": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: N\u00edzk\u00fd tlak v chladic\u00edm okruhu reagoval. Po ur\u010dit\u00e9 dob\u011b automatick\u00fd restart tepeln\u00e9ho \u010derpadla.",
               "703": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Pokud tepeln\u00e9 \u010derpadlo b\u011b\u017e\u00ed a teplota v p\u0159edstihu je men\u0161\u00ed ne\u017e 5 \u00b0C, rozpozn\u00e1no jako ochrana proti mrazu.",
-              "704": "P\u0159ekro\u010dena maxim\u00e1ln\u00ed teplota v hork\u00e9m plynov\u00e9m okruhu. Automatick\u00fd restart tepeln\u00e9ho \u010derpadla po hh:mm.",
+              "704": "P\u0159ekro\u010dena maxim\u00e1ln\u00ed teplota v hork\u00e9m plynov\u00e9m okruhu. Automatick\u00fd restart tepeln\u00e9ho \u010derpadla za hh:mm.",
               "705": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Spu\u0161t\u011bn ochrann\u00fd ventil\u00e1toru motoru.",
               "706": "Pouze u S/W a W/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Spu\u0161t\u011bna ochrana \u010derpadla solanky nebo studen\u00e9 vody nebo kompresoru.",
               "707": "P\u0159eru\u0161en\u00ed nebo zkrat v k\u00f3dovac\u00edm mostu v tepeln\u00e9m \u010derpadle po prvn\u00edm spu\u0161t\u011bn\u00ed.",
@@ -589,7 +589,7 @@
       "status_line_2": {
         "name": "Stav 2",
         "state": {
-          "since": "od",
+          "since": "ji\u017e",
           "in": "za",
           "unknown": "nezn\u00e1mo"
         }
@@ -597,7 +597,7 @@
       "status_line_3": {
         "name": "Stav 3",
         "state": {
-          "heating": "vyt\u00e1p\u011bm\u00ed",
+          "heating": "vyt\u00e1p\u011bn\u00ed",
           "defrost": "odmrazov\u00e1n\u00ed",
           "cooling": "chlazen\u00ed",
           "pump forerun": "p\u0159edeh\u0159ev \u010derpadla",
