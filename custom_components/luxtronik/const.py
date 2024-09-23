@@ -172,7 +172,7 @@ class LuxStatus3Option(StrEnum):
     thermal_desinfection: Final = ("thermal desinfection",)
     cooling: Final = ("cooling",)
     swimming_pool_solar: Final = ("swimming pool/solar",)
-    heating_external_energy_source: Final = ("heating external engery source",)
+    heating_external_energy_source: Final = ("heating external energy source",)
     domestic_water_external_energy_source: Final = (
         "domestic water external energy source",
     )
