@@ -3,6 +3,7 @@ from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     UPDATE_INTERVAL_NORMAL,
+    UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
     LuxMode,
     LuxParameter as LP,
