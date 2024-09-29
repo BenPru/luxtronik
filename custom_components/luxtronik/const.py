@@ -91,6 +91,7 @@ class DeviceKey(StrEnum):
 class FirmwareVersionMinor(Enum):
     """Firmware minor versions."""
 
+    minor_80: Final = 80
     minor_88: Final = 88
 
 

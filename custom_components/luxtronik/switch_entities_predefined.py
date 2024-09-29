@@ -3,10 +3,12 @@ from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     UPDATE_INTERVAL_NORMAL,
+    UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
     LuxMode,
     LuxParameter as LP,
     LuxVisibility as LV,
+    FirmwareVersionMinor,
     SensorKey,
 )
 from .model import LuxtronikSwitchDescription
@@ -43,6 +45,8 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         icon="mdi:volume-minus",
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0357_SILENT_MODE_TIME_MENU,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_80,
+        update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,

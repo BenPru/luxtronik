@@ -104,6 +104,8 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_HEAT,
         preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.PRESET_MODE
+        | ClimateEntityFeature.TURN_OFF  # noqa: W503
+        | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
@@ -126,7 +128,9 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_mode_mapping=HVAC_MODE_MAPPING_COOL,
         hvac_action_mapping=HVAC_ACTION_MAPPING_COOL,
         preset_modes=[PRESET_NONE],
-        supported_features=ClimateEntityFeature.TARGET_TEMPERATURE,
+        supported_features=ClimateEntityFeature.TURN_OFF
+        | ClimateEntityFeature.TURN_ON  # noqa: W503
+        | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
         # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
@@ -223,6 +227,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self._attr_temperature_unit = description.temperature_unit
         self._attr_hvac_modes = description.hvac_modes
         self._attr_preset_modes = description.preset_modes
+        self._enable_turn_on_off_backwards_compatibility = False
         self._attr_supported_features = description.supported_features
 
         self._sensor_data = get_sensor_data(
@@ -310,6 +315,12 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self._attr_target_temperature = kwargs[ATTR_TEMPERATURE]
         super()._handle_coordinator_update()
 
+    async def async_turn_off(self) -> None:
+        await self.async_set_hvac_mode(HVACMode.OFF)
+    
+    async def async_turn_on(self) -> None:
+        await self.async_set_hvac_mode(HVACMode[self.entity_description.hvac_mode_mapping[LuxMode.automatic.value].upper()])
+        
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode."""
         self._attr_hvac_mode = hvac_mode
