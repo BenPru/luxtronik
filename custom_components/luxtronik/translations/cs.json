@@ -1,0 +1,845 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "evu_unlocked": {
+        "name": "HDO"
+      },
+      "compressor": {
+        "name": "Kompresor"
+      },
+      "compressor2": {
+        "name": "Kompresor 2"
+      },
+      "pump_flow": {
+        "name": "\u010cerpadlo"
+      },
+      "compressor_heater": {
+        "name": "Oh\u0159ev kompresoru"
+      },
+      "defrost_valve": {
+        "name": "Ventil odmrazov\u00e1n\u00ed"
+      },
+      "additional_heat_generator": {
+        "name": "P\u0159\u00eddavn\u00fd zdroj tepla"
+      },
+      "disturbance_output": {
+        "name": "Stav syst\u00e9mu"
+      },
+      "circulation_pump_heating": {
+        "name": "Ob\u011bhov\u00e9 \u010derpadlo vyt\u00e1p\u011bn\u00ed"
+      },
+      "additional_circulation_pump": {
+        "name": "P\u0159\u00eddavn\u00e9 ob\u011bhov\u00e9 \u010derpadlo"
+      },
+      "dhw_recirculation_pump": {
+        "name": "Recirkulace TUV"
+      },
+      "dhw_circulation_pump": {
+        "name": "Cirkulace TUV"
+      },
+      "dhw_charging_pump": {
+        "name": "\u010cerpadlo pro dob\u00edjen\u00ed oh\u0159\u00edva\u010de vody"
+      },
+      "solar_pump": {
+        "name": "Sol\u00e1rn\u00ed \u010derpadlo"
+      },
+      "approval_cooling": {
+        "name": "Ov\u011b\u0159en\u00ed chladic\u00edho syst\u00e9mu"
+      },
+      "defrost_end_flow_okay": {
+        "name": "Odtok odmrazov\u00e1n\u00ed"
+      },
+      "motor_protection": {
+        "name": "Ochrana motoru"
+      }
+    },
+    "device": {
+      "heatpump": {
+        "name": "T\u010c"
+      },
+      "heating": {
+        "name": "Topen\u00ed"
+      },
+      "domestic_water": {
+        "name": "TUV"
+      },
+      "cooling": {
+        "name": "Chlazen\u00ed"
+      }
+    },
+    "switch": {
+      "remote_maintenance": {
+        "name": "Vzd\u00e1len\u00e1 \u00fadr\u017eba"
+      },
+      "efficiency_pump": {
+        "name": "\u00da\u010dinnost \u010derpadla"
+      },
+      "pump_heat_control": {
+        "name": "Ovl\u00e1d\u00e1n\u00ed \u010derpadla pro oh\u0159ev"
+      },
+      "heating": {
+        "name": "Automatick\u00fd re\u017eim vyt\u00e1p\u011bn\u00ed"
+      },
+      "pump_optimization": {
+        "name": "Optimalizace \u010derpadla"
+      },
+      "heating_threshold": {
+        "name": "Teplotn\u00ed mez pro vyt\u00e1p\u011bn\u00ed"
+      },
+      "domestic_water": {
+        "name": "Automatick\u00fd re\u017eim oh\u0159evu TUV"
+      },
+      "cooling": {
+        "name": "Chlazen\u00ed"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Aktualizace firmware"
+      }
+    },
+    "number": {
+      "release_second_heat_generator": {
+        "name": "Odem\u010den\u00ed druh\u00e9ho gener\u00e1toru tepla"
+      },
+      "pump_optimization": {
+        "name": "Optimalizace \u010derpadla"
+      },
+      "heating_threshold": {
+        "name": "Teplotn\u00ed mez pro vyt\u00e1p\u011bn\u00ed"
+      },
+      "heating_target_correction": {
+        "name": "Korekce po\u017eadovan\u00e9 teploty vyt\u00e1p\u011bn\u00ed"
+      },
+      "heating_min_flow_out_temperature": {
+        "name": "Minim\u00e1ln\u00ed teplota zp\u00e1te\u010dky vyt\u00e1p\u011bn\u00ed"
+      },
+      "heating_circuit_curve1_temperature": {
+        "name": "Topn\u00e1 k\u0159ivka 1"
+      },
+      "heating_circuit_curve2_temperature": {
+        "name": "Topn\u00e1 k\u0159ivka 2"
+      },
+      "heating_circuit_curve_night_temperature": {
+        "name": "No\u010dn\u00ed topn\u00e1 k\u0159ivka"
+      },
+      "heating_circuit2_curve1_temperature": {
+        "name": "Topn\u00e1 k\u0159ivka 1 pro okruh 2"
+      },
+      "heating_circuit2_curve2_temperature": {
+        "name": "Topn\u00e1 k\u0159ivka 2 pro okruh 2"
+      },
+      "heating_circuit2_curve_night_temperature": {
+        "name": "No\u010dn\u00ed topn\u00e1 k\u0159ivka pro okruh 2"
+      },
+      "heating_circuit3_curve1_temperature": {
+        "name": "Topn\u00e1 k\u0159ivka 1 pro okruh 3"
+      },
+      "heating_circuit3_curve2_temperature": {
+        "name": "Topn\u00e1 k\u0159ivka 2 pro okruh 3"
+      },
+      "heating_circuit3_curve_night_temperature": {
+        "name": "No\u010dn\u00ed topn\u00e1 k\u0159ivka pro okruh 3"
+      },
+      "dhw_target_temperature": {
+        "name": "po\u017eadovan\u00e1 teplota TUV"
+      },
+      "dhw_thermal_desinfection_target": {
+        "name": "po\u017eadovan\u00e1 teplota term\u00e1ln\u00ed dezinfekce TUV"
+      },
+      "solar_pump_max_temperature_collector": {
+        "name": "Maxim\u00e1ln\u00ed teplota sol\u00e1rn\u00edho kolektoru \u010derpadla"
+      },
+      "solar_pump_off_max_difference_temperature_boiler": {
+        "name": "Max. rozd\u00edl teploty vypnut\u00ed sol\u00e1rn\u00edho \u010derpadla kolektor/bojler"
+      },
+      "solar_pump_off_difference_temperature": {
+        "name": "Rozd\u00edl teploty vypnut\u00ed sol\u00e1rn\u00edho \u010derpadla kolektor/bojler"
+      },
+      "solar_pump_on_difference_temperature": {
+        "name": "Rozd\u00edl teploty zapnut\u00ed sol\u00e1rn\u00edho \u010derpadla kolektor/bojler"
+      },
+      "dhw_hysteresis": {
+        "name": "Hystereze TUV"
+      },
+      "heating_room_temperature_impact_factor": {
+        "name": "Faktor vlivu teploty m\u00edstnosti na vyt\u00e1p\u011bn\u00ed"
+      },
+      "heating_maximum_circulation_pump_speed": {
+        "name": "Maxim\u00e1ln\u00ed rychlost ob\u011bhov\u00e9ho \u010derpadla p\u0159i vyt\u00e1p\u011bn\u00ed"
+      },
+      "heating_max_flow_out_increase_temperature": {
+        "name": "Maxim\u00e1ln\u00ed zv\u00fd\u0161en\u00ed teploty zp\u00e1te\u010dky vyt\u00e1p\u011bn\u00ed"
+      },
+      "heating_hysteresis": {
+        "name": "Hystereze regul\u00e1toru vyt\u00e1p\u011bn\u00ed"
+      },
+      "heating_night_lowering_to_temperature": {
+        "name": "Sn\u00ed\u017een\u00ed teploty na noc"
+      },
+      "efficiency_pump_nominal": {
+        "name": "Nomin\u00e1ln\u00ed \u00fa\u010dinnost \u010derpadla"
+      },
+      "efficiency_pump_minimal": {
+        "name": "Minim\u00e1ln\u00ed \u00fa\u010dinnost \u010derpadla"
+      },
+      "cooling_threshold_temperature": {
+        "name": "Minim\u00e1ln\u00ed teplota pro chlazen\u00ed"
+      },
+      "cooling_start_delay_hours": {
+        "name": "Zpo\u017ed\u011bn\u00ed za\u010d\u00e1tku chlazen\u00ed"
+      },
+      "cooling_stop_delay_hours": {
+        "name": "Zpo\u017ed\u011bn\u00ed konce chlazen\u00ed"
+      },
+      "cooling_target_temperature_mk1": {
+        "name": "po\u017eadovan\u00e1 teplota chlazen\u00ed MK1"
+      },
+      "cooling_target_temperature_mk2": {
+        "name": "po\u017eadovan\u00e1 teplota chlazen\u00ed MK2"
+      },
+      "cooling_target_temperature_mk3": {
+        "name": "po\u017eadovan\u00e1 teplota chlazen\u00ed MK3"
+      },
+      "heat_source_input_temperature_min": {
+        "name": "Minim\u00e1ln\u00ed vstupn\u00ed teplota zdroje tepla"
+      }
+    },
+    "sensor": {
+      "status": {
+        "name": "Stav",
+        "state": {
+          "heating": "Vyt\u00e1p\u011bn\u00ed",
+          "hot water": "Oh\u0159ev TUV",
+          "swimming pool/solar": "Baz\u00e9n / Sol\u00e1rn\u00ed",
+          "evu": "Blokace HDO",
+          "defrost": "Odmrazov\u00e1n\u00ed",
+          "heating external source": "Vyt\u00e1p\u011bn\u00ed z extern\u00edho zdroje",
+          "cooling": "Chlazen\u00ed",
+          "no request": "Klidov\u00fd re\u017eim"
+        },
+        "state_attributes": {
+          "evu_text": {
+            "state": {
+              "evu_until": "Zb\u00fdv\u00e1 {evu_time} minut do konce HDO blokace.",
+              "evu_in": "HDO blokovace za {evu_time} minut."
+            }
+          }
+        }
+      },
+      "error_reason": {
+        "name": "Posledn\u00ed chyba",
+        "state": {
+          "701": "N\u00edzkotlakov\u00e1 porucha",
+          "702": "N\u00edzkotlakov\u00fd z\u00e1mek - RESET automaticky",
+          "703": "Ochrana proti mrazu\nPros\u00edm, volejte technika",
+          "704": "Porucha hork\u00e9ho plynu\n Reset automaticky za hh:mm",
+          "705": "Ochrana ventil\u00e1toru motoru\nPros\u00edm, volejte technika",
+          "706": "Ochrana motoru ob\u011bhov\u00e9ho \u010derpadla\nPros\u00edm, volejte technika",
+          "707": "K\u00f3dov\u00e1n\u00ed tepeln\u00e9ho \u010derpadla\nPros\u00edm, volejte technika",
+          "708": "Sn\u00edma\u010d zp\u00e1te\u010dky\nPros\u00edm, volejte technika",
+          "709": "Sn\u00edma\u010d pr\u016ftoku\nPros\u00edm, volejte technika",
+          "710": "Sn\u00edma\u010d hork\u00e9ho plynu\nPros\u00edm, volejte technika",
+          "711": "Sn\u00edma\u010d venkovn\u00ed teploty\nPros\u00edm, volejte technika",
+          "712": "Sn\u00edma\u010d TUV\nPros\u00edm, volejte technika",
+          "713": "Sn\u00edma\u010d zdroje tepla - Zapnuto\nPros\u00edm, volejte technika",
+          "714": "Hork\u00fd plyn pro oh\u0159ev vody - Reset automaticky za hh:mm",
+          "715": "Vypnut\u00ed vysok\u00e9ho tlaku - RESET automaticky",
+          "716": "Porucha vysok\u00e9ho tlaku\nPros\u00edm, volejte technika",
+          "717": "Pr\u016ftokov\u00fd sn\u00edma\u010d tepla\nPros\u00edm, volejte technika",
+          "718": "Max. venkovn\u00ed teplota - RESET automaticky za hh:mm",
+          "719": "Min. venkovn\u00ed teplota - RESET automaticky za hh:mm",
+          "720": "Teplota zdroje tepla - RESET automaticky za hh:mm",
+          "721": "Vypnut\u00ed n\u00edzk\u00e9ho tlaku - RESET automaticky",
+          "722": "Rozd\u00edl teploty topn\u00e9 vody\nPros\u00edm, volejte technika",
+          "723": "Rozd\u00edl teploty TUV\nPros\u00edm, volejte technika",
+          "724": "Rozd\u00edl teploty odmrazov\u00e1n\u00ed\nPros\u00edm, volejte technika",
+          "725": "Chyba v syst\u00e9mu oh\u0159evu vody\nPros\u00edm, volejte technika",
+          "726": "Sn\u00edma\u010d sm\u011b\u0161ovac\u00edho okruhu 1\nPros\u00edm, volejte technika",
+          "727": "Tlak roztoku\nPros\u00edm, volejte technika",
+          "728": "Sn\u00edma\u010d vypnut\u00ed zdroje tepla\nPros\u00edm, volejte technika",
+          "729": "Chyba f\u00e1ze\nPros\u00edm, volejte technika",
+          "730": "V\u00fdkon vyt\u00e1p\u011bn\u00ed\nPros\u00edm, volejte technika",
+          "732": "Porucha chlazen\u00ed\nPros\u00edm, volejte technika",
+          "733": "Porucha anody\nPros\u00edm, volejte technika",
+          "734": "Porucha anody\nPros\u00edm, volejte technika",
+          "735": "Sn\u00edma\u010d extern\u00edho zdroje energie\nPros\u00edm, volejte technika",
+          "736": "Sn\u00edma\u010d sol\u00e1rn\u00edho kolektoru\nPros\u00edm, volejte technika",
+          "737": "Sn\u00edma\u010d sol\u00e1rn\u00ed n\u00e1dr\u017ee\nPros\u00edm, volejte technika",
+          "738": "Sn\u00edma\u010d sm\u011b\u0161ovac\u00edho okruhu 2\nPros\u00edm, volejte technika",
+          "750": "Sn\u00edma\u010d extern\u00ed zp\u00e1te\u010dky\nPros\u00edm, volejte technika",
+          "751": "Chyba monitorov\u00e1n\u00ed f\u00e1ze",
+          "752": "Chyba monitorov\u00e1n\u00ed pr\u016ftoku",
+          "755": "Ztr\u00e1ta spojen\u00ed se Slave \u010derpadlem\nPros\u00edm, volejte technika",
+          "756": "Ztr\u00e1ta spojen\u00ed s Master \u010derpadlem\nPros\u00edm, volejte technika",
+          "757": "Porucha n\u00edzk\u00e9ho tlaku u oh\u0159\u00edva\u010de vody",
+          "758": "Porucha odmrazov\u00e1n\u00ed",
+          "759": "Zpr\u00e1va o term\u00e1ln\u00ed dezinfekci",
+          "760": "Porucha odmrazov\u00e1n\u00ed",
+          "761": "P\u0159eru\u0161en\u00e9 LIN spojen\u00ed",
+          "762": "Sn\u00edma\u010d sac\u00edho kompresoru",
+          "763": "Sn\u00edma\u010d sac\u00edho v\u00fdparn\u00edku",
+          "764": "Sn\u00edma\u010d oh\u0159evu kompresoru",
+          "765": "P\u0159eh\u0159\u00e1t\u00ed",
+          "766": "Hranice pou\u017eit\u00ed kompresoru",
+          "767": "Omezova\u010d teploty topn\u00e9ho t\u011blesa",
+          "770": "N\u00edzk\u00e9 p\u0159eh\u0159\u00e1t\u00ed",
+          "771": "Vysok\u00e9 p\u0159eh\u0159\u00e1t\u00ed",
+          "776": "Meze pou\u017eit\u00ed kompresoru",
+          "777": "Expanzn\u00ed ventil",
+          "778": "Sn\u00edma\u010d n\u00edzk\u00e9ho tlaku",
+          "779": "Sn\u00edma\u010d vysok\u00e9ho tlaku",
+          "780": "Sn\u00edma\u010d EVI (Enhanced Vapour Injection)",
+          "781": "Sn\u00edma\u010d kapaliny p\u0159ed expanzn\u00edm ventilem",
+          "782": "Sn\u00edma\u010d EVI (Enhanced Vapour Injection) sac\u00edho plynu",
+          "783": "Komunikace SEC-Inverter",
+          "784": "VSS uzam\u010deno",
+          "785": "Porucha desky SEC",
+          "786": "Komunikace SEC-Inverter",
+          "787": "V\u00fdstraha VD",
+          "788": "Z\u00e1va\u017en\u00e1 chyba m\u011bni\u010de",
+          "789": "LIN/K\u00f3dov\u00e1n\u00ed nen\u00ed k dispozici",
+          "790": "Z\u00e1va\u017en\u00e1 chyba m\u011bni\u010de",
+          "791": "Ztr\u00e1ta ModBus spojen\u00ed",
+          "792": "P\u0159eru\u0161en\u00e9 LIN spojen\u00ed",
+          "793": "Z\u00e1va\u017en\u00e1 chyba m\u011bni\u010de",
+          "-1": "Nezn\u00e1m\u00e1 chyba"
+        },
+        "state_attributes": {
+          "timestamp": {
+            "name": "\u010cas"
+          },
+          "cause": {
+            "name": "P\u0159\u00ed\u010dina",
+            "state": {
+              "701": "N\u00edzkotlakov\u00fd p\u0159ep\u00edna\u010d v chladic\u00edm okruhu reagoval v\u00edcekr\u00e1t (LW) nebo d\u00e9le ne\u017e 20 sekund (SW).",
+              "702": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: N\u00edzk\u00fd tlak v chladic\u00edm okruhu reagoval. Po ur\u010dit\u00e9 dob\u011b automatick\u00fd restart tepeln\u00e9ho \u010derpadla.",
+              "703": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Pokud tepeln\u00e9 \u010derpadlo b\u011b\u017e\u00ed a teplota v p\u0159edstihu je men\u0161\u00ed ne\u017e 5 \u00b0C, rozpozn\u00e1no jako ochrana proti mrazu.",
+              "704": "P\u0159ekro\u010dena maxim\u00e1ln\u00ed teplota v hork\u00e9m plynov\u00e9m okruhu. Automatick\u00fd restart tepeln\u00e9ho \u010derpadla za hh:mm.",
+              "705": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Spu\u0161t\u011bn ochrann\u00fd ventil\u00e1toru motoru.",
+              "706": "Pouze u S/W a W/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Spu\u0161t\u011bna ochrana \u010derpadla solanky nebo studen\u00e9 vody nebo kompresoru.",
+              "707": "P\u0159eru\u0161en\u00ed nebo zkrat v k\u00f3dovac\u00edm mostu v tepeln\u00e9m \u010derpadle po prvn\u00edm spu\u0161t\u011bn\u00ed.",
+              "708": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di zp\u00e1te\u010dky.",
+              "709": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di p\u0159edeh\u0159\u00e1t\u00ed.\n\u017d\u00e1dn\u00e9 vypnut\u00ed poruchy u S/W a W/W za\u0159\u00edzen\u00ed.",
+              "710": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di hork\u00e9ho plynu v chladic\u00edm okruhu.",
+              "711": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di venkovn\u00ed teploty.\n\u017d\u00e1dn\u00e9 vypnut\u00ed poruchy. Konstantn\u00ed hodnota na -5 \u00b0C.",
+              "712": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di tepl\u00e9 vody.\n\u017d\u00e1dn\u00e9 vypnut\u00ed poruchy.",
+              "713": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di tepl\u00e9ho zdroje (Vstup).",
+              "714": "Tepeln\u00e1 hranice pou\u017eit\u00ed tepeln\u00e9ho \u010derpadla p\u0159ekro\u010dena.\nP\u0159\u00edprava tepl\u00e9 vody je uzam\u010dena po hh:mm.",
+              "715": "Vysokotlakov\u00fd p\u0159ep\u00edna\u010d v chladic\u00edm okruhu reagoval. Po ur\u010dit\u00e9 dob\u011b automatick\u00fd restart tepeln\u00e9ho \u010derpadla.",
+              "716": "Vysokotlakov\u00fd p\u0159ep\u00edna\u010d v chladic\u00edm okruhu reagoval opakovan\u011b.",
+              "717": "Pr\u016ftokov\u00fd sp\u00edna\u010d u W/W za\u0159\u00edzen\u00ed reagoval b\u011bhem p\u0159edplachovac\u00ed doby nebo provozu.",
+              "718": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Venkovn\u00ed teplota p\u0159ekro\u010dila povolenou maxim\u00e1ln\u00ed hodnotu.",
+              "719": "Pouze u L/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Venkovn\u00ed teplota klesla pod povolenou minim\u00e1ln\u00ed hodnotu.",
+              "720": "Pouze u S/W a W/W za\u0159\u00edzen\u00ed mo\u017en\u00e9: Teplota na v\u00fdstupu z parn\u00edku n\u011bkolikr\u00e1t klesla pod bezpe\u010dnostn\u00ed hodnotu. Automatick\u00fd restart tepeln\u00e9ho \u010derpadla po hh:mm.",
+              "721": "N\u00edzkotlakov\u00fd p\u0159ep\u00edna\u010d v chladic\u00edm okruhu reagoval. Po ur\u010dit\u00e9 dob\u011b automatick\u00fd restart tepeln\u00e9ho \u010derpadla (SW a WW).",
+              "722": "Teplotn\u00ed diference p\u0159i topn\u00e9 \u010dinnosti je negativn\u00ed (=chybn\u00e9).",
+              "723": "Teplotn\u00ed diference p\u0159i oh\u0159evu tepl\u00e9 vody je negativn\u00ed (=chybn\u00e9).",
+              "724": "Teplotn\u00ed diference v topn\u00e9 smy\u010dce b\u011bhem odmrazov\u00e1n\u00ed > 15 K (nebezpe\u010d\u00ed mrazu).",
+              "725": "Porucha oh\u0159evu tepl\u00e9 vody, po\u017eadovan\u00e1 teplota z\u00e1sobn\u00edku je podstatn\u011b ni\u017e\u0161\u00ed.",
+              "726": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di sm\u011b\u0161ovac\u00ed smy\u010dky 1.",
+              "727": "N\u00edzkotlakov\u00fd p\u0159ep\u00edna\u010d solanky reagoval b\u011bhem p\u0159edplachovac\u00ed doby nebo provozu.",
+              "728": "P\u0159eru\u0161en\u00ed nebo zkrat v sn\u00edma\u010di vypnut\u00ed tepl\u00e9ho zdroje.",
+              "729": "Kompresor bez v\u00fdkonu po zapnut\u00ed.",
+              "730": "Program vyh\u0159\u00edv\u00e1n\u00ed nedok\u00e1zal dos\u00e1hnout teplotn\u00ed \u00farovn\u011b VZ v dan\u00e9m \u010dasov\u00e9m intervalu. Program vyh\u0159\u00edv\u00e1n\u00ed pokra\u010duje.",
+              "732": "Topn\u00e1 voda byla n\u011bkolikr\u00e1t pod 16 \u00b0C.",
+              "733": "Vstupn\u00ed sign\u00e1l z\u00e1mku ciz\u00edho proudu reagoval.",
+              "734": "Chyba 733 trv\u00e1 d\u00e9le ne\u017e dva t\u00fddny a oh\u0159ev tepl\u00e9 vody je uzam\u010den.",
+              "735": "Pouze s vestav\u011bnou deskou Comfort-/roz\u0161\u00ed\u0159en\u00edm mo\u017en\u00e9: P\u0159eru\u0161en\u00ed nebo zkrat ve sn\u00edma\u010di extern\u00edho zdroje energie.",
+              "736": "Pouze s vestav\u011bnou deskou Comfort-/roz\u0161\u00ed\u0159en\u00edm mo\u017en\u00e9: P\u0159eru\u0161en\u00ed nebo zkrat ve sn\u00edma\u010di sol\u00e1rn\u00edho kolektoru.",
+              "737": "Pouze s vestav\u011bnou deskou Comfort-/roz\u0161\u00ed\u0159en\u00edm mo\u017en\u00e9: P\u0159eru\u0161en\u00ed nebo zkrat ve sn\u00edma\u010di sol\u00e1rn\u00ed n\u00e1dr\u017ee.",
+              "738": "Pouze s vestav\u011bnou deskou Comfort-/roz\u0161\u00ed\u0159en\u00edm mo\u017en\u00e9: P\u0159eru\u0161en\u00ed nebo zkrat ve sn\u00edma\u010di sm\u011b\u0161ovac\u00ed smy\u010dky 2.",
+              "750": "P\u0159eru\u0161en\u00ed nebo zkrat ve sn\u00edma\u010di extern\u00edho zp\u00e1te\u010dky.",
+              "751": "F\u00e1zov\u00e9 rel\u00e9 reagovalo.",
+              "752": "F\u00e1zov\u00e9 rel\u00e9 nebo pr\u016ftokov\u00fd sp\u00edna\u010d reagoval.",
+              "755": "Slave neodpov\u00edd\u00e1 d\u00e9le ne\u017e 5 minut.",
+              "756": "Master neodpov\u00edd\u00e1 d\u00e9le ne\u017e 5 minut.",
+              "757": "N\u00edzkotlakov\u00fd p\u0159ep\u00edna\u010d u za\u0159\u00edzen\u00ed s oh\u0159evem vody reagoval v\u00edcekr\u00e1t nebo d\u00e9le ne\u017e 20 sekund.",
+              "758": "Odmrazov\u00e1n\u00ed bylo 5kr\u00e1t v \u0159ad\u011b ukon\u010deno kv\u016fli p\u0159\u00edli\u0161 n\u00edzk\u00e9 teplot\u011b p\u0159edstihu.",
+              "759": "Term\u00e1ln\u00ed dezinfekce nemohla b\u00fdt provedena spr\u00e1vn\u011b 3kr\u00e1t v \u0159ad\u011b.",
+              "760": "Odmrazov\u00e1n\u00ed bylo 5kr\u00e1t v \u0159ad\u011b ukon\u010deno po maxim\u00e1ln\u00ed dob\u011b (siln\u00fd v\u00edtr narazil na v\u00fdparn\u00edk).",
+              "761": "LIN-Time out",
+              "762": "Chyba sn\u00edma\u010de sac\u00edho kompresoru.",
+              "763": "Chyba sn\u00edma\u010de sac\u00edho v\u00fdparn\u00edku.",
+              "764": "Chyba sn\u00edma\u010de oh\u0159evu kompresoru.",
+              "765": "P\u0159eh\u0159\u00e1t\u00ed trvaj\u00edc\u00ed d\u00e9le ne\u017e 5 minut pod 2K.",
+              "766": "Provoz 5 minut mimo rozsah pou\u017eit\u00ed kompresoru.",
+              "767": "STB oh\u0159\u00edva\u010de na SEC bylo aktivov\u00e1no.",
+              "770": "P\u0159eh\u0159\u00e1t\u00ed trvaj\u00edc\u00ed d\u00e9le ne\u017e dlouhou dobu pod mezn\u00ed hodnotou.",
+              "771": "P\u0159eh\u0159\u00e1t\u00ed trvaj\u00edc\u00ed d\u00e9le ne\u017e dlouhou dobu nad mezn\u00ed hodnotou.",
+              "776": "Kompresor pracuje d\u00e9le ne\u017e dlouhou dobu mimo sv\u00e9 meze pou\u017eit\u00ed.",
+              "777": "Expanzn\u00ed ventil je vadn\u00fd.",
+              "778": "Sn\u00edma\u010d n\u00edzk\u00e9ho tlaku je vadn\u00fd.",
+              "779": "Sn\u00edma\u010d vysok\u00e9ho tlaku je vadn\u00fd.",
+              "780": "Sn\u00edma\u010d EVI je vadn\u00fd.",
+              "781": "Sn\u00edma\u010d kapaliny p\u0159ed expanzn\u00edm ventilem je vadn\u00fd.",
+              "782": "Sn\u00edma\u010d EVI (Enhanced Vapour Injection) sac\u00edho plynu je vadn\u00fd.",
+              "783": "Komunikace mezi SEC a Inverterem je naru\u0161ena.",
+              "784": "Inverter je uzam\u010den.",
+              "785": "Chyba na desce SEC.",
+              "786": "Naru\u0161en\u00ed komunikace mezi SEC a HZIO od SEC.",
+              "787": "Kompresor hl\u00e1s\u00ed chybu.",
+              "788": "Chyba v Inverteru.",
+              "789": "Ovl\u00e1dac\u00ed panel nemohl detekovat \u017e\u00e1dn\u00e9 k\u00f3dov\u00e1n\u00ed. Bu\u010f je p\u0159eru\u0161eno LIN spojen\u00ed, nebo odpor k\u00f3dov\u00e1n\u00ed nen\u00ed rozpozn\u00e1n.",
+              "790": "Chyba ve zdroji nap\u00e1jen\u00ed Inverteru / Kompresoru.",
+              "791": "Deska SEC nen\u00ed del\u0161\u00ed dobu dostupn\u00e1. 791 se spust\u00ed, pokud byla nalezena deska HZIO (bez samostatn\u00e9ho k\u00f3dov\u00e1n\u00ed), ale nen\u00ed na n\u00ed rozpozn\u00e1na \u017e\u00e1dn\u00e1 deska SEC.",
+              "792": "Nelze naj\u00edt \u017e\u00e1dn\u00fd z\u00e1kladn\u00ed panel a \u017e\u00e1dn\u00e1 konfigurace.",
+              "793": "Chyba teploty v Inverteru.",
+              "-1": "Nezn\u00e1m\u00e1 chyba"
+            }
+          },
+          "remedy": {
+            "name": "Oprava",
+            "state": {
+              "701": "Kontrola tepeln\u00e9ho \u010derpadla na \u00fanik, sp\u00edna\u010de tlaku, odmrazov\u00e1n\u00ed a minim\u00e1ln\u00ed teplotu vzduchu.",
+              "702": "Kontrola tepeln\u00e9ho \u010derpadla na \u00fanik, sp\u00edna\u010de tlaku, odmrazov\u00e1n\u00ed a minim\u00e1ln\u00ed teplotu vzduchu.",
+              "703": "Kontrola v\u00fdkonu tepeln\u00e9ho \u010derpadla, odmrazovac\u00edho ventilu a topn\u00e9ho syst\u00e9mu.",
+              "704": "Kontrola mno\u017estv\u00ed chladiva, v\u00fdparu, p\u0159eh\u0159\u00e1t\u00ed p\u0159edeh\u0159\u00e1t\u00e9ho, n\u00e1vratov\u00e9ho proudu a minim\u00e1ln\u00ed teploty vody.",
+              "705": "Kontrola ventil\u00e1toru.",
+              "706": "Kontrola nastaven\u00fdch hodnot, kompresoru, BOSUP.",
+              "707": "Kontrola odporu k\u00f3dov\u00e1n\u00ed v tepeln\u00e9m \u010derpadle, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "708": "Kontrola zp\u011btn\u00e9ho chladi\u010de, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "709": "Kontrola p\u0159edeh\u0159\u00edva\u010de, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "710": "Kontrola \u010didla hork\u00e9ho plynu, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "711": "Kontrola \u010didla venkovn\u00ed teploty, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "712": "Kontrola \u010didla tepl\u00e9 vody, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "713": "Kontrola \u010didla zdroje tepla, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "714": "Kontrola pr\u016ftoku tepl\u00e9 vody, v\u00fdm\u011bn\u00edku tepla, teploty tepl\u00e9 vody a ob\u011bhov\u00e9ho \u010derpadla tepl\u00e9 vody.",
+              "715": "Kontrola pr\u016ftoku tepl\u00e9 vody, odtokov\u00e9ho potrub\u00ed, teploty a kondenzace.",
+              "716": "Kontrola pr\u016ftoku tepl\u00e9 vody, odtokov\u00e9ho potrub\u00ed, teploty a kondenzace.",
+              "717": "Kontrola pr\u016ftoku, sp\u00edna\u010de bodu rosy, filtru, voln\u00e9ho vzduchu.",
+              "718": "Kontrola venkovn\u00ed teploty a nastaven\u00e9 hodnoty.",
+              "719": "Kontrola venkovn\u00ed teploty a nastaven\u00e9 hodnoty.",
+              "720": "Kontrola pr\u016ftoku, filtru, voln\u00e9ho vzduchu, teploty.",
+              "721": "Kontrola sp\u00edna\u010de tlaku, pr\u016ftoku strany WQ.",
+              "722": "Kontrola funkce a um\u00edst\u011bn\u00ed \u010didel p\u0159ed a za odb\u011brem.",
+              "723": "Kontrola funkce a um\u00edst\u011bn\u00ed \u010didel p\u0159ed a za odb\u011brem.",
+              "724": "Kontrola funkce a um\u00edst\u011bn\u00ed \u010didel p\u0159ed a za odb\u011brem, v\u00fdkonu HUP, p\u0159epadu a topn\u00fdch okruh\u016f.",
+              "725": "Kontrola ob\u011bhov\u00e9ho \u010derpadla tepl\u00e9 vody, pln\u011bn\u00ed z\u00e1sobn\u00edku, uz\u00e1v\u011brky a trojcestn\u00e9ho ventilu. Odvzdu\u0161n\u011bn\u00ed topn\u00e9 vody a tepl\u00e9 vody.",
+              "726": "Kontrola \u010didla m\u00edchac\u00edho okruhu, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "727": "Kontrola tlaku sol\u00e1rn\u00edho kolektoru a tlakov\u00e9ho sp\u00edna\u010de sol\u00e1rn\u00edho kolektoru.",
+              "728": "Kontrola \u010didla zdroje tepla, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
+              "729": "Kontrola ot\u00e1\u010dek a kompresoru.",
+              "730": "Kontrola spot\u0159eby v\u00fdkonu b\u011bhem oh\u0159evu.",
+              "731": "Kontrola \u010didla zdroje tepla, v\u00fdparu a bodu rosy.",
+              "732": "Kontrola sm\u011b\u0161ova\u010de a ob\u011bhov\u00e9ho \u010derpadla pro vyt\u00e1p\u011bn\u00ed.",
+              "733": "Kontrola p\u0159ipojovac\u00edho veden\u00ed anody a potenciostatu. Napln\u011bn\u00ed z\u00e1sobn\u00edku tepl\u00e9 vody.",
+              "734": "Do\u010dasn\u00e9 potvrzen\u00ed chyby pro obnoven\u00ed p\u0159\u00edpravy tepl\u00e9 vody. Opravte chybu 733.",
+              "735": "Kontrola \u010didla extern\u00edho zdroje energie, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "736": "Kontrola \u010didla sol\u00e1rn\u00edho kolektoru, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "737": "Kontrola \u010didla sol\u00e1rn\u00edho z\u00e1sobn\u00edku, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "738": "Kontrola \u010didla sm\u011b\u0161ovac\u00edho okruhu 2, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "750": "Kontrola extern\u00edho zp\u011btn\u00e9ho chladi\u010de, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "751": "Kontrola ot\u00e1\u010dek a rel\u00e9 po\u0159ad\u00ed f\u00e1z\u00ed.",
+              "752": "Viz chyby \u010d. 751 a \u010d. 717.",
+              "755": "Kontrola s\u00ed\u0165ov\u00e9ho p\u0159ipojen\u00ed, p\u0159ep\u00edna\u010de a IP adres. P\u0159\u00edpadn\u011b znovu spus\u0165te hled\u00e1n\u00ed tepeln\u00e9ho \u010derpadla.",
+              "756": "Kontrola s\u00ed\u0165ov\u00e9ho p\u0159ipojen\u00ed, p\u0159ep\u00edna\u010de a IP adres. P\u0159\u00edpadn\u011b znovu spus\u0165te hled\u00e1n\u00ed tepeln\u00e9ho \u010derpadla.",
+              "757": "P\u0159i t\u0159ikr\u00e1t opakovan\u00e9m v\u00fdskytu t\u00e9to poruchy m\u016f\u017ee b\u00fdt za\u0159\u00edzen\u00ed odem\u010deno pouze autorizovan\u00fdm servisn\u00edm person\u00e1lem!",
+              "758": "Kontrola pr\u016ftoku a \u010didla p\u0159edeh\u0159\u00e1t\u00e9ho.",
+              "759": "Kontrola nastaven\u00ed druh\u00e9ho zdroje tepla a bezpe\u010dnostn\u00edho teplotn\u00edho omezova\u010de.",
+              "760": "Ochrana ventil\u00e1toru a v\u00fdparn\u00edku p\u0159ed siln\u00fdm v\u011btrem.",
+              "761": "Kontrola kabelu/kontaktu.",
+              "762": "Kontrola \u010didla, p\u0159\u00edpadn\u011b jeho v\u00fdm\u011bna.",
+              "763": "Kontrola \u010didla, p\u0159\u00edpadn\u011b jeho v\u00fdm\u011bna.",
+              "764": "Kontrola \u010didla, p\u0159\u00edpadn\u011b jeho v\u00fdm\u011bna.",
+              "765": "P\u0159i prvn\u00edm zapnut\u00ed. Kontrola ot\u00e1\u010dek, jinak kontaktujte servis.",
+              "766": "Kontrola ot\u00e1\u010dek.",
+              "767": "Kontrola topn\u00e9ho t\u011blesa a znovu zasunut\u00ed pojistky.",
+              "770": "Kontrola teplotn\u00edho \u010didla, tlakov\u00e9ho sn\u00edma\u010de a expanzn\u00edho ventilu.",
+              "771": "Kontrola teplotn\u00edho \u010didla, tlakov\u00e9ho sn\u00edma\u010de, napln\u011bn\u00ed a expanzn\u00edho ventilu.",
+              "776": "Kontrola termodynamiky.",
+              "777": "Kontrola expanzn\u00edho ventilu, p\u0159ipojovac\u00edho kabelu a p\u0159\u00edpadn\u011b desky SEC.",
+              "778": "Kontrola \u010didla, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "779": "Kontrola \u010didla, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "780": "Kontrola \u010didla, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "781": "Kontrola \u010didla, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "782": "Kontrola \u010didla, konektoru a p\u0159ipojovac\u00edho veden\u00ed.",
+              "783": "Kontrola p\u0159ipojovac\u00edho kabelu, kondenz\u00e1tor\u016f proti ru\u0161en\u00ed a kabelov\u00e1n\u00ed.",
+              "784": "Kompletn\u00ed odpojen\u00ed za\u0159\u00edzen\u00ed na 2 minuty od nap\u00e1jen\u00ed. P\u0159i opakovan\u00e9m v\u00fdskytu zkontrolujte invertor a kompresor.",
+              "785": "V\u00fdm\u011bna desky SEC.",
+              "786": "Kontrola kabelov\u00e9ho spojen\u00ed HZ/IO SEC-Board.",
+              "787": "Potvrzen\u00ed poruchy. Pokud chyba opakovan\u011b nastane, kontaktujte autorizovan\u00fd servis (tj. z\u00e1kaznick\u00fd servis).",
+              "788": "Kontrola invertoru.",
+              "789": "Kontrola p\u0159ipojovac\u00edho kabelu LIN/kodovac\u00edho odporu.",
+              "790": "Kontrola kabelov\u00e1n\u00ed, invertoru a kompresoru.",
+              "791": "Pokud jde o konfiguraci SEC, zkontrolujte ModBus kabel mezi HZ/IO a deskou SEC. Stejn\u011b tak zkontrolujte DESKU SEC, zda v\u0161e blik\u00e1, jak m\u00e1. Pokud to nen\u00ed konfigurace s deskou SEC (nap\u0159\u00edklad u za\u0159\u00edzen\u00ed P184), pak zkontrolujte kodovac\u00ed odpor HZ/IO.",
+              "792": "Kontrola k\u00f3dovac\u00edho konektoru na desce LIN.",
+              "793": "Chyba se oprav\u00ed automaticky."
+            }
+          }
+        }
+      },
+      "switchoff_reason": {
+        "name": "Vypnut\u00ed",
+        "state": {
+          "0": "Porucha tepeln\u00e9ho \u010derpadla",
+          "1": "Porucha za\u0159\u00edzen\u00ed",
+          "2": "Re\u017eim druh\u00e9ho zdroje tepla",
+          "3": "Blokov\u00e1no distribu\u010dn\u00edm subjektem",
+          "4": "",
+          "5": "B\u011bh odmrazov\u00e1n\u00ed (pouze u n\u00edzkoteplotn\u00edch za\u0159\u00edzen\u00ed)",
+          "6": "Teplota dos\u00e1hla maxim\u00e1ln\u00ed povolen\u00e9 \u00farovn\u011b",
+          "7": "Teplota dos\u00e1hla minim\u00e1ln\u00ed povolen\u00e9 \u00farovn\u011b",
+          "8": "N\u00edzk\u00e1 \u00farove\u0148 povolen\u00e9 teploty",
+          "9": "\u017d\u00e1dn\u00fd po\u017eadavek",
+          "11": "Pr\u016ftok v tepeln\u00e9m zdroji",
+          "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+        },
+        "state_attributes": {
+          "timestamp": {
+            "name": "\u010casov\u00e1 zn\u00e1mka"
+          },
+          "code_1": {
+            "name": "P\u0159edposledn\u00ed vypnut\u00ed",
+            "state": {
+              "0": "Porucha tepeln\u00e9ho \u010derpadla",
+              "1": "Porucha za\u0159\u00edzen\u00ed",
+              "2": "Re\u017eim druh\u00e9ho zdroje tepla",
+              "3": "Blokov\u00e1no distribu\u010dn\u00edm subjektem",
+              "4": "",
+              "5": "B\u011bh odmrazov\u00e1n\u00ed (pouze u n\u00edzkoteplotn\u00edch za\u0159\u00edzen\u00ed)",
+              "6": "Teplota dos\u00e1hla maxim\u00e1ln\u00ed povolen\u00e9 \u00farovn\u011b",
+              "7": "Teplota dos\u00e1hla minim\u00e1ln\u00ed povolen\u00e9 \u00farovn\u011b",
+              "8": "N\u00edzk\u00e1 \u00farove\u0148 povolen\u00e9 teploty",
+              "9": "\u017d\u00e1dn\u00fd po\u017eadavek",
+              "11": "Pr\u016ftok v tepeln\u00e9m zdroji",
+              "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+            }
+          },
+          "timestamp_1": {
+            "name": "P\u0159edposledn\u00ed \u010dasov\u00fd okam\u017eik"
+          },
+          "code_2": {
+            "name": "P\u0159edp\u0159edposledn\u00ed d\u016fvod vypnut\u00ed",
+            "state": {
+              "0": "Porucha tepeln\u00e9ho \u010derpadla",
+              "1": "Porucha za\u0159\u00edzen\u00ed",
+              "2": "Re\u017eim druh\u00e9ho topn\u00e9ho za\u0159\u00edzen\u00ed",
+              "3": "Blok\u00e1da distribu\u010dn\u00ed s\u00edt\u011b",
+              "4": "",
+              "5": "Automatick\u00e9 odmrazov\u00e1n\u00ed (pouze u vzduchovodn\u00edch za\u0159\u00edzen\u00ed s chlazen\u00edm)",
+              "6": "Maxim\u00e1ln\u00ed teplotn\u00ed limit provozu",
+              "7": "Minim\u00e1ln\u00ed teplotn\u00ed limit provozu",
+              "8": "Ni\u017e\u0161\u00ed limit provozu",
+              "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
+              "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
+              "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+            },
+            "timestamp_2": {
+              "name": "P\u0159edp\u0159edposledn\u00ed \u010dasov\u00fd okam\u017eik"
+            }
+          },
+          "code_3": {
+            "name": "T\u0159et\u00ed p\u0159edposledn\u00ed d\u016fvod vypnut\u00ed",
+            "state": {
+              "0": "Porucha tepeln\u00e9ho \u010derpadla",
+              "1": "Porucha za\u0159\u00edzen\u00ed",
+              "2": "Re\u017eim druh\u00e9ho topn\u00e9ho za\u0159\u00edzen\u00ed",
+              "3": "Blok\u00e1da distribu\u010dn\u00ed s\u00edt\u011b",
+              "4": "",
+              "5": "Automatick\u00e9 odmrazov\u00e1n\u00ed (pouze u vzduchovodn\u00edch za\u0159\u00edzen\u00ed s chlazen\u00edm)",
+              "6": "Maxim\u00e1ln\u00ed teplotn\u00ed limit provozu",
+              "7": "Minim\u00e1ln\u00ed teplotn\u00ed limit provozu",
+              "8": "Ni\u017e\u0161\u00ed limit provozu",
+              "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
+              "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
+              "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+            }
+          },
+          "timestamp_3": {
+            "name": "\u010ctvrt\u00fd p\u0159edposledn\u00ed \u010dasov\u00fd okam\u017eik"
+          },
+          "code_4": {
+            "name": "P\u00e1t\u00e9 p\u0159edposledn\u00ed vypnut\u00ed",
+            "state": {
+              "0": "Porucha tepeln\u00e9ho \u010derpadla",
+              "1": "Porucha za\u0159\u00edzen\u00ed",
+              "2": "Re\u017eim druh\u00e9ho topn\u00e9ho za\u0159\u00edzen\u00ed",
+              "3": "Blok\u00e1da distribu\u010dn\u00ed s\u00edt\u011b",
+              "4": "",
+              "5": "Automatick\u00e9 odmrazov\u00e1n\u00ed (pouze u vzduchovodn\u00edch za\u0159\u00edzen\u00ed s chlazen\u00edm)",
+              "6": "Maxim\u00e1ln\u00ed teplotn\u00ed limit provozu",
+              "7": "Minim\u00e1ln\u00ed teplotn\u00ed limit provozu",
+              "8": "Ni\u017e\u0161\u00ed limit provozu",
+              "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
+              "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
+              "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+            }
+          },
+          "timestamp_4": {
+            "name": "P\u00e1t\u00fd p\u0159edposledn\u00ed \u010dasov\u00fd okam\u017eik"
+          }
+        }
+      },
+      "status_line_1": {
+        "name": "Stav 1",
+        "state": {
+          "heatpump running": "Tepeln\u00e9 \u010derpadlo b\u011b\u017e\u00ed",
+          "heatpump idle": "Tepeln\u00e9 \u010derpadlo je v klidov\u00e9m re\u017eimu",
+          "heatpump coming": "Tepeln\u00e9 \u010derpadlo se spou\u0161t\u00ed",
+          "heatpump shutdown": "Tepeln\u00e9 \u010derpadlo vyp\u00edn\u00e1",
+          "errorcode slot": "Chybov\u00fd k\u00f3d tepeln\u00e9ho \u010derpadla ve slotu 0",
+          "pump forerun": "P\u0159edeh\u0159ev \u010derpadla",
+          "defrost": "Odmrazov\u00e1n\u00ed",
+          "waiting on LIN connection": "\u010cek\u00e1 na LIN p\u0159ipojen\u00ed",
+          "compressor heating up": "Kompresor se zah\u0159\u00edv\u00e1",
+          "compressor heater": "Oh\u0159ev kompresoru"
+        }
+      },
+      "status_line_2": {
+        "name": "Stav 2",
+        "state": {
+          "since": "ji\u017e",
+          "in": "za",
+          "unknown": "nezn\u00e1mo"
+        }
+      },
+      "status_line_3": {
+        "name": "Stav 3",
+        "state": {
+          "heating": "vyt\u00e1p\u011bn\u00ed",
+          "defrost": "odmrazov\u00e1n\u00ed",
+          "cooling": "chlazen\u00ed",
+          "pump forerun": "p\u0159edeh\u0159ev \u010derpadla",
+          "thermal desinfection": "tepeln\u00e1 dezinfekce",
+          "swimming pool/solar": "baz\u00e9n/sol\u00e1ry",
+          "no request": "\u017e\u00e1dn\u00fd po\u017eadavek",
+          "cycle lock": "blokov\u00e1n\u00ed cyklu",
+          "lock time": "\u010das blokace",
+          "domestic water": "nah\u0159\u00edv\u00e1n\u00ed TUV",
+          "flow monitoring": "kontrola pr\u016ftoku",
+          "grid switch on delay": "zpo\u017ed\u011bn\u00ed p\u0159i zapnut\u00ed s\u00edt\u011b",
+          "info bake out program": "informace z programu pe\u010den\u00ed",
+          "heating external engery source": "oh\u0159ev z extern\u00edho zdroje energie",
+          "domestic water external energy source": "TUV z extern\u00edho zdroje energie",
+          "second heat generator 1 active": "druh\u00fd gener\u00e1tor tepla 1 aktivn\u00ed"
+        }
+      },
+      "heat_source_output": {
+        "name": "V\u00fdstup vyt\u00e1p\u011bn\u00ed"
+      },
+      "heat_source_input_temperature": {
+        "name": "Teplota vstupu vyt\u00e1p\u011bn\u00ed"
+      },
+      "outdoor_temperature": {
+        "name": "Venkovn\u00ed teplota"
+      },
+      "status_time": {
+        "name": "\u010cas stavu"
+      },
+      "outdoor_temperature_average": {
+        "name": "Pr\u016fm\u011brn\u00e1 venkovn\u00ed teplota"
+      },
+      "compressor1_impulses": {
+        "name": "Impuls\u016f kompresoru 1"
+      },
+      "compressor1_operation_hours": {
+        "name": "Hodiny provozu kompresoru 1"
+      },
+      "compressor2_impulses": {
+        "name": "Impuls\u016f kompresoru 2"
+      },
+      "compressor2_operation_hours": {
+        "name": "Hodiny provozu kompresoru 2"
+      },
+      "operation_hours": {
+        "name": "Celkov\u00e9 hodiny provozu"
+      },
+      "heat_amount_counter": {
+        "name": "Mno\u017estv\u00ed tepla"
+      },
+      "hot_gas_temperature": {
+        "name": "Teplota hork\u00e9ho plynu"
+      },
+      "suction_compressor_temperature": {
+        "name": "Teplota sac\u00edho kompresoru"
+      },
+      "suction_evaporator_temperature": {
+        "name": "Teplota sac\u00edho vypa\u0159ova\u010de"
+      },
+      "compressor_heating_temperature": {
+        "name": "Teplota oh\u0159evu kompresoru"
+      },
+      "overheating_temperature": {
+        "name": "P\u0159et\u00e1p\u011bc\u00ed teplota"
+      },
+      "overheating_target_temperature": {
+        "name": "po\u017eadovan\u00e1 p\u0159et\u00e1p\u011bc\u00ed teplota"
+      },
+      "high_pressure": {
+        "name": "Vysok\u00fd tlak"
+      },
+      "low_pressure": {
+        "name": "N\u00edzk\u00fd tlak"
+      },
+      "additional_heat_generator_operation_hours": {
+        "name": "Hodiny provozu dodate\u010dn\u00e9ho zdroje tepla"
+      },
+      "analog_out1": {
+        "name": "Analogov\u00fd v\u00fdstup 1"
+      },
+      "analog_out2": {
+        "name": "Analogov\u00fd v\u00fdstup 2"
+      },
+      "current_heat_output": {
+        "name": "Aktu\u00e1ln\u00ed v\u00fdkon"
+      },
+      "additional_heat_generator_amount_counter": {
+        "name": "Mno\u017estv\u00ed tepla dodate\u010dn\u00e9ho zdroje"
+      },
+      "heat_source_output_temperature": {
+        "name": "Teplota v\u00fdstupu tepla"
+      },
+      "pump_frequency": {
+        "name": "Frekvence \u010derpadla"
+      },
+      "domestic_water": {
+        "name": "TUV"
+      },
+      "dhw_temperature": {
+        "name": "Teplota TUV"
+      },
+      "dhw_operation_hours": {
+        "name": "Hodiny provozu TUV"
+      },
+      "dhw_heat_amount": {
+        "name": "Mno\u017estv\u00ed tepla pro TUV"
+      },
+      "dhw_energy_input": {
+        "name": "Spot\u0159ebovan\u00e1 energie pro TUV"
+      },
+      "flow_in_temperature": {
+        "name": "Teplota vstupu"
+      },
+      "flow_out_temperature": {
+        "name": "Teplota zp\u00e1te\u010dky"
+      },
+      "flow_out_temperature_target": {
+        "name": "po\u017eadovan\u00e1 teplota zp\u00e1te\u010dky"
+      },
+      "operation_hours_heating": {
+        "name": "Hodiny provozu topen\u00ed"
+      },
+      "heat_amount_heating": {
+        "name": "Mno\u017estv\u00ed tepla pro topen\u00ed"
+      },
+      "heat_amount_flow_rate": {
+        "name": "Mno\u017estv\u00ed tepla"
+      },
+      "heat_source_flow_rate": {
+        "name": "Pr\u016ftok zdroje vyt\u00e1p\u011bn\u00ed"
+      },
+      "heat_energy_input": {
+        "name": "Spot\u0159ebovan\u00e1 energie pro topen\u00ed"
+      },
+      "flow_out_temperature_external": {
+        "name": "Teplota vn\u011bj\u0161\u00edho zp\u00e1te\u010dky"
+      },
+      "solar_collector_temperature": {
+        "name": "Teplota sol\u00e1rn\u00edho kolektoru"
+      },
+      "solar_buffer_temperature": {
+        "name": "Teplota sol\u00e1rn\u00edho z\u00e1sobn\u00edku"
+      },
+      "operation_hours_solar": {
+        "name": "Hodiny provozu sol\u00e1rn\u00edho za\u0159\u00edzen\u00ed"
+      },
+      "operation_hours_cooling": {
+        "name": "Hodiny provozu chlazen\u00ed"
+      },
+      "room_thermostat_temperature": {
+        "name": "Teplota termostatu m\u00edstnosti"
+      },
+      "room_thermostat_temperature_target": {
+        "name": "po\u017eadovan\u00e1 teplota termostatu m\u00edstnosti"
+      },
+      "pump_flow_delta_target": {
+        "name": "po\u017eadovan\u00fd rozd\u00edl pr\u016ftoku \u010derpadla"
+      },
+      "pump_flow_delta": {
+        "name": "Rozd\u00edl pr\u016ftoku \u010derpadla"
+      },
+      "circulation_pump_delta_target": {
+        "name": "po\u017eadovan\u00fd rozd\u00edl pr\u016ftoku ob\u011bhov\u00e9ho \u010derpadla"
+      },
+      "circulation_pump_delta": {
+        "name": "Rozd\u00edl pr\u016ftoku ob\u011bhov\u00e9ho \u010derpadla"
+      }
+    },
+    "climate": {
+      "heating": {
+        "name": "Topen\u00ed"
+      },
+      "cooling": {
+        "name": "Chlazen\u00ed"
+      }
+    },
+    "water_heater": {
+      "domestic_water": {
+        "name": "TUV"
+      }
+    }
+  },
+  "config": {
+    "abort": {
+      "already_configured": "Toto za\u0159\u00edzen\u00ed je ji\u017e nakonfigurov\u00e1no.",
+      "already_in_progress": "Konfigura\u010dn\u00ed proces ji\u017e prob\u00edh\u00e1.",
+      "cannot_connect": "P\u0159ipojen\u00ed k Luxtronik selhalo.\nZkontrolujte pros\u00edm IP adresu/hostname a port.\n\nChyba:\n{connect_error}",
+      "no_devices_found": "V s\u00edti nebyla nalezena \u017e\u00e1dn\u00e1 za\u0159\u00edzen\u00ed.",
+      "single_instance_allowed": "Ji\u017e nakonfigurov\u00e1no. Pouze jedna konfigurace je povolena.",
+      "unknown": "Neo\u010dek\u00e1van\u00e1 chyba"
+    },
+    "error": {
+      "address": "Zad\u00e1na neplatn\u00e1 vzd\u00e1len\u00e1 adresa. Adresa mus\u00ed b\u00fdt IP adresa nebo platn\u00fd hostname.",
+      "address_in_use": "Vybran\u00fd port je na tomto syst\u00e9mu ji\u017e pou\u017e\u00edv\u00e1n.",
+      "unknown": "Neo\u010dek\u00e1van\u00e1 chyba"
+    },
+    "step": {
+      "user": {
+        "description": "P\u0159ipojen\u00ed tepeln\u00e9ho \u010derpadla s Luxtronik controllerem k Home Assistantu.",
+        "data": {
+          "host": "Hostitel",
+          "port": "S\u00ed\u0165ov\u00fd port",
+          "timeout": "\u010casov\u00fd limit s\u00ed\u0165ov\u00e9ho socketu (sekundy)",
+          "max_data_length": "Maxim\u00e1ln\u00ed d\u00e9lka datov\u00e9ho bal\u00ed\u010dku"
+        },
+        "data_description": {
+          "host": "N\u00e1zev hostitele, nebo IP adresa",
+          "port": "Obvykle 8889 nebo 8888",
+          "timeout": "Pokud je s\u00ed\u0165 nebo tepeln\u00e9 \u010derpadlo pomal\u00e9, m\u016f\u017eete zde jemn\u011b nastavit \u010dasov\u00fd limit.",
+          "max_data_length": "Pokud je s\u00ed\u0165 nebo tepeln\u00e9 \u010derpadlo pomal\u00e9, m\u016f\u017eete zde jemn\u011b nastavit maxim\u00e1ln\u00ed d\u00e9lku datov\u00e9ho bal\u00ed\u010dku."
+        }
+      },
+      "options": {
+        "description": "Nastaven\u00ed pro Luxtronik tepeln\u00e9 \u010derpadlo {name}.\nTato nastaven\u00ed lze pozd\u011bji zm\u011bnit v r\u00e1mci integrac\u00ed.",
+        "data": {
+          "ha_sensor_indoor_temperature": "ID senzoru pro vnit\u0159n\u00ed teplotu",
+          "control_mode_home_assistant": "Experiment\u00e1ln\u00ed!: \u0158\u00eddit stav termostatu Zap/Vyp pomoc\u00ed Home Assistant.",
+          "ha_sensor_prefix": "P\u0159edpona ID entity"
+        },
+        "data_description": {
+          "ha_sensor_indoor_temperature": "V Home Assistantu bude vytvo\u0159en termostat pro \u0159\u00edzen\u00ed vyt\u00e1p\u011bn\u00ed. Skute\u010dn\u00e1 teplota bude ur\u010dena senzorem v Home Assistantu.\nPokud je Luxtronik p\u0159ipojena k hardwarov\u00e9mu termostatu m\u00edstnosti, toto pole by m\u011blo z\u016fstat pr\u00e1zdn\u00e9.",
+          "control_mode_home_assistant": "Pokud je termostat Home Assistant v re\u017eimu ne\u010dinnosti, stav Vypnut\u00ed bude odesl\u00e1n Luxtronikem a Luxtronik nebude moci toto za\u0159\u00edzen\u00ed spustit.",
+          "ha_sensor_prefix": "D\u016fle\u017eit\u00e9, pokud jsou pou\u017eity v\u00edce tepeln\u00fdch \u010derpadel.\nP\u0159i pou\u017eit\u00ed jednoho lze pou\u017e\u00edt jednodu\u0161e 'luxtronik'."
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "description": "Nastaven\u00ed pro tepeln\u00e9 \u010derpadlo Luxtronik {name}.",
+        "data": {
+          "ha_sensor_indoor_temperature": "ID senzoru pro vnit\u0159n\u00ed teplotu",
+          "control_mode_home_assistant": "Experiment\u00e1ln\u00ed!: \u0158\u00eddit stav termostatu Zap/Vyp pomoc\u00ed Home Assistant.",
+          "ha_sensor_prefix": "P\u0159edpona ID entity"
+        },
+        "data_description": {
+          "ha_sensor_indoor_temperature": "V Home Assistantu bude vytvo\u0159en termostat pro \u0159\u00edzen\u00ed vyt\u00e1p\u011bn\u00ed. Skute\u010dn\u00e1 teplota bude ur\u010dena senzorem v Home Assistantu.\nPokud je Luxtronik p\u0159ipojena k hardwarov\u00e9mu termostatu m\u00edstnosti, toto pole by m\u011blo z\u016fstat pr\u00e1zdn\u00e9.",
+          "control_mode_home_assistant": "Pokud je termostat Home Assistant v re\u017eimu ne\u010dinnosti, stav Vypnut\u00ed bude odesl\u00e1n Luxtronikem a Luxtronik nebude moci toto za\u0159\u00edzen\u00ed spustit.",
+          "ha_sensor_prefix": "D\u016fle\u017eit\u00e9, pokud jsou pou\u017eity v\u00edce tepeln\u00fdch \u010derpadel.\nP\u0159i pou\u017eit\u00ed jednoho lze pou\u017e\u00edt jednodu\u0161e 'luxtronik'."
+        }
+      }
+    }
+  }
+}
