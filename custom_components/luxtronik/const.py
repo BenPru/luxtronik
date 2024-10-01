@@ -503,6 +503,7 @@ class LuxCalculation(StrEnum):
     # 254 Flow Rate
     C0257_CURRENT_HEAT_OUTPUT: Final = "calculations.Heat_Output"
     # 258 RBE Version
+    C0268_CURRENT_POWER_CONSUMPTION: Final = "calculations.Unknown_Calculation_268"
 
 
 # endregion Lux calculations
@@ -606,6 +607,7 @@ class SensorKey(StrEnum):
     ANALOG_OUT1 = "analog_out1"
     ANALOG_OUT2 = "analog_out2"
     CURRENT_HEAT_OUTPUT = "current_heat_output"
+    CURRENT_POWER_CONSUMPTION = "current_power_consumption"
     PUMP_FREQUENCY = "pump_frequency"
     PUMP_FLOW_DELTA_TARGET = "pump_flow_delta_target"
     PUMP_FLOW_DELTA = "pump_flow_delta"

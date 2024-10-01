@@ -195,13 +195,13 @@
             "cooling_stop_delay_hours": {
                 "name": "Stop delay"
             },
-	        "cooling_target_temperature_mk1": {
+            "cooling_target_temperature_mk1": {
                 "name": "Cooling target temperature"
             },
-	        "cooling_target_temperature_mk2": {
+            "cooling_target_temperature_mk2": {
                 "name": "Cooling target temperature"
             },
-    	    "cooling_target_temperature_mk3": {
+            "cooling_target_temperature_mk3": {
                 "name": "Cooling target temperature"
             },
             "heat_source_input_temperature_min": {
@@ -314,7 +314,7 @@
                 "remedy": {
                     "name": "Remedy"
                 }
-        },
+            },
             "switchoff_reason": {
                 "name": "Switchoff reason",
                 "state": {
@@ -445,6 +445,9 @@
             "current_heat_output": {
                 "name": "Current heat output"
             },
+            "current_power_consumption": {
+                "name": "Current power consumption"
+            },
             "additional_heat_generator_amount_counter": {
                 "name": "Additional heat generator amount counter"
             },
@@ -559,8 +562,8 @@
             "user": {
                 "description": "Set up your Luxtronik heatpump controller to allow monitoring and control.",
                 "data": {
-                  "host": "Host",
-                  "port": "Network Port",
+                    "host": "Host",
+                    "port": "Network Port",
                     "timeout": "Network socket timeout (Sec.)",
                     "max_data_length": "Max data package length"
                 },
@@ -570,8 +573,8 @@
                     "timeout": "If the network or the heatpump is slow, you can fine tune the timeout.",
                     "max_data_length": "If the network or the heatpump is slow, you can fine tune the date package length."
                 }
-             },
-             "options": {
+            },
+            "options": {
                 "description": "Settings for the Luxtronik heatpump {name}.\nThese settings can also be changed later under Integrations.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor id for the indoor temperature",
@@ -583,7 +586,7 @@
                     "control_mode_home_assistant": "When the Home Assistant Thermostat is in the Idle state, the Off state is reported to Luxtronik and Luxtronik cannot start this item.",
                     "ha_sensor_prefix": "Important if several heat pumps are used.\nIn the case of a single one, 'luxtronik' can simply be used."
                 }
-             }
+            }
         }
     },
     "options": {
