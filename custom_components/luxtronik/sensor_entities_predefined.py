@@ -568,6 +568,7 @@ SENSORS: list[descr] = [
         device_key=DeviceKey.heating,
         entity_category=None,
         icon="mdi:thermometer",
+        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LV.V0122_ROOM_THERMOSTAT,
