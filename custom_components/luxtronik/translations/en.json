@@ -451,6 +451,9 @@
             "additional_heat_generator_amount_counter": {
                 "name": "Additional heat generator amount counter"
             },
+            "second_heat_generator_amount_counter": {
+                "name": "Second heat generator amount counter"
+            },
             "heat_source_output_temperature": {
                 "name": "Heat source output"
             },
@@ -510,6 +513,9 @@
             },
             "operation_hours_cooling": {
                 "name": "Operation hours"
+            },
+            "cooling_energy_input": {
+                "name": "Energy input"
             },
             "room_thermostat_temperature": {
                 "name": "Room thermostat"
