@@ -683,6 +683,9 @@
             "current_heat_output": {
                 "name": "Leistung Ist"
             },
+            "current_power_consumption": {
+                "name": "Leistungsaufnahme"
+            },
             "additional_heat_generator_amount_counter": {
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge"
             },

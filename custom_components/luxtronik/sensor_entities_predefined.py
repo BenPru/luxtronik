@@ -443,6 +443,17 @@ SENSORS: list[descr] = [
             attr(SA.REMEDY, LC.C0100_ERROR_REASON),
         ),
     ),
+    descr(
+        key=SensorKey.CURRENT_POWER_CONSUMPTION,
+        luxtronik_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
+        icon="mdi:lightning-bolt-circle",
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        entity_registry_enabled_default=False,
+        native_precision=0,
+    ),
     # endregion Main heatpump
     # region Heating
     descr(
