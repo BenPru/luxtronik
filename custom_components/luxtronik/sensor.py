@@ -449,18 +449,18 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         return ','.join(days)
 
     def _restore_attr_value(self, value: Any | None) -> Any:
-        if value is not None: 
-            if ',' in str(value):
-                vals = list() 
-                for day in str(value).split(","): 
-                    for idx, name in enumerate(calendar.day_name):
-                        if day == name: 
-                            vals.append(idx)
-                            break
-                return vals
+        if value is not None:
             if ":" in str(value):
                 vals = str(value).split(":")
                 return time(int(vals[0]), int(vals[1]))
+            vals = list() 
+            for day in str(value).split(","): 
+                for idx, name in enumerate(calendar.day_name):
+                    if day == name: 
+                        vals.append(idx)
+                        break
+            if len(vals):
+                return vals 
         return time.min 
 
 
