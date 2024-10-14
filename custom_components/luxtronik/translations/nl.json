@@ -142,7 +142,7 @@
                 "name": "VC3 Verwarmingscurve 's Nachts"
             },
             "dhw_target_temperature": {
-                "name": "Zou moeten"
+                "name": "Doeltemperatuur"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Doeltemperatuur thermische desinfectie"
@@ -207,7 +207,7 @@
                 "name": "Status",
                 "state": {
                     "heating": "Verwarmt",
-                    "hot water": "Industrieel water",
+                    "hot water": "Drinkwater",
                     "swimming pool/solar": "Zwembad/zonne-energie",
                     "evu": "Netwerkblokkering",
                     "defrost": "Ontdooien",
@@ -678,7 +678,7 @@
                 "name": "Analoge uitgang 2"
             },
             "current_heat_output": {
-                "name": "Prestaties wel"
+                "name": "Actuele warmteconsumptie"
             },
             "additional_heat_generator_amount_counter": {
                 "name": "Warmtehoeveelheid extra warmtegenerator"
@@ -690,13 +690,13 @@
                 "name": "Pomp frequentie"
             },
             "domestic_water": {
-                "name": "Industrieel water"
+                "name": "Warm water"
             },
             "dhw_temperature": {
-                "name": "Industrieel water"
+                "name": "Warm water"
             },
             "dhw_operation_hours": {
-                "name": "Werk uren"
+                "name": "Werkuren"
             },
             "dhw_heat_amount": {
                 "name": "Hoeveelheid warmte"
@@ -741,7 +741,7 @@
                 "name": "Bedrijfsuren zonne-energie"
             },
             "operation_hours_cooling": {
-                "name": "Werk uren"
+                "name": "Werkuren"
             },
             "room_thermostat_temperature": {
                 "name": "Kamerthermostaat"
@@ -772,7 +772,7 @@
         },
         "water_heater": {
             "domestic_water": {
-                "name": "Industrieel water"
+                "name": "Drinkwater"
             }
         }
     },
