@@ -419,7 +419,11 @@ class LuxCalculation(StrEnum):
     C0015_OUTDOOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TA"
     C0016_OUTDOOR_TEMPERATURE_AVERAGE: Final = "calculations.ID_WEB_Mitteltemperatur"
     C0017_DHW_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TBW"
-    C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
+    C0018_FLOW_IN_CIRCUIT2_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TFB1"
+    C0019_FLOW_IN_CIRCUIT3_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TFB2"
+    C0020_FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE: Final = "calculations.ID_WEB_Sollwert_TVL_MK1"
+    C0021_FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE: Final = "calculations.ID_WEB_Sollwert_TVL_MK2"
+    C0022_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
     C0026_SOLAR_COLLECTOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSK"
     C0027_SOLAR_BUFFER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSS"
     C0029_DEFROST_END_FLOW_OKAY: Final = "calculations.ID_WEB_ASDin"
@@ -448,6 +452,9 @@ class LuxCalculation(StrEnum):
     C0059_COMPRESSOR2_IMPULSES: Final = "calculations.ID_WEB_Zaehler_BetrZeitImpVD2"
     C0060_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
         "calculations.ID_WEB_Zaehler_BetrZeitZWE1"
+    )
+    C0061_ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS: Final = (
+        "calculations.ID_WEB_Zaehler_BetrZeitZWE2"
     )
     C0063_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitWP"
     C0064_OPERATION_HOURS_HEATING: Final = "calculations.ID_WEB_Zaehler_BetrZeitHz"
@@ -551,6 +558,9 @@ class LuxVisibility(StrEnum):
     V0086_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
         "visibilities.ID_Visi_Bst_BStdZWE1"
     )
+    V0087_ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS: Final = (
+        "visibilities.ID_Visi_Bst_BStdZWE2"
+    )
     V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = "visibilities.ID_Visi_EinstTemp_TWQmin"
     V0121_EVU_LOCKED: Final = "visibilities.ID_Visi_SysEin_EVUSperre"
     V0122_ROOM_THERMOSTAT: Final = "visibilities.ID_Visi_SysEin_Raumstation"
@@ -613,6 +623,9 @@ class SensorKey(StrEnum):
     ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS = (
         "additional_heat_generator_operation_hours"
     )
+    ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS = (
+        "additional_heat_generator2_operation_hours"
+    )
     ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = (
         "additional_heat_generator_amount_counter"
     )
@@ -629,6 +642,10 @@ class SensorKey(StrEnum):
     HEAT_SOURCE_OUTPUT_TEMPERATURE = "heat_source_output_temperature"
     ERROR_REASON = "error_reason"
     FLOW_IN_TEMPERATURE = "flow_in_temperature"
+    FLOW_IN_CIRCUIT2_TEMPERATURE = "flow_in_circuit2_temperature"
+    FLOW_IN_CIRCUIT3_TEMPERATURE = "flow_in_circuit3_temperature"
+    FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE = "flow_in_circuit2_target_temperature"
+    FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE = "flow_in_circuit3_target_temperature"
     FLOW_OUT_TEMPERATURE = "flow_out_temperature"
     FLOW_OUT_TEMPERATURE_TARGET = "flow_out_temperature_target"
     FLOW_OUT_TEMPERATURE_EXTERNAL = "flow_out_temperature_external"

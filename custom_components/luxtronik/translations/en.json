@@ -22,6 +22,9 @@
             "additional_heat_generator": {
                 "name": "Additional heat generator"
             },
+            "additional_heat_generator2": {
+                "name": "Additional heat generator 2"
+            },
             "disturbance_output": {
                 "name": "Systemhealth"
             },
@@ -477,6 +480,18 @@
             },
             "flow_in_temperature": {
                 "name": "Flow in temperature"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Flow in temperature circuit 2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Flow in temperature circuit 3"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Flow in target temperature circuit 2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Flow in target temperature circuit 3"
             },
             "flow_out_temperature": {
                 "name": "Flow out temperature"

@@ -22,6 +22,9 @@
             "additional_heat_generator": {
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger"
             },
+            "additional_heat_generator2": {
+                "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger 2"
+            },
             "disturbance_output": {
                 "name": "Systemzustand"
             },
@@ -712,6 +715,18 @@
             },
             "flow_in_temperature": {
                 "name": "Vorlauf Temperatur"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Vorlauf Temperatur MK2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Vorlauf Temperatur MK3"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Vorlauf Soll Temperatur MK2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Vorlauf Soll Temperatur MK3"
             },
             "flow_out_temperature": {
                 "name": "R\u00fccklauf Temperatur"

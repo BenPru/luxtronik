@@ -292,6 +292,36 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         config_entry.version = 7
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
+    if config_entry.version == 7:
+        _up(
+            "flow_in_circuit2_temperature",
+            SK.FLOW_IN_CIRCUIT2_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "flow_in_circuit3_temperature",
+            SK.FLOW_IN_CIRCUIT3_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "flow_in_circuit2_target_temperature",
+            SK.FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "flow_in_circuit3_target_temperature",
+            SK.FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "additional_heat_generator2_operation_hours",
+            SK.ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS,
+            P.NUMBER,
+        )
+
+        new_data = {**config_entry.data}
+        hass.config_entries.async_update_entry(config_entry, data=new_data)
+
     LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
