@@ -22,6 +22,9 @@
       "additional_heat_generator": {
         "name": "P\u0159\u00eddavn\u00fd zdroj tepla"
       },
+      "additional_heat_generator2": {
+        "name": "P\u0159\u00eddavn\u00fd zdroj tepla 2"
+      },
       "disturbance_output": {
         "name": "Stav syst\u00e9mu"
       },
@@ -710,6 +713,18 @@
       },
       "flow_in_temperature": {
         "name": "Teplota vstupu"
+      },
+      "flow_in_circuit2_temperature": {
+        "name": "Okruh vstupní teploty 2"
+      },
+      "flow_in_circuit3_temperature": {
+          "name": "Okruh vstupní teploty 3"
+      },
+      "flow_in_circuit2_target_temperature": {
+          "name": "Obvod cílové teploty vstupu 2"
+      },
+      "flow_in_circuit3_target_temperature": {
+          "name": "Obvod cílové teploty vstupu 3"
       },
       "flow_out_temperature": {
         "name": "Teplota zp\u00e1te\u010dky"
