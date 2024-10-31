@@ -459,7 +459,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                     if day == name: 
                         vals.append(idx)
                         break
-            if len(vals):
+            if vals:
                 return vals 
         return time.min 
 
