@@ -468,6 +468,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfPower.WATT,
         entity_registry_enabled_default=False,
         native_precision=0,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_88,
     ),
     # endregion Main heatpump
     # region Heating
