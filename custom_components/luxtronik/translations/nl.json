@@ -22,6 +22,9 @@
             "additional_heat_generator": {
                 "name": "Extra warmtegenerator"
             },
+            "additional_heat_generator2": {
+                "name": "Extra warmtegenerator 2"
+            },
             "disturbance_output": {
                 "name": "Systeemstatus"
             },
@@ -706,6 +709,18 @@
             },
             "flow_in_temperature": {
                 "name": "Aanvoertemperatuur"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Circuit van de aanvoertemperatuur 2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Circuit van de aanvoertemperatuur 3"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Voeding doeltemperatuurcircuit 2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Voeding doeltemperatuurcircuit 3"
             },
             "flow_out_temperature": {
                 "name": "Retourtemperatuur"

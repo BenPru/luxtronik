@@ -19,6 +19,9 @@
             "additional_heat_generator": {
                 "name": "Dodatkowy generator ciep\u0142a"
             },
+            "additional_heat_generator2": {
+                "name": "Dodatkowy generator ciep\u0142a 2"
+            },
             "disturbance_output": {
                 "name": "Stan systemu"
             },
@@ -414,6 +417,18 @@
             },
             "flow_in_temperature": {
                 "name": "Temperatura na wej\u015Bciu"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Obwód temperatury wlotowej 2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Obwód temperatury wlotowej 3"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Obwód docelowej temperatury na wlocie 2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Obwód docelowej temperatury na wlocie 3"
             },
             "flow_out_temperature": {
                 "name": "Temperatura na wyj\u015Bciu"
