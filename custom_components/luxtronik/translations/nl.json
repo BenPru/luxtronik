@@ -117,32 +117,41 @@
             "heating_min_flow_out_temperature": {
                 "name": "Minimaal doelrendement"
             },
-            "heating_circuit_curve1_temperature": {
-                "name": "Verwarmingscurve 1"
+            "heating_curve_end_temperature": {
+                "name": "Eindpunt Verwarmingscurve"
             },
-            "heating_circuit_curve2_temperature": {
-                "name": "Verwarmingscurve 2"
+            "heating_curve_parallel_shift_temperature": {
+                "name": "Verwarmingscurve parallelle verschuiving"
             },
-            "heating_circuit_curve_night_temperature": {
-                "name": "Verwarmingscurve 's Nachts"
+            "heating_curve_night_temperature": {
+                "name": "Verwarmingscurve 's nachts reductie"
             },
-            "heating_circuit2_curve1_temperature": {
-                "name": "VC2 Verwarmingscurve 1"
+            "heating_curve_circuit1_end_temperature": {
+                "name": "VC1 Eindpunt Verwarmingscurve"
             },
-            "heating_circuit2_curve2_temperature": {
-                "name": "VC2 Verwarmingscurve 2"
+            "heating_curve_circuit1_parallel_shift_temperature": {
+                "name": "VC1 Verwarmingscurve parallelle verschuiving"
             },
-            "heating_circuit2_curve_night_temperature": {
-                "name": "VC2 Verwarmingscurve 's Nachts"
+            "heating_curve_circuit1_night_temperature": {
+                "name": "VC1 Verwarmingscurve 's nachts reductie"
             },
-            "heating_circuit3_curve1_temperature": {
-                "name": "VC3 Verwarmingscurve 1"
+            "heating_curve_circuit2_end_temperature": {
+                "name": "VC2 Eindpunt Verwarmingscurve"
             },
-            "heating_circuit3_curve2_temperature": {
-                "name": "VC3 Verwarmingscurve 2"
+            "heating_curve_circuit2_parallel_shift_temperature": {
+                "name": "VC2 Verwarmingscurve parallelle verschuiving"
             },
-            "heating_circuit3_curve_night_temperature": {
-                "name": "VC3 Verwarmingscurve 's Nachts"
+            "heating_curve_circuit2_night_temperature": {
+                "name": "VC2 Verwarmingscurve 's nachts reductie"
+            },
+            "heating_curve_circuit3_end_temperature": {
+                "name": "VC3 Eindpunt Verwarmingscurve"
+            },
+            "heating_curve_circuit3_parallel_shift_temperature": {
+                "name": "VC3 Verwarmingscurve parallelle verschuiving"
+            },
+            "heating_curve_circuit3_night_temperature": {
+                "name": "VC3 Verwarmingscurve 's nachts reductie"
             },
             "dhw_target_temperature": {
                 "name": "Doeltemperatuur"
@@ -710,11 +719,17 @@
             "flow_in_temperature": {
                 "name": "Aanvoertemperatuur"
             },
+            "flow_in_circuit1_temperature": {
+                "name": "Circuit van de aanvoertemperatuur 1"
+            },
             "flow_in_circuit2_temperature": {
                 "name": "Circuit van de aanvoertemperatuur 2"
             },
             "flow_in_circuit3_temperature": {
                 "name": "Circuit van de aanvoertemperatuur 3"
+            },
+            "flow_in_circuit1_target_temperature": {
+                "name": "Voeding doeltemperatuurcircuit 1"
             },
             "flow_in_circuit2_target_temperature": {
                 "name": "Voeding doeltemperatuurcircuit 2"
