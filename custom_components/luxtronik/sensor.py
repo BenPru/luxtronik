@@ -224,12 +224,18 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             # evu start
             if (
                 self._attr_cache[SA.EVU_FIRST_START_TIME] == time.min
-                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
                 or (
-                    self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
-                    and time_now.hour < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
+                    time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
+                    or (
+                        self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
+                        and time_now.hour < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
+                    )
+                    or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
                 )
-                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
+                and (
+                    self._attr_cache[SA.EVU_FIRST_END_TIME].hour > time_now.hour
+                    or self._attr_cache[SA.EVU_FIRST_END_TIME] == time.min
+                )
             ):
                 self._attr_cache[SA.EVU_FIRST_START_TIME] = time_now
             else:
