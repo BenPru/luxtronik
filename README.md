@@ -168,7 +168,7 @@ Only a small number of the over 1100 parameters have a known funtion and only th
 All parameters can be configured as sensors and read that way.
 
 
-### Support Tickets
+### 4 Support Tickets
 If you create a ticket please provide always a diagnostic file as issue attachment:
 ![image](https://github.com/BenPru/luxtronik/assets/32298537/89c26414-0304-438f-9204-79cf0a338db3)
 
