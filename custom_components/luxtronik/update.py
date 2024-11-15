@@ -155,8 +155,10 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                     datetime.utcnow().timestamp()
                 )
                 # Filename e.g.: wp2reg-V2.88.1-9086
-                # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'.
-                self.__firmware_version_available = filename.split("-", 1)[1]
+                # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'. --> Split by -
+                #                             'wpreg.V1.88.3-9717'   --> Split by .
+                token = '-' if filename.count('-') > 1 else '.'
+                self.__firmware_version_available = filename.split(token, 1)[1]
             except Exception:  # pylint: disable=broad-except
                 LOGGER.warning(
                     "Could not request download portal firmware version",
