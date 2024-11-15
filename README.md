@@ -1,5 +1,7 @@
 # Luxtronik
 
+If you like 🩷 this project, [sponsor it (click)](https://github.com/sponsors/BenPru).
+
 ## Warning
 
 > :warning: **New Code-Base - PLEASE READ!** :warning:  
