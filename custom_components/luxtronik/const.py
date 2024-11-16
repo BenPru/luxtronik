@@ -301,7 +301,7 @@ class LuxParameter(StrEnum):
     P0019_HEATING_CURVE_CIRCUIT2_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK2ABS_akt"  # 0
     )
-        # luxtronik*_heating_curve_circuit3*
+    # luxtronik*_heating_curve_circuit3*
     P0020_HEATING_CURVE_CIRCUIT3_END_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK3E_akt"  # 270
     )
@@ -643,7 +643,7 @@ class SensorKey(StrEnum):
     ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = (
         "additional_heat_generator_amount_counter"
     )
-    SECOND_HEAT_GENERATOR_AMOUNT_COUNTER= "second_heat_generator_amount_counter"
+    SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = "second_heat_generator_amount_counter"
     ANALOG_OUT1 = "analog_out1"
     ANALOG_OUT2 = "analog_out2"
     CURRENT_HEAT_OUTPUT = "current_heat_output"
