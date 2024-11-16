@@ -98,7 +98,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         icon="mdi:download-lock",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        native_min_value=-20.0, # -9.0
+        native_min_value=-20.0,  # -9.0
         native_max_value=0.0,
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
@@ -535,7 +535,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LV.V0005_COOLING,
-    ),    
+    ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_START_DELAY_HOURS,
         luxtronik_key=LP.P0850_COOLING_START_DELAY_HOURS,
@@ -575,7 +575,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LP.P0042_MIXING_CIRCUIT1_TYPE,
-    ), 
+    ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK2,
         luxtronik_key=LP.P0133_COOLING_TARGET_TEMPERATURE_MK2,
@@ -589,7 +589,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LP.P0130_MIXING_CIRCUIT2_TYPE,
-    ), 
+    ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK3,
         luxtronik_key=LP.P0966_COOLING_TARGET_TEMPERATURE_MK3,
@@ -603,7 +603,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LP.P0780_MIXING_CIRCUIT3_TYPE,
-    ), 
+    ),
     # endregion Cooling
 ]
-
