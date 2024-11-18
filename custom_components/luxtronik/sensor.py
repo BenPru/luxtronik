@@ -215,13 +215,17 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         super()._handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
-        weekday = datetime.today().weekday()
-        if not isinstance(self._attr_cache[SA.EVU_DAYS], list):
+        weekday = datetime.today().weekday()     
+        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
+            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(',')
+        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
             self._attr_cache[SA.EVU_DAYS] = list()
         if self._attr_native_value is None or self._last_state is None:
             pass
         elif self._attr_native_value == evu and str(self._last_state) != evu:
             # evu start
+            if weekday not in self._attr_cache[SA.EVU_DAYS]:
+                self._attr_cache[SA.EVU_DAYS].append(weekday)
             if (
                 self._attr_cache[SA.EVU_FIRST_START_TIME] == time.min
                 or (
