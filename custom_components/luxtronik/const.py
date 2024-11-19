@@ -226,6 +226,18 @@ class LuxSwitchoffReason(Enum):
     undefined_17: Final = 17  # ???
     undefined_18: Final = 18  # ???
     PV_max: Final = 19
+    undefined_20: Final = 20  # ???
+    undefined_21: Final = 21  # ???
+    undefined_22: Final = 22  # ???
+    undefined_23: Final = 23  # ???
+    undefined_24: Final = 24  # ???
+    undefined_25: Final = 25  # ???
+    undefined_26: Final = 26  # ???
+    undefined_27: Final = 27  # ???
+    undefined_28: Final = 28  # ???
+    undefined_29: Final = 29  # ???
+    undefined_30: Final = 30  # ???
+    undefined_31: Final = 31  # ???
 
 
 LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
