@@ -253,8 +253,13 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 discovery_info.ip,
             )
             # Validate dhcp result with socket broadcast:
-            broadcast_discover_ip, broadcast_discover_port = discover()[0]
-            if broadcast_discover_ip != discovery_info.ip:
+            heatpump_list = discover()
+            broadcast_discover_ip = ''
+            for heatpump in heatpump_list:
+                if heatpump[0] == discovery_info.ip:
+                  broadcast_discover_ip = heatpump[0]
+                  broadcast_discover_port = heatpump[1]
+            if broadcast_discover_ip == '':
                 return self.async_abort(reason="no_devices_found")
             config = dict[str, Any]()
             config[CONF_HOST] = broadcast_discover_ip
