@@ -113,8 +113,8 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
 
     def release_notes(self) -> str | None:
         """Build release notes."""
-        release_url = get_manufacturer_firmware_url_by_model(self.coordinator.model)
         download_id = get_firmware_download_id(self.installed_version)
+        release_url = get_manufacturer_firmware_url_by_model(self.coordinator.model, download_id)
         download_url = f"{DOWNLOAD_PORTAL_URL}{download_id}"
         manual_url = (
             FIRMWARE_UPDATE_MANUAL_DE
