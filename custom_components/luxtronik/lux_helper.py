@@ -127,12 +127,12 @@ def get_firmware_download_id(installed_version: str | None) -> int | None:
     return None
 
 
-def get_manufacturer_firmware_url_by_model(model: str) -> str:
+def get_manufacturer_firmware_url_by_model(model: str, default_id: int) -> str:
     """Return the manufacturer firmware download url."""
     layout_id = 0
 
     if model is None:
-        layout_id = 0
+        layout_id = default_id
     elif model.startswith(tuple(LUX_MODELS_ALPHA_INNOTEC)):
         layout_id = 1
     elif model.startswith(tuple(LUX_MODELS_NOVELAN)):
