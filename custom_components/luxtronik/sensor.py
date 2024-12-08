@@ -411,13 +411,14 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
             self._attr_cache[SA.EVU_DAYS] = list()
         evu_pause = 0
-        if not self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
+        if self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
             evu_pause += (24 - datetime.now().hour)*60 - datetime.now().minute
+            evu_time = self._attr_cache[SA.EVU_FIRST_START_TIME]
             for i in range(1, 7):
                 if weekday+i > 6:
                     i = -7+i
                 if weekday+i in self._attr_cache[SA.EVU_DAYS]:
-                    return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute + evu_pause
+                    return evu_time.hour*60 + evu_time.minute + evu_pause
                 else:
                     evu_pause += 1440
         else:
