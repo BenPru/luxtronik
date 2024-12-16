@@ -57,7 +57,7 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         | WaterHeaterEntityFeature.AWAY_MODE,
         luxtronik_key=LuxParameter.P0004_MODE_DHW,
         luxtronik_key_current_temperature=LuxCalculation.C0017_DHW_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0002_DHW_TARGET_TEMPERATURE,
+        luxtronik_key_target_temperature=LuxParameter.P0105_DHW_TARGET_TEMPERATURE,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_heating=LuxOperationMode.domestic_water,
         # luxtronik_key_target_temperature_high=LuxParameter,
