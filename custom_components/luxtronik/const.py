@@ -93,6 +93,7 @@ class FirmwareVersionMinor(Enum):
 
     minor_80: Final = 80
     minor_88: Final = 88
+    minor_90: Final = 90
 
 
 LUXTRONIK_HA_SIGNAL_UPDATE_ENTITY = "luxtronik_entry_update"
@@ -226,18 +227,8 @@ class LuxSwitchoffReason(Enum):
     undefined_17: Final = 17  # ???
     undefined_18: Final = 18  # ???
     PV_max: Final = 19
-    undefined_20: Final = 20  # ???
-    undefined_21: Final = 21  # ???
-    undefined_22: Final = 22  # ???
-    undefined_23: Final = 23  # ???
-    undefined_24: Final = 24  # ???
-    undefined_25: Final = 25  # ???
-    undefined_26: Final = 26  # ???
-    undefined_27: Final = 27  # ???
-    undefined_28: Final = 28  # ???
-    undefined_29: Final = 29  # ???
-    undefined_30: Final = 30  # ???
-    undefined_31: Final = 31  # ???
+    undefined_24: Final = 24 # ???
+    undefined_25: Final = 25 # ???
 
 
 LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
@@ -393,7 +384,8 @@ class LuxParameter(StrEnum):
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
     P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
     P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER: Final = "parameters.Unknown_Parameter_1140"
-
+    P1158_POWER_LIMIT_SWITCH: Final = "parameters.Unknown_Parameter_1158"
+    P1159_POWER_LIMIT_VALUE: Final = "parameters.Unknown_Parameter_1159"
 
 # endregion Lux parameters
 
@@ -577,7 +569,7 @@ class LuxVisibility(StrEnum):
     V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "visibilities.ID_Visi_Waermemenge_ZWE"
     )
-    V0357_SILENT_MODE_TIME_MENU: Final = "visibilities.Unknown_Parameter_357"
+    V0357_ELECTRICAL_POWER_LIMITATION_SWITCH: Final = "visibilities.Unknown_Parameter_357"
 
 
 # endregion visibilities
@@ -650,6 +642,8 @@ class SensorKey(StrEnum):
     EFFICIENCY_PUMP = "efficiency_pump"
     EFFICIENCY_PUMP_NOMINAL = "efficiency_pump_nominal"
     EFFICIENCY_PUMP_MINIMAL = "efficiency_pump_minimal"
+    ELECTRICAL_POWER_LIMITATION_SWITCH = "electrical_power_limitation_switch"
+    ELECTRICAL_POWER_LIMITATION_VALUE = "electrical_power_limitation_value"
     PUMP_HEAT_CONTROL = "pump_heat_control"
     HEATING = "heating"
     PUMP_OPTIMIZATION = "pump_optimization"
