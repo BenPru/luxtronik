@@ -7,7 +7,7 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfTemperature,
     UnitOfTime,
-    UnitOfPower
+    UnitOfPower,
 )
 from homeassistant.helpers.entity import EntityCategory
 
