@@ -93,6 +93,7 @@ class FirmwareVersionMinor(Enum):
 
     minor_80: Final = 80
     minor_88: Final = 88
+    minor_90: Final = 90
 
 
 LUXTRONIK_HA_SIGNAL_UPDATE_ENTITY = "luxtronik_entry_update"
@@ -393,7 +394,8 @@ class LuxParameter(StrEnum):
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
     P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
     P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER: Final = "parameters.Unknown_Parameter_1140"
-
+    P1158_POWER_LIMIT_SWITCH: Final = "parameters.Unknown_Parameter_1158"
+    P1159_POWER_LIMIT_VALUE: Final = "parameters.Unknown_Parameter_1159"
 
 # endregion Lux parameters
 
@@ -577,7 +579,7 @@ class LuxVisibility(StrEnum):
     V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "visibilities.ID_Visi_Waermemenge_ZWE"
     )
-    V0357_SILENT_MODE_TIME_MENU: Final = "visibilities.Unknown_Parameter_357"
+    V0357_ELECTRICAL_POWER_LIMITATION_SWITCH: Final = "visibilities.Unknown_Parameter_357"
 
 
 # endregion visibilities
@@ -650,6 +652,8 @@ class SensorKey(StrEnum):
     EFFICIENCY_PUMP = "efficiency_pump"
     EFFICIENCY_PUMP_NOMINAL = "efficiency_pump_nominal"
     EFFICIENCY_PUMP_MINIMAL = "efficiency_pump_minimal"
+    ELECTRICAL_POWER_LIMITATION_SWITCH = "electrical_power_limitation_switch"
+    ELECTRICAL_POWER_LIMITATION_VALUE = "electrical_power_limitation_value"
     PUMP_HEAT_CONTROL = "pump_heat_control"
     HEATING = "heating"
     PUMP_OPTIMIZATION = "pump_optimization"

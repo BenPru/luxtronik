@@ -40,12 +40,12 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.P1087_SILENT_MODE,
-        key=SensorKey.SILENT_MODE,
-        icon="mdi:volume-minus",
+        key=SensorKey.ELECTRICAL_POWER_LIMITATION_SWITCH,
+        luxtronik_key=LP.P1158_POWER_LIMIT_SWITCH,
+        icon="mdi:leaf-circle-outline",
         entity_category=EntityCategory.CONFIG,
-        visibility=LV.V0357_SILENT_MODE_TIME_MENU,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_80,
+        visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_90,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     # LuxtronikSwitchDescription(
