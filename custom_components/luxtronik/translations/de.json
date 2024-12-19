@@ -94,7 +94,11 @@
             },
             "cooling": {
                 "name": "K\u00fchlung"
+            },
+            "smartgrid": {
+                "name": "Smart Grid"
             }
+			
         },
         "update": {
             "firmware": {

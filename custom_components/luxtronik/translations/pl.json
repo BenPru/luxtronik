@@ -91,7 +91,10 @@
             },
             "cooling": {
                 "name": "Ch\u0142odzenie"
-            }
+            },
+	        "smartgrid": {
+		       "name": "Smart Grid"
+	        }
         },
         "update": {
             "firmware": {

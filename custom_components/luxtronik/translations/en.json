@@ -97,7 +97,10 @@
             },
             "silent_mode": {
                 "name": "Silent mode"
-            }
+            },
+		    "smartgrid": {
+			  "name": "Smart Grid"
+		    }
         },
         "update": {
             "firmware": {

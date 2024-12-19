@@ -94,7 +94,10 @@
       },
       "cooling": {
         "name": "Chlazen\u00ed"
-      }
+      },
+	  "smartgrid": {
+		"name": "Smart Grid"
+	  }
     },
     "update": {
       "firmware": {

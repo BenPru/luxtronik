@@ -379,6 +379,9 @@ class LuxParameter(StrEnum):
     P1032_HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED: Final = (
         "parameters.ID_Einst_P155_PumpHeat_Max"
     )
+    P1030_SMART_GRID_SWITCH: Final = (
+        "parameters.ID_Einst_SmartGrid"
+    )
     P1033_PUMP_HEAT_CONTROL: Final = "parameters.ID_Einst_P155_PumpHeatCtrl"
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "parameters.ID_Waermemenge_ZWE"
@@ -721,6 +724,7 @@ class SensorKey(StrEnum):
     COOLING_TARGET_TEMPERATURE_MK1 = "cooling_target_temperature_mk1"
     COOLING_TARGET_TEMPERATURE_MK2 = "cooling_target_temperature_mk2"
     COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
+    SMART_GRID_SWITCH = "smartgrid"
     SWITCHOFF_REASON = "switchoff_reason"
     SILENT_MODE = "silent_mode"
 
