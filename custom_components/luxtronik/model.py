@@ -171,10 +171,15 @@ class LuxtronikClimateDescription(
     temperature_unit: str = UnitOfTemperature.CELSIUS
 
 
+def metaclass_resolver(*classes):
+    metaclass = tuple(set(type(cls) for cls in classes))
+    metaclass = metaclass[0] if len(metaclass)==1 \
+                else type("_".join(mcls.__name__ for mcls in metaclass), metaclass, {})   # class M_C
+    return metaclass("_".join(cls.__name__ for cls in classes), classes, {})   
+
 @dataclass
 class LuxtronikWaterHeaterDescription(
-    LuxtronikEntityDescription,
-    WaterHeaterEntityEntityDescription,
+    metaclass_resolver(LuxtronikEntityDescription, WaterHeaterEntityEntityDescription)
 ):
     """Class describing Luxtronik water heater entities."""
 
@@ -187,7 +192,7 @@ class LuxtronikWaterHeaterDescription(
     luxtronik_key_target_temperature: LuxParameter = LuxParameter.UNSET
     luxtronik_key_target_temperature_high: LuxParameter = LuxParameter.UNSET
     luxtronik_key_target_temperature_low: LuxParameter = LuxParameter.UNSET
-    temperature_unit: str = UnitOfTemperature.CELSIUS.value
+    temperature_unit: str = UnitOfTemperature.CELSIUS
 
 
 @dataclass
