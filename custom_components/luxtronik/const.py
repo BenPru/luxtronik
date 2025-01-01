@@ -93,6 +93,7 @@ class FirmwareVersionMinor(Enum):
 
     minor_80: Final = 80
     minor_88: Final = 88
+    minor_90: Final = 90
 
 
 LUXTRONIK_HA_SIGNAL_UPDATE_ENTITY = "luxtronik_entry_update"
