@@ -479,6 +479,7 @@
                     "8": "Onderste toepassingslimiet",
                     "9": "Geen vereiste",
                     "11": "Doorstroomwarmtebron",
+                    "12": "Lagedruk-pauze",
                     "-1": "Onbekende afsluiting"
                 },
                 "state_attributes": {
@@ -499,6 +500,7 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
+                            "12": "Lagedruk-pauze",
                             "-1": "Onbekende afsluiting"
                         }
                     },
@@ -519,6 +521,7 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
+                            "12": "Lagedruk-pauze",
                             "-1": "Onbekende afsluiting"
                         }
                     },
@@ -539,6 +542,7 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
+                            "12": "Lagedruk-pauze",
                             "-1": "Onbekende afsluiting"
                         }
                     },
@@ -559,6 +563,7 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
+                            "12": "Lagedruk-pauze",
                             "-1": "Onbekende afsluiting"
                         }
                     },
