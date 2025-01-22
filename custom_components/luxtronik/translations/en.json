@@ -329,6 +329,7 @@
                     "8": "Lower limitation of use",
                     "9": "no request",
                     "11": "flow rate",
+                    "12": "Low pressure pause",
                     "-1": "Unknown switchoff"
                 }
             },
