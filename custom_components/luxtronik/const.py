@@ -273,7 +273,7 @@ class LuxParameter(StrEnum):
 
     UNSET: Final = "UNSET"
     P0001_HEATING_TARGET_CORRECTION: Final = "parameters.ID_Einst_WK_akt"
-    P0002_DHW_TARGET_TEMPERATURE: Final = "parameters.ID_Einst_BWS_akt"
+    P0105_DHW_TARGET_TEMPERATURE: Final = "parameters.ID_Soll_BWS_akt"
     P0003_MODE_HEATING: Final = "parameters.ID_Ba_Hz_akt"
     P0004_MODE_DHW: Final = "parameters.ID_Ba_Bw_akt"
     P0011_HEATING_CIRCUIT_CURVE1_TEMPERATURE: Final = "parameters.ID_Einst_HzHwHKE_akt"
