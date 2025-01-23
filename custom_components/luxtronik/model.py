@@ -215,4 +215,3 @@ class LuxtronikUpdateEntityDescription(
 
     device_class = UpdateDeviceClass.FIRMWARE
     platform = Platform.UPDATE
-    
