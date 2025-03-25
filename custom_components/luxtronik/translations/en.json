@@ -94,6 +94,12 @@
             },
             "silent_mode": {
                 "name": "Silent mode"
+            },
+            "pump_vent_hup": {
+                "name": "Venting HUP"
+            },
+            "pump_vent_active": {
+                "name": "Venting active"
             }
         },
         "update": {
@@ -206,6 +212,9 @@
             },
             "heat_source_input_temperature_min": {
                 "name": "Heat source input minimum"
+            },
+            "pump_vent_timer_h": {
+                "name": "Venting runtime"
             }
         },
         "sensor": {
