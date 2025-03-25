@@ -91,6 +91,12 @@
       },
       "cooling": {
         "name": "Chlazen\u00ed"
+      },
+      "pump_vent_hup": {
+        "name": "Odv\u011btr\u00e1v\u00e1n\u00ed HUP"
+      },
+      "pump_vent_active": {
+          "name": "Odv\u011btr\u00e1v\u00e1n\u00ed aktiv\u00ed"
       }
     },
     "update": {
@@ -203,6 +209,9 @@
       },
       "heat_source_input_temperature_min": {
         "name": "Minim\u00e1ln\u00ed vstupn\u00ed teplota zdroje tepla"
+      },
+      "pump_vent_timer_h": {
+        "name": "Doba provozu odvzdu\u0161\u0148ov\u00E1n\u00ED"
       }
     },
     "sensor": {
