@@ -81,6 +81,21 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         icon="mdi:download-outline",
         entity_category=EntityCategory.CONFIG,
     ),
+    LuxtronikSwitchDescription(
+        device_key=DeviceKey.heating,
+        luxtronik_key=LP.P0678_VENTING_HUP_ACTIVE,
+        key=SensorKey.PUMP_VENT_HUP,
+        icon="mdi:pump",
+        entity_category=EntityCategory.CONFIG,
+        visibility=LV.V0163_PUMP_VENT_HUP,
+    ),
+        LuxtronikSwitchDescription(
+        device_key=DeviceKey.heating,
+        luxtronik_key=LP.P0158_VENTING_ACTIVE,
+        key=SensorKey.PUMP_VENT_ACTIVE,
+        icon="mdi:pump",
+        entity_category=EntityCategory.CONFIG,
+    ),
     # endregion Heating
     # region Domestic water
     LuxtronikSwitchDescription(
