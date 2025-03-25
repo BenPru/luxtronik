@@ -91,6 +91,12 @@
             },
             "cooling": {
                 "name": "K\u00fchlung"
+            },
+            "pump_vent_hup": {
+                "name": "Entl\u00fcften HUP"
+            },
+            "pump_vent_active": {
+                "name": "Entl\u00fcften aktiv"
             }
         },
         "update": {
@@ -203,6 +209,9 @@
             },
             "heat_source_input_temperature_min": {
                 "name": "W\u00e4rmequelle Eingang Minimum"
+            },
+            "pump_vent_timer_h": {
+                "name": "Entl\u00fcftung Laufzeit"
             }
         },
         "sensor": {
