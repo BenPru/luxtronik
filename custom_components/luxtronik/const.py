@@ -1,4 +1,5 @@
 """Constants for the Luxtronik heatpump integration."""
+
 # region Imports
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -304,6 +305,7 @@ class LuxParameter(StrEnum):
     )
     P0090_RELEASE_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWEFreig_akt"
     P0093_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = "parameters.ID_Einst_TWQmin_akt"
+    P0105_DHW_TARGET_TEMPERATURE: Final = "parameters.ID_Soll_BWS_akt"
     # MODE_COOLING: Automatic or Off
     P0108_MODE_COOLING: Final = "parameters.ID_Einst_BA_Kuehl_akt"
     P0110_COOLING_OUTDOOR_TEMP_THRESHOLD: Final = "parameters.ID_Einst_KuehlFreig_akt"
@@ -393,7 +395,9 @@ class LuxParameter(StrEnum):
     P1137_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
     P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
-    P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER: Final = "parameters.Unknown_Parameter_1140"
+    P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
+        "parameters.Unknown_Parameter_1140"
+    )
 
 
 # endregion Lux parameters
@@ -552,7 +556,9 @@ class LuxVisibility(StrEnum):
     V0086_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
         "visibilities.ID_Visi_Bst_BStdZWE1"
     )
-    V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = "visibilities.ID_Visi_EinstTemp_TWQmin"
+    V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = (
+        "visibilities.ID_Visi_EinstTemp_TWQmin"
+    )
     V0121_EVU_LOCKED: Final = "visibilities.ID_Visi_SysEin_EVUSperre"
     V0122_ROOM_THERMOSTAT: Final = "visibilities.ID_Visi_SysEin_Raumstation"
     V0144_PUMP_OPTIMIZATION: Final = "visibilities.ID_Visi_SysEin_Pumpenoptim"
@@ -617,7 +623,7 @@ class SensorKey(StrEnum):
     ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = (
         "additional_heat_generator_amount_counter"
     )
-    SECOND_HEAT_GENERATOR_AMOUNT_COUNTER= "second_heat_generator_amount_counter"
+    SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = "second_heat_generator_amount_counter"
     ANALOG_OUT1 = "analog_out1"
     ANALOG_OUT2 = "analog_out2"
     CURRENT_HEAT_OUTPUT = "current_heat_output"

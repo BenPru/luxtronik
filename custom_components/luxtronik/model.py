@@ -1,10 +1,12 @@
 """The Luxtronik models."""
+
 # region Imports
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from packaging.version import Version
 from typing import Any
 
 from luxtronik import Calculations, Parameters, Visibilities
@@ -19,20 +21,16 @@ from homeassistant.components.number import NumberEntityDescription, NumberMode
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.update import UpdateEntityDescription, UpdateDeviceClass
-from homeassistant.components.water_heater import (
-    WaterHeaterEntityFeature
-)
+from homeassistant.components.water_heater import WaterHeaterEntityFeature
 
 # fix breaking change due to typo in WaterHeaterEntityDescription (#132888)
 WaterHeaterEntityDescription = None
 
 try:
-    from homeassistant.components.water_heater import (
-        WaterHeaterEntityDescription
-    )
+    from homeassistant.components.water_heater import WaterHeaterEntityDescription
 except ImportError:
     from homeassistant.components.water_heater import (
-        WaterHeaterEntityEntityDescription as WaterHeaterEntityDescription
+        WaterHeaterEntityEntityDescription as WaterHeaterEntityDescription,
     )
 
 from homeassistant.const import Platform, UnitOfTemperature
@@ -91,6 +89,8 @@ class LuxtronikEntityDescription(EntityDescription):
     visibility: LuxVisibility = LuxVisibility.UNSET
     invisible_if_value: Any | None = None
     min_firmware_version_minor: FirmwareVersionMinor | None = None
+    min_firmware_version: Version | None = None
+    max_firmware_version: Version | None = None
 
     extra_attributes: tuple(LuxtronikEntityAttributeDescription) = ()
     state_class: str | None = None
@@ -185,8 +185,13 @@ class LuxtronikClimateDescription(
 
 def metaclass_resolver(*classes):
     metaclass = tuple(set(type(cls) for cls in classes))
-    metaclass = metaclass[0] if len(metaclass)==1 else type("_".join(mcls.__name__ for mcls in metaclass), metaclass, {})   # class M_C
-    return metaclass("_".join(cls.__name__ for cls in classes), classes, {})   
+    metaclass = (
+        metaclass[0]
+        if len(metaclass) == 1
+        else type("_".join(mcls.__name__ for mcls in metaclass), metaclass, {})
+    )  # class M_C
+    return metaclass("_".join(cls.__name__ for cls in classes), classes, {})
+
 
 @dataclass
 class LuxtronikWaterHeaterDescription(
@@ -215,4 +220,3 @@ class LuxtronikUpdateEntityDescription(
 
     device_class = UpdateDeviceClass.FIRMWARE
     platform = Platform.UPDATE
-    

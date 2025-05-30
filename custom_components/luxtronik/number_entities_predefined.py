@@ -1,4 +1,7 @@
 """Luxtronik number sensors definitions."""
+
+from packaging.version import Version
+
 # region Imports
 from homeassistant.components.number import NumberMode
 from homeassistant.components.sensor import SensorDeviceClass
@@ -12,6 +15,7 @@ from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     DeviceKey,
+    FirmwareVersionMinor,
     LuxCalculation as LC,
     LuxParameter as LP,
     LuxVisibility as LV,
@@ -98,7 +102,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         icon="mdi:download-lock",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        native_min_value=-20.0, # -9.0
+        native_min_value=-20.0,  # -9.0
         native_max_value=0.0,
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
@@ -380,6 +384,22 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_min_value=-40.0,
         native_max_value=60.0,
         native_step=1.0,
+        max_firmware_version=Version("3.90.0"),
+        update_interval=None,
+    ),
+    # Bug #280 since firmware 3.90.1 different set point
+    LuxtronikNumberDescription(
+        key=SensorKey.DHW_TARGET_TEMPERATURE,
+        luxtronik_key=LP.P0105_DHW_TARGET_TEMPERATURE,
+        device_key=DeviceKey.domestic_water,
+        mode=NumberMode.BOX,
+        icon="mdi:thermometer-water",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_min_value=-40.0,
+        native_max_value=60.0,
+        native_step=1.0,
+        min_firmware_version=Version("3.90.1"),
         update_interval=None,
     ),
     LuxtronikNumberDescription(
@@ -481,7 +501,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         key=SensorKey.COOLING_OUTDOOR_TEMP_THRESHOLD,
         luxtronik_key=LP.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         device_key=DeviceKey.cooling,
-        icon='mdi:sun-thermometer',
+        icon="mdi:sun-thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=18.0,
@@ -490,12 +510,12 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LV.V0005_COOLING,
-    ),    
+    ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_START_DELAY_HOURS,
         luxtronik_key=LP.P0850_COOLING_START_DELAY_HOURS,
         device_key=DeviceKey.cooling,
-        icon='mdi:clock-start',
+        icon="mdi:clock-start",
         native_unit_of_measurement=UnitOfTime.HOURS,
         native_min_value=0.0,
         native_max_value=12.0,
@@ -508,7 +528,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         key=SensorKey.COOLING_STOP_DELAY_HOURS,
         luxtronik_key=LP.P0851_COOLING_STOP_DELAY_HOURS,
         device_key=DeviceKey.cooling,
-        icon='mdi:clock-end',
+        icon="mdi:clock-end",
         native_unit_of_measurement=UnitOfTime.HOURS,
         native_min_value=0.0,
         native_max_value=12.0,
@@ -521,7 +541,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK1,
         luxtronik_key=LP.P0132_COOLING_TARGET_TEMPERATURE_MK1,
         device_key=DeviceKey.cooling,
-        icon='mdi:sun-thermometer',
+        icon="mdi:sun-thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=18.0,
@@ -530,12 +550,12 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LP.P0042_MIXING_CIRCUIT1_TYPE,
-    ), 
+    ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK2,
         luxtronik_key=LP.P0133_COOLING_TARGET_TEMPERATURE_MK2,
         device_key=DeviceKey.cooling,
-        icon='mdi:sun-thermometer',
+        icon="mdi:sun-thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=18.0,
@@ -544,12 +564,12 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LP.P0130_MIXING_CIRCUIT2_TYPE,
-    ), 
+    ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK3,
         luxtronik_key=LP.P0966_COOLING_TARGET_TEMPERATURE_MK3,
         device_key=DeviceKey.cooling,
-        icon='mdi:sun-thermometer',
+        icon="mdi:sun-thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=18.0,
@@ -558,7 +578,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
         visibility=LP.P0780_MIXING_CIRCUIT3_TYPE,
-    ), 
+    ),
     # endregion Cooling
 ]
-
