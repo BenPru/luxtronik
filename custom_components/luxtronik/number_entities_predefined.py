@@ -1,8 +1,8 @@
 """Luxtronik number sensors definitions."""
 
+# region Imports
 from packaging.version import Version
 
-# region Imports
 from homeassistant.components.number import NumberMode
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import (
@@ -15,7 +15,6 @@ from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     DeviceKey,
-    FirmwareVersionMinor,
     LuxCalculation as LC,
     LuxParameter as LP,
     LuxVisibility as LV,
