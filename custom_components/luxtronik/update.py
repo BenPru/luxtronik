@@ -149,16 +149,20 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 response = requests.get(
                     f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30
                 )
+                LOGGER.debug(f"HTTP response status: {response.status_code}, headers: {response.headers}")
+                
                 header_content_disposition = response.headers["content-disposition"]
                 filename = re.findall("filename=(.+)", header_content_disposition)[0]
                 self.__firmware_version_available_last_request = (
                     datetime.utcnow().timestamp()
                 )
-                # Filename e.g.: wp2reg-V2.88.1-9086
-                # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'. --> Split by -
-                #                             'wpreg.V1.88.3-9717'   --> Split by .
-                token = '-' if filename.count('-') > 1 else '.'
-                self.__firmware_version_available = filename.split(token, 1)[1]
+                # Filename e.g.: wp2reg-V2.88.1-9086 or wpreg.V1.88.3-9717
+                # Looks for 'V' followed by three numbers separated by dots
+                match = re.search(r'V\d+\.\d+\.\d+', filename) 
+                if match:
+                    self.__firmware_version_available = match.group(0)
+                else:
+                    self.__firmware_version_available = STATE_UNAVAILABLE
             except Exception:  # pylint: disable=broad-except
                 LOGGER.warning(
                     "Could not request download portal firmware version",
