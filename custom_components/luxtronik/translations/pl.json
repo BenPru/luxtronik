@@ -88,6 +88,12 @@
             },
             "cooling": {
                 "name": "Ch\u0142odzenie"
+            },
+            "pump_vent_hup": {
+                "name": "Wentylacja HUP"
+            },
+            "pump_vent_active": {
+                "name": "Aktywne odpowietrzanie"
             }
         },
         "update": {
@@ -155,6 +161,9 @@
             },
             "heating_night_lowering_to_temperature": {
                 "name": "Obni\u017Cenie temperatury ogrzewania w nocy"
+            },
+            "pump_vent_timer_h": {
+                "name": "Czas pracy odpowietrzania"
             }
         },
         "sensor": {

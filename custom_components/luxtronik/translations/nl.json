@@ -91,6 +91,12 @@
             },
             "cooling": {
                 "name": "Koeling"
+            },
+            "pump_vent_hup": {
+                "name": "Ontluchting HUP"
+            },
+            "pump_vent_active": {
+                "name": "Ontluchting actief"
             }
         },
         "update": {
@@ -200,6 +206,9 @@
             },
             "cooling_target_temperature_mk3": {
                 "name": "Verkoelend doel"
+            },
+            "pump_vent_timer_h": {
+                "name": "Looptijd ontluchting"
             }
         },
         "sensor": {

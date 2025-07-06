@@ -319,11 +319,14 @@ class LuxParameter(StrEnum):
     P0130_MIXING_CIRCUIT2_TYPE: Final = "parameters.ID_Einst_MK2Typ_akt"
     P0132_COOLING_TARGET_TEMPERATURE_MK1: Final = "parameters.ID_Sollwert_KuCft1_akt"
     P0133_COOLING_TARGET_TEMPERATURE_MK2: Final = "parameters.ID_Sollwert_KuCft2_akt"
-    P0780_MIXING_CIRCUIT3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"
+    P0155_VENTING_TIME_HOURS: Final = "parameters.ID_Einst_Entl_time_akt"
+    P0158_VENTING_ACTIVE: Final = "parameters.ID_Einst_Entl_akt"
+    P0780_MIXING_CIRCUIT3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"        
     P0149_FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = "parameters.ID_Einst_TVLmax_akt"
     P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
         "parameters.ID_Einst_TDC_Max_akt"
     )
+    P0678_VENTING_HUP_ACTIVE: Final = "parameters.ID_Einst_Entl_Typ_0"
     P0699_HEATING_THRESHOLD: Final = "parameters.ID_Einst_Heizgrenze"
     P0700_HEATING_THRESHOLD_TEMPERATURE: Final = "parameters.ID_Einst_Heizgrenze_Temp"
     P0716_0720_SWITCHOFF_REASON: Final = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
@@ -556,6 +559,8 @@ class LuxVisibility(StrEnum):
     V0121_EVU_LOCKED: Final = "visibilities.ID_Visi_SysEin_EVUSperre"
     V0122_ROOM_THERMOSTAT: Final = "visibilities.ID_Visi_SysEin_Raumstation"
     V0144_PUMP_OPTIMIZATION: Final = "visibilities.ID_Visi_SysEin_Pumpenoptim"
+    V0163_PUMP_VENT_HUP: Final = "visibilities.ID_Visi_Enlt_HUP"
+    V0175_PUMP_VENT_TIMER_H: Final = "visibilities.ID_Visi_Enlt_Laufzeit"
     V0211_MK3: Final = "visibilities.ID_Visi_MK3"
     V0239_EFFICIENCY_PUMP_NOMINAL: Final = (
         "visibilities.ID_Visi_SysEin_EffizienzpumpeNom"
@@ -720,6 +725,9 @@ class SensorKey(StrEnum):
     COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
     SWITCHOFF_REASON = "switchoff_reason"
     SILENT_MODE = "silent_mode"
+    PUMP_VENT_HUP = "pump_vent_hup"
+    PUMP_VENT_TIMER_H = "pump_vent_timer_h"
+    PUMP_VENT_ACTIVE = "pump_vent_active"
 
 
 # endregion Keys
