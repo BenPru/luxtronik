@@ -339,7 +339,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if description.visibility == LV.V0059A_DHW_CHARGING_PUMP:
             return not self._detect_dhw_circulation_pump_present()
         if description.visibility == LV.V0005_COOLING:
-            return  self.detect_cooling_present()
+            return self.detect_cooling_present()
         visibility_result = self.get_value(description.visibility)
         if visibility_result is None:
             LOGGER.warning("Could not load visibility %s", description.visibility)
@@ -369,7 +369,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LV.V0039_SOLAR_BUFFER,
             LV.V0250_SOLAR,
         ]:
-            return self._detect_solar_present()        
+            return self._detect_solar_present()
         
         if not self.device_key_active(description.device_key):
             return False

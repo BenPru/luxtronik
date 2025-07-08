@@ -91,7 +91,7 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
-    VERSION = 7
+    VERSION = 8
     _hassio_discovery = None
     _discovery_host = None
     _discovery_port = None
