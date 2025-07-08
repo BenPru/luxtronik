@@ -168,7 +168,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 self.__firmware_version_available_last_request = (
                     datetime.utcnow().timestamp()
                 )
-		self.__firmware_version_available = self.extract_firmware_version(filename)
+                self.__firmware_version_available = self.extract_firmware_version(filename)
             except Exception:  # pylint: disable=broad-except
                 LOGGER.warning(
                     "Could not request download portal firmware version",
