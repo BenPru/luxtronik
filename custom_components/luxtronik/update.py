@@ -111,7 +111,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             return None
         return self.__firmware_version_available[: len(self.installed_version)]
 
-   @staticmethod
+    @staticmethod
     def extract_firmware_version(filename):
         """
         Extracts firmware version string from filename using regex.
