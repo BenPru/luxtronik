@@ -1,12 +1,11 @@
 # Luxtronik
 
-## Home Assistant 2023.9.*
+If you like 🩷 this project, [sponsor it (click)](https://github.com/sponsors/BenPru).
 
-Home Assistant 2023.9.* and higher is not supported by the last stable integration version!
-The latest integration version supports Home Assistant 2023.9.*, but is only a pre-release with some limitations!
+## Warning
 
 > :warning: **New Code-Base - PLEASE READ!** :warning:  
-* Backup your data before update (different config structure!) and don't use in productive environment. If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
+* Backup your data before update (different config structure!). If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
 * This release has no more language selection. The HA backend language is used.
 * Some entities which can not detected automaticly are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
 * The RBE Room Temperature Sensor is currently not implemented.
@@ -61,7 +60,8 @@ The new integration will appear as a new integration and under 'Explore & Downlo
 
 Install the integration
 
-1. Click on the new integration or find it under 'Explore & Download Repositories' in the bottom right
+1. Click on the new integration or find it under 'Explore & Download Repositories' in the bottom right with the search word 'luxtronik'.
+  * Choose the one with the blue download button: ![image](https://github.com/BenPru/luxtronik/assets/32298537/84a7e17f-1ae2-471b-8f79-ca9cdab1d249)
 2. Select 'download' at the bottom right.
 3. Restart Home Assistant
 
@@ -101,7 +101,7 @@ Select Configure and review the settings.
 
 ## 3. Tips for using Luxtronik
 
-It's not always clear from the name alone what an entity exactly means and how it effects your heatpump. The main source of information is ofcourse the [Luxtronik Operating Manual](https://www.alpha-innotec.cz/wp-content/uploads/2019/03/controller2-1.pdf).
+It's not always clear from the name alone what an entity exactly means and how it effects your heatpump. The main source of information is ofcourse the [Luxtronik Operating Manual](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf).
 
 Another great source is [FHEM - Luxtronik 2.0](https://wiki.fhem.de/wiki/Luxtronik_2.0). It's in German so use Google Translate.  
 It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carfully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information.
@@ -168,7 +168,7 @@ Only a small number of the over 1100 parameters have a known funtion and only th
 All parameters can be configured as sensors and read that way.
 
 
-### Support Tickets
+### 4 Support Tickets
 If you create a ticket please provide always a diagnostic file as issue attachment:
 ![image](https://github.com/BenPru/luxtronik/assets/32298537/89c26414-0304-438f-9204-79cf0a338db3)
 

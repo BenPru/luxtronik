@@ -3,10 +3,12 @@ from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     UPDATE_INTERVAL_NORMAL,
+    UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
     LuxMode,
     LuxParameter as LP,
     LuxVisibility as LV,
+    FirmwareVersionMinor,
     SensorKey,
 )
 from .model import LuxtronikSwitchDescription
@@ -29,6 +31,12 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
+        LuxtronikSwitchDescription(
+        key=SensorKey.SMART_GRID_SWITCH,
+        luxtronik_key=LP.P1030_SMART_GRID_SWITCH,
+        icon="mdi:grid",
+        entity_category=EntityCategory.CONFIG,
+    ),
     LuxtronikSwitchDescription(
         luxtronik_key=LP.P1033_PUMP_HEAT_CONTROL,
         key=SensorKey.PUMP_HEAT_CONTROL,
@@ -36,6 +44,14 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
+    ),
+    LuxtronikSwitchDescription(
+        key=SensorKey.ELECTRICAL_POWER_LIMITATION_SWITCH,
+        luxtronik_key=LP.P1158_POWER_LIMIT_SWITCH,
+        icon="mdi:download-lock",
+        entity_category=EntityCategory.CONFIG,
+        visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,

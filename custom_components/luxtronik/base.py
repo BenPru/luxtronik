@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
+from enum import StrEnum
 
-from homeassistant.backports.enum import StrEnum
-from homeassistant.components.sensor import RestoreSensor
 from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback

@@ -11,6 +11,8 @@ from homeassistant.helpers.entity_registry import (
 )
 
 from .const import (
+    ATTR_PARAMETER,
+    ATTR_VALUE,
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
@@ -19,6 +21,8 @@ from .const import (
     DOMAIN,
     LOGGER,
     PLATFORMS,
+    SERVICE_WRITE,
+    SERVICE_WRITE_SCHEMA,
     SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator
@@ -48,7 +52,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
+    await hass.async_add_executor_job(setup_hass_services, hass, entry)
+
     return True
+
+
+def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
+    """Home Assistant services."""
+
+    async def write_parameter(service):
+        """Write a parameter to the Luxtronik heatpump."""
+        parameter = service.data.get(ATTR_PARAMETER)
+        value = service.data.get(ATTR_VALUE)
+        data = hass.data[DOMAIN].get(entry.entry_id)
+        coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
+        await coordinator.async_write(parameter, value)
+
+    hass.services.register(
+        DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
+    )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -107,6 +129,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     ent_reg = None
 
     def _up(ident: str, new_id: SK, platform: P = P.SENSOR) -> None:
+        nonlocal prefix, ent_reg
         if prefix is None or ent_reg is None:
             prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
             ent_reg = async_get(hass)
@@ -203,17 +226,17 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         )
         _up(
             "heating_circuit_curve1_temperature",
-            SK.HEATING_CIRCUIT_CURVE1_TEMPERATURE,
+            SK.HEATING_CURVE_END_TEMPERATURE,
             P.NUMBER,
         )
         _up(
             "heating_circuit_curve2_temperature",
-            SK.HEATING_CIRCUIT_CURVE2_TEMPERATURE,
+            SK.HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE,
             P.NUMBER,
         )
         _up(
             "heating_circuit_curve_night_temperature",
-            SK.HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE,
+            SK.HEATING_CURVE_NIGHT_TEMPERATURE,
             P.NUMBER,
         )
         _up(
@@ -266,7 +289,82 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         _up("cooling_stop_delay_hours", SK.COOLING_STOP_DELAY_HOURS, P.NUMBER)
 
         new_data = {**config_entry.data}
-        config_entry.version = 7
+        hass.config_entries.async_update_entry(config_entry, data=new_data)
+
+    if config_entry.version == 7:
+        # harmonize naming
+        _up(
+            "flow_in_circuit2_temperature",
+            SK.FLOW_IN_CIRCUIT1_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "flow_in_circuit3_temperature",
+            SK.FLOW_IN_CIRCUIT2_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "flow_in_circuit2_target_temperature",
+            SK.FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "flow_in_circuit3_target_temperature",
+            SK.FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE,
+            P.NUMBER,
+        )
+
+        # main circuit
+        _up(
+            "heating_circuit_curve1_temperature",
+            SK.HEATING_CURVE_END_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "heating_circuit_curve2_temperature",
+            SK.HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "heating_circuit_curve_night_temperature",
+            SK.HEATING_CURVE_NIGHT_TEMPERATURE,
+            P.NUMBER,
+        )
+
+        # circuit 1
+        _up(
+            "heating_circuit2_curve1_temperature",
+            SK.HEATING_CURVE_CIRCUIT1_END_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "heating_circuit2_curve2_temperature",
+            SK.HEATING_CURVE_CIRCUIT1_PARALLEL_SHIFT_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "heating_circuit2_curve_night_temperature",
+            SK.HEATING_CURVE_CIRCUIT1_NIGHT_TEMPERATURE,
+            P.NUMBER,
+        )
+        # circuit 3
+        _up(
+            "heating_circuit3_curve1_temperature",
+            SK.HEATING_CURVE_CIRCUIT3_END_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "heating_circuit3_curve2_temperature",
+            SK.HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE,
+            P.NUMBER,
+        )
+        _up(
+            "heating_circuit3_curve_night_temperature",
+            SK.HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE,
+            P.NUMBER,
+        )
+
+        new_data = {**config_entry.data}
         hass.config_entries.async_update_entry(config_entry, data=new_data)
 
     LOGGER.info("Migration to version %s successful", config_entry.version)

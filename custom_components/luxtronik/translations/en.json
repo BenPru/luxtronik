@@ -22,6 +22,9 @@
             "additional_heat_generator": {
                 "name": "Additional heat generator"
             },
+            "additional_heat_generator2": {
+                "name": "Additional heat generator 2"
+            },
             "disturbance_output": {
                 "name": "Systemhealth"
             },
@@ -71,6 +74,9 @@
             "remote_maintenance": {
                 "name": "Remote maintenance"
             },
+            "electrical_power_limitation_switch": {
+                "name": "Power limitation"
+            },
             "efficiency_pump": {
                 "name": "Efficiency pump"
             },
@@ -91,6 +97,12 @@
             },
             "cooling": {
                 "name": "Cooling"
+            },
+            "silent_mode": {
+                "name": "Silent mode"
+            },
+            "smartgrid": {
+                "name": "Smart Grid"
             }
         },
         "update": {
@@ -105,6 +117,9 @@
             "pump_optimization": {
                 "name": "Pump optimization"
             },
+            "electrical_power_limitation_value": {
+                "name": "Power limit"
+            },
             "heating_threshold": {
                 "name": "Heating threshold"
             },
@@ -114,32 +129,41 @@
             "heating_min_flow_out_temperature": {
                 "name": "Min. target flow out"
             },
-            "heating_circuit_curve1_temperature": {
-                "name": "Heating curve 1"
+            "heating_curve_end_temperature": {
+                "name": "Heating curve end point"
             },
-            "heating_circuit_curve2_temperature": {
-                "name": "Heating curve 2"
+            "heating_curve_parallel_shift_temperature": {
+                "name": "Heating curve parallel shift"
             },
-            "heating_circuit_curve_night_temperature": {
-                "name": "Heating curve night"
+            "heating_curve_night_temperature": {
+                "name": "Heating curve night reduction"
             },
-            "heating_circuit2_curve1_temperature": {
-                "name": "HC2 Heating curve 1"
+            "heating_curve_circuit1_end_temperature": {
+                "name": "MC1 heating curve end point"
             },
-            "heating_circuit2_curve2_temperature": {
-                "name": "HC2 Heating curve 2"
+            "heating_curve_circuit1_parallel_shift_temperature": {
+                "name": "MC1 heating curve parallel shift"
             },
-            "heating_circuit2_curve_night_temperature": {
-                "name": "HC2 Heating curve night"
+            "heating_curve_circuit1_night_temperature": {
+                "name": "MC1 heating curve night reduction"
             },
-            "heating_circuit3_curve1_temperature": {
-                "name": "HC3 Heating curve 1"
+            "heating_curve_circuit2_end_temperature": {
+                "name": "MC2 heating curve end point"
             },
-            "heating_circuit3_curve2_temperature": {
-                "name": "HC3 Heating curve 2"
+            "heating_curve_circuit2_parallel_shift_temperature": {
+                "name": "MC2 heating curve parallel shift"
             },
-            "heating_circuit3_curve_night_temperature": {
-                "name": "HC3 Heating curve night"
+            "heating_curve_circuit2_night_temperature": {
+                "name": "MC2 heating curve night reduction"
+            },
+            "heating_curve_circuit3_end_temperature": {
+                "name": "MC3 heating curve end point"
+            },
+            "heating_curve_circuit3_parallel_shift_temperature": {
+                "name": "MC3 heating curve parallel shift"
+            },
+            "heating_curve_circuit3_night_temperature": {
+                "name": "MC3 heating curve night reduction"
             },
             "dhw_target_temperature": {
                 "name": "Target"
@@ -192,14 +216,17 @@
             "cooling_stop_delay_hours": {
                 "name": "Stop delay"
             },
-	    "cooling_target_temperature_mk1": {
+            "cooling_target_temperature_mk1": {
                 "name": "Cooling target temperature"
             },
-	    "cooling_target_temperature_mk2": {
+            "cooling_target_temperature_mk2": {
                 "name": "Cooling target temperature"
             },
-	    "cooling_target_temperature_mk3": {
+            "cooling_target_temperature_mk3": {
                 "name": "Cooling target temperature"
+            },
+            "heat_source_input_temperature_min": {
+                "name": "Heat source input minimum"
             }
         },
         "sensor": {
@@ -483,6 +510,7 @@
                     "8": "Lower limitation of use",
                     "9": "no request",
                     "11": "flow rate",
+                    "12": "Low pressure pause",
                     "-1": "Unknown switchoff"
                 }
             },
@@ -599,8 +627,14 @@
             "current_heat_output": {
                 "name": "Current heat output"
             },
+            "current_power_consumption": {
+                "name": "Current power consumption"
+            },
             "additional_heat_generator_amount_counter": {
                 "name": "Additional heat generator amount counter"
+            },
+            "second_heat_generator_amount_counter": {
+                "name": "Second heat generator amount counter"
             },
             "heat_source_output_temperature": {
                 "name": "Heat source output"
@@ -625,6 +659,24 @@
             },
             "flow_in_temperature": {
                 "name": "Flow in temperature"
+            },
+            "flow_in_circuit1_temperature": {
+                "name": "Flow in temperature circuit 1"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Flow in temperature circuit 2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Flow in temperature circuit 3"
+            },
+            "flow_in_circuit1_target_temperature": {
+                "name": "Flow in target temperature circuit 1"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Flow in target temperature circuit 2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Flow in target temperature circuit 3"
             },
             "flow_out_temperature": {
                 "name": "Flow out temperature"
@@ -661,6 +713,9 @@
             },
             "operation_hours_cooling": {
                 "name": "Operation hours"
+            },
+            "cooling_energy_input": {
+                "name": "Energy input"
             },
             "room_thermostat_temperature": {
                 "name": "Room thermostat"
@@ -713,8 +768,8 @@
             "user": {
                 "description": "Set up your Luxtronik heatpump controller to allow monitoring and control.",
                 "data": {
-                  "host": "Host",
-                  "port": "Network Port",
+                    "host": "Host",
+                    "port": "Network Port",
                     "timeout": "Network socket timeout (Sec.)",
                     "max_data_length": "Max data package length"
                 },
@@ -724,8 +779,8 @@
                     "timeout": "If the network or the heatpump is slow, you can fine tune the timeout.",
                     "max_data_length": "If the network or the heatpump is slow, you can fine tune the date package length."
                 }
-             },
-             "options": {
+            },
+            "options": {
                 "description": "Settings for the Luxtronik heatpump {name}.\nThese settings can also be changed later under Integrations.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor id for the indoor temperature",
@@ -737,7 +792,7 @@
                     "control_mode_home_assistant": "When the Home Assistant Thermostat is in the Idle state, the Off state is reported to Luxtronik and Luxtronik cannot start this item.",
                     "ha_sensor_prefix": "Important if several heat pumps are used.\nIn the case of a single one, 'luxtronik' can simply be used."
                 }
-             }
+            }
         }
     },
     "options": {

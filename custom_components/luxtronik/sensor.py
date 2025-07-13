@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, time, timezone
+import calendar
 from decimal import Decimal
 from typing import Any
 
@@ -182,11 +183,12 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     _coordinator: LuxtronikCoordinator
     _last_state: StateType | date | datetime | Decimal = None
 
-    _attr_cache: dict[SA, time] = {}
+    _attr_cache: dict[SA, object] = {}
     _attr_cache[SA.EVU_FIRST_START_TIME] = time.min
     _attr_cache[SA.EVU_FIRST_END_TIME] = time.min
     _attr_cache[SA.EVU_SECOND_START_TIME] = time.min
     _attr_cache[SA.EVU_SECOND_END_TIME] = time.min
+    _attr_cache[SA.EVU_DAYS] = list()
 
     _unrecorded_attributes = frozenset(
         LuxtronikSensorEntity._unrecorded_attributes
@@ -198,6 +200,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             SA.EVU_SECOND_START_TIME,
             SA.EVU_SECOND_END_TIME,
             SA.EVU_MINUTES_UNTIL_NEXT_EVENT,
+            SA.EVU_DAYS,
         }
     )
 
@@ -212,22 +215,37 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         super()._handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
+        weekday = datetime.today().weekday()     
+        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
+            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(',')
+        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
+            self._attr_cache[SA.EVU_DAYS] = list()
         if self._attr_native_value is None or self._last_state is None:
             pass
         elif self._attr_native_value == evu and str(self._last_state) != evu:
             # evu start
+            if weekday not in self._attr_cache[SA.EVU_DAYS]:
+                self._attr_cache[SA.EVU_DAYS].append(weekday)
             if (
                 self._attr_cache[SA.EVU_FIRST_START_TIME] == time.min
-                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
                 or (
-                    self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
-                    and time_now.hour < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
+                    time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
+                    or (
+                        self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
+                        and time_now.hour < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
+                    )
+                    or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
                 )
-                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
+                and (
+                    self._attr_cache[SA.EVU_FIRST_END_TIME].hour > time_now.hour
+                    or self._attr_cache[SA.EVU_FIRST_END_TIME] == time.min
+                )
             ):
                 self._attr_cache[SA.EVU_FIRST_START_TIME] = time_now
             else:
                 self._attr_cache[SA.EVU_SECOND_START_TIME] = time_now
+                if weekday not in self._attr_cache[SA.EVU_DAYS]:
+                    self._attr_cache[SA.EVU_DAYS].append(weekday)
         elif self._attr_native_value != evu and str(self._last_state) == evu:
             # evu end
             if (
@@ -292,7 +310,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                     T_in       = self._get_value(LC.C0010_FLOW_IN_TEMPERATURE)
                     T_out      = self._get_value(LC.C0011_FLOW_OUT_TEMPERATURE)
                     T_heat_in  = self._get_value(LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-                    T_heat_out = self._get_value(LC.C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE)
+                    T_heat_out = self._get_value(LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE)
                     Flow_WQ    = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
                     Pump       = self._get_value(LC.C0043_PUMP_FLOW)
                     if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
@@ -318,6 +336,9 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         )
         attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
             self._attr_cache[SA.EVU_SECOND_END_TIME]
+        )
+        attr[SA.EVU_DAYS] = self._wd_txt(
+            self._attr_cache[SA.EVU_DAYS]
         )
         self._enrich_extra_attributes()
         self.async_write_ha_state()
@@ -384,7 +405,24 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         if evu_time == time.min:
             return None
         evu_hours = (24 if evu_time < time_now else 0) + evu_time.hour
-        return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute
+        weekday = datetime.today().weekday()
+        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
+            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(',')
+        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
+            self._attr_cache[SA.EVU_DAYS] = list()
+        evu_pause = 0
+        if self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
+            evu_pause += (24 - datetime.now().hour)*60 - datetime.now().minute
+            evu_time = self._attr_cache[SA.EVU_FIRST_START_TIME]
+            for i in range(1, 7):
+                if weekday+i > 6:
+                    i = -7+i
+                if weekday+i in self._attr_cache[SA.EVU_DAYS]:
+                    return evu_time.hour*60 + evu_time.minute + evu_pause
+                else:
+                    evu_pause += 1440
+        else:
+            return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute
 
     def _get_next_evu_event_time(self) -> time:
         event: time = time.min
@@ -415,11 +453,28 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     def _tm_txt(self, value: time) -> str:
         return "" if value == time.min else value.strftime("%H:%M")
 
+    def _wd_txt(self, value: list) -> str:
+        if not value:
+            return ""
+        days = []
+        for i in value:
+            days.append(calendar.day_name[i])
+        return ','.join(days)
+
     def _restore_attr_value(self, value: Any | None) -> Any:
-        if value is None or ":" not in str(value):
-            return time.min
-        vals = str(value).split(":")
-        return time(int(vals[0]), int(vals[1]))
+        if value is not None:
+            if ":" in str(value):
+                vals = str(value).split(":")
+                return time(int(vals[0]), int(vals[1]))
+            vals = list() 
+            for day in str(value).split(","): 
+                for idx, name in enumerate(calendar.day_name):
+                    if day == name: 
+                        vals.append(idx)
+                        break
+            if vals:
+                return vals 
+        return time.min 
 
 
 class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):

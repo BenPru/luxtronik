@@ -5,9 +5,6 @@ from __future__ import annotations
 import socket
 import struct
 import threading
-import time
-
-from async_timeout import timeout
 
 from luxtronik.calculations import Calculations
 from luxtronik.parameters import Parameters
@@ -127,12 +124,12 @@ def get_firmware_download_id(installed_version: str | None) -> int | None:
     return None
 
 
-def get_manufacturer_firmware_url_by_model(model: str) -> str:
+def get_manufacturer_firmware_url_by_model(model: str, default_id: int) -> str:
     """Return the manufacturer firmware download url."""
     layout_id = 0
 
     if model is None:
-        layout_id = 0
+        layout_id = default_id
     elif model.startswith(tuple(LUX_MODELS_ALPHA_INNOTEC)):
         layout_id = 1
     elif model.startswith(tuple(LUX_MODELS_NOVELAN)):
@@ -161,6 +158,13 @@ def _is_socket_closed(sock: socket.socket) -> bool:
         return False  # socket is open and reading from it would block
     except ConnectionResetError:
         return True  # socket was closed for some other reason
+    except OSError as err:
+        if err.errno == 107:  # Socket not connected
+            return True
+        LOGGER.exception(
+            "Unexpected exception when checking if a socket is closed", exc_info=err
+        )
+        return False
     except Exception as err:  # pylint: disable=broad-except
         LOGGER.exception(
             "Unexpected exception when checking if a socket is closed", exc_info=err
@@ -269,7 +273,8 @@ class Luxtronik:
         # Flush queue after writing all values
         self.parameters.queue = {}
         # Give the heatpump a short time to handle the value changes/calculations:
-        time.sleep(WAIT_TIME_WRITE_PARAMETER)
+        # Todo: Change methods to async
+        # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
     def _read_parameters(self):
         data = []
