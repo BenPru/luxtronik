@@ -48,7 +48,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     LuxtronikSwitchDescription(
         key=SensorKey.ELECTRICAL_POWER_LIMITATION_SWITCH,
         luxtronik_key=LP.P1158_POWER_LIMIT_SWITCH,
-        icon="mdi:leaf-circle-outline",
+        icon="mdi:download-lock",
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
         min_firmware_version_minor=FirmwareVersionMinor.minor_90,
