@@ -39,7 +39,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     LuxtronikNumberDescription(
         key=SensorKey.RELEASE_SECOND_HEAT_GENERATOR,
         luxtronik_key=LP.P0090_RELEASE_SECOND_HEAT_GENERATOR,
-        icon="mdi:download-lock",
+        icon="mdi:lock-minus",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=-20.0,
@@ -54,7 +54,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         key=SensorKey.RELEASE_TIME_SECOND_HEAT_GENERATOR,
         luxtronik_key=LP.P0992_RELEASE_TIME_SECOND_HEAT_GENERATOR,
         translation_key_name="release_second_heat_generator",
-        icon="mdi:timer-play",
+        icon="mdi:lock-clock",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         native_min_value=20,
@@ -111,7 +111,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     LuxtronikNumberDescription(
         key=SensorKey.ELECTRICAL_POWER_LIMITATION_VALUE,
         luxtronik_key=LP.P1159_POWER_LIMIT_VALUE,
-        icon="mdi:arrow-collapse-down",
+        icon="mdi:download",
         device_class=SensorDeviceClass.POWER,
         entity_category=EntityCategory.CONFIG,
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
