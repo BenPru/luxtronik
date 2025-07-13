@@ -74,9 +74,9 @@
       "efficiency_pump": {
         "name": "\u00da\u010dinnost \u010derpadla"
       },
-	  "electrical_power_limitation_switch": {
-				"name": "Power limitation"
-			},
+      "electrical_power_limitation_switch": {
+	"name": "Power limitation"
+      },
       "pump_heat_control": {
         "name": "Ovl\u00e1d\u00e1n\u00ed \u010derpadla pro oh\u0159ev"
       },
@@ -95,9 +95,9 @@
       "cooling": {
         "name": "Chlazen\u00ed"
       },
-	  "smartgrid": {
-		"name": "Smart Grid"
-	  }
+      "smartgrid": {
+        "name": "Smart Grid"
+      }
     },
     "update": {
       "firmware": {
