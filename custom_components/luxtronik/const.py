@@ -277,20 +277,41 @@ class LuxParameter(StrEnum):
     P0002_DHW_TARGET_TEMPERATURE: Final = "parameters.ID_Einst_BWS_akt"
     P0003_MODE_HEATING: Final = "parameters.ID_Ba_Hz_akt"
     P0004_MODE_DHW: Final = "parameters.ID_Ba_Bw_akt"
-    P0011_HEATING_CIRCUIT_CURVE1_TEMPERATURE: Final = "parameters.ID_Einst_HzHwHKE_akt"
-    P0012_HEATING_CIRCUIT_CURVE2_TEMPERATURE: Final = "parameters.ID_Einst_HzHKRANH_akt"
-    P0013_HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE: Final = (
+    # luxtronik*_heating_curve*
+    P0011_HEATING_CURVE_END_TEMPERATURE: Final = "parameters.ID_Einst_HzHwHKE_akt"
+    P0012_HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE: Final = "parameters.ID_Einst_HzHKRANH_akt"
+    P0013_HEATING_CURVE_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzHKRABS_akt"
     )
-    # luxtronik*_heating_circuit2_curve*
-    P0014_HEATING_CIRCUIT2_CURVE1_TEMPERATURE: Final = (
+    # luxtronik*_heating_curve_circuit1*
+    P0014_HEATING_CURVE_CIRCUIT1_END_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK1E_akt"  # 260
     )
-    P0015_HEATING_CIRCUIT2_CURVE2_TEMPERATURE: Final = (
+    P0015_HEATING_CURVE_CIRCUIT1_PARALLEL_SHIFT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK1ANH_akt"  # 290
     )
-    P0016_HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE: Final = (
+    P0016_HEATING_CURVE_CIRCUIT1_NIGHT_TEMPERATURE: Final = (
         "parameters.ID_Einst_HzMK1ABS_akt"  # 0
+    )
+    # luxtronik*_heating_curve_circuit2*
+    P0017_HEATING_CURVE_CIRCUIT2_END_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK2E_akt"  # 260
+    )
+    P0018_HEATING_CURVE_CIRCUIT2_PARALLEL_SHIFT_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK2ANH_akt"  # 290
+    )
+    P0019_HEATING_CURVE_CIRCUIT2_NIGHT_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK2ABS_akt"  # 0
+    )
+    # luxtronik*_heating_curve_circuit3*
+    P0020_HEATING_CURVE_CIRCUIT3_END_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK3E_akt"  # 270
+    )
+    P0021_HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK3ANH_akt"  # 290
+    )
+    P0022_HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE: Final = (
+        "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
     P0042_MIXING_CIRCUIT1_TYPE: Final = "parameters.ID_Einst_MK1Typ_akt"
@@ -330,16 +351,6 @@ class LuxParameter(StrEnum):
     P0700_HEATING_THRESHOLD_TEMPERATURE: Final = "parameters.ID_Einst_Heizgrenze_Temp"
     P0716_0720_SWITCHOFF_REASON: Final = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
     P0721_0725_SWITCHOFF_TIMESTAMP: Final = "parameters.ID_Switchoff_file_{ID}_1"  # e.g. ID_Switchoff_file_0_1 - ID_Switchoff_file_4_1
-    # luxtronik*_heating_circuit3_curve*
-    P0774_HEATING_CIRCUIT3_CURVE1_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK3E_akt"  # 270
-    )
-    P0775_HEATING_CIRCUIT3_CURVE2_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK3ANH_akt"  # 290
-    )
-    P0776_HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE: Final = (
-        "parameters.ID_Einst_HzMK3ABS_akt"  # 0
-    )
     P0850_COOLING_START_DELAY_HOURS: Final = "parameters.ID_Einst_Kuhl_Zeit_Ein_akt"
     P0851_COOLING_STOP_DELAY_HOURS: Final = "parameters.ID_Einst_Kuhl_Zeit_Aus_akt"
     P0860_REMOTE_MAINTENANCE: Final = "parameters.ID_Einst_Fernwartung_akt"
@@ -424,7 +435,13 @@ class LuxCalculation(StrEnum):
     C0015_OUTDOOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TA"
     C0016_OUTDOOR_TEMPERATURE_AVERAGE: Final = "calculations.ID_WEB_Mitteltemperatur"
     C0017_DHW_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TBW"
-    C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
+    C0018_FLOW_IN_CIRCUIT1_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TFB1"
+    C0019_FLOW_IN_CIRCUIT2_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TFB2"
+    C0020_FLOW_IN_CIRCUIT3_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TFB3"
+    C0021_FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE: Final = "calculations.ID_WEB_Sollwert_TVL_MK1"
+    C0022_FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE: Final = "calculations.ID_WEB_Sollwert_TVL_MK2"
+    C0023_FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE: Final = "calculations.ID_WEB_Sollwert_TVL_MK3"
+    C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWA"
     C0026_SOLAR_COLLECTOR_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSK"
     C0027_SOLAR_BUFFER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSS"
     C0029_DEFROST_END_FLOW_OKAY: Final = "calculations.ID_WEB_ASDin"
@@ -453,6 +470,9 @@ class LuxCalculation(StrEnum):
     C0059_COMPRESSOR2_IMPULSES: Final = "calculations.ID_WEB_Zaehler_BetrZeitImpVD2"
     C0060_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
         "calculations.ID_WEB_Zaehler_BetrZeitZWE1"
+    )
+    C0061_ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS: Final = (
+        "calculations.ID_WEB_Zaehler_BetrZeitZWE2"
     )
     C0063_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitWP"
     C0064_OPERATION_HOURS_HEATING: Final = "calculations.ID_WEB_Zaehler_BetrZeitHz"
@@ -532,7 +552,9 @@ class LuxVisibility(StrEnum):
 
     UNSET: Final = "UNSET"
     V0005_COOLING: Final = "visibilities.ID_Visi_Kuhlung"
+    V0007_MK1: Final = "visibilities.ID_Visi_MK1"
     V0008_MK2: Final = "visibilities.ID_Visi_MK2"
+    V0009_MK3: Final = "visibilities.ID_Visi_MK3"
     V0023_FLOW_IN_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Vorlauf"
     V0024_FLOW_OUT_TEMPERATURE_EXTERNAL: Final = "visibilities.ID_Visi_Temp_Rucklauf"
     V0027_HOT_GAS_TEMPERATURE: Final = "visibilities.ID_Visi_Temp_Heissgas"
@@ -559,10 +581,13 @@ class LuxVisibility(StrEnum):
     V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = (
         "visibilities.ID_Visi_EinstTemp_TWQmin"
     )
+    V0087_ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS: Final = (
+        "visibilities.ID_Visi_Bst_BStdZWE2"
+    )
+    V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = "visibilities.ID_Visi_EinstTemp_TWQmin"
     V0121_EVU_LOCKED: Final = "visibilities.ID_Visi_SysEin_EVUSperre"
     V0122_ROOM_THERMOSTAT: Final = "visibilities.ID_Visi_SysEin_Raumstation"
     V0144_PUMP_OPTIMIZATION: Final = "visibilities.ID_Visi_SysEin_Pumpenoptim"
-    V0211_MK3: Final = "visibilities.ID_Visi_MK3"
     V0239_EFFICIENCY_PUMP_NOMINAL: Final = (
         "visibilities.ID_Visi_SysEin_EffizienzpumpeNom"
     )
@@ -620,6 +645,9 @@ class SensorKey(StrEnum):
     ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS = (
         "additional_heat_generator_operation_hours"
     )
+    ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS = (
+        "additional_heat_generator2_operation_hours"
+    )
     ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = (
         "additional_heat_generator_amount_counter"
     )
@@ -636,6 +664,12 @@ class SensorKey(StrEnum):
     HEAT_SOURCE_OUTPUT_TEMPERATURE = "heat_source_output_temperature"
     ERROR_REASON = "error_reason"
     FLOW_IN_TEMPERATURE = "flow_in_temperature"
+    FLOW_IN_CIRCUIT1_TEMPERATURE = "flow_in_circuit1_temperature"
+    FLOW_IN_CIRCUIT2_TEMPERATURE = "flow_in_circuit2_temperature"
+    FLOW_IN_CIRCUIT3_TEMPERATURE = "flow_in_circuit3_temperature"
+    FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE = "flow_in_circuit1_target_temperature"
+    FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE = "flow_in_circuit2_target_temperature"
+    FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE = "flow_in_circuit3_target_temperature"
     FLOW_OUT_TEMPERATURE = "flow_out_temperature"
     FLOW_OUT_TEMPERATURE_TARGET = "flow_out_temperature_target"
     FLOW_OUT_TEMPERATURE_EXTERNAL = "flow_out_temperature_external"
@@ -669,18 +703,23 @@ class SensorKey(StrEnum):
     PUMP_OPTIMIZATION_TIME = "pump_optimization_time"
     HEATING_THRESHOLD_TEMPERATURE = "heating_threshold_temperature"
     HEATING_MIN_FLOW_OUT_TEMPERATURE = "heating_min_flow_out_temperature"
-    HEATING_CIRCUIT_CURVE1_TEMPERATURE = "heating_circuit_curve1_temperature"
-    HEATING_CIRCUIT_CURVE2_TEMPERATURE = "heating_circuit_curve2_temperature"
-    HEATING_CIRCUIT_CURVE_NIGHT_TEMPERATURE = "heating_circuit_curve_night_temperature"
-    HEATING_CIRCUIT2_CURVE1_TEMPERATURE = "heating_circuit2_curve1_temperature"
-    HEATING_CIRCUIT2_CURVE2_TEMPERATURE = "heating_circuit2_curve2_temperature"
-    HEATING_CIRCUIT2_CURVE_NIGHT_TEMPERATURE = (
-        "heating_circuit2_curve_night_temperature"
+    HEATING_CURVE_END_TEMPERATURE = "heating_curve_end_temperature"
+    HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE = "heating_curve_parallel_shift_temperature"
+    HEATING_CURVE_NIGHT_TEMPERATURE = "heating_curve_night_temperature"
+    HEATING_CURVE_CIRCUIT1_END_TEMPERATURE = "heating_curve_circuit1_end_temperature"
+    HEATING_CURVE_CIRCUIT1_PARALLEL_SHIFT_TEMPERATURE = "heating_curve_circuit1_parallel_shift_temperature"
+    HEATING_CURVE_CIRCUIT1_NIGHT_TEMPERATURE = (
+        "heating_curve_circuit1_night_temperature"
     )
-    HEATING_CIRCUIT3_CURVE1_TEMPERATURE = "heating_circuit3_curve1_temperature"
-    HEATING_CIRCUIT3_CURVE2_TEMPERATURE = "heating_circuit3_curve2_temperature"
-    HEATING_CIRCUIT3_CURVE_NIGHT_TEMPERATURE = (
-        "heating_circuit3_curve_night_temperature"
+    HEATING_CURVE_CIRCUIT2_END_TEMPERATURE = "heating_curve_circuit2_end_temperature"
+    HEATING_CURVE_CIRCUIT2_PARALLEL_SHIFT_TEMPERATURE = "heating_curve_circuit2_parallel_shift_temperature"
+    HEATING_CURVE_CIRCUIT2_NIGHT_TEMPERATURE = (
+        "heating_curve_circuit2_night_temperature"
+    )
+    HEATING_CURVE_CIRCUIT3_END_TEMPERATURE = "heating_curve_circuit3_end_temperature"
+    HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE = "heating_curve_circuit3_parallel_shift_temperature"
+    HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE = (
+        "heating_curve_circuit3_night_temperature"
     )
     HEATING_NIGHT_LOWERING_TO_TEMPERATURE = "heating_night_lowering_to_temperature"
     HEATING_HYSTERESIS = "heating_hysteresis"

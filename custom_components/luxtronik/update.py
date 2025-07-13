@@ -111,6 +111,20 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             return None
         return self.__firmware_version_available[: len(self.installed_version)]
 
+    @staticmethod
+    def extract_firmware_version(filename):
+        """
+        Extracts firmware version string from filename using regex.
+                # Filename e.g.: wp2reg-V2.88.1-9086
+                # Extract 'V3.91.0' from 'wp2reg-V3.91.0_d0dc76bb'
+                # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'
+                # Extract 'V1.88.3-9717' from 'wpreg.V1.88.3-9717'
+        """
+        match = re.search(r'V\d+\.\d+\.\d+(?:-\d+$)?', filename)
+        if match:
+            return match.group(0)
+        return None
+
     def release_notes(self) -> str | None:
         """Build release notes."""
         download_id = get_firmware_download_id(self.installed_version)
@@ -154,11 +168,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 self.__firmware_version_available_last_request = (
                     datetime.utcnow().timestamp()
                 )
-                # Filename e.g.: wp2reg-V2.88.1-9086
-                # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'. --> Split by -
-                #                             'wpreg.V1.88.3-9717'   --> Split by .
-                token = '-' if filename.count('-') > 1 else '.'
-                self.__firmware_version_available = filename.split(token, 1)[1]
+                self.__firmware_version_available = self.extract_firmware_version(filename)
             except Exception:  # pylint: disable=broad-except
                 LOGGER.warning(
                     "Could not request download portal firmware version",
