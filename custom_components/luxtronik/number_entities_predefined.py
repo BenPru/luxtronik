@@ -10,6 +10,7 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfTemperature,
     UnitOfTime,
+    UnitOfPower,
 )
 from homeassistant.helpers.entity import EntityCategory
 
@@ -21,6 +22,7 @@ from .const import (
     SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
+    FirmwareVersionMinor,
 )
 from .model import (
     LuxtronikEntityAttributeDescription as attr,
@@ -40,7 +42,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     LuxtronikNumberDescription(
         key=SensorKey.RELEASE_SECOND_HEAT_GENERATOR,
         luxtronik_key=LP.P0090_RELEASE_SECOND_HEAT_GENERATOR,
-        icon="mdi:download-lock",
+        icon="mdi:lock-minus",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=-20.0,
@@ -55,7 +57,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         key=SensorKey.RELEASE_TIME_SECOND_HEAT_GENERATOR,
         luxtronik_key=LP.P0992_RELEASE_TIME_SECOND_HEAT_GENERATOR,
         translation_key_name="release_second_heat_generator",
-        icon="mdi:timer-play",
+        icon="mdi:lock-clock",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         native_min_value=20,
@@ -108,6 +110,19 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         factor=0.1,
         entity_registry_enabled_default=False,
         visibility=LV.V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN,
+    ),
+    LuxtronikNumberDescription(
+        key=SensorKey.ELECTRICAL_POWER_LIMITATION_VALUE,
+        luxtronik_key=LP.P1159_POWER_LIMIT_VALUE,
+        icon="mdi:download",
+        device_class=SensorDeviceClass.POWER,
+        entity_category=EntityCategory.CONFIG,
+        native_unit_of_measurement=UnitOfPower.KILO_WATT,
+        native_min_value=0.0,
+        native_max_value=30.0,
+        native_step=0.1,
+        factor=0.1,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # endregion Main heatpump
     # region Heating
