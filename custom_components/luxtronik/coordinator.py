@@ -1,4 +1,5 @@
 """Update coordinator for Luxtronik integration."""
+
 # region Imports
 from __future__ import annotations
 
@@ -6,6 +7,7 @@ import asyncio
 import re
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
+from packaging.version import Version
 import threading
 from types import MappingProxyType
 from typing import Any, Concatenate, TypeVar
@@ -48,7 +50,7 @@ _P = ParamSpec("_P")
 
 
 def catch_luxtronik_errors(
-    func: Callable[Concatenate[_LuxtronikCoordinatorT, _P], Awaitable[None]]
+    func: Callable[Concatenate[_LuxtronikCoordinatorT, _P], Awaitable[None]],
 ) -> Callable[Concatenate[_LuxtronikCoordinatorT, _P], Coroutine[Any, Any, None]]:
     """Catch Luxtronik errors."""
 
@@ -287,6 +289,36 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             # default_model=self.model,
         )
 
+    def _is_version_not_compatible(
+        self, description: LuxtronikEntityDescription
+    ) -> bool:
+        """Check if the current firmware version is NOT compatible with the entity description."""
+
+        # Check minor version if specified
+        if (
+            description.min_firmware_version_minor is not None
+            and self.firmware_version_minor
+            < description.min_firmware_version_minor.value
+        ):
+            return True
+
+        # Check minimum version if specified
+        if (
+            description.min_firmware_version is not None
+            and self.firmware_package_version < description.min_firmware_version
+        ):
+            return True
+
+        # Check maximum version if specified
+        if (
+            description.max_firmware_version is not None
+            and self.firmware_package_version > description.max_firmware_version
+        ):
+            return True
+
+        # If all checks pass or no version restrictions are specified
+        return False
+
     @property
     def serial_number(self) -> str:
         """Return the serial number."""
@@ -320,7 +352,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         ver = self.firmware_version
         if ver is None:
             return 0
-        return int(re.sub('[^0-9]','', ver.split(".")[1]))
+        return int(re.sub("[^0-9]", "", ver.split(".")[1]))
+
+    @property
+    def firmware_package_version(self) -> Version:
+        """Return the heatpump firmware version."""
+        return Version(str(self.get_value(LC.C0081_FIRMWARE_VERSION)))
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
@@ -339,7 +376,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if description.visibility == LV.V0059A_DHW_CHARGING_PUMP:
             return not self._detect_dhw_circulation_pump_present()
         if description.visibility == LV.V0005_COOLING:
-            return  self.detect_cooling_present()
+            return self.detect_cooling_present()
         visibility_result = self.get_value(description.visibility)
         if visibility_result is None:
             LOGGER.warning("Could not load visibility %s", description.visibility)
@@ -348,11 +385,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def entity_active(self, description: LuxtronikEntityDescription) -> bool:
         """Is description activated."""
-        if (
-            description.min_firmware_version_minor is not None
-            and description.min_firmware_version_minor.value  # noqa: W503
-            > self.firmware_version_minor  # noqa: W503
-        ):
+        if self._is_version_not_compatible(description):
             return False
         if description.visibility in [
             LP.P0042_MIXING_CIRCUIT1_TYPE,
@@ -369,8 +402,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LV.V0039_SOLAR_BUFFER,
             LV.V0250_SOLAR,
         ]:
-            return self._detect_solar_present()        
-        
+            return self._detect_solar_present()
+
         if not self.device_key_active(description.device_key):
             return False
         if description.invisible_if_value is not None:
@@ -448,16 +481,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
             or (
                 bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
-                and float(
-                    self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE)
-                )  # noqa: W503
+                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))  # noqa: W503
                 != 5.0  # noqa: W503
             )
             or (
                 bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
-                and float(
-                    self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE)
-                )  # noqa: W503
+                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))  # noqa: W503
                 != 150.0  # noqa: W503
             )
         )

@@ -3,22 +3,45 @@
   "name": "Luxtronik",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/luxtronik",
-  "requirements": ["luxtronik==0.3.14", "requests>=2.28.2", "getmac==0.8.2"],
+  "requirements": [
+    "luxtronik==0.3.14",
+    "requests>=2.28.2",
+    "getmac==0.8.2",
+    "packaging>=24.2"
+  ],
   "issue_tracker": "https://github.com/BenPru/luxtronik/issues",
-  "dependencies": ["http"],
+  "dependencies": [
+    "http"
+  ],
   "after_dependencies": [],
-  "codeowners": ["@BenPru"],
+  "codeowners": [
+    "@BenPru"
+  ],
   "iot_class": "local_polling",
-  "version": "2024.11.19",
+  "version": "2025.1.4",
   "homeassistant": "2024.8.0",
   "dhcp": [
-    { "macaddress": "000E8C*" },
-    { "macaddress": "001999*" },
-    { "macaddress": "000982*" },
-    { "macaddress": "04D16E*" },
-    { "macaddress": "40ECF8*" },
-    { "hostname": "wp-novelan" }
+    {
+      "macaddress": "000E8C*"
+    },
+    {
+      "macaddress": "001999*"
+    },
+    {
+      "macaddress": "000982*"
+    },
+    {
+      "macaddress": "04D16E*"
+    },
+    {
+      "macaddress": "40ECF8*"
+    },
+    {
+      "hostname": "wp-novelan"
+    }
   ],
   "integration_type": "hub",
-  "loggers": ["luxtronik"]
+  "loggers": [
+    "luxtronik"
+  ]
 }

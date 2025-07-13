@@ -22,6 +22,9 @@
             "additional_heat_generator": {
                 "name": "Additional heat generator"
             },
+            "additional_heat_generator2": {
+                "name": "Additional heat generator 2"
+            },
             "disturbance_output": {
                 "name": "Systemhealth"
             },
@@ -126,32 +129,41 @@
             "heating_min_flow_out_temperature": {
                 "name": "Min. target flow out"
             },
-            "heating_circuit_curve1_temperature": {
-                "name": "Heating curve 1"
+            "heating_curve_end_temperature": {
+                "name": "Heating curve end point"
             },
-            "heating_circuit_curve2_temperature": {
-                "name": "Heating curve 2"
+            "heating_curve_parallel_shift_temperature": {
+                "name": "Heating curve parallel shift"
             },
-            "heating_circuit_curve_night_temperature": {
-                "name": "Heating curve night"
+            "heating_curve_night_temperature": {
+                "name": "Heating curve night reduction"
             },
-            "heating_circuit2_curve1_temperature": {
-                "name": "HC2 Heating curve 1"
+            "heating_curve_circuit1_end_temperature": {
+                "name": "MC1 heating curve end point"
             },
-            "heating_circuit2_curve2_temperature": {
-                "name": "HC2 Heating curve 2"
+            "heating_curve_circuit1_parallel_shift_temperature": {
+                "name": "MC1 heating curve parallel shift"
             },
-            "heating_circuit2_curve_night_temperature": {
-                "name": "HC2 Heating curve night"
+            "heating_curve_circuit1_night_temperature": {
+                "name": "MC1 heating curve night reduction"
             },
-            "heating_circuit3_curve1_temperature": {
-                "name": "HC3 Heating curve 1"
+            "heating_curve_circuit2_end_temperature": {
+                "name": "MC2 heating curve end point"
             },
-            "heating_circuit3_curve2_temperature": {
-                "name": "HC3 Heating curve 2"
+            "heating_curve_circuit2_parallel_shift_temperature": {
+                "name": "MC2 heating curve parallel shift"
             },
-            "heating_circuit3_curve_night_temperature": {
-                "name": "HC3 Heating curve night"
+            "heating_curve_circuit2_night_temperature": {
+                "name": "MC2 heating curve night reduction"
+            },
+            "heating_curve_circuit3_end_temperature": {
+                "name": "MC3 heating curve end point"
+            },
+            "heating_curve_circuit3_parallel_shift_temperature": {
+                "name": "MC3 heating curve parallel shift"
+            },
+            "heating_curve_circuit3_night_temperature": {
+                "name": "MC3 heating curve night reduction"
             },
             "dhw_target_temperature": {
                 "name": "Target"
@@ -338,6 +350,7 @@
                     "8": "Lower limitation of use",
                     "9": "no request",
                     "11": "flow rate",
+                    "12": "Low pressure pause",
                     "-1": "Unknown switchoff"
                 }
             },
@@ -486,6 +499,24 @@
             },
             "flow_in_temperature": {
                 "name": "Flow in temperature"
+            },
+            "flow_in_circuit1_temperature": {
+                "name": "Flow in temperature circuit 1"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Flow in temperature circuit 2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Flow in temperature circuit 3"
+            },
+            "flow_in_circuit1_target_temperature": {
+                "name": "Flow in target temperature circuit 1"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Flow in target temperature circuit 2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Flow in target temperature circuit 3"
             },
             "flow_out_temperature": {
                 "name": "Flow out temperature"

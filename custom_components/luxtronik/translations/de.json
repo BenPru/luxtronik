@@ -22,6 +22,9 @@
             "additional_heat_generator": {
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger"
             },
+            "additional_heat_generator2": {
+                "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger 2"
+            },
             "disturbance_output": {
                 "name": "Systemzustand"
             },
@@ -124,32 +127,41 @@
             "heating_min_flow_out_temperature": {
                 "name": "Min. Soll R\u00fccklauf"
             },
-            "heating_circuit_curve1_temperature": {
-                "name": "Heizkurve 1"
+            "heating_curve_end_temperature": {
+                "name": "Heizkurve Endpunkt"
             },
-            "heating_circuit_curve2_temperature": {
-                "name": "Heizkurve 2"
+            "heating_curve_parallel_shift_temperature": {
+                "name": "Heizkurve Parallelverschiebung"
             },
-            "heating_circuit_curve_night_temperature": {
-                "name": "Heizkurve Nachts"
+            "heating_curve_night_temperature": {
+                "name": "Heizkurve Nachtabsenkung"
             },
-            "heating_circuit2_curve1_temperature": {
-                "name": "MK2 Heizkurve 1"
+            "heating_curve_circuit1_end_temperature": {
+                "name": "MK1 Heizkurve Endpunkt"
             },
-            "heating_circuit2_curve2_temperature": {
-                "name": "MK2 Heizkurve 2"
+            "heating_curve_circuit1_parallel_shift_temperature": {
+                "name": "MK1 Heizkurve Parallelverschiebung"
             },
-            "heating_circuit2_curve_night_temperature": {
-                "name": "MK2 Heizkurve Nachts"
+            "heating_curve_circuit1_night_temperature": {
+                "name": "MK1 Heizkurve Nachtabsenkung"
             },
-            "heating_circuit3_curve1_temperature": {
-                "name": "MK3 Heizkurve 1"
+            "heating_curve_circuit2_end_temperature": {
+                "name": "MK2 Heizkurve Endpunkt"
             },
-            "heating_circuit3_curve2_temperature": {
-                "name": "MK3 Heizkurve 2"
+            "heating_curve_circuit2_parallel_shift_temperature": {
+                "name": "MK2 Heizkurve Parallelverschiebung"
             },
-            "heating_circuit3_curve_night_temperature": {
-                "name": "MK3 Heizkurve Nachts"
+            "heating_curve_circuit2_night_temperature": {
+                "name": "MK2 Heizkurve Nachtabsenkung"
+            },
+            "heating_curve_circuit3_end_temperature": {
+                "name": "MK3 Heizkurve Endpunkt"
+            },
+            "heating_curve_circuit3_parallel_shift_temperature": {
+                "name": "MK3 Heizkurve Parallelverschiebung"
+            },
+            "heating_curve_circuit3_night_temperature": {
+                "name": "MK3 Heizkurve Nachtabsenkung"
             },
             "dhw_target_temperature": {
                 "name": "Soll"
@@ -492,6 +504,7 @@
                     "8": "Untere Einsatzgrenze",
                     "9": "Keine Anforderung",
                     "11": "Durchfluss-W\u00e4rmequelle",
+                    "12": "Niederdruck-Pause",
                     "-1": "Unbekannte Abschaltung"
                 },
                 "state_attributes": {
@@ -512,6 +525,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
+                            "12": "Niederdruck-Pause",
                             "-1": "Unbekannte Abschaltung"
                         }
                     },
@@ -532,6 +546,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
+                            "12": "Niederdruck-Pause",
                             "-1": "Unbekannte Abschaltung"
                         }
                     },
@@ -552,6 +567,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
+                            "12": "Niederdruck-Pause",
                             "-1": "Unbekannte Abschaltung"
                         }
                     },
@@ -572,6 +588,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
+                            "12": "Niederdruck-Pause",
                             "-1": "Unbekannte Abschaltung"
                         }
                     },
@@ -722,6 +739,24 @@
             },
             "flow_in_temperature": {
                 "name": "Vorlauf Temperatur"
+            },
+            "flow_in_circuit1_temperature": {
+                "name": "Vorlauf Temperatur MK1"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Vorlauf Temperatur MK2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Vorlauf Temperatur MK3"
+            },
+            "flow_in_circuit1_target_temperature": {
+                "name": "Vorlauf Soll Temperatur MK1"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Vorlauf Soll Temperatur MK2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Vorlauf Soll Temperatur MK3"
             },
             "flow_out_temperature": {
                 "name": "R\u00fccklauf Temperatur"
