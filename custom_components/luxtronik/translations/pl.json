@@ -74,9 +74,6 @@
             "efficiency_pump": {
                 "name": "Pompa wydajna"
             },
-            "electrical_power_limitation_switch": {
-                "name": "Power limitation"
-            },
             "pump_heat_control": {
                 "name": "Sterowanie ogrzewaniem pompy"
             },
@@ -94,9 +91,6 @@
             },
             "cooling": {
                 "name": "Ch\u0142odzenie"
-            },
-            "smartgrid": {
-                "name": "Smart Grid"
             }
         },
         "update": {
@@ -113,9 +107,6 @@
             },
             "heating_threshold": {
                 "name": "Pr\u00F3g ogrzewania"
-            },
-            "electrical_power_limitation_value": {
-                "name": "Power limit"
             },
             "heating_target_correction": {
                 "name": "Korekcja celu grzewczego"
