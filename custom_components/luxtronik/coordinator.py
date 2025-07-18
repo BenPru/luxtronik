@@ -73,10 +73,6 @@ def catch_luxtronik_errors(
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
-    device_infos = dict[str, DeviceInfo]()
-    update_reason_write = False
-    client: Luxtronik = None
-
     def __init__(
         self,
         hass: HomeAssistant,
@@ -88,6 +84,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.lock = threading.Lock()
         self.client = client
         self._config = config
+        self.device_infos = dict[str, DeviceInfo]()
+        self.update_reason_write = False
         super().__init__(
             hass,
             LOGGER,
