@@ -77,9 +77,6 @@
             "efficiency_pump": {
                 "name": "Effizienzpumpe"
             },
-            "electrical_power_limitation_switch": {
-                "name": "Leistungsbegrenzung"
-            },
             "pump_heat_control": {
                 "name": "Pumpenheizkontrolle"
             },
@@ -97,11 +94,7 @@
             },
             "cooling": {
                 "name": "K\u00fchlung"
-            },
-            "smartgrid": {
-                "name": "Smart Grid"
             }
-			
         },
         "update": {
             "firmware": {
@@ -114,9 +107,6 @@
             },
             "pump_optimization": {
                 "name": "Pumpenoptimierung"
-            },
-            "electrical_power_limitation_value": {
-                "name": "Leistungslimit"
             },
             "heating_threshold": {
                 "name": "Heizgrenze"

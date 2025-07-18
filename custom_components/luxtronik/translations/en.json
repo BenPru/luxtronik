@@ -74,9 +74,6 @@
             "remote_maintenance": {
                 "name": "Remote maintenance"
             },
-            "electrical_power_limitation_switch": {
-                "name": "Power limitation"
-            },
             "efficiency_pump": {
                 "name": "Efficiency pump"
             },
@@ -100,9 +97,6 @@
             },
             "silent_mode": {
                 "name": "Silent mode"
-            },
-            "smartgrid": {
-                "name": "Smart Grid"
             }
         },
         "update": {
@@ -116,9 +110,6 @@
             },
             "pump_optimization": {
                 "name": "Pump optimization"
-            },
-            "electrical_power_limitation_value": {
-                "name": "Power limit"
             },
             "heating_threshold": {
                 "name": "Heating threshold"

@@ -77,9 +77,6 @@
             "efficiency_pump": {
                 "name": "Efficiëntie Pomp"
             },
-            "electrical_power_limitation_switch": {
-                "name": "Stroom limitatie"
-            },
             "pump_heat_control": {
                 "name": "Controle pompverwarming"
             },
@@ -97,9 +94,6 @@
             },
             "cooling": {
                 "name": "Koeling"
-            },
-            "smartgrid": {
-                "name": "Smart Grid"
             }
         },
         "update": {
@@ -113,9 +107,6 @@
             },
             "pump_optimization": {
                 "name": "Pompoptimalisatie"
-            },
-            "electrical_power_limitation_value": {
-                "name": "Stroom limiet"
             },
             "heating_threshold": {
                 "name": "Verwarmingslimiet"

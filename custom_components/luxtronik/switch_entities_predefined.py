@@ -31,12 +31,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
-        LuxtronikSwitchDescription(
-        key=SensorKey.SMART_GRID_SWITCH,
-        luxtronik_key=LP.P1030_SMART_GRID_SWITCH,
-        icon="mdi:grid",
-        entity_category=EntityCategory.CONFIG,
-    ),
     LuxtronikSwitchDescription(
         luxtronik_key=LP.P1033_PUMP_HEAT_CONTROL,
         key=SensorKey.PUMP_HEAT_CONTROL,
@@ -46,12 +40,13 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
-        key=SensorKey.ELECTRICAL_POWER_LIMITATION_SWITCH,
-        luxtronik_key=LP.P1158_POWER_LIMIT_SWITCH,
-        icon="mdi:download-lock",
+        luxtronik_key=LP.P1087_SILENT_MODE,
+        key=SensorKey.SILENT_MODE,
+        icon="mdi:volume-minus",
         entity_category=EntityCategory.CONFIG,
-        visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_90,
+        visibility=LV.V0357_SILENT_MODE_TIME_MENU,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_80,
+        update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,
