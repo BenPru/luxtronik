@@ -578,9 +578,6 @@ class LuxVisibility(StrEnum):
     V0086_ADDITIONAL_HEAT_GENERATOR_OPERATION_HOURS: Final = (
         "visibilities.ID_Visi_Bst_BStdZWE1"
     )
-    V0105_HEAT_SOURCE_INPUT_TEMPERATURE_MIN: Final = (
-        "visibilities.ID_Visi_EinstTemp_TWQmin"
-    )
     V0087_ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS: Final = (
         "visibilities.ID_Visi_Bst_BStdZWE2"
     )
