@@ -392,6 +392,9 @@ class LuxParameter(StrEnum):
     P1032_HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED: Final = (
         "parameters.ID_Einst_P155_PumpHeat_Max"
     )
+    P1030_SMART_GRID_SWITCH: Final = (
+        "parameters.ID_Einst_SmartGrid"
+    )
     P1033_PUMP_HEAT_CONTROL: Final = "parameters.ID_Einst_P155_PumpHeatCtrl"
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "parameters.ID_Waermemenge_ZWE"
@@ -406,10 +409,11 @@ class LuxParameter(StrEnum):
     P1137_DHW_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1137"
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
     P1139_COOLING_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1139"
+    P1158_POWER_LIMIT_SWITCH: Final = "parameters.Unknown_Parameter_1158"
+    P1159_POWER_LIMIT_VALUE: Final = "parameters.Unknown_Parameter_1159"
     P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "parameters.Unknown_Parameter_1140"
     )
-
 
 # endregion Lux parameters
 
@@ -606,7 +610,7 @@ class LuxVisibility(StrEnum):
     V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "visibilities.ID_Visi_Waermemenge_ZWE"
     )
-    V0357_SILENT_MODE_TIME_MENU: Final = "visibilities.Unknown_Parameter_357"
+    V0357_ELECTRICAL_POWER_LIMITATION_SWITCH: Final = "visibilities.Unknown_Parameter_357"
 
 
 # endregion visibilities
@@ -688,6 +692,8 @@ class SensorKey(StrEnum):
     EFFICIENCY_PUMP = "efficiency_pump"
     EFFICIENCY_PUMP_NOMINAL = "efficiency_pump_nominal"
     EFFICIENCY_PUMP_MINIMAL = "efficiency_pump_minimal"
+    ELECTRICAL_POWER_LIMITATION_SWITCH = "electrical_power_limitation_switch"
+    ELECTRICAL_POWER_LIMITATION_VALUE = "electrical_power_limitation_value"
     PUMP_HEAT_CONTROL = "pump_heat_control"
     HEATING = "heating"
     PUMP_OPTIMIZATION = "pump_optimization"
@@ -760,6 +766,7 @@ class SensorKey(StrEnum):
     COOLING_TARGET_TEMPERATURE_MK1 = "cooling_target_temperature_mk1"
     COOLING_TARGET_TEMPERATURE_MK2 = "cooling_target_temperature_mk2"
     COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
+    SMART_GRID_SWITCH = "smartgrid"
     SWITCHOFF_REASON = "switchoff_reason"
     SILENT_MODE = "silent_mode"
 
