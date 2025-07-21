@@ -7,7 +7,7 @@ If you like 🩷 this project, [sponsor it (click)](https://github.com/sponsors/
 > :warning: **New Code-Base - PLEASE READ!** :warning:  
 * Backup your data before update (different config structure!). If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
 * This release has no more language selection. The HA backend language is used.
-* Some entities which can not detected automaticly are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
+* Some entities which can not detected automatically are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
 * The RBE Room Temperature Sensor is currently not implemented.
 * The update sensor "rings" for new firmware versions, but the "Install"-Button has no function. The Firmware has to be installed manually. An the Install-Button is necessary to get notified.
 * In the integration configuration you can set a ha sensor id for the indoor temperature value.
@@ -104,23 +104,23 @@ Select Configure and review the settings.
 It's not always clear from the name alone what an entity exactly means and how it effects your heatpump. The main source of information is ofcourse the [Luxtronik Operating Manual](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf).
 
 Another great source is [FHEM - Luxtronik 2.0](https://wiki.fhem.de/wiki/Luxtronik_2.0). It's in German so use Google Translate.  
-It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carfully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information.
+It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carefully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information.
 
 ### 3.1 Energy use
 
-Not all heatpumps have build in electrical energy metering and instead only show the energy produced in heat, not the energy consumed in electricity. Adding a (strong) energy meter is a nice addition to measure the SCOP of your device. Shelly energy meters are recommended since they offer offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) and a [variety of in-line or clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) with various protection mechanisms.
+Not all heatpumps have build in electrical electrical energy metering and instead only show the energy produced in heat, not the energy consumed in electricity. Adding a (strong) energy meter is a nice addition to measure the SCOP of your device. Shelly energy meters are recommended since they offer offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) and a [variety of in-line or clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) with various protection mechanisms.
 
 ### 3.2 Additional sensors (advanced)
 
 If you miss a sensor please have a look in the devices under "+n entities not shown". Not all entities can autodetect by the integration. You can enable the entities by your self.
 
-The most usefull sensors and parameters are created automaticly. But if you miss a sensor you can add it manually via yaml configuration like the original module from [Bouni/luxtronik](https://github.com/Bouni/luxtronik).
+The most useful sensors and parameters are created automatically. But if you miss a sensor you can add it manually via yaml configuration like the original module from [Bouni/luxtronik](https://github.com/Bouni/luxtronik).
 
 A short description of many of the available sensors can be found here [Loxwiki - Luxtronik Java Web Interface](https://loxwiki.atlassian.net/wiki/spaces/LOX/pages/1533935933/Java+Webinterface)
 
 #### Parameter IDs
 
-Take these files as a reference to figure ot which IDs to use:
+Take these files as a reference to figure out which IDs to use:
 
 - <https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/parameters.py>
 - <https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/calculations.py>
@@ -128,7 +128,7 @@ Take these files as a reference to figure ot which IDs to use:
 
 #### Service
 
-In order to change parameters on the Luxtronik conroller, you can use the following service:
+In order to change parameters on the Luxtronik controller, you can use the following service:
 
 ```yaml
 Domain: luxtronik2
@@ -143,13 +143,13 @@ Service Data: {"parameter": "ID_Ba_Hz_akt", "value": "Automatic"}
   - description: Value you want to set the parameter to.
   - type: [string, float]
 
-Only a small number of the over 1100 parameters have a known funtion and only these can be written, these are:
+Only a small number of the over 1100 parameters have a known function and only these can be written, these are:
 
 - `ID_Ba_Hz_akt` The mode of operation of the heating circuit, possible values are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
-- `ID_Ba_Bw_akt` The mode of operation of the hot water circuit, possible valus are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
+- `ID_Ba_Bw_akt` The mode of operation of the hot water circuit, possible values are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
 - `ID_Soll_BWS_akt` The set point for hot water generation, for example 50.0 for 50.0°C
 - `ID_Einst_BA_Kuehl_akt` The mode of operation of the cooling circuit, possible values are "Automatic", "Off"
-- `ID_Einst_KuehlFreig_akt` The outdoor temprature from wher on the cooling should start to operate, for example 24.0
+- `ID_Einst_KuehlFreig_akt` The outdoor temperature from where on the cooling should start to operate, for example 24.0
 - `ID_Ba_Sw_akt` The mode of operation of the swimming pool heating circuit, possible values are "Automatic", "Party", "Holidays", "Off"
 - `ID_Einst_TDC_Max_akt` Max. temperature difference of the hot water buffer tank, for example 70.0
 - `ID_Sollwert_KuCft1_akt` Cooling set point for mixer circuit 1, for example 19.0
