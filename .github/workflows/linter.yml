@@ -11,7 +11,21 @@ on:
     branches: [ "main" ]
 
 jobs:
-  run-ruff:
+  run-ruff-format:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: ruff setup
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "--version" # skips check. setup only
+      - run: ruff format # auto format
+      - run: ruff check --fix # auto-fix
+      
+  run-ruff-check:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -20,8 +34,6 @@ jobs:
         uses: actions/checkout@v4
       - name: ruff check
         uses: astral-sh/ruff-action@v3
-      - name: ruff format
-        run: ruff format
         
 # This pylint configuration works but has too many issues to run repeatedly.
 # It should be run on-demand or scheduled until most issues are fixed.
