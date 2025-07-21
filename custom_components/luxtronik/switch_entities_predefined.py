@@ -1,4 +1,5 @@
 """Luxtronik switch definitions."""
+
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
@@ -30,7 +31,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_registry_enabled_default=False,
         # device_class=SensorDeviceClass.HEAT
     ),
-        LuxtronikSwitchDescription(
+    LuxtronikSwitchDescription(
         key=SensorKey.SMART_GRID_SWITCH,
         luxtronik_key=LP.P1030_SMART_GRID_SWITCH,
         icon="mdi:grid",

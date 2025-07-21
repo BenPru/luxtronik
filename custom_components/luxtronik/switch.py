@@ -1,4 +1,5 @@
 """Support for Luxtronik switches."""
+
 # region Imports
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
 """Luxtronik Home Assistant Base Device Model."""
+
 # region Imports
 from __future__ import annotations
 
@@ -63,9 +64,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 if value is None:
                     pass
                 elif isinstance(value, StrEnum):
-                    self._attr_extra_state_attributes[
-                        field
-                    ] = f"{value.name[1:5]} {value.value}"
+                    self._attr_extra_state_attributes[field] = (
+                        f"{value.name[1:5]} {value.value}"
+                    )
                 else:
                     self._attr_extra_state_attributes[field] = value
         if description.translation_key is None:
@@ -195,7 +196,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             hours, minutes = divmod(minutes, 60)
             return f"{hours:01.0f}:{minutes:02.0f} {UnitOfTime.HOURS}"
         if attr.format == SensorAttrFormat.CELSIUS_TENTH:
-            return f"{value/10:.1f} {UnitOfTemperature.CELSIUS}"
+            return f"{value / 10:.1f} {UnitOfTemperature.CELSIUS}"
         if attr.format == SensorAttrFormat.SWITCH_GAP:
             flow_out_target = float(
                 self._get_value(LC.C0012_FLOW_OUT_TEMPERATURE_TARGET)

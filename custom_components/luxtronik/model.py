@@ -51,6 +51,7 @@ except ImportError:
 
 # endregion Imports
 
+
 @dataclass
 class LuxtronikCoordinatorData:
     """Data Type of LuxtronikCoordinator's data."""
@@ -58,6 +59,7 @@ class LuxtronikCoordinatorData:
     parameters: Parameters
     calculations: Calculations
     visibilities: Visibilities
+
 
 @dataclass
 class LuxtronikEntityAttributeDescription:

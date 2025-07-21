@@ -1,4 +1,5 @@
 """Support for ait Luxtronik thermostat devices."""
+
 # region Imports
 from __future__ import annotations
 
@@ -319,7 +320,13 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         await self.async_set_hvac_mode(HVACMode.OFF)
 
     async def async_turn_on(self) -> None:
-        await self.async_set_hvac_mode(HVACMode[self.entity_description.hvac_mode_mapping[LuxMode.automatic.value].upper()])
+        await self.async_set_hvac_mode(
+            HVACMode[
+                self.entity_description.hvac_mode_mapping[
+                    LuxMode.automatic.value
+                ].upper()
+            ]
+        )
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode."""

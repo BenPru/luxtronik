@@ -1,4 +1,5 @@
 """Support for Luxtronik number sensors."""
+
 # flake8: noqa: W503
 # region Imports
 from __future__ import annotations
