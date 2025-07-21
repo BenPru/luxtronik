@@ -22,7 +22,6 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
-    LOGGER,
     DeviceKey,
     LuxCalculation as LC,
     LuxOperationMode,
