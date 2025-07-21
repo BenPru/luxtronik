@@ -147,7 +147,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         if isinstance(value, str):
             try:
                 value = datetime.strptime(value, "%Y-%m-%d").date()
-            except: ValueError:
+            except ValueError:
                 return True
         return value < datetime.now().date()
 
