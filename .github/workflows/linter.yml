@@ -37,3 +37,7 @@ jobs:
         uses: actions/checkout@v4
       - name: codespell
         uses: codespell-project/actions-codespell@v2
+        with:
+        #  path: src
+          skip: .src/custom_components/luxtronik/translations 
+
