@@ -43,7 +43,7 @@ jobs:
       - name: codespell
         uses: codespell-project/actions-codespell@v2
         with:
-        #  path: src
+          path: ./
         #  skip: ./custom_components/luxtronik/translations/ 
           skip: cs.json, de.json, nl.json, pl.json
           ignore_words_list: hass
