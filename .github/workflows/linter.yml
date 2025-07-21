@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        continue-on-error: true
       - name: ruff
         uses: astral-sh/ruff-action@v3
+        continue-on-error: true
       - name: pylint
         uses: kgpl/gh-pylint@v1
         with: 
