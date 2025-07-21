@@ -22,6 +22,7 @@ jobs:
         uses: astral-sh/ruff-action@v3
         with:
           args: "--version" # skips check. setup only
+          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       - name: ruff auto formal
         run: ruff format # auto format
       - name: ruff auto fix  
@@ -34,6 +35,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       - name: ruff check
         uses: astral-sh/ruff-action@v3
         
