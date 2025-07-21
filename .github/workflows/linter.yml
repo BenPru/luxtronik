@@ -3,7 +3,12 @@
 # https://github.com/settings/notifications
 name: Linter
 
-on: [push, pull_request]
+# consider applying to all branches to help people find issues sooner
+on:
+  push:
+    branches: [ "main" ] 
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   run-ruff:
@@ -40,6 +45,6 @@ jobs:
         with:
         #  path: src
         #  skip: ./custom_components/luxtronik/translations/ 
-          skip: "*cs.json, *de.json, *nl.json, *pl.json"
+          skip: cs.json, de.json, nl.json, pl.json
           ignore_words_list: hass
 
