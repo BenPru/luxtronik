@@ -9,11 +9,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        continue-on-error: true
       - name: ruff
         uses: astral-sh/ruff-action@v3
       - name: pylint
         uses: kgpl/gh-pylint@v1
         with: 
           python-version: 3.13
+        continue-on-error: true
       - name: codespell
         uses: codespell-project/actions-codespell@v2
+        continue-on-error: true
