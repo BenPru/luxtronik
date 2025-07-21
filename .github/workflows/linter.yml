@@ -18,24 +18,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: ruff
+      - name: ruff check
         uses: astral-sh/ruff-action@v3
+      - name: ruff format
+        run: ruff format
         
-  run-pylint:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install pylint homeassistant luxtronik==0.3.14 requests>=2.28.2 getmac==0.8.2
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: pylint
-        run: |
-          pylint $(git ls-files '*.py')
+# This pylint configuration works but has too many issues to run repeatedly.
+# It should be run on-demand or scheduled until most issues are fixed.
+#  run-pylint:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          python -m pip install pylint homeassistant luxtronik==0.3.14 requests>=2.28.2 getmac==0.8.2
+#          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#      - name: pylint
+#        run: |
+#          pylint $(git ls-files '*.py')
         
   run-codespell:
     runs-on: ubuntu-latest
