@@ -215,13 +215,17 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         super()._handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
-        weekday = datetime.today().weekday()
-        if not isinstance(self._attr_cache[SA.EVU_DAYS], list):
+        weekday = datetime.today().weekday()     
+        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
+            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(',')
+        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
             self._attr_cache[SA.EVU_DAYS] = list()
         if self._attr_native_value is None or self._last_state is None:
             pass
         elif self._attr_native_value == evu and str(self._last_state) != evu:
             # evu start
+            if weekday not in self._attr_cache[SA.EVU_DAYS]:
+                self._attr_cache[SA.EVU_DAYS].append(weekday)
             if (
                 self._attr_cache[SA.EVU_FIRST_START_TIME] == time.min
                 or (
@@ -306,7 +310,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                     T_in       = self._get_value(LC.C0010_FLOW_IN_TEMPERATURE)
                     T_out      = self._get_value(LC.C0011_FLOW_OUT_TEMPERATURE)
                     T_heat_in  = self._get_value(LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-                    T_heat_out = self._get_value(LC.C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE)
+                    T_heat_out = self._get_value(LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE)
                     Flow_WQ    = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
                     Pump       = self._get_value(LC.C0043_PUMP_FLOW)
                     if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
@@ -407,13 +411,14 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
             self._attr_cache[SA.EVU_DAYS] = list()
         evu_pause = 0
-        if not self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
+        if self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
             evu_pause += (24 - datetime.now().hour)*60 - datetime.now().minute
+            evu_time = self._attr_cache[SA.EVU_FIRST_START_TIME]
             for i in range(1, 7):
                 if weekday+i > 6:
                     i = -7+i
                 if weekday+i in self._attr_cache[SA.EVU_DAYS]:
-                    return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute + evu_pause
+                    return evu_time.hour*60 + evu_time.minute + evu_pause
                 else:
                     evu_pause += 1440
         else:
