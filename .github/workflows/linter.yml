@@ -3,7 +3,9 @@
 # https://github.com/settings/notifications
 name: Linter
 
-# consider applying to all branches to help people find issues sooner
+# Ruff and PyLint appear to be the most commonly used linters for home assistant.
+# consider applying to all branches on pre-commit to help people find issues sooner
+
 on:
   push:
     branches: [ "main" ] 
@@ -11,32 +13,34 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # Ruff format is a comprehensive formatting
   run-ruff-format:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: false # complete all jobs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: ruff setup
         uses: astral-sh/ruff-action@v3
         with:
-          args: "--version" # skips check. setup only
-          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-      - name: ruff auto formal
+          args: "--version" # replace default "check" to do setup only.
+          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
+      - name: ruff auto format
         run: ruff format # auto format
       - name: ruff auto fix  
         run: ruff check --fix-only # auto-fix
-      
+
+  # Comprehansive and fast linter
   run-ruff-check:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: false # complete all jobs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
       - name: ruff check
         uses: astral-sh/ruff-action@v3
         
@@ -57,18 +61,18 @@ jobs:
 #      - name: pylint
 #        run: |
 #          pylint $(git ls-files '*.py')
-        
+
+  # CodeSpell performs a spellcheck. English only.      
   run-codespell:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: false # complete all jobs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: codespell
         uses: codespell-project/actions-codespell@v2
         with:
-        #  skip: ./custom_components/luxtronik/translations/ 
-          skip: cs.json,de.json,nl.json,pl.json
-          ignore_words_list: hass
+          skip: cs.json,de.json,nl.json,pl.json # skip these files
+          ignore_words_list: hass # skip these words
 
