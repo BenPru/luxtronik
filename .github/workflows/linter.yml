@@ -1,0 +1,19 @@
+# This workflow executes several linters 
+name: Linter
+
+on: [push, pull_request]
+
+jobs:
+  run-linters:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: ruff
+        uses: astral-sh/ruff-action@v3
+      - name: pylint
+        uses: kgpl/gh-pylint@v1
+        with: 
+          python-version: 3.13
+      - name: codespell
+        uses: codespell-project/actions-codespell@v2
