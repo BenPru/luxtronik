@@ -434,7 +434,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     # region Domestic water
     LuxtronikNumberDescription(
         key=SensorKey.DHW_TARGET_TEMPERATURE,
-        luxtronik_key=LP.P0002_DHW_TARGET_TEMPERATURE,
+        luxtronik_key=LP.P0105_DHW_TARGET_TEMPERATURE,
         device_key=DeviceKey.domestic_water,
         mode=NumberMode.BOX,
         icon="mdi:thermometer-water",
