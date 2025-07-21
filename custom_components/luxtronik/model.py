@@ -23,16 +23,6 @@ from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.update import UpdateEntityDescription, UpdateDeviceClass
 from homeassistant.components.water_heater import WaterHeaterEntityFeature
 
-# fix breaking change due to typo in WaterHeaterEntityDescription (#132888)
-WaterHeaterEntityDescription = None
-
-try:
-    from homeassistant.components.water_heater import WaterHeaterEntityDescription
-except ImportError:
-    from homeassistant.components.water_heater import (
-        WaterHeaterEntityEntityDescription as WaterHeaterEntityDescription,
-    )
-
 from homeassistant.const import Platform, UnitOfTemperature
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.typing import StateType
@@ -49,8 +39,17 @@ from .const import (
     SensorAttrKey,
 )
 
-# endregion Imports
+# fix breaking change due to typo in WaterHeaterEntityDescription (#132888)
+WaterHeaterEntityDescription = None
 
+try:
+    from homeassistant.components.water_heater import WaterHeaterEntityDescription
+except ImportError:
+    from homeassistant.components.water_heater import (
+        WaterHeaterEntityEntityDescription as WaterHeaterEntityDescription,
+    )
+
+# endregion Imports
 
 @dataclass
 class LuxtronikCoordinatorData:
@@ -59,7 +58,6 @@ class LuxtronikCoordinatorData:
     parameters: Parameters
     calculations: Calculations
     visibilities: Visibilities
-
 
 @dataclass
 class LuxtronikEntityAttributeDescription:
