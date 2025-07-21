@@ -150,10 +150,3 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             except ValueError:
                 return True
         return value < datetime.now().date()
-
-from datetime import datetime, date
-
-
-
-
-
