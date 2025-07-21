@@ -22,8 +22,10 @@ jobs:
         uses: astral-sh/ruff-action@v3
         with:
           args: "--version" # skips check. setup only
-      - run: ruff format # auto format
-      - run: ruff check --fix # auto-fix
+      - name: ruff auto formal
+        run: ruff format # auto format
+      - name: ruff auto fix  
+        run: ruff check --fix-only # auto-fix
       
   run-ruff-check:
     runs-on: ubuntu-latest
