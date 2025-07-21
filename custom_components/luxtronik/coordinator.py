@@ -229,7 +229,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         platform: EntityPlatform | None = None,
     ):
         host = config[CONF_HOST]
-        dev = self.device_infos[DeviceKey.heatpump.value] = self._build_device_info(
+        self.device_infos[DeviceKey.heatpump.value] = self._build_device_info(
             DeviceKey.heatpump, host, platform
         )
         via = (
