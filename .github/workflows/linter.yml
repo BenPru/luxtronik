@@ -1,4 +1,6 @@
 # This workflow executes several linters 
+# disable email notifications in your settings: 
+# https://github.com/settings/notifications
 name: Linter
 
 on: [push, pull_request]
