@@ -81,6 +81,7 @@ def discover() -> list[tuple[str, int | None]]:
                             "an old Luxtronic software version might be the reason"
                         )
                     results.append((ip_address, res_port))
+                    continue
                 LOGGER.debug(
                     "Received response from %s, but with wrong content, skipping",
                     ip_address,
