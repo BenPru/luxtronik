@@ -94,7 +94,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0163_PUMP_VENT_HUP,
     ),
-        LuxtronikSwitchDescription(
+    LuxtronikSwitchDescription(
         device_key=DeviceKey.heating,
         luxtronik_key=LP.P0158_VENTING_ACTIVE,
         key=SensorKey.PUMP_VENT_ACTIVE,

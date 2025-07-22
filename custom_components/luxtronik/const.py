@@ -343,7 +343,7 @@ class LuxParameter(StrEnum):
     P0133_COOLING_TARGET_TEMPERATURE_MK2: Final = "parameters.ID_Sollwert_KuCft2_akt"
     P0155_VENTING_TIME_HOURS: Final = "parameters.ID_Einst_Entl_time_akt"
     P0158_VENTING_ACTIVE: Final = "parameters.ID_Einst_Entl_akt"
-    P0780_MIXING_CIRCUIT3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"        
+    P0780_MIXING_CIRCUIT3_TYPE: Final = "parameters.ID_Einst_MK3Typ_akt"
     P0149_FLOW_IN_TEMPERATURE_MAX_ALLOWED: Final = "parameters.ID_Einst_TVLmax_akt"
     P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER: Final = (
         "parameters.ID_Einst_TDC_Max_akt"

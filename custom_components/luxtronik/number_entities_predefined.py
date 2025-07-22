@@ -430,7 +430,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_registry_enabled_default=False,
         visibility=LV.V0122_ROOM_THERMOSTAT,
     ),
-        LuxtronikNumberDescription(
+    LuxtronikNumberDescription(
         key=SensorKey.PUMP_VENT_TIMER_H,
         luxtronik_key=LP.P0155_VENTING_TIME_HOURS,
         device_key=DeviceKey.heating,
