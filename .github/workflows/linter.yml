@@ -8,46 +8,37 @@ name: Linter
 
 on:
   push:
-    branches: [ "main" ] 
+    branches: 
+      - "main"
   pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   # Ruff format is a comprehensive formatting
-  run-ruff-format:
+  run-ruff:
+    name: Ruff
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # complete all jobs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: ruff setup
+      - name: Ruff setup
         uses: astral-sh/ruff-action@v3
         with:
           args: "--version" # replace default "check" to do setup only.
           github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
-      - name: ruff auto format
+      - name: Ruff auto format
         run: ruff format # auto format
-      - name: ruff auto fix  
+      - name: Ruff auto fix  
         run: ruff check --fix-only # auto-fix
-      - name: Commit changes # optionally, auto commit format changes.
+      - name: Commit changes # auto commit format changes.
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: format code with ruff'
-
-  # Comprehansive and fast linter
-  run-ruff-check:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false # complete all jobs
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
-      - name: ruff check
+          commit_message: "chore: format code with ruff"
+      - name: Ruff check # report remaining issues
         uses: astral-sh/ruff-action@v3
-        
+
 # This pylint configuration works but has too many issues to run repeatedly.
 # It should be run on-demand or scheduled until most issues are fixed.
 #  run-pylint:
@@ -68,15 +59,15 @@ jobs:
 
   # CodeSpell performs a spellcheck. English only.      
   run-codespell:
+    name: CodeSpell
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # complete all jobs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: codespell
+      - name: CodeSpell
         uses: codespell-project/actions-codespell@v2
         with:
           skip: cs.json,de.json,nl.json,pl.json # skip these files
           ignore_words_list: hass # skip these words
-
