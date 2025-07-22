@@ -1,4 +1,5 @@
 """Luxtronik Update platform."""
+
 # region Imports
 from __future__ import annotations
 
@@ -120,7 +121,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'
                 # Extract 'V1.88.3-9717' from 'wpreg.V1.88.3-9717'
         """
-        match = re.search(r'V\d+\.\d+\.\d+(?:-\d+$)?', filename)
+        match = re.search(r"V\d+\.\d+\.\d+(?:-\d+$)?", filename)
         if match:
             return match.group(0)
         return None
@@ -128,7 +129,9 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
     def release_notes(self) -> str | None:
         """Build release notes."""
         download_id = get_firmware_download_id(self.installed_version)
-        release_url = get_manufacturer_firmware_url_by_model(self.coordinator.model, download_id)
+        release_url = get_manufacturer_firmware_url_by_model(
+            self.coordinator.model, download_id
+        )
         download_url = f"{DOWNLOAD_PORTAL_URL}{download_id}"
         manual_url = (
             FIRMWARE_UPDATE_MANUAL_DE
@@ -168,7 +171,9 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 self.__firmware_version_available_last_request = (
                     datetime.utcnow().timestamp()
                 )
-                self.__firmware_version_available = self.extract_firmware_version(filename)
+                self.__firmware_version_available = self.extract_firmware_version(
+                    filename
+                )
             except Exception:  # pylint: disable=broad-except
                 LOGGER.warning(
                     "Could not request download portal firmware version",

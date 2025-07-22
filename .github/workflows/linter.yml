@@ -1,0 +1,82 @@
+# This workflow executes several linters 
+# disable email notifications in your settings: 
+# https://github.com/settings/notifications
+name: Linter
+
+# Ruff and PyLint appear to be the most commonly used linters for home assistant.
+# consider applying to all branches on pre-commit to help people find issues sooner
+
+on:
+  push:
+    branches: [ "main" ] 
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Ruff format is a comprehensive formatting
+  run-ruff-format:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # complete all jobs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: ruff setup
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "--version" # replace default "check" to do setup only.
+          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
+      - name: ruff auto format
+        run: ruff format # auto format
+      - name: ruff auto fix  
+        run: ruff check --fix-only # auto-fix
+      - name: Commit changes # optionally, auto commit format changes.
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: format code with ruff'
+
+  # Comprehansive and fast linter
+  run-ruff-check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # complete all jobs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
+      - name: ruff check
+        uses: astral-sh/ruff-action@v3
+        
+# This pylint configuration works but has too many issues to run repeatedly.
+# It should be run on-demand or scheduled until most issues are fixed.
+#  run-pylint:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          python -m pip install pylint homeassistant luxtronik==0.3.14 requests>=2.28.2 getmac==0.8.2
+#          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#      - name: pylint
+#        run: |
+#          pylint $(git ls-files '*.py')
+
+  # CodeSpell performs a spellcheck. English only.      
+  run-codespell:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # complete all jobs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: codespell
+        uses: codespell-project/actions-codespell@v2
+        with:
+          skip: cs.json,de.json,nl.json,pl.json # skip these files
+          ignore_words_list: hass # skip these words
+

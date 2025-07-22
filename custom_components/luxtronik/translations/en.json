@@ -369,7 +369,7 @@
                     "heatpump running": "The heatpump runs",
                     "heatpump idle": "The heatpump is idle",
                     "heatpump coming": "The heatpump is coming",
-                    "heatpump shutdown": "The heatpump is shuting down",
+                    "heatpump shutdown": "The heatpump is shutting down",
                     "errorcode slot": "Heatpump error code in slot 0",
                     "pump forerun": "Pump forerun",
                     "defrost": "Defrost",
@@ -402,7 +402,7 @@
                     "flow monitoring": "flow monitoring",
                     "grid switch on delay": "grid switch on delay",
                     "info bake out program": "info bake out program",
-                    "heating external engery source": "heating external engery source",
+                    "heating external energy source": "heating external energy source",
                     "domestic water external energy source": "Domestic water external energy source",
                     "second heat generator 1 active": "second heat generator 1 active"
                 }
@@ -610,7 +610,7 @@
         },
         "error": {
             "address": "Invalid remote-address insert. The address have to be an ip-address or a resolvable hostname.",
-            "address_in_use": "The choosen listen port is already in use on this system.",
+            "address_in_use": "The chosen listen port is already in use on this system.",
             "unknown": "Unexpected error"
         },
         "step": {

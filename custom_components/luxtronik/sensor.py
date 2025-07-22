@@ -1,4 +1,5 @@
 """Support for Luxtronik sensors."""
+
 # flake8: noqa: W503
 # region Imports
 from __future__ import annotations
@@ -22,7 +23,6 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
-    LOGGER,
     DeviceKey,
     LuxCalculation as LC,
     LuxOperationMode,
@@ -215,9 +215,9 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         super()._handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
-        weekday = datetime.today().weekday()     
+        weekday = datetime.today().weekday()
         if isinstance(self._attr_cache[SA.EVU_DAYS], str):
-            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(',')
+            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(",")
         elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
             self._attr_cache[SA.EVU_DAYS] = list()
         if self._attr_native_value is None or self._last_state is None:
@@ -232,7 +232,8 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                     time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
                     or (
                         self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
-                        and time_now.hour < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
+                        and time_now.hour
+                        < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
                     )
                     or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
                 )
@@ -297,7 +298,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             ]
             if sl3 in s3_workaround:
                 DHW_recirculation = self._get_value(LC.C0038_DHW_RECIRCULATION_PUMP)
-                AddHeat           = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
+                AddHeat = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
                 if AddHeat and DHW_recirculation:
                     # more fixes to detect thermal desinfection sequences
                     self._attr_native_value = LuxOperationMode.domestic_water.value
@@ -307,13 +308,20 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             if self._attr_native_value == LuxOperationMode.no_request.value:
                 # detect passive cooling
                 if self.coordinator.detect_cooling_present():
-                    T_in       = self._get_value(LC.C0010_FLOW_IN_TEMPERATURE)
-                    T_out      = self._get_value(LC.C0011_FLOW_OUT_TEMPERATURE)
-                    T_heat_in  = self._get_value(LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-                    T_heat_out = self._get_value(LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE)
-                    Flow_WQ    = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
-                    Pump       = self._get_value(LC.C0043_PUMP_FLOW)
-                    if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
+                    T_in = self._get_value(LC.C0010_FLOW_IN_TEMPERATURE)
+                    T_out = self._get_value(LC.C0011_FLOW_OUT_TEMPERATURE)
+                    T_heat_in = self._get_value(LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
+                    T_heat_out = self._get_value(
+                        LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
+                    )
+                    Flow_WQ = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
+                    Pump = self._get_value(LC.C0043_PUMP_FLOW)
+                    if (
+                        (T_out > T_in)
+                        and (T_heat_out > T_heat_in)
+                        and (Flow_WQ > 0)
+                        and Pump
+                    ):
                         # LOGGER.info(f"Cooling mode detected!!!")
                         self._attr_native_value = LuxOperationMode.cooling.value
             # endregion Workaround Detect passive cooling operation mode
@@ -337,9 +345,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
             self._attr_cache[SA.EVU_SECOND_END_TIME]
         )
-        attr[SA.EVU_DAYS] = self._wd_txt(
-            self._attr_cache[SA.EVU_DAYS]
-        )
+        attr[SA.EVU_DAYS] = self._wd_txt(self._attr_cache[SA.EVU_DAYS])
         self._enrich_extra_attributes()
         self.async_write_ha_state()
 
@@ -407,18 +413,21 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         evu_hours = (24 if evu_time < time_now else 0) + evu_time.hour
         weekday = datetime.today().weekday()
         if isinstance(self._attr_cache[SA.EVU_DAYS], str):
-            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(',')
+            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(",")
         elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
             self._attr_cache[SA.EVU_DAYS] = list()
         evu_pause = 0
-        if self._attr_cache[SA.EVU_DAYS] and weekday not in self._attr_cache[SA.EVU_DAYS]:
-            evu_pause += (24 - datetime.now().hour)*60 - datetime.now().minute
+        if (
+            self._attr_cache[SA.EVU_DAYS]
+            and weekday not in self._attr_cache[SA.EVU_DAYS]
+        ):
+            evu_pause += (24 - datetime.now().hour) * 60 - datetime.now().minute
             evu_time = self._attr_cache[SA.EVU_FIRST_START_TIME]
             for i in range(1, 7):
-                if weekday+i > 6:
-                    i = -7+i
-                if weekday+i in self._attr_cache[SA.EVU_DAYS]:
-                    return evu_time.hour*60 + evu_time.minute + evu_pause
+                if weekday + i > 6:
+                    i = -7 + i
+                if weekday + i in self._attr_cache[SA.EVU_DAYS]:
+                    return evu_time.hour * 60 + evu_time.minute + evu_pause
                 else:
                     evu_pause += 1440
         else:
@@ -459,22 +468,22 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         days = []
         for i in value:
             days.append(calendar.day_name[i])
-        return ','.join(days)
+        return ",".join(days)
 
     def _restore_attr_value(self, value: Any | None) -> Any:
         if value is not None:
             if ":" in str(value):
                 vals = str(value).split(":")
                 return time(int(vals[0]), int(vals[1]))
-            vals = list() 
-            for day in str(value).split(","): 
+            vals = list()
+            for day in str(value).split(","):
                 for idx, name in enumerate(calendar.day_name):
-                    if day == name: 
+                    if day == name:
                         vals.append(idx)
                         break
             if vals:
-                return vals 
-        return time.min 
+                return vals
+        return time.min
 
 
 class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):

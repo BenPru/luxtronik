@@ -1,4 +1,5 @@
 """Config flow to configure the Luxtronik heatpump controller integration."""
+
 # region Imports
 from __future__ import annotations
 
@@ -163,9 +164,9 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                             hasattr(legacy_entry, "data")
                             and CONF_HA_SENSOR_INDOOR_TEMPERATURE in legacy_entry.data
                         ):
-                            self.context["data"][
-                                CONF_HA_SENSOR_INDOOR_TEMPERATURE
-                            ] = legacy_entry.data[CONF_HA_SENSOR_INDOOR_TEMPERATURE]
+                            self.context["data"][CONF_HA_SENSOR_INDOOR_TEMPERATURE] = (
+                                legacy_entry.data[CONF_HA_SENSOR_INDOOR_TEMPERATURE]
+                            )
                         return
                 except Exception:  # pylint: disable=broad-except
                     continue
@@ -215,20 +216,20 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     description_placeholders=description_placeholders,
                 )
 
-            self._title = (
-                title
-            ) = f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"
+            self._title = title = (
+                f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"
+            )
             name = f"{title} ({data[CONF_HOST]}:{data[CONF_PORT]})"
 
             await self.async_set_unique_id(coordinator.unique_id)
             self._abort_if_unique_id_configured()
 
-            self.context["data"][
-                CONF_HA_SENSOR_PREFIX
-            ] = f"luxtronik_{coordinator.unique_id}"
-            self.context["data"][
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE
-            ] = f"sensor.{self._sensor_prefix}_room_temperature"
+            self.context["data"][CONF_HA_SENSOR_PREFIX] = (
+                f"luxtronik_{coordinator.unique_id}"
+            )
+            self.context["data"][CONF_HA_SENSOR_INDOOR_TEMPERATURE] = (
+                f"sensor.{self._sensor_prefix}_room_temperature"
+            )
             await self._async_migrate_data_from_custom_component_luxtronik2()
             return self.async_show_form(
                 step_id="options",

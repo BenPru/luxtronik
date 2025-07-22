@@ -1,4 +1,5 @@
 """The Luxtronik heatpump integration."""
+
 # region Imports
 from __future__ import annotations
 

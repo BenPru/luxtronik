@@ -1,4 +1,5 @@
 """Luxtronik binary sensors definitions."""
+
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 
 from .const import DeviceKey, LuxCalculation as LC, LuxVisibility as LV, SensorKey
