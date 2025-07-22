@@ -310,7 +310,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                     T_in       = self._get_value(LC.C0010_FLOW_IN_TEMPERATURE)
                     T_out      = self._get_value(LC.C0011_FLOW_OUT_TEMPERATURE)
                     T_heat_in  = self._get_value(LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-                    T_heat_out = self._get_value(LC.C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE)
+                    T_heat_out = self._get_value(LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE)
                     Flow_WQ    = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
                     Pump       = self._get_value(LC.C0043_PUMP_FLOW)
                     if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:

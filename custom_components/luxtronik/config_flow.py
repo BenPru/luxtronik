@@ -8,7 +8,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.components.dhcp import DhcpServiceInfo
+from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
@@ -91,7 +91,7 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
-    VERSION = 7
+    VERSION = 8
     _hassio_discovery = None
     _discovery_host = None
     _discovery_port = None

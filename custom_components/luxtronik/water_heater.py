@@ -1,12 +1,14 @@
 """Luxtronik water heater component."""
+
 # region Imports
 from __future__ import annotations
 
 from typing import Any
+from packaging.version import Version
 
 from typing_extensions import override
 
-from homeassistant.components.climate import HVACAction
+from homeassistant.components.climate.const import HVACAction
 from homeassistant.components.water_heater import (
     ENTITY_ID_FORMAT,
     STATE_ELECTRIC,
@@ -57,7 +59,7 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         | WaterHeaterEntityFeature.AWAY_MODE,
         luxtronik_key=LuxParameter.P0004_MODE_DHW,
         luxtronik_key_current_temperature=LuxCalculation.C0017_DHW_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0002_DHW_TARGET_TEMPERATURE,
+        luxtronik_key_target_temperature=LuxParameter.P0105_DHW_TARGET_TEMPERATURE,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_heating=LuxOperationMode.domestic_water,
         # luxtronik_key_target_temperature_high=LuxParameter,
@@ -65,7 +67,26 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         icon="mdi:water-boiler",
         temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0029_DHW_TEMPERATURE,
-    )
+        max_firmware_version=Version("3.90.0"),
+    ),
+    LuxtronikWaterHeaterDescription(
+        key=SensorKey.DOMESTIC_WATER,
+        operation_list=[STATE_OFF, STATE_HEAT_PUMP, STATE_ELECTRIC, STATE_PERFORMANCE],
+        supported_features=WaterHeaterEntityFeature.OPERATION_MODE
+        | WaterHeaterEntityFeature.TARGET_TEMPERATURE
+        | WaterHeaterEntityFeature.AWAY_MODE,
+        luxtronik_key=LuxParameter.P0004_MODE_DHW,
+        luxtronik_key_current_temperature=LuxCalculation.C0017_DHW_TEMPERATURE,
+        luxtronik_key_target_temperature=LuxParameter.P0105_DHW_TARGET_TEMPERATURE,
+        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_action_heating=LuxOperationMode.domestic_water,
+        # luxtronik_key_target_temperature_high=LuxParameter,
+        # luxtronik_key_target_temperature_low=LuxParameter,
+        icon="mdi:water-boiler",
+        temperature_unit=UnitOfTemperature.CELSIUS,
+        visibility=LuxVisibility.V0029_DHW_TEMPERATURE,
+        min_firmware_version=Version("3.90.1"),
+    ),
 ]
 # endregion Const
 
