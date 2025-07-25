@@ -633,6 +633,7 @@ SENSORS: list[descr] = [
         device_key=DeviceKey.heating,
         entity_category=None,
         icon="mdi:waves-arrow-right",
+        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         visibility=LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL,
