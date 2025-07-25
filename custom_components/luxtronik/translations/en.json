@@ -95,6 +95,9 @@
             "domestic_water": {
                 "name": "Mode automatic"
             },
+            "charging_pump": {
+                "name": "Charging pump"
+            },
             "cooling": {
                 "name": "Cooling"
             },
