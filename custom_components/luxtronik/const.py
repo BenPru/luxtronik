@@ -714,6 +714,7 @@ class SensorKey(StrEnum):
     HEATING_THRESHOLD = "heating_threshold"
     DOMESTIC_WATER = "domestic_water"
     COOLING = "cooling"
+    CHARGING_PUMP = "charging_pump"
     RELEASE_SECOND_HEAT_GENERATOR = "release_second_heat_generator"
     RELEASE_TIME_SECOND_HEAT_GENERATOR = "release_time_second_heat_generator"
     HEATING_TARGET_CORRECTION = "heating_target_correction"
