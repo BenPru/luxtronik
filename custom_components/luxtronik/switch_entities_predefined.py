@@ -119,6 +119,12 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         off_state=LuxMode.off.value,
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
+    LuxtronikSwitchDescription(
+        device_key=DeviceKey.domestic_water,
+        luxtronik_key=LP.P0085_DHW_CHARGING_PUMP,
+        key=SensorKey.CHARGING_PUMP,
+        icon="mdi:pump",
+    ),
     # endregion Domestic water
     # region Cooling
     LuxtronikSwitchDescription(
