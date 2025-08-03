@@ -49,8 +49,11 @@ This integration works locally. It's only necessary to connect the Luxtronik con
 
 ### 1.1 HACS (recommended)
 
-Add the custom repo to HACS
+Add the custom repo to HACS:
 
+[![Open your Home Assistant instance and show the add HACS repository dialog with a specific repository pre-filled.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BenPru&repository=Luxtronik&category=integration)
+
+Or:
 1. Go to 'HACS > Integration'
 2. Select 'Custom repositories' from the top right menu
 3. Under Repository, enter '<https://github.com/BenPru/luxtronik>'
