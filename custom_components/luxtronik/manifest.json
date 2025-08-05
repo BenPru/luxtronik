@@ -19,7 +19,6 @@
   ],
   "iot_class": "local_polling",
   "version": "2025.7.20",
-  "homeassistant": "2025.6.0",
   "dhcp": [
     {
       "macaddress": "000E8C*"
