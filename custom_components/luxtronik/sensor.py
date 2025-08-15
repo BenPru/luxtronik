@@ -377,10 +377,10 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             return ""
         if line_2_state is None or line_2_state == STATE_UNAVAILABLE:
             return ""
-        line_1 = self.platform.platform_translations.get(
+        line_1 = self.platform.platform_data.platform_translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.{line_1_state}"
         )
-        line_2 = self.platform.platform_translations.get(
+        line_2 = self.platform.platform_data.platform_translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.{line_2_state}"
         )
         # Show evu end time if available
@@ -388,13 +388,13 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         if evu_event_minutes is None:
             pass
         elif self.native_value == LuxOperationMode.evu.value:
-            text_locale = self.platform.platform_translations.get(
+            text_locale = self.platform.platform_data.platform_translations.get(
                 f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_until"
             )
             evu_until = text_locale.format(evu_time=evu_event_minutes)
             return f"{evu_until} {line_1} {line_2} {status_time}."
         elif evu_event_minutes <= 30:
-            text_locale = self.platform.platform_translations.get(
+            text_locale = self.platform.platform_data.platform_translations.get(
                 f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_in"
             )
             evu_in = text_locale.format(evu_time=evu_event_minutes)
