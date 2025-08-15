@@ -170,11 +170,26 @@ Only a small number of the over 1100 parameters have a known function and only t
 > ℹ️ Before changing a parameter it smart to first read the current value and note it somewhere in case you want to set it back to its original value.
 All parameters can be configured as sensors and read that way.
 
+## 4 Troubleshooting
 
-### 4 Support Tickets
-If you create a ticket please provide always a diagnostic file as issue attachment:
+In case of issues, perform the following steps first.
+1. *Restart the heatpump*. Perform a full powercycle. This solves most connectivity issues.
+2. *Download the latest (beta) version if this integration*.
+   1. Go to `HACS` > `Luxtronik`.
+   2. From the 3-dot menu, select `Redownload`.
+   3. Expend `Need a different version` and select the latest pre-release.
+   4. Select `Download`
+   5. Restart Home Assistant.
+3. *Check the system logs*. If the integration isn't working, check the system logs first.
+
+### Asking for help
+If you can't figure it out on your own, consult the community. Do a thorough search first before asking for help.
+1. *Use the HA Community Forum*. For basic questions regarding the functionality of your heatpump or the integration, the [HA community forum](https://community.home-assistant.io/t/writing-a-component-for-luxtronik-heatpumps/35796) is the best place to start.
+2. *Use the Discussions*. For more in-depth questions, check the [GitHub Discussions](https://github.com/BenPru/luxtronik/discussions).
+ 
+### Support Tickets
+If something is broken and you can't fix it with the help of the community, [create a support issue](https://github.com/BenPru/luxtronik/issues). Always include a diagnostic file as issue attachment:
 ![image](https://github.com/BenPru/luxtronik/assets/32298537/89c26414-0304-438f-9204-79cf0a338db3)
-
 
 ## Some Screenshots
 
