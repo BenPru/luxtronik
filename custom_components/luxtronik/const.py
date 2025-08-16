@@ -412,7 +412,9 @@ class LuxParameter(StrEnum):
     P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER: Final = (
         "parameters.Unknown_Parameter_1140"
     )
-    P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT: Final = "parameters.Unknown_Parameter_1148"
+    P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT: Final = (
+        "parameters.Unknown_Parameter_1148"
+    )
     P1158_POWER_LIMIT_SWITCH: Final = "parameters.Unknown_Parameter_1158"
     P1159_POWER_LIMIT_VALUE: Final = "parameters.Unknown_Parameter_1159"
 
