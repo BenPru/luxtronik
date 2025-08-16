@@ -1,4 +1,5 @@
 """Support for Luxtronik number sensors."""
+
 # flake8: noqa: W503
 # region Imports
 from __future__ import annotations
@@ -147,6 +148,6 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         if isinstance(value, str):
             try:
                 value = datetime.strptime(value, "%Y-%m-%d").date()
-            except:
+            except ValueError:
                 return True
         return value < datetime.now().date()

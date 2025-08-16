@@ -1,4 +1,5 @@
 """Diagnostics support for Luxtronik."""
+
 # region Imports
 from __future__ import annotations
 

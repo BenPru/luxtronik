@@ -1,4 +1,5 @@
 """Config flow to configure the Luxtronik heatpump controller integration."""
+
 # region Imports
 from __future__ import annotations
 
@@ -8,7 +9,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.components.dhcp import DhcpServiceInfo
+from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
@@ -91,7 +92,7 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
-    VERSION = 7
+    VERSION = 8
     _hassio_discovery = None
     _discovery_host = None
     _discovery_port = None
@@ -163,9 +164,9 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                             hasattr(legacy_entry, "data")
                             and CONF_HA_SENSOR_INDOOR_TEMPERATURE in legacy_entry.data
                         ):
-                            self.context["data"][
-                                CONF_HA_SENSOR_INDOOR_TEMPERATURE
-                            ] = legacy_entry.data[CONF_HA_SENSOR_INDOOR_TEMPERATURE]
+                            self.context["data"][CONF_HA_SENSOR_INDOOR_TEMPERATURE] = (
+                                legacy_entry.data[CONF_HA_SENSOR_INDOOR_TEMPERATURE]
+                            )
                         return
                 except Exception:  # pylint: disable=broad-except
                     continue
@@ -215,20 +216,20 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     description_placeholders=description_placeholders,
                 )
 
-            self._title = (
-                title
-            ) = f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"
+            self._title = title = (
+                f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"
+            )
             name = f"{title} ({data[CONF_HOST]}:{data[CONF_PORT]})"
 
             await self.async_set_unique_id(coordinator.unique_id)
             self._abort_if_unique_id_configured()
 
-            self.context["data"][
-                CONF_HA_SENSOR_PREFIX
-            ] = f"luxtronik_{coordinator.unique_id}"
-            self.context["data"][
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE
-            ] = f"sensor.{self._sensor_prefix}_room_temperature"
+            self.context["data"][CONF_HA_SENSOR_PREFIX] = (
+                f"luxtronik_{coordinator.unique_id}"
+            )
+            self.context["data"][CONF_HA_SENSOR_INDOOR_TEMPERATURE] = (
+                f"sensor.{self._sensor_prefix}_room_temperature"
+            )
             await self._async_migrate_data_from_custom_component_luxtronik2()
             return self.async_show_form(
                 step_id="options",
@@ -253,8 +254,13 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 discovery_info.ip,
             )
             # Validate dhcp result with socket broadcast:
-            broadcast_discover_ip, broadcast_discover_port = discover()[0]
-            if broadcast_discover_ip != discovery_info.ip:
+            heatpump_list = discover()
+            broadcast_discover_ip = ""
+            for heatpump in heatpump_list:
+                if heatpump[0] == discovery_info.ip:
+                    broadcast_discover_ip = heatpump[0]
+                    broadcast_discover_port = heatpump[1]
+            if broadcast_discover_ip == "":
                 return self.async_abort(reason="no_devices_found")
             config = dict[str, Any]()
             config[CONF_HOST] = broadcast_discover_ip

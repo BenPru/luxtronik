@@ -1,4 +1,5 @@
 """Support for Luxtronik binary sensors."""
+
 # region Imports
 from __future__ import annotations
 

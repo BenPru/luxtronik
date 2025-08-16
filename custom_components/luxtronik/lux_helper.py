@@ -1,13 +1,11 @@
 """Helper for luxtronik heatpump module."""
+
 # region Imports
 from __future__ import annotations
 
 import socket
 import struct
 import threading
-import time
-
-from async_timeout import timeout
 
 from luxtronik.calculations import Calculations
 from luxtronik.parameters import Parameters
@@ -83,6 +81,7 @@ def discover() -> list[tuple[str, int | None]]:
                             "an old Luxtronic software version might be the reason"
                         )
                     results.append((ip_address, res_port))
+                    continue
                 LOGGER.debug(
                     "Received response from %s, but with wrong content, skipping",
                     ip_address,

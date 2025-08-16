@@ -22,6 +22,9 @@
             "additional_heat_generator": {
                 "name": "Additional heat generator"
             },
+            "additional_heat_generator2": {
+                "name": "Additional heat generator 2"
+            },
             "disturbance_output": {
                 "name": "Systemhealth"
             },
@@ -71,6 +74,9 @@
             "remote_maintenance": {
                 "name": "Remote maintenance"
             },
+            "electrical_power_limitation_switch": {
+                "name": "Power limitation"
+            },
             "efficiency_pump": {
                 "name": "Efficiency pump"
             },
@@ -94,6 +100,15 @@
             },
             "silent_mode": {
                 "name": "Silent mode"
+            },
+            "pump_vent_hup": {
+                "name": "Venting HUP"
+            },
+            "pump_vent_active": {
+                "name": "Venting active"
+            },
+            "smartgrid": {
+                "name": "Smart Grid"
             }
         },
         "update": {
@@ -108,6 +123,9 @@
             "pump_optimization": {
                 "name": "Pump optimization"
             },
+            "electrical_power_limitation_value": {
+                "name": "Power limit"
+            },
             "heating_threshold": {
                 "name": "Heating threshold"
             },
@@ -117,32 +135,41 @@
             "heating_min_flow_out_temperature": {
                 "name": "Min. target flow out"
             },
-            "heating_circuit_curve1_temperature": {
-                "name": "Heating curve 1"
+            "heating_curve_end_temperature": {
+                "name": "Heating curve end point"
             },
-            "heating_circuit_curve2_temperature": {
-                "name": "Heating curve 2"
+            "heating_curve_parallel_shift_temperature": {
+                "name": "Heating curve parallel shift"
             },
-            "heating_circuit_curve_night_temperature": {
-                "name": "Heating curve night"
+            "heating_curve_night_temperature": {
+                "name": "Heating curve night reduction"
             },
-            "heating_circuit2_curve1_temperature": {
-                "name": "HC2 Heating curve 1"
+            "heating_curve_circuit1_end_temperature": {
+                "name": "MC1 heating curve end point"
             },
-            "heating_circuit2_curve2_temperature": {
-                "name": "HC2 Heating curve 2"
+            "heating_curve_circuit1_parallel_shift_temperature": {
+                "name": "MC1 heating curve parallel shift"
             },
-            "heating_circuit2_curve_night_temperature": {
-                "name": "HC2 Heating curve night"
+            "heating_curve_circuit1_night_temperature": {
+                "name": "MC1 heating curve night reduction"
             },
-            "heating_circuit3_curve1_temperature": {
-                "name": "HC3 Heating curve 1"
+            "heating_curve_circuit2_end_temperature": {
+                "name": "MC2 heating curve end point"
             },
-            "heating_circuit3_curve2_temperature": {
-                "name": "HC3 Heating curve 2"
+            "heating_curve_circuit2_parallel_shift_temperature": {
+                "name": "MC2 heating curve parallel shift"
             },
-            "heating_circuit3_curve_night_temperature": {
-                "name": "HC3 Heating curve night"
+            "heating_curve_circuit2_night_temperature": {
+                "name": "MC2 heating curve night reduction"
+            },
+            "heating_curve_circuit3_end_temperature": {
+                "name": "MC3 heating curve end point"
+            },
+            "heating_curve_circuit3_parallel_shift_temperature": {
+                "name": "MC3 heating curve parallel shift"
+            },
+            "heating_curve_circuit3_night_temperature": {
+                "name": "MC3 heating curve night reduction"
             },
             "dhw_target_temperature": {
                 "name": "Target"
@@ -206,6 +233,9 @@
             },
             "heat_source_input_temperature_min": {
                 "name": "Heat source input minimum"
+            },
+            "pump_vent_timer_h": {
+                "name": "Venting runtime"
             }
         },
         "sensor": {
@@ -339,7 +369,7 @@
                     "heatpump running": "The heatpump runs",
                     "heatpump idle": "The heatpump is idle",
                     "heatpump coming": "The heatpump is coming",
-                    "heatpump shutdown": "The heatpump is shuting down",
+                    "heatpump shutdown": "The heatpump is shutting down",
                     "errorcode slot": "Heatpump error code in slot 0",
                     "pump forerun": "Pump forerun",
                     "defrost": "Defrost",
@@ -372,7 +402,7 @@
                     "flow monitoring": "flow monitoring",
                     "grid switch on delay": "grid switch on delay",
                     "info bake out program": "info bake out program",
-                    "heating external engery source": "heating external engery source",
+                    "heating external energy source": "heating external energy source",
                     "domestic water external energy source": "Domestic water external energy source",
                     "second heat generator 1 active": "second heat generator 1 active"
                 }
@@ -479,6 +509,24 @@
             "flow_in_temperature": {
                 "name": "Flow in temperature"
             },
+            "flow_in_circuit1_temperature": {
+                "name": "Flow in temperature circuit 1"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Flow in temperature circuit 2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Flow in temperature circuit 3"
+            },
+            "flow_in_circuit1_target_temperature": {
+                "name": "Flow in target temperature circuit 1"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Flow in target temperature circuit 2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Flow in target temperature circuit 3"
+            },
             "flow_out_temperature": {
                 "name": "Flow out temperature"
             },
@@ -562,7 +610,7 @@
         },
         "error": {
             "address": "Invalid remote-address insert. The address have to be an ip-address or a resolvable hostname.",
-            "address_in_use": "The choosen listen port is already in use on this system.",
+            "address_in_use": "The chosen listen port is already in use on this system.",
             "unknown": "Unexpected error"
         },
         "step": {

@@ -1,4 +1,5 @@
 """Support for Luxtronik classes."""
+
 # region Imports
 from typing import Any
 

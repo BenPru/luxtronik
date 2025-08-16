@@ -22,6 +22,9 @@
       "additional_heat_generator": {
         "name": "P\u0159\u00eddavn\u00fd zdroj tepla"
       },
+      "additional_heat_generator2": {
+        "name": "P\u0159\u00eddavn\u00fd zdroj tepla 2"
+      },
       "disturbance_output": {
         "name": "Stav syst\u00e9mu"
       },
@@ -74,6 +77,9 @@
       "efficiency_pump": {
         "name": "\u00da\u010dinnost \u010derpadla"
       },
+      "electrical_power_limitation_switch": {
+	"name": "Power limitation"
+      },
       "pump_heat_control": {
         "name": "Ovl\u00e1d\u00e1n\u00ed \u010derpadla pro oh\u0159ev"
       },
@@ -91,6 +97,15 @@
       },
       "cooling": {
         "name": "Chlazen\u00ed"
+      },
+      "pump_vent_hup": {
+        "name": "Odv\u011btr\u00e1v\u00e1n\u00ed HUP"
+      },
+      "pump_vent_active": {
+          "name": "Odv\u011btr\u00e1v\u00e1n\u00ed aktiv\u00ed"
+      },
+      "smartgrid": {
+        "name": "Smart Grid"
       }
     },
     "update": {
@@ -105,6 +120,9 @@
       "pump_optimization": {
         "name": "Optimalizace \u010derpadla"
       },
+	  "electrical_power_limitation_value": {
+                "name": "Power limit"
+      },
       "heating_threshold": {
         "name": "Teplotn\u00ed mez pro vyt\u00e1p\u011bn\u00ed"
       },
@@ -114,32 +132,41 @@
       "heating_min_flow_out_temperature": {
         "name": "Minim\u00e1ln\u00ed teplota zp\u00e1te\u010dky vyt\u00e1p\u011bn\u00ed"
       },
-      "heating_circuit_curve1_temperature": {
-        "name": "Topn\u00e1 k\u0159ivka 1"
+      "heating_curve_end_temperature": {
+        "name": "Koncov\u00fd bod topn\u00e9 k\u0159ivky"
       },
-      "heating_circuit_curve2_temperature": {
-        "name": "Topn\u00e1 k\u0159ivka 2"
+      "heating_curve_parallel_shift_temperature": {
+          "name": "Paraleln\u00ed posun topn\u00e9 k\u0159ivky"
       },
-      "heating_circuit_curve_night_temperature": {
-        "name": "No\u010dn\u00ed topn\u00e1 k\u0159ivka"
+      "heating_curve_night_temperature": {
+          "name": "No\u010dn\u00ed redukce topn\u00e9 k\u0159ivky"
       },
-      "heating_circuit2_curve1_temperature": {
-        "name": "Topn\u00e1 k\u0159ivka 1 pro okruh 2"
+      "heating_curve_circuit1_end_temperature": {
+          "name": "Koncov\u00fd bod topn\u00e9 k\u0159ivky pro okruh 1"
       },
-      "heating_circuit2_curve2_temperature": {
-        "name": "Topn\u00e1 k\u0159ivka 2 pro okruh 2"
+      "heating_curve_circuit1_parallel_shift_temperature": {
+          "name": "Paraleln\u00ed posun topn\u00e9 k\u0159ivky pro okruh 1"
       },
-      "heating_circuit2_curve_night_temperature": {
-        "name": "No\u010dn\u00ed topn\u00e1 k\u0159ivka pro okruh 2"
+      "heating_curve_circuit1_night_temperature": {
+          "name": "No\u010dn\u00ed redukce topn\u00e9 k\u0159ivky pro okruh 1"
       },
-      "heating_circuit3_curve1_temperature": {
-        "name": "Topn\u00e1 k\u0159ivka 1 pro okruh 3"
+      "heating_curve_circuit2_end_temperature": {
+          "name": "Koncov\u00fd bod topn\u00e9 k\u0159ivky pro okruh 2"
       },
-      "heating_circuit3_curve2_temperature": {
-        "name": "Topn\u00e1 k\u0159ivka 2 pro okruh 3"
+      "heating_curve_circuit2_parallel_shift_temperature": {
+          "name": "Paraleln\u00ed posun topn\u00e9 k\u0159ivky pro okruh 2"
       },
-      "heating_circuit3_curve_night_temperature": {
-        "name": "No\u010dn\u00ed topn\u00e1 k\u0159ivka pro okruh 3"
+      "heating_curve_circuit2_night_temperature": {
+          "name": "No\u010dn\u00ed redukce topn\u00e9 k\u0159ivky pro okruh 2"
+      },
+      "heating_curve_circuit3_end_temperature": {
+          "name": "Koncov\u00fd bod topn\u00e9 k\u0159ivky pro okruh 3"
+      },
+      "heating_curve_circuit3_parallel_shift_temperature": {
+          "name": "Paraleln\u00ed posun topn\u00e9 k\u0159ivky pro okruh 3"
+      },
+      "heating_curve_circuit3_night_temperature": {
+          "name": "No\u010dn\u00ed redukce topn\u00e9 k\u0159ivky pro okruh 3"
       },
       "dhw_target_temperature": {
         "name": "po\u017eadovan\u00e1 teplota TUV"
@@ -203,6 +230,9 @@
       },
       "heat_source_input_temperature_min": {
         "name": "Minim\u00e1ln\u00ed vstupn\u00ed teplota zdroje tepla"
+      },
+      "pump_vent_timer_h": {
+        "name": "Doba provozu odvzdu\u0161\u0148ov\u00E1n\u00ED"
       }
     },
     "sensor": {
@@ -710,6 +740,24 @@
       },
       "flow_in_temperature": {
         "name": "Teplota vstupu"
+      },
+      "flow_in_circuit1_temperature": {
+        "name": "Okruh vstupní teploty 1"
+      },
+      "flow_in_circuit2_temperature": {
+        "name": "Okruh vstupní teploty 2"
+      },
+      "flow_in_circuit3_temperature": {
+          "name": "Okruh vstupní teploty 3"
+      },
+      "flow_in_circuit1_target_temperature": {
+          "name": "Obvod cílové teploty vstupu 1"
+      },
+      "flow_in_circuit2_target_temperature": {
+          "name": "Obvod cílové teploty vstupu 2"
+      },
+      "flow_in_circuit3_target_temperature": {
+          "name": "Obvod cílové teploty vstupu 3"
       },
       "flow_out_temperature": {
         "name": "Teplota zp\u00e1te\u010dky"

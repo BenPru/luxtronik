@@ -1,9 +1,9 @@
 """Luxtronik switch definitions."""
+
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     UPDATE_INTERVAL_NORMAL,
-    UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
     LuxMode,
     LuxParameter as LP,
@@ -32,6 +32,12 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
+        key=SensorKey.SMART_GRID_SWITCH,
+        luxtronik_key=LP.P1030_SMART_GRID_SWITCH,
+        icon="mdi:grid",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    LuxtronikSwitchDescription(
         luxtronik_key=LP.P1033_PUMP_HEAT_CONTROL,
         key=SensorKey.PUMP_HEAT_CONTROL,
         icon="mdi:pump",
@@ -40,13 +46,12 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
-        luxtronik_key=LP.P1087_SILENT_MODE,
-        key=SensorKey.SILENT_MODE,
-        icon="mdi:volume-minus",
+        key=SensorKey.ELECTRICAL_POWER_LIMITATION_SWITCH,
+        luxtronik_key=LP.P1158_POWER_LIMIT_SWITCH,
+        icon="mdi:download-lock",
         entity_category=EntityCategory.CONFIG,
-        visibility=LV.V0357_SILENT_MODE_TIME_MENU,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_80,
-        update_interval=UPDATE_INTERVAL_VERY_SLOW,
+        visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,
@@ -79,6 +84,21 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         luxtronik_key=LP.P0699_HEATING_THRESHOLD,
         key=SensorKey.HEATING_THRESHOLD,
         icon="mdi:download-outline",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    LuxtronikSwitchDescription(
+        device_key=DeviceKey.heating,
+        luxtronik_key=LP.P0678_VENTING_HUP_ACTIVE,
+        key=SensorKey.PUMP_VENT_HUP,
+        icon="mdi:pump",
+        entity_category=EntityCategory.CONFIG,
+        visibility=LV.V0163_PUMP_VENT_HUP,
+    ),
+    LuxtronikSwitchDescription(
+        device_key=DeviceKey.heating,
+        luxtronik_key=LP.P0158_VENTING_ACTIVE,
+        key=SensorKey.PUMP_VENT_ACTIVE,
+        icon="mdi:pump",
         entity_category=EntityCategory.CONFIG,
     ),
     # endregion Heating

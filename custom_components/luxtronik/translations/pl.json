@@ -19,6 +19,9 @@
             "additional_heat_generator": {
                 "name": "Dodatkowy generator ciep\u0142a"
             },
+            "additional_heat_generator2": {
+                "name": "Dodatkowy generator ciep\u0142a 2"
+            },
             "disturbance_output": {
                 "name": "Stan systemu"
             },
@@ -71,6 +74,9 @@
             "efficiency_pump": {
                 "name": "Pompa wydajna"
             },
+            "electrical_power_limitation_switch": {
+                "name": "Power limitation"
+            },
             "pump_heat_control": {
                 "name": "Sterowanie ogrzewaniem pompy"
             },
@@ -88,6 +94,15 @@
             },
             "cooling": {
                 "name": "Ch\u0142odzenie"
+            },
+            "pump_vent_hup": {
+                "name": "Wentylacja HUP"
+            },
+            "pump_vent_active": {
+                "name": "Aktywne odpowietrzanie"
+            },
+            "smartgrid": {
+                "name": "Smart Grid"
             }
         },
         "update": {
@@ -105,20 +120,50 @@
             "heating_threshold": {
                 "name": "Pr\u00F3g ogrzewania"
             },
+            "electrical_power_limitation_value": {
+                "name": "Power limit"
+            },
             "heating_target_correction": {
                 "name": "Korekcja celu grzewczego"
             },
             "heating_min_flow_out_temperature": {
                 "name": "Min. docelowy odp\u0142yw"
             },
-            "heating_circuit_curve1_temperature": {
-                "name": "Krzywa grzewcza 1"
+            "heating_curve_end_temperature": {
+                "name": "Punkt ko\u0144cowy krzywej grzewczej"
             },
-            "heating_circuit_curve2_temperature": {
-                "name": "Krzywa grzewcza 2"
+            "heating_curve_parallel_shift_temperature": {
+                "name": "R\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
             },
-            "heating_circuit_curve_night_temperature": {
-                "name": "Krzywa grzewcza noc"
+            "heating_curve_night_temperature": {
+                "name": "Nocna redukcja krzywej grzewczej"
+            },
+            "heating_curve_circuit1_end_temperature": {
+                "name": "Obw\u00f3d mieszany 1 punkt ko\u0144cowy krzywej grzewczej"
+            },
+            "heating_curve_circuit1_parallel_shift_temperature": {
+                "name": "Obw\u00f3d mieszany 1 r\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
+            },
+            "heating_curve_circuit1_night_temperature": {
+                "name": "Obw\u00f3d mieszany 1 nocna redukcja krzywej grzewczej"
+            },
+            "heating_curve_circuit2_end_temperature": {
+                "name": "Obw\u00f3d mieszany 2 punkt ko\u0144cowy krzywej grzewczej"
+            },
+            "heating_curve_circuit2_parallel_shift_temperature": {
+                "name": "Obw\u00f3d mieszany 2 r\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
+            },
+            "heating_curve_circuit2_night_temperature": {
+                "name": "Obw\u00f3d mieszany 2 nocna redukcja krzywej grzewczej"
+            },
+            "heating_curve_circuit3_end_temperature": {
+                "name": "Obw\u00f3d mieszany 3 punkt ko\u0144cowy krzywej grzewczej"
+            },
+            "heating_curve_circuit3_parallel_shift_temperature": {
+                "name": "Obw\u00f3d mieszany 3 r\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
+            },
+            "heating_curve_circuit3_night_temperature": {
+                "name": "Obw\u00f3d mieszany 3 nocna redukcja krzywej grzewczej"
             },
             "dhw_target_temperature": {
                 "name": "Temperatura docelowa ciep\u0142ej wody"
@@ -155,6 +200,9 @@
             },
             "heating_night_lowering_to_temperature": {
                 "name": "Obni\u017Cenie temperatury ogrzewania w nocy"
+            },
+            "pump_vent_timer_h": {
+                "name": "Czas pracy odpowietrzania"
             }
         },
         "sensor": {
@@ -414,6 +462,24 @@
             },
             "flow_in_temperature": {
                 "name": "Temperatura na wej\u015Bciu"
+            },
+            "flow_in_circuit1_temperature": {
+                "name": "Obwód temperatury wlotowej 1"
+            },
+            "flow_in_circuit2_temperature": {
+                "name": "Obwód temperatury wlotowej 2"
+            },
+            "flow_in_circuit3_temperature": {
+                "name": "Obwód temperatury wlotowej 3"
+            },
+            "flow_in_circuit1_target_temperature": {
+                "name": "Obwód docelowej temperatury na wlocie 1"
+            },
+            "flow_in_circuit2_target_temperature": {
+                "name": "Obwód docelowej temperatury na wlocie 2"
+            },
+            "flow_in_circuit3_target_temperature": {
+                "name": "Obwód docelowej temperatury na wlocie 3"
             },
             "flow_out_temperature": {
                 "name": "Temperatura na wyj\u015Bciu"

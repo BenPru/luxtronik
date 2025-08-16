@@ -7,7 +7,7 @@ If you like 🩷 this project, [sponsor it (click)](https://github.com/sponsors/
 > :warning: **New Code-Base - PLEASE READ!** :warning:  
 * Backup your data before update (different config structure!). If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
 * This release has no more language selection. The HA backend language is used.
-* Some entities which can not detected automaticly are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
+* Some entities which can not detected automatically are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
 * The RBE Room Temperature Sensor is currently not implemented.
 * The update sensor "rings" for new firmware versions, but the "Install"-Button has no function. The Firmware has to be installed manually. An the Install-Button is necessary to get notified.
 * In the integration configuration you can set a ha sensor id for the indoor temperature value.
@@ -49,8 +49,11 @@ This integration works locally. It's only necessary to connect the Luxtronik con
 
 ### 1.1 HACS (recommended)
 
-Add the custom repo to HACS
+Add the custom repo to HACS:
 
+[![Open your Home Assistant instance and show the add HACS repository dialog with a specific repository pre-filled.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BenPru&repository=Luxtronik&category=integration)
+
+Or:
 1. Go to 'HACS > Integration'
 2. Select 'Custom repositories' from the top right menu
 3. Under Repository, enter '<https://github.com/BenPru/luxtronik>'
@@ -104,23 +107,23 @@ Select Configure and review the settings.
 It's not always clear from the name alone what an entity exactly means and how it effects your heatpump. The main source of information is ofcourse the [Luxtronik Operating Manual](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf).
 
 Another great source is [FHEM - Luxtronik 2.0](https://wiki.fhem.de/wiki/Luxtronik_2.0). It's in German so use Google Translate.  
-It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carfully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information.
+It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carefully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information.
 
 ### 3.1 Energy use
 
-Not all heatpumps have build in electrical energy metering and instead only show the energy produced in heat, not the energy consumed in electricity. Adding a (strong) energy meter is a nice addition to measure the SCOP of your device. Shelly energy meters are recommended since they offer offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) and a [variety of in-line or clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) with various protection mechanisms.
+Not all heatpumps have build in electrical electrical energy metering and instead only show the energy produced in heat, not the energy consumed in electricity. Adding a (strong) energy meter is a nice addition to measure the SCOP of your device. Shelly energy meters are recommended since they offer offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) and a [variety of in-line or clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) with various protection mechanisms.
 
 ### 3.2 Additional sensors (advanced)
 
 If you miss a sensor please have a look in the devices under "+n entities not shown". Not all entities can autodetect by the integration. You can enable the entities by your self.
 
-The most usefull sensors and parameters are created automaticly. But if you miss a sensor you can add it manually via yaml configuration like the original module from [Bouni/luxtronik](https://github.com/Bouni/luxtronik).
+The most useful sensors and parameters are created automatically. But if you miss a sensor you can add it manually via yaml configuration like the original module from [Bouni/luxtronik](https://github.com/Bouni/luxtronik).
 
 A short description of many of the available sensors can be found here [Loxwiki - Luxtronik Java Web Interface](https://loxwiki.atlassian.net/wiki/spaces/LOX/pages/1533935933/Java+Webinterface)
 
 #### Parameter IDs
 
-Take these files as a reference to figure ot which IDs to use:
+Take these files as a reference to figure out which IDs to use:
 
 - <https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/parameters.py>
 - <https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/calculations.py>
@@ -128,7 +131,7 @@ Take these files as a reference to figure ot which IDs to use:
 
 #### Service
 
-In order to change parameters on the Luxtronik conroller, you can use the following service:
+In order to change parameters on the Luxtronik controller, you can use the following service:
 
 ```yaml
 Domain: luxtronik2
@@ -143,13 +146,13 @@ Service Data: {"parameter": "ID_Ba_Hz_akt", "value": "Automatic"}
   - description: Value you want to set the parameter to.
   - type: [string, float]
 
-Only a small number of the over 1100 parameters have a known funtion and only these can be written, these are:
+Only a small number of the over 1100 parameters have a known function and only these can be written, these are:
 
 - `ID_Ba_Hz_akt` The mode of operation of the heating circuit, possible values are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
-- `ID_Ba_Bw_akt` The mode of operation of the hot water circuit, possible valus are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
+- `ID_Ba_Bw_akt` The mode of operation of the hot water circuit, possible values are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
 - `ID_Soll_BWS_akt` The set point for hot water generation, for example 50.0 for 50.0°C
 - `ID_Einst_BA_Kuehl_akt` The mode of operation of the cooling circuit, possible values are "Automatic", "Off"
-- `ID_Einst_KuehlFreig_akt` The outdoor temprature from wher on the cooling should start to operate, for example 24.0
+- `ID_Einst_KuehlFreig_akt` The outdoor temperature from where on the cooling should start to operate, for example 24.0
 - `ID_Ba_Sw_akt` The mode of operation of the swimming pool heating circuit, possible values are "Automatic", "Party", "Holidays", "Off"
 - `ID_Einst_TDC_Max_akt` Max. temperature difference of the hot water buffer tank, for example 70.0
 - `ID_Sollwert_KuCft1_akt` Cooling set point for mixer circuit 1, for example 19.0
@@ -167,11 +170,26 @@ Only a small number of the over 1100 parameters have a known funtion and only th
 > ℹ️ Before changing a parameter it smart to first read the current value and note it somewhere in case you want to set it back to its original value.
 All parameters can be configured as sensors and read that way.
 
+## 4 Troubleshooting
 
-### 4 Support Tickets
-If you create a ticket please provide always a diagnostic file as issue attachment:
+In case of issues, perform the following steps first.
+1. *Restart the heatpump*. Perform a full powercycle. This solves most connectivity issues.
+2. *Download the latest (beta) version if this integration*.
+   1. Go to `HACS` > `Luxtronik`.
+   2. From the 3-dot menu, select `Redownload`.
+   3. Expend `Need a different version` and select the latest pre-release.
+   4. Select `Download`
+   5. Restart Home Assistant.
+3. *Check the system logs*. If the integration isn't working, check the system logs first.
+
+### Asking for help
+If you can't figure it out on your own, consult the community. Do a thorough search first before asking for help.
+1. *Use the HA Community Forum*. For basic questions regarding the functionality of your heatpump or the integration, the [HA community forum](https://community.home-assistant.io/t/writing-a-component-for-luxtronik-heatpumps/35796) is the best place to start.
+2. *Use the Discussions*. For more in-depth questions, check the [GitHub Discussions](https://github.com/BenPru/luxtronik/discussions).
+ 
+### Support Tickets
+If something is broken and you can't fix it with the help of the community, [create a support issue](https://github.com/BenPru/luxtronik/issues). Always include a diagnostic file as issue attachment:
 ![image](https://github.com/BenPru/luxtronik/assets/32298537/89c26414-0304-438f-9204-79cf0a338db3)
-
 
 ## Some Screenshots
 
