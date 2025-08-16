@@ -313,7 +313,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""
         value = kwargs.get(ATTR_TEMPERATURE)
-        lux_key = LuxParameter.P1148_HEATING_TARGET_TEMP_RBE
+        lux_key = LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT
         data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
             lux_key.split(".")[1], int(value * 10)
         )
