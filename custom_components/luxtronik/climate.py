@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from typing import Any
+from packaging.version import Version
 
 from homeassistant.components.climate import (
     ENTITY_ID_FORMAT,
@@ -35,6 +36,7 @@ from .const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    LOGGER,
     LUX_STATE_ICON_MAP,
     LUX_STATE_ICON_MAP_COOL,
     DeviceKey,
@@ -110,7 +112,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_RBE,
+        luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.heating.value,
@@ -297,7 +299,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             self._attr_current_temperature = get_sensor_data(data, key)
             
         key_tar = self.entity_description.luxtronik_key_target_temperature
-        if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_RBE:
+        if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
             self._attr_target_temperature = get_sensor_data(data, key_tar) / 10
         elif key_tar != LuxParameter.UNSET:
             self._attr_target_temperature = get_sensor_data(data, key_tar)
@@ -344,13 +346,17 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         """Set new target temperature."""
         self._attr_target_temperature = kwargs[ATTR_TEMPERATURE]
         key_tar = self.entity_description.luxtronik_key_target_temperature
-        if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_RBE:
+        LOGGER.info(f"async_set_temperature={key_tar},{self._attr_target_temperature}")
+        if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
                 key_tar.split(".")[1], int(self._attr_target_temperature * 10)
             )
             self._handle_coordinator_update(data)
-        elif key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET
-            super()._handle_coordinator_update()
+        elif key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
+            data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
+                key_tar.split(".")[1], int(self._attr_target_temperature)
+            )
+            self._handle_coordinator_update(data)
 
     async def async_turn_off(self) -> None:
         await self.async_set_hvac_mode(HVACMode.OFF)
