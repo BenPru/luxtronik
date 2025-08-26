@@ -23,6 +23,12 @@ from .const import (
 
 WAIT_TIME_WRITE_PARAMETER = 1.0
 
+# Luxtronik communication protocol commands:
+# 3002 - Write parameter (command, parameter_index, value)
+# 3003 - Read parameters
+# 3004 - Read calculations  
+# 3005 - Read visibility flags
+
 # List of ports that are known to respond to discovery packets
 LUXTRONIK_DISCOVERY_PORTS = [4444, 47808]
 
