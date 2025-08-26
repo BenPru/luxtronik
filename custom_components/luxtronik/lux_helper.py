@@ -226,10 +226,8 @@ class Luxtronik:
         with self._lock:
             is_none = self._socket is None
             if is_none:
-                self._socket = socket.socket(
-                    socket.AF_INET,
-                    socket.SOCK_STREAM,
-                )
+                self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._socket.settimeout(self._socket_timeout)
             if is_none or _is_socket_closed(self._socket):
                 try:
                     self._socket.connect((self._host, self._port))
@@ -242,6 +240,15 @@ class Luxtronik:
                         self._socket.connect((self._host, self._port))
                     else:
                         raise err
+                except socket.timeout:
+                    LOGGER.error(
+                        "Connection to %s:%s timed out after %ss",
+                        self._host,
+                        self._port,
+                        self._socket_timeout,
+                    )
+                    self._disconnect()
+                    return
                 self._socket.settimeout(self._socket_timeout)
                 LOGGER.info(
                     "Connected to Luxtronik heatpump %s:%s with timeout %ss",
