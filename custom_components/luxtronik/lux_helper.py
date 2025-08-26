@@ -6,6 +6,7 @@ from __future__ import annotations
 import socket
 import struct
 import threading
+import time
 
 from luxtronik.calculations import Calculations
 from luxtronik.parameters import Parameters
@@ -142,7 +143,20 @@ def get_manufacturer_firmware_url_by_model(model: str, default_id: int) -> str:
 
 
 def _is_socket_closed(sock: socket.socket) -> bool:
+    """Check if a socket connection is closed.
+
+    Uses multiple methods to detect if a socket is closed:
+    1. Check file descriptor validity
+    2. Attempt to peek at socket data without blocking
+
+    Args:
+        sock: The socket to check
+
+    Returns:
+        True if socket is closed, False if open or undetermined
+    """
     try:
+        # Check if file descriptor is valid
         if sock.fileno() < 0:
             return True
     except Exception as err:  # pylint: disable=broad-except
@@ -150,7 +164,7 @@ def _is_socket_closed(sock: socket.socket) -> bool:
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
     try:
-        # this will try to read bytes without blocking and also without removing them from buffer (peek only)
+        # Try to read bytes without blocking and without removing them from buffer (peek only)
         last_timeout = sock.gettimeout()
         sock.settimeout(None)
         data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
@@ -267,11 +281,17 @@ class Luxtronik:
         self._read_visibilities()
 
     def _write(self):
+        """Write queued parameter changes to the Luxtronik heat pump.
+
+        Processes all queued parameter changes and sends them using command 3002.
+        Each parameter is sent as: command (3002), parameter index, parameter value.
+        """
         for index, value in self.parameters.queue.items():
             if not isinstance(index, int) or not isinstance(value, int):
                 LOGGER.warning("Parameter id '%s' or value '%s' invalid!", index, value)
                 continue
             LOGGER.info("Parameter '%d' set to '%s'", index, value)
+            # Send parameter update (command 3002, parameter index, value)
             data = struct.pack(">iii", 3002, index, value)
             LOGGER.debug("Data %s", data)
             self._socket.sendall(data)
@@ -281,9 +301,8 @@ class Luxtronik:
             LOGGER.debug("Value %s", val)
         # Flush queue after writing all values
         self.parameters.queue = {}
-        # Give the heatpump a short time to handle the value changes/calculations:
-        # Todo: Change methods to async
-        # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
+        # Give the heatpump a short time to handle the value changes/calculations
+        time.sleep(WAIT_TIME_WRITE_PARAMETER)
 
     def _read_parameters(self):
         data = []
@@ -309,7 +328,13 @@ class Luxtronik:
         self.parameters.parse(data)
 
     def _read_calculations(self):
+        """Read calculation values from the Luxtronik heat pump.
+
+        Sends command 3004 to request calculation data and reads the response.
+        Each calculation value is a 4-byte integer in big-endian format.
+        """
         data = []
+        # Send request for calculations data (command 3004)
         self._socket.sendall(struct.pack(">ii", 3004, 0))
         cmd = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Command %s", cmd)
@@ -324,6 +349,7 @@ class Luxtronik:
             )
             return
         LOGGER.debug("Length %s", length)
+        # Read calculation values - each value is a 4-byte signed integer
         for _ in range(0, length):
             try:
                 data.append(struct.unpack(">i", self._socket.recv(4))[0])
@@ -334,7 +360,13 @@ class Luxtronik:
         self.calculations.parse(data)
 
     def _read_visibilities(self):
+        """Read visibility flags from the Luxtronik heat pump.
+
+        Sends command 3005 to request visibility data and reads the response.
+        Each visibility value is a 1-byte boolean in signed byte format.
+        """
         data = []
+        # Send request for visibility data (command 3005)
         self._socket.sendall(struct.pack(">ii", 3005, 0))
         cmd = struct.unpack(">i", self._socket.recv(4))[0]
         LOGGER.debug("Command %s", cmd)
@@ -350,6 +382,7 @@ class Luxtronik:
             # Force reconnect for the next readout
             self._disconnect()
         LOGGER.debug("Length %s", length)
+        # Read visibility flags - each flag is a 1-byte signed value
         for _ in range(0, length):
             try:
                 data.append(struct.unpack(">b", self._socket.recv(1))[0])

@@ -460,7 +460,6 @@ class LuxCalculation(StrEnum):
     C0027_SOLAR_BUFFER_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TSS"
     C0029_DEFROST_END_FLOW_OKAY: Final = "calculations.ID_WEB_ASDin"
     C0031_EVU_UNLOCKED: Final = "calculations.ID_WEB_EVUin"
-    # C0032_HIGH_PRESSURE_OKAY: Final = "calculations.ID_WEB_HDin"  # True/False -> Hochdruck OK
     C0034_MOTOR_PROTECTION: Final = "calculations.ID_WEB_MOTin"
     C0037_DEFROST_VALVE: Final = "calculations.ID_WEB_AVout"
     C0038_DHW_RECIRCULATION_PUMP: Final = "calculations.ID_WEB_BUPout"
@@ -508,8 +507,6 @@ class LuxCalculation(StrEnum):
     C0081_FIRMWARE_VERSION: Final = "calculations.ID_WEB_SoftStand"
     C0095_ERROR_TIME: Final = "calculations.ID_WEB_ERROR_Time0"
     C0100_ERROR_REASON: Final = "calculations.ID_WEB_ERROR_Nr0"
-    # TODO: !
-    # C0105_ERROR_COUNTER: Final = "calculations.ID_WEB_AnzahlFehlerInSpeicher"
     C0117_STATUS_LINE_1: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile1"
     C0118_STATUS_LINE_2: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile2"
     C0119_STATUS_LINE_3: Final = "calculations.ID_WEB_HauptMenuStatus_Zeile3"
