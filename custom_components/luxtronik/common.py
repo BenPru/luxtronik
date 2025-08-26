@@ -95,6 +95,15 @@ def correct_key_value(
     ):
         return LuxStatus1Option.compressor_heater
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
+    # region Workaround Detect passive cooling operation mode
+    if (
+        sensor_id == LC.C0080_STATUS
+        and value == LuxOperationMode.no_request 
+        and bool(get_sensor_data(sensors,LC.C0119_STATUS_LINE_3) == 'cooling')
+    ):
+        return LuxOperationMode.cooling
+    # endregion Workaround Detect passive cooling operation mode
+    
     return value
 
 

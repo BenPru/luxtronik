@@ -304,27 +304,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                     self._attr_native_value = LuxOperationMode.domestic_water.value
             # endregion Workaround Thermal desinfection with (only) using 2nd heatsource
 
-            # region Workaround Detect passive cooling operation mode
-            if self._attr_native_value == LuxOperationMode.no_request.value:
-                # detect passive cooling
-                if self.coordinator.detect_cooling_present():
-                    T_in = self._get_value(LC.C0010_FLOW_IN_TEMPERATURE)
-                    T_out = self._get_value(LC.C0011_FLOW_OUT_TEMPERATURE)
-                    T_heat_in = self._get_value(LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-                    T_heat_out = self._get_value(
-                        LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
-                    )
-                    Flow_WQ = self._get_value(LC.C0173_HEAT_SOURCE_FLOW_RATE)
-                    Pump = self._get_value(LC.C0043_PUMP_FLOW)
-                    if (
-                        (T_out > T_in)
-                        and (T_heat_out > T_heat_in)
-                        and (Flow_WQ > 0)
-                        and Pump
-                    ):
-                        # LOGGER.info(f"Cooling mode detected!!!")
-                        self._attr_native_value = LuxOperationMode.cooling.value
-            # endregion Workaround Detect passive cooling operation mode
         # endregion Workaround Luxtronik Bug
 
         self._last_state = self._attr_native_value
