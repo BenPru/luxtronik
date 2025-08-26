@@ -226,10 +226,8 @@ class Luxtronik:
         with self._lock:
             is_none = self._socket is None
             if is_none:
-                self._socket = socket.socket(
-                    socket.AF_INET,
-                    socket.SOCK_STREAM,
-                )
+                self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._socket.settimeout(self._socket_timeout)
             if is_none or _is_socket_closed(self._socket):
                 try:
                     self._socket.connect((self._host, self._port))
