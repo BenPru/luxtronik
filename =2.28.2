@@ -1,0 +1,468 @@
+Defaulting to user installation because normal site-packages is not writeable
+Collecting flake8
+  Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata
+     - 3.8 kB ? 0:00:00
+Collecting pytest
+  Downloading pytest-8.4.1-py3-none-any.whl.metadata
+     - 7.7 kB ? 0:00:00
+Collecting homeassistant
+  Downloading homeassistant-2025.1.4-py3-none-any.whl.metadata
+     - 4.8 kB ? 0:00:00
+Collecting luxtronik==0.3.14
+  Downloading luxtronik-0.3.14-py3-none-any.whl.metadata
+     - 2.2 kB ? 0:00:00
+Requirement already satisfied: requests in /usr/lib/python3/dist-packages (2.31.0)
+Collecting getmac==0.8.2
+  Downloading getmac-0.8.2-py2.py3-none-any.whl.metadata
+     - 25.4 kB ? 0:00:00
+Collecting mccabe<0.8.0,>=0.7.0 (from flake8)
+  Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata
+     - 5.0 kB ? 0:00:00
+Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8)
+  Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata
+     - 4.5 kB ? 0:00:00
+Collecting pyflakes<3.5.0,>=3.4.0 (from flake8)
+  Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata
+     - 3.5 kB ? 0:00:00
+Collecting iniconfig>=1 (from pytest)
+  Downloading iniconfig-2.1.0-py3-none-any.whl.metadata
+     - 2.7 kB ? 0:00:00
+Requirement already satisfied: packaging>=20 in /usr/lib/python3/dist-packages (from pytest) (24.0)
+Collecting pluggy<2,>=1.5 (from pytest)
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata
+     - 4.8 kB ? 0:00:00
+Requirement already satisfied: pygments>=2.7.2 in /usr/lib/python3/dist-packages (from pytest) (2.17.2)
+Collecting aiodns==3.2.0 (from homeassistant)
+  Downloading aiodns-3.2.0-py3-none-any.whl.metadata
+     - 4.0 kB ? 0:00:00
+Collecting aiohasupervisor==0.2.2b5 (from homeassistant)
+  Downloading aiohasupervisor-0.2.2b5-py3-none-any.whl.metadata
+     - 5.1 kB ? 0:00:00
+Collecting aiohttp==3.11.11 (from homeassistant)
+  Downloading aiohttp-3.11.11-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 7.7 kB ? 0:00:00
+Collecting aiohttp-cors==0.7.0 (from homeassistant)
+  Downloading aiohttp_cors-0.7.0-py3-none-any.whl.metadata
+     - 20.1 kB ? 0:00:00
+Collecting aiohttp-fast-zlib==0.2.0 (from homeassistant)
+  Downloading aiohttp_fast_zlib-0.2.0-py3-none-any.whl.metadata
+     - 5.6 kB ? 0:00:00
+Collecting aiozoneinfo==0.2.1 (from homeassistant)
+  Downloading aiozoneinfo-0.2.1-py3-none-any.whl.metadata
+     - 5.5 kB ? 0:00:00
+Collecting astral==2.2 (from homeassistant)
+  Downloading astral-2.2-py2.py3-none-any.whl.metadata
+     - 1.5 kB ? 0:00:00
+Collecting async-interrupt==1.2.0 (from homeassistant)
+  Downloading async_interrupt-1.2.0-py3-none-any.whl.metadata
+     - 4.9 kB ? 0:00:00
+Collecting attrs==24.2.0 (from homeassistant)
+  Downloading attrs-24.2.0-py3-none-any.whl.metadata
+     - 11.5 kB ? 0:00:00
+Collecting atomicwrites-homeassistant==1.4.1 (from homeassistant)
+  Downloading atomicwrites_homeassistant-1.4.1-py2.py3-none-any.whl.metadata
+     - 6.0 kB ? 0:00:00
+Collecting awesomeversion==24.6.0 (from homeassistant)
+  Downloading awesomeversion-24.6.0-py3-none-any.whl.metadata
+     - 9.0 kB ? 0:00:00
+Collecting bcrypt==4.2.0 (from homeassistant)
+  Downloading bcrypt-4.2.0-cp39-abi3-manylinux_2_28_x86_64.whl.metadata
+     - 9.6 kB ? 0:00:00
+Requirement already satisfied: certifi>=2021.5.30 in /usr/lib/python3/dist-packages (from homeassistant) (2023.11.17)
+Collecting ciso8601==2.3.2 (from homeassistant)
+  Downloading ciso8601-2.3.2-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 23.2 kB ? 0:00:00
+Collecting cronsim==2.6 (from homeassistant)
+  Downloading cronsim-2.6-py3-none-any.whl.metadata
+     - 6.9 kB ? 0:00:00
+Collecting fnv-hash-fast==1.0.2 (from homeassistant)
+  Downloading fnv_hash_fast-1.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux_2_5_x86_64.manylinux1_x86_64.manylinux2014_x86_64.whl.metadata
+     - 4.7 kB ? 0:00:00
+Collecting hass-nabucasa==0.87.0 (from homeassistant)
+  Downloading hass_nabucasa-0.87.0-py3-none-any.whl.metadata
+     - 1.8 kB ? 0:00:00
+Collecting httpx==0.27.2 (from homeassistant)
+  Downloading httpx-0.27.2-py3-none-any.whl.metadata
+     - 7.1 kB ? 0:00:00
+Collecting home-assistant-bluetooth==1.13.0 (from homeassistant)
+  Downloading home_assistant_bluetooth-1.13.0-py3-none-any.whl.metadata
+     - 5.4 kB ? 0:00:00
+Collecting ifaddr==0.2.0 (from homeassistant)
+  Downloading ifaddr-0.2.0-py3-none-any.whl.metadata
+     - 4.9 kB ? 0:00:00
+Collecting Jinja2==3.1.5 (from homeassistant)
+  Downloading jinja2-3.1.5-py3-none-any.whl.metadata
+     - 2.6 kB ? 0:00:00
+Collecting lru-dict==1.3.0 (from homeassistant)
+  Downloading lru_dict-1.3.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 4.5 kB ? 0:00:00
+Collecting PyJWT==2.10.1 (from homeassistant)
+  Downloading PyJWT-2.10.1-py3-none-any.whl.metadata
+     - 4.0 kB ? 0:00:00
+Collecting cryptography==44.0.0 (from homeassistant)
+  Downloading cryptography-44.0.0-cp39-abi3-manylinux_2_28_x86_64.whl.metadata
+     - 5.7 kB ? 0:00:00
+Collecting Pillow==11.0.0 (from homeassistant)
+  Downloading pillow-11.0.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata
+     - 9.1 kB ? 0:00:00
+Collecting propcache==0.2.1 (from homeassistant)
+  Downloading propcache-0.2.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 9.2 kB ? 0:00:00
+Collecting pyOpenSSL==24.3.0 (from homeassistant)
+  Downloading pyOpenSSL-24.3.0-py3-none-any.whl.metadata
+     - 15.8 kB ? 0:00:00
+Collecting orjson==3.10.12 (from homeassistant)
+  Downloading orjson-3.10.12-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 41.8 kB 158.2 MB/s 0:00:00
+Collecting psutil-home-assistant==0.0.1 (from homeassistant)
+  Downloading psutil_home_assistant-0.0.1-py3-none-any.whl.metadata
+     - 882 bytes ? 0:00:00
+Collecting python-slugify==8.0.4 (from homeassistant)
+  Downloading python_slugify-8.0.4-py2.py3-none-any.whl.metadata
+     - 8.5 kB ? 0:00:00
+Collecting PyYAML==6.0.2 (from homeassistant)
+  Downloading PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 2.1 kB ? 0:00:00
+Collecting requests
+  Downloading requests-2.32.3-py3-none-any.whl.metadata
+     - 4.6 kB ? 0:00:00
+Collecting securetar==2024.11.0 (from homeassistant)
+  Downloading securetar-2024.11.0-py3-none-any.whl.metadata
+     - 2.0 kB ? 0:00:00
+Collecting SQLAlchemy==2.0.36 (from homeassistant)
+  Downloading SQLAlchemy-2.0.36-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 9.7 kB ? 0:00:00
+Collecting typing-extensions<5.0,>=4.12.2 (from homeassistant)
+  Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata
+     - 3.3 kB ? 0:00:00
+Collecting ulid-transform==1.0.2 (from homeassistant)
+  Downloading ulid_transform-1.0.2-cp312-cp312-manylinux_2_36_x86_64.whl.metadata
+     - 5.4 kB ? 0:00:00
+Collecting urllib3<2,>=1.26.5 (from homeassistant)
+  Downloading urllib3-1.26.20-py2.py3-none-any.whl.metadata
+     - 50.1 kB 237.7 MB/s 0:00:00
+Collecting uv==0.5.8 (from homeassistant)
+  Downloading uv-0.5.8-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 11.5 kB ? 0:00:00
+Collecting voluptuous==0.15.2 (from homeassistant)
+  Downloading voluptuous-0.15.2-py3-none-any.whl.metadata
+     - 20.6 kB ? 0:00:00
+Collecting voluptuous-serialize==2.6.0 (from homeassistant)
+  Downloading voluptuous_serialize-2.6.0-py3-none-any.whl.metadata
+     - 316 bytes ? 0:00:00
+Collecting voluptuous-openapi==0.0.5 (from homeassistant)
+  Downloading voluptuous_openapi-0.0.5-py3-none-any.whl.metadata
+     - 325 bytes ? 0:00:00
+Collecting yarl==1.18.3 (from homeassistant)
+  Downloading yarl-1.18.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 69.2 kB 290.6 MB/s 0:00:00
+Collecting webrtc-models==0.3.0 (from homeassistant)
+  Downloading webrtc_models-0.3.0-py3-none-any.whl.metadata
+     - 2.9 kB ? 0:00:00
+Collecting charset-normalizer<4,>=2 (from requests)
+  Downloading charset_normalizer-3.4.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata
+     - 36.7 kB 107.5 MB/s 0:00:00
+Requirement already satisfied: idna<4,>=2.5 in /usr/lib/python3/dist-packages (from requests) (3.6)
+Collecting pycares>=4.0.0 (from aiodns==3.2.0->homeassistant)
+  Downloading pycares-4.10.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata
+     - 4.3 kB ? 0:00:00
+Collecting mashumaro<4.0,>=3.11 (from aiohasupervisor==0.2.2b5->homeassistant)
+  Downloading mashumaro-3.16-py3-none-any.whl.metadata
+     - 118.2 kB 292.0 MB/s 0:00:00
+Collecting aiohappyeyeballs>=2.3.0 (from aiohttp==3.11.11->homeassistant)
+  Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl.metadata
+     - 5.9 kB ? 0:00:00
+Collecting aiosignal>=1.1.2 (from aiohttp==3.11.11->homeassistant)
+  Downloading aiosignal-1.4.0-py3-none-any.whl.metadata
+     - 3.7 kB ? 0:00:00
+Collecting frozenlist>=1.1.1 (from aiohttp==3.11.11->homeassistant)
+  Downloading frozenlist-1.7.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 18.6 kB ? 0:00:00
+Collecting multidict<7.0,>=4.5 (from aiohttp==3.11.11->homeassistant)
+  Downloading multidict-6.6.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata
+     - 5.3 kB ? 0:00:00
+Collecting tzdata>=2024.1 (from aiozoneinfo==0.2.1->homeassistant)
+  Downloading tzdata-2025.2-py2.py3-none-any.whl.metadata
+     - 1.4 kB ? 0:00:00
+Requirement already satisfied: pytz in /usr/lib/python3/dist-packages (from astral==2.2->homeassistant) (2024.1)
+Collecting cffi>=1.12 (from cryptography==44.0.0->homeassistant)
+  Downloading cffi-1.17.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 1.5 kB ? 0:00:00
+Collecting fnvhash<0.2.0,>=0.1.0 (from fnv-hash-fast==1.0.2->homeassistant)
+  Downloading fnvhash-0.1.0.tar.gz
+     - 1.9 kB ? 0:00:00
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting acme==3.0.1 (from hass-nabucasa==0.87.0->homeassistant)
+  Downloading acme-3.0.1-py3-none-any.whl.metadata
+     - 1.4 kB ? 0:00:00
+Collecting pycognito==2024.5.1 (from hass-nabucasa==0.87.0->homeassistant)
+  Downloading pycognito-2024.5.1-py3-none-any.whl.metadata
+     - 25.0 kB ? 0:00:00
+Collecting snitun==0.39.1 (from hass-nabucasa==0.87.0->homeassistant)
+  Downloading snitun-0.39.1-py3-none-any.whl.metadata
+     - 4.5 kB ? 0:00:00
+Collecting josepy<2,>=1.13.0 (from acme==3.0.1->hass-nabucasa==0.87.0->homeassistant)
+  Downloading josepy-1.15.0-py3-none-any.whl.metadata
+     - 1.7 kB ? 0:00:00
+Collecting pyrfc3339 (from acme==3.0.1->hass-nabucasa==0.87.0->homeassistant)
+  Downloading pyrfc3339-2.1.0-py3-none-any.whl.metadata
+     - 2.8 kB ? 0:00:00
+Requirement already satisfied: setuptools>=41.6.0 in /usr/lib/python3/dist-packages (from acme==3.0.1->hass-nabucasa==0.87.0->homeassistant) (68.1.2)
+Collecting habluetooth>=3.0 (from home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading habluetooth-5.1.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata
+     - 5.4 kB ? 0:00:00
+Collecting anyio (from httpx==0.27.2->homeassistant)
+  Downloading anyio-4.10.0-py3-none-any.whl.metadata
+     - 4.0 kB ? 0:00:00
+Collecting httpcore==1.* (from httpx==0.27.2->homeassistant)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata
+     - 21.5 kB ? 0:00:00
+Collecting sniffio (from httpx==0.27.2->homeassistant)
+  Downloading sniffio-1.3.1-py3-none-any.whl.metadata
+     - 3.9 kB ? 0:00:00
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/lib/python3/dist-packages (from Jinja2==3.1.5->homeassistant) (2.1.5)
+Collecting psutil (from psutil-home-assistant==0.0.1->homeassistant)
+  Downloading psutil-7.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 22.3 kB ? 0:00:00
+Requirement already satisfied: boto3>=1.10.49 in /usr/lib/python3/dist-packages (from pycognito==2024.5.1->hass-nabucasa==0.87.0->homeassistant) (1.34.46)
+Collecting envs>=1.3 (from pycognito==2024.5.1->hass-nabucasa==0.87.0->homeassistant)
+  Downloading envs-1.4-py3-none-any.whl.metadata
+     - 842 bytes ? 0:00:00
+Collecting text-unidecode>=1.3 (from python-slugify==8.0.4->homeassistant)
+  Downloading text_unidecode-1.3-py2.py3-none-any.whl.metadata
+     - 2.4 kB ? 0:00:00
+Collecting async-timeout>=3.0.1 (from snitun==0.39.1->hass-nabucasa==0.87.0->homeassistant)
+  Downloading async_timeout-5.0.1-py3-none-any.whl.metadata
+     - 5.1 kB ? 0:00:00
+Collecting greenlet!=0.4.17 (from SQLAlchemy==2.0.36->homeassistant)
+  Downloading greenlet-3.2.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata
+     - 4.1 kB ? 0:00:00
+Collecting h11>=0.16 (from httpcore==1.*->httpx==0.27.2->homeassistant)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata
+     - 8.3 kB ? 0:00:00
+Collecting pycparser (from cffi>=1.12->cryptography==44.0.0->homeassistant)
+  Downloading pycparser-2.22-py3-none-any.whl.metadata
+     - 943 bytes ? 0:00:00
+Collecting bleak>=1.0.1 (from habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading bleak-1.1.0-py3-none-any.whl.metadata
+     - 5.1 kB ? 0:00:00
+Collecting bleak-retry-connector>=4.2.0 (from habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading bleak_retry_connector-4.4.0-py3-none-any.whl.metadata
+     - 7.4 kB ? 0:00:00
+Collecting bluetooth-adapters>=2 (from habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading bluetooth_adapters-2.0.0-py3-none-any.whl.metadata
+     - 5.3 kB ? 0:00:00
+Collecting bluetooth-auto-recovery>=1.5.1 (from habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading bluetooth_auto_recovery-1.5.2-py3-none-any.whl.metadata
+     - 5.5 kB ? 0:00:00
+Collecting bluetooth-data-tools>=1.28.0 (from habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading bluetooth_data_tools-1.28.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 5.2 kB ? 0:00:00
+Collecting btsocket>=0.3.0 (from habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading btsocket-0.3.0-py2.py3-none-any.whl.metadata
+     - 7.0 kB ? 0:00:00
+Collecting dbus-fast>=2.30.2 (from habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading dbus_fast-2.44.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+     - 10.7 kB ? 0:00:00
+Collecting aiooui>=0.1.1 (from bluetooth-adapters>=2->habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading aiooui-0.1.9-py3-none-any.whl.metadata
+     - 4.1 kB ? 0:00:00
+Collecting uart-devices>=0.1.0 (from bluetooth-adapters>=2->habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading uart_devices-0.1.1-py3-none-any.whl.metadata
+     - 4.9 kB ? 0:00:00
+Collecting usb-devices>=0.4.5 (from bluetooth-adapters>=2->habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading usb_devices-0.4.5-py3-none-any.whl.metadata
+     - 5.3 kB ? 0:00:00
+Collecting PyRIC>=0.1.6.3 (from bluetooth-auto-recovery>=1.5.1->habluetooth>=3.0->home-assistant-bluetooth==1.13.0->homeassistant)
+  Downloading PyRIC-0.1.6.3.tar.gz
+     - 870.4 kB 245.2 MB/s 0:00:00
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Downloading luxtronik-0.3.14-py3-none-any.whl
+   - 22.6 kB 126.1 MB/s 0:00:00
+Downloading getmac-0.8.2-py2.py3-none-any.whl
+   - 24.3 kB 152.8 MB/s 0:00:00
+Downloading flake8-7.3.0-py2.py3-none-any.whl
+   - 57.9 kB 213.8 MB/s 0:00:00
+Downloading mccabe-0.7.0-py2.py3-none-any.whl
+   - 7.3 kB ? 0:00:00
+Downloading pycodestyle-2.14.0-py2.py3-none-any.whl
+   - 31.6 kB 239.5 MB/s 0:00:00
+Downloading pyflakes-3.4.0-py2.py3-none-any.whl
+   - 63.6 kB 250.5 MB/s 0:00:00
+Downloading pytest-8.4.1-py3-none-any.whl
+   - 365.5 kB 222.0 MB/s 0:00:00
+Downloading pluggy-1.6.0-py3-none-any.whl
+   - 20.5 kB 66.1 MB/s 0:00:00
+Downloading homeassistant-2025.1.4-py3-none-any.whl
+   - 40.0 MB 111.9 MB/s 0:00:00
+Downloading requests-2.32.3-py3-none-any.whl
+   - 64.9 kB 275.1 MB/s 0:00:00
+Downloading aiodns-3.2.0-py3-none-any.whl
+   - 5.7 kB ? 0:00:00
+Downloading aiohasupervisor-0.2.2b5-py3-none-any.whl
+   - 36.7 kB 140.8 MB/s 0:00:00
+Downloading aiohttp-3.11.11-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 1.7 MB 233.5 MB/s 0:00:00
+Downloading orjson-3.10.12-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 131.6 kB 199.9 MB/s 0:00:00
+Downloading yarl-1.18.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 336.9 kB 163.0 MB/s 0:00:00
+Downloading aiohttp_cors-0.7.0-py3-none-any.whl
+   - 27.6 kB 195.0 MB/s 0:00:00
+Downloading aiohttp_fast_zlib-0.2.0-py3-none-any.whl
+   - 8.4 kB ? 0:00:00
+Downloading aiozoneinfo-0.2.1-py3-none-any.whl
+   - 8.0 kB ? 0:00:00
+Downloading astral-2.2-py2.py3-none-any.whl
+   - 30.8 kB 217.6 MB/s 0:00:00
+Downloading async_interrupt-1.2.0-py3-none-any.whl
+   - 8.9 kB ? 0:00:00
+Downloading atomicwrites_homeassistant-1.4.1-py2.py3-none-any.whl
+   - 7.1 kB ? 0:00:00
+Downloading attrs-24.2.0-py3-none-any.whl
+   - 63.0 kB 271.2 MB/s 0:00:00
+Downloading awesomeversion-24.6.0-py3-none-any.whl
+   - 14.7 kB ? 0:00:00
+Downloading bcrypt-4.2.0-cp39-abi3-manylinux_2_28_x86_64.whl
+   - 273.8 kB 206.7 MB/s 0:00:00
+Downloading ciso8601-2.3.2-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 40.1 kB 162.1 MB/s 0:00:00
+Downloading cronsim-2.6-py3-none-any.whl
+   - 13.5 kB ? 0:00:00
+Downloading cryptography-44.0.0-cp39-abi3-manylinux_2_28_x86_64.whl
+   - 4.2 MB 156.2 MB/s 0:00:00
+Downloading fnv_hash_fast-1.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux_2_5_x86_64.manylinux1_x86_64.manylinux2014_x86_64.whl
+   - 154.2 kB 205.3 MB/s 0:00:00
+Downloading hass_nabucasa-0.87.0-py3-none-any.whl
+   - 56.2 kB 193.7 MB/s 0:00:00
+Downloading webrtc_models-0.3.0-py3-none-any.whl
+   - 7.5 kB ? 0:00:00
+Downloading acme-3.0.1-py3-none-any.whl
+   - 95.9 kB 221.8 MB/s 0:00:00
+Downloading home_assistant_bluetooth-1.13.0-py3-none-any.whl
+   - 7.9 kB ? 0:00:00
+Downloading httpx-0.27.2-py3-none-any.whl
+   - 76.4 kB 208.4 MB/s 0:00:00
+Downloading ifaddr-0.2.0-py3-none-any.whl
+   - 12.3 kB ? 0:00:00
+Downloading jinja2-3.1.5-py3-none-any.whl
+   - 134.6 kB 221.6 MB/s 0:00:00
+Downloading lru_dict-1.3.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 32.2 kB 137.6 MB/s 0:00:00
+Downloading pillow-11.0.0-cp312-cp312-manylinux_2_28_x86_64.whl
+   - 4.4 MB 204.6 MB/s 0:00:00
+Downloading propcache-0.2.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 243.6 kB 190.2 MB/s 0:00:00
+Downloading psutil_home_assistant-0.0.1-py3-none-any.whl
+   - 6.3 kB ? 0:00:00
+Downloading pycognito-2024.5.1-py3-none-any.whl
+   - 26.6 kB 199.3 MB/s 0:00:00
+Downloading PyJWT-2.10.1-py3-none-any.whl
+   - 23.0 kB 130.8 MB/s 0:00:00
+Downloading pyOpenSSL-24.3.0-py3-none-any.whl
+   - 56.1 kB 229.9 MB/s 0:00:00
+Downloading python_slugify-8.0.4-py2.py3-none-any.whl
+   - 10.1 kB ? 0:00:00
+Downloading PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 767.5 kB 240.4 MB/s 0:00:00
+Downloading securetar-2024.11.0-py3-none-any.whl
+   - 9.4 kB ? 0:00:00
+Downloading snitun-0.39.1-py3-none-any.whl
+   - 39.1 kB 185.7 MB/s 0:00:00
+Downloading SQLAlchemy-2.0.36-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 3.2 MB 217.8 MB/s 0:00:00
+Downloading ulid_transform-1.0.2-cp312-cp312-manylinux_2_36_x86_64.whl
+   - 170.1 kB 193.3 MB/s 0:00:00
+Downloading uv-0.5.8-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   \ 14.8 MB 199.0 MB/s 0:00:00
+Downloading voluptuous-0.15.2-py3-none-any.whl
+   - 31.3 kB 242.8 MB/s 0:00:00
+Downloading voluptuous_openapi-0.0.5-py3-none-any.whl
+   - 8.6 kB ? 0:00:00
+Downloading voluptuous_serialize-2.6.0-py3-none-any.whl
+   - 6.8 kB ? 0:00:00
+Downloading charset_normalizer-3.4.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+   - 151.8 kB 216.9 MB/s 0:00:00
+Downloading httpcore-1.0.9-py3-none-any.whl
+   - 78.8 kB 197.2 MB/s 0:00:00
+Downloading josepy-1.15.0-py3-none-any.whl
+   - 32.8 kB 186.7 MB/s 0:00:00
+Downloading mashumaro-3.16-py3-none-any.whl
+   - 94.0 kB 182.1 MB/s 0:00:00
+Downloading multidict-6.6.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+   - 256.1 kB 225.0 MB/s 0:00:00
+Downloading typing_extensions-4.15.0-py3-none-any.whl
+   - 44.6 kB 242.4 MB/s 0:00:00
+Downloading urllib3-1.26.20-py2.py3-none-any.whl
+   - 144.2 kB 216.1 MB/s 0:00:00
+Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl
+   - 15.3 kB ? 0:00:00
+Downloading aiosignal-1.4.0-py3-none-any.whl
+   - 7.5 kB ? 0:00:00
+Downloading async_timeout-5.0.1-py3-none-any.whl
+   - 6.2 kB ? 0:00:00
+Downloading cffi-1.17.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 479.4 kB 261.0 MB/s 0:00:00
+Downloading envs-1.4-py3-none-any.whl
+   - 11.0 kB ? 0:00:00
+Downloading frozenlist-1.7.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 241.8 kB 212.3 MB/s 0:00:00
+Downloading greenlet-3.2.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+   - 607.6 kB 253.0 MB/s 0:00:00
+Downloading h11-0.16.0-py3-none-any.whl
+   - 37.5 kB 205.5 MB/s 0:00:00
+Downloading habluetooth-5.1.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+   - 783.8 kB 228.2 MB/s 0:00:00
+Downloading bleak-1.1.0-py3-none-any.whl
+   - 136.2 kB 169.7 MB/s 0:00:00
+Downloading bleak_retry_connector-4.4.0-py3-none-any.whl
+   - 17.7 kB 75.8 MB/s 0:00:00
+Downloading bluetooth_adapters-2.0.0-py3-none-any.whl
+   - 20.1 kB 105.8 MB/s 0:00:00
+Downloading aiooui-0.1.9-py3-none-any.whl
+   - 367.4 kB 255.2 MB/s 0:00:00
+Downloading bluetooth_auto_recovery-1.5.2-py3-none-any.whl
+   - 11.5 kB ? 0:00:00
+Downloading bluetooth_data_tools-1.28.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 410.5 kB 173.5 MB/s 0:00:00
+Downloading btsocket-0.3.0-py2.py3-none-any.whl
+   - 14.8 kB ? 0:00:00
+Downloading dbus_fast-2.44.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 895.1 kB 260.9 MB/s 0:00:00
+Downloading iniconfig-2.1.0-py3-none-any.whl
+   - 6.0 kB ? 0:00:00
+Downloading pycares-4.10.0-cp312-cp312-manylinux_2_28_x86_64.whl
+   - 641.0 kB 245.3 MB/s 0:00:00
+Downloading text_unidecode-1.3-py2.py3-none-any.whl
+   - 78.2 kB 273.0 MB/s 0:00:00
+Downloading tzdata-2025.2-py2.py3-none-any.whl
+   - 347.8 kB 243.1 MB/s 0:00:00
+Downloading uart_devices-0.1.1-py3-none-any.whl
+   - 4.8 kB ? 0:00:00
+Downloading usb_devices-0.4.5-py3-none-any.whl
+   - 5.3 kB ? 0:00:00
+Downloading anyio-4.10.0-py3-none-any.whl
+   - 107.2 kB 206.5 MB/s 0:00:00
+Downloading sniffio-1.3.1-py3-none-any.whl
+   - 10.2 kB ? 0:00:00
+Downloading psutil-7.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   - 278.0 kB 221.8 MB/s 0:00:00
+Downloading pycparser-2.22-py3-none-any.whl
+   - 117.6 kB 216.5 MB/s 0:00:00
+Downloading pyrfc3339-2.1.0-py3-none-any.whl
+   - 6.8 kB ? 0:00:00
+Building wheels for collected packages: fnvhash, PyRIC
+  Building wheel for fnvhash (setup.py): started
+  Building wheel for fnvhash (setup.py): finished with status 'done'
+  Created wheel for fnvhash: filename=fnvhash-0.1.0-py3-none-any.whl size=2149 sha256=33070300c517fdf2f099333f06c1c19ea492adffa9beaaf42eadc11240ac6cbf
+  Stored in directory: /home/runner/.cache/pip/wheels/f3/f2/c9/9d2b575fa41b9c1f8b35131e1db072490bc6ff034ceb66eaca
+  Building wheel for PyRIC (setup.py): started
+  Building wheel for PyRIC (setup.py): finished with status 'done'
+  Created wheel for PyRIC: filename=PyRIC-0.1.6.3-py2.py3-none-any.whl size=407893 sha256=a3026b84ab357bfb9ecba93b79225f698c4c61b18e5fb9c8017c0ea34e72b3ca
+  Stored in directory: /home/runner/.cache/pip/wheels/71/5f/b2/33e36e10ea0e6b0dda30e364900611b0d428c72f9be83c3e38
+Successfully built fnvhash PyRIC
+Installing collected packages: text-unidecode, PyRIC, luxtronik, ifaddr, fnvhash, ciso8601, btsocket, voluptuous, uv, usb-devices, urllib3, ulid-transform, uart-devices, tzdata, typing-extensions, sniffio, PyYAML, python-slugify, pyrfc3339, PyJWT, pyflakes, pycparser, pycodestyle, psutil, propcache, pluggy, Pillow, orjson, multidict, mccabe, lru-dict, Jinja2, iniconfig, h11, greenlet, getmac, frozenlist, fnv-hash-fast, envs, dbus-fast, cronsim, charset-normalizer, bcrypt, awesomeversion, attrs, atomicwrites-homeassistant, async-timeout, async-interrupt, astral, aiooui, aiohappyeyeballs, yarl, voluptuous-serialize, voluptuous-openapi, SQLAlchemy, requests, pytest, psutil-home-assistant, mashumaro, httpcore, flake8, cffi, bleak, anyio, aiozoneinfo, aiosignal, webrtc-models, pycares, httpx, cryptography, bluetooth-adapters, aiohttp, snitun, securetar, pyOpenSSL, bluetooth-data-tools, bluetooth-auto-recovery, bleak-retry-connector, aiohttp-fast-zlib, aiohttp-cors, aiohasupervisor, aiodns, pycognito, josepy, habluetooth, home-assistant-bluetooth, acme, hass-nabucasa, homeassistant
+
+Successfully installed Jinja2-3.1.5 Pillow-11.0.0 PyJWT-2.10.1 PyRIC-0.1.6.3 PyYAML-6.0.2 SQLAlchemy-2.0.36 acme-3.0.1 aiodns-3.2.0 aiohappyeyeballs-2.6.1 aiohasupervisor-0.2.2b5 aiohttp-3.11.11 aiohttp-cors-0.7.0 aiohttp-fast-zlib-0.2.0 aiooui-0.1.9 aiosignal-1.4.0 aiozoneinfo-0.2.1 anyio-4.10.0 astral-2.2 async-interrupt-1.2.0 async-timeout-5.0.1 atomicwrites-homeassistant-1.4.1 attrs-24.2.0 awesomeversion-24.6.0 bcrypt-4.2.0 bleak-1.1.0 bleak-retry-connector-4.4.0 bluetooth-adapters-2.0.0 bluetooth-auto-recovery-1.5.2 bluetooth-data-tools-1.28.2 btsocket-0.3.0 cffi-1.17.1 charset-normalizer-3.4.3 ciso8601-2.3.2 cronsim-2.6 cryptography-44.0.0 dbus-fast-2.44.3 envs-1.4 flake8-7.3.0 fnv-hash-fast-1.0.2 fnvhash-0.1.0 frozenlist-1.7.0 getmac-0.8.2 greenlet-3.2.4 h11-0.16.0 habluetooth-5.1.0 hass-nabucasa-0.87.0 home-assistant-bluetooth-1.13.0 homeassistant-2025.1.4 httpcore-1.0.9 httpx-0.27.2 ifaddr-0.2.0 iniconfig-2.1.0 josepy-1.15.0 lru-dict-1.3.0 luxtronik-0.3.14 mashumaro-3.16 mccabe-0.7.0 multidict-6.6.4 orjson-3.10.12 pluggy-1.6.0 propcache-0.2.1 psutil-7.0.0 psutil-home-assistant-0.0.1 pyOpenSSL-24.3.0 pycares-4.10.0 pycodestyle-2.14.0 pycognito-2024.5.1 pycparser-2.22 pyflakes-3.4.0 pyrfc3339-2.1.0 pytest-8.4.1 python-slugify-8.0.4 requests-2.32.3 securetar-2024.11.0 sniffio-1.3.1 snitun-0.39.1 text-unidecode-1.3 typing-extensions-4.15.0 tzdata-2025.2 uart-devices-0.1.1 ulid-transform-1.0.2 urllib3-1.26.20 usb-devices-0.4.5 uv-0.5.8 voluptuous-0.15.2 voluptuous-openapi-0.0.5 voluptuous-serialize-2.6.0 webrtc-models-0.3.0 yarl-1.18.3
