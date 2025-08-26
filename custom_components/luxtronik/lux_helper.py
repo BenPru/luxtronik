@@ -241,7 +241,12 @@ class Luxtronik:
                     else:
                         raise err
                 except socket.timeout:
-                    LOGGER.error("Connection to %s:%s timed out after %ss", self._host, self._port, self._socket_timeout)
+                    LOGGER.error(
+                        "Connection to %s:%s timed out after %ss",
+                        self._host,
+                        self._port,
+                        self._socket_timeout,
+                    )
                     self._disconnect()
                     return
                 self._socket.settimeout(self._socket_timeout)
