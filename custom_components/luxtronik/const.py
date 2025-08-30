@@ -53,7 +53,7 @@ CONF_LOCK_TIMEOUT: Final = "lock_timeout"
 CONF_SAFE: Final = "safe"
 CONF_MAX_DATA_LENGTH: Final = "max_data_length"
 
-DEFAULT_HOST: Final = "wp-novelan"
+DEFAULT_HOST: Final = ""
 DEFAULT_PORT: Final = 8889
 DEFAULT_TIMEOUT: Final = 60.0
 DEFAULT_MAX_DATA_LENGTH: Final = 10000
