@@ -337,12 +337,6 @@
                     "792": "LIN-connection lost",
                     "793": "Major VSS fault",
                     "-1": "Unknown error"
-                },
-                "cause": {
-                    "name": "Cause"
-                },
-                "remedy": {
-                    "name": "Remedy"
                 }
             },
             "switchoff_reason": {
@@ -373,7 +367,7 @@
                     "errorcode slot": "Heatpump error code in slot 0",
                     "pump forerun": "Pump forerun",
                     "defrost": "Defrost",
-                    "writing on LIN connection": "Writing on LIN connection",
+                    "witing on LIN connection": "Waiting on LIN connection",
                     "compressor heating up": "The Compressor is heating up",
                     "compressor heater": "Compressor heater"
                 }
@@ -402,7 +396,7 @@
                     "flow monitoring": "flow monitoring",
                     "grid switch on delay": "grid switch on delay",
                     "info bake out program": "info bake out program",
-                    "heating external energy source": "heating external energy source",
+                    "heating external engery source": "heating external energy source",
                     "domestic water external energy source": "Domestic water external energy source",
                     "second heat generator 1 active": "second heat generator 1 active"
                 }
@@ -466,6 +460,9 @@
             },
             "additional_heat_generator_operation_hours": {
                 "name": "Additional heat generator operation hours"
+            },
+            "additional_heat_generator2_operation_hours": {
+                "name": "Additional heat generator2 operation hours"
             },
             "analog_out1": {
                 "name": "Analog out 1"
@@ -534,16 +531,16 @@
                 "name": "Flow out target temperature"
             },
             "operation_hours_heating": {
-                "name":"Operation hours"
+                "name": "Operation hours"
             },
             "heat_amount_heating": {
-                "name":"Heating heat amount"
+                "name": "Heating heat amount"
             },
             "heat_amount_flow_rate": {
-                "name":"Heating heat amount flow rate"
+                "name": "Heating heat amount flow rate"
             },
             "heat_source_flow_rate": {
-                "name":"Heating heat source flow rate"
+                "name": "Heating heat source flow rate"
             },
             "heat_energy_input": {
                 "name": "Energy input heating"

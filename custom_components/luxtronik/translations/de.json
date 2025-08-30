@@ -615,7 +615,7 @@
                     "errorcode slot": "W\u00e4rmepumpe Fehlercode in Schacht 0",
                     "pump forerun": "Pumpenvorlauf",
                     "defrost": "Taut ab",
-                    "witing on LIN connection": "Schreibt auf LIN Verbindung",
+                    "witing on LIN connection": "Wartet auf LIN Verbindung",
                     "compressor heating up": "Der Verdichter heizt auf",
                     "compressor heater": "Verdichter-Heizung"
                 }
@@ -708,6 +708,9 @@
             },
             "additional_heat_generator_operation_hours": {
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger Betriebsstunden"
+            },
+            "additional_heat_generator2_operation_hours": {
+                "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger2 Betriebsstunden"
             },
             "analog_out1": {
                 "name": "Analog Ausgang 1"

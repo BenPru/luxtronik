@@ -201,6 +201,27 @@
             "heating_night_lowering_to_temperature": {
                 "name": "Obni\u017Cenie temperatury ogrzewania w nocy"
             },
+            "efficiency_pump_nominal": {
+                "name": "Nominalna wydajno\u015b\u0107 pompy"
+            },
+            "efficiency_pump_minimal": {
+                "name": "Minimalna wydajno\u015b\u0107 pompy"
+            },
+            "cooling_start_delay_hours": {
+                "name": "Opó\u017anienie startu"
+            },
+            "cooling_stop_delay_hours": {
+                "name": "Opó\u017anienie zatrzymania"
+            },
+            "cooling_target_temperature_mk1": {
+                "name": "Docelowa temperatura ch\u0142odzenia"
+            },
+            "cooling_target_temperature_mk2": {
+                "name": "Docelowa temperatura ch\u0142odzenia"
+            },
+            "cooling_target_temperature_mk3": {
+                "name": "Docelowa temperatura ch\u0142odzenia"
+            },
             "pump_vent_timer_h": {
                 "name": "Czas pracy odpowietrzania"
             }
@@ -304,6 +325,12 @@
                     "792": "Utracono po\u0142\u0105czenie LIN",
                     "793": "Powa\u017Cna usterka VSS",
                     "-1": "Nieznany b\u0142\u0105d"
+                },
+                "cause": {
+                    "name": "Przyczyna"
+                },
+                "remedy": {
+                    "name": "Rozwi\u0105zanie"
                 }
             },
             "switchoff_reason": {
@@ -333,7 +360,7 @@
                     "errorcode slot": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017Adzie 0",
                     "pump forerun": "Rozbieg pompy",
                     "defrost": "Rozmra\u017Canie",
-                    "writing on LIN connection": "Zapis na po\u0142\u0105czeniu LIN",
+                    "witing on LIN connection": "Oczekiwanie na po\u0142\u0105czenie LIN",
                     "compressor heating up": "Spr\u0119\u017Carka nagrzewa si\u0119",
                     "compressor heater": "Grza\u0142ka spr\u0119\u017Carki"
                 }
@@ -425,7 +452,10 @@
                 "name": "Niskie ci\u015Bnienie"
             },
             "additional_heat_generator_operation_hours": {
-                "name": "Dodatkowe godziny pracy \u017Ar\u00F3d\u0142a ciep\u0142a"
+                "name": "Godziny pracy dodatkowego \u017A\u00F3d\u0142a ciep\u0142a"
+            },
+            "additional_heat_generator2_operation_hours": {
+                "name": "Godziny pracy dodatkowego \u017A\u00F3d\u0142a ciep\u0142a"
             },
             "analog_out1": {
                 "name": "Wyj\u015Bcie analogowe 1"
@@ -488,16 +518,16 @@
                 "name": "Docelowa temperatura na wyj\u015Bciu"
             },
             "operation_hours_heating": {
-                "name":"Godziny pracy ogrzewania"
+                "name": "Godziny pracy ogrzewania"
             },
             "heat_amount_heating": {
-                "name":"Ilo\u015B\u0107 ciep\u0142a grzewczego"
+                "name": "Ilo\u015B\u0107 ciep\u0142a grzewczego"
             },
             "heat_amount_flow_rate": {
-                "name":"Nat\u0119\u017Cenie przep\u0142ywu ilo\u015Bci ciep\u0142a grzewczego"
+                "name": "Nat\u0119\u017Cenie przep\u0142ywu ilo\u015Bci ciep\u0142a grzewczego"
             },
             "heat_source_flow_rate": {
-                "name":"Nat\u0119\u017Cenie przep\u0142ywu \u017Ar\u00F3d\u0142a ciep\u0142a grzewczego"
+                "name": "Nat\u0119\u017Cenie przep\u0142ywu \u017Ar\u00F3d\u0142a ciep\u0142a grzewczego"
             },
             "heat_energy_input": {
                 "name": "Ogrzewanie wej\u015Bciowe energii"
@@ -556,15 +586,15 @@
             "user": {
                 "description": "Skonfiguruj sterownik pompy ciep\u0142a Luxtronik, aby umo\u017Cliwi\u0107 monitorowanie i kontrol\u0119.",
                 "data": {
-                  "host": "Host",
-                  "port": "Port sieciowy"
+                    "host": "Host",
+                    "port": "Port sieciowy"
                 },
                 "data_description": {
                     "host": "Nazwa hosta lub adres IP",
                     "port": "Zwykle 8889 lub 8888"
                 }
-             },
-             "options": {
+            },
+            "options": {
                 "description": "Ustawienia pompy ciep\u0142a Luxtronik {name}.\nTe ustawienia mo\u017Cna r\u00F3wnie\u017C zmieni\u0107 p\u00F3\u017Aniej w zak\u0142adce Integracje.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Identyfikator czujnika temperatury wewn\u0119trznej",
@@ -576,7 +606,7 @@
                     "control_mode_home_assistant": "Kiedy termostat Home Assistant znajduje si\u0119 w stanie bezczynno\u015Bci, do firmy Luxtronik zg\u0142aszany jest stan wy\u0142\u0105czenia i firma Luxtronik nie mo\u017Ce uruchomi\u0107 tego elementu.",
                     "ha_sensor_prefix": "Wa\u017Cne w przypadku stosowania kilku pomp ciep\u0142a.\n W przypadku jednej mo\u017Cna po prostu zastosowa\u0107 „luxtronik”."
                 }
-             }
+            }
         }
     },
     "options": {

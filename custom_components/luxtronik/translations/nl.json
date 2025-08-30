@@ -5,10 +5,10 @@
                 "name": "Tijdvrijgave blokkeren"
             },
             "compressor": {
-                "naam": "Compressor"
+                "name": "Compressor"
             },
             "compressor2": {
-                "naam": "Compressor 2"
+                "name": "Compressor 2"
             },
             "pump_flow": {
                 "name": "Brijncirculatiepomp"
@@ -47,7 +47,7 @@
                 "name": "Zonnepomp"
             },
             "approval_cooling": {
-                "naam": "Delen"
+                "name": "Koelen toegestaan"
             },
             "defrost_end_flow_okay": {
                 "name": "Ontdooien is voltooid \u002f stroom OK"
@@ -337,7 +337,7 @@
                         "name": "Tijd"
                     },
                     "cause": {
-                        "name": "Veroorzaakt",
+                        "name": "Oorzaak",
                         "state": {
                             "701": "Lagedrukpressostaat in het koelcircuit heeft \u0028LW\u0029 meerdere keren of \u0028SW\u0029 langer dan 20 seconden geactiveerd.",
                             "702": "Alleen mogelijk met L\u002fW-apparaten\u003a Lage druk in het koelcircuit heeft gereageerd. Automatische HP-herstart na enige tijd.",
@@ -605,16 +605,16 @@
             "status_line_1": {
                 "name": "Status 1",
                 "state": {
-                    "warmtepomp draait": "De warmtepomp draait",
-                    "warmtepomp inactief": "De warmtepomp is inactief",
-                    "warmtepomp komt eraan": "De warmtepomp start",
-                    "warmtepompuitschakeling": "De warmtepomp schakelt uit",
+                    "heatpump running": "De warmtepomp draait",
+                    "heatpump idle": "De warmtepomp is inactief",
+                    "heatpump coming": "De warmtepomp start",
+                    "heatpump shutdown": "De warmtepomp schakelt uit",
                     "errorcode slot": "Foutcode warmtepomp in slot 0",
-                    "pompvoorloop": "Pompvoorloop",
-                    "ontdooien": "Ontdooien",
-                    "witing on LIN-verbinding": "Schrijven op LIN-verbinding",
-                    "compressor warmt op": "De compressor is aan het opwarmen",
-                    "compressorverwarmer": "Compressorverwarmer"
+                    "pump forerun": "Pompvoorloop",
+                    "defrost": "Ontdooien",
+                    "witing on LIN connection": "Wacht op LIN-verbinding",
+                    "compressor heating up": "De compressor is aan het opwarmen",
+                    "compressor heater": "Compressorverwarmer"
                 }
             },
             "status_line_2": {
@@ -704,7 +704,10 @@
                 "name": "Lage druk"
             },
             "additional_heat_generator_operation_hours": {
-                "name": "Extra bedrijfsuren warmteopwekker"
+                "name": "Bedrijfsuren extra warmteopwekker"
+            },
+            "additional_heat_generator2_operation_hours": {
+                "name": "Bedrijfsuren extra warmteopwekker2"
             },
             "analog_out1": {
                 "name": "Analoge uitgang 1"
@@ -825,7 +828,7 @@
         },
         "water_heater": {
             "domestic_water": {
-                "name": "Drinkwater"
+                "name": "Warm water"
             }
         }
     },
@@ -848,7 +851,7 @@
                 "description": "Verbind een Luxtronik warmtepomp met Home Assistant.",
                 "data": {
                     "host": "Host",
-                    "poort": "Netwerkpoort",
+                    "port": "Netwerkpoort",
                     "timeout": "Time-out netwerksocket (sec)",
                     "max_data_length": "Maximale lengte van datapakketten"
                 },
