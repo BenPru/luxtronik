@@ -42,17 +42,16 @@ def discover() -> list[tuple[str, int | None]]:
 
     # pylint: disable=too-many-nested-blocks
     for port in LUXTRONIK_DISCOVERY_PORTS:
-        LOGGER.debug("Send discovery packets to port %s", port)
+        LOGGER.info("Send discovery packets to port %s", port)
         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         server.bind(("", port))
         server.settimeout(LUXTRONIK_DISCOVERY_TIMEOUT)
 
         # send AIT magic broadcast packet
-        server.sendto(LUXTRONIK_DISCOVERY_MAGIC_PACKET.encode(), ("<broadcast>", port))
-        LOGGER.debug(
-            "Sending broadcast request %s", LUXTRONIK_DISCOVERY_MAGIC_PACKET.encode()
-        )
+        magic_bytes = LUXTRONIK_DISCOVERY_MAGIC_PACKET.encode()
+        server.sendto(magic_bytes, ("255.255.255.255", port))
+        LOGGER.debug("Sending broadcast request %s", magic_bytes)
 
         while True:
             try:
@@ -65,32 +64,35 @@ def discover() -> list[tuple[str, int | None]]:
                 # if the response starts with the magic nonsense
                 if res.startswith(LUXTRONIK_DISCOVERY_RESPONSE_PREFIX):
                     res_list = res.split(";")
-                    LOGGER.debug(
-                        "Received response from %s %s", ip_address, str(res_list)
+                    LOGGER.info(
+                        "Received response from %s: %s", ip_address, str(res_list)
                     )
                     try:
                         res_port: int | None = int(res_list[2])
-                        if res_port is None or res_port < 1 or res_port > 65535:
-                            LOGGER.debug("Response contained an invalid port, ignoring")
-                            res_port = None
-                    except ValueError:
+                    except (ValueError, IndexError):
                         res_port = None
-                    if res_port is None:
-                        LOGGER.debug(
-                            "Response did not contain a valid port number,"
-                            "an old Luxtronic software version might be the reason"
+                        
+                    if res_port is None or res_port < 1 or res_port > 65535:
+                        LOGGER.info(
+                            f"Response contains [port={res_port}] which is not a valid port number,"
+                             "an old Luxtronic software version might be the reason. "
+                             "Skipping this port."
                         )
-                    results.append((ip_address, res_port))
-                    continue
-                LOGGER.debug(
-                    "Received response from %s, but with wrong content, skipping",
-                    ip_address,
-                )
-                continue
-            # if the timeout triggers, go on an use the other broadcast port
+                    elif (ip_address, res_port) not in results:
+                        LOGGER.info(
+                            f"Discovered heatpump at {ip_address}:{res_port}"
+                        )
+                        results.append((ip_address, res_port))
+                    
+                else:    
+                    LOGGER.debug(
+                        f"Received response from {ip_address}, but with wrong content, skipping"
+                    )
+                    
+            # if the timeout triggers, go on and use the other broadcast port
             except socket.timeout:
                 break
-
+        server.close()
     return results
 
 
