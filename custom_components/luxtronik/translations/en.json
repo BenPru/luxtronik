@@ -23,7 +23,7 @@
                 "name": "Additional heat generator"
             },
             "additional_heat_generator2": {
-                "name": "Additional heat generator 2"h
+                "name": "Additional heat generator 2",
             },
             "disturbance_output": {
                 "name": "Systemhealth"
