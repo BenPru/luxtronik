@@ -85,7 +85,7 @@ def correct_key_value(
         LC.C0100_ERROR_REASON,
         # LP.P0716_0720_SWITCHOFF_REASON,
         ]
-        and ((value == -1) OR (value == "-1"))
+        and ((value == -1) or (value == "-1"))
     ):
         value = "Minus_1"
         
