@@ -87,7 +87,7 @@ def correct_key_value(
         ]
         and ((value == -1) or (value == "-1"))
     ):
-        value = "Minus_1"
+        value = "minus_1"
         
     if (
         sensor_id == LC.C0080_STATUS

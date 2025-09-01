@@ -324,7 +324,7 @@
                     "791": "Utracono komunikacj\u0119 ModBus",
                     "792": "Utracono po\u0142\u0105czenie LIN",
                     "793": "Powa\u017cna usterka VSS",
-                    "Minus_1": "Nieznany b\u0142\u0105d"
+                    "minus_1": "Nieznany b\u0142\u0105d"
                 },
                 "state_attributes": {
                     "timestamp": {

@@ -336,7 +336,7 @@
                     "791": "Lost ModBus communication",
                     "792": "LIN-connection lost",
                     "793": "Major VSS fault",
-                    "Minus_1": "Unknown error"
+                    "minus_1": "Unknown error"
                 }
             },
             "switchoff_reason": {

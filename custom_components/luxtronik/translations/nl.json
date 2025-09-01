@@ -330,7 +330,7 @@
                     "791": "ModBus-verbinding verbroken",
                     "792": "LIN-verbinding onderbroken",
                     "793": "Fatale omvormerfout",
-                    "Minus_1": "Onbekende fout"
+                    "minus_1": "Onbekende fout"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -412,7 +412,7 @@
                             "791": "SEC-bord is al enige tijd niet toegankelijk. 791 wordt geactiveerd wanneer een HZIO-bord is gevonden (zonder aparte codering) maar er kan geen SEC-bord op worden herkend.",
                             "792": "Er kon geen moederbord of andere configuratie worden gevonden.",
                             "793": "Temperatuurfout in omvormer",
-                            "Minus_1": "Onbekende fout"
+                            "minus_1": "Onbekende fout"
                         }
                     },
                     "remedy": {
