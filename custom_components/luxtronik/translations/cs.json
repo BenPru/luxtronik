@@ -232,7 +232,7 @@
                 "name": "Minim\u00e1ln\u00ed vstupn\u00ed teplota zdroje tepla"
             },
             "pump_vent_timer_h": {
-                "name": "Doba provozu odvzdu\u0161\u0148ov\u00E1n\u00ED"
+                "name": "Doba provozu odvzdu\u0161\u0148ov\u00e1n\u00ed"
             }
         },
         "sensor": {
@@ -240,13 +240,13 @@
                 "name": "Stav",
                 "state": {
                     "heating": "Vyt\u00e1p\u011bn\u00ed",
-                    "hot water": "Oh\u0159ev TUV",
-                    "swimming pool/solar": "Baz\u00e9n / Sol\u00e1rn\u00ed",
+                    "hot_water": "Oh\u0159ev TUV",
+                    "swimming_pool_solar": "Baz\u00e9n / Sol\u00e1rn\u00ed",
                     "evu": "Blokace HDO",
                     "defrost": "Odmrazov\u00e1n\u00ed",
-                    "heating external source": "Vyt\u00e1p\u011bn\u00ed z extern\u00edho zdroje",
+                    "heating_external_source": "Vyt\u00e1p\u011bn\u00ed z extern\u00edho zdroje",
                     "cooling": "Chlazen\u00ed",
-                    "no request": "Klidov\u00fd re\u017eim"
+                    "no_request": "Klidov\u00fd re\u017eim"
                 },
                 "state_attributes": {
                     "evu_text": {
@@ -604,16 +604,16 @@
             "status_line_1": {
                 "name": "Stav 1",
                 "state": {
-                    "heatpump running": "Tepeln\u00e9 \u010derpadlo b\u011b\u017e\u00ed",
-                    "heatpump idle": "Tepeln\u00e9 \u010derpadlo je v klidov\u00e9m re\u017eimu",
-                    "heatpump coming": "Tepeln\u00e9 \u010derpadlo se spou\u0161t\u00ed",
-                    "heatpump shutdown": "Tepeln\u00e9 \u010derpadlo vyp\u00edn\u00e1",
-                    "errorcode slot": "Chybov\u00fd k\u00f3d tepeln\u00e9ho \u010derpadla ve slotu 0",
-                    "pump forerun": "P\u0159edeh\u0159ev \u010derpadla",
+                    "heatpump_running": "Tepeln\u00e9 \u010derpadlo b\u011b\u017e\u00ed",
+                    "heatpump_idle": "Tepeln\u00e9 \u010derpadlo je v klidov\u00e9m re\u017eimu",
+                    "heatpump_coming": "Tepeln\u00e9 \u010derpadlo se spou\u0161t\u00ed",
+                    "heatpump_shutdown": "Tepeln\u00e9 \u010derpadlo vyp\u00edn\u00e1",
+                    "errorcode_slot_0": "Chybov\u00fd k\u00f3d tepeln\u00e9ho \u010derpadla ve slotu 0",
+                    "pump_forerun": "P\u0159edeh\u0159ev \u010derpadla",
                     "defrost": "Odmrazov\u00e1n\u00ed",
-                    "witing on LIN connection": "\u010cek\u00e1n\u00ed na p\u0159ipojen\u00ed LIN",
-                    "compressor heating up": "Kompresor se zah\u0159\u00edv\u00e1",
-                    "compressor heater": "Oh\u0159ev kompresoru"
+                    "waiting_on_lin_connection": "\u010cek\u00e1n\u00ed na p\u0159ipojen\u00ed LIN",
+                    "compressor_heating_up": "Kompresor se zah\u0159\u00edv\u00e1",
+                    "compressor_heater": "Oh\u0159ev kompresoru"
                 }
             },
             "status_line_2": {
@@ -742,22 +742,22 @@
                 "name": "Teplota vstupu"
             },
             "flow_in_circuit1_temperature": {
-                "name": "Okruh vstupní teploty 1"
+                "name": "Okruh vstupn\u00ed teploty 1"
             },
             "flow_in_circuit2_temperature": {
-                "name": "Okruh vstupní teploty 2"
+                "name": "Okruh vstupn\u00ed teploty 2"
             },
             "flow_in_circuit3_temperature": {
-                "name": "Okruh vstupní teploty 3"
+                "name": "Okruh vstupn\u00ed teploty 3"
             },
             "flow_in_circuit1_target_temperature": {
-                "name": "Obvod cílové teploty vstupu 1"
+                "name": "Obvod c\u00edlov\u00e9 teploty vstupu 1"
             },
             "flow_in_circuit2_target_temperature": {
-                "name": "Obvod cílové teploty vstupu 2"
+                "name": "Obvod c\u00edlov\u00e9 teploty vstupu 2"
             },
             "flow_in_circuit3_target_temperature": {
-                "name": "Obvod cílové teploty vstupu 3"
+                "name": "Obvod c\u00edlov\u00e9 teploty vstupu 3"
             },
             "flow_out_temperature": {
                 "name": "Teplota zp\u00e1te\u010dky"
