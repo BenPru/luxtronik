@@ -330,7 +330,7 @@
                     "791": "ModBus-verbinding verbroken",
                     "792": "LIN-verbinding onderbroken",
                     "793": "Fatale omvormerfout",
-                    "-1": "Onbekende fout"
+                    "Minus_1": "Onbekende fout"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -412,11 +412,11 @@
                             "791": "SEC-bord is al enige tijd niet toegankelijk. 791 wordt geactiveerd wanneer een HZIO-bord is gevonden (zonder aparte codering) maar er kan geen SEC-bord op worden herkend.",
                             "792": "Er kon geen moederbord of andere configuratie worden gevonden.",
                             "793": "Temperatuurfout in omvormer",
-                            "-1": "Onbekende fout"
+                            "Minus_1": "Onbekende fout"
                         }
                     },
                     "remedy": {
-                        "name": "Remedie",
+                        "name": "Oplossing",
                         "state": {
                             "701": "Controleer HD op lekkage, schakelpunt drukschakelaar, ontdooiing en TA-min.",
                             "702": "Controleer HD op lekkage, schakelpunt drukschakelaar, ontdooiing en TA-min.",
@@ -509,8 +509,7 @@
                     "8": "Onderste toepassingslimiet",
                     "9": "Geen vereiste",
                     "11": "Doorstroomwarmtebron",
-                    "12": "Lagedruk-pauze",
-                    "-1": "Onbekende afsluiting"
+                    "12": "Lagedruk-pauze"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -551,8 +550,7 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
-                            "12": "Lagedruk-pauze",
-                            "-1": "Onbekende afsluiting"
+                            "12": "Lagedruk-pauze"
                         }
                     },
                     "timestamp_2": {
@@ -593,8 +591,7 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
-                            "12": "Lagedruk-pauze",
-                            "-1": "Onbekende afsluiting"
+                            "12": "Lagedruk-pauze"
                         }
                     },
                     "timestamp_4": {

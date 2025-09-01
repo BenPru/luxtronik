@@ -333,7 +333,7 @@
                     "791": "ModBus Verbindung verloren",
                     "792": "LIN-Verbindung unterbrochen",
                     "793": "Schwerw. Inverter Fehler",
-                    "-1": "Unbekannter Fehler"
+                    "Minus_1": "Unbekannter Fehler"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -415,7 +415,7 @@
                             "791": "SEC-Board seit einiger Zeit nicht mehr erreichbar. 791 wird ausgel\u00f6st, wenn zwar eine HZIO-Platine gefunden worden ist (ohne separate Kodierung), allerdings kein SEC-Board daran erkannt werden kann.",
                             "792": "Es konnte keine Grundplatine und auch sonst keine Konfiguration gefunden werden.",
                             "793": "Temperaturfehler im Inverter",
-                            "-1": "Unbekannter Fehler"
+                            "Minus_1": "Unbekannter Fehler"
                         }
                     },
                     "remedy": {
@@ -512,8 +512,7 @@
                     "8": "Untere Einsatzgrenze",
                     "9": "Keine Anforderung",
                     "11": "Durchfluss-W\u00e4rmequelle",
-                    "12": "Niederdruck-Pause",
-                    "-1": "Unbekannte Abschaltung"
+                    "12": "Niederdruck-Pause"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -533,8 +532,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause",
-                            "-1": "Unbekannte Abschaltung"
+                            "12": "Niederdruck-Pause"
                         }
                     },
                     "timestamp_1": {
@@ -554,8 +552,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause",
-                            "-1": "Unbekannte Abschaltung"
+                            "12": "Niederdruck-Pause"
                         }
                     },
                     "timestamp_2": {
@@ -575,8 +572,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause",
-                            "-1": "Unbekannte Abschaltung"
+                            "12": "Niederdruck-Pause"
                         }
                     },
                     "timestamp_3": {
@@ -596,8 +592,7 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause",
-                            "-1": "Unbekannte Abschaltung"
+                            "12": "Niederdruck-Pause"
                         }
                     },
                     "timestamp_4": {

@@ -324,14 +324,19 @@
                     "791": "Utracono komunikacj\u0119 ModBus",
                     "792": "Utracono po\u0142\u0105czenie LIN",
                     "793": "Powa\u017cna usterka VSS",
-                    "-1": "Nieznany b\u0142\u0105d"
+                    "Minus_1": "Nieznany b\u0142\u0105d"
                 },
-                "cause": {
-                    "name": "Przyczyna"
-                },
-                "remedy": {
-                    "name": "Rozwi\u0105zanie"
-                }
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Czas"
+                    },
+					"cause": {
+						"name": "Przyczyna"
+					},
+					"remedy": {
+						"name": "Rozwi\u0105zanie"
+					}
+				}
             },
             "switchoff_reason": {
                 "name": "Pow\u00f3d wy\u0142\u0105czenia",
@@ -346,8 +351,7 @@
                     "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
                     "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                     "9": "nieaktywny",
-                    "11": "Przep\u0142yw",
-                    "-1": "Nieznane wy\u0142\u0105czenie"
+                    "11": "Przep\u0142yw"
                 }
             },
             "status_line_1": {
