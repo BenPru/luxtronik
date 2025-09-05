@@ -49,6 +49,9 @@ def get_sensor_data(
         return None
     if group == CONF_PARAMETERS:
         sensor = sensors.parameters.get(sensor_id)
+    elif sensor_id == 'ID_WEB_SoftStand':
+        sensor = "".join([sensors.calculations.get(i).value for i in range(81, 91)])
+        return sensor
     elif group == CONF_CALCULATIONS:
         sensor = sensors.calculations.get(sensor_id)
     elif group == CONF_VISIBILITIES:

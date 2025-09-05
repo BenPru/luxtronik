@@ -342,7 +342,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def firmware_version(self) -> str:
         """Return the heatpump firmware version."""
-        return str(self.get_value(LC.C0081_FIRMWARE_VERSION))
+        return str(self.get_sensor_by_id(LC.C0081_FIRMWARE_VERSION))
+        #return str("".join([self.calculations.get(i).value for i in range(81, 91)]) )
 
     @property
     def firmware_version_minor(self) -> int:
@@ -355,7 +356,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def firmware_package_version(self) -> Version:
         """Return the heatpump firmware version."""
-        return Version(str(self.get_value(LC.C0081_FIRMWARE_VERSION)))
+        return Version(self.firmware_version)
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
@@ -444,7 +445,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         try:
             group = group_sensor_id.split(".")[0]
             sensor_id = group_sensor_id.split(".")[1]
-            return self.get_sensor(group, sensor_id)
+            if sensor_id == 'ID_WEB_SoftStand':
+                return "".join([self.get_sensor(group,i).value for i in range(81, 91)])
+            else:
+                return self.get_sensor(group, sensor_id)
         except IndexError as error:
             LOGGER.critical(group_sensor_id, error, exc_info=True)
 
