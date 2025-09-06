@@ -149,7 +149,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         max_firmware_version=Version("3.90.0"),
-    ),    
+    ),
     LuxtronikClimateDescription(
         key=SensorKey.COOLING,
         hvac_modes=[HVACMode.COOL, HVACMode.OFF],
@@ -297,7 +297,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
         elif key != LuxCalculation.UNSET:
             self._attr_current_temperature = get_sensor_data(data, key)
-            
+
         key_tar = self.entity_description.luxtronik_key_target_temperature
         if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
             self._attr_target_temperature = get_sensor_data(data, key_tar) / 10
@@ -306,7 +306,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
 
         if key_tar == LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
             correction_factor = get_sensor_data(
-                data, self.entity_description.luxtronik_key_correction_factor.value, False
+                data,
+                self.entity_description.luxtronik_key_correction_factor.value,
+                False,
             )
             # LOGGER.info(f"self._attr_target_temperature={self._attr_target_temperature}")
             # LOGGER.info(f"self._attr_current_temperature={self._attr_current_temperature}")
@@ -319,7 +321,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
                 and self._attr_current_temperature > 0.0
                 and correction_factor is not None  # noqa: W503
             ):
-                delta_temp = self._attr_target_temperature - self._attr_current_temperature
+                delta_temp = (
+                    self._attr_target_temperature - self._attr_current_temperature
+                )
                 correction = round(
                     delta_temp * (correction_factor / 100.0), 1
                 )  # correction_factor is in %, so need to divide by 100
