@@ -100,7 +100,10 @@ def correct_key_value(
     if (
         sensor_id == LC.C0080_STATUS
         and value == LuxOperationMode.no_request
-        and bool(get_sensor_data(sensors, LC.C0119_STATUS_LINE_3) == LuxStatus3Option.cooling.value)
+        and bool(
+            get_sensor_data(sensors, LC.C0119_STATUS_LINE_3)
+            == LuxStatus3Option.cooling.value
+        )
     ):
         return LuxOperationMode.cooling
     # endregion Workaround Detect passive cooling operation mode
@@ -108,7 +111,10 @@ def correct_key_value(
     if (
         sensor_id == LC.C0080_STATUS
         and value == LuxOperationMode.no_request
-        and bool(get_sensor_data(sensors, LC.C0119_STATUS_LINE_3) in LuxStatus3Option.heating.value)
+        and bool(
+            get_sensor_data(sensors, LC.C0119_STATUS_LINE_3)
+            in LuxStatus3Option.heating.value
+        )
     ):
         T_in = get_sensor_data(sensors, LC.C0010_FLOW_IN_TEMPERATURE)
         T_out = get_sensor_data(sensors, LC.C0011_FLOW_OUT_TEMPERATURE)
@@ -116,14 +122,9 @@ def correct_key_value(
         T_heat_out = get_sensor_data(sensors, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE)
         Flow_WQ = get_sensor_data(sensors, LC.C0173_HEAT_SOURCE_FLOW_RATE)
         Pump = get_sensor_data(sensors, LC.C0043_PUMP_FLOW)
-        if (
-            (T_out > T_in)
-            and (T_heat_out > T_heat_in)
-            and (Flow_WQ > 0)
-            and Pump
-        ):    
+        if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
             return LuxOperationMode.cooling
-    # endregion Workaround Detect active cooling operation mode    
+    # endregion Workaround Detect active cooling operation mode
 
     # no changes needed, return sensor value
     return value
