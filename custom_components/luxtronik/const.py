@@ -36,7 +36,7 @@ UPDATE_INTERVAL_SLOW: Final = timedelta(minutes=3)
 UPDATE_INTERVAL_VERY_SLOW: Final = timedelta(minutes=5)
 
 
-SECOND_TO_HOUR_FACTOR: Final = (1/3600)
+SECOND_TO_HOUR_FACTOR: Final = 1 / 3600
 # endregion Constants Main
 
 # region Conf

@@ -73,23 +73,18 @@ def correct_key_value(
 ) -> Any:
     """Handle special value corrections."""
     # fix 'states may not contain spaces ea for valid translations'
-    if (
-        sensor_id in [
+    if sensor_id in [
         LC.C0080_STATUS,
         LC.C0117_STATUS_LINE_1,
         LC.C0119_STATUS_LINE_3,
-        ]
-    ):
-        value = value.replace(' ','_').replace('/','_').lower() 
-    if (
-        sensor_id in [
+    ]:
+        value = value.replace(" ", "_").replace("/", "_").lower()
+    if sensor_id in [
         LC.C0100_ERROR_REASON,
         # LP.P0716_0720_SWITCHOFF_REASON,
-        ]
-        and ((value == -1) or (value == "-1"))
-    ):
+    ] and ((value == -1) or (value == "-1")):
         value = "minus_1"
-        
+
     if (
         sensor_id == LC.C0080_STATUS
         and value == LuxOperationMode.heating
