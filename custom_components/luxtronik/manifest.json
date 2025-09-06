@@ -45,5 +45,5 @@
     "getmac==0.8.2",
     "packaging>=24.2"
   ],
-  "version": "2025.7.20"
+  "version": "2025.9.6"
 }
