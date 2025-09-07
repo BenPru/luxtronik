@@ -72,6 +72,9 @@ def correct_key_value(
     sensor_id: str | LP | LC | LV,
 ) -> Any:
     """Handle special value corrections."""
+    # prevent dealing with None value below
+    if value is None:
+        return value
     # fix 'states may not contain spaces ea for valid translations'
     if sensor_id in [
         LC.C0080_STATUS,
