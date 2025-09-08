@@ -34,6 +34,13 @@ LUXTRONIK_DISCOVERY_MAGIC_PACKET = "2000;111;1;\x00"
 # Content of response that is contained in responses to discovery broadcast
 LUXTRONIK_DISCOVERY_RESPONSE_PREFIX = "2500;111;"
 
+LUXTRONIK_SOCKET_READ_SIZE_INTEGER = 4
+LUXTRONIK_SOCKET_READ_SIZE_CHAR = 1
+
+LUXTRONIK_PARAMETERS_WRITE = 3002
+LUXTRONIK_PARAMETERS_READ = 3003
+LUXTRONIK_CALCULATIONS_READ = 3004
+LUXTRONIK_VISIBILITIES_READ = 3005
 
 def discover() -> list[tuple[str, int | None]]:
     """Broadcast discovery for Luxtronik heat pumps."""
@@ -262,9 +269,9 @@ class Luxtronik:
             self._read()
 
     def _read(self):
-        self._read_parameters()
-        self._read_calculations()
-        self._read_visibilities()
+        self._read_data(LUXTRONIK_PARAMETERS_READ, LUXTRONIK_SOCKET_READ_SIZE_INTEGER, self.parameters, "parameters")
+        self._read_data(LUXTRONIK_CALCULATIONS_READ, LUXTRONIK_SOCKET_READ_SIZE_INTEGER, self.calculations, "calculations")
+        self._read_data(LUXTRONIK_VISIBILITIES_READ, LUXTRONIK_SOCKET_READ_SIZE_CHAR, self.visibilities, "visibilities")
 
     def _write(self):
         for index, value in self.parameters.queue.items():
@@ -272,7 +279,7 @@ class Luxtronik:
                 LOGGER.warning("Parameter id '%s' or value '%s' invalid!", index, value)
                 continue
             LOGGER.info("Parameter '%d' set to '%s'", index, value)
-            data = struct.pack(">iii", 3002, index, value)
+            data = struct.pack(">iii", LUXTRONIK_PARAMETERS_WRITE, index, value)
             LOGGER.debug("Data %s", data)
             self._socket.sendall(data)
             cmd = struct.unpack(">i", self._socket.recv(4))[0]
@@ -285,76 +292,42 @@ class Luxtronik:
         # Todo: Change methods to async
         # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
-    def _read_parameters(self):
+    def _read_data(self, command: int, item_size: int, parser, label: str) -> None:
+        """Generic method to read data from the socket."""
         data = []
-        self._socket.sendall(struct.pack(">ii", 3003, 0))
-        cmd = struct.unpack(">i", self._socket.recv(4))[0]
-        LOGGER.debug("Command %s", cmd)
-        length = struct.unpack(">i", self._socket.recv(4))[0]
-        if length > self._max_data_length:
-            LOGGER.warning(
-                "Skip reading parameters! Length oversized! %s>%s",
-                length,
-                self._max_data_length,
-            )
-            return
-        LOGGER.debug("Length %s", length)
-        for _ in range(0, length):
-            try:
-                data.append(struct.unpack(">i", self._socket.recv(4))[0])
-            except struct.error as err:
-                # not logging this as error as it would be logged on every read cycle
-                LOGGER.debug(err)
-        LOGGER.debug("Read %d parameters", length)
-        self.parameters.parse(data)
 
-    def _read_calculations(self):
-        data = []
-        self._socket.sendall(struct.pack(">ii", 3004, 0))
-        cmd = struct.unpack(">i", self._socket.recv(4))[0]
-        LOGGER.debug("Command %s", cmd)
-        stat = struct.unpack(">i", self._socket.recv(4))[0]
-        LOGGER.debug("Stat %s", stat)
-        length = struct.unpack(">i", self._socket.recv(4))[0]
-        if length > self._max_data_length:
-            LOGGER.warning(
-                "Skip reading calculations! Length oversized! %s>%s",
-                length,
-                self._max_data_length,
-            )
-            return
-        LOGGER.debug("Length %s", length)
-        for _ in range(0, length):
-            try:
-                data.append(struct.unpack(">i", self._socket.recv(4))[0])
-            except struct.error as err:
-                # not logging this as error as it would be logged on every read cycle
-                LOGGER.debug(err)
-        LOGGER.debug("Read %d calculations", length)
-        self.calculations.parse(data)
+        try:
+            self._socket.sendall(struct.pack(">ii", command, 0))
+            cmd = struct.unpack(">i", self._socket.recv(4))[0]
+            LOGGER.debug("Command %s (%s)", cmd, label)
 
-    def _read_visibilities(self):
-        data = []
-        self._socket.sendall(struct.pack(">ii", 3005, 0))
-        cmd = struct.unpack(">i", self._socket.recv(4))[0]
-        LOGGER.debug("Command %s", cmd)
-        length = struct.unpack(">i", self._socket.recv(4))[0]
-        if length > self._max_data_length:
-            LOGGER.warning(
-                "Skip reading visibilities! Length oversized! %s>%s",
-                length,
-                self._max_data_length,
-            )
-            return
-        elif length <= 0:
-            # Force reconnect for the next readout
-            self._disconnect()
-        LOGGER.debug("Length %s", length)
-        for _ in range(0, length):
-            try:
-                data.append(struct.unpack(">b", self._socket.recv(1))[0])
-            except struct.error as err:
-                # not logging this as error as it would be logged on every read cycle
-                LOGGER.debug(err)
-        LOGGER.debug("Read %d visibilities", length)
-        self.visibilities.parse(data)
+            # Optional status field for calculations
+            if command == LUXTRONIK_CALCULATIONS_READ:
+                stat = struct.unpack(">i", self._socket.recv(4))[0]
+                LOGGER.debug("Stat %s", stat)
+
+            length = struct.unpack(">i", self._socket.recv(4))[0]
+            if length > self._max_data_length:
+                LOGGER.warning("Skip reading %s! Length oversized! %s > %s", label, length, self._max_data_length)
+                return
+            elif length <= 0:
+                LOGGER.warning("Invalid length for %s (%s), forcing disconnect", label, length)
+                self._disconnect()
+                return
+
+            LOGGER.debug("Length %s (%s)", length, label)
+
+            fmt = ">i" if item_size == LUXTRONIK_SOCKET_READ_SIZE_INTEGER else ">b"
+            for _ in range(length):
+                try:
+                    raw = self._socket.recv(item_size)
+                    data.append(struct.unpack(fmt, raw)[0])
+                except struct.error as err:
+                    LOGGER.debug("Error reading %s item: %s", label, err)
+
+            LOGGER.debug("Read %d %s items", length, label)
+            parser.parse(data)
+
+        except Exception as err:
+            LOGGER.error("Failed to read %s: %s", label, err, exc_info=True)
+
