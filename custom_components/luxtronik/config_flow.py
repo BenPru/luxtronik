@@ -247,47 +247,64 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_dhcp(self, discovery_info: DhcpServiceInfo) -> FlowResult:
         """Prepare configuration for a DHCP discovered Luxtronik heatpump."""
+        LOGGER.info(
+            "DHCP discovery: hostname='%s', IP='%s', MAC='%s'",
+            discovery_info.hostname,
+            discovery_info.ip,
+            discovery_info.macaddress,
+        )
+
         try:
-            LOGGER.info(
-                "Found device with hostname '%s' IP '%s'",
-                discovery_info.hostname,
-                discovery_info.ip,
-            )
-            # Validate dhcp result with socket broadcast:
+            # Validate DHCP result with socket broadcast
             heatpump_list = discover()
-            broadcast_discover_ip = ""
-            for heatpump in heatpump_list:
-                if heatpump[0] == discovery_info.ip:
-                    broadcast_discover_ip = heatpump[0]
-                    broadcast_discover_port = heatpump[1]
-            if broadcast_discover_ip == "":
+            broadcast_discover_ip = None
+            broadcast_discover_port = None
+
+            for ip, port in heatpump_list:
+                if ip == discovery_info.ip:
+                    broadcast_discover_ip = ip
+                    broadcast_discover_port = port
+                    break
+
+            if not broadcast_discover_ip:
+                LOGGER.debug("No matching device found via broadcast for IP %s", discovery_info.ip)
                 return self.async_abort(reason="no_devices_found")
-            config = dict[str, Any]()
-            config[CONF_HOST] = broadcast_discover_ip
-            config[CONF_PORT] = broadcast_discover_port
-            config[CONF_TIMEOUT] = DEFAULT_TIMEOUT
-            config[CONF_MAX_DATA_LENGTH] = DEFAULT_MAX_DATA_LENGTH
+
+            config = {
+                CONF_HOST: broadcast_discover_ip,
+                CONF_PORT: broadcast_discover_port or DEFAULT_PORT,
+                CONF_TIMEOUT: DEFAULT_TIMEOUT,
+                CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+            }
+
             try:
                 coordinator = LuxtronikCoordinator.connect(self.hass, config)
-            except Exception:  # pylint: disable=broad-except
+            except Exception as err:  # pylint: disable=broad-except
+                LOGGER.warning("Failed to connect to Luxtronik device at %s: %s", broadcast_discover_ip, err)
                 return self.async_abort(reason="cannot_connect")
-            await self.async_set_unique_id(coordinator.unique_id)
-            self._abort_if_unique_id_configured()
 
-            self._discovery_host = discovery_info.ip
-            self._discovery_port = (
-                DEFAULT_PORT
-                if broadcast_discover_port is None
-                else broadcast_discover_port
-            )
+            await self.async_set_unique_id(coordinator.unique_id)
+
+            try:
+                self._abort_if_unique_id_configured()
+            except data_entry_flow.AbortFlow:
+                LOGGER.debug("Device already configured: %s", coordinator.unique_id)
+                raise
+
+            self._discovery_host = broadcast_discover_ip
+            self._discovery_port = broadcast_discover_port or DEFAULT_PORT
             self._discovery_schema = self._get_schema()
+
             return await self.async_step_user()
+
         except Exception as err:
             LOGGER.error(
-                "Could not handle config_flow.async_step_dhcp %s",
-                discovery_info,
-                exc_info=err,
+                "Unhandled error in async_step_dhcp for device %s: %s",
+                discovery_info.ip,
+                err,
+                exc_info=True,
             )
+            return self.async_abort(reason="unknown")
 
     async def _show_setup_form(
         self, errors: dict[str, str] | None = None
