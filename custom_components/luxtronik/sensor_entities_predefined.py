@@ -368,7 +368,7 @@ SENSORS: list[descr] = [
         invisible_if_value=0.0,
         factor=0.1,
         native_precision=1,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_88,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_90,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
