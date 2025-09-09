@@ -12,7 +12,7 @@ from homeassistant import config_entries
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult, AbortFlow
 from homeassistant.helpers import selector
 
 from .const import (
@@ -287,7 +287,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             try:
                 self._abort_if_unique_id_configured()
-            except data_entry_flow.AbortFlow:
+            except AbortFlow:
                 LOGGER.debug("Device already configured: %s", coordinator.unique_id)
                 raise
 
