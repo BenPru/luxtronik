@@ -40,43 +40,6 @@ PORT_SELECTOR = vol.All(
     vol.Coerce(int),
 )
 
-STEP_USER_DATA_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_HOST, default=DEFAULT_HOST): str,
-        vol.Required(CONF_PORT, default=DEFAULT_PORT): PORT_SELECTOR,
-        vol.Required(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
-        vol.Required(CONF_MAX_DATA_LENGTH, default=DEFAULT_MAX_DATA_LENGTH): int,
-    }
-)
-
-
-def _get_options_schema(options, default_sensor_indoor_temperature: str) -> vol.Schema:
-    """Build and return the options schema."""
-    return vol.Schema(
-        {
-            vol.Optional(
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-                default=default_sensor_indoor_temperature,
-                description={
-                    "suggested_value": None
-                    if options is None
-                    else options.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
-                },
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain=Platform.SENSOR)
-            ),
-            # vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
-            # vol.Required(
-            #     CONF_HA_SENSOR_PREFIX,
-            #     default=f"luxtronik_{unique_id}",
-            #     description={
-            #         "suggested_value": None
-            #         if options is None
-            #         else options.get(CONF_HA_SENSOR_PREFIX)
-            #     },
-            # ): str,
-        }
-    )
 
 
 # CONFIG_SCHEMA = STEP_OPTIONS_DATA_SCHEMA
@@ -113,22 +76,129 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
 
+    @staticmethod
+    def _get_user_data_schema(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> vol.Schema:
+        """Return the user input schema with fallback defaults."""
+        return vol.Schema({
+            vol.Required(CONF_HOST, default=host): str,
+            vol.Required(CONF_PORT, default=port): int,
+            vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
+            vol.Optional(CONF_MAX_DATA_LENGTH, default=DEFAULT_MAX_DATA_LENGTH): int,
+        })
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle a flow initiated by the user."""
         try:
-            if user_input is None:
+            LOGGER.info("Starting async_step_user")
+
+            device_list = await self.hass.async_add_executor_job(discover)
+            LOGGER.info("Discovered devices: %s", device_list)
+
+            configured_hosts_ports = {
+                (entry.data.get(CONF_HOST), entry.data.get(CONF_PORT))
+                for entry in self._async_current_entries()
+            }
+            LOGGER.info("Already configured devices: %s", configured_hosts_ports)
+
+            self._all_devices = [
+                {
+                    "host": host,
+                    "port": port,
+                    "configured": (host, port) in configured_hosts_ports
+                }
+                for host, port in device_list
+            ]
+            LOGGER.info("All devices with config status: %s", self._all_devices)
+
+            self._available_devices = [
+                d for d in self._all_devices if not d["configured"]
+            ]
+            LOGGER.info("Available (unconfigured) devices: %s", self._available_devices)
+
+            if self._available_devices:
+                device_options = {
+                    f"{d['host']}:{d['port']}": f"{d['host']}:{d['port']}"
+                    for d in self._available_devices
+                }
+                LOGGER.info("Presenting selection form for available devices")
+
                 return self.async_show_form(
-                    step_id="user", data_schema=STEP_USER_DATA_SCHEMA
+                    step_id="select_devices",
+                    data_schema=vol.Schema({
+                        vol.Required("selected_devices", default=[]): vol.All(
+                            cv.ensure_list,
+                            [vol.In(device_options)]
+                        )
+                    }),
+                    description_placeholders={
+                        "configured": ", ".join(
+                            f"{d['host']}:{d['port']}" for d in self._all_devices if d["configured"]
+                        )
+                    }
                 )
-            return await self.async_step_options(user_input)
+
+            else:
+                LOGGER.info("All discovered devices are already configured. Showing manual entry form.")
+                return self.async_show_form(
+                    step_id="manual_entry",
+                    data_schema=self._get_user_data_schema()
+                )
+
         except Exception as err:
             LOGGER.error(
-                "Could not handle config_flow.async_step_user %s",
-                user_input,
+                "Could not handle config_flow.async_step_user",
                 exc_info=err,
             )
+            return self.async_abort(reason="unknown")
+
+    async def async_step_select_devices(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle user selection of discovered devices."""
+        if user_input is None:
+            return await self.async_step_user()
+
+        selected = user_input.get("selected_devices", [])
+
+        for device_str in selected:
+            host, port = device_str.split(":")
+            self.hass.async_create_task(
+                self._create_entry_for_device(host, int(port))
+            )
+
+        return self.async_abort(reason="devices_configured")
+
+    async def async_step_manual_entry(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle manual entry of host and port."""
+        if user_input is None:
+            LOGGER.info("Showing manual entry form")
+            return self.async_show_form(
+                step_id="manual_entry",
+                data_schema=self._get_user_data_schema()
+            )
+
+        LOGGER.info("Creating entry from manual input: %s", user_input)
+        return self.async_create_entry(
+            title=f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}",
+            data=user_input,
+        )
+
+    async def _create_entry_for_device(self, host: str, port: int) -> None:
+        """Create a config entry for a discovered device."""
+        self.async_create_entry(
+            title=f"{host}:{port}",
+            data={
+                CONF_HOST: host,
+                CONF_PORT: port,
+                CONF_TIMEOUT: DEFAULT_TIMEOUT,
+                CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+            },
+        )
+
 
     async def _async_migrate_data_from_custom_component_luxtronik2(self):
         """
@@ -322,23 +392,34 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
         """Return a value from Luxtronik."""
         return self.options.get(key, self.config_entry.data.get(key, default))
 
-    # def _get_options_schema(self):
-    #     """Return a schema for Luxtronik configuration options."""
-    #     return vol.Schema(
-    #         {
-    #             vol.Optional(
-    #                 CONF_CONTROL_MODE_HOME_ASSISTANT,
-    #                 default=self._get_value(CONF_CONTROL_MODE_HOME_ASSISTANT, False),
-    #             ): bool,
-    #             vol.Optional(
-    #                 CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-    #                 default=self._get_value(
-    #                     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-    #                     f"sensor.{self._sensor_prefix}_room_temperature",
-    #                 ),
-    #             ): str,
-    #         }
-    #     )
+    @staticmethod
+    def _get_options_schema(options, default_sensor_indoor_temperature: str) -> vol.Schema:
+        """Build and return the options schema."""
+        return vol.Schema(
+            {
+                vol.Optional(
+                    CONF_HA_SENSOR_INDOOR_TEMPERATURE,
+                    default=default_sensor_indoor_temperature,
+                    description={
+                        "suggested_value": None
+                        if options is None
+                        else options.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
+                    },
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=Platform.SENSOR)
+                ),
+                # vol.Optional(CONF_CONTROL_MODE_HOME_ASSISTANT, default=False): bool,
+                # vol.Required(
+                #     CONF_HA_SENSOR_PREFIX,
+                #     default=f"luxtronik_{unique_id}",
+                #     description={
+                #         "suggested_value": None
+                #         if options is None
+                #         else options.get(CONF_HA_SENSOR_PREFIX)
+                #     },
+                # ): str,
+            }
+        )
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -376,4 +457,3 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
             )
 
 
-# config_entry_flow.register_discovery_flow(DOMAIN, "Luxtronik", _async_has_devices)

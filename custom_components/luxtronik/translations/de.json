@@ -848,6 +848,14 @@
             "unknown": "Unerwarteter Fehler"
         },
         "step": {
+			"manual_entry": {
+				"title": "Manual Device Configuration",
+				"description": "No new devices were discovered or all discovered devices are already configured. You can manually enter a host and port."
+			},
+			"select_devices": {
+				"title": "Select Devices to Configure",
+				"description": "Select one or more devices to add. Already configured devices: {configured}"
+			},
             "user": {
                 "description": "Verbinde eine Luxtronik W\u00e4rmepumpe mit Home Assistant.",
                 "data": {

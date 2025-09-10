@@ -600,6 +600,7 @@
             "already_configured": "Service is already configured.",
             "already_in_progress": "The config flow is already running.",
             "cannot_connect": "Failed to connect to Luxtronik.\nPlease check ip-address/hostname and port.\n\nError:\n{connect_error}",
+			"devices_configured": "Selected devices have been configured.",
             "no_devices_found": "No devices found on the network",
             "single_instance_allowed": "Already configured. Only a single configuration possible.",
             "unknown": "Unknown error"
@@ -610,6 +611,14 @@
             "unknown": "Unexpected error"
         },
         "step": {
+			"manual_entry": {
+				"title": "Manual Device Configuration",
+				"description": "No new devices were discovered or all discovered devices are already configured. You can manually enter a host and port."
+			},
+			"select_devices": {
+				"title": "Select Devices to Configure",
+				"description": "Select one or more devices to add. Already configured devices: {configured}"
+			},
             "user": {
                 "description": "Set up your Luxtronik heatpump controller to allow monitoring and control.",
                 "data": {

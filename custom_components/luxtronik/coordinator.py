@@ -502,8 +502,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return cooling_present
 
     async def async_shutdown(self) -> None:
-        """Make sure a coordinator is shut down as well as it's connection."""
+        """Make sure a coordinator is shut down as well as its connection."""
         await super().async_shutdown()
-        if self.client is not None:
+        if hasattr(self, "client") and self.client is not None:
             # await self.client.disconnect()
             del self.client
+        else:
+            LOGGER.warning("LuxtronikCoordinator has no 'client' attribute during shutdown.")
