@@ -237,7 +237,7 @@
                 "name": "Status",
                 "state": {
                     "heating": "Verwarmt",
-                    "hot_water": "Drinkwater",
+                    "hot_water": "Warm water",
                     "swimming_pool_solar": "Zwembad/zonne-energie",
                     "evu": "Netwerkblokkering",
                     "defrost": "Ontdooien",
@@ -496,7 +496,7 @@
                 }
             },
             "switchoff_reason": {
-                "name": "Afsluiten",
+                "name": "Reden van afschakeling",
                 "state": {
                     "0": "Storing warmtepomp",
                     "1": "Systeemstoring",
@@ -625,20 +625,20 @@
             "status_line_3": {
                 "name": "Status 3",
                 "state": {
-                    "heating": "verwarmt",
-                    "defrost": "ontdooien",
-                    "cooling": "koelen",
+                    "heating": "Verwarmt",
+                    "defrost": "Ontdooien",
+                    "cooling": "Koelen",
                     "pump_forerun": "Pompvoorloop",
                     "thermal_desinfection": "thermische desinfectie",
                     "swimming_pool_solar": "Zwembad / zonne-energie",
                     "no_request": "geen verzoek",
                     "cycle_lock": "inschakelslot",
                     "lock_time": "vergrendeltijd",
-                    "domestic_water": "huishoudelijk water",
+                    "domestic_water": "Warm water",
                     "flow_monitoring": "flowmonitoring",
                     "grid_switch_on_delay": "Vertraging bij inschakelen net",
                     "info_bake_out_program": "Informatie uit opwarmprogramma",
-                    "heating_external_engery_source": "verwarming uit een externe energiebron",
+                    "heating_external_engery_source": "Verwarming uit een externe energiebron",
                     "domestic_water_external_energy_source": "Huishoudelijk water uit externe energiebron",
                     "second_heat_generator_1_active": "tweede warmteopwekker 1 actief"
                 }
@@ -831,45 +831,55 @@
     },
     "config": {
         "abort": {
-            "already_configured": "Dit apparaat is al geconfigureerd.",
-            "already_in_progress": "Het configuratieproces is al bezig.",
-            "cannot_connect": "De verbinding met Luxtronik is mislukt.\nControleer het IP-adres/hostnaam en de poort.\n\nFout:\n{connect_error}",
-            "no_devices_found": "Er konden geen apparaten gevonden worden op het netwerk.",
-            "single_instance_allowed": "Al geconfigureerd. Er is slechts \u00e9\u00e9n configuratie toegestaan.",
-            "unknown": "Onverwachte fout"
+            "already_configured": "Dienst is al geconfigureerd.",
+            "already_in_progress": "De configuratiestroom is al actief.",
+            "cannot_connect": "Verbinding met Luxtronik mislukt.\nControleer IP-adres/hostnaam en poort.\n\nFout:\n{connect_error}",
+            "devices_configured": "Geselecteerde apparaten zijn geconfigureerd.",
+            "no_devices_found": "Geen apparaten gevonden op het netwerk",
+            "single_instance_allowed": "Al geconfigureerd. Slechts \u00e9\u00e9n configuratie toegestaan.",
+            "unknown": "Onbekende fout"
         },
         "error": {
-            "address": "Ongeldig extern adres opgegeven. Het adres moet een IP-adres of een oplosbare hostnaam zijn.",
-            "address_in_use": "De geselecteerde luisterpoort is al in gebruik op dit systeem.",
+            "address": "Ongeldig extern adres. Het adres moet een IP-adres of een oplosbare hostnaam zijn.",
+            "address_in_use": "De gekozen poort is al in gebruik op dit systeem.",
             "unknown": "Onverwachte fout"
         },
         "step": {
             "user": {
-                "description": "Verbind een Luxtronik warmtepomp met Home Assistant.",
+                "title": "Luxtronik warmtepomp installatie",
+                "description": "Ontdekte apparaten al geconfigureerd: {configured}",
                 "data": {
                     "host": "Host",
-                    "port": "Netwerkpoort",
-                    "timeout": "Time-out netwerksocket (sec)",
-                    "max_data_length": "Maximale lengte van datapakketten"
+                    "port": "Network Port",
+                    "timeout": "Network socket timeout (Sec.)",
+                    "max_data_length": "Max data package length"
                 },
                 "data_description": {
-                    "host": "Netwerknaam of IP-adres",
-                    "port": "Meestal 8889 of 8888",
-                    "timeout": "Als het netwerk of de warmtepomp traag is, kunt u hier fijne aanpassingen maken.",
-                    "max_data_length": "Als het netwerk of de warmtepomp traag is, kunt u hier fijne aanpassingen maken."
+                    "host": "Hostname or IP address",
+                    "port": "Normally 8889 or 8888",
+                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
+                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
                 }
             },
+            "manual_entry": {
+                "title": "Luxtronik-apparaat configureren op {host}:{port}",
+                "description": "Geen nieuwe apparaten gevonden of alle ontdekte apparaten zijn al geconfigureerd. U kunt handmatig een host en poort invoeren."
+            },
+            "select_devices": {
+                "title": "Selecteer apparaten om te configureren",
+                "description": "Selecteer een of meer apparaten om toe te voegen. Al geconfigureerde apparaten: {configured}"
+            },
             "options": {
-                "description": "Instellingen voor de Luxtronik warmtepomp {name}.\nDeze instellingen kunnen later ook worden gewijzigd onder Integraties.",
+                "description": "Instellingen voor de Luxtronik warmtepomp {name}.\nDeze instellingen kunnen later worden gewijzigd onder Integraties.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
-                    "control_mode_home_assistant": "Experimenteel!: Regel de aan/uit-status van de thermostaat via Home Assistant.",
-                    "ha_sensor_prefix": "Entiteits-ID voorvoegsel"
+                    "control_mode_home_assistant": "Experimenteel!: Thermostaatstatus regelen via Home Assistant.",
+                    "ha_sensor_prefix": "Voorvoegsel voor entiteit-ID's"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "Er wordt een thermostaat voor verwarmingsregeling aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is aangesloten op een hardware kamerthermostaat, moet dit veld leeg worden gelaten.",
-                    "control_mode_home_assistant": "Als de Home Assistant-thermostaat in de inactieve status staat, krijgt Luxtronik de status Uit en kan Luxtronik dit item niet starten.",
-                    "ha_sensor_prefix": "Belangrijk als er meerdere warmtepompen worden gebruikt.\nVoor \u00e9\u00e9n warmtepomp kunt u eenvoudigweg 'luxtronik' gebruiken."
+                    "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
+                    "control_mode_home_assistant": "Wanneer de Home Assistant-thermostaat in de idle-status staat, wordt de uit-status aan Luxtronik gemeld en kan Luxtronik dit item niet starten.",
+                    "ha_sensor_prefix": "Belangrijk bij gebruik van meerdere warmtepompen. Bij \u00e9\u00e9n enkele kan gewoon 'luxtronik' worden gebruikt."
                 }
             }
         }
@@ -877,16 +887,17 @@
     "options": {
         "step": {
             "user": {
+                "title": "Opties configureren voor {name}",
                 "description": "Instellingen voor de Luxtronik warmtepomp {name}.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
-                    "control_mode_home_assistant": "Experimenteel!: Regel de aan/uit-status van de thermostaat via Home Assistant.",
-                    "ha_sensor_prefix": "Entiteits-ID voorvoegsel"
+                    "control_mode_home_assistant": "Experimenteel!: Thermostaatstatus regelen via Home Assistant.",
+                    "ha_sensor_prefix": "Voorvoegsel voor entiteit-ID's"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "Er wordt een thermostaat voor verwarmingsregeling aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is aangesloten op een hardware kamerthermostaat, moet dit veld leeg worden gelaten.",
-                    "control_mode_home_assistant": "Als de Home Assistant-thermostaat in de inactieve status staat, krijgt Luxtronik de status Uit en kan Luxtronik dit item niet starten.",
-                    "ha_sensor_prefix": "Belangrijk als er meerdere warmtepompen worden gebruikt.\nVoor \u00e9\u00e9n warmtepomp kunt u eenvoudigweg 'luxtronik' gebruiken."
+                    "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
+                    "control_mode_home_assistant": "Wanneer de Home Assistant-thermostaat in de idle-status staat, wordt de uit-status aan Luxtronik gemeld en kan Luxtronik dit item niet starten.",
+                    "ha_sensor_prefix": "Belangrijk bij gebruik van meerdere warmtepompen. Bij \u00e9\u00e9n enkele kan gewoon 'luxtronik' worden gebruikt."
                 }
             }
         }

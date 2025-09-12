@@ -50,7 +50,7 @@
                 "name": "Approval"
             },
             "defrost_end_flow_okay": {
-                "name": "Defrost end \u002f Flow okay"
+                "name": "Defrost end / Flow okay"
             },
             "motor_protection": {
                 "name": "Motor protection"
@@ -600,27 +600,20 @@
             "already_configured": "Service is already configured.",
             "already_in_progress": "The config flow is already running.",
             "cannot_connect": "Failed to connect to Luxtronik.\nPlease check ip-address/hostname and port.\n\nError:\n{connect_error}",
-			"devices_configured": "Selected devices have been configured.",
+            "devices_configured": "Selected devices have been configured.",
             "no_devices_found": "No devices found on the network",
             "single_instance_allowed": "Already configured. Only a single configuration possible.",
             "unknown": "Unknown error"
         },
         "error": {
-            "address": "Invalid remote-address insert. The address have to be an ip-address or a resolvable hostname.",
+            "address": "Invalid remote-address insert. The address has to be an IP address or a resolvable hostname.",
             "address_in_use": "The chosen listen port is already in use on this system.",
             "unknown": "Unexpected error"
         },
         "step": {
-			"manual_entry": {
-				"title": "Manual Device Configuration",
-				"description": "No new devices were discovered or all discovered devices are already configured. You can manually enter a host and port."
-			},
-			"select_devices": {
-				"title": "Select Devices to Configure",
-				"description": "Select one or more devices to add. Already configured devices: {configured}"
-			},
             "user": {
-                "description": "Set up your Luxtronik heatpump controller to allow monitoring and control.",
+                "title": "Luxtronik Heatpump Setup",
+                "description": "Discovered devices already configured: {configured}",
                 "data": {
                     "host": "Host",
                     "port": "Network Port",
@@ -628,18 +621,26 @@
                     "max_data_length": "Max data package length"
                 },
                 "data_description": {
-                    "host": "Hostname or ip address",
+                    "host": "Hostname or IP address",
                     "port": "Normally 8889 or 8888",
-                    "timeout": "If the network or the heatpump is slow, you can fine tune the timeout.",
-                    "max_data_length": "If the network or the heatpump is slow, you can fine tune the date package length."
+                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
+                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
                 }
+            },
+            "manual_entry": {
+                "title": "Configure Luxtronik device at {host}:{port}",
+                "description": "No new devices were discovered or all discovered devices are already configured. You can manually enter a host and port."
+            },
+            "select_devices": {
+                "title": "Select Devices to Configure",
+                "description": "Select one or more devices to add. Already configured devices: {configured}"
             },
             "options": {
                 "description": "Settings for the Luxtronik heatpump {name}.\nThese settings can also be changed later under Integrations.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "Sensor id for the indoor temperature",
+                    "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature",
                     "control_mode_home_assistant": "Experimental!: Control thermostat on/off status by Home Assistant.",
-                    "ha_sensor_prefix": "Prefix entity-ids"
+                    "ha_sensor_prefix": "Prefix entity IDs"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
@@ -652,11 +653,12 @@
     "options": {
         "step": {
             "user": {
+                "title": "Configure options for {name}",
                 "description": "Settings for the Luxtronik heat pump {name}.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "Sensor id for the indoor temperature",
+                    "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature",
                     "control_mode_home_assistant": "Experimental!: Control thermostat on/off status by Home Assistant.",
-                    "ha_sensor_prefix": "Prefix entity-ids"
+                    "ha_sensor_prefix": "Prefix entity IDs"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",

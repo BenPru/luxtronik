@@ -330,13 +330,13 @@
                     "timestamp": {
                         "name": "Czas"
                     },
-					"cause": {
-						"name": "Przyczyna"
-					},
-					"remedy": {
-						"name": "Rozwi\u0105zanie"
-					}
-				}
+                    "cause": {
+                        "name": "Przyczyna"
+                    },
+                    "remedy": {
+                        "name": "Rozwi\u0105zanie"
+                    }
+                }
             },
             "switchoff_reason": {
                 "name": "Pow\u00f3d wy\u0142\u0105czenia",
@@ -575,40 +575,54 @@
     "config": {
         "abort": {
             "already_configured": "Us\u0142uga jest ju\u017c skonfigurowana.",
-            "already_in_progress": "Przep\u0142yw konfiguracji jest ju\u017c uruchomiony.",
-            "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 ze sterownikiem Luxtronik.\nSprawd\u017a adres IP/nazw\u0119 hosta i numer portu.",
-            "no_devices_found": "Nie znaleziono urz\u0105dze\u0144 w sieci LAN",
-            "single_instance_allowed": "Sterownik jest ju\u017c skonfigurowany. Mo\u017cliwa jest tylko jedna instancja.",
+            "already_in_progress": "Proces konfiguracji ju\u017c trwa.",
+            "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 z Luxtronik.\nSprawd\u017a adres IP/nazw\u0119 hosta i port.\n\nB\u0142\u0105d:\n{connect_error}",
+            "devices_configured": "Wybrane urz\u0105dzenia zosta\u0142y skonfigurowane.",
+            "no_devices_found": "Nie znaleziono urz\u0105dze\u0144 w sieci",
+            "single_instance_allowed": "Ju\u017c skonfigurowano. Mo\u017cliwa tylko jedna konfiguracja.",
             "unknown": "Nieznany b\u0142\u0105d"
         },
         "error": {
             "address": "Nieprawid\u0142owy adres zdalny. Adres musi by\u0107 adresem IP lub rozpoznawaln\u0105 nazw\u0105 hosta.",
-            "address_in_use": "Wybrany port nas\u0142uchiwania jest ju\u017c u\u017cywany w tym systemie.",
-            "unknown": "Niespodziewany b\u0142\u0105d"
+            "address_in_use": "Wybrany port jest ju\u017c u\u017cywany w tym systemie.",
+            "unknown": "Nieoczekiwany b\u0142\u0105d"
         },
         "step": {
             "user": {
-                "description": "Skonfiguruj sterownik pompy ciep\u0142a Luxtronik, aby umo\u017cliwi\u0107 monitorowanie i kontrol\u0119.",
+                "title": "Instalacja pompy ciep\u0142a Luxtronik",
+                "description": "Wykryte urz\u0105dzenia ju\u017c skonfigurowane: {configured}",
                 "data": {
                     "host": "Host",
-                    "port": "Port sieciowy"
+                    "port": "Network Port",
+                    "timeout": "Network socket timeout (Sec.)",
+                    "max_data_length": "Max data package length"
                 },
                 "data_description": {
-                    "host": "Nazwa hosta lub adres IP",
-                    "port": "Zwykle 8889 lub 8888"
+                    "host": "Hostname or IP address",
+                    "port": "Normally 8889 or 8888",
+                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
+                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
                 }
             },
+            "manual_entry": {
+                "title": "Skonfiguruj urz\u0105dzenie Luxtronik na {host}:{port}",
+                "description": "Nie znaleziono nowych urz\u0105dze\u0144 lub wszystkie wykryte urz\u0105dzenia s\u0105 ju\u017c skonfigurowane. Mo\u017cesz r\u0119cznie wprowadzi\u0107 hosta i port."
+            },
+            "select_devices": {
+                "title": "Wybierz urz\u0105dzenia do skonfigurowania",
+                "description": "Wybierz jedno lub wi\u0119cej urz\u0105dze\u0144 do dodania. Ju\u017c skonfigurowane urz\u0105dzenia: {configured}"
+            },
             "options": {
-                "description": "Ustawienia pompy ciep\u0142a Luxtronik {name}.\nTe ustawienia mo\u017cna r\u00f3wnie\u017c zmieni\u0107 p\u00f3\u017aniej w zak\u0142adce Integracje.",
+                "description": "Ustawienia dla pompy ciep\u0142a Luxtronik {name}.\nTe ustawienia mo\u017cna p\u00f3\u017aniej zmieni\u0107 w sekcji Integracje.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "Identyfikator czujnika temperatury wewn\u0119trznej",
-                    "control_mode_home_assistant": "Eksperymentalnie!: Kontroluj stan w\u0142\u0105czania/wy\u0142\u0105czania termostatu za pomoc\u0105 Home Assistant.",
-                    "ha_sensor_prefix": "Przedrostek identyfikator\u00f3w jednostek"
+                    "ha_sensor_indoor_temperature": "ID czujnika temperatury wewn\u0119trznej",
+                    "control_mode_home_assistant": "Eksperymentalne!: Sterowanie statusem termostatu przez Home Assistant.",
+                    "ha_sensor_prefix": "Prefiks dla identyfikator\u00f3w encji"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "W Home Assistant tworzony jest termostat do sterowania ogrzewaniem. Rzeczywist\u0105 temperatur\u0119 ustawia czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, to pole powinno pozosta\u0107 puste.",
-                    "control_mode_home_assistant": "Kiedy termostat Home Assistant znajduje si\u0119 w stanie bezczynno\u015bci, do firmy Luxtronik zg\u0142aszany jest stan wy\u0142\u0105czenia i firma Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
-                    "ha_sensor_prefix": "Wa\u017cne w przypadku stosowania kilku pomp ciep\u0142a.\n W przypadku jednej mo\u017cna po prostu zastosowa\u0107 \u201eluxtronik\u201d."
+                    "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, pozostaw to pole puste.",
+                    "control_mode_home_assistant": "Gdy termostat Home Assistant jest w stanie bezczynno\u015bci, stan wy\u0142\u0105czenia jest zg\u0142aszany do Luxtronik i Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
+                    "ha_sensor_prefix": "Wa\u017cne przy u\u017cyciu wielu pomp ciep\u0142a. W przypadku jednej mo\u017cna po prostu u\u017cy\u0107 'luxtronik'."
                 }
             }
         }
@@ -616,16 +630,17 @@
     "options": {
         "step": {
             "user": {
-                "description": "Ustawienia pompy ciep\u0142a Luxtronik {name}.",
+                "title": "Skonfiguruj opcje dla {name}",
+                "description": "Ustawienia dla pompy ciep\u0142a Luxtronik {name}.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "Identyfikator czujnika temperatury wewn\u0119trznej",
-                    "control_mode_home_assistant": "Eksperymentalnie!: Kontroluj stan w\u0142\u0105czania/wy\u0142\u0105czania termostatu za pomoc\u0105 Home Assistant.",
-                    "ha_sensor_prefix": "Przedrostek identyfikator\u00f3w jednostek"
+                    "ha_sensor_indoor_temperature": "ID czujnika temperatury wewn\u0119trznej",
+                    "control_mode_home_assistant": "Eksperymentalne!: Sterowanie statusem termostatu przez Home Assistant.",
+                    "ha_sensor_prefix": "Prefiks dla identyfikator\u00f3w encji"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "W Home Assistant tworzony jest termostat do sterowania ogrzewaniem. Rzeczywist\u0105 temperatur\u0119 ustawia czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, to pole powinno pozosta\u0107 puste.",
-                    "control_mode_home_assistant": "Kiedy termostat Home Assistant znajduje si\u0119 w stanie bezczynno\u015bci, do firmy Luxtronik zg\u0142aszany jest stan wy\u0142\u0105czenia i firma Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
-                    "ha_sensor_prefix": "Wa\u017cne w przypadku stosowania kilku pomp ciep\u0142a.\nW przypadku jednej mo\u017cna po prostu zastosowa\u0107 \u201eluxtronik\u201d."
+                    "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, pozostaw to pole puste.",
+                    "control_mode_home_assistant": "Gdy termostat Home Assistant jest w stanie bezczynno\u015bci, stan wy\u0142\u0105czenia jest zg\u0142aszany do Luxtronik i Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
+                    "ha_sensor_prefix": "Wa\u017cne przy u\u017cyciu wielu pomp ciep\u0142a. W przypadku jednej mo\u017cna po prostu u\u017cy\u0107 'luxtronik'."
                 }
             }
         }
