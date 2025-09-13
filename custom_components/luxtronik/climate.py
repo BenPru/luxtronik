@@ -290,7 +290,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        domain = self.entity_description.key.value
+        #domain = self.entity_description.key.value
         mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
         self._attr_hvac_mode = (
             None if mode is None else self.entity_description.hvac_mode_mapping[mode]
