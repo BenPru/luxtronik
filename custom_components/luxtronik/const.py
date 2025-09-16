@@ -36,7 +36,7 @@ UPDATE_INTERVAL_SLOW: Final = timedelta(minutes=3)
 UPDATE_INTERVAL_VERY_SLOW: Final = timedelta(minutes=5)
 
 
-SECOUND_TO_HOUR_FACTOR: Final = 0.000277777777778
+SECOND_TO_HOUR_FACTOR: Final = 1 / 3600
 # endregion Constants Main
 
 # region Conf
@@ -53,7 +53,7 @@ CONF_LOCK_TIMEOUT: Final = "lock_timeout"
 CONF_SAFE: Final = "safe"
 CONF_MAX_DATA_LENGTH: Final = "max_data_length"
 
-DEFAULT_HOST: Final = "wp-novelan"
+DEFAULT_HOST: Final = ""
 DEFAULT_PORT: Final = 8889
 DEFAULT_TIMEOUT: Final = 60.0
 DEFAULT_MAX_DATA_LENGTH: Final = 10000
@@ -124,12 +124,12 @@ class LuxOperationMode(StrEnum):
     """Lux Operation modes heating, hot water etc."""
 
     heating: Final = "heating"  # 0
-    domestic_water: Final = "hot water"  # 1
-    swimming_pool_solar: Final = "swimming pool/solar"  # 2
+    domestic_water: Final = "hot_water"  # 1
+    swimming_pool_solar: Final = "swimming_pool_solar"  # 2
     evu: Final = "evu"  # 3
     defrost: Final = "defrost"  # 4
-    no_request: Final = "no request"  # 5
-    heating_external_source: Final = "heating external source"  # 6
+    no_request: Final = "no_request"  # 5
+    heating_external_source: Final = "heating_external_source"  # 6
     cooling: Final = "cooling"  # 7
 
 
@@ -146,16 +146,16 @@ class LuxMode(StrEnum):
 class LuxStatus1Option(StrEnum):
     """LuxStatus1 option defrost etc."""
 
-    heatpump_running: Final = "heatpump running"
-    heatpump_idle: Final = "heatpump idle"
-    heatpump_coming: Final = "heatpump coming"
-    heatpump_shutdown: Final = "heatpump shutdown"
-    errorcode_slot_zero: Final = "errorcode slot 0"
+    heatpump_running: Final = "heatpump_running"
+    heatpump_idle: Final = "heatpump_idle"
+    heatpump_coming: Final = "heatpump_coming"
+    heatpump_shutdown: Final = "heatpump_shutdown"
+    errorcode_slot_zero: Final = "errorcode_slot_0"
     defrost: Final = "defrost"
-    witing_on_LIN_connection: Final = "witing on LIN connection"
-    compressor_heating_up: Final = "compressor heating up"
-    pump_forerun: Final = "pump forerun"
-    compressor_heater: Final = "compressor heater"
+    waiting_on_lin_connection: Final = "witing_on_LIN_connection"
+    compressor_heating_up: Final = "compressor_heating_up"
+    pump_forerun: Final = "pump_forerun"
+    compressor_heater: Final = "compressor_heater"
 
 
 class LuxStatus3Option(StrEnum):
@@ -164,23 +164,23 @@ class LuxStatus3Option(StrEnum):
     unknown: Final = ("unknown",)
     none: Final = ("none",)
     heating: Final = ("heating",)
-    no_request: Final = ("no request",)
-    grid_switch_on_delay: Final = ("grid switch on delay",)
-    cycle_lock: Final = ("cycle lock",)
-    lock_time: Final = ("lock time",)
-    domestic_water: Final = ("domestic water",)
-    info_bake_out_program: Final = ("info bake out program",)
+    no_request: Final = ("no_request",)
+    grid_switch_on_delay: Final = ("grid_switch_on_delay",)
+    cycle_lock: Final = ("cycle_lock",)
+    lock_time: Final = ("lock_time",)
+    domestic_water: Final = ("domestic_water",)
+    info_bake_out_program: Final = ("info_bake_out_program",)
     defrost: Final = ("defrost",)
-    pump_forerun: Final = ("pump forerun",)
-    thermal_desinfection: Final = ("thermal desinfection",)
+    pump_forerun: Final = ("pump_forerun",)
+    thermal_desinfection: Final = ("thermal_desinfection",)
     cooling: Final = ("cooling",)
-    swimming_pool_solar: Final = ("swimming pool/solar",)
-    heating_external_energy_source: Final = ("heating external energy source",)
+    swimming_pool_solar: Final = ("swimming_pool_solar",)
+    heating_external_energy_source: Final = ("heating_external_energy_source",)
     domestic_water_external_energy_source: Final = (
-        "domestic water external energy source",
+        "domestic_water_external_energy_source",
     )
-    flow_monitoring: Final = ("flow monitoring",)
-    second_heat_generator_1_active: Final = ("second heat generator 1 active",)
+    flow_monitoring: Final = ("flow_monitoring",)
+    second_heat_generator_1_active: Final = ("second_heat_generator_1_active",)
 
 
 class LuxMkTypes(Enum):

@@ -11,10 +11,10 @@
                 "name": "Przep\u0142yw pompy"
             },
             "compressor_heater": {
-                "name": "Grza\u0142ka spr\u0119\u017Carki"
+                "name": "Grza\u0142ka spr\u0119\u017carki"
             },
             "defrost_valve": {
-                "name": "Zaw\u00F3r odszraniania"
+                "name": "Zaw\u00f3r odszraniania"
             },
             "additional_heat_generator": {
                 "name": "Dodatkowy generator ciep\u0142a"
@@ -47,7 +47,7 @@
                 "name": "Zatwierdzenie ch\u0142odzenia"
             },
             "defrost_end_flow_okay": {
-                "name": "Koniec odszraniania \u002f Przep\u0142yw w porz\u0105dku"
+                "name": "Koniec odszraniania / Przep\u0142yw w porz\u0105dku"
             },
             "motor_protection": {
                 "name": "Ochrona silnika"
@@ -87,7 +87,7 @@
                 "name": "Optymalizacja pompy"
             },
             "heating_threshold": {
-                "name": "Pr\u00F3g ogrzewania"
+                "name": "Pr\u00f3g ogrzewania"
             },
             "domestic_water": {
                 "name": "Tryb AUTO ciep\u0142ej wody"
@@ -118,7 +118,7 @@
                 "name": "Optymalizacja pompy"
             },
             "heating_threshold": {
-                "name": "Pr\u00F3g ogrzewania"
+                "name": "Pr\u00f3g ogrzewania"
             },
             "electrical_power_limitation_value": {
                 "name": "Power limit"
@@ -175,22 +175,22 @@
                 "name": "Maks. temperatura kolektora s\u0142onecznego"
             },
             "solar_pump_off_max_difference_temperature_boiler": {
-                "name": "Wy\u0142\u0105czenie maks. kolektor r\u00F3\u017Cnicowy/kocio\u0142 (pompa solarna)"
+                "name": "Wy\u0142\u0105czenie maks. kolektor r\u00f3\u017cnicowy/kocio\u0142 (pompa solarna)"
             },
             "solar_pump_off_difference_temperature": {
-                "name": "R\u00F3\u017Cnica wy\u0142\u0105czania kolektora/kot\u0142a (pompa solarna)"
+                "name": "R\u00f3\u017cnica wy\u0142\u0105czania kolektora/kot\u0142a (pompa solarna)"
             },
             "solar_pump_on_difference_temperature": {
-                "name": "R\u00F3\u017Cnica w\u0142\u0105czania kolektora/kot\u0142a (pompa solarna)"
+                "name": "R\u00f3\u017cnica w\u0142\u0105czania kolektora/kot\u0142a (pompa solarna)"
             },
             "dhw_hysteresis": {
                 "name": "Histereza ciep\u0142ej wody"
             },
             "heating_room_temperature_impact_factor": {
-                "name": "Wsp\u00F3\u0142czynnik wp\u0142ywu temperatury pokojowej"
+                "name": "Wsp\u00f3\u0142czynnik wp\u0142ywu temperatury pokojowej"
             },
             "heating_maximum_circulation_pump_speed": {
-                "name": "Maksymalna pr\u0119dko\u015B\u0107 pompy obiegowej (ogrzewanie)"
+                "name": "Maksymalna pr\u0119dko\u015b\u0107 pompy obiegowej (ogrzewanie)"
             },
             "heating_max_flow_out_increase_temperature": {
                 "name": "Maks. docelowy wzrost odp\u0142ywu"
@@ -199,7 +199,28 @@
                 "name": "Ogrzewanie histerezy"
             },
             "heating_night_lowering_to_temperature": {
-                "name": "Obni\u017Cenie temperatury ogrzewania w nocy"
+                "name": "Obni\u017cenie temperatury ogrzewania w nocy"
+            },
+            "efficiency_pump_nominal": {
+                "name": "Nominalna wydajno\u015b\u0107 pompy"
+            },
+            "efficiency_pump_minimal": {
+                "name": "Minimalna wydajno\u015b\u0107 pompy"
+            },
+            "cooling_start_delay_hours": {
+                "name": "Op\u00f3\u017anienie startu"
+            },
+            "cooling_stop_delay_hours": {
+                "name": "Op\u00f3\u017anienie zatrzymania"
+            },
+            "cooling_target_temperature_mk1": {
+                "name": "Docelowa temperatura ch\u0142odzenia"
+            },
+            "cooling_target_temperature_mk2": {
+                "name": "Docelowa temperatura ch\u0142odzenia"
+            },
+            "cooling_target_temperature_mk3": {
+                "name": "Docelowa temperatura ch\u0142odzenia"
             },
             "pump_vent_timer_h": {
                 "name": "Czas pracy odpowietrzania"
@@ -210,18 +231,18 @@
                 "name": "Pompa ciep\u0142a",
                 "state": {
                     "heating": "Ogrzewanie",
-                    "hot water": "Ciep\u0142a woda",
-                    "swimming pool/solar": "Basen / Solar",
+                    "hot_water": "Ciep\u0142a woda",
+                    "swimming_pool_solar": "Basen / Solar",
                     "evu": "Blokada sieci - brak zasilania",
-                    "defrost": "Rozmra\u017Canie",
-                    "heating external source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o ogrzewania",
+                    "defrost": "Rozmra\u017canie",
+                    "heating_external_source": "Zewn\u0119trzne \u017ar\u00f3d\u0142o ogrzewania",
                     "cooling": "Ch\u0142odzenie",
-                    "no request": "Brak zapotrzebowania"
+                    "no_request": "Brak zapotrzebowania"
                 },
                 "state_attributes": {
                     "evu_text": {
                         "state": {
-                            "evu_until": "Czas blokady d\u0142u\u017Cszy o {evu_time} minut.2",
+                            "evu_until": "Czas blokady d\u0142u\u017cszy o {evu_time} minut.2",
                             "evu_in": "Czas blokady za {evu_time} minut."
                         }
                     }
@@ -230,9 +251,9 @@
             "error_reason": {
                 "name": "Ostatni b\u0142\u0105d",
                 "state": {
-                    "701": "B\u0142\u0105d niskiego ci\u015Bnienia.",
-                    "702": "Zatrzymanie przy niskim ci\u015Bnieniu\nRESETUJ automat.",
-                    "703": "\u015Brodek przeciw zamarzaniu\nProsz\u0119 wezwa\u0107 montera",
+                    "701": "B\u0142\u0105d niskiego ci\u015bnienia.",
+                    "702": "Zatrzymanie przy niskim ci\u015bnieniu\nRESETUJ automat.",
+                    "703": "\u015brodek przeciw zamarzaniu\nProsz\u0119 wezwa\u0107 montera",
                     "704": "B\u0142\u0105d gor\u0105cego gazu\nZresetuj w gg:mm",
                     "705": "Zabezpieczenie silnika VEN\nProsz\u0119 wezwa\u0107 instalatora",
                     "706": "Zabezpieczenie silnika BCP\nProsz\u0119 wezwa\u0107 instalatora",
@@ -241,22 +262,22 @@
                     "709": "Czujnik przep\u0142ywu\nProsz\u0119 wezwa\u0107 instalatora",
                     "710": "Czujnik gor\u0105cego gazu\nProsz\u0119 wezwa\u0107 instalatora",
                     "711": "Temperatura zewn\u0119trzna czujnik\nProsz\u0119 wezwa\u0107 instalatora",
-                    "712": "Czujnik ciep\u0142ej wody u\u017Cytkowej.\nProsz\u0119 wezwa\u0107 instalatora",
+                    "712": "Czujnik ciep\u0142ej wody u\u017cytkowej.\nProsz\u0119 wezwa\u0107 instalatora",
                     "713": "Czujnik HS-on\nProsz\u0119 wezwa\u0107 instalatora",
                     "714": "Gor\u0105cy gaz SW\nResetuj w gg:mm",
-                    "715": "Wy\u0142\u0105czenie wysokiego ci\u015Bnienia\nRESET auto.",
-                    "716": "Usterka wysokiego ci\u015Bnienia\nProsz\u0119 wezwa\u0107 instalatora",
+                    "715": "Wy\u0142\u0105czenie wysokiego ci\u015bnienia\nRESET auto.",
+                    "716": "Usterka wysokiego ci\u015bnienia\nProsz\u0119 wezwa\u0107 instalatora",
                     "717": "Przep\u0142yw HS\nProsz\u0119 wezwa\u0107 instalatora",
                     "718": "Maks. temp. zew.\nRESET auto. w gg:mm",
                     "719": "Min. temp. zew.\nRESET auto. w gg:mm",
                     "720": "Temperatura HS\nRESET AUTO. w gg:mm",
-                    "721": "Wy\u0142\u0105czenie przy niskim ci\u015Bnieniu\nRESET auto.",
+                    "721": "Wy\u0142\u0105czenie przy niskim ci\u015bnieniu\nRESET auto.",
                     "722": "Tempdiff HW\nProsz\u0119 wezwa\u0107 instalatora",
                     "723": "Tempdiff SW\nProsz\u0119 wezwa\u0107 instalatora",
-                    "724": "Rozmra\u017Canie Tempdiff\nProsz\u0119 wezwa\u0107 instalatora",
+                    "724": "Rozmra\u017canie Tempdiff\nProsz\u0119 wezwa\u0107 instalatora",
                     "725": "B\u0142\u0105d systemowy SW\nProsz\u0119 wezwa\u0107 instalatora",
                     "726": "Czujnik obiegu mieszania 1\nProsz\u0119 wezwa\u0107 instalatora",
-                    "727": "Ci\u015Bnienie solanki\nProsz\u0119 wezwa\u0107 instalatora",
+                    "727": "Ci\u015bnienie solanki\nProsz\u0119 wezwa\u0107 instalatora",
                     "728": "Czujnik HS wy\u0142\u0105czony\nProsz\u0119 wezwa\u0107 instalatora",
                     "729": "B\u0142\u0105d pola wiruj\u0105cego\nProsz\u0119 wezwa\u0107 instalatora",
                     "732": "Usterka ch\u0142odzenia\nProsz\u0119 wezwa\u0107 instalatora",
@@ -271,71 +292,81 @@
                     "752": "B\u0142\u0105d przep\u0142ywu",
                     "755": "Utracono po\u0142\u0105czenie z modu\u0142em slave\nZadzwo\u0144 do instalatora",
                     "756": "Utracono po\u0142\u0105czenie z masterem\nZadzwo\u0144 do instalatora",
-                    "757": "Usterka niskiego ci\u015Bnienia w urz\u0105dzeniu SW",
-                    "758": "Usterka rozmra\u017Cania",
+                    "757": "Usterka niskiego ci\u015bnienia w urz\u0105dzeniu SW",
+                    "758": "Usterka rozmra\u017cania",
                     "759": "Komunikat TDI",
-                    "760": "B\u0142\u0105d rozmra\u017Cania",
+                    "760": "B\u0142\u0105d rozmra\u017cania",
                     "761": "Przekroczenie limitu czasu LIN/utracono po\u0142\u0105czenie LIN",
                     "762": "czujnik (wlot parownika)",
-                    "763": "czujnik (wlot spr\u0119\u017Carki)",
-                    "764": "Czujnik Grza\u0142ka spr\u0119\u017Carki",
+                    "763": "czujnik (wlot spr\u0119\u017carki)",
+                    "764": "Czujnik Grza\u0142ka spr\u0119\u017carki",
                     "765": "Przegrzanie",
-                    "766": "zakres funkcjonalny spr\u0119\u017Carki",
+                    "766": "zakres funkcjonalny spr\u0119\u017carki",
                     "767": "STB E-Rod",
                     "768": "Monitorowanie przep\u0142ywu",
                     "769": "Sterowanie pomp\u0105",
                     "770": "Niskie przegrzanie",
                     "771": "Wysokie przegrzanie",
                     "776": "granica zastosowania-CP",
-                    "777": "Zaw\u00F3r rozpr\u0119\u017Cny",
-                    "778": "Czujnik niskiego ci\u015Bnienia",
-                    "779": "Czujnik wysokiego ci\u015Bnienia",
+                    "777": "Zaw\u00f3r rozpr\u0119\u017cny",
+                    "778": "Czujnik niskiego ci\u015bnienia",
+                    "779": "Czujnik wysokiego ci\u015bnienia",
                     "780": "Czujnik EVI",
                     "781": "Temperatura cieczy czujnik przed EXV",
                     "782": "Temp. gazu zasysanego EVI czujnik",
-                    "783": "Komunikacja SEC – Falownik",
+                    "783": "Komunikacja SEC \u2013 Falownik",
                     "784": "Blokada VSS",
                     "785": "Uszkodzona p\u0142yta SEC",
                     "787": "Alarm VD",
-                    "788": "Powa\u017Cna usterka VSS",
+                    "788": "Powa\u017cna usterka VSS",
                     "789": "Nie znaleziono LIN/kodowania",
-                    "790": "Powa\u017Cna usterka VSS",
+                    "790": "Powa\u017cna usterka VSS",
                     "791": "Utracono komunikacj\u0119 ModBus",
                     "792": "Utracono po\u0142\u0105czenie LIN",
-                    "793": "Powa\u017Cna usterka VSS",
-                    "-1": "Nieznany b\u0142\u0105d"
-                }
+                    "793": "Powa\u017cna usterka VSS",
+                    "minus_1": "Nieznany b\u0142\u0105d"
+                },
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Czas"
+                    },
+					"cause": {
+						"name": "Przyczyna"
+					},
+					"remedy": {
+						"name": "Rozwi\u0105zanie"
+					}
+				}
             },
             "switchoff_reason": {
-                "name": "Pow\u00F3d wy\u0142\u0105czenia",
+                "name": "Pow\u00f3d wy\u0142\u0105czenia",
                 "state": {
-                    "0": "Zak\u0142\u00F3cenie pompy ciep\u0142a",
-                    "1": "Zaburzenie ro\u015Blin",
+                    "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
+                    "1": "Zaburzenie ro\u015blin",
                     "2": "Tryb pracy drugiego generatora ciep\u0142a",
                     "3": "Blokada EVU",
                     "4": "",
                     "5": "Odszranianie powietrzem",
-                    "6": "Maksymalne ograniczenie temperatury u\u017Cytkowania",
-                    "7": "Ograniczenie temperatury u\u017Cytkowania minimalne",
-                    "8": "Ni\u017Csze ograniczenie u\u017Cytkowania",
+                    "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
+                    "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
+                    "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                     "9": "nieaktywny",
-                    "11": "Przep\u0142yw",
-                    "-1": "Nieznane wy\u0142\u0105czenie"
+                    "11": "Przep\u0142yw"
                 }
             },
             "status_line_1": {
                 "name": "Stan 1",
                 "state": {
-                    "heatpump running": "Pompa ciep\u0142a jest aktywna",
-                    "heatpump idle": "Pompa ciep\u0142a jest nieaktywna",
-                    "heatpump coming": "Pompa ciep\u0142a jest uruchamiana",
-                    "heatpump shutdown": "Pompa ciep\u0142a wy\u0142\u0105cza si\u0119",
-                    "errorcode slot": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017Adzie 0",
-                    "pump forerun": "Rozbieg pompy",
-                    "defrost": "Rozmra\u017Canie",
-                    "writing on LIN connection": "Zapis na po\u0142\u0105czeniu LIN",
-                    "compressor heating up": "Spr\u0119\u017Carka nagrzewa si\u0119",
-                    "compressor heater": "Grza\u0142ka spr\u0119\u017Carki"
+                    "heatpump_running": "Pompa ciep\u0142a jest aktywna",
+                    "heatpump_idle": "Pompa ciep\u0142a jest nieaktywna",
+                    "heatpump_coming": "Pompa ciep\u0142a jest uruchamiana",
+                    "heatpump_shutdown": "Pompa ciep\u0142a wy\u0142\u0105cza si\u0119",
+                    "errorcode_slot_0": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017adzie 0",
+                    "pump_forerun": "Rozbieg pompy",
+                    "defrost": "Rozmra\u017canie",
+                    "waiting_on_lin_connection": "Oczekiwanie na po\u0142\u0105czenie LIN",
+                    "compressor_heating_up": "Spr\u0119\u017carka nagrzewa si\u0119",
+                    "compressor_heater": "Grza\u0142ka spr\u0119\u017carki"
                 }
             },
             "status_line_2": {
@@ -350,7 +381,7 @@
                 "name": "Stan 3",
                 "state": {
                     "heating": "ogrzewanie",
-                    "defrost": "rozmra\u017Canie",
+                    "defrost": "rozmra\u017canie",
                     "cooling": "ch\u0142odzenie",
                     "pump forerun": "rozbieg pompy",
                     "thermal desinfection": "dezynfekcja termiczna",
@@ -360,18 +391,18 @@
                     "lock time": "czas blokady",
                     "domestic water": "ciep\u0142a woda",
                     "flow monitoring": "monitorowanie przep\u0142ywu",
-                    "grid switch on delay": "op\u00F3\u017Anienie w\u0142\u0105czenia sieci",
+                    "grid switch on delay": "op\u00f3\u017anienie w\u0142\u0105czenia sieci",
                     "info bake out program": "Informacje o programie pieczenia",
-                    "heating external engery source": "ogrzewanie z zewn\u0119trznego \u017Ar\u00F3d\u0142a energii",
-                    "domestic water external energy source": "Zewn\u0119trzne \u017Ar\u00F3d\u0142o energii ciep\u0142ej wody",
+                    "heating external engery source": "ogrzewanie z zewn\u0119trznego \u017ar\u00f3d\u0142a energii",
+                    "domestic water external energy source": "Zewn\u0119trzne \u017ar\u00f3d\u0142o energii ciep\u0142ej wody",
                     "second heat generator 1 active": "drugi generator ciep\u0142a 1 aktywny"
                 }
             },
             "heat_source_output": {
-                "name": "Do \u017Ar\u00F3d\u0142a ciep\u0142a"
+                "name": "Do \u017ar\u00f3d\u0142a ciep\u0142a"
             },
             "heat_source_input_temperature": {
-                "name": "Wej\u015Bcie \u017Ar\u00F3d\u0142a ciep\u0142a"
+                "name": "Wej\u015bcie \u017ar\u00f3d\u0142a ciep\u0142a"
             },
             "outdoor_temperature": {
                 "name": "Temperatura zewn\u0119trzna"
@@ -380,31 +411,31 @@
                 "name": "Czas stanu"
             },
             "outdoor_temperature_average": {
-                "name": "\u015Arednia temperatura zewn\u0119trzna"
+                "name": "\u015arednia temperatura zewn\u0119trzna"
             },
             "compressor1_impulses": {
-                "name": "Impulsy spr\u0119\u017Carki 1"
+                "name": "Impulsy spr\u0119\u017carki 1"
             },
             "compressor1_operation_hours": {
-                "name": "Godziny pracy spr\u0119\u017Carki 1"
+                "name": "Godziny pracy spr\u0119\u017carki 1"
             },
             "compressor2_impulses": {
-                "name": "Impulsy spr\u0119\u017Carki 2"
+                "name": "Impulsy spr\u0119\u017carki 2"
             },
             "compressor2_operation_hours": {
-                "name": "Godziny pracy spr\u0119\u017Carki 2"
+                "name": "Godziny pracy spr\u0119\u017carki 2"
             },
             "operation_hours": {
                 "name": "Godziny pracy"
             },
             "heat_amount_counter": {
-                "name": "Licznik ilo\u015Bci ciep\u0142a"
+                "name": "Licznik ilo\u015bci ciep\u0142a"
             },
             "hot_gas_temperature": {
                 "name": "Temperatura gor\u0105cego gazu"
             },
             "suction_compressor_temperature": {
-                "name": "Temperatura spr\u0119\u017Carki ss\u0105cej"
+                "name": "Temperatura spr\u0119\u017carki ss\u0105cej"
             },
             "suction_evaporator_temperature": {
                 "name": "Temperatura parownika ss\u0105cego"
@@ -419,31 +450,34 @@
                 "name": "Cel przegrzania"
             },
             "high_pressure": {
-                "name": "Wysokie ci\u015Bnienie"
+                "name": "Wysokie ci\u015bnienie"
             },
             "low_pressure": {
-                "name": "Niskie ci\u015Bnienie"
+                "name": "Niskie ci\u015bnienie"
             },
             "additional_heat_generator_operation_hours": {
-                "name": "Dodatkowe godziny pracy \u017Ar\u00F3d\u0142a ciep\u0142a"
+                "name": "Godziny pracy dodatkowego \u017a\u00f3d\u0142a ciep\u0142a"
+            },
+            "additional_heat_generator2_operation_hours": {
+                "name": "Godziny pracy dodatkowego \u017a\u00f3d\u0142a ciep\u0142a"
             },
             "analog_out1": {
-                "name": "Wyj\u015Bcie analogowe 1"
+                "name": "Wyj\u015bcie analogowe 1"
             },
             "analog_out2": {
-                "name": "Wyj\u015Bcie analogowe 2"
+                "name": "Wyj\u015bcie analogowe 2"
             },
             "current_heat_output": {
                 "name": "Aktualna moc cieplna"
             },
             "additional_heat_generator_amount_counter": {
-                "name": "Licznik ilo\u015Bci dodatkowego \u017Ar\u00F3d\u0142a ciep\u0142a"
+                "name": "Licznik ilo\u015bci dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a"
             },
             "heat_source_output_temperature": {
-                "name": "Moc \u017Ar\u00F3d\u0142a ciep\u0142a"
+                "name": "Moc \u017ar\u00f3d\u0142a ciep\u0142a"
             },
             "pump_frequency": {
-                "name": "Cz\u0119stotliwo\u015B\u0107 pompy"
+                "name": "Cz\u0119stotliwo\u015b\u0107 pompy"
             },
             "domestic_water": {
                 "name": "Ciep\u0142a woda"
@@ -455,55 +489,55 @@
                 "name": "Godziny pracy ciep\u0142ej wody"
             },
             "dhw_heat_amount": {
-                "name": "Ilo\u015B\u0107 ciep\u0142a ciep\u0142ej wody"
+                "name": "Ilo\u015b\u0107 ciep\u0142a ciep\u0142ej wody"
             },
             "dhw_energy_input": {
-                "name": "Pob\u00F3r energii ciep\u0142ej wody"
+                "name": "Pob\u00f3r energii ciep\u0142ej wody"
             },
             "flow_in_temperature": {
-                "name": "Temperatura na wej\u015Bciu"
+                "name": "Temperatura na wej\u015bciu"
             },
             "flow_in_circuit1_temperature": {
-                "name": "Obwód temperatury wlotowej 1"
+                "name": "Obw\u00f3d temperatury wlotowej 1"
             },
             "flow_in_circuit2_temperature": {
-                "name": "Obwód temperatury wlotowej 2"
+                "name": "Obw\u00f3d temperatury wlotowej 2"
             },
             "flow_in_circuit3_temperature": {
-                "name": "Obwód temperatury wlotowej 3"
+                "name": "Obw\u00f3d temperatury wlotowej 3"
             },
             "flow_in_circuit1_target_temperature": {
-                "name": "Obwód docelowej temperatury na wlocie 1"
+                "name": "Obw\u00f3d docelowej temperatury na wlocie 1"
             },
             "flow_in_circuit2_target_temperature": {
-                "name": "Obwód docelowej temperatury na wlocie 2"
+                "name": "Obw\u00f3d docelowej temperatury na wlocie 2"
             },
             "flow_in_circuit3_target_temperature": {
-                "name": "Obwód docelowej temperatury na wlocie 3"
+                "name": "Obw\u00f3d docelowej temperatury na wlocie 3"
             },
             "flow_out_temperature": {
-                "name": "Temperatura na wyj\u015Bciu"
+                "name": "Temperatura na wyj\u015bciu"
             },
             "flow_out_temperature_target": {
-                "name": "Docelowa temperatura na wyj\u015Bciu"
+                "name": "Docelowa temperatura na wyj\u015bciu"
             },
             "operation_hours_heating": {
-                "name":"Godziny pracy ogrzewania"
+                "name": "Godziny pracy ogrzewania"
             },
             "heat_amount_heating": {
-                "name":"Ilo\u015B\u0107 ciep\u0142a grzewczego"
+                "name": "Ilo\u015b\u0107 ciep\u0142a grzewczego"
             },
             "heat_amount_flow_rate": {
-                "name":"Nat\u0119\u017Cenie przep\u0142ywu ilo\u015Bci ciep\u0142a grzewczego"
+                "name": "Nat\u0119\u017cenie przep\u0142ywu ilo\u015bci ciep\u0142a grzewczego"
             },
             "heat_source_flow_rate": {
-                "name":"Nat\u0119\u017Cenie przep\u0142ywu \u017Ar\u00F3d\u0142a ciep\u0142a grzewczego"
+                "name": "Nat\u0119\u017cenie przep\u0142ywu \u017ar\u00f3d\u0142a ciep\u0142a grzewczego"
             },
             "heat_energy_input": {
-                "name": "Ogrzewanie wej\u015Bciowe energii"
+                "name": "Ogrzewanie wej\u015bciowe energii"
             },
             "flow_out_temperature_external": {
-                "name": "Zewn\u0119trzna temperatura na wyj\u015Bciu"
+                "name": "Zewn\u0119trzna temperatura na wyj\u015bciu"
             },
             "solar_collector_temperature": {
                 "name": "Kolektor solarny"
@@ -540,43 +574,43 @@
     },
     "config": {
         "abort": {
-            "already_configured": "Us\u0142uga jest ju\u017C skonfigurowana.",
-            "already_in_progress": "Przep\u0142yw konfiguracji jest ju\u017C uruchomiony.",
-            "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 ze sterownikiem Luxtronik.\nSprawd\u017A adres IP/nazw\u0119 hosta i numer portu.",
+            "already_configured": "Us\u0142uga jest ju\u017c skonfigurowana.",
+            "already_in_progress": "Przep\u0142yw konfiguracji jest ju\u017c uruchomiony.",
+            "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 ze sterownikiem Luxtronik.\nSprawd\u017a adres IP/nazw\u0119 hosta i numer portu.",
             "no_devices_found": "Nie znaleziono urz\u0105dze\u0144 w sieci LAN",
-            "single_instance_allowed": "Sterownik jest ju\u017C skonfigurowany. Mo\u017Cliwa jest tylko jedna instancja.",
+            "single_instance_allowed": "Sterownik jest ju\u017c skonfigurowany. Mo\u017cliwa jest tylko jedna instancja.",
             "unknown": "Nieznany b\u0142\u0105d"
         },
         "error": {
             "address": "Nieprawid\u0142owy adres zdalny. Adres musi by\u0107 adresem IP lub rozpoznawaln\u0105 nazw\u0105 hosta.",
-            "address_in_use": "Wybrany port nas\u0142uchiwania jest ju\u017C u\u017Cywany w tym systemie.",
+            "address_in_use": "Wybrany port nas\u0142uchiwania jest ju\u017c u\u017cywany w tym systemie.",
             "unknown": "Niespodziewany b\u0142\u0105d"
         },
         "step": {
             "user": {
-                "description": "Skonfiguruj sterownik pompy ciep\u0142a Luxtronik, aby umo\u017Cliwi\u0107 monitorowanie i kontrol\u0119.",
+                "description": "Skonfiguruj sterownik pompy ciep\u0142a Luxtronik, aby umo\u017cliwi\u0107 monitorowanie i kontrol\u0119.",
                 "data": {
-                  "host": "Host",
-                  "port": "Port sieciowy"
+                    "host": "Host",
+                    "port": "Port sieciowy"
                 },
                 "data_description": {
                     "host": "Nazwa hosta lub adres IP",
                     "port": "Zwykle 8889 lub 8888"
                 }
-             },
-             "options": {
-                "description": "Ustawienia pompy ciep\u0142a Luxtronik {name}.\nTe ustawienia mo\u017Cna r\u00F3wnie\u017C zmieni\u0107 p\u00F3\u017Aniej w zak\u0142adce Integracje.",
+            },
+            "options": {
+                "description": "Ustawienia pompy ciep\u0142a Luxtronik {name}.\nTe ustawienia mo\u017cna r\u00f3wnie\u017c zmieni\u0107 p\u00f3\u017aniej w zak\u0142adce Integracje.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Identyfikator czujnika temperatury wewn\u0119trznej",
                     "control_mode_home_assistant": "Eksperymentalnie!: Kontroluj stan w\u0142\u0105czania/wy\u0142\u0105czania termostatu za pomoc\u0105 Home Assistant.",
-                    "ha_sensor_prefix": "Przedrostek identyfikator\u00F3w jednostek"
+                    "ha_sensor_prefix": "Przedrostek identyfikator\u00f3w jednostek"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "W Home Assistant tworzony jest termostat do sterowania ogrzewaniem. Rzeczywist\u0105 temperatur\u0119 ustawia czujnik Home Assistant.\nJe\u015Bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, to pole powinno pozosta\u0107 puste.",
-                    "control_mode_home_assistant": "Kiedy termostat Home Assistant znajduje si\u0119 w stanie bezczynno\u015Bci, do firmy Luxtronik zg\u0142aszany jest stan wy\u0142\u0105czenia i firma Luxtronik nie mo\u017Ce uruchomi\u0107 tego elementu.",
-                    "ha_sensor_prefix": "Wa\u017Cne w przypadku stosowania kilku pomp ciep\u0142a.\n W przypadku jednej mo\u017Cna po prostu zastosowa\u0107 „luxtronik”."
+                    "ha_sensor_indoor_temperature": "W Home Assistant tworzony jest termostat do sterowania ogrzewaniem. Rzeczywist\u0105 temperatur\u0119 ustawia czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, to pole powinno pozosta\u0107 puste.",
+                    "control_mode_home_assistant": "Kiedy termostat Home Assistant znajduje si\u0119 w stanie bezczynno\u015bci, do firmy Luxtronik zg\u0142aszany jest stan wy\u0142\u0105czenia i firma Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
+                    "ha_sensor_prefix": "Wa\u017cne w przypadku stosowania kilku pomp ciep\u0142a.\n W przypadku jednej mo\u017cna po prostu zastosowa\u0107 \u201eluxtronik\u201d."
                 }
-             }
+            }
         }
     },
     "options": {
@@ -586,12 +620,12 @@
                 "data": {
                     "ha_sensor_indoor_temperature": "Identyfikator czujnika temperatury wewn\u0119trznej",
                     "control_mode_home_assistant": "Eksperymentalnie!: Kontroluj stan w\u0142\u0105czania/wy\u0142\u0105czania termostatu za pomoc\u0105 Home Assistant.",
-                    "ha_sensor_prefix": "Przedrostek identyfikator\u00F3w jednostek"
+                    "ha_sensor_prefix": "Przedrostek identyfikator\u00f3w jednostek"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "W Home Assistant tworzony jest termostat do sterowania ogrzewaniem. Rzeczywist\u0105 temperatur\u0119 ustawia czujnik Home Assistant.\nJe\u015Bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, to pole powinno pozosta\u0107 puste.",
-                    "control_mode_home_assistant": "Kiedy termostat Home Assistant znajduje si\u0119 w stanie bezczynno\u015Bci, do firmy Luxtronik zg\u0142aszany jest stan wy\u0142\u0105czenia i firma Luxtronik nie mo\u017Ce uruchomi\u0107 tego elementu.",
-                    "ha_sensor_prefix": "Wa\u017Cne w przypadku stosowania kilku pomp ciep\u0142a.\nW przypadku jednej mo\u017Cna po prostu zastosowa\u0107 „luxtronik”."
+                    "ha_sensor_indoor_temperature": "W Home Assistant tworzony jest termostat do sterowania ogrzewaniem. Rzeczywist\u0105 temperatur\u0119 ustawia czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, to pole powinno pozosta\u0107 puste.",
+                    "control_mode_home_assistant": "Kiedy termostat Home Assistant znajduje si\u0119 w stanie bezczynno\u015bci, do firmy Luxtronik zg\u0142aszany jest stan wy\u0142\u0105czenia i firma Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
+                    "ha_sensor_prefix": "Wa\u017cne w przypadku stosowania kilku pomp ciep\u0142a.\nW przypadku jednej mo\u017cna po prostu zastosowa\u0107 \u201eluxtronik\u201d."
                 }
             }
         }
