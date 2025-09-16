@@ -9,7 +9,6 @@ from typing import Any
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers import selector
 from homeassistant import config_entries
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform
@@ -34,13 +33,6 @@ from .schema_helper import build_user_data_schema, build_options_schema
 
 # endregion Imports
 
-async def _async_has_devices(hass: HomeAssistant) -> bool:
-    """Return if there are devices that can be discovered."""
-    # Check if there are any devices that can be discovered in the network.
-    device_list = await hass.async_add_executor_job(discover)
-    return device_list is not None and len(device_list) > 0
-
-
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
@@ -51,21 +43,58 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     _sensor_prefix = DOMAIN
     _title = "Luxtronik"
 
+    def _build_config(self, host: str, port: int) -> dict[str, Any]:
+        return {
+            CONF_HOST: host,
+            CONF_PORT: port,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+
+    async def _discover_devices(self) -> list[tuple[str, int]]:
+        """Run device discovery in executor."""
+        return await self.hass.async_add_executor_job(discover)
+
+    async def _connect_and_get_coordinator(self, config: dict[str, Any]) -> LuxtronikCoordinator | None:
+        """Try to connect to a Luxtronik device and return coordinator."""
+        try:
+            coordinator = LuxtronikCoordinator.connect(self.hass, config)
+            LOGGER.info("Luxtronik connect to device %s:%s successful!", config[CONF_HOST], config[CONF_PORT])
+            return coordinator
+        except Exception as err:
+            LOGGER.error("Luxtronik connect to device %s:%s failed: %s", config[CONF_HOST], config[CONF_PORT], err)
+            return None
+
+    async def _set_unique_id_or_abort(self, coordinator: LuxtronikCoordinator, config: dict[str, Any]) -> bool:
+        """Set unique ID and abort if already configured."""
+        try:
+            await self.async_set_unique_id(coordinator.unique_id)
+            self._abort_if_unique_id_configured()
+            return True
+        except AbortFlow:
+            LOGGER.debug("Device already configured: %s", config[CONF_HOST])
+            return False
+
+    def _create_entry(self, config: dict[str, Any]) -> FlowResult:
+        """Create a config entry."""
+        return self.async_create_entry(
+            title=f"{config[CONF_HOST]}:{config[CONF_PORT]}",
+            data=config,
+        )
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle a flow initiated by the user."""
         try:
             LOGGER.info("Starting async_step_user")
-
-            device_list = await self.hass.async_add_executor_job(discover)
-            LOGGER.info("Discovered devices: %s", device_list)
+            LOGGER.info("Starting discovery of Luxtronik devices on network")
+            device_list = await self._discover_devices()
 
             configured_hosts_ports = {
                 (entry.data.get(CONF_HOST), entry.data.get(CONF_PORT))
                 for entry in self._async_current_entries()
             }
-            LOGGER.info("Already configured devices: %s", configured_hosts_ports)
 
             self._all_devices = [
                 {
@@ -75,22 +104,18 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 }
                 for host, port in device_list
             ]
-            LOGGER.info("All devices with config status: %s", self._all_devices)
+            LOGGER.info("All discovered devices with config status: %s", self._all_devices)
 
             self._available_devices = [
-                d for d in self._all_devices #if not d["configured"]
+                d for d in self._all_devices if not d["configured"]
             ]
             LOGGER.info("Available (unconfigured) devices: %s", self._available_devices)
 
             if self._available_devices:
-                device_options = {
-                    f"{d['host']}:{d['port']}": f"{d['host']}:{d['port']}"
-                    for d in self._available_devices
-                }
-                LOGGER.info("Presenting selection form for available devices")
-                LOGGER.info(f"device_options={device_options}")
+                device_options_list = [f"{d['host']}:{d['port']}" for d in self._available_devices]
 
-                device_options_list = list(device_options.values())
+                LOGGER.info("Presenting selection form for available devices")
+                LOGGER.info(f"device_options_list={device_options_list}")
 
                 return self.async_show_form(
                     step_id="select_devices",
@@ -136,34 +161,19 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         selected = user_input.get("selected_devices", [])
 
+
         for device_str in selected:
             host, port = device_str.split(":")
-            config = {
-                CONF_HOST: host,
-                CONF_PORT: int(port),
-                CONF_TIMEOUT: DEFAULT_TIMEOUT,
-                CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
-            }
+            config = self._build_config(host, port)
 
-            try:
-                coordinator = LuxtronikCoordinator.connect(self.hass, config)
-                await self.async_set_unique_id(coordinator.unique_id)
-                self._abort_if_unique_id_configured()
+            coordinator = await self._connect_and_get_coordinator(config)
+            if not coordinator:
+                return self.async_abort(reason="cannot_connect")
 
-                self.hass.async_create_task(
-                    self.async_create_entry(
-                        title=f"{host}:{port}",
-                        data=config,
-                    )
-                )
+            if not await self._set_unique_id_or_abort(coordinator,config):
+                return self.async_abort(reason="already_configured")
 
-            except AbortFlow:
-                LOGGER.debug("Device already configured: %s", config[CONF_HOST])
-                continue  # Skip this device
-
-            except Exception as err:
-                LOGGER.error("Failed to connect to %s:%s during selection: %s", host, port, err)
-                continue  # Skip this device
+            return self._create_entry(config)
 
         return self.async_abort(reason="devices_configured")
 
@@ -178,24 +188,17 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 data_schema=build_user_data_schema()
             )
 
-        try:
-            coordinator = LuxtronikCoordinator.connect(self.hass, user_input)
-            await self.async_set_unique_id(coordinator.unique_id)
-            self._abort_if_unique_id_configured()
+        config = self._build_config(user_input[CONF_HOST], user_input[CONF_PORT])
 
-        except AbortFlow:
-            LOGGER.debug("Device already configured: %s", user_input[CONF_HOST])
-            return self.async_abort(reason="already_configured")
-
-        except Exception as err:
-            LOGGER.error("Failed to connect during manual entry: %s", err)
+        coordinator = await self._connect_and_get_coordinator(config)
+        if not coordinator:
             return self.async_abort(reason="cannot_connect")
 
-        LOGGER.info("Creating entry from manual input: %s", user_input)
-        return self.async_create_entry(
-            title=f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}",
-            data=user_input,
-        )
+        if not await self._set_unique_id_or_abort(coordinator,config):
+            return self.async_abort(reason="already_configured")
+
+        return self._create_entry(config)
+
 
     async def _async_migrate_data_from_custom_component_luxtronik2(self):
         """
@@ -247,46 +250,52 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Prepare configuration for a DHCP discovered Luxtronik heatpump."""
         try:
             LOGGER.info(
-                "DHCP discovery: hostname='%s', IP='%s'",
+                "DHCP discovered a possible Luxtronik device '%s' @ '%s'",
                 discovery_info.hostname,
                 discovery_info.ip,
             )
 
-            # Run discover in executor to avoid blocking
-            heatpump_list = await self.hass.async_add_executor_job(discover)
+            configured_hosts = {
+                entry.data.get(CONF_HOST)
+                for entry in self._async_current_entries()
+            }
 
-            # Match discovered IP
+            # Check if IP is already configured
+            if discovery_info.ip in configured_hosts:
+                LOGGER.info("DHCP IP '%s' is already configured as Luxtronik device, aborting.", discovery_info.ip)
+                return self.async_abort(reason="already_configured")
+
+            heatpump_list = await self._discover_devices()
+
+            # Check if DHCP device was also discovered as Luxtronik device
             matched = next(
                 ((host, port) for host, port in heatpump_list if host == discovery_info.ip),
                 None
             )
 
-            if not matched:
-                LOGGER.warning("No matching device found for DHCP IP: %s", discovery_info.ip)
-                return self.async_abort(reason="no_devices_found")
+            host, port = matched if matched else (discovery_info.ip, DEFAULT_PORT)
 
-            host, port = matched
-            config = {
-                CONF_HOST: host,
-                CONF_PORT: port or DEFAULT_PORT,
-                CONF_TIMEOUT: DEFAULT_TIMEOUT,
-                CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
-            }
+            if matched:
+                LOGGER.info("DHCP device '%s:%s' not yet configured, and recognized as Luxtronik device!",
+                            host,
+                            port)
+            else:
+                LOGGER.warning(
+                    "DHCP IP: %s was not discovered as being a Luxtronik device. Will try to connect anyway, using default port %s",
+                    discovery_info.ip,
+                    DEFAULT_PORT
+                )
 
-            try:
-                coordinator = LuxtronikCoordinator.connect(self.hass, config)
-            except Exception as err:
-                LOGGER.error("DHCP connection failed: %s", err)
+            config = self._build_config(host, port)
+
+            coordinator = await self._connect_and_get_coordinator(config)
+            if not coordinator:
                 return self.async_abort(reason="cannot_connect")
 
-            await self.async_set_unique_id(coordinator.unique_id)
-            self._abort_if_unique_id_configured()
+            if not await self._set_unique_id_or_abort(coordinator,config):
+                return self.async_abort(reason="already_configured")
 
-            # Store for use in user step
-            self._discovery_host = host
-            self._discovery_port = port or DEFAULT_PORT
-
-            return await self.async_step_user()
+            return self._create_entry(config)
 
         except Exception as err:
             LOGGER.error("Unhandled DHCP discovery error", exc_info=err)
