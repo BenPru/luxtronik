@@ -1,12 +1,16 @@
+pytestmark = pytest.mark.enable_custom_integrations
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
+from homeassistant.const import CONF_HOST, CONF_PORT, DEFAULT_PORT
 
 from custom_components.luxtronik.config_flow import LuxtronikFlowHandler, LuxtronikOptionsFlowHandler
-from custom_components.luxtronik.const import DOMAIN, CONF_HOST, CONF_PORT, DEFAULT_PORT
+from custom_components.luxtronik.const import DOMAIN
+
 
 @pytest.fixture
 def mock_hass():
