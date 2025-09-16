@@ -111,7 +111,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
+        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
@@ -245,10 +245,27 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             description=description,
             device_info_ident=description.device_key,
         )
-        if description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
-            description.luxtronik_key_current_temperature = entry.data.get(
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE
+
+        domain = description.key.value
+        configured_indoor_temp_sensor = entry.data.get(
+            CONF_HA_SENSOR_INDOOR_TEMPERATURE
+        )
+
+        if configured_indoor_temp_sensor is not None:
+            description.luxtronik_key_current_temperature = (
+                configured_indoor_temp_sensor
             )
+            LOGGER.debug(
+                f"[INIT,{domain}] Using configured indoor temp sensor: {description.luxtronik_key_current_temperature}"
+            )
+        elif description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
+            description.luxtronik_key_current_temperature = (
+                LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE
+            )
+            LOGGER.debug(
+                f"[INIT,{domain}] Using default indoor temp sensor: {description.luxtronik_key_current_temperature}"
+            )
+
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
@@ -273,6 +290,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         data = self.coordinator.data if data is None else data
         if data is None:
             return
+        # domain = self.entity_description.key.value
         mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
         self._attr_hvac_mode = (
             None if mode is None else self.entity_description.hvac_mode_mapping[mode]
@@ -292,11 +310,12 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if self._attr_preset_mode == PRESET_NONE:  # or self._attr_is_aux_heat:
             self._last_hvac_mode_before_preset = None
         key = self.entity_description.luxtronik_key_current_temperature
-        if isinstance(key, str):
+        if key.startswith("sensor."):
             temp = self.hass.states.get(key)
             self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
         elif key != LuxCalculation.UNSET:
             self._attr_current_temperature = get_sensor_data(data, key)
+        # LOGGER.info(f'[{domain}] self._attr_current_temperature={self._attr_current_temperature}')
 
         key_tar = self.entity_description.luxtronik_key_target_temperature
         if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
@@ -350,7 +369,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         """Set new target temperature."""
         self._attr_target_temperature = kwargs[ATTR_TEMPERATURE]
         key_tar = self.entity_description.luxtronik_key_target_temperature
-        LOGGER.info(f"async_set_temperature={key_tar},{self._attr_target_temperature}")
+        LOGGER.debug(f"async_set_temperature={key_tar},{self._attr_target_temperature}")
         if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
                 key_tar.split(".")[1], int(self._attr_target_temperature * 10)
