@@ -3,10 +3,10 @@ pytestmark = pytest.mark.enable_custom_integrations
 
 from homeassistant import data_entry_flow
 from homeassistant.core import HomeAssistant
-from homeassistant.const import CONF_HOST, CONF_PORT, DEFAULT_PORT
+from homeassistant.const import CONF_HOST, CONF_PORT
 
 from custom_components.luxtronik.config_flow import LuxtronikFlowHandler, LuxtronikOptionsFlowHandler
-from custom_components.luxtronik.const import DOMAIN,CONF_HA_SENSOR_INDOOR_TEMPERATURE
+from custom_components.luxtronik.const import DOMAIN,CONF_HA_SENSOR_INDOOR_TEMPERATURE, DEFAULT_PORT
 
 
 @pytest.fixture
