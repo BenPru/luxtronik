@@ -1,6 +1,6 @@
+import pytest
 pytestmark = pytest.mark.enable_custom_integrations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.core import HomeAssistant

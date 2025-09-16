@@ -1,6 +1,6 @@
+import pytest
 pytestmark = pytest.mark.enable_custom_integrations
 
-import pytest
 from homeassistant import data_entry_flow
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_HOST, CONF_PORT, DEFAULT_PORT
