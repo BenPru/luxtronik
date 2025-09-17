@@ -16,17 +16,10 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Checkout plugin repo
-      uses: actions/checkout@v3
-      with:
-        repository: MatthewFlamm/pytest-homeassistant-custom-components
-        path: pytest-homeassistant-custom-components
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r tests/requirements-dev.txt
-        pip install ./pytest-homeassistant-custom-components
 
     - name: Run tests with coverage
       run: |
