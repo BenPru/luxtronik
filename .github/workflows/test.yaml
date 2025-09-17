@@ -20,6 +20,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r tests/requirements-dev.txt
+        pip install git+https://github.com/MatthewFlamm/pytest-homeassistant-custom-components.git
 
     - name: Run tests with coverage
       run: |

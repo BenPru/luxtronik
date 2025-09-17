@@ -1,4 +1,3 @@
 pytest
 pytest-asyncio
 pytest-cov
-git+https://github.com/MatthewFlamm/pytest-homeassistant-custom-components.git
