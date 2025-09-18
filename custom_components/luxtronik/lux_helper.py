@@ -71,24 +71,22 @@ def discover() -> list[tuple[str, int | None]]:
                         res_port: int | None = int(res_list[2])
                     except (ValueError, IndexError):
                         res_port = None
-                        
+
                     if res_port is None or res_port < 1 or res_port > 65535:
                         LOGGER.info(
                             f"Response contains [port={res_port}] which is not a valid port number,"
-                             "an old Luxtronic software version might be the reason. "
-                             "Skipping this port."
+                            "an old Luxtronic software version might be the reason. "
+                            "Skipping this port."
                         )
                     elif (ip_address, res_port) not in results:
-                        LOGGER.info(
-                            f"Discovered heatpump at {ip_address}:{res_port}"
-                        )
+                        LOGGER.info(f"Discovered heatpump at {ip_address}:{res_port}")
                         results.append((ip_address, res_port))
-                    
-                else:    
+
+                else:
                     LOGGER.debug(
                         f"Skipping invalid response from {ip_address}: {str(res_list)}"
                     )
-                    
+
             # if the timeout triggers, go on and use the other broadcast port
             except socket.timeout:
                 break
