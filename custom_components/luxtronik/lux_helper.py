@@ -42,6 +42,7 @@ LUXTRONIK_PARAMETERS_READ = 3003
 LUXTRONIK_CALCULATIONS_READ = 3004
 LUXTRONIK_VISIBILITIES_READ = 3005
 
+
 def discover() -> list[tuple[str, int | None]]:
     """Broadcast discovery for Luxtronik heat pumps."""
 
@@ -270,11 +271,25 @@ class Luxtronik:
 
             self._read()
 
-
     def _read(self):
-        self._read_data(LUXTRONIK_PARAMETERS_READ, LUXTRONIK_SOCKET_READ_SIZE_INTEGER, self.parameters, "parameters")
-        self._read_data(LUXTRONIK_CALCULATIONS_READ, LUXTRONIK_SOCKET_READ_SIZE_INTEGER, self.calculations, "calculations")
-        self._read_data(LUXTRONIK_VISIBILITIES_READ, LUXTRONIK_SOCKET_READ_SIZE_CHAR, self.visibilities, "visibilities")
+        self._read_data(
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+            self.parameters,
+            "parameters",
+        )
+        self._read_data(
+            LUXTRONIK_CALCULATIONS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+            self.calculations,
+            "calculations",
+        )
+        self._read_data(
+            LUXTRONIK_VISIBILITIES_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_CHAR,
+            self.visibilities,
+            "visibilities",
+        )
 
     def _write(self):
         for index, value in self.parameters.queue.items():
@@ -295,7 +310,9 @@ class Luxtronik:
         # Todo: Change methods to async
         # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
-    def _read_data(self, command: int, item_size: int, parser, label: str, retries: int = 1) -> None:
+    def _read_data(
+        self, command: int, item_size: int, parser, label: str, retries: int = 1
+    ) -> None:
         """Generic method to read data from the socket with timeout and retry handling."""
         data = []
 
@@ -312,10 +329,17 @@ class Luxtronik:
 
                 length = struct.unpack(">i", self._socket.recv(4))[0]
                 if length > self._max_data_length:
-                    LOGGER.warning("Skip reading %s! Length oversized! %s > %s", label, length, self._max_data_length)
+                    LOGGER.warning(
+                        "Skip reading %s! Length oversized! %s > %s",
+                        label,
+                        length,
+                        self._max_data_length,
+                    )
                     return
                 elif length <= 0 and command == LUXTRONIK_VISIBILITIES_READ:
-                    LOGGER.warning("Invalid length for %s (%s), forcing disconnect", label, length)
+                    LOGGER.warning(
+                        "Invalid length for %s (%s), forcing disconnect", label, length
+                    )
                     self._disconnect()
                     return
 
@@ -335,7 +359,12 @@ class Luxtronik:
                 return  # Success, exit after first successful attempt
 
             except socket.timeout:
-                LOGGER.warning("Timeout while reading %s (attempt %d/%d)", label, attempt + 1, retries + 1)
+                LOGGER.warning(
+                    "Timeout while reading %s (attempt %d/%d)",
+                    label,
+                    attempt + 1,
+                    retries + 1,
+                )
                 if attempt == retries:
                     self._disconnect()
                     return
