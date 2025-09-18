@@ -6,6 +6,7 @@ from __future__ import annotations
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_TIMEOUT, Platform as P
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity_registry import (
     async_get,
@@ -34,26 +35,27 @@ from .coordinator import LuxtronikCoordinator
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Luxtronik from a config entry."""
 
-    hass.data.setdefault(DOMAIN, {})
+    data = hass.data.setdefault(DOMAIN, {})
 
-    # Create API instance
-    coordinator = LuxtronikCoordinator.connect(hass, entry)
+    try:
+        coordinator = await LuxtronikCoordinator.connect(hass, entry)
+        await coordinator.async_config_entry_first_refresh()
+    except Exception as err:
+        LOGGER.error("Luxtronik connection failed: %s", err)
+        raise ConfigEntryNotReady from err
 
-    await coordinator.async_config_entry_first_refresh()
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
-    data = hass.data.setdefault(DOMAIN, {})
-    data[entry.entry_id] = {}
-    data[entry.entry_id][CONF_COORDINATOR] = coordinator
+    data[entry.entry_id] = {CONF_COORDINATOR: coordinator}
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Trigger a refresh again now that all platforms have registered
     hass.async_create_task(coordinator.async_refresh())
 
-    # hass.config_entries.async_setup_platforms(entry, PLATFORMS)
-
     await hass.async_add_executor_job(setup_hass_services, hass, entry)
+
+    LOGGER.info("Luxtronik integration setup completed for %s", entry.entry_id)
 
     return True
 

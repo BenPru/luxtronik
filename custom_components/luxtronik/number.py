@@ -9,6 +9,7 @@ from datetime import date, datetime
 from homeassistant.components.number import ENTITY_ID_FORMAT, NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util.dt import utcnow
 
@@ -31,10 +32,13 @@ from .number_entities_predefined import NUMBER_SENSORS
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up luxtronik number sensors dynamically through luxtronik discovery."""
-    data: dict = hass.data[DOMAIN][entry.entry_id]
+    """Set up Luxtronik binary sensors dynamically through Luxtronik discovery."""
+
+    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if not data or CONF_COORDINATOR not in data:
+        raise ConfigEntryNotReady
+
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
-    await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
         (

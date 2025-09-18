@@ -26,6 +26,7 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
 
@@ -181,10 +182,13 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up the Luxtronik thermostat from ConfigEntry."""
-    data: dict = hass.data[DOMAIN][entry.entry_id]
+    """Set up Luxtronik binary sensors dynamically through Luxtronik discovery."""
+
+    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if not data or CONF_COORDINATOR not in data:
+        raise ConfigEntryNotReady
+
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
-    await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
         (
