@@ -41,7 +41,7 @@ from .sensor_entities_predefined import SENSORS, SENSORS_INDEX, SENSORS_STATUS
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up Luxtronik binary sensors dynamically through Luxtronik discovery."""
+    """Set up Luxtronik sensors dynamically through Luxtronik discovery."""
 
     data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
     if not data or CONF_COORDINATOR not in data:
@@ -133,6 +133,9 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._sensor_data = get_sensor_data(
             coordinator.data, description.luxtronik_key.value
         )
+        self.async_on_remove(
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+        )
 
     async def _data_update(self, event):
         self._handle_coordinator_update()
@@ -141,12 +144,9 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if (
-            not self.coordinator.update_reason_write
-            and self.next_update is not None
-            and self.next_update > utcnow()
-        ):
+        if not self.should_update():
             return
+
         data = self.coordinator.data if data is None else data
         if data is None:
             return

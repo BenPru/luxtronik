@@ -44,7 +44,7 @@ async def async_setup_entry(
 
 
 class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
-    """Luxtronik Switch Entity."""
+    """Luxtronik Binary Sensor Entity."""
 
     entity_description: LuxtronikBinarySensorEntityDescription
     _coordinator: LuxtronikCoordinator
@@ -70,7 +70,9 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
-        hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+        self.async_on_remove(
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+        )
 
     async def _data_update(self, event):
         self._handle_coordinator_update()
@@ -80,28 +82,29 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if (
-            not self.coordinator.update_reason_write
-            and self.next_update is not None
-            and self.next_update > utcnow()
-        ):
+        if not self.should_update():
             return
+
         data = self.coordinator.data if data is None else data
         if data is None:
             return
+
         self._attr_state = get_sensor_data(
             data, self.entity_description.luxtronik_key.value
         )
-        if (
-            self.entity_description.on_state is True
-            or self.entity_description.on_state is False  # noqa: W503
-        ) and self._attr_state is not None:
+
+        if isinstance(self.entity_description.on_state, bool) and self._attr_state is not None:
             self._attr_state = bool(self._attr_state)
+
         if self.entity_description.inverted:
             self._attr_is_on = self._attr_state != self.entity_description.on_state
         else:
-            self._attr_is_on = self._attr_state == self.entity_description.on_state or (
-                self.entity_description.on_states is not None
-                and self._attr_state in self.entity_description.on_states  # noqa: W503
+            self._attr_is_on = (
+                self._attr_state == self.entity_description.on_state
+                or (
+                    self.entity_description.on_states is not None
+                    and self._attr_state in self.entity_description.on_states
+                )
             )
+
         super()._handle_coordinator_update()

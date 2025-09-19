@@ -11,6 +11,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import dt as dt_util
 from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
@@ -53,7 +54,7 @@ async def async_setup_entry(
 
 
 class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
-    """Luxtronik Sensor Entity."""
+    """Luxtronik Number Entity."""
 
     entity_description: LuxtronikNumberDescription
     _coordinator: LuxtronikCoordinator
@@ -80,6 +81,10 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
+        self.async_on_remove(
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+        )
+
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
@@ -88,15 +93,13 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if (
-            not self.coordinator.update_reason_write
-            and self.next_update is not None
-            and self.next_update > utcnow()
-        ):
+        if not self.should_update():
             return
+
         data = self.coordinator.data if data is None else data
         if data is None:
             return
+        
         self._attr_native_value = get_sensor_data(
             data, self.entity_description.luxtronik_key.value
         )
@@ -141,7 +144,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
                 or self._is_past(self._attr_cache[attr.key])
             )
         ):
-            self._attr_cache[attr.key] = datetime.now().date()
+            self._attr_cache[attr.key] = dt_util.utcnow().date()
         result = self._attr_cache[attr.key] if attr.key in self._attr_cache else ""
 
         return str(result)
@@ -154,4 +157,4 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
                 value = datetime.strptime(value, "%Y-%m-%d").date()
             except ValueError:
                 return True
-        return value < datetime.now().date()
+        return value < dt_util.utcnow().date()
