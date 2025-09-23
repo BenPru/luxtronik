@@ -153,7 +153,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         for device_str in selected:
             host, port = device_str.split(":")
-            config = self._build_config(host, port)
+            config = self._build_config(host, int(port))
 
             try:
                 coordinator = await connect_and_get_coordinator(self.hass, config)
@@ -184,7 +184,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 data_schema=build_user_data_schema()
             )
 
-        config = self._build_config(user_input[CONF_HOST], user_input[CONF_PORT])
+        config = self._build_config(user_input[CONF_HOST], int(user_input[CONF_PORT]))
 
         try:
             coordinator = await connect_and_get_coordinator(self.hass, config)
@@ -289,7 +289,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     DEFAULT_PORT
                 )
 
-            config = self._build_config(host, port)
+            config = self._build_config(host, int(port))
 
             try:
                 coordinator = await connect_and_get_coordinator(self.hass, config)
