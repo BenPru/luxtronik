@@ -27,7 +27,7 @@ from .const import (
     DOMAIN,
     LOGGER,
 )
-from .coordinator import LuxtronikCoordinator
+from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator, LuxtronikConnectionError
 from .lux_helper import discover
 from .schema_helper import build_user_data_schema, build_options_schema
 
@@ -54,16 +54,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _discover_devices(self) -> list[tuple[str, int]]:
         """Run device discovery in executor."""
         return await self.hass.async_add_executor_job(discover)
-
-    async def _connect_and_get_coordinator(self, config: dict[str, Any]) -> LuxtronikCoordinator | None:
-        """Try to connect to a Luxtronik device and return coordinator."""
-        try:
-            coordinator = LuxtronikCoordinator.connect(self.hass, config)
-            LOGGER.info("Luxtronik connect to device %s:%s successful!", config[CONF_HOST], config[CONF_PORT])
-            return coordinator
-        except Exception as err:
-            LOGGER.error("Luxtronik connect to device %s:%s failed: %s", config[CONF_HOST], config[CONF_PORT], err)
-            return None
 
     async def _set_unique_id_or_abort(self, coordinator: LuxtronikCoordinator, config: dict[str, Any]) -> bool:
         """Set unique ID and abort if already configured."""
@@ -120,7 +110,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_show_form(
                     step_id="select_devices",
                     data_schema=vol.Schema({
-                        vol.Required("selected_devices", default=[]): selector.SelectSelector(
+                        vol.Optional("selected_devices", default=[]): selector.SelectSelector(
                             selector.SelectSelectorConfig(
                                 options=device_options_list,
                                 multiple=True,
@@ -138,11 +128,11 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.info("All discovered devices are already configured. Showing manual entry form.")
                 return self.async_show_form(
                     step_id="manual_entry",
-                    data_schema = build_user_data_schema(),
-                    title_placeholders={
-                        "host": user_input.get(CONF_HOST, "unknown"),
-                        "port": user_input.get(CONF_PORT, DEFAULT_PORT),
-                    }                    
+                    data_schema=build_user_data_schema(),
+                    description_placeholders={
+                        "host": user_input.get(CONF_HOST, "unknown") if user_input else "unknown",
+                        "port": user_input.get(CONF_PORT, DEFAULT_PORT) if user_input else DEFAULT_PORT,
+                    }
                 )
 
         except Exception as err:
@@ -161,14 +151,20 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         selected = user_input.get("selected_devices", [])
 
-
         for device_str in selected:
             host, port = device_str.split(":")
             config = self._build_config(host, port)
 
-            coordinator = await self._connect_and_get_coordinator(config)
-            if not coordinator:
-                return self.async_abort(reason="cannot_connect")
+            try:
+                coordinator = await connect_and_get_coordinator(self.hass, config)
+            except LuxtronikConnectionError as err:
+                return self.async_abort(
+                    reason="cannot_connect",
+                    description_placeholders={
+                        "host": err.host,
+                        "connect_error": str(err.original)
+                    }
+                )
 
             if not await self._set_unique_id_or_abort(coordinator,config):
                 return self.async_abort(reason="already_configured")
@@ -190,9 +186,16 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         config = self._build_config(user_input[CONF_HOST], user_input[CONF_PORT])
 
-        coordinator = await self._connect_and_get_coordinator(config)
-        if not coordinator:
-            return self.async_abort(reason="cannot_connect")
+        try:
+            coordinator = await connect_and_get_coordinator(self.hass, config)
+        except LuxtronikConnectionError as err:
+            return self.async_abort(
+                reason="cannot_connect",
+                description_placeholders={
+                    "host": err.host,
+                    "connect_error": str(err.original)
+                }
+            )
 
         if not await self._set_unique_id_or_abort(coordinator,config):
             return self.async_abort(reason="already_configured")
@@ -288,9 +291,16 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             config = self._build_config(host, port)
 
-            coordinator = await self._connect_and_get_coordinator(config)
-            if not coordinator:
-                return self.async_abort(reason="cannot_connect")
+            try:
+                coordinator = await connect_and_get_coordinator(self.hass, config)
+            except LuxtronikConnectionError as err:
+                return self.async_abort(
+                    reason="cannot_connect",
+                    description_placeholders={
+                        "host": err.host,
+                        "connect_error": str(err.original)
+                    }
+                )
 
             if not await self._set_unique_id_or_abort(coordinator,config):
                 return self.async_abort(reason="already_configured")
@@ -307,7 +317,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Get default options flow."""
         from .config_flow import LuxtronikOptionsFlowHandler
         return LuxtronikOptionsFlowHandler(config_entry)
-
 
 class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
     """Handle a Luxtronik options flow."""
@@ -349,11 +358,23 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
 
                 return self.async_create_entry(title="", data={})
 
+            config = {
+                CONF_HOST: self.config_entry.data.get(CONF_HOST),
+                CONF_PORT: self.config_entry.data.get(CONF_PORT, DEFAULT_PORT),
+                CONF_TIMEOUT: self.config_entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
+                CONF_MAX_DATA_LENGTH: self.config_entry.data.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH),
+            }
+
             try:
-                coordinator = LuxtronikCoordinator.connect(self.hass, self.config_entry)
-            except Exception as err:
-                LOGGER.error("Failed to connect during options flow: %s", err)
-                return self.async_abort(reason="cannot_connect")
+                coordinator = await connect_and_get_coordinator(self.hass, config)
+            except LuxtronikConnectionError as err:
+                return self.async_abort(
+                    reason="cannot_connect",
+                    description_placeholders={
+                        "host": err.host,
+                        "connect_error": str(err.original)
+                    }
+                )
 
             # Show form with current value
             title = f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"

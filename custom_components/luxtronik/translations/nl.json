@@ -831,10 +831,11 @@
     },
     "config": {
         "abort": {
-            "already_configured": "Dienst is al geconfigureerd.",
+            "cannot_connect": "De verbinding met Luxtronik op {host} is mislukt.\nFout: {connect_error}",
+            "already_configured": "Dit apparaat is al geconfigureerd.",
             "already_in_progress": "De configuratiestroom is al actief.",
-            "cannot_connect": "Verbinding met Luxtronik mislukt.\nControleer IP-adres/hostnaam en poort.\n\nFout:\n{connect_error}",
-            "devices_configured": "Geselecteerde apparaten zijn geconfigureerd.",
+            "devices_configured": "Alle geselecteerde apparaten zijn al geconfigureerd.",
+            "options_error": "Er is een fout opgetreden bij het laden van de opties.",
             "no_devices_found": "Geen apparaten gevonden op het netwerk",
             "single_instance_allowed": "Al geconfigureerd. Slechts \u00e9\u00e9n configuratie toegestaan.",
             "unknown": "Onbekende fout"

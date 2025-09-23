@@ -830,13 +830,14 @@
     },
     "config": {
         "abort": {
-            "already_configured": "Slu\u017eba je ji\u017e nakonfigurov\u00e1na.",
-            "already_in_progress": "Konfigura\u010dn\u00ed proces ji\u017e prob\u00edh\u00e1.",
-            "cannot_connect": "Nepoda\u0159ilo se p\u0159ipojit k Luxtronik.\nZkontrolujte IP adresu/n\u00e1zev hostitele a port.\n\nChyba:\n{connect_error}",
-            "devices_configured": "Vybran\u00e1 za\u0159\u00edzen\u00ed byla nakonfigurov\u00e1na.",
-            "no_devices_found": "V s\u00edti nebyla nalezena \u017e\u00e1dn\u00e1 za\u0159\u00edzen\u00ed",
-            "single_instance_allowed": "Ji\u017e nakonfigurov\u00e1no. Je mo\u017en\u00e1 pouze jedna konfigurace.",
-            "unknown": "Nezn\u00e1m\u00e1 chyba"
+        "cannot_connect": "Nepoda\u0159ilo se p\u0159ipojit k Luxtronik na adrese {host}.\\nChyba: {connect_error}",
+        "already_configured": "Toto za\u0159\u00edzen\u00ed je ji\u017e nakonfigurov\u00e1no.",
+        "already_in_progress": "Konfigura\u010dn\u00ed proces ji\u017e prob\u00edh\u00e1.",
+        "devices_configured": "V\u0161echna vybran\u00e1 za\u0159\u00edzen\u00ed jsou ji\u017e nakonfigurov\u00e1na.",
+        "options_error": "P\u0159i na\u010d\u00edt\u00e1n\u00ed mo\u017enost\u00ed do\u0161lo k chyb\u011b.",
+        "no_devices_found": "Na s\u00edti nebyla nalezena \u017e\u00e1dn\u00e1 za\u0159\u00edzen\u00ed.",
+        "single_instance_allowed": "Ji\u017e nakonfigurov\u00e1no. Povolen\u00e1 je pouze jedna instance.",
+        "unknown": "Nezn\u00e1m\u00e1 chyba."
         },
         "error": {
             "address": "Neplatn\u00e1 vzd\u00e1len\u00e1 adresa. Adresa mus\u00ed b\u00fdt IP adresa nebo rozpoznateln\u00fd n\u00e1zev hostitele.",

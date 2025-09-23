@@ -597,13 +597,14 @@
     },
     "config": {
         "abort": {
-            "already_configured": "Service is already configured.",
-            "already_in_progress": "The config flow is already running.",
-            "cannot_connect": "Failed to connect to Luxtronik.\nPlease check ip-address/hostname and port.\n\nError:\n{connect_error}",
-            "devices_configured": "Selected devices have been configured.",
-            "no_devices_found": "No devices found on the network",
-            "single_instance_allowed": "Already configured. Only a single configuration possible.",
-            "unknown": "Unknown error"
+        "cannot_connect": "Failed to connect to Luxtronik at {host}.\\nError: {connect_error}",
+        "already_configured": "This device is already configured.",
+        "already_in_progress": "The configuration flow is already in progress.",
+        "devices_configured": "All selected devices are already configured.",
+        "options_error": "An error occurred while loading the options.",
+        "no_devices_found": "No devices found on the network.",
+        "single_instance_allowed": "Already configured. Only one instance is allowed.",
+        "unknown": "Unknown error."
         },
         "error": {
             "address": "Invalid remote-address insert. The address has to be an IP address or a resolvable hostname.",

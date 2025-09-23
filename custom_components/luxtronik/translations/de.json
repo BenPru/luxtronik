@@ -835,13 +835,14 @@
     },
     "config": {
         "abort": {
-            "already_configured": "Dienst ist bereits konfiguriert.",
-            "already_in_progress": "Der Konfigurationsablauf l\u00e4uft bereits.",
-            "cannot_connect": "Verbindung zu Luxtronik fehlgeschlagen.\nBitte IP-Adresse/Hostname und Port \u00fcberpr\u00fcfen.\n\nFehler:\n{connect_error}",
-            "devices_configured": "Ausgew\u00e4hlte Ger\u00e4te wurden konfiguriert.",
-            "no_devices_found": "Keine Ger\u00e4te im Netzwerk gefunden",
-            "single_instance_allowed": "Bereits konfiguriert. Nur eine einzelne Konfiguration m\u00f6glich.",
-            "unknown": "Unbekannter Fehler"
+        "cannot_connect": "Verbindung zu Luxtronik unter {host} fehlgeschlagen.\\nFehler: {connect_error}",
+        "already_configured": "Dieses Ger\u00e4t ist bereits konfiguriert.",
+        "already_in_progress": "Der Konfigurationsvorgang ist bereits aktiv.",
+        "devices_configured": "Alle ausgew\u00e4hlten Ger\u00e4te sind bereits konfiguriert.",
+        "options_error": "Beim Laden der Optionen ist ein Fehler aufgetreten.",
+        "no_devices_found": "Keine Ger\u00e4te im Netzwerk gefunden.",
+        "single_instance_allowed": "Bereits konfiguriert. Nur eine Instanz erlaubt.",
+        "unknown": "Unbekannter Fehler."
         },
         "error": {
             "address": "Ung\u00fcltige Remote-Adresse. Die Adresse muss eine IP-Adresse oder ein aufl\u00f6sbarer Hostname sein.",
