@@ -13,6 +13,7 @@ from homeassistant.components.sensor import ENTITY_ID_FORMAT, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 from homeassistant.util.dt import utcnow, dt as dt_util
@@ -40,10 +41,13 @@ from .sensor_entities_predefined import SENSORS, SENSORS_INDEX, SENSORS_STATUS
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up luxtronik sensors dynamically through luxtronik discovery."""
-    data: dict = hass.data[DOMAIN][entry.entry_id]
+    """Set up Luxtronik sensors dynamically through Luxtronik discovery."""
+
+    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if not data or CONF_COORDINATOR not in data:
+        raise ConfigEntryNotReady
+
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
-    await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
         (
@@ -129,6 +133,9 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._sensor_data = get_sensor_data(
             coordinator.data, description.luxtronik_key.value
         )
+        self.async_on_remove(
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+        )
 
     async def _data_update(self, event):
         self._handle_coordinator_update()
@@ -137,12 +144,9 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if (
-            not self.coordinator.update_reason_write
-            and self.next_update is not None
-            and self.next_update > utcnow()
-        ):
+        if not self.should_update():
             return
+
         data = self.coordinator.data if data is None else data
         if data is None:
             return

@@ -194,9 +194,8 @@ class Luxtronik:
         port: int,
         socket_timeout: float,
         max_data_length: int,
-        safe=True,
+        safe: bool = True,
     ) -> None:
-        """Init Luxtronik helper."""
         self._lock = threading.Lock()
         self._socket = None
         self._host = host
@@ -206,7 +205,6 @@ class Luxtronik:
         self.calculations = Calculations()
         self.parameters = Parameters(safe=safe)
         self.visibilities = Visibilities()
-        self.read()
 
     def __del__(self):
         """Luxtronik helper descructor."""
@@ -221,6 +219,26 @@ class Luxtronik:
                 "Disconnected from Luxtronik heatpump %s:%s", self._host, self._port
             )
 
+    def connect(self) -> None:
+        """Establish connection to the heatpump."""
+        with self._lock:
+            if self._socket is None or _is_socket_closed(self._socket):
+                self._disconnect()  # Ensure clean state
+                self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._socket.settimeout(self._socket_timeout)
+                try:
+                    self._socket.connect((self._host, self._port))
+                    LOGGER.info(
+                        "Connected to Luxtronik heatpump %s:%s with timeout %.1fs",
+                        self._host,
+                        self._port,
+                        self._socket_timeout,
+                    )
+                except (socket.timeout, OSError) as err:
+                    LOGGER.error("Failed to connect: %s", err)
+                    self._disconnect()
+                    raise
+
     def read(self):
         """Read data from heatpump."""
         self._read_write(write=False)
@@ -229,47 +247,18 @@ class Luxtronik:
         """Write parameter to heatpump."""
         self._read_write(write=True)
 
+
     def _read_write(self, write=False):
-        with self._lock:
-            is_none = self._socket is None
-            if is_none:
-                self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self._socket.settimeout(self._socket_timeout)
+        try:
+            self.connect()
+        except Exception as err:
+            LOGGER.error("Connection failed during read/write: %s", err)
+            return
 
-            if is_none or _is_socket_closed(self._socket):
-                try:
-                    self._socket.connect((self._host, self._port))
-                except socket.timeout:
-                    LOGGER.error(
-                        "Connection to %s:%s timed out after %.1fs",
-                        self._host,
-                        self._port,
-                        self._socket_timeout,
-                    )
-                    self._disconnect()
-                    return
-                except OSError as err:
-                    if err.errno == 9:  # Bad file descriptor
-                        self._disconnect()
-                        return
-                    elif err.errno == 106:
-                        self._socket.close()
-                        self._socket.connect((self._host, self._port))
-                    else:
-                        raise err
+        if write:
+            self._write()
 
-                self._socket.settimeout(self._socket_timeout)
-                LOGGER.info(
-                    "Connected to Luxtronik heatpump %s:%s with timeout %.1fs",
-                    self._host,
-                    self._port,
-                    self._socket_timeout,
-                )
-
-            if write:
-                self._write()
-
-            self._read()
+        self._read()
 
     def _read(self):
         self._read_data(
