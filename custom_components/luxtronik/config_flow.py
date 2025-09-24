@@ -128,11 +128,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.info("All discovered devices are already configured. Showing manual entry form.")
                 return self.async_show_form(
                     step_id="manual_entry",
-                    data_schema=build_user_data_schema(),
-                    description_placeholders={
-                        "host": user_input.get(CONF_HOST, "unknown") if user_input else "unknown",
-                        "port": user_input.get(CONF_PORT, DEFAULT_PORT) if user_input else DEFAULT_PORT,
-                    }
+                    data_schema=build_user_data_schema()
                 )
 
         except Exception as err:

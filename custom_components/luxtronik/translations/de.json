@@ -835,14 +835,14 @@
     },
     "config": {
         "abort": {
-        "cannot_connect": "Verbindung zu Luxtronik unter {host} fehlgeschlagen.\\nFehler: {connect_error}",
-        "already_configured": "Dieses Ger\u00e4t ist bereits konfiguriert.",
-        "already_in_progress": "Der Konfigurationsvorgang ist bereits aktiv.",
-        "devices_configured": "Alle ausgew\u00e4hlten Ger\u00e4te sind bereits konfiguriert.",
-        "options_error": "Beim Laden der Optionen ist ein Fehler aufgetreten.",
-        "no_devices_found": "Keine Ger\u00e4te im Netzwerk gefunden.",
-        "single_instance_allowed": "Bereits konfiguriert. Nur eine Instanz erlaubt.",
-        "unknown": "Unbekannter Fehler."
+            "cannot_connect": "Verbindung zu Luxtronik unter {host} fehlgeschlagen.\\nFehler: {connect_error}",
+            "already_configured": "Dieses Ger\u00e4t ist bereits konfiguriert.",
+            "already_in_progress": "Der Konfigurationsvorgang ist bereits aktiv.",
+            "devices_configured": "Alle ausgew\u00e4hlten Ger\u00e4te sind bereits konfiguriert.",
+            "options_error": "Beim Laden der Optionen ist ein Fehler aufgetreten.",
+            "no_devices_found": "Keine Ger\u00e4te im Netzwerk gefunden.",
+            "single_instance_allowed": "Bereits konfiguriert. Nur eine Instanz erlaubt.",
+            "unknown": "Unbekannter Fehler."
         },
         "error": {
             "address": "Ung\u00fcltige Remote-Adresse. Die Adresse muss eine IP-Adresse oder ein aufl\u00f6sbarer Hostname sein.",
@@ -867,7 +867,7 @@
                 }
             },
             "manual_entry": {
-                "title": "Luxtronik-Ger\u00e4t konfigurieren unter {host}:{port}",
+                "title": "Manuelle Luxtronik-Konfiguration",
                 "description": "Keine neuen Ger\u00e4te gefunden oder alle entdeckten Ger\u00e4te sind bereits konfiguriert. Sie k\u00f6nnen Host und Port manuell eingeben."
             },
             "select_devices": {

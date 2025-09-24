@@ -863,7 +863,7 @@
                 }
             },
             "manual_entry": {
-                "title": "Luxtronik-apparaat configureren op {host}:{port}",
+                "title": "Handmatige Luxtronik-apparaat configuratie",
                 "description": "Geen nieuwe apparaten gevonden of alle ontdekte apparaten zijn al geconfigureerd. U kunt handmatig een host en poort invoeren."
             },
             "select_devices": {
