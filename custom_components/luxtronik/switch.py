@@ -20,6 +20,7 @@ from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikSwitchDescription
 from .switch_entities_predefined import SWITCHES
 
+import asyncio
 # endregion Imports
 
 
@@ -71,14 +72,20 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self._attr_unique_id = self.entity_id
 
         self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
         )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
+    @callback
+    def _handle_data_update_event(self, event) -> None:
+        """Handle Luxtronik data update event."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
 
     @callback
-    def _handle_coordinator_update(
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
@@ -95,6 +102,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         if isinstance(descr.on_state, bool) and state is not None:
             state = bool(state)
 
+
         if descr.inverted:
             self._attr_is_on = state != descr.on_state
         else:
@@ -105,7 +113,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
                 )
             )
 
-        super()._handle_coordinator_update()
+        await super()._async_handle_coordinator_update()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
@@ -131,10 +139,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
             else value == self.entity_description.on_state
         )
 
-
-        # Trigger UI/state update in Home Assistant
         self.async_write_ha_state()
+        await self._async_handle_coordinator_update(data)
 
-        # Optionally update coordinator-based logic
-        self._handle_coordinator_update(data)
 

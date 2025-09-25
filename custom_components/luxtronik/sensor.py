@@ -130,17 +130,24 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
             f"{self._sensor_prefix}_{description.key}"
         )
         self._attr_unique_id = self.entity_id
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
-        )
+        # self._sensor_data = get_sensor_data(
+        #     coordinator.data, description.luxtronik_key.value
+        # )
         self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
         )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
+    @callback
+    def _handle_data_update_event(self, event) -> None:
+        """Handle Luxtronik data update event."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
 
-    def _handle_coordinator_update_internal(
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update_internal(
         self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
@@ -170,13 +177,12 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
                 )
             self._attr_native_value = float_value
 
-    @callback
-    def _handle_coordinator_update(
+    async def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        self._handle_coordinator_update_internal(data, use_key)
-        super()._handle_coordinator_update()
+        await self._async_handle_coordinator_update_internal(data, use_key)
+        await super()._async_handle_coordinator_update()
 
 
 class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
@@ -208,15 +214,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         }
     )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
-
-    @callback
-    def _handle_coordinator_update(
+    async def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        super()._handle_coordinator_update(data)
+        await super()._async_handle_coordinator_update(data)
         time_now = time(datetime.now().hour, datetime.now().minute)
         evu = LuxOperationMode.evu.value
         weekday = datetime.today().weekday()
@@ -475,8 +477,7 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
 
     entity_description: LuxtronikIndexSensorDescription
 
-    @callback
-    def _handle_coordinator_update(
+    async def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""

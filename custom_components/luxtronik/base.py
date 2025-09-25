@@ -128,14 +128,26 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     def _restore_attr_value(self, value: Any | None) -> Any:
         return value
 
-    def should_update(self) -> bool:
-        """Determine if the entity should update based on next_update."""
+    def should_update(self, force: bool = False) -> bool:
+        """Determine if the entity should update based on next_update and write reason."""
+        if force or self.coordinator.update_reason_write:
+            return True
         if self.entity_description.update_interval is None:
             return True
         return self.next_update is None or self.next_update <= utcnow()
+    
+    async def _data_update(self, event):
+        await self._handle_coordinator_update()
+
+    async def async_update_callback(self) -> None:
+        await self._handle_coordinator_update()
 
     @callback
-    def _handle_coordinator_update(self, force: bool = False) -> None:
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update(self, force: bool = False) -> None:
         """Handle updated data from the coordinator."""
         if not force and not self.should_update():
             return
@@ -149,16 +161,23 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._attr_state = value
 
-        icon_state = getattr(self, "_attr_is_on", getattr(self, "_attr_current_lux_operation", self._attr_state))
-        if descr.icon_by_state and icon_state in descr.icon_by_state:
-            self._attr_icon = descr.icon_by_state.get(icon_state)
-        else:
-            self._attr_icon = descr.icon
+        # Determine the state used for icon selection
+        icon_state = getattr(self, "_attr_is_on", None)
+        if icon_state is None:
+            icon_state = getattr(self, "_attr_current_lux_operation", self._attr_state)
 
-        if hasattr(self, "_attr_current_operation"):
-            if self._attr_current_operation == STATE_OFF:
+        # Set icon based on state mapping
+        if self.entity_description.icon_by_state:
+            self._attr_icon = self.entity_description.icon_by_state.get(icon_state, self.entity_description.icon)
+        else:
+            self._attr_icon = self.entity_description.icon
+
+        # Append suffixes based on current operation mode
+        current_op = getattr(self, "_attr_current_operation", None)
+        if self._attr_icon and isinstance(self._attr_icon, str):
+            if current_op == STATE_OFF:
                 self._attr_icon += "-off"
-            elif self._attr_current_operation == STATE_HEAT_PUMP:
+            elif current_op == STATE_HEAT_PUMP:
                 self._attr_icon += "-auto"
 
         self._enrich_extra_attributes()
@@ -166,7 +185,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         if descr.update_interval is not None:
             self.next_update = dt_util.utcnow() + descr.update_interval
 
-        super()._handle_coordinator_update()
+        self.async_write_ha_state()
 
     def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:

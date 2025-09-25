@@ -50,7 +50,7 @@ from .const import (
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikClimateDescription
-
+import asyncio
 # endregion Imports
 
 # region Const
@@ -283,11 +283,21 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
+        self.async_on_remove(
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
+        )
 
     @callback
-    def _handle_coordinator_update(
+    def _handle_data_update_event(self, event) -> None:
+        """Handle Luxtronik data update event."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
@@ -362,16 +372,17 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
                 # LOGGER.info(f"correction={correction}")
                 if correction_current is None or correction_current != correction:
                     # LOGGER.info(f'key_correction_target={key_correction_target.split(".")[1]}')
-                    _ = self.coordinator.write(
+                    data = await self.coordinator.async_write(
                         key_correction_target.split(".")[1], correction
-                    )  # mypy: allow-unused-coroutine
+                    )
+                    await self._async_handle_coordinator_update(data)
 
-        super()._handle_coordinator_update()
+        await super()._async_handle_coordinator_update()
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:
         lux_key = self.entity_description.luxtronik_key.value
         data = await self.coordinator.async_write(lux_key.split(".")[1], lux_mode)
-        self._handle_coordinator_update(data)
+        await self._async_handle_coordinator_update(data)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""
@@ -382,12 +393,12 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
                 key_tar.split(".")[1], int(self._attr_target_temperature * 10)
             )
-            self._handle_coordinator_update(data)
+            await self._async_handle_coordinator_update(data)
         elif key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
                 key_tar.split(".")[1], int(self._attr_target_temperature)
             )
-            self._handle_coordinator_update(data)
+            await self._async_handle_coordinator_update(data)
 
     async def async_turn_off(self) -> None:
         await self.async_set_hvac_mode(HVACMode.OFF)

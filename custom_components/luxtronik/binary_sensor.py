@@ -17,6 +17,7 @@ from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikBinarySensorEntityDescription
 
+import asyncio
 # endregion Imports
 
 
@@ -57,7 +58,7 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         description: LuxtronikBinarySensorEntityDescription,
         device_info_ident: DeviceKey,
     ) -> None:
-        """Init Luxtronik Switch."""
+        """Initialize Luxtronik Binary Sensor Entity."""
         super().__init__(
             coordinator=coordinator,
             description=description,
@@ -66,19 +67,26 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
-        )
+        # self._sensor_data = get_sensor_data(
+        #     coordinator.data, description.luxtronik_key.value
+        # )
+
 
         self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
         )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
+    @callback
+    def _handle_data_update_event(self, event) -> None:
+        """Handle Luxtronik data update event."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
 
     @callback
-    def _handle_coordinator_update(
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
@@ -107,4 +115,6 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
                 )
             )
 
-        super()._handle_coordinator_update()
+        await super()._async_handle_coordinator_update()
+        self.async_write_ha_state()
+

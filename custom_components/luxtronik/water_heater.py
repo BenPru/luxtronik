@@ -38,6 +38,7 @@ from .const import (
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikWaterHeaterDescription
+import asyncio
 
 # endregion Imports
 
@@ -148,29 +149,31 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
-    @property
-    def hvac_action(self) -> HVACAction | str | None:
-        """Return the current running hvac operation."""
-        if (
-            self.entity_description.luxtronik_action_heating is not None
-            and self._current_action
-            == self.entity_description.luxtronik_action_heating.value
-        ):
-            return HVACAction.HEATING
-        return HVACAction.OFF
+        self.async_on_remove(
+            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
+        )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
-
-    @override
     @callback
-    def _handle_coordinator_update(
+    def _handle_data_update_event(self, event) -> None:
+        """Handle Luxtronik data update event."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
+        if not self.should_update():
+            return
+
         data = self.coordinator.data if data is None else data
         if data is None:
             return
+
         descr = self.entity_description
         mode = get_sensor_data(data, descr.luxtronik_key.value)
         self._attr_current_operation = None if mode is None else OPERATION_MAPPING[mode]
@@ -188,12 +191,12 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self._attr_target_temperature = get_sensor_data(
             data, descr.luxtronik_key_target_temperature.value
         )
-        super()._handle_coordinator_update()
+        await super()._async_handle_coordinator_update()
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:
         lux_key = self.entity_description.luxtronik_key.value
         data = await self.coordinator.async_write(lux_key.split(".")[1], lux_mode)
-        self._handle_coordinator_update(data)
+        await self._async_handle_coordinator_update(data)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""
@@ -202,7 +205,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
             lux_key.split(".")[1], value
         )
-        self._handle_coordinator_update(data)
+        await self._async_handle_coordinator_update(data)
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:
         """Set new target operation mode."""
@@ -223,3 +226,14 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             await self._async_set_lux_mode(LuxMode.automatic.value)
         else:
             await self.async_set_operation_mode(self._last_operation_mode_before_away)
+
+    @property
+    def hvac_action(self) -> HVACAction | str | None:
+        """Return the current running hvac operation."""
+        if (
+            self.entity_description.luxtronik_action_heating is not None
+            and self._current_action
+            == self.entity_description.luxtronik_action_heating.value
+        ):
+            return HVACAction.HEATING
+        return HVACAction.OFF
