@@ -78,18 +78,6 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
         self._attr_mode = description.mode
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
-        )
-
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
-        )
-
-    @callback
-    def _handle_data_update_event(self, event) -> None:
-        """Handle Luxtronik data update event."""
-        self.hass.async_create_task(self._async_handle_coordinator_update())
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -100,16 +88,11 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
-
         data = self.coordinator.data if data is None else data
         if data is None:
             return
         
-        self._attr_native_value = get_sensor_data(
-            data, self.entity_description.luxtronik_key.value
-        )
+        self._attr_native_value = self._get_value(self.entity_description.luxtronik_key)
         if self._attr_native_value is not None:
             if self.entity_description.factor is not None:
                 self._attr_native_value *= self.entity_description.factor

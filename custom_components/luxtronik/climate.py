@@ -50,7 +50,7 @@ from .const import (
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikClimateDescription
-import asyncio
+
 # endregion Imports
 
 # region Const
@@ -283,15 +283,6 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
-        )
-
-    @callback
-    def _handle_data_update_event(self, event) -> None:
-        """Handle Luxtronik data update event."""
-        self.hass.async_create_task(self._async_handle_coordinator_update())
-
     @callback
     def _handle_coordinator_update(self) -> None:
         """Sync callback registered with DataUpdateCoordinator."""
@@ -301,22 +292,19 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
 
         data = self.coordinator.data if data is None else data
         if data is None:
             return
         
         # domain = self.entity_description.key.value
-        mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
+        mode = self._get_value(self.entity_description.luxtronik_key)
         self._attr_hvac_mode = (
             None if mode is None else self.entity_description.hvac_mode_mapping[mode]
         )
         self._attr_preset_mode = None if mode is None else HVAC_PRESET_MAPPING[mode]
-        self._attr_current_lux_operation = lux_action = get_sensor_data(
-            data, self.entity_description.luxtronik_key_current_action.value
-        )
+        self._attr_current_lux_operation = lux_action = self._get_value(self.entity_description.luxtronik_key_current_action)
+
         self._attr_hvac_action = (
             None
             if lux_action is None
@@ -332,50 +320,50 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             temp = self.hass.states.get(key)
             self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
         elif key != LuxCalculation.UNSET:
-            self._attr_current_temperature = get_sensor_data(data, key)
+            self._attr_current_temperature = self._get_value(key)
         # LOGGER.info(f'[{domain}] self._attr_current_temperature={self._attr_current_temperature}')
 
         key_tar = self.entity_description.luxtronik_key_target_temperature
         if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
-            self._attr_target_temperature = get_sensor_data(data, key_tar) / 10
+            self._attr_target_temperature = self._get_value(key_tar) / 10
         elif key_tar != LuxParameter.UNSET:
-            self._attr_target_temperature = get_sensor_data(data, key_tar)
+            self._attr_target_temperature = self._get_value(key_tar)
 
-        if key_tar == LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
-            correction_factor = get_sensor_data(
-                data,
-                self.entity_description.luxtronik_key_correction_factor.value,
-                False,
-            )
-            # LOGGER.info(f"self._attr_target_temperature={self._attr_target_temperature}")
-            # LOGGER.info(f"self._attr_current_temperature={self._attr_current_temperature}")
-            # LOGGER.info(f"correction_factor={correction_factor}")
-            # LOGGER.info(f"lux_action={lux_action}")
-            # LOGGER.info(f"_attr_hvac_action={self._attr_hvac_action}")
-            if (
-                self._attr_target_temperature is not None
-                and self._attr_current_temperature is not None  # noqa: W503
-                and self._attr_current_temperature > 0.0
-                and correction_factor is not None  # noqa: W503
-            ):
-                delta_temp = (
-                    self._attr_target_temperature - self._attr_current_temperature
-                )
-                correction = round(
-                    delta_temp * (correction_factor / 100.0), 1
-                )  # correction_factor is in %, so need to divide by 100
-                key_correction_target = (
-                    self.entity_description.luxtronik_key_correction_target.value
-                )
-                correction_current = get_sensor_data(data, key_correction_target)
-                # LOGGER.info(f"correction_current={correction_current}")
-                # LOGGER.info(f"correction={correction}")
-                if correction_current is None or correction_current != correction:
-                    # LOGGER.info(f'key_correction_target={key_correction_target.split(".")[1]}')
-                    data = await self.coordinator.async_write(
-                        key_correction_target.split(".")[1], correction
-                    )
-                    await self._async_handle_coordinator_update(data)
+        # if key_tar == LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
+        #     correction_factor = get_sensor_data(
+        #         data,
+        #         self.entity_description.luxtronik_key_correction_factor.value,
+        #         False,
+        #     )
+        #     # LOGGER.info(f"self._attr_target_temperature={self._attr_target_temperature}")
+        #     # LOGGER.info(f"self._attr_current_temperature={self._attr_current_temperature}")
+        #     # LOGGER.info(f"correction_factor={correction_factor}")
+        #     # LOGGER.info(f"lux_action={lux_action}")
+        #     # LOGGER.info(f"_attr_hvac_action={self._attr_hvac_action}")
+        #     if (
+        #         self._attr_target_temperature is not None
+        #         and self._attr_current_temperature is not None  # noqa: W503
+        #         and self._attr_current_temperature > 0.0
+        #         and correction_factor is not None  # noqa: W503
+        #     ):
+        #         delta_temp = (
+        #             self._attr_target_temperature - self._attr_current_temperature
+        #         )
+        #         correction = round(
+        #             delta_temp * (correction_factor / 100.0), 1
+        #         )  # correction_factor is in %, so need to divide by 100
+        #         key_correction_target = (
+        #             self.entity_description.luxtronik_key_correction_target.value
+        #         )
+        #         correction_current = get_sensor_data(data, key_correction_target)
+        #         # LOGGER.info(f"correction_current={correction_current}")
+        #         # LOGGER.info(f"correction={correction}")
+        #         if correction_current is None or correction_current != correction:
+        #             # LOGGER.info(f'key_correction_target={key_correction_target.split(".")[1]}')
+        #             data = await self.coordinator.async_write(
+        #                 key_correction_target.split(".")[1], correction
+        #             )
+        #             await self._async_handle_coordinator_update(data)
 
         await super()._async_handle_coordinator_update()
 

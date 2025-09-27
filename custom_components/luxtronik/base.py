@@ -10,11 +10,9 @@ from enum import StrEnum
 from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
-from homeassistant.util.dt import utcnow
 
 from .common import get_sensor_data
 from .const import (
@@ -37,8 +35,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     """Luxtronik base device."""
 
     entity_description: LuxtronikEntityDescription
-    next_update: datetime | None = None
-
     _attr_cache: dict[SA, Any] = {}
     _entity_component_unrecorded_attributes = frozenset(
         {
@@ -60,7 +56,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         }
         for field in description.__dataclass_fields__:
             if field.startswith("luxtronik_key_"):
-                value = description.__getattribute__(field)
+                value = getattr(description, field)
                 if value is None:
                     pass
                 elif isinstance(value, StrEnum):
@@ -97,27 +93,19 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         try:
             last_state = await self.async_get_last_state()
-            if last_state is None:
-                return
-            self._attr_state = last_state.state
+            if last_state is not None:
+                self._attr_state = last_state.state
 
-            for attr in self.entity_description.extra_attributes:
-                if not attr.restore_on_startup or attr.key not in last_state.attributes:
-                    continue
-                self._attr_cache[attr.key] = self._restore_attr_value(
-                    last_state.attributes[attr.key]
-                )
+                for attr in self.entity_description.extra_attributes:
+                    if not attr.restore_on_startup or attr.key not in last_state.attributes:
+                        continue
+                    self._attr_cache[attr.key] = self._restore_attr_value(last_state.attributes[attr.key])
 
             last_extra_data = await self.async_get_last_extra_data()
             if last_extra_data is not None:
                 data: dict[str, Any] = last_extra_data.as_dict()
                 for attr in data:
                     setattr(self, attr, data.get(attr))
-
-            data_updated = f"{self.entity_id}_data_updated"
-            self.async_on_remove(
-                async_dispatcher_connect(self.hass, data_updated, self._schedule_immediate_update)
-            )
 
         except Exception as err:
             LOGGER.error(
@@ -128,30 +116,12 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     def _restore_attr_value(self, value: Any | None) -> Any:
         return value
 
-    def should_update(self, force: bool = False) -> bool:
-        """Determine if the entity should update based on next_update and write reason."""
-        if force or self.coordinator.update_reason_write:
-            return True
-        if self.entity_description.update_interval is None:
-            return True
-        return self.next_update is None or self.next_update <= utcnow()
-    
-    async def _data_update(self, event):
-        await self._handle_coordinator_update()
-
-    async def async_update_callback(self) -> None:
-        await self._handle_coordinator_update()
-
     @callback
     def _handle_coordinator_update(self) -> None:
-        """Sync callback registered with DataUpdateCoordinator."""
         self.hass.async_create_task(self._async_handle_coordinator_update())
 
-    async def _async_handle_coordinator_update(self, force: bool = False) -> None:
+    async def _async_handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        if not force and not self.should_update():
-            return
-
         descr = self.entity_description
         value = self._get_value(descr.luxtronik_key)
 
@@ -181,10 +151,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 self._attr_icon += "-auto"
 
         self._enrich_extra_attributes()
-
-        if descr.update_interval is not None:
-            self.next_update = dt_util.utcnow() + descr.update_interval
-
         self.async_write_ha_state()
 
     def _enrich_extra_attributes(self) -> None:
@@ -196,10 +162,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             self._attr_extra_state_attributes[attr.key.value] = self.formatted_data(
                 attr
             )
-
-    @callback
-    def _schedule_immediate_update(self):
-        self.async_schedule_update_ha_state(True)
 
     def formatted_data(self, attr: LuxtronikEntityAttributeDescription) -> str:
         """Calculate the attribute value."""
@@ -234,5 +196,5 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         return str(value)
 
-    def _get_value(self, key: LC | LP) -> Any:
+    def _get_value(self, key: LC | LP) -> Any | None:
         return get_sensor_data(self.coordinator.data, key)

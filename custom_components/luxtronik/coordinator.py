@@ -72,102 +72,53 @@ def catch_luxtronik_errors(
 
 
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
-    """Representation of a Luxtronik Coordinator."""
-
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        client: Luxtronik,
-        config: Mapping[str, Any],
-    ) -> None:
-        self.lock = threading.Lock()
+    def __init__(self, hass: HomeAssistant, client: Luxtronik, config: dict[str, Any]) -> None:
         self.client = client
+        self.lock = threading.Lock()
         self._config = config
         self.device_infos: dict[str, DeviceInfo] = {}
-        self.update_reason_write = False
-
+        
         super().__init__(
             hass,
             LOGGER,
             name=DOMAIN,
-            update_method=self._async_update_data,
-            update_interval=UPDATE_INTERVAL_FAST,
+            update_interval=UPDATE_INTERVAL_NORMAL,  # or NORMAL if preferred
         )
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
-        self.data = await self._async_read_data()
-        return self.data
-
-    async def _async_read_data(self) -> LuxtronikCoordinatorData:
-        return await self._async_read_or_write(False, None, None)
-
-    async def async_write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
-        return await self._async_read_or_write(True, parameter, value)
-
-    async def _async_read_or_write(
-        self, write: bool, parameter: str | None, value: Any
-    ) -> LuxtronikCoordinatorData:
-        if write:
-            data = await self._write(parameter, value)
-            self.async_set_updated_data(data)
-            self.update_interval = UPDATE_INTERVAL_FAST
-            self.update_reason_write = True
-        else:
-            data = self._read()
-            self.async_set_updated_data(data)
-            self.update_interval = (
-                UPDATE_INTERVAL_FAST
-                if bool(self.get_value(LC.C0044_COMPRESSOR))
-                else UPDATE_INTERVAL_NORMAL
-            )
-            self.update_reason_write = False
-        return data
-
-
-    def _read(self) -> LuxtronikCoordinatorData:
         try:
             with self.lock:
                 self.client.read()
-        except (OSError, ConnectionRefusedError, ConnectionResetError) as err:
-            raise UpdateFailed("Read: Error communicating with device") from err
+            return LuxtronikCoordinatorData(
+                parameters=self.client.parameters,
+                calculations=self.client.calculations,
+                visibilities=self.client.visibilities,
+            )
         except Exception as err:
-            raise UpdateFailed("Read: Unexpected error") from err
+            raise UpdateFailed(f"Error fetching data: {err}") from err
 
-        self.data = LuxtronikCoordinatorData(
-            parameters=self.client.parameters,
-            calculations=self.client.calculations,
-            visibilities=self.client.visibilities,
-        )
-        return self.data
-
-    async def _write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
+    async def async_write(self, parameter: str, value: Any) -> None:
         try:
             self.client.parameters.set(parameter, value)
             with self.lock:
                 await self.hass.async_add_executor_job(self.client.write)
-        except (ConnectionRefusedError, ConnectionResetError) as err:
-            LOGGER.exception("Connection error during write")
-            raise UpdateFailed("Write: Error communicating with device") from err
+
+            # Perform a fresh read from the device
+            with self.lock:
+                self.client.read()
+
+            # Confirm the value after the read
+            confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
+            LOGGER.info(
+                'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
+                parameter,
+                value,
+                confirmed_value,
+            )
+
+            await self.async_refresh()
         except Exception as err:
-            LOGGER.exception("Unexpected error during write")
-            raise UpdateFailed("Write: Unexpected error") from err
-
-        await self.hass.async_add_executor_job(self.client.read)
-        self.data = LuxtronikCoordinatorData(
-            parameters=self.client.parameters,
-            calculations=self.client.calculations,
-            visibilities=self.client.visibilities,
-        )
-
-        confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
-        LOGGER.info(
-            'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
-            parameter,
-            value,
-            confirmed_value,
-        )
-        return self.data
-
+            raise UpdateFailed(f"Write error: {err}") from err
 
 
     @staticmethod

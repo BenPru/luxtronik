@@ -38,7 +38,6 @@ from .const import (
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikWaterHeaterDescription
-import asyncio
 
 # endregion Imports
 
@@ -119,8 +118,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
 
     _attr_min_temp = 40.0
     _attr_max_temp = 65.0
-    _attr_target_temperature_low = 45.0
-    _attr_target_temperature_high = 65.0
 
     _last_operation_mode_before_away: str | None = None
     _current_action: str | None = None
@@ -145,19 +142,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self._attr_operation_list = description.operation_list
         self._attr_supported_features = description.supported_features
 
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
-        )
-
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
-        )
-
-    @callback
-    def _handle_data_update_event(self, event) -> None:
-        """Handle Luxtronik data update event."""
-        self.hass.async_create_task(self._async_handle_coordinator_update())
-
     @callback
     def _handle_coordinator_update(self) -> None:
         """Sync callback registered with DataUpdateCoordinator."""
@@ -167,29 +151,24 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
-
         data = self.coordinator.data if data is None else data
         if data is None:
             return
 
         descr = self.entity_description
-        mode = get_sensor_data(data, descr.luxtronik_key.value)
+        mode = self._get_value(descr.luxtronik_key)
+
         self._attr_current_operation = None if mode is None else OPERATION_MAPPING[mode]
-        self._current_action = get_sensor_data(
-            data, descr.luxtronik_key_current_action.value
-        )
+        self._current_action = self._get_value(descr.luxtronik_key_current_action)
+
         self._attr_is_away_mode_on = (
             None if mode is None else mode == LuxMode.holidays.value
         )
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
-        self._attr_current_temperature = get_sensor_data(
-            data, descr.luxtronik_key_current_temperature.value
+        self._attr_current_temperature = self._get_value(descr.luxtronik_key_current_temperature.value
         )
-        self._attr_target_temperature = get_sensor_data(
-            data, descr.luxtronik_key_target_temperature.value
+        self._attr_target_temperature = self._get_value(descr.luxtronik_key_target_temperature.value
         )
         await super()._async_handle_coordinator_update()
 

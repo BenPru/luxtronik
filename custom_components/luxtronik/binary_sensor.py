@@ -8,7 +8,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
@@ -17,7 +16,6 @@ from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikBinarySensorEntityDescription
 
-import asyncio
 # endregion Imports
 
 
@@ -67,19 +65,6 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        # self._sensor_data = get_sensor_data(
-        #     coordinator.data, description.luxtronik_key.value
-        # )
-
-
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
-        )
-
-    @callback
-    def _handle_data_update_event(self, event) -> None:
-        """Handle Luxtronik data update event."""
-        self.hass.async_create_task(self._async_handle_coordinator_update())
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -90,16 +75,11 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
-
         data = self.coordinator.data if data is None else data
         if data is None:
             return
 
-        self._attr_state = get_sensor_data(
-            data, self.entity_description.luxtronik_key.value
-        )
+        self._attr_state = self._get_value(self.entity_description.luxtronik_key)
 
         if isinstance(self.entity_description.on_state, bool) and self._attr_state is not None:
             self._attr_state = bool(self._attr_state)

@@ -3,7 +3,6 @@
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
-    UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxMode,
     LuxParameter as LP,
@@ -69,7 +68,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         device_class=None,
         on_state=LuxMode.automatic.value,
         off_state=LuxMode.off.value,
-        update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     LuxtronikSwitchDescription(
         device_key=DeviceKey.heating,
@@ -117,7 +115,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
             LuxMode.holidays.value,
         ],
         off_state=LuxMode.off.value,
-        update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     # endregion Domestic water
     # region Cooling
@@ -130,7 +127,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         device_class=None,
         on_state=LuxMode.automatic.value,
         off_state=LuxMode.off.value,
-        update_interval=UPDATE_INTERVAL_NORMAL,
     ),
     # endregion Cooling
 ]

@@ -32,6 +32,7 @@ from .const import (
     SensorAttrKey as SA,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
+from .evu_helper import LuxtronikEVUTracker
 from .model import LuxtronikIndexSensorDescription, LuxtronikSensorDescription
 from .sensor_entities_predefined import SENSORS, SENSORS_INDEX, SENSORS_STATUS
 
@@ -130,36 +131,27 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
             f"{self._sensor_prefix}_{description.key}"
         )
         self._attr_unique_id = self.entity_id
-        # self._sensor_data = get_sensor_data(
-        #     coordinator.data, description.luxtronik_key.value
-        # )
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._handle_data_update_event)
-        )
-
-    @callback
-    def _handle_data_update_event(self, event) -> None:
-        """Handle Luxtronik data update event."""
-        self.hass.async_create_task(self._async_handle_coordinator_update())
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Sync callback registered with DataUpdateCoordinator."""
         self.hass.async_create_task(self._async_handle_coordinator_update())
 
+    async def _async_handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
+    ) -> None:
+        """Handle updated data from the coordinator."""
+        await self._async_handle_coordinator_update_internal(data, use_key)
+        await super()._async_handle_coordinator_update()
+
     async def _async_handle_coordinator_update_internal(
         self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
-
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        self._attr_native_value = get_sensor_data(
-            data, use_key or self.entity_description.luxtronik_key.value
-        )
+        self._attr_native_value = self._get_value(self.entity_description.luxtronik_key)
 
         if self._attr_native_value is None:
             pass
@@ -177,160 +169,77 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
                 )
             self._attr_native_value = float_value
 
-    async def _handle_coordinator_update(
-        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
-    ) -> None:
-        """Handle updated data from the coordinator."""
-        await self._async_handle_coordinator_update_internal(data, use_key)
-        await super()._async_handle_coordinator_update()
-
-
 class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
-    """Luxtronik Status Sensor with extended attr."""
-
-    entity_description: LuxtronikSensorDescription
-
-    _coordinator: LuxtronikCoordinator
-    _last_state: StateType | date | datetime | Decimal = None
-
-    _attr_cache: dict[SA, object] = {}
-    _attr_cache[SA.EVU_FIRST_START_TIME] = time.min
-    _attr_cache[SA.EVU_FIRST_END_TIME] = time.min
-    _attr_cache[SA.EVU_SECOND_START_TIME] = time.min
-    _attr_cache[SA.EVU_SECOND_END_TIME] = time.min
-    _attr_cache[SA.EVU_DAYS] = list()
+    """Luxtronik Status Sensor with extended attributes and EVU tracking."""
 
     _unrecorded_attributes = frozenset(
         LuxtronikSensorEntity._unrecorded_attributes
         | {
             SA.STATUS_TEXT,
             SA.STATUS_RAW,
-            SA.EVU_FIRST_START_TIME,
-            SA.EVU_FIRST_END_TIME,
-            SA.EVU_SECOND_START_TIME,
-            SA.EVU_SECOND_END_TIME,
-            SA.EVU_MINUTES_UNTIL_NEXT_EVENT,
-            SA.EVU_DAYS,
         }
     )
 
-    async def _handle_coordinator_update(
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        coordinator: LuxtronikCoordinator,
+        description: LuxtronikSensorDescription,
+        device_info_ident: DeviceKey,
+    ) -> None:
+        super().__init__(hass, entry, coordinator, description, device_info_ident)
+        self._evu_tracker = LuxtronikEVUTracker()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
         await super()._async_handle_coordinator_update(data)
-        time_now = time(datetime.now().hour, datetime.now().minute)
-        evu = LuxOperationMode.evu.value
-        weekday = datetime.today().weekday()
-        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
-            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(",")
-        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
-            self._attr_cache[SA.EVU_DAYS] = list()
-        if self._attr_native_value is None or self._last_state is None:
-            pass
-        elif self._attr_native_value == evu and str(self._last_state) != evu:
-            # evu start
-            if weekday not in self._attr_cache[SA.EVU_DAYS]:
-                self._attr_cache[SA.EVU_DAYS].append(weekday)
-            if (
-                self._attr_cache[SA.EVU_FIRST_START_TIME] == time.min
-                or (
-                    time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
-                    or (
-                        self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
-                        and time_now.hour
-                        < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
-                    )
-                    or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
-                )
-                and (
-                    self._attr_cache[SA.EVU_FIRST_END_TIME].hour > time_now.hour
-                    or self._attr_cache[SA.EVU_FIRST_END_TIME] == time.min
-                )
-            ):
-                self._attr_cache[SA.EVU_FIRST_START_TIME] = time_now
-            else:
-                self._attr_cache[SA.EVU_SECOND_START_TIME] = time_now
-                if weekday not in self._attr_cache[SA.EVU_DAYS]:
-                    self._attr_cache[SA.EVU_DAYS].append(weekday)
-        elif self._attr_native_value != evu and str(self._last_state) == evu:
-            # evu end
-            if (
-                self._attr_cache[SA.EVU_FIRST_END_TIME] == time.min
-                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
-                or (
-                    self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
-                    and time_now < self._attr_cache[SA.EVU_SECOND_START_TIME]
-                )
-            ):
-                self._attr_cache[SA.EVU_FIRST_END_TIME] = time_now
-            else:
-                self._attr_cache[SA.EVU_SECOND_END_TIME] = time_now
 
-        # region Workaround Luxtronik Bug
-        else:
-            # region Workaround: Inverter heater is active but not the heatpump!
-            # Status shows heating but status 3 = no request!
-            sl1 = self._get_value(LC.C0117_STATUS_LINE_1)
-            sl3 = self._get_value(LC.C0119_STATUS_LINE_3)
-            add_circ_pump = self._get_value(LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
-            s1_workaround: list[str] = [
-                LuxStatus1Option.heatpump_idle,
-                LuxStatus1Option.pump_forerun,
-                LuxStatus1Option.heatpump_coming,
-            ]
-            s3_workaround: list[str | None] = [
-                LuxStatus3Option.no_request,
-                LuxStatus3Option.unknown,
-                LuxStatus3Option.none,
-                LuxStatus3Option.grid_switch_on_delay,
-                None,
-            ]
-            if sl1 in s1_workaround and sl3 in s3_workaround and not add_circ_pump:
-                # ignore pump forerun
-                self._attr_native_value = LuxOperationMode.no_request.value
-            # endregion Workaround: Inverter heater is active but not the heatpump!
+        # Update EVU tracker
+        self._evu_tracker.update(self._attr_native_value)
 
-            # region Workaround Thermal desinfection with heatpump running
-            if sl3 == LuxStatus3Option.thermal_desinfection:
-                # map thermal desinfection to Domestic Water iso Heating
+        # Workaround logic for Luxtronik quirks
+        sl1 = self._get_value(LC.C0117_STATUS_LINE_1)
+        sl3 = self._get_value(LC.C0119_STATUS_LINE_3)
+        add_circ_pump = self._get_value(LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
+
+        s1_workaround = [
+            LuxStatus1Option.heatpump_idle,
+            LuxStatus1Option.pump_forerun,
+            LuxStatus1Option.heatpump_coming,
+        ]
+        s3_workaround = [
+            LuxStatus3Option.no_request,
+            LuxStatus3Option.unknown,
+            LuxStatus3Option.none,
+            LuxStatus3Option.grid_switch_on_delay,
+            None,
+        ]
+
+        if sl1 in s1_workaround and sl3 in s3_workaround and not add_circ_pump:
+            self._attr_native_value = LuxOperationMode.no_request.value
+
+        if sl3 == LuxStatus3Option.thermal_desinfection:
+            self._attr_native_value = LuxOperationMode.domestic_water.value
+
+        if sl3 in [LuxStatus3Option.no_request, LuxStatus3Option.cycle_lock]:
+            DHW_recirculation = self._get_value(LC.C0038_DHW_RECIRCULATION_PUMP)
+            AddHeat = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
+            if AddHeat and DHW_recirculation:
                 self._attr_native_value = LuxOperationMode.domestic_water.value
-            # endregion Workaround Thermal desinfection with heatpump running
 
-            # region Workaround Thermal desinfection with (only) using 2nd heatsource
-            s3_workaround: list[str | None] = [
-                LuxStatus3Option.no_request,
-                LuxStatus3Option.cycle_lock,
-            ]
-            if sl3 in s3_workaround:
-                DHW_recirculation = self._get_value(LC.C0038_DHW_RECIRCULATION_PUMP)
-                AddHeat = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
-                if AddHeat and DHW_recirculation:
-                    # more fixes to detect thermal desinfection sequences
-                    self._attr_native_value = LuxOperationMode.domestic_water.value
-            # endregion Workaround Thermal desinfection with (only) using 2nd heatsource
-
-        # endregion Workaround Luxtronik Bug
-
-        self._last_state = self._attr_native_value
-
+        # Update attributes
         attr = self._attr_extra_state_attributes
         attr[SA.STATUS_RAW] = self._attr_native_value
         attr[SA.STATUS_TEXT] = self._build_status_text()
-        attr[SA.EVU_MINUTES_UNTIL_NEXT_EVENT] = self._calc_next_evu_event_minutes_text()
-        attr[SA.EVU_FIRST_START_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_FIRST_START_TIME]
-        )
-        attr[SA.EVU_FIRST_END_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_FIRST_END_TIME]
-        )
-        attr[SA.EVU_SECOND_START_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_SECOND_START_TIME]
-        )
-        attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_SECOND_END_TIME]
-        )
-        attr[SA.EVU_DAYS] = self._wd_txt(self._attr_cache[SA.EVU_DAYS])
+        attr.update(self._evu_tracker.get_attributes())
         self._enrich_extra_attributes()
         self.async_write_ha_state()
 
@@ -362,113 +271,33 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             return ""
         if line_2_state is None or line_2_state == STATE_UNAVAILABLE:
             return ""
+
         line_1 = self.platform.platform_data.platform_translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.{line_1_state}"
         )
         line_2 = self.platform.platform_data.platform_translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.{line_2_state}"
         )
-        # Show evu end time if available
-        evu_event_minutes = self._calc_next_evu_event_minutes()
+
+        evu_event_minutes = self._evu_tracker.get_next_event_minutes()
         if evu_event_minutes is None:
-            pass
-        elif self.native_value == LuxOperationMode.evu.value:
+            return f"{line_1} {line_2} {status_time}."
+
+        if self.native_value == LuxOperationMode.evu.value:
             text_locale = self.platform.platform_data.platform_translations.get(
                 f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_until"
             )
             evu_until = text_locale.format(evu_time=evu_event_minutes)
             return f"{evu_until} {line_1} {line_2} {status_time}."
-        elif evu_event_minutes <= 30:
+
+        if evu_event_minutes <= 30:
             text_locale = self.platform.platform_data.platform_translations.get(
                 f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_in"
             )
             evu_in = text_locale.format(evu_time=evu_event_minutes)
             return f"{line_1} {line_2} {status_time}. {evu_in}"
+
         return f"{line_1} {line_2} {status_time}."
-
-    def _calc_next_evu_event_minutes_text(self) -> str:
-        minutes = self._calc_next_evu_event_minutes()
-        return "" if minutes is None else str(minutes)
-
-    def _calc_next_evu_event_minutes(self) -> int | None:
-        evu_time = self._get_next_evu_event_time()
-        time_now = time(datetime.now().hour, datetime.now().minute)
-        if evu_time == time.min:
-            return None
-        evu_hours = (24 if evu_time < time_now else 0) + evu_time.hour
-        weekday = datetime.today().weekday()
-        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
-            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(",")
-        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
-            self._attr_cache[SA.EVU_DAYS] = list()
-        evu_pause = 0
-        if (
-            self._attr_cache[SA.EVU_DAYS]
-            and weekday not in self._attr_cache[SA.EVU_DAYS]
-        ):
-            evu_pause += (24 - datetime.now().hour) * 60 - datetime.now().minute
-            evu_time = self._attr_cache[SA.EVU_FIRST_START_TIME]
-            for i in range(1, 7):
-                if weekday + i > 6:
-                    i = -7 + i
-                if weekday + i in self._attr_cache[SA.EVU_DAYS]:
-                    return evu_time.hour * 60 + evu_time.minute + evu_pause
-                else:
-                    evu_pause += 1440
-        else:
-            return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute
-
-    def _get_next_evu_event_time(self) -> time:
-        event: time = time.min
-        time_now = time(datetime.now().hour, datetime.now().minute)
-        for evu_time in (
-            self._attr_cache[SA.EVU_FIRST_START_TIME],
-            self._attr_cache[SA.EVU_FIRST_END_TIME],
-            self._attr_cache[SA.EVU_SECOND_START_TIME],
-            self._attr_cache[SA.EVU_SECOND_END_TIME],
-        ):
-            if evu_time == time.min:
-                continue
-            if evu_time > time_now and (event == time.min or evu_time < event):
-                event = evu_time
-        if event == time.min:
-            for evu_time in (
-                self._attr_cache[SA.EVU_FIRST_START_TIME],
-                self._attr_cache[SA.EVU_FIRST_END_TIME],
-                self._attr_cache[SA.EVU_SECOND_START_TIME],
-                self._attr_cache[SA.EVU_SECOND_END_TIME],
-            ):
-                if evu_time == time.min:
-                    continue
-                if event == time.min or evu_time < event:
-                    event = evu_time
-        return event
-
-    def _tm_txt(self, value: time) -> str:
-        return "" if value == time.min else value.strftime("%H:%M")
-
-    def _wd_txt(self, value: list) -> str:
-        if not value:
-            return ""
-        days = []
-        for i in value:
-            days.append(calendar.day_name[i])
-        return ",".join(days)
-
-    def _restore_attr_value(self, value: Any | None) -> Any:
-        if value is not None:
-            if ":" in str(value):
-                vals = str(value).split(":")
-                return time(int(vals[0]), int(vals[1]))
-            vals = list()
-            for day in str(value).split(","):
-                for idx, name in enumerate(calendar.day_name):
-                    if day == name:
-                        vals.append(idx)
-                        break
-            if vals:
-                return vals
-        return time.min
 
 
 class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
@@ -477,7 +306,12 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
 
     entity_description: LuxtronikIndexSensorDescription
 
-    async def _handle_coordinator_update(
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Sync callback registered with DataUpdateCoordinator."""
+        self.hass.async_create_task(self._async_handle_coordinator_update())
+
+    async def _async_handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
