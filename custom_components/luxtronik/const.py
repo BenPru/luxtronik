@@ -242,23 +242,26 @@ class LuxSwitchoffReason(Enum):
     undefined_31: Final = 31  # ???
 
 
-LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
+LUX_STATE_ICON_MAP_HEAT: Final[dict[StateType | date | datetime | Decimal, str]] = {
     LuxOperationMode.heating.value: "mdi:radiator",
-    LuxOperationMode.domestic_water.value: "mdi:waves",
-    LuxOperationMode.swimming_pool_solar.value: "mdi:pool",
+    LuxOperationMode.domestic_water.value: "mdi:radiator-off",
+    LuxOperationMode.swimming_pool_solar.value: "mdi:radiator-off",
     LuxOperationMode.evu.value: "mdi:power-plug-off",
     LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
-    LuxOperationMode.no_request.value: "mdi:hvac-off",  # "mdi:heat-pump-outline",  # "mdi:radiator-disabled",
+    LuxOperationMode.no_request.value: "mdi:radiator-off",  # "mdi:heat-pump-outline",  # "mdi:radiator-disabled",
     LuxOperationMode.heating_external_source.value: "mdi:patio-heater",
-    LuxOperationMode.cooling.value: "mdi:air-conditioner",
+    LuxOperationMode.cooling.value: "mdi:radiator-off",
 }
 
 LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]] = {
-    LuxOperationMode.swimming_pool_solar.value: "mdi:pool",
+    LuxOperationMode.heating.value: "mdi:snowflake-off",
+    LuxOperationMode.domestic_water.value: "mdi:snowflake-off",
+    LuxOperationMode.swimming_pool_solar.value: "mdi:snowflake-off",
     LuxOperationMode.evu.value: "mdi:power-plug-off",
     LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
     LuxOperationMode.no_request.value: "mdi:snowflake-off",
-    LuxOperationMode.cooling.value: "mdi:air-conditioner",
+    LuxOperationMode.heating_external_source.value: "mdi:snowflake-off",
+    LuxOperationMode.cooling.value: "mdi:snowflake",
 }
 
 LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]

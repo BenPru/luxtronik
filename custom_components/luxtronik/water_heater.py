@@ -8,7 +8,8 @@ from packaging.version import Version
 
 from typing_extensions import override
 
-from homeassistant.components.climate.const import HVACAction
+#from homeassistant.components.climate.const import HVACAction
+from homeassistant.components.climate import HVACMode, HVACAction
 from homeassistant.components.water_heater import (
     ENTITY_ID_FORMAT,
     STATE_ELECTRIC,
@@ -205,14 +206,20 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             await self._async_set_lux_mode(LuxMode.automatic.value)
         else:
             await self.async_set_operation_mode(self._last_operation_mode_before_away)
+   
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            "lux_operation_mode": self._attr_current_operation,
+        }
 
     @property
-    def hvac_action(self) -> HVACAction | str | None:
-        """Return the current running hvac operation."""
-        if (
-            self.entity_description.luxtronik_action_heating is not None
-            and self._current_action
-            == self.entity_description.luxtronik_action_heating.value
-        ):
-            return HVACAction.HEATING
-        return HVACAction.OFF
+    def icon(self) -> str | None:
+        """Return the icon based on water heater state and activity."""
+        if self._attr_current_operation == STATE_OFF:
+            return "mdi:power-off"
+
+        if self._current_action == self.entity_description.luxtronik_action_heating.value:
+            return "mdi:water-boiler"
+
+        return "mdi:water-boiler-off"

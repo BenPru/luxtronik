@@ -14,7 +14,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
-    LUX_STATE_ICON_MAP,
+    LUX_STATE_ICON_MAP_HEAT,
     SECOND_TO_HOUR_FACTOR,
     UPDATE_INTERVAL_NORMAL,
     UPDATE_INTERVAL_SLOW,
@@ -45,7 +45,7 @@ SENSORS_STATUS: list[descr] = [
     descr(
         key=SensorKey.STATUS,
         luxtronik_key=LC.C0080_STATUS,
-        icon_by_state=LUX_STATE_ICON_MAP,
+        icon_by_state=LUX_STATE_ICON_MAP_HEAT,
         device_class=SensorDeviceClass.ENUM,
         extra_attributes=(
             attr(SA.EVU_FIRST_START_TIME, LC.UNSET, None, True),

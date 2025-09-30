@@ -131,24 +131,13 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._attr_state = value
 
-        # Determine the state used for icon selection
-        icon_state = getattr(self, "_attr_is_on", None)
-        if icon_state is None:
-            icon_state = getattr(self, "_attr_current_lux_operation", self._attr_state)
-
         # Set icon based on state mapping
+        # NOTE: Climate and water_heater have their own icon property
         if self.entity_description.icon_by_state:
+            icon_state = getattr(self, "_attr_is_on", None)
             self._attr_icon = self.entity_description.icon_by_state.get(icon_state, self.entity_description.icon)
         else:
             self._attr_icon = self.entity_description.icon
-
-        # Append suffixes based on current operation mode
-        current_op = getattr(self, "_attr_current_operation", None)
-        if self._attr_icon and isinstance(self._attr_icon, str):
-            if current_op == STATE_OFF:
-                self._attr_icon += "-off"
-            elif current_op == STATE_HEAT_PUMP:
-                self._attr_icon += "-auto"
 
         self._enrich_extra_attributes()
         self.async_write_ha_state()

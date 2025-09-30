@@ -38,7 +38,7 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     LOGGER,
-    LUX_STATE_ICON_MAP,
+    LUX_STATE_ICON_MAP_HEAT,
     LUX_STATE_ICON_MAP_COOL,
     DeviceKey,
     LuxCalculation,
@@ -116,10 +116,10 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.heating.value,
+        luxtronik_action_active=LuxOperationMode.heating,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
-        icon_by_state=LUX_STATE_ICON_MAP,
+        icon_by_state=LUX_STATE_ICON_MAP_HEAT,
         temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
@@ -140,12 +140,12 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.heating.value,
+        luxtronik_action_active=LuxOperationMode.heating,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
-        icon_by_state=LUX_STATE_ICON_MAP,
+        icon_by_state=LUX_STATE_ICON_MAP_HEAT,
         temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
@@ -165,7 +165,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.cooling.value,
+        luxtronik_action_active=LuxOperationMode.cooling,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         # luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
@@ -297,22 +297,14 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if data is None:
             return
         
-        # domain = self.entity_description.key.value
         mode = self._get_value(self.entity_description.luxtronik_key)
         self._attr_hvac_mode = (
             None if mode is None else self.entity_description.hvac_mode_mapping[mode]
         )
         self._attr_preset_mode = None if mode is None else HVAC_PRESET_MAPPING[mode]
+
         self._attr_current_lux_operation = lux_action = self._get_value(self.entity_description.luxtronik_key_current_action)
 
-        self._attr_hvac_action = (
-            None
-            if lux_action is None
-            else self.entity_description.hvac_action_mapping[lux_action]
-        )
-        # self._attr_is_aux_heat = (
-        #     None if mode is None else mode == LuxMode.second_heatsource.value
-        # )
         if self._attr_preset_mode == PRESET_NONE:  # or self._attr_is_aux_heat:
             self._last_hvac_mode_before_preset = None
         key = self.entity_description.luxtronik_key_current_temperature
@@ -321,6 +313,10 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
         elif key != LuxCalculation.UNSET:
             self._attr_current_temperature = self._get_value(key)
+        
+        #domain = self.entity_description.key.value
+        #LOGGER.info(f'[{domain}] _attr_hvac_action={self._attr_hvac_action}')
+        #LOGGER.info(f'[{domain}] _attr_preset_mode={self._attr_preset_mode}')
         # LOGGER.info(f'[{domain}] self._attr_current_temperature={self._attr_current_temperature}')
 
         key_tar = self.entity_description.luxtronik_key_target_temperature
@@ -406,8 +402,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         lux_mode = [
             k
             for k, v in self.entity_description.hvac_mode_mapping.items()
-            if v == hvac_mode.value
-        ][0]
+            if v == hvac_mode.value][0]
         await self._async_set_lux_mode(lux_mode)
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
@@ -416,9 +411,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if preset_mode in [PRESET_COMFORT]:
             lux_mode = LuxMode.automatic
         elif preset_mode != PRESET_NONE:
-            lux_mode = [k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode][
-                0
-            ]
+            lux_mode = [k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode][0]
             if self._last_hvac_mode_before_preset is None:
                 self._last_hvac_mode_before_preset = self._attr_hvac_mode
         elif self._last_hvac_mode_before_preset is not None:
@@ -460,3 +453,38 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             # self._attr_is_aux_heat,
             self._last_hvac_mode_before_preset,
         )
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon based on HVAC mode and current Lux operation mode."""
+        if self._attr_hvac_mode == HVACMode.OFF:
+            return "mdi:power-off"
+
+        if self.entity_description.icon_by_state and self._attr_current_lux_operation:
+            return self.entity_description.icon_by_state.get(
+                self._attr_current_lux_operation, "mdi:thermometer"
+            )
+
+        return "mdi:thermometer"
+    
+    @property
+    def hvac_action(self) -> HVACAction | None:
+        """Return the current HVAC action (e.g., heating, cooling, idle)."""
+        if self._attr_hvac_mode == HVACMode.OFF:
+            return HVACAction.OFF
+
+        lux_action = self._attr_current_lux_operation
+        if lux_action and self.entity_description.hvac_action_mapping:
+            action = self.entity_description.hvac_action_mapping.get(lux_action)
+            if action in HVACAction.__members__.values():
+                return HVACAction(action)
+
+        return HVACAction.IDLE
+
+    @property
+    def hvac_mode(self) -> HVACMode | str | None:
+        if self._attr_hvac_mode in HVACMode.__members__.values():
+            return HVACMode(self._attr_hvac_mode)
+        return self._attr_hvac_mode
+
+

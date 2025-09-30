@@ -64,9 +64,14 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         device_key=DeviceKey.heating,
         luxtronik_key=LP.P0003_MODE_HEATING,
         key=SensorKey.HEATING,
-        icon_by_state={True: "mdi:radiator", False: "mdi:radiator-off"},
         device_class=None,
         on_state=LuxMode.automatic.value,
+        on_states=[
+            LuxMode.automatic.value,
+            LuxMode.second_heatsource.value,
+            LuxMode.party.value,
+            LuxMode.holidays.value,
+        ],
         off_state=LuxMode.off.value,
     ),
     LuxtronikSwitchDescription(
@@ -105,7 +110,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         device_key=DeviceKey.domestic_water,
         luxtronik_key=LP.P0004_MODE_DHW,
         key=SensorKey.DOMESTIC_WATER,
-        icon_by_state={True: "mdi:water-boiler-auto", False: "mdi:water-boiler-off"},
         device_class=None,
         on_state=LuxMode.automatic.value,
         on_states=[
