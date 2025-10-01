@@ -226,7 +226,6 @@ SENSORS: list[descr] = [
     descr(
         key=SensorKey.HEAT_AMOUNT_FLOW_RATE,
         luxtronik_key=LC.C0155_HEAT_AMOUNT_FLOW_RATE,
-        device_key=DeviceKey.heating,
         icon="mdi:water-sync",
         state_class=SensorStateClass.MEASUREMENT,
         device_class=None,  # SensorDeviceClass.WATER, <- There is no predefined device class for flow at the moment.
@@ -238,7 +237,6 @@ SENSORS: list[descr] = [
     descr(
         key=SensorKey.HEAT_SOURCE_FLOW_RATE,
         luxtronik_key=LC.C0173_HEAT_SOURCE_FLOW_RATE,
-        device_key=DeviceKey.heating,
         icon="mdi:water-sync",
         state_class=SensorStateClass.MEASUREMENT,
         device_class=None,  # SensorDeviceClass.WATER, <- There is no predefined device class for flow at the moment.
