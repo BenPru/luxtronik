@@ -607,7 +607,7 @@
             "unknown": "Unknown error."
         },
         "error": {
-            "address": "Invalid remote-address insert. The address has to be an IP address or a resolvable hostname.",
+            "address": "Invalid remote-address. The address has to be an IP address or a resolvable hostname.",
             "address_in_use": "The chosen listen port is already in use on this system.",
             "unknown": "Unexpected error"
         },
@@ -634,7 +634,10 @@
             },
             "select_devices": {
                 "title": "Select Devices to Configure",
-                "description": "Select one or more devices to add. Already configured devices: {configured}"
+                "description": "Select one or more devices to add. Already configured devices: {configured}",               
+                "data": {
+                    "select_device_to_configure": "Select the device you want to configure"
+                }
             },
             "options": {
                 "description": "Settings for the Luxtronik heatpump {name}.\nThese settings can also be changed later under Integrations.",

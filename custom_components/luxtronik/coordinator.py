@@ -50,6 +50,7 @@ from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 _LuxtronikCoordinatorT = TypeVar("_LuxtronikCoordinatorT", bound="LuxtronikCoordinator")
 _P = ParamSpec("_P")
 
+
 def catch_luxtronik_errors(
     func: Callable[Concatenate[_LuxtronikCoordinatorT, _P], Awaitable[None]],
 ) -> Callable[Concatenate[_LuxtronikCoordinatorT, _P], Coroutine[Any, Any, None]]:
@@ -72,6 +73,7 @@ def catch_luxtronik_errors(
 
 
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
+    """Representation of a Luxtronik Coordinator."""
     def __init__(self, hass: HomeAssistant, client: Luxtronik, config: dict[str, Any]) -> None:
         self.client = client
         self.lock = threading.Lock()
@@ -219,7 +221,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             },
             sw_version=self.firmware_version,
             model=self.model,
-            suggested_area="Utility room",
+            suggested_area="",  # was "Utility room",
             hw_version=None,
             manufacturer=self.manufacturer,
             # default_name=f"{text}",
@@ -446,19 +448,27 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if hasattr(self, "client") and self.client is not None:
             del self.client
         else:
-            LOGGER.warning("LuxtronikCoordinator has no 'client' attribute during shutdown.")
+            LOGGER.warning(
+                "LuxtronikCoordinator has no 'client' attribute during shutdown."
+            )
+
 
 class LuxtronikConnectionError(HomeAssistantError):
     """Raised when connection to Luxtronik fails."""
 
     def __init__(self, host: str, port: int, original: Exception):
-        super().__init__(f"Failed to connect to {host}:{port} - {type(original).__name__}: {original}")
+        super().__init__(
+            f"Failed to connect to {host}:{port} - {type(original).__name__}: {original}"
+        )
         self.host = host
         self.port = port
         self.original = original
 
 
-async def connect_and_get_coordinator(hass: HomeAssistant, config: dict[str, Any]) -> LuxtronikCoordinator:
+async def connect_and_get_coordinator(
+    hass: HomeAssistant, config: dict[str, Any]
+) -> LuxtronikCoordinator:
+
     """Try to connect to a Luxtronik device and return coordinator."""
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT, DEFAULT_PORT)
@@ -466,6 +476,11 @@ async def connect_and_get_coordinator(hass: HomeAssistant, config: dict[str, Any
     try:
         coordinator = await LuxtronikCoordinator.connect(hass, config)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
+
+        # ✅ Perform initial data fetch manually
+        await coordinator._async_update_data()
+        LOGGER.info("Initial data fetched for coordinator")
+
         return coordinator
     except Exception as err:
         LOGGER.error("Luxtronik connect to device %s:%s failed: %s", host, port, err)
