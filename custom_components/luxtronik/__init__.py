@@ -26,9 +26,10 @@ from .const import (
     SERVICE_WRITE_SCHEMA,
     SensorKey as SK,
 )
-from .coordinator import LuxtronikCoordinator,connect_and_get_coordinator
+from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 
 # endregion Imports
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Luxtronik from a config entry."""
@@ -48,9 +49,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Trigger a refresh again now that all platforms have registered
     hass.async_create_task(coordinator.async_refresh())
 
-    # 🛠️ Update title 
+    # 🛠️ Update title
     if coordinator.manufacturer is not None:
-        new_title = f"{coordinator.manufacturer} @ {config[CONF_HOST]}:{config[CONF_PORT]}"
+        new_title = (
+            f"{coordinator.manufacturer} @ {config[CONF_HOST]}:{config[CONF_PORT]}"
+        )
     else:
         new_title = f"Luxtronik @ {config[CONF_HOST]}:{config[CONF_PORT]}"
     LOGGER.info("new_title: %s", new_title)
@@ -60,6 +63,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.async_add_executor_job(setup_hass_services, hass, entry)
 
     return True
+
 
 def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
     """Home Assistant services."""

@@ -249,7 +249,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         domain = description.key.value
         configured_indoor_temp_sensor = entry.options.get(
             CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-            entry.data.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
+            entry.data.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE),
         )
 
         if configured_indoor_temp_sensor is not None:

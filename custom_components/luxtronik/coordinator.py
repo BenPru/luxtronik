@@ -49,6 +49,7 @@ from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 _LuxtronikCoordinatorT = TypeVar("_LuxtronikCoordinatorT", bound="LuxtronikCoordinator")
 _P = ParamSpec("_P")
 
+
 def catch_luxtronik_errors(
     func: Callable[Concatenate[_LuxtronikCoordinatorT, _P], Awaitable[None]],
 ) -> Callable[Concatenate[_LuxtronikCoordinatorT, _P], Coroutine[Any, Any, None]]:
@@ -68,6 +69,7 @@ def catch_luxtronik_errors(
         await self.async_request_refresh()
 
     return wrapper
+
 
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
@@ -278,7 +280,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             },
             sw_version=self.firmware_version,
             model=self.model,
-            suggested_area="", # was "Utility room",
+            suggested_area="",  # was "Utility room",
             hw_version=None,
             manufacturer=self.manufacturer,
             # default_name=f"{text}",
@@ -507,17 +509,26 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             # await self.client.disconnect()
             del self.client
         else:
-            LOGGER.warning("LuxtronikCoordinator has no 'client' attribute during shutdown.")
+            LOGGER.warning(
+                "LuxtronikCoordinator has no 'client' attribute during shutdown."
+            )
+
 
 class LuxtronikConnectionError(HomeAssistantError):
     """Raised when connection to Luxtronik fails."""
+
     def __init__(self, host: str, port: int, original: Exception):
-        super().__init__(f"Failed to connect to {host}:{port} - {type(original).__name__}: {original}")
+        super().__init__(
+            f"Failed to connect to {host}:{port} - {type(original).__name__}: {original}"
+        )
         self.host = host
         self.port = port
         self.original = original
 
-async def connect_and_get_coordinator(hass: HomeAssistant, config: dict[str, Any]) -> LuxtronikCoordinator:
+
+async def connect_and_get_coordinator(
+    hass: HomeAssistant, config: dict[str, Any]
+) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT, DEFAULT_PORT)

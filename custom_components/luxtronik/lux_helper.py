@@ -87,7 +87,9 @@ def discover() -> list[tuple[str, int | None]]:
                             "Skipping this port."
                         )
                     elif (ip_address, res_port) not in results:
-                        LOGGER.info(f"Discovered Luxtronik heatpump at {ip_address}:{res_port}")
+                        LOGGER.info(
+                            f"Discovered Luxtronik heatpump at {ip_address}:{res_port}"
+                        )
                         results.append((ip_address, res_port))
 
                 else:

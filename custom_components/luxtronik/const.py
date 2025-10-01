@@ -21,7 +21,7 @@ DOMAIN: Final = "luxtronik2"
 NICKNAME_PREFIX: Final = "Home Assistant"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
-#LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
+# LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [
     Platform.WATER_HEATER,
