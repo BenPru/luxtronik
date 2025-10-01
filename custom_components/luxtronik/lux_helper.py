@@ -72,7 +72,7 @@ def discover() -> list[tuple[str, int | None]]:
                 res_list = res.split(";")
                 # if the response starts with the magic nonsense
                 if res.startswith(LUXTRONIK_DISCOVERY_RESPONSE_PREFIX):
-                    LOGGER.info(
+                    LOGGER.debug(
                         f"Received valid Luxtronik response from {ip_address}: {str(res_list)}"
                     )
                     try:
@@ -87,7 +87,7 @@ def discover() -> list[tuple[str, int | None]]:
                             "Skipping this port."
                         )
                     elif (ip_address, res_port) not in results:
-                        LOGGER.info(f"Discovered heatpump at {ip_address}:{res_port}")
+                        LOGGER.info(f"Discovered Luxtronik heatpump at {ip_address}:{res_port}")
                         results.append((ip_address, res_port))
 
                 else:

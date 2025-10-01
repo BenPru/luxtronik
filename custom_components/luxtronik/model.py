@@ -92,7 +92,7 @@ class LuxtronikEntityDescription(EntityDescription):
     min_firmware_version: Version | None = None
     max_firmware_version: Version | None = None
 
-    extra_attributes: tuple(LuxtronikEntityAttributeDescription) = ()
+    extra_attributes: tuple[LuxtronikEntityAttributeDescription, ...] = ()
     state_class: str | None = None
 
 

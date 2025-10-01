@@ -11,12 +11,12 @@ from packaging.version import Version
 import threading
 from types import MappingProxyType
 from typing import Any, Concatenate, TypeVar
-
 from typing_extensions import ParamSpec
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -29,6 +29,7 @@ from .const import (
     CONF_VISIBILITIES,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_TIMEOUT,
+    DEFAULT_PORT,
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
@@ -47,7 +48,6 @@ from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 
 _LuxtronikCoordinatorT = TypeVar("_LuxtronikCoordinatorT", bound="LuxtronikCoordinator")
 _P = ParamSpec("_P")
-
 
 def catch_luxtronik_errors(
     func: Callable[Concatenate[_LuxtronikCoordinatorT, _P], Awaitable[None]],
@@ -68,7 +68,6 @@ def catch_luxtronik_errors(
         await self.async_request_refresh()
 
     return wrapper
-
 
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
@@ -279,7 +278,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             },
             sw_version=self.firmware_version,
             model=self.model,
-            suggested_area="Utility room",
+            suggested_area="", # was "Utility room",
             hw_version=None,
             manufacturer=self.manufacturer,
             # default_name=f"{text}",
@@ -502,8 +501,36 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return cooling_present
 
     async def async_shutdown(self) -> None:
-        """Make sure a coordinator is shut down as well as it's connection."""
+        """Make sure a coordinator is shut down as well as its connection."""
         await super().async_shutdown()
-        if self.client is not None:
+        if hasattr(self, "client") and self.client is not None:
             # await self.client.disconnect()
             del self.client
+        else:
+            LOGGER.warning("LuxtronikCoordinator has no 'client' attribute during shutdown.")
+
+class LuxtronikConnectionError(HomeAssistantError):
+    """Raised when connection to Luxtronik fails."""
+    def __init__(self, host: str, port: int, original: Exception):
+        super().__init__(f"Failed to connect to {host}:{port} - {type(original).__name__}: {original}")
+        self.host = host
+        self.port = port
+        self.original = original
+
+async def connect_and_get_coordinator(hass: HomeAssistant, config: dict[str, Any]) -> LuxtronikCoordinator:
+    """Try to connect to a Luxtronik device and return coordinator."""
+    host = config.get(CONF_HOST)
+    port = config.get(CONF_PORT, DEFAULT_PORT)
+
+    try:
+        coordinator = LuxtronikCoordinator.connect(hass, config)
+        LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
+
+        # ✅ Perform initial data fetch manually
+        await coordinator._async_update_data()
+        LOGGER.info("Initial data fetched for coordinator")
+
+        return coordinator
+    except Exception as err:
+        LOGGER.error("Luxtronik connect to device %s:%s failed: %s", host, port, err)
+        raise LuxtronikConnectionError(host, port, err)

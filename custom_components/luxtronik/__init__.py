@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_TIMEOUT, Platform as P
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity_registry import (
@@ -26,37 +26,40 @@ from .const import (
     SERVICE_WRITE_SCHEMA,
     SensorKey as SK,
 )
-from .coordinator import LuxtronikCoordinator
+from .coordinator import LuxtronikCoordinator,connect_and_get_coordinator
 
 # endregion Imports
-
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Luxtronik from a config entry."""
 
-    hass.data.setdefault(DOMAIN, {})
+    data = hass.data.setdefault(DOMAIN, {})
+    LOGGER.info(entry)
+    # Create coordinator using shared connection logic
+    config = entry.data
+    coordinator = await connect_and_get_coordinator(hass, config)
 
-    # Create API instance
-    coordinator = LuxtronikCoordinator.connect(hass, entry)
-
-    await coordinator.async_config_entry_first_refresh()
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
-    data = hass.data.setdefault(DOMAIN, {})
-    data[entry.entry_id] = {}
-    data[entry.entry_id][CONF_COORDINATOR] = coordinator
+    data[entry.entry_id] = {CONF_COORDINATOR: coordinator}
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Trigger a refresh again now that all platforms have registered
     hass.async_create_task(coordinator.async_refresh())
 
-    # hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    # 🛠️ Update title 
+    if coordinator.manufacturer is not None:
+        new_title = f"{coordinator.manufacturer} @ {config[CONF_HOST]}:{config[CONF_PORT]}"
+    else:
+        new_title = f"Luxtronik @ {config[CONF_HOST]}:{config[CONF_PORT]}"
+    LOGGER.info("new_title: %s", new_title)
+
+    hass.config_entries.async_update_entry(entry, title=new_title.strip())
 
     await hass.async_add_executor_job(setup_hass_services, hass, entry)
 
     return True
-
 
 def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
     """Home Assistant services."""
@@ -383,7 +386,7 @@ def _identifiers_exists(
 
 
 async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):
-    coordinator = LuxtronikCoordinator.connect(hass, config_entry)
+    coordinator = await connect_and_get_coordinator(hass, config_entry.data)
     dr_instance = dr.async_get(hass)
     devices: list[dr.DeviceEntry] = dr.async_entries_for_config_entry(
         dr_instance, config_entry.entry_id
