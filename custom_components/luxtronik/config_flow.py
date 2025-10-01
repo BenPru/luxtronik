@@ -33,6 +33,8 @@ from .schema_helper import build_user_data_schema, build_options_schema
 
 # endregion Imports
 
+SELECT_DEVICE_LABEL = "select_device_to_configure"
+
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
@@ -60,17 +62,26 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             await self.async_set_unique_id(coordinator.unique_id)
             self._abort_if_unique_id_configured()
+
             return True
         except AbortFlow:
             LOGGER.debug("Device already configured: %s", config[CONF_HOST])
             return False
 
-    def _create_entry(self, config: dict[str, Any]) -> FlowResult:
-        """Create a config entry."""
+    def _create_entry(self, config: dict[str, Any], coordinator: LuxtronikCoordinator) -> FlowResult:
+        if CONF_HA_SENSOR_PREFIX not in config:
+            config[CONF_HA_SENSOR_PREFIX] = f"luxtronik_{coordinator.unique_id}"
+
+        if coordinator.manufacturer is not None:
+            title = f"{coordinator.manufacturer} @ {config[CONF_HOST]}:{config[CONF_PORT]}"
+        else:
+            title = f"Luxtronik @ {config[CONF_HOST]}:{config[CONF_PORT]}"
+
         return self.async_create_entry(
-            title=f"{config[CONF_HOST]}:{config[CONF_PORT]}",
+            title=title,
             data=config,
         )
+
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -78,6 +89,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initiated by the user."""
         try:
             LOGGER.info("Starting async_step_user")
+            await self._async_migrate_data_from_custom_component_luxtronik2()
+
             LOGGER.info("Starting discovery of Luxtronik devices on network")
             device_list = await self._discover_devices()
 
@@ -110,10 +123,10 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_show_form(
                     step_id="select_devices",
                     data_schema=vol.Schema({
-                        vol.Optional("selected_devices", default=[]): selector.SelectSelector(
+                        vol.Required(SELECT_DEVICE_LABEL): selector.SelectSelector(
                             selector.SelectSelectorConfig(
                                 options=device_options_list,
-                                multiple=True,
+                                multiple=False,  # ✅ Only one device selectable
                                 mode=selector.SelectSelectorMode.DROPDOWN
                             )
                         )
@@ -124,6 +137,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         )
                     }
                 )
+
             else:
                 LOGGER.info("All discovered devices are already configured. Showing manual entry form.")
                 return self.async_show_form(
@@ -141,33 +155,29 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_select_devices(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle user selection of discovered devices."""
+        """Handle user selection of a discovered device."""
         if user_input is None:
             return await self.async_step_user()
 
-        selected = user_input.get("selected_devices", [])
+        device_str = user_input.get(SELECT_DEVICE_LABEL)
+        host, port = device_str.split(":")
+        config = self._build_config(host, int(port))
 
-        for device_str in selected:
-            host, port = device_str.split(":")
-            config = self._build_config(host, int(port))
+        try:
+            coordinator = await connect_and_get_coordinator(self.hass, config)
+        except LuxtronikConnectionError as err:
+            return self.async_abort(
+                reason="cannot_connect",
+                description_placeholders={
+                    "host": err.host,
+                    "connect_error": str(err.original)
+                }
+            )
 
-            try:
-                coordinator = await connect_and_get_coordinator(self.hass, config)
-            except LuxtronikConnectionError as err:
-                return self.async_abort(
-                    reason="cannot_connect",
-                    description_placeholders={
-                        "host": err.host,
-                        "connect_error": str(err.original)
-                    }
-                )
+        if not await self._set_unique_id_or_abort(coordinator, config):
+            return self.async_abort(reason="already_configured")
 
-            if not await self._set_unique_id_or_abort(coordinator,config):
-                return self.async_abort(reason="already_configured")
-
-            return self._create_entry(config)
-
-        return self.async_abort(reason="devices_configured")
+        return self._create_entry(config, coordinator)
 
     async def async_step_manual_entry(
         self, user_input: dict[str, Any] | None = None
@@ -196,7 +206,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if not await self._set_unique_id_or_abort(coordinator,config):
             return self.async_abort(reason="already_configured")
 
-        return self._create_entry(config)
+        return self._create_entry(config, coordinator)
 
 
     async def _async_migrate_data_from_custom_component_luxtronik2(self):
@@ -217,7 +227,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     continue
                 try:
                     # Try to connect and lookup serial number:
-                    coord_legacy = LuxtronikCoordinator.connect(self.hass, legacy_entry)
+                    coord_legacy = await connect_and_get_coordinator(self.hass, legacy_entry)
                     if self.context["unique_id"] == coord_legacy.unique_id:
                         # Match Found! --> Migrate
                         # How to use .INTEGRATION or other instead of .USER?
@@ -301,7 +311,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             if not await self._set_unique_id_or_abort(coordinator,config):
                 return self.async_abort(reason="already_configured")
 
-            return self._create_entry(config)
+            return self._create_entry(config, coordinator)
 
         except Exception as err:
             LOGGER.error("Unhandled DHCP discovery error", exc_info=err)

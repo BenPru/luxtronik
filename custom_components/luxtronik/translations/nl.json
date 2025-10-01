@@ -868,7 +868,10 @@
             },
             "select_devices": {
                 "title": "Selecteer apparaten om te configureren",
-                "description": "Selecteer een of meer apparaten om toe te voegen. Al geconfigureerde apparaten: {configured}"
+                "description": "Selecteer een of meer apparaten om toe te voegen. Al geconfigureerde apparaten: {configured}",
+                "data": {
+                    "select_device_to_configure": "Selecteer de heatpomp die je wilt configureren"
+                }
             },
             "options": {
                 "description": "Instellingen voor de Luxtronik warmtepomp {name}.\nDeze instellingen kunnen later worden gewijzigd onder Integraties.",

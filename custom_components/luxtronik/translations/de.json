@@ -872,7 +872,10 @@
             },
             "select_devices": {
                 "title": "Ger\u00e4te zur Konfiguration ausw\u00e4hlen",
-                "description": "W\u00e4hlen Sie ein oder mehrere Ger\u00e4te zur Konfiguration aus. Bereits konfigurierte Ger\u00e4te: {configured}"
+                "description": "W\u00e4hlen Sie ein oder mehrere Ger\u00e4te zur Konfiguration aus. Bereits konfigurierte Ger\u00e4te: {configured}",
+                "data": {
+                    "select_device_to_configure": "W\u00e4hlen Sie das Ger\u00e4t aus, das Sie konfigurieren m\u00f6chten"
+                    }
             },
             "options": {
                 "description": "Einstellungen f\u00fcr die Luxtronik-W\u00e4rmepumpe {name}.\nDiese Einstellungen k\u00f6nnen sp\u00e4ter unter Integrationen ge\u00e4ndert werden.",

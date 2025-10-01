@@ -611,7 +611,10 @@
             },
             "select_devices": {
                 "title": "Wybierz urz\u0105dzenia do skonfigurowania",
-                "description": "Wybierz jedno lub wi\u0119cej urz\u0105dze\u0144 do dodania. Ju\u017c skonfigurowane urz\u0105dzenia: {configured}"
+                "description": "Wybierz jedno lub wi\u0119cej urz\u0105dze\u0144 do dodania. Ju\u017c skonfigurowane urz\u0105dzenia: {configured}",       
+                "data": {
+                    "select_device_to_configure": "Wybierz urz\u0105dzenie, kt\u00f3re chcesz skonfigurowa\u0107"
+                }
             },
             "options": {
                 "description": "Ustawienia dla pompy ciep\u0142a Luxtronik {name}.\nTe ustawienia mo\u017cna p\u00f3\u017aniej zmieni\u0107 w sekcji Integracje.",

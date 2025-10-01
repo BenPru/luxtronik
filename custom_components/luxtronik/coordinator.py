@@ -278,7 +278,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             },
             sw_version=self.firmware_version,
             model=self.model,
-            suggested_area="Utility room",
+            suggested_area="", # was "Utility room",
             hw_version=None,
             manufacturer=self.manufacturer,
             # default_name=f"{text}",
@@ -525,6 +525,11 @@ async def connect_and_get_coordinator(hass: HomeAssistant, config: dict[str, Any
     try:
         coordinator = LuxtronikCoordinator.connect(hass, config)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
+
+        # ✅ Perform initial data fetch manually
+        await coordinator._async_update_data()
+        LOGGER.info("Initial data fetched for coordinator")
+
         return coordinator
     except Exception as err:
         LOGGER.error("Luxtronik connect to device %s:%s failed: %s", host, port, err)
