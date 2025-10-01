@@ -853,13 +853,13 @@
                     "host": "Host",
                     "port": "Network Port",
                     "timeout": "Network socket timeout (Sec.)",
-                    "max_data_length": "Max data package length"
+                    "max_data_length": "Max data pakket lengte"
                 },
                 "data_description": {
-                    "host": "Hostname or IP address",
-                    "port": "Normally 8889 or 8888",
-                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
-                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
+                    "host": "Hostname of IP adres",
+                    "port": "Normaal 8889 of 8888",
+                    "timeout": "Als het netwerk of de warmtepomp langzaam reageert kan de timeout hierop aangepast worden.",
+                    "max_data_length": "Als het netwerk of warmtepomp langzaam reageert kan de data pakket lengte aangepast worden."
                 }
             },
             "manual_entry": {
