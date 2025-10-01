@@ -33,6 +33,9 @@ def build_options_schema(
             default=current_value,
             description={"suggested_value": current_value},
         ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain=Platform.SENSOR)
+            selector.EntitySelectorConfig(
+                domain="sensor",
+                device_class="temperature"
+            )
         )
     })
