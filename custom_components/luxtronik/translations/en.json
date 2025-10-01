@@ -607,7 +607,7 @@
             "unknown": "Unknown error."
         },
         "error": {
-            "address": "Invalid remote-address insert. The address has to be an IP address or a resolvable hostname.",
+            "address": "Invalid remote-address. The address has to be an IP address or a resolvable hostname.",
             "address_in_use": "The chosen listen port is already in use on this system.",
             "unknown": "Unexpected error"
         },
