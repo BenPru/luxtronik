@@ -81,7 +81,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         )
         description.translation_key = translation_key
         description.has_entity_name = True
-        self._attr_state = self._get_value(description.luxtronik_key)
 
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
@@ -140,7 +139,11 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             self._attr_icon = self.entity_description.icon
 
         self._enrich_extra_attributes()
-        self.async_write_ha_state()
+        if value is None:
+            LOGGER.debug("Skipping state update due to missing value for %s", descr.key)
+            return
+        else:
+            self.async_write_ha_state()
 
     def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:
@@ -186,4 +189,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         return str(value)
 
     def _get_value(self, key: LC | LP) -> Any | None:
+        if not self.coordinator.data:
+            return None
         return get_sensor_data(self.coordinator.data, key)
