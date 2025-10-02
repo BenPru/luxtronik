@@ -1,16 +1,13 @@
-
 """Update coordinator for Luxtronik integration."""
 
 # region Imports
 from __future__ import annotations
 
-import asyncio
 import re
 import threading
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 from packaging.version import Version
-from types import MappingProxyType
 from typing import Any, Concatenate, TypeVar
 from typing_extensions import ParamSpec
 
@@ -34,7 +31,6 @@ from .const import (
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
-    UPDATE_INTERVAL_FAST,
     UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxCalculation as LC,
@@ -74,12 +70,15 @@ def catch_luxtronik_errors(
 
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
-    def __init__(self, hass: HomeAssistant, client: Luxtronik, config: dict[str, Any]) -> None:
+
+    def __init__(
+        self, hass: HomeAssistant, client: Luxtronik, config: dict[str, Any]
+    ) -> None:
         self.client = client
         self.lock = threading.Lock()
         self._config = config
         self.device_infos: dict[str, DeviceInfo] = {}
-        
+
         super().__init__(
             hass,
             LOGGER,
@@ -122,12 +121,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         except Exception as err:
             raise UpdateFailed(f"Write error: {err}") from err
 
-
     @staticmethod
     async def connect(
         hass: HomeAssistant, config_entry: ConfigEntry | dict
     ) -> LuxtronikCoordinator:
-        config = config_entry.data if isinstance(config_entry, ConfigEntry) else config_entry
+        config = (
+            config_entry.data if isinstance(config_entry, ConfigEntry) else config_entry
+        )
 
         host = config[CONF_HOST]
         port = config.get(CONF_PORT, DEFAULT_PORT)
@@ -442,7 +442,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Detect and returns True if Cooling is present."""
         cooling_present = len(self._detect_cooling_mk()) > 0
         return cooling_present
- 
+
     async def async_shutdown(self) -> None:
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
@@ -468,7 +468,6 @@ class LuxtronikConnectionError(HomeAssistantError):
 async def connect_and_get_coordinator(
     hass: HomeAssistant, config: dict[str, Any]
 ) -> LuxtronikCoordinator:
-
     """Try to connect to a Luxtronik device and return coordinator."""
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT, DEFAULT_PORT)

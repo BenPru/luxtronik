@@ -1,7 +1,8 @@
-from datetime import datetime, time
+from datetime import time
 import calendar
 from homeassistant.util import dt as dt_util
 from .const import LuxOperationMode, SensorAttrKey as SA
+
 
 class LuxtronikEVUTracker:
     def __init__(self):
@@ -83,10 +84,18 @@ class LuxtronikEVUTracker:
 
     def get_attributes(self) -> dict[str, str]:
         return {
-            SA.EVU_FIRST_START_TIME: self._format_time(self._cache[SA.EVU_FIRST_START_TIME]),
-            SA.EVU_FIRST_END_TIME: self._format_time(self._cache[SA.EVU_FIRST_END_TIME]),
-            SA.EVU_SECOND_START_TIME: self._format_time(self._cache[SA.EVU_SECOND_START_TIME]),
-            SA.EVU_SECOND_END_TIME: self._format_time(self._cache[SA.EVU_SECOND_END_TIME]),
+            SA.EVU_FIRST_START_TIME: self._format_time(
+                self._cache[SA.EVU_FIRST_START_TIME]
+            ),
+            SA.EVU_FIRST_END_TIME: self._format_time(
+                self._cache[SA.EVU_FIRST_END_TIME]
+            ),
+            SA.EVU_SECOND_START_TIME: self._format_time(
+                self._cache[SA.EVU_SECOND_START_TIME]
+            ),
+            SA.EVU_SECOND_END_TIME: self._format_time(
+                self._cache[SA.EVU_SECOND_END_TIME]
+            ),
             SA.EVU_DAYS: self._format_days(self._cache[SA.EVU_DAYS]),
             SA.EVU_MINUTES_UNTIL_NEXT_EVENT: str(self.get_next_event_minutes() or ""),
         }

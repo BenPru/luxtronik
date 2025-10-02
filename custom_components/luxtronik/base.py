@@ -7,8 +7,7 @@ from datetime import datetime
 from typing import Any
 from enum import StrEnum
 
-from homeassistant.components.water_heater import STATE_HEAT_PUMP
-from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
+from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -96,9 +95,14 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 self._attr_state = last_state.state
 
                 for attr in self.entity_description.extra_attributes:
-                    if not attr.restore_on_startup or attr.key not in last_state.attributes:
+                    if (
+                        not attr.restore_on_startup
+                        or attr.key not in last_state.attributes
+                    ):
                         continue
-                    self._attr_cache[attr.key] = self._restore_attr_value(last_state.attributes[attr.key])
+                    self._attr_cache[attr.key] = self._restore_attr_value(
+                        last_state.attributes[attr.key]
+                    )
 
             last_extra_data = await self.async_get_last_extra_data()
             if last_extra_data is not None:
@@ -134,7 +138,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         # NOTE: Climate and water_heater have their own icon property
         if self.entity_description.icon_by_state:
             icon_state = getattr(self, "_attr_is_on", None)
-            self._attr_icon = self.entity_description.icon_by_state.get(icon_state, self.entity_description.icon)
+            self._attr_icon = self.entity_description.icon_by_state.get(
+                icon_state, self.entity_description.icon
+            )
         else:
             self._attr_icon = self.entity_description.icon
 

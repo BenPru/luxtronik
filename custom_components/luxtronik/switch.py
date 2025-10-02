@@ -12,7 +12,6 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
-from .common import get_sensor_data
 from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey, LOGGER
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikSwitchDescription
@@ -87,15 +86,11 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         if isinstance(descr.on_state, bool) and state is not None:
             state = bool(state)
 
-
         if descr.inverted:
             self._attr_is_on = state != descr.on_state
         else:
-            self._attr_is_on = (
-                state == descr.on_state
-                or (
-                    descr.on_states is not None and state in descr.on_states
-                )
+            self._attr_is_on = state == descr.on_state or (
+                descr.on_states is not None and state in descr.on_states
             )
 
         await super()._async_handle_coordinator_update()
@@ -116,6 +111,3 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         )
 
         # Coordinator will refresh and trigger update callback
-
-
-

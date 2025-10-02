@@ -249,7 +249,6 @@ class Luxtronik:
         """Write parameter to heatpump."""
         self._read_write(write=True)
 
-
     def _read_write(self, write=False):
         try:
             self.connect()

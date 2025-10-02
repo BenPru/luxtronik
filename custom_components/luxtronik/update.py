@@ -50,7 +50,11 @@ async def async_setup_entry(
     )
 
     async_add_entities(
-        [LuxtronikUpdateEntity(entry=entry, coordinator=coordinator, description=description)],
+        [
+            LuxtronikUpdateEntity(
+                entry=entry, coordinator=coordinator, description=description
+            )
+        ],
         True,
     )
 
@@ -124,10 +128,10 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             else FIRMWARE_UPDATE_MANUAL_EN
         )
         return (
-            f'For your {release_url}'
+            f"For your {release_url}"
             f"{self.coordinator.manufacturer} {self.coordinator.model} (Download ID {download_id})</a> is "
-            f'{download_url}Firmware Version {self._firmware_version_available}</a> available.<br>'
-            f'{manual_url}Firmware Update Instructions</a><br><br>'
+            f"{download_url}Firmware Version {self._firmware_version_available}</a> available.<br>"
+            f"{manual_url}Firmware Update Instructions</a><br><br>"
             "The Install button below has no function. It is only needed to trigger notifications in Home Assistant.<br><br>"
             "Alpha Innotec does not provide a changelog. Please contact support for more information."
         )
@@ -154,12 +158,22 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30) as response:
+                async with session.get(
+                    f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30
+                ) as response:
                     header = response.headers.get("content-disposition", "")
-                    filename = re.findall("filename=(.+)", header)[0] if "filename=" in header else ""
-                    self._firmware_version_available = self.extract_firmware_version(filename)
+                    filename = (
+                        re.findall("filename=(.+)", header)[0]
+                        if "filename=" in header
+                        else ""
+                    )
+                    self._firmware_version_available = self.extract_firmware_version(
+                        filename
+                    )
         except Exception:
-            LOGGER.warning("Could not request firmware version from download portal", exc_info=True)
+            LOGGER.warning(
+                "Could not request firmware version from download portal", exc_info=True
+            )
             self._firmware_version_available = STATE_UNAVAILABLE
 
     @staticmethod
@@ -167,5 +181,3 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         """Extract firmware version from filename."""
         match = re.search(r"V\d+\.\d+\.\d+(?:-\d+)?", filename)
         return match.group(0) if match else None
-
-

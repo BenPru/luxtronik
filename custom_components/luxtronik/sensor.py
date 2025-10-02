@@ -4,9 +4,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import date, datetime, time, timezone
-import calendar
-from decimal import Decimal
+from datetime import datetime, timezone
 from typing import Any
 
 from homeassistant.components.sensor import ENTITY_ID_FORMAT, SensorEntity
@@ -15,11 +13,9 @@ from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import StateType
-from homeassistant.util.dt import utcnow, dt as dt_util
+from homeassistant.util.dt import dt as dt_util
 
 from .base import LuxtronikEntity
-from .common import get_sensor_data
 from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
@@ -168,6 +164,7 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
                     float_value, self.entity_description.native_precision
                 )
             self._attr_native_value = float_value
+
 
 class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     """Luxtronik Status Sensor with extended attributes and EVU tracking."""

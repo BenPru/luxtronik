@@ -11,7 +11,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
-from .common import get_sensor_data
 from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikBinarySensorEntityDescription
@@ -81,20 +80,19 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
 
         self._attr_state = self._get_value(self.entity_description.luxtronik_key)
 
-        if isinstance(self.entity_description.on_state, bool) and self._attr_state is not None:
+        if (
+            isinstance(self.entity_description.on_state, bool)
+            and self._attr_state is not None
+        ):
             self._attr_state = bool(self._attr_state)
 
         if self.entity_description.inverted:
             self._attr_is_on = self._attr_state != self.entity_description.on_state
         else:
-            self._attr_is_on = (
-                self._attr_state == self.entity_description.on_state
-                or (
-                    self.entity_description.on_states is not None
-                    and self._attr_state in self.entity_description.on_states
-                )
+            self._attr_is_on = self._attr_state == self.entity_description.on_state or (
+                self.entity_description.on_states is not None
+                and self._attr_state in self.entity_description.on_states
             )
 
         await super()._async_handle_coordinator_update()
         self.async_write_ha_state()
-

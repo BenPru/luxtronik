@@ -6,10 +6,8 @@ from __future__ import annotations
 from typing import Any
 from packaging.version import Version
 
-from typing_extensions import override
 
-#from homeassistant.components.climate.const import HVACAction
-from homeassistant.components.climate import HVACMode, HVACAction
+# from homeassistant.components.climate.const import HVACAction
 from homeassistant.components.water_heater import (
     ENTITY_ID_FORMAT,
     STATE_ELECTRIC,
@@ -24,7 +22,6 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
-from .common import get_sensor_data
 from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
@@ -167,9 +164,11 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         )
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
-        self._attr_current_temperature = self._get_value(descr.luxtronik_key_current_temperature.value
+        self._attr_current_temperature = self._get_value(
+            descr.luxtronik_key_current_temperature.value
         )
-        self._attr_target_temperature = self._get_value(descr.luxtronik_key_target_temperature.value
+        self._attr_target_temperature = self._get_value(
+            descr.luxtronik_key_target_temperature.value
         )
         await super()._async_handle_coordinator_update()
 
@@ -206,7 +205,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             await self._async_set_lux_mode(LuxMode.automatic.value)
         else:
             await self.async_set_operation_mode(self._last_operation_mode_before_away)
-   
+
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         return {
@@ -219,7 +218,10 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         if self._attr_current_operation == STATE_OFF:
             return "mdi:power-off"
 
-        if self._current_action == self.entity_description.luxtronik_action_heating.value:
+        if (
+            self._current_action
+            == self.entity_description.luxtronik_action_heating.value
+        ):
             return "mdi:water-boiler"
 
         return "mdi:water-boiler-off"
