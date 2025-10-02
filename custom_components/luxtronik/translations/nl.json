@@ -905,5 +905,9 @@
                 }
             }
         }
-    }
+    },
+    "preset_mode.none": "Automatisch",
+    "preset_mode.away": "Vakantie",
+    "preset_mode.boost": "Party"
 }
+

@@ -1,3 +1,4 @@
+
 """Update coordinator for Luxtronik integration."""
 
 # region Imports
@@ -5,10 +6,10 @@ from __future__ import annotations
 
 import asyncio
 import re
+import threading
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 from packaging.version import Version
-import threading
 from types import MappingProxyType
 from typing import Any, Concatenate, TypeVar
 from typing_extensions import ParamSpec
@@ -16,7 +17,7 @@ from typing_extensions import ParamSpec
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -73,128 +74,65 @@ def catch_luxtronik_errors(
 
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
-
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        client: Luxtronik,
-        config: Mapping[str, Any],
-    ) -> None:
-        """Initialize Luxtronik Client."""
-
-        self.lock = threading.Lock()
+    def __init__(self, hass: HomeAssistant, client: Luxtronik, config: dict[str, Any]) -> None:
         self.client = client
+        self.lock = threading.Lock()
         self._config = config
-        self.device_infos = dict[str, DeviceInfo]()
-        self.update_reason_write = False
+        self.device_infos: dict[str, DeviceInfo] = {}
+        
         super().__init__(
             hass,
             LOGGER,
             name=DOMAIN,
-            update_method=self._async_update_data,
-            update_interval=UPDATE_INTERVAL_FAST,
+            update_interval=UPDATE_INTERVAL_NORMAL,  # or NORMAL if preferred
         )
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
-        """Connect and fetch data."""
-        self.data = await self._async_read_data()
-        return self.data
-
-    async def _async_read_data(self) -> LuxtronikCoordinatorData:
-        return await self._async_read_or_write(False, None, None)
-
-    async def write(self, parameter, value) -> LuxtronikCoordinatorData:
-        """Write a parameter to the Luxtronik heatpump."""
-        return asyncio.run_coroutine_threadsafe(
-            self.async_write(parameter, value), self.hass.loop
-        ).result()
-
-    async def async_write(self, parameter, value) -> LuxtronikCoordinatorData:
-        """Write a parameter to the Luxtronik heatpump."""
-        return await self._async_read_or_write(True, parameter, value)
-
-    async def _async_read_or_write(
-        self, write, parameter, value
-    ) -> LuxtronikCoordinatorData:
-        if write:
-            data = self._write(parameter, value)
-            self.async_set_updated_data(data)
-            self.async_request_refresh()
-            self.update_interval = UPDATE_INTERVAL_FAST
-            self.update_reason_write = True
-        else:
-            data = self._read()
-            self.async_set_updated_data(data)
-            self.update_interval = (
-                UPDATE_INTERVAL_FAST
-                if bool(self.get_value(LC.C0044_COMPRESSOR))
-                else UPDATE_INTERVAL_NORMAL
-            )
-            self.update_reason_write = False
-        return data
-
-    def _read(self) -> LuxtronikCoordinatorData:
         try:
             with self.lock:
                 self.client.read()
-        except (OSError, ConnectionRefusedError, ConnectionResetError) as err:
-            raise UpdateFailed("Read: Error communicating with device") from err
-        except UpdateFailed:
-            pass
-        except Exception as err:
-            raise UpdateFailed("Read: Error communicating with device") from err
-        self.data = LuxtronikCoordinatorData(
-            parameters=self.client.parameters,
-            calculations=self.client.calculations,
-            visibilities=self.client.visibilities,
-        )
-        return self.data
-
-    def _write(self, parameter, value) -> LuxtronikCoordinatorData:
-        try:
-            self.client.parameters.set(parameter, value)
-            with self.lock:
-                self.client.write()
-        except (ConnectionRefusedError, ConnectionResetError) as err:
-            LOGGER.exception(err)
-            raise UpdateFailed("Read: Error communicating with device") from err
-        except UpdateFailed as err:
-            LOGGER.exception(err)
-        except Exception as err:
-            LOGGER.exception(err)
-            raise UpdateFailed("Write: Error communicating with device") from err
-        finally:
-            self.data = LuxtronikCoordinatorData(
+            return LuxtronikCoordinatorData(
                 parameters=self.client.parameters,
                 calculations=self.client.calculations,
                 visibilities=self.client.visibilities,
             )
+        except Exception as err:
+            raise UpdateFailed(f"Error fetching data: {err}") from err
+
+    async def async_write(self, parameter: str, value: Any) -> None:
+        try:
+            self.client.parameters.set(parameter, value)
+            with self.lock:
+                await self.hass.async_add_executor_job(self.client.write)
+
+            # Perform a fresh read from the device
+            with self.lock:
+                self.client.read()
+
+            # Confirm the value after the read
+            confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
             LOGGER.info(
-                'LuxtronikDevice.write finished %s value: "%s"',
+                'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
                 parameter,
                 value,
+                confirmed_value,
             )
-        return self.data
+
+            await self.async_refresh()
+        except Exception as err:
+            raise UpdateFailed(f"Write error: {err}") from err
+
 
     @staticmethod
-    def connect(
+    async def connect(
         hass: HomeAssistant, config_entry: ConfigEntry | dict
     ) -> LuxtronikCoordinator:
-        """Connect to heatpump."""
-        config: dict[Any, Any] | MappingProxyType[str, Any] | None = None
-        if isinstance(config_entry, ConfigEntry):
-            config = config_entry.data
-        else:
-            config = config_entry
+        config = config_entry.data if isinstance(config_entry, ConfigEntry) else config_entry
 
         host = config[CONF_HOST]
-        port = config[CONF_PORT]
-        timeout = config[CONF_TIMEOUT] if CONF_TIMEOUT in config else DEFAULT_TIMEOUT
-        max_data_length = (
-            config[CONF_MAX_DATA_LENGTH]
-            if CONF_MAX_DATA_LENGTH in config
-            else DEFAULT_MAX_DATA_LENGTH
-        )
+        port = config.get(CONF_PORT, DEFAULT_PORT)
+        timeout = config.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
+        max_data_length = config.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH)
 
         client = Luxtronik(
             host=host,
@@ -203,11 +141,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             max_data_length=max_data_length,
             safe=False,
         )
-        return LuxtronikCoordinator(
-            hass=hass,
-            client=client,
-            config=config,
-        )
+
+        try:
+            await hass.async_add_executor_job(client.connect)
+        except Exception as err:
+            LOGGER.error("Luxtronik connection failed: %s", err)
+            raise ConfigEntryNotReady from err
+
+        return LuxtronikCoordinator(hass=hass, client=client, config=config)
 
     def get_device(
         self,
@@ -501,12 +442,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Detect and returns True if Cooling is present."""
         cooling_present = len(self._detect_cooling_mk()) > 0
         return cooling_present
-
+ 
     async def async_shutdown(self) -> None:
-        """Make sure a coordinator is shut down as well as its connection."""
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
-            # await self.client.disconnect()
             del self.client
         else:
             LOGGER.warning(
@@ -529,12 +468,13 @@ class LuxtronikConnectionError(HomeAssistantError):
 async def connect_and_get_coordinator(
     hass: HomeAssistant, config: dict[str, Any]
 ) -> LuxtronikCoordinator:
+
     """Try to connect to a Luxtronik device and return coordinator."""
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT, DEFAULT_PORT)
 
     try:
-        coordinator = LuxtronikCoordinator.connect(hass, config)
+        coordinator = await LuxtronikCoordinator.connect(hass, config)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
         # ✅ Perform initial data fetch manually

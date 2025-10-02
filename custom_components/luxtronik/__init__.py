@@ -7,6 +7,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity_registry import async_get
 
@@ -33,6 +34,7 @@ from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Luxtronik from a config entry."""
     data = hass.data.setdefault(DOMAIN, {})
+
     LOGGER.info(entry)
 
     config = entry.data
@@ -53,6 +55,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.config_entries.async_update_entry(entry, title=new_title.strip())
 
     await hass.async_add_executor_job(setup_hass_services, hass, entry)
+
+    LOGGER.info("Luxtronik integration setup completed for %s", entry.entry_id)
+
     return True
 
 

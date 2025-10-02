@@ -14,7 +14,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
-    LUX_STATE_ICON_MAP,
+    LUX_STATE_ICON_MAP_HEAT,
     SECOND_TO_HOUR_FACTOR,
     UPDATE_INTERVAL_NORMAL,
     UPDATE_INTERVAL_SLOW,
@@ -45,7 +45,7 @@ SENSORS_STATUS: list[descr] = [
     descr(
         key=SensorKey.STATUS,
         luxtronik_key=LC.C0080_STATUS,
-        icon_by_state=LUX_STATE_ICON_MAP,
+        icon_by_state=LUX_STATE_ICON_MAP_HEAT,
         device_class=SensorDeviceClass.ENUM,
         extra_attributes=(
             attr(SA.EVU_FIRST_START_TIME, LC.UNSET, None, True),
@@ -226,7 +226,6 @@ SENSORS: list[descr] = [
     descr(
         key=SensorKey.HEAT_AMOUNT_FLOW_RATE,
         luxtronik_key=LC.C0155_HEAT_AMOUNT_FLOW_RATE,
-        device_key=DeviceKey.heating,
         icon="mdi:water-sync",
         state_class=SensorStateClass.MEASUREMENT,
         device_class=None,  # SensorDeviceClass.WATER, <- There is no predefined device class for flow at the moment.
@@ -238,7 +237,6 @@ SENSORS: list[descr] = [
     descr(
         key=SensorKey.HEAT_SOURCE_FLOW_RATE,
         luxtronik_key=LC.C0173_HEAT_SOURCE_FLOW_RATE,
-        device_key=DeviceKey.heating,
         icon="mdi:water-sync",
         state_class=SensorStateClass.MEASUREMENT,
         device_class=None,  # SensorDeviceClass.WATER, <- There is no predefined device class for flow at the moment.
