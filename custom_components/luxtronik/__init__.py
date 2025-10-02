@@ -17,6 +17,7 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
+    CONFIG_ENTRY_VERSION,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_TIMEOUT,
     DOMAIN,
@@ -93,7 +94,7 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry) -> Non
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Migrate old entry to the latest version."""
     current_version = config_entry.version
-    latest_version = 8
+    latest_version = CONFIG_ENTRY_VERSION
 
     while current_version < latest_version:
         LOGGER.debug("Starting migration from version %s", current_version)
