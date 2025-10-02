@@ -88,6 +88,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=title,
             data=config,
+            supports_remove_device=True,
         )
 
     async def async_step_user(
