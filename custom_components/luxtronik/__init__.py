@@ -89,7 +89,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     """Migrate old entry to the latest version."""
     current_version = config_entry.version
     latest_version = 8
-    
 
     while current_version < latest_version:
         LOGGER.debug("Starting migration from version %s", current_version)
@@ -100,10 +99,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             if CONF_HA_SENSOR_PREFIX not in new_data:
                 new_data[CONF_HA_SENSOR_PREFIX] = "luxtronik"
             await hass.config_entries.async_update_entry(
-                config_entry,
-                data=new_data,
-                version=2,
-                unique_id=coordinator.unique_id
+                config_entry, data=new_data, version=2, unique_id=coordinator.unique_id
             )
             current_version = 2
 
@@ -146,99 +142,176 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     return True
 
 
-async def _async_update_config_entry(hass: HomeAssistant, config_entry: ConfigEntry, data: dict[str, Any], version: int) -> None:
+async def _async_update_config_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry, data: dict[str, Any], version: int
+) -> None:
     """Update config entry with new data and version."""
-    hass.config_entries.async_update_entry(
-        config_entry,
-        data=data,
-        version=version
-    )
+    hass.config_entries.async_update_entry(config_entry, data=data, version=version)
 
 
 async def _rename_entities(hass: HomeAssistant, config_entry: ConfigEntry):
     """Rename all entities for version 5 migration."""
-    await _up_many(hass, config_entry, {
-        P.SENSOR: [
-            ("pump_frequency", SK.PUMP_FREQUENCY),
-            ("room_thermostat_temperature", SK.ROOM_THERMOSTAT_TEMPERATURE),
-            ("room_thermostat_temperature_target", SK.ROOM_THERMOSTAT_TEMPERATURE_TARGET),
-        ],
-        P.BINARY_SENSOR: [
-            ("evu_unlocked", SK.EVU_UNLOCKED),
-            ("compressor", SK.COMPRESSOR),
-            ("pump_flow", SK.PUMP_FLOW),
-            ("compressor_heater", SK.COMPRESSOR_HEATER),
-            ("defrost_valve", SK.DEFROST_VALVE),
-            ("additional_heat_generator", SK.ADDITIONAL_HEAT_GENERATOR),
-            ("disturbance_output", SK.DISTURBANCE_OUTPUT),
-            ("circulation_pump_heating", SK.CIRCULATION_PUMP_HEATING),
-            ("additional_circulation_pump", SK.ADDITIONAL_CIRCULATION_PUMP),
-            ("approval_cooling", SK.APPROVAL_COOLING),
-        ],
-        P.NUMBER: [
-            ("release_second_heat_generator", SK.RELEASE_SECOND_HEAT_GENERATOR),
-            ("release_time_second_heat_generator", SK.RELEASE_TIME_SECOND_HEAT_GENERATOR),
-            ("heating_target_correction", SK.HEATING_TARGET_CORRECTION),
-            ("pump_optimization_time", SK.PUMP_OPTIMIZATION_TIME),
-            ("heating_threshold_temperature", SK.HEATING_THRESHOLD_TEMPERATURE),
-            ("heating_min_flow_out_temperature", SK.HEATING_MIN_FLOW_OUT_TEMPERATURE),
-            ("heating_circuit_curve1_temperature", SK.HEATING_CURVE_END_TEMPERATURE),
-            ("heating_circuit_curve2_temperature", SK.HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE),
-            ("heating_circuit_curve_night_temperature", SK.HEATING_CURVE_NIGHT_TEMPERATURE),
-            ("heating_night_lowering_to_temperature", SK.HEATING_NIGHT_LOWERING_TO_TEMPERATURE),
-            ("heating_hysteresis", SK.HEATING_HYSTERESIS),
-            ("heating_max_flow_out_increase_temperature", SK.HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE),
-            ("heating_maximum_circulation_pump_speed", SK.HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED),
-            ("heating_room_temperature_impact_factor", SK.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR),
-        ],
-        P.SWITCH: [
-            ("remote_maintenance", SK.REMOTE_MAINTENANCE),
-            ("efficiency_pump", SK.EFFICIENCY_PUMP),
-            ("pump_heat_control", SK.PUMP_HEAT_CONTROL),
-            ("heating", SK.HEATING),
-            ("pump_optimization", SK.PUMP_OPTIMIZATION),
-            ("heating_threshold", SK.HEATING_THRESHOLD),
-            ("domestic_water", SK.DOMESTIC_WATER),
-            ("cooling", SK.COOLING),
-        ],
-        P.CLIMATE: [
-            ("heating", SK.HEATING),
-            ("cooling", SK.COOLING),
-        ],
-    })
+    await _up_many(
+        hass,
+        config_entry,
+        {
+            P.SENSOR: [
+                ("pump_frequency", SK.PUMP_FREQUENCY),
+                ("room_thermostat_temperature", SK.ROOM_THERMOSTAT_TEMPERATURE),
+                (
+                    "room_thermostat_temperature_target",
+                    SK.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
+                ),
+            ],
+            P.BINARY_SENSOR: [
+                ("evu_unlocked", SK.EVU_UNLOCKED),
+                ("compressor", SK.COMPRESSOR),
+                ("pump_flow", SK.PUMP_FLOW),
+                ("compressor_heater", SK.COMPRESSOR_HEATER),
+                ("defrost_valve", SK.DEFROST_VALVE),
+                ("additional_heat_generator", SK.ADDITIONAL_HEAT_GENERATOR),
+                ("disturbance_output", SK.DISTURBANCE_OUTPUT),
+                ("circulation_pump_heating", SK.CIRCULATION_PUMP_HEATING),
+                ("additional_circulation_pump", SK.ADDITIONAL_CIRCULATION_PUMP),
+                ("approval_cooling", SK.APPROVAL_COOLING),
+            ],
+            P.NUMBER: [
+                ("release_second_heat_generator", SK.RELEASE_SECOND_HEAT_GENERATOR),
+                (
+                    "release_time_second_heat_generator",
+                    SK.RELEASE_TIME_SECOND_HEAT_GENERATOR,
+                ),
+                ("heating_target_correction", SK.HEATING_TARGET_CORRECTION),
+                ("pump_optimization_time", SK.PUMP_OPTIMIZATION_TIME),
+                ("heating_threshold_temperature", SK.HEATING_THRESHOLD_TEMPERATURE),
+                (
+                    "heating_min_flow_out_temperature",
+                    SK.HEATING_MIN_FLOW_OUT_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit_curve1_temperature",
+                    SK.HEATING_CURVE_END_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit_curve2_temperature",
+                    SK.HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit_curve_night_temperature",
+                    SK.HEATING_CURVE_NIGHT_TEMPERATURE,
+                ),
+                (
+                    "heating_night_lowering_to_temperature",
+                    SK.HEATING_NIGHT_LOWERING_TO_TEMPERATURE,
+                ),
+                ("heating_hysteresis", SK.HEATING_HYSTERESIS),
+                (
+                    "heating_max_flow_out_increase_temperature",
+                    SK.HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE,
+                ),
+                (
+                    "heating_maximum_circulation_pump_speed",
+                    SK.HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
+                ),
+                (
+                    "heating_room_temperature_impact_factor",
+                    SK.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
+                ),
+            ],
+            P.SWITCH: [
+                ("remote_maintenance", SK.REMOTE_MAINTENANCE),
+                ("efficiency_pump", SK.EFFICIENCY_PUMP),
+                ("pump_heat_control", SK.PUMP_HEAT_CONTROL),
+                ("heating", SK.HEATING),
+                ("pump_optimization", SK.PUMP_OPTIMIZATION),
+                ("heating_threshold", SK.HEATING_THRESHOLD),
+                ("domestic_water", SK.DOMESTIC_WATER),
+                ("cooling", SK.COOLING),
+            ],
+            P.CLIMATE: [
+                ("heating", SK.HEATING),
+                ("cooling", SK.COOLING),
+            ],
+        },
+    )
 
 
 async def _rename_cooling_entities(hass: HomeAssistant, config_entry: ConfigEntry):
-    await _up_many(hass, config_entry, {
-        P.NUMBER: [
-            ("cooling_threshold_temperature", SK.COOLING_OUTDOOR_TEMP_THRESHOLD),
-            ("cooling_start_delay_hours", SK.COOLING_START_DELAY_HOURS),
-            ("cooling_stop_delay_hours", SK.COOLING_STOP_DELAY_HOURS),
-        ]
-    })
+    await _up_many(
+        hass,
+        config_entry,
+        {
+            P.NUMBER: [
+                ("cooling_threshold_temperature", SK.COOLING_OUTDOOR_TEMP_THRESHOLD),
+                ("cooling_start_delay_hours", SK.COOLING_START_DELAY_HOURS),
+                ("cooling_stop_delay_hours", SK.COOLING_STOP_DELAY_HOURS),
+            ]
+        },
+    )
 
 
 async def _rename_curve_entities(hass: HomeAssistant, config_entry: ConfigEntry):
-    await _up_many(hass, config_entry, {
-        P.NUMBER: [
-            ("flow_in_circuit2_temperature", SK.FLOW_IN_CIRCUIT1_TEMPERATURE),
-            ("flow_in_circuit3_temperature", SK.FLOW_IN_CIRCUIT2_TEMPERATURE),
-            ("flow_in_circuit2_target_temperature", SK.FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE),
-            ("flow_in_circuit3_target_temperature", SK.FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE),
-            ("heating_circuit_curve1_temperature", SK.HEATING_CURVE_END_TEMPERATURE),
-            ("heating_circuit_curve2_temperature", SK.HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE),
-            ("heating_circuit_curve_night_temperature", SK.HEATING_CURVE_NIGHT_TEMPERATURE),
-            ("heating_circuit2_curve1_temperature", SK.HEATING_CURVE_CIRCUIT1_END_TEMPERATURE),
-            ("heating_circuit2_curve2_temperature", SK.HEATING_CURVE_CIRCUIT1_PARALLEL_SHIFT_TEMPERATURE),
-            ("heating_circuit2_curve_night_temperature", SK.HEATING_CURVE_CIRCUIT1_NIGHT_TEMPERATURE),
-            ("heating_circuit3_curve1_temperature", SK.HEATING_CURVE_CIRCUIT3_END_TEMPERATURE),
-            ("heating_circuit3_curve2_temperature", SK.HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE),
-            ("heating_circuit3_curve_night_temperature", SK.HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE),
-        ]
-    })
+    await _up_many(
+        hass,
+        config_entry,
+        {
+            P.NUMBER: [
+                ("flow_in_circuit2_temperature", SK.FLOW_IN_CIRCUIT1_TEMPERATURE),
+                ("flow_in_circuit3_temperature", SK.FLOW_IN_CIRCUIT2_TEMPERATURE),
+                (
+                    "flow_in_circuit2_target_temperature",
+                    SK.FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE,
+                ),
+                (
+                    "flow_in_circuit3_target_temperature",
+                    SK.FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit_curve1_temperature",
+                    SK.HEATING_CURVE_END_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit_curve2_temperature",
+                    SK.HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit_curve_night_temperature",
+                    SK.HEATING_CURVE_NIGHT_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit2_curve1_temperature",
+                    SK.HEATING_CURVE_CIRCUIT1_END_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit2_curve2_temperature",
+                    SK.HEATING_CURVE_CIRCUIT1_PARALLEL_SHIFT_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit2_curve_night_temperature",
+                    SK.HEATING_CURVE_CIRCUIT1_NIGHT_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit3_curve1_temperature",
+                    SK.HEATING_CURVE_CIRCUIT3_END_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit3_curve2_temperature",
+                    SK.HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE,
+                ),
+                (
+                    "heating_circuit3_curve_night_temperature",
+                    SK.HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE,
+                ),
+            ]
+        },
+    )
 
 
-async def _up_many(hass: HomeAssistant, config_entry: ConfigEntry, mappings: dict[P, list[tuple[str, SK]]]):
+async def _up_many(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    mappings: dict[P, list[tuple[str, SK]]],
+):
     prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
     ent_reg = async_get(hass)
 
@@ -251,11 +324,26 @@ async def _up_many(hass: HomeAssistant, config_entry: ConfigEntry, mappings: dic
                     entity_id, new_entity_id=new_ident, new_unique_id=new_ident
                 )
             except KeyError as err:
-                LOGGER.info("Skip rename entity - Not existing: %s -> %s", entity_id, new_ident, exc_info=err)
+                LOGGER.info(
+                    "Skip rename entity - Not existing: %s -> %s",
+                    entity_id,
+                    new_ident,
+                    exc_info=err,
+                )
             except ValueError as err:
-                LOGGER.warning("Could not rename entity %s -> %s", entity_id, new_ident, exc_info=err)
+                LOGGER.warning(
+                    "Could not rename entity %s -> %s",
+                    entity_id,
+                    new_ident,
+                    exc_info=err,
+                )
             except Exception as err:
-                LOGGER.error("Could not rename entity %s -> %s", entity_id, new_ident, exc_info=err)
+                LOGGER.error(
+                    "Could not rename entity %s -> %s",
+                    entity_id,
+                    new_ident,
+                    exc_info=err,
+                )
 
 
 def _identifiers_exists(
@@ -268,7 +356,9 @@ async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: Config
     coordinator = await connect_and_get_coordinator(hass, config_entry.data)
     dr_instance = dr.async_get(hass)
     devices = dr.async_entries_for_config_entry(dr_instance, config_entry.entry_id)
-    identifiers_list = [info["identifiers"] for info in coordinator.device_infos.values()]
+    identifiers_list = [
+        info["identifiers"] for info in coordinator.device_infos.values()
+    ]
     for device_entry in devices:
         if not _identifiers_exists(identifiers_list, device_entry.identifiers):
             dr_instance.async_remove_device(device_entry.id)
