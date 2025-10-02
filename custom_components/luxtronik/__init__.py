@@ -27,7 +27,10 @@ from .const import (
     SERVICE_WRITE_SCHEMA,
     SensorKey as SK,
 )
-from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
+from .coordinator import (
+    LuxtronikCoordinator, 
+    LuxtronikConnectionError,
+    connect_and_get_coordinator)
 
 # endregion Imports
 
@@ -39,7 +42,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     LOGGER.info(entry)
 
     config = entry.data
-    coordinator = await connect_and_get_coordinator(hass, config)
+
+    try:
+        coordinator = await connect_and_get_coordinator(hass, config)
+    except LuxtronikConnectionError as err:
+        raise ConfigEntryNotReady(f"Could not connect to {err.host}:{err.port}") from err
+
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
     data[entry.entry_id] = {CONF_COORDINATOR: coordinator}

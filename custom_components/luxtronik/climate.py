@@ -304,7 +304,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         )
         self._attr_preset_mode = None if mode is None else HVAC_PRESET_MAPPING[mode]
 
-        self._attr_current_lux_operation = lux_action = self._get_value(
+        self._attr_current_lux_operation = self._get_value(
             self.entity_description.luxtronik_key_current_action
         )
 
