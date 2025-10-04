@@ -18,9 +18,12 @@ from homeassistant.helpers.typing import StateType
 
 # region Constants Main
 DOMAIN: Final = "luxtronik2"
+CONFIG_ENTRY_VERSION: Final = 8
 NICKNAME_PREFIX: Final = "Home Assistant"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
+# LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
+
 PLATFORMS: list[str] = [
     Platform.WATER_HEATER,
     Platform.SENSOR,
@@ -94,6 +97,7 @@ class FirmwareVersionMinor(Enum):
 
     minor_80: Final = 80
     minor_88: Final = 88
+    minor_89: Final = 89
     minor_90: Final = 90
 
 
@@ -145,6 +149,7 @@ class LuxMode(StrEnum):
 
 class LuxStatus1Option(StrEnum):
     """LuxStatus1 option defrost etc."""
+    # HA-state : Heatpump_state
 
     heatpump_running: Final = "heatpump_running"
     heatpump_idle: Final = "heatpump_idle"
@@ -152,7 +157,7 @@ class LuxStatus1Option(StrEnum):
     heatpump_shutdown: Final = "heatpump_shutdown"
     errorcode_slot_zero: Final = "errorcode_slot_0"
     defrost: Final = "defrost"
-    waiting_on_lin_connection: Final = "witing_on_LIN_connection"
+    waiting_on_lin_connection: Final = "witing_on_lin_connection"
     compressor_heating_up: Final = "compressor_heating_up"
     pump_forerun: Final = "pump_forerun"
     compressor_heater: Final = "compressor_heater"

@@ -251,8 +251,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         )
 
         domain = description.key.value
-        configured_indoor_temp_sensor = entry.data.get(
-            CONF_HA_SENSOR_INDOOR_TEMPERATURE
+        configured_indoor_temp_sensor = entry.options.get(
+            CONF_HA_SENSOR_INDOOR_TEMPERATURE,
+            entry.data.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE),
         )
 
         if configured_indoor_temp_sensor is not None:
@@ -330,41 +331,6 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             self._attr_target_temperature = get_sensor_data(data, key_tar) / 10
         elif key_tar != LuxParameter.UNSET:
             self._attr_target_temperature = get_sensor_data(data, key_tar)
-
-        if key_tar == LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
-            correction_factor = get_sensor_data(
-                data,
-                self.entity_description.luxtronik_key_correction_factor.value,
-                False,
-            )
-            # LOGGER.info(f"self._attr_target_temperature={self._attr_target_temperature}")
-            # LOGGER.info(f"self._attr_current_temperature={self._attr_current_temperature}")
-            # LOGGER.info(f"correction_factor={correction_factor}")
-            # LOGGER.info(f"lux_action={lux_action}")
-            # LOGGER.info(f"_attr_hvac_action={self._attr_hvac_action}")
-            if (
-                self._attr_target_temperature is not None
-                and self._attr_current_temperature is not None  # noqa: W503
-                and self._attr_current_temperature > 0.0
-                and correction_factor is not None  # noqa: W503
-            ):
-                delta_temp = (
-                    self._attr_target_temperature - self._attr_current_temperature
-                )
-                correction = round(
-                    delta_temp * (correction_factor / 100.0), 1
-                )  # correction_factor is in %, so need to divide by 100
-                key_correction_target = (
-                    self.entity_description.luxtronik_key_correction_target.value
-                )
-                correction_current = get_sensor_data(data, key_correction_target)
-                # LOGGER.info(f"correction_current={correction_current}")
-                # LOGGER.info(f"correction={correction}")
-                if correction_current is None or correction_current != correction:
-                    # LOGGER.info(f'key_correction_target={key_correction_target.split(".")[1]}')
-                    _ = self.coordinator.write(
-                        key_correction_target.split(".")[1], correction
-                    )  # mypy: allow-unused-coroutine
 
         super()._handle_coordinator_update()
 

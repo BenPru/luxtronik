@@ -226,7 +226,6 @@ SENSORS: list[descr] = [
     descr(
         key=SensorKey.HEAT_AMOUNT_FLOW_RATE,
         luxtronik_key=LC.C0155_HEAT_AMOUNT_FLOW_RATE,
-        device_key=DeviceKey.heating,
         icon="mdi:water-sync",
         state_class=SensorStateClass.MEASUREMENT,
         device_class=None,  # SensorDeviceClass.WATER, <- There is no predefined device class for flow at the moment.
@@ -238,7 +237,6 @@ SENSORS: list[descr] = [
     descr(
         key=SensorKey.HEAT_SOURCE_FLOW_RATE,
         luxtronik_key=LC.C0173_HEAT_SOURCE_FLOW_RATE,
-        device_key=DeviceKey.heating,
         icon="mdi:water-sync",
         state_class=SensorStateClass.MEASUREMENT,
         device_class=None,  # SensorDeviceClass.WATER, <- There is no predefined device class for flow at the moment.
@@ -624,7 +622,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         factor=0.01,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_88,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
@@ -706,7 +704,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         factor=0.01,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_88,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
