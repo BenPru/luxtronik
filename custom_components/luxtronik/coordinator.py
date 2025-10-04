@@ -96,85 +96,45 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         )
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
-        """Connect and fetch data."""
-        self.data = await self._async_read_data()
-        return self.data
-
-    async def _async_read_data(self) -> LuxtronikCoordinatorData:
-        return await self._async_read_or_write(False, None, None)
-
-    async def write(self, parameter, value) -> LuxtronikCoordinatorData:
-        """Write a parameter to the Luxtronik heatpump."""
-        return asyncio.run_coroutine_threadsafe(
-            self.async_write(parameter, value), self.hass.loop
-        ).result()
-
-    async def async_write(self, parameter, value) -> LuxtronikCoordinatorData:
-        """Write a parameter to the Luxtronik heatpump."""
-        return await self._async_read_or_write(True, parameter, value)
-
-    async def _async_read_or_write(
-        self, write, parameter, value
-    ) -> LuxtronikCoordinatorData:
-        if write:
-            data = self._write(parameter, value)
-            self.async_set_updated_data(data)
-            self.async_request_refresh()
-            self.update_interval = UPDATE_INTERVAL_FAST
-            self.update_reason_write = True
-        else:
-            data = self._read()
-            self.async_set_updated_data(data)
-            self.update_interval = (
-                UPDATE_INTERVAL_FAST
-                if bool(self.get_value(LC.C0044_COMPRESSOR))
-                else UPDATE_INTERVAL_NORMAL
-            )
-            self.update_reason_write = False
-        return data
-
-    def _read(self) -> LuxtronikCoordinatorData:
         try:
             with self.lock:
                 self.client.read()
-        except (OSError, ConnectionRefusedError, ConnectionResetError) as err:
-            raise UpdateFailed("Read: Error communicating with device") from err
-        except UpdateFailed:
-            pass
-        except Exception as err:
-            raise UpdateFailed("Read: Error communicating with device") from err
-        self.data = LuxtronikCoordinatorData(
-            parameters=self.client.parameters,
-            calculations=self.client.calculations,
-            visibilities=self.client.visibilities,
-        )
-        return self.data
-
-    def _write(self, parameter, value) -> LuxtronikCoordinatorData:
-        try:
-            self.client.parameters.set(parameter, value)
-            with self.lock:
-                self.client.write()
-        except (ConnectionRefusedError, ConnectionResetError) as err:
-            LOGGER.exception(err)
-            raise UpdateFailed("Read: Error communicating with device") from err
-        except UpdateFailed as err:
-            LOGGER.exception(err)
-        except Exception as err:
-            LOGGER.exception(err)
-            raise UpdateFailed("Write: Error communicating with device") from err
-        finally:
-            self.data = LuxtronikCoordinatorData(
+            return LuxtronikCoordinatorData(
                 parameters=self.client.parameters,
                 calculations=self.client.calculations,
                 visibilities=self.client.visibilities,
             )
+        except Exception as err:
+            raise UpdateFailed(f"Error fetching data: {err}") from err
+
+    async def async_write(self, parameter: str, value: Any) -> None:
+        try:
+            self.client.parameters.set(parameter, value)
+            with self.lock:
+                await self.hass.async_add_executor_job(self.client.write)
+
+            # Perform a fresh read from the device
+            with self.lock:
+                self.client.read()
+
+            # Confirm the value after the read
+            confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
             LOGGER.info(
-                'LuxtronikDevice.write finished %s value: "%s"',
+                'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
                 parameter,
                 value,
+                confirmed_value,
             )
-        return self.data
+
+            await self.async_refresh()
+        except Exception as err:
+            raise UpdateFailed(f"Write error: {err}") from err
+
+    def write(self, parameter, value) -> LuxtronikCoordinatorData:
+        """Write a parameter to the Luxtronik heatpump."""
+        LOGGER.info("Coordinator.write used, should not happen!")
+        return False
+
 
     @staticmethod
     def connect(

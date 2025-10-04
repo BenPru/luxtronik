@@ -62,7 +62,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.config_entries.async_update_entry(entry, title=new_title.strip())
 
-    await hass.async_add_executor_job(setup_hass_services, hass, entry)
+    setup_hass_services(hass, entry)
 
     return True
 
@@ -78,7 +78,7 @@ def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
         coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
         await coordinator.async_write(parameter, value)
 
-    hass.services.register(
+    hass.services.async_register(
         DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
     )
 
