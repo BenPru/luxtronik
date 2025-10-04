@@ -18,6 +18,7 @@ from .const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
+    CONFIG_ENTRY_VERSION,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
@@ -40,7 +41,7 @@ SELECT_DEVICE_LABEL = "select_device_to_configure"
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
-    VERSION = 8
+    VERSION = CONFIG_ENTRY_VERSION
     _discovery_host = None
     _discovery_port = None
 
