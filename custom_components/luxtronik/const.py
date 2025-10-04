@@ -154,7 +154,7 @@ class LuxStatus1Option(StrEnum):
     heatpump_shutdown: Final = "heatpump_shutdown"
     errorcode_slot_zero: Final = "errorcode_slot_0"
     defrost: Final = "defrost"
-    waiting_on_lin_connection: Final = "witing_on_LIN_connection"
+    waiting_on_lin_connection: Final = "witing_on_lin_connection"
     compressor_heating_up: Final = "compressor_heating_up"
     pump_forerun: Final = "pump_forerun"
     compressor_heater: Final = "compressor_heater"
