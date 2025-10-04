@@ -351,7 +351,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             self._handle_coordinator_update(data)
         elif key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
-                key_tar.split(".")[1], int(self._attr_target_temperature)
+                key_tar.split(".")[1], self._attr_target_temperature
             )
             self._handle_coordinator_update(data)
 

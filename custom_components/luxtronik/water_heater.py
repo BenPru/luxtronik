@@ -118,8 +118,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
 
     _attr_min_temp = 40.0
     _attr_max_temp = 65.0
-    _attr_target_temperature_low = 45.0
-    _attr_target_temperature_high = 65.0
 
     _last_operation_mode_before_away: str | None = None
     _current_action: str | None = None

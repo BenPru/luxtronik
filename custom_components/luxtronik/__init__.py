@@ -38,6 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Luxtronik from a config entry."""
 
     data = hass.data.setdefault(DOMAIN, {})
+    config = entry.data
 
     try:
         coordinator = await LuxtronikCoordinator.connect(hass, entry)
@@ -53,7 +54,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Trigger a refresh again now that all platforms have registered
-    hass.async_create_task(coordinator.async_refresh())
+    await coordinator.async_refresh()
 
     # 🛠️ Update title
     if coordinator.manufacturer is not None:
@@ -114,7 +115,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         new_data = {**config_entry.data}
 
         if current_version == 1:
-            coordinator = LuxtronikCoordinator.connect(hass, config_entry)
+            coordinator = await LuxtronikCoordinator.connect(hass, config_entry)
             if CONF_HA_SENSOR_PREFIX not in new_data:
                 new_data[CONF_HA_SENSOR_PREFIX] = "luxtronik"
             await hass.config_entries.async_update_entry(
