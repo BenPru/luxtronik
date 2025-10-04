@@ -20,6 +20,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from .common import correct_key_value
 from .const import (
@@ -137,7 +138,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
 
     @staticmethod
-    def connect(
+    async def connect(
         hass: HomeAssistant, config_entry: ConfigEntry | dict
     ) -> LuxtronikCoordinator:
         """Connect to heatpump."""
@@ -163,6 +164,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             max_data_length=max_data_length,
             safe=False,
         )
+     
+        # Test connection
+        try:
+            await hass.async_add_executor_job(client.connect)
+        except Exception as err:
+            LOGGER.error("Luxtronik connection failed: %s", err)
+            raise ConfigEntryNotReady from err
+
         return LuxtronikCoordinator(
             hass=hass,
             client=client,
