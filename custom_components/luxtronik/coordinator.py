@@ -99,7 +99,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
         try:
             with self.lock:
-                self.client.read()
+                await self.hass.async_add_executor_job(self.client.read)
             return LuxtronikCoordinatorData(
                 parameters=self.client.parameters,
                 calculations=self.client.calculations,
@@ -116,7 +116,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
             # Perform a fresh read from the device
             with self.lock:
-                self.client.read()
+                await self.hass.async_add_executor_job(self.client.read)
 
             # Confirm the value after the read
             confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
