@@ -3,7 +3,6 @@
 # region Imports
 from __future__ import annotations
 
-import asyncio
 import re
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
@@ -35,7 +34,6 @@ from .const import (
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
     UPDATE_INTERVAL_FAST,
-    UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -136,7 +134,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         LOGGER.info("Coordinator.write used, should not happen!")
         return False
 
-
     @staticmethod
     async def connect(
         hass: HomeAssistant, config_entry: ConfigEntry | dict
@@ -164,7 +161,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             max_data_length=max_data_length,
             safe=False,
         )
-     
+
         # Test connection
         try:
             await hass.async_add_executor_job(client.connect)

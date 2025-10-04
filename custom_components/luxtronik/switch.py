@@ -1,4 +1,3 @@
-
 """Support for Luxtronik switches."""
 
 # region Imports
@@ -11,7 +10,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
@@ -98,11 +96,8 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         if descr.inverted:
             self._attr_is_on = state != descr.on_state
         else:
-            self._attr_is_on = (
-                state == descr.on_state
-                or (
-                    descr.on_states is not None and state in descr.on_states
-                )
+            self._attr_is_on = state == descr.on_state or (
+                descr.on_states is not None and state in descr.on_states
             )
 
         super()._handle_coordinator_update()
@@ -131,10 +126,8 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
             else value == self.entity_description.on_state
         )
 
-
         # Trigger UI/state update in Home Assistant
         self.async_write_ha_state()
 
         # Optionally update coordinator-based logic
         self._handle_coordinator_update(data)
-

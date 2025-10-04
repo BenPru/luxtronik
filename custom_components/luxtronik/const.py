@@ -149,6 +149,7 @@ class LuxMode(StrEnum):
 
 class LuxStatus1Option(StrEnum):
     """LuxStatus1 option defrost etc."""
+
     # HA-state : Heatpump_state
 
     heatpump_running: Final = "heatpump_running"
