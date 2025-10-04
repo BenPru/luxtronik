@@ -96,6 +96,7 @@ class FirmwareVersionMinor(Enum):
 
     minor_80: Final = 80
     minor_88: Final = 88
+    minor_89: Final = 89
     minor_90: Final = 90
 
 
@@ -147,6 +148,7 @@ class LuxMode(StrEnum):
 
 class LuxStatus1Option(StrEnum):
     """LuxStatus1 option defrost etc."""
+    # HA-state : Heatpump_state
 
     heatpump_running: Final = "heatpump_running"
     heatpump_idle: Final = "heatpump_idle"

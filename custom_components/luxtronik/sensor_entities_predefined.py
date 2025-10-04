@@ -624,7 +624,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         factor=0.01,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_88,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
@@ -706,7 +706,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         factor=0.01,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_88,
+        min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
