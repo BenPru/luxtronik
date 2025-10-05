@@ -94,7 +94,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         if isinstance(descr.on_state, bool) and state is not None:
             state = bool(state)
 
-        #prev_attr_is_on = self._attr_is_on
+        # prev_attr_is_on = self._attr_is_on
 
         self._attr_is_on = (
             state != descr.on_state
