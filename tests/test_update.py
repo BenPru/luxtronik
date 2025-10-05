@@ -10,6 +10,7 @@ class TestFirmwareVersionExtraction(unittest.TestCase):
             ("wpreg.V1.88.3-9717", "V1.88.3-9717"),
             ("otherprefix-V2.99.2-1234", "V2.99.2-1234"),
             ("something-V3.91.0_moretext", "V3.91.0"),
+            ("wp2reg-B3.92.2-123", "B3.92.2"),
             ("nofirmwarehere.txt", None),
         ]
         for filename, expected in cases:
