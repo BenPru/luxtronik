@@ -137,9 +137,6 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self._sensor_data = get_sensor_data(
             coordinator.data, description.luxtronik_key.value
         )
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
-        )
 
     async def _data_update(self, event):
         self._handle_coordinator_update()
@@ -148,8 +145,8 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
+        # if not self.should_update():
+        #    return
 
         data = self.coordinator.data if data is None else data
         if data is None:
@@ -180,6 +177,8 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
     ) -> None:
         """Handle updated data from the coordinator."""
         self._handle_coordinator_update_internal(data, use_key)
+
+        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
 

@@ -73,10 +73,6 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
-        )
-
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
@@ -110,4 +106,5 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
                 and self._attr_state in self.entity_description.on_states
             )
 
+        self.async_write_ha_state()
         super()._handle_coordinator_update()

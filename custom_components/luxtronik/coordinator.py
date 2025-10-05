@@ -99,6 +99,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         async with self._lock:
             try:
                 await self.hass.async_add_executor_job(self.client.read)
+                LOGGER.debug("_async_update_data")
                 return LuxtronikCoordinatorData(
                     parameters=self.client.parameters,
                     calculations=self.client.calculations,
@@ -107,16 +108,19 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             except Exception as err:
                 raise UpdateFailed(f"Error fetching data: {err}") from err
 
-    async def async_write(self, parameter: str, value: Any) -> None:
+    async def async_write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
         try:
             async with self._lock:
                 await self.hass.async_add_executor_job(
                     self.client.parameters.set, parameter, value
                 )
+                LOGGER.debug("Done: self.client.parameters.set")
                 await self.hass.async_add_executor_job(self.client.write)
-                await self.hass.async_add_executor_job(
-                    self.client.read
-                )  # Refresh after write
+                LOGGER.debug("Done: self.client.write")
+
+            # Refresh after write
+            await self.async_refresh()
+            LOGGER.debug("Coordinator data refreshed!")
 
             # Confirm the value after the read
             confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
@@ -127,7 +131,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 confirmed_value,
             )
 
-            await self.async_refresh()
+            return self.data
         except Exception as err:
             raise UpdateFailed(f"Write error: {err}") from err
 
