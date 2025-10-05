@@ -84,7 +84,6 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
-
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
@@ -93,7 +92,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        #if not self.should_update():
+        # if not self.should_update():
         #    return
 
         data = self.coordinator.data if data is None else data

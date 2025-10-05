@@ -132,9 +132,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
     def should_update(self) -> bool:
         """Determine if the entity should update based on next_update."""
-        #if self.entity_description.luxtronik_key in [LP.P0049_PUMP_OPTIMIZATION,LC.C0017_DHW_TEMPERATURE]:
+        # if self.entity_description.luxtronik_key in [LP.P0049_PUMP_OPTIMIZATION,LC.C0017_DHW_TEMPERATURE]:
         #    LOGGER.info("should_update,%s,%s,@ %s", self.entity_description.luxtronik_key, self.entity_description.update_interval,self.next_update)
-        if self.entity_description.update_interval is None:       
+        if self.entity_description.update_interval is None:
             return True
         return self.next_update is None or self.next_update <= utcnow()
 

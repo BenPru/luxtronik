@@ -73,7 +73,6 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
 
-
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
@@ -82,7 +81,7 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        #if not self.should_update():
+        # if not self.should_update():
         #    return
 
         data = self.coordinator.data if data is None else data
@@ -100,11 +99,10 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self._attr_is_on = (
             state != descr.on_state
             if self.entity_description.inverted
-            else state == descr.on_state or (
-                descr.on_states is not None and state in descr.on_states
-            )
+            else state == descr.on_state
+            or (descr.on_states is not None and state in descr.on_states)
         )
-           
+
         self.async_write_ha_state()
         super()._handle_coordinator_update()
 
