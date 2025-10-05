@@ -16,7 +16,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
-from homeassistant.util.dt import utcnow, dt as dt_util
+from homeassistant.util.dt import dt as dt_util
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data

@@ -8,7 +8,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
@@ -93,18 +92,18 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
             data, self.entity_description.luxtronik_key.value
         )
 
-        if isinstance(self.entity_description.on_state, bool) and self._attr_state is not None:
+        if (
+            isinstance(self.entity_description.on_state, bool)
+            and self._attr_state is not None
+        ):
             self._attr_state = bool(self._attr_state)
 
         if self.entity_description.inverted:
             self._attr_is_on = self._attr_state != self.entity_description.on_state
         else:
-            self._attr_is_on = (
-                self._attr_state == self.entity_description.on_state
-                or (
-                    self.entity_description.on_states is not None
-                    and self._attr_state in self.entity_description.on_states
-                )
+            self._attr_is_on = self._attr_state == self.entity_description.on_state or (
+                self.entity_description.on_states is not None
+                and self._attr_state in self.entity_description.on_states
             )
 
         super()._handle_coordinator_update()

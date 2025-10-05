@@ -116,7 +116,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
             data_updated = f"{self.entity_id}_data_updated"
             self.async_on_remove(
-                async_dispatcher_connect(self.hass, data_updated, self._schedule_immediate_update)
+                async_dispatcher_connect(
+                    self.hass, data_updated, self._schedule_immediate_update
+                )
             )
 
         except Exception as err:
@@ -149,7 +151,11 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._attr_state = value
 
-        icon_state = getattr(self, "_attr_is_on", getattr(self, "_attr_current_lux_operation", self._attr_state))
+        icon_state = getattr(
+            self,
+            "_attr_is_on",
+            getattr(self, "_attr_current_lux_operation", self._attr_state),
+        )
         if descr.icon_by_state and icon_state in descr.icon_by_state:
             self._attr_icon = descr.icon_by_state.get(icon_state)
         else:

@@ -33,7 +33,6 @@ from .const import (
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
     UPDATE_INTERVAL_FAST,
-    UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -109,9 +108,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     async def async_write(self, parameter: str, value: Any) -> None:
         try:
             async with self._lock:
-                await self.hass.async_add_executor_job(self.client.parameters.set, parameter, value)
+                await self.hass.async_add_executor_job(
+                    self.client.parameters.set, parameter, value
+                )
                 await self.hass.async_add_executor_job(self.client.write)
-                await self.hass.async_add_executor_job(self.client.read)  # Refresh after write
+                await self.hass.async_add_executor_job(
+                    self.client.read
+                )  # Refresh after write
 
             # Confirm the value after the read
             confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
@@ -130,7 +133,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Write a parameter to the Luxtronik heatpump."""
         LOGGER.info("Coordinator.write used, should not happen!")
         return False
-
 
     @staticmethod
     async def connect(
@@ -159,7 +161,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             max_data_length=max_data_length,
             safe=False,
         )
-     
+
         # Test connection
         try:
             await hass.async_add_executor_job(client.connect)

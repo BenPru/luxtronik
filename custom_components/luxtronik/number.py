@@ -12,7 +12,6 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
-from homeassistant.util.dt import utcnow
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data
@@ -99,7 +98,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        
+
         self._attr_native_value = get_sensor_data(
             data, self.entity_description.luxtronik_key.value
         )
