@@ -135,10 +135,10 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             else FIRMWARE_UPDATE_MANUAL_EN
         )
         return (
-            f'For your {release_url}'
+            f"For your {release_url}"
             f"{self.coordinator.manufacturer} {self.coordinator.model} (Download ID {download_id})</a> is "
-            f'{download_url}Firmware Version {self.__firmware_version_available}</a> available.<br>'
-            f'{manual_url}Firmware Update Instructions</a><br><br>'
+            f"{download_url}Firmware Version {self.__firmware_version_available}</a> available.<br>"
+            f"{manual_url}Firmware Update Instructions</a><br><br>"
             "The Install button below has no function. It is only needed to notify in Home Assistant.<br><br>"
             "Alpha Innotec doesn't provide a changelog.<br>Please contact support for more information."
         )
@@ -161,16 +161,26 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30) as response:
+                async with session.get(
+                    f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30
+                ) as response:
                     if response.status != 200:
                         raise Exception(f"HTTP error: {response.status}")
 
-                    header_content_disposition = response.headers.get("Content-Disposition", "")
-                    filename_match = re.findall("filename=(.+)", header_content_disposition)
+                    header_content_disposition = response.headers.get(
+                        "Content-Disposition", ""
+                    )
+                    filename_match = re.findall(
+                        "filename=(.+)", header_content_disposition
+                    )
                     filename = filename_match[0] if filename_match else None
 
-                    self.__firmware_version_available_last_request = datetime.utcnow().timestamp()
-                    self.__firmware_version_available = self.extract_firmware_version(filename)
+                    self.__firmware_version_available_last_request = (
+                        datetime.utcnow().timestamp()
+                    )
+                    self.__firmware_version_available = self.extract_firmware_version(
+                        filename
+                    )
         except Exception:
             LOGGER.warning(
                 "Could not request download portal firmware version",

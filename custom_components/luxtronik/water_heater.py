@@ -109,9 +109,7 @@ async def async_setup_entry(
 
     async_add_entities(
         [
-            LuxtronikWaterHeater(
-                hass, entry, coordinator, description
-            )
+            LuxtronikWaterHeater(hass, entry, coordinator, description)
             for description in WATER_HEATERS
             if coordinator.entity_active(description)
         ],
