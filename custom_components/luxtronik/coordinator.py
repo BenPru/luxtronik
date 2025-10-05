@@ -7,7 +7,7 @@ import re
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 from packaging.version import Version
-import threading
+
 from types import MappingProxyType
 from typing import Any, Concatenate, TypeVar
 from typing_extensions import ParamSpec
@@ -81,7 +81,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> None:
         """Initialize Luxtronik Client."""
 
-        self.lock = threading.Lock()
+        self._lock = asyncio.Lock()
         self.client = client
         self._config = config
         self.device_infos = dict[str, DeviceInfo]()
@@ -95,26 +95,23 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         )
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
-        try:
-            with self.lock:
-                self.client.read()
-            return LuxtronikCoordinatorData(
-                parameters=self.client.parameters,
-                calculations=self.client.calculations,
-                visibilities=self.client.visibilities,
-            )
-        except Exception as err:
-            raise UpdateFailed(f"Error fetching data: {err}") from err
+        async with self._lock:
+            try:
+                await self.hass.async_add_executor_job(self.client.read)
+                return LuxtronikCoordinatorData(
+                    parameters=self.client.parameters,
+                    calculations=self.client.calculations,
+                    visibilities=self.client.visibilities,
+                )
+            except Exception as err:
+                raise UpdateFailed(f"Error fetching data: {err}") from err
 
     async def async_write(self, parameter: str, value: Any) -> None:
         try:
-            self.client.parameters.set(parameter, value)
-            with self.lock:
+            async with self._lock:
+                await self.hass.async_add_executor_job(self.client.parameters.set, parameter, value)
                 await self.hass.async_add_executor_job(self.client.write)
-
-            # Perform a fresh read from the device
-            with self.lock:
-                self.client.read()
+                await self.hass.async_add_executor_job(self.client.read)  # Refresh after write
 
             # Confirm the value after the read
             confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
@@ -500,7 +497,7 @@ async def connect_and_get_coordinator(
     port = config.get(CONF_PORT, DEFAULT_PORT)
 
     try:
-        coordinator = LuxtronikCoordinator.connect(hass, config)
+        coordinator = await LuxtronikCoordinator.connect(hass, config)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
         # ✅ Perform initial data fetch manually
