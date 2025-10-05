@@ -54,7 +54,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Trigger a refresh again now that all platforms have registered
-    await coordinator.async_refresh()
+    #await coordinator.async_refresh()
 
     # 🛠️ Update title
     if coordinator.manufacturer is not None:

@@ -6,6 +6,7 @@ from __future__ import annotations
 import socket
 import struct
 import threading
+import time
 
 from luxtronik.calculations import Calculations
 from luxtronik.parameters import Parameters
@@ -302,13 +303,18 @@ class Luxtronik:
         # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
     def _read_data(
-        self, command: int, item_size: int, parser, label: str, retries: int = 1
+        self, command: int, item_size: int, parser, label: str, retries: int = 4
     ) -> None:
         """Generic method to read data from the socket with timeout and retry handling."""
         data = []
 
         for attempt in range(retries + 1):
             try:
+                # check if connection still exists before reading
+                if self._socket is None or _is_socket_closed(self._socket):
+                    LOGGER.warning("Socket is not connected. Attempting to reconnect...")
+                    self.connect()
+
                 self._socket.sendall(struct.pack(">ii", command, 0))
                 cmd = struct.unpack(">i", self._socket.recv(4))[0]
                 LOGGER.debug("Command %s (%s)", cmd, label)
@@ -349,18 +355,26 @@ class Luxtronik:
                 parser.parse(data)
                 return  # Success, exit after first successful attempt
 
-            except socket.timeout:
+            except (socket.timeout, ConnectionResetError, OSError) as err:
                 LOGGER.warning(
-                    "Timeout while reading %s (attempt %d/%d)",
+                    "Error while reading %s (attempt %d/%d): %s",
                     label,
                     attempt + 1,
                     retries + 1,
+                    err,
                 )
-                if attempt == retries:
-                    self._disconnect()
+                self._disconnect()
+
+                if attempt < retries:
+                    delay = 1 # min(30, 10 * attempt)  # cap delay to avoid long waits
+                    LOGGER.warning("Waiting %s seconds before retrying...", delay)
+                    time.sleep(delay)
+                else:
+                    LOGGER.error("All attempts to read %s failed.", label)
                     return
 
             except Exception as err:
-                LOGGER.error("Failed to read %s: %s", label, err, exc_info=True)
+                LOGGER.error("Unexpected error during read of %s: %s", label, err, exc_info=True)
                 self._disconnect()
                 return
+

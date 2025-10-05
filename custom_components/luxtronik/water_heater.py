@@ -99,7 +99,6 @@ async def async_setup_entry(
     """Initialize DHW device from config entry."""
     data: dict = hass.data[DOMAIN][config_entry.entry_id]
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
-    await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
         (
