@@ -35,6 +35,7 @@ from .const import (
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
     UPDATE_INTERVAL_FAST,
+    UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -92,7 +93,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LOGGER,
             name=DOMAIN,
             update_method=self._async_update_data,
-            update_interval=UPDATE_INTERVAL_FAST,
+            update_interval=UPDATE_INTERVAL_NORMAL,
         )
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
@@ -498,6 +499,10 @@ async def connect_and_get_coordinator(
     hass: HomeAssistant, config: dict[str, Any]
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
+
+    if isinstance(config, ConfigEntry):
+        config = config.data
+
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT, DEFAULT_PORT)
 

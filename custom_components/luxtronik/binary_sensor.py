@@ -30,14 +30,18 @@ async def async_setup_entry(
 
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
 
+    # Ensure coordinator has valid data before adding entities
+    if not coordinator.last_update_success:
+        raise ConfigEntryNotReady
+
     async_add_entities(
-        (
+        [
             LuxtronikBinarySensorEntity(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in BINARY_SENSORS
             if coordinator.entity_active(description)
-        ),
+        ],
         True,
     )
 

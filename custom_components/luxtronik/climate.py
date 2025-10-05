@@ -182,7 +182,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up Luxtronik binary sensors dynamically through Luxtronik discovery."""
+    """Set up Luxtronik climate entities dynamically through Luxtronik discovery."""
 
     data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
     if not data or CONF_COORDINATOR not in data:
@@ -190,12 +190,18 @@ async def async_setup_entry(
 
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
 
+    # Ensure coordinator has valid data before adding entities
+    if not coordinator.last_update_success:
+        raise ConfigEntryNotReady
+
     async_add_entities(
-        (
-            LuxtronikThermostat(hass, entry, coordinator, description)
+        [
+            LuxtronikThermostat(
+                hass, entry, coordinator, description
+                )
             for description in THERMOSTATS
             if coordinator.entity_active(description)
-        ),
+        ],
         True,
     )
 

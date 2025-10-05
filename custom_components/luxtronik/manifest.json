@@ -41,7 +41,6 @@
   ],
   "requirements": [
     "luxtronik==0.3.14",
-    "requests>=2.28.2",
     "getmac==0.8.2",
     "packaging>=24.2"
   ],
