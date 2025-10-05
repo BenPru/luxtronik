@@ -120,8 +120,9 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 # Extract 'V3.91.0' from 'wp2reg-V3.91.0_d0dc76bb'
                 # Extract 'V2.88.1-9086' from 'wp2reg-V2.88.1-9086'
                 # Extract 'V1.88.3-9717' from 'wpreg.V1.88.3-9717'
+                # Extract 'B3.92.2-123' from 'wp2reg-B3.92.2-123'
         """
-        match = re.search(r"V\d+\.\d+\.\d+(?:-\d+$)?", filename)
+        match = re.search(r"(?:V|B)\d+\.\d+\.\d+(?:-\d+$)?", filename)
         if match:
             return match.group(0)
         return None
