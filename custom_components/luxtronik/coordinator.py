@@ -321,8 +321,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     @property
     def firmware_package_version(self) -> Version:
-        """Return the heatpump firmware version."""
-        return Version(str(self.get_value(LC.C0081_FIRMWARE_VERSION)))
+        """
+        Return the heatpump firmware version.
+
+        If the firmware version string starts with a "B" (=Beta), it is removed before parsing.
+        """
+        return Version(self.firmware_version.lstrip("B"))
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
