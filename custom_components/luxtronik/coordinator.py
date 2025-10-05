@@ -1,7 +1,8 @@
 """Update coordinator for Luxtronik integration."""
 
 # region Imports
-import asyncio, re
+import asyncio
+import re
 
 from __future__ import annotations
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
