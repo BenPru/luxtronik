@@ -34,7 +34,6 @@ from .const import (
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
-    UPDATE_INTERVAL_FAST,
     UPDATE_INTERVAL_NORMAL,
     DeviceKey,
     LuxCalculation as LC,

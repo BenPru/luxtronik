@@ -196,9 +196,7 @@ async def async_setup_entry(
 
     async_add_entities(
         [
-            LuxtronikThermostat(
-                hass, entry, coordinator, description
-                )
+            LuxtronikThermostat(hass, entry, coordinator, description)
             for description in THERMOSTATS
             if coordinator.entity_active(description)
         ],
