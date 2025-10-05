@@ -311,7 +311,9 @@ class Luxtronik:
             try:
                 # check if connection still exists before reading
                 if self._socket is None or _is_socket_closed(self._socket):
-                    LOGGER.warning("Socket is not connected. Attempting to reconnect...")
+                    LOGGER.warning(
+                        "Socket is not connected. Attempting to reconnect..."
+                    )
                     self.connect()
 
                 self._socket.sendall(struct.pack(">ii", command, 0))
@@ -365,7 +367,7 @@ class Luxtronik:
                 self._disconnect()
 
                 if attempt < retries:
-                    delay = 1 # min(30, 10 * attempt)  # cap delay to avoid long waits
+                    delay = 1  # min(30, 10 * attempt)  # cap delay to avoid long waits
                     LOGGER.warning("Waiting %s seconds before retrying...", delay)
                     time.sleep(delay)
                 else:
@@ -373,7 +375,8 @@ class Luxtronik:
                     return
 
             except Exception as err:
-                LOGGER.error("Unexpected error during read of %s: %s", label, err, exc_info=True)
+                LOGGER.error(
+                    "Unexpected error during read of %s: %s", label, err, exc_info=True
+                )
                 self._disconnect()
                 return
-

@@ -109,9 +109,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     async def async_write(self, parameter: str, value: Any) -> None:
         try:
             async with self._lock:
-                await self.hass.async_add_executor_job(self.client.parameters.set, parameter, value)
+                await self.hass.async_add_executor_job(
+                    self.client.parameters.set, parameter, value
+                )
                 await self.hass.async_add_executor_job(self.client.write)
-                await self.hass.async_add_executor_job(self.client.read)  # Refresh after write
+                await self.hass.async_add_executor_job(
+                    self.client.read
+                )  # Refresh after write
 
             # Confirm the value after the read
             confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
