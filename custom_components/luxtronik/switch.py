@@ -14,6 +14,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .base import LuxtronikEntity
 from .common import get_sensor_data
 from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey, LOGGER
+
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikSwitchDescription
 from .switch_entities_predefined import SWITCHES
@@ -72,9 +73,6 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
 
-        self.async_on_remove(
-            hass.bus.async_listen(f"{DOMAIN}_data_update", self._data_update)
-        )
 
     async def _data_update(self, event):
         self._handle_coordinator_update()
@@ -84,8 +82,8 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
+        #if not self.should_update():
+        #    return
 
         data = self.coordinator.data if data is None else data
         if data is None:
@@ -97,13 +95,17 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         if isinstance(descr.on_state, bool) and state is not None:
             state = bool(state)
 
-        if descr.inverted:
-            self._attr_is_on = state != descr.on_state
-        else:
-            self._attr_is_on = state == descr.on_state or (
+        prev_attr_is_on = self._attr_is_on
+
+        self._attr_is_on = (
+            state != descr.on_state
+            if self.entity_description.inverted
+            else state == descr.on_state or (
                 descr.on_states is not None and state in descr.on_states
             )
-
+        )
+           
+        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
@@ -119,19 +121,5 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         data = await self.coordinator.async_write(
             self.entity_description.luxtronik_key.value.split(".")[1], state
         )
-        value = get_sensor_data(data, self.entity_description.luxtronik_key.value)
 
-        if isinstance(self.entity_description.on_state, bool):
-            value = bool(value)
-
-        self._attr_is_on = (
-            value != self.entity_description.on_state
-            if self.entity_description.inverted
-            else value == self.entity_description.on_state
-        )
-
-        # Trigger UI/state update in Home Assistant
-        self.async_write_ha_state()
-
-        # Optionally update coordinator-based logic
         self._handle_coordinator_update(data)

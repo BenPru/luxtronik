@@ -298,8 +298,8 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        if not self.should_update():
-            return
+        #if not self.should_update():
+        #    return
 
         data = self.coordinator.data if data is None else data
         if data is None:
@@ -337,12 +337,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if key_tar != LuxParameter.UNSET:
             self._attr_target_temperature = get_sensor_data(data, key_tar)
 
+        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
-    async def _async_set_lux_mode(self, lux_mode: str) -> None:
-        lux_key = self.entity_description.luxtronik_key.value
-        data = await self.coordinator.async_write(lux_key.split(".")[1], lux_mode)
-        self._handle_coordinator_update(data)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""
@@ -395,6 +392,11 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         else:
             lux_mode = LuxMode.off.value
         await self._async_set_lux_mode(lux_mode)
+
+    async def _async_set_lux_mode(self, lux_mode: str) -> None:
+        lux_key = self.entity_description.luxtronik_key.value
+        data = await self.coordinator.async_write(lux_key.split(".")[1], lux_mode)
+        self._handle_coordinator_update(data)
 
     # async def async_turn_aux_heat_on(self) -> None:
     #     """Turn auxiliary heater on."""

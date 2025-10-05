@@ -188,12 +188,15 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         )
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
+
         self._attr_current_temperature = get_sensor_data(
             data, descr.luxtronik_key_current_temperature.value
         )
         self._attr_target_temperature = get_sensor_data(
             data, descr.luxtronik_key_target_temperature.value
         )
+
+        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:
