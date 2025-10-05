@@ -31,10 +31,12 @@ from .const import (
 )
 
 # Apply global overrides before anything else
-from .lux_overrides import apply_heatpump_code_override
+from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
 
 # override HeatpumpCode datatype, so it includes recent Heatpump models
-apply_heatpump_code_override()
+update_Luxtronik_HeatpumpCodes()
+# update/extend Luxtronik.Parameters
+update_Luxtronik_Parameters()
 
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 

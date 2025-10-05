@@ -327,9 +327,8 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         # LOGGER.info(f'[{domain}] self._attr_current_temperature={self._attr_current_temperature}')
 
         key_tar = self.entity_description.luxtronik_key_target_temperature
-        if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
-            self._attr_target_temperature = get_sensor_data(data, key_tar) / 10
-        elif key_tar != LuxParameter.UNSET:
+
+        if key_tar != LuxParameter.UNSET:
             self._attr_target_temperature = get_sensor_data(data, key_tar)
 
         super()._handle_coordinator_update()
@@ -344,12 +343,8 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self._attr_target_temperature = kwargs[ATTR_TEMPERATURE]
         key_tar = self.entity_description.luxtronik_key_target_temperature
         LOGGER.debug(f"async_set_temperature={key_tar},{self._attr_target_temperature}")
-        if key_tar == LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT:
-            data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
-                key_tar.split(".")[1], int(self._attr_target_temperature * 10)
-            )
-            self._handle_coordinator_update(data)
-        elif key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
+
+        if key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
                 key_tar.split(".")[1], self._attr_target_temperature
             )

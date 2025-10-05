@@ -1,6 +1,18 @@
-from luxtronik.datatypes import HeatpumpCode
+from luxtronik.datatypes import HeatpumpCode,Celsius, Bool, Unknown
+from luxtronik.parameters import Parameters
 
-def apply_heatpump_code_override():
+
+# Define your custom parameters in a dictionary
+parameters_to_add = {
+    1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
+    # Add more as needed
+}
+
+def update_Luxtronik_Parameters():
+    Parameters.parameters.update(parameters_to_add)
+
+
+def update_Luxtronik_HeatpumpCodes():
     # Updated list of Heatpump models
     HeatpumpCode.codes = {
         0: "ERC",
