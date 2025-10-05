@@ -45,6 +45,5 @@
     "getmac==0.8.2",
     "packaging>=24.2"
   ],
-  "services": ["services.yaml"],
   "version": "2025.10.05"
 }
