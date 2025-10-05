@@ -1,9 +1,27 @@
 write:
-  description: Write a parameter on the luxtronik heatpump.
+  name: Write Luxtronik Parameter
+  description: |
+    Write a parameter to the Luxtronik heatpump.
+
+    Example usage in YAML:
+
+      service: luxtronik2.write
+      data:
+        parameter: "ID_Ba_Bw_akt"
+        value: "Automatic"
+
   fields:
-    parameter: 
-      description: ID of the value to write.
+    parameter:
+      name: Parameter ID
+      description: The ID of the parameter to write.
+      required: true
       example: "ID_Ba_Bw_akt"
-    value: 
-      description: Value to write. 
+      selector:
+        text:
+    value:
+      name: Value
+      description: The value to write to the parameter.
+      required: true
       example: "Automatic"
+      selector:
+        text:
