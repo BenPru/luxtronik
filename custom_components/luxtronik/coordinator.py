@@ -1,13 +1,13 @@
 """Update coordinator for Luxtronik integration."""
 
 # region Imports
-from __future__ import annotations
-
+import asyncio
 import re
+
+from __future__ import annotations
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 from packaging.version import Version
-
 from types import MappingProxyType
 from typing import Any, Concatenate, TypeVar
 from typing_extensions import ParamSpec
