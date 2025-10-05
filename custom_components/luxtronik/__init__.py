@@ -29,6 +29,15 @@ from .const import (
     SERVICE_WRITE_SCHEMA,
     SensorKey as SK,
 )
+
+# Apply global overrides before anything else
+from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
+
+# override HeatpumpCode datatype, so it includes recent Heatpump models
+update_Luxtronik_HeatpumpCodes()
+# update/extend Luxtronik.Parameters
+update_Luxtronik_Parameters()
+
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 
 # endregion Imports

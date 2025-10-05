@@ -27,8 +27,9 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     data: dict = hass.data[DOMAIN][entry.entry_id]
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
-    client = coordinator.client
-    client.read()
+
+    # Optionally refresh data to ensure it's up to date
+    await coordinator.async_request_refresh()
 
     mac: str | None = None
     async with timeout(10):
@@ -39,18 +40,19 @@ async def async_get_config_entry_diagnostics(
         entry_data["data"] = {}
     if mac is not None:
         entry_data["data"]["mac"] = mac[:9] + "*"
+
     diag_data = {
         "entry": entry_data,
         "devices": coordinator.device_infos,
-        "parameters": _dump_items(client.parameters.parameters),
-        "calculations": _dump_items(client.calculations.calculations),
-        "visibilities": _dump_items(client.visibilities.visibilities),
+        "parameters": _dump_items(coordinator.data.parameters.parameters),
+        "calculations": _dump_items(coordinator.data.calculations.calculations),
+        "visibilities": _dump_items(coordinator.data.visibilities.visibilities),
     }
     return diag_data
 
 
 def _dump_items(items: dict) -> dict:
     dump = {}
-    for index, item in items.items():
-        dump[f"{index:<4d} {item.name:<60}"] = f"{items.get(index)}"
+    for index, item in sorted(items.items()):
+        dump[f"{index:<4d} {item.name:<60}"] = f"{item}"
     return dump
