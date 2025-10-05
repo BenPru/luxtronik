@@ -32,15 +32,16 @@ from .const import (
 
 # Apply global overrides before anything else
 from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
+from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
+
+# endregion Imports
 
 # override HeatpumpCode datatype, so it includes recent Heatpump models
 update_Luxtronik_HeatpumpCodes()
 # update/extend Luxtronik.Parameters
 update_Luxtronik_Parameters()
 
-from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
-
-# endregion Imports
+LOGGER.info("Custom HeatpumpCode and Parameters overrides applied.")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
