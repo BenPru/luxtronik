@@ -377,11 +377,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
 
             new_options = dict(self.options)
 
-            if user_input is None:
-                # User opened the form but didn't submit anything
-                if CONF_HA_SENSOR_INDOOR_TEMPERATURE in new_options:
-                    new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
-            else:
+            if user_input is not None:
                 # User submitted the form
                 value = user_input.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
                 if value:
@@ -389,12 +385,12 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
                 elif CONF_HA_SENSOR_INDOOR_TEMPERATURE in new_options:
                     new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
 
-            LOGGER.info("new_options: %s", new_options)
+                LOGGER.info("new_options: %s", new_options)
 
-            if dict(self.options) != new_options:
-                # Save updated options
+                # Merge options from user_input into data
                 self.hass.config_entries.async_update_entry(
                     self.config_entry,
+                    data=self.config_entry.data | user_input,
                     options=new_options,
                 )
 
@@ -402,6 +398,8 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
                 await self.hass.config_entries.async_reload(self.config_entry.entry_id)
 
                 return self.async_create_entry(title="", data={})
+
+            # User opened the form but didn't submit anything
 
             config = {
                 CONF_HOST: self.config_entry.data.get(CONF_HOST),
@@ -426,9 +424,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
             # Show form with current value
             title = f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"
             name = f"{title} ({self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]})"
-            current_value = self.config_entry.options.get(
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE
-            )
+            current_value = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
 
             return self.async_show_form(
                 step_id="user",
