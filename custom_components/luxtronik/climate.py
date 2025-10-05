@@ -296,7 +296,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        #if not self.should_update():
+        # if not self.should_update():
         #    return
 
         data = self.coordinator.data if data is None else data
@@ -337,7 +337,6 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
 
         self.async_write_ha_state()
         super()._handle_coordinator_update()
-
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""

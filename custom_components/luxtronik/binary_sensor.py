@@ -73,7 +73,6 @@ class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
             coordinator.data, description.luxtronik_key.value
         )
 
-
     async def _data_update(self, event):
         self._handle_coordinator_update()
 
