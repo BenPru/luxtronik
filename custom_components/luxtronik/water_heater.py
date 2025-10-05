@@ -20,6 +20,7 @@ from homeassistant.components.water_heater import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, STATE_OFF, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
@@ -92,20 +93,26 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Initialize DHW device from config entry."""
-    data: dict = hass.data[DOMAIN][config_entry.entry_id]
+
+    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if not data or CONF_COORDINATOR not in data:
+        raise ConfigEntryNotReady
+
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
 
+    # Ensure coordinator has valid data before adding entities
+    if not coordinator.last_update_success:
+        raise ConfigEntryNotReady
+
     async_add_entities(
-        (
-            LuxtronikWaterHeater(hass, config_entry, coordinator, description)
+        [
+            LuxtronikWaterHeater(hass, entry, coordinator, description)
             for description in WATER_HEATERS
             if coordinator.entity_active(description)
-        ),
+        ],
         True,
     )
 

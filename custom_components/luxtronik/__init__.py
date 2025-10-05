@@ -51,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     config = entry.data
 
     try:
-        coordinator = await LuxtronikCoordinator.connect(hass, entry)
+        coordinator = await connect_and_get_coordinator(hass, entry)
         await coordinator.async_config_entry_first_refresh()
     except Exception as err:
         LOGGER.error("Luxtronik connection failed: %s", err)
@@ -125,7 +125,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         new_data = {**config_entry.data}
 
         if current_version == 1:
-            coordinator = await LuxtronikCoordinator.connect(hass, config_entry)
+            coordinator = await connect_and_get_coordinator(hass, config_entry)
             if CONF_HA_SENSOR_PREFIX not in new_data:
                 new_data[CONF_HA_SENSOR_PREFIX] = "luxtronik"
             await hass.config_entries.async_update_entry(
@@ -386,7 +386,7 @@ def _identifiers_exists(
 
 
 async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):
-    coordinator = await connect_and_get_coordinator(hass, config_entry.data)
+    coordinator = await connect_and_get_coordinator(hass, config_entry)
     dr_instance = dr.async_get(hass)
     devices: list[dr.DeviceEntry] = dr.async_entries_for_config_entry(
         dr_instance, config_entry.entry_id
