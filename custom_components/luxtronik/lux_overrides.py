@@ -1,4 +1,4 @@
-from luxtronik.datatypes import HeatpumpCode,Celsius, Bool, Unknown
+from luxtronik.datatypes import HeatpumpCode, Celsius
 from luxtronik.parameters import Parameters
 
 
@@ -7,6 +7,7 @@ parameters_to_add = {
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
     # Add more as needed
 }
+
 
 def update_Luxtronik_Parameters():
     Parameters.parameters.update(parameters_to_add)
