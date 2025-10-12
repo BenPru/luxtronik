@@ -21,6 +21,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, STATE_OFF, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
@@ -29,6 +30,7 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    LOGGER,
     DeviceKey,
     LuxCalculation,
     LuxMode,
@@ -107,11 +109,17 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
+    unavailable_keys = [i.luxtronik_key for i in WATER_HEATERS
+                        if not coordinator.key_exists(i.luxtronik_key)]
+    if unavailable_keys:
+        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+
     async_add_entities(
         [
             LuxtronikWaterHeater(hass, entry, coordinator, description)
             for description in WATER_HEATERS
-            if coordinator.entity_active(description)
+            if (coordinator.entity_active(description) and
+                coordinator.key_exists(description.luxtronik_key) )
         ],
         True,
     )
@@ -141,16 +149,23 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             description=description,
             device_info_ident=DeviceKey.domestic_water,
         )
+
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
+
         self._attr_temperature_unit = description.temperature_unit
         self._attr_operation_list = description.operation_list
         self._attr_supported_features = description.supported_features
 
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+        self._debouncer_set_temp = Debouncer(
+            hass,
+            LOGGER,
+            cooldown=0.5,
+            immediate=False,
+            function=self._async_write_temperature,
         )
+        self._pending_temperature: float | None = None
 
     @property
     def hvac_action(self) -> HVACAction | str | None:
@@ -162,9 +177,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         ):
             return HVACAction.HEATING
         return HVACAction.OFF
-
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
 
     @override
     @callback
@@ -203,11 +215,16 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self._handle_coordinator_update(data)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
+        self._pending_temperature = kwargs.get(ATTR_TEMPERATURE)
+        await self._debouncer_set_temp.async_call()
+
+    async def _async_write_temperature(self) -> None:
         """Set new target temperature."""
-        value = kwargs.get(ATTR_TEMPERATURE)
+        if self._pending_temperature is None:
+            return
         lux_key = self.entity_description.luxtronik_key_target_temperature.value
-        data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
-            lux_key.split(".")[1], value
+        data = await self.coordinator.async_write(
+            lux_key.split(".")[1], self._pending_temperature
         )
         self._handle_coordinator_update(data)
 

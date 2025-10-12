@@ -395,6 +395,37 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.detect_cooling_present()
         raise NotImplementedError
 
+    def key_exists(self, luxtronik_key: str | LP | LC | LV) -> bool:
+        """Check if the given Luxtronik key exists in the coordinator's data by matching item.name."""
+        try:
+            key_str = str(luxtronik_key)
+            if not key_str or "." not in key_str or "{" in key_str:
+                return False
+
+            group, sensor_id = key_str.split(".", 1)
+            LOGGER.debug("Checking key existence: %s (group: %s, sensor_id: %s)", key_str, group, sensor_id)
+
+            if group == "parameters":
+                items = self.data.parameters.parameters.items()
+            elif group == "calculations":
+                items = self.data.calculations.calculations.items()
+            elif group == "visibilities":
+                items = self.data.visibilities.visibilities.items()
+            else:
+                return False
+
+            return any(item.name == sensor_id for _, item in items)
+
+        except Exception as e:
+            LOGGER.warning("Error checking key existence for %s: %s", luxtronik_key, e)
+            return False
+
+
+
+        # except Exception as e:
+        #     LOGGER.debug("Key check failed for %s: %s", luxtronik_key, e)
+        #     return False
+
     @property
     def has_heating(self) -> bool:
         """Is heating activated."""

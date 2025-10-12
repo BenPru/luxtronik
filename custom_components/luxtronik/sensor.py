@@ -24,8 +24,10 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    LOGGER,
     DeviceKey,
     LuxCalculation as LC,
+    LuxParameter as LP,
     LuxOperationMode,
     LuxStatus1Option,
     LuxStatus3Option,
@@ -53,13 +55,19 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
+    unavailable_keys = [i.luxtronik_key for i in SENSORS + SENSORS_STATUS 
+                        if not coordinator.key_exists(i.luxtronik_key)]
+    if unavailable_keys:
+        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+
     async_add_entities(
         [
             LuxtronikSensorEntity(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SENSORS
-            if coordinator.entity_active(description)
+            if (coordinator.entity_active(description) and
+                coordinator.key_exists(description.luxtronik_key) )
         ],
         True,
     )
@@ -70,7 +78,8 @@ async def async_setup_entry(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SENSORS_STATUS
-            if coordinator.entity_active(description)
+            if (coordinator.entity_active(description) and
+                coordinator.key_exists(description.luxtronik_key) )
         ],
         True,
     )
@@ -129,20 +138,14 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
             description=description,
             device_info_ident=device_info_ident,
         )
-        self._sensor_prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(
-            f"{self._sensor_prefix}_{description.key}"
-        )
+
+        self._sensor_prefix = prefix = entry.data[CONF_HA_SENSOR_PREFIX]
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
-        )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
-
-    def _handle_coordinator_update_internal(
-        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
         # if not self.should_update():
@@ -151,32 +154,20 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        self._attr_native_value = get_sensor_data(
-            data, use_key or self.entity_description.luxtronik_key.value
-        )
 
-        if self._attr_native_value is None:
-            pass
+        value = get_sensor_data(data, self.entity_description.luxtronik_key.value)
 
-        elif isinstance(self._attr_native_value, (float, int)) and (
-            self.entity_description.factor is not None
-            or self.entity_description.native_precision is not None
-        ):
-            float_value = float(self._attr_native_value)
-            if self.entity_description.factor is not None:
-                float_value *= self.entity_description.factor
-            if self.entity_description.native_precision is not None:
-                float_value = round(
-                    float_value, self.entity_description.native_precision
-                )
-            self._attr_native_value = float_value
-
-    @callback
-    def _handle_coordinator_update(
-        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
-    ) -> None:
-        """Handle updated data from the coordinator."""
-        self._handle_coordinator_update_internal(data, use_key)
+        if value is None:
+            self._attr_native_value = None
+        elif isinstance(value, (float, int)):
+            factor = self.entity_description.factor or 1
+            precision = self.entity_description.native_precision
+            value = float(value) * factor
+            if precision is not None:
+                value = round(value, precision)
+            self._attr_native_value = value
+        else:
+            self._attr_native_value = value
 
         self.async_write_ha_state()
         super()._handle_coordinator_update()
@@ -211,8 +202,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         }
     )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
 
     @callback
     def _handle_coordinator_update(

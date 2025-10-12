@@ -51,7 +51,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         icon="mdi:download-lock",
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
-        min_firmware_version_minor=FirmwareVersionMinor.minor_90,
+        #min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,

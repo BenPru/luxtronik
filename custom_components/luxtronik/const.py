@@ -25,13 +25,13 @@ LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
 # LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [
-    Platform.WATER_HEATER,
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
-    Platform.CLIMATE,
     Platform.NUMBER,
     Platform.SWITCH,
     Platform.UPDATE,
+    Platform.WATER_HEATER,
+    Platform.CLIMATE,
 ]
 UPDATE_INTERVAL_FAST: Final = timedelta(seconds=10)
 UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)

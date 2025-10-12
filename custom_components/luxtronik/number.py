@@ -10,6 +10,7 @@ from homeassistant.components.number import ENTITY_ID_FORMAT, NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
@@ -19,6 +20,7 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    LOGGER,
     DeviceKey,
     SensorAttrFormat,
 )
@@ -44,13 +46,19 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
+    unavailable_keys = [i.luxtronik_key for i in NUMBER_SENSORS
+                        if not coordinator.key_exists(i.luxtronik_key)]
+    if unavailable_keys:
+        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+
     async_add_entities(
         [
             LuxtronikNumberEntity(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in NUMBER_SENSORS
-            if coordinator.entity_active(description)
+            if (coordinator.entity_active(description) and
+                coordinator.key_exists(description.luxtronik_key) )
         ],
         True,
     )
@@ -76,16 +84,24 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             description=description,
             device_info_ident=device_info_ident,
         )
+
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
+        
         self._attr_mode = description.mode
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+
+        # Debouncer for rate-limiting value updates
+        self._debouncer = Debouncer(
+            hass,
+            LOGGER,
+            cooldown=0.5,
+            immediate=False,
+            function=self._async_set_native_value,
         )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
+        # Store pending value for debounced write
+        self._pending_value: float | None = None
 
     @callback
     def _handle_coordinator_update(
@@ -99,27 +115,33 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         if data is None:
             return
 
-        self._attr_native_value = get_sensor_data(
-            data, self.entity_description.luxtronik_key.value
-        )
-        if self._attr_native_value is not None:
-            if self.entity_description.factor is not None:
-                self._attr_native_value *= self.entity_description.factor
-            if self.entity_description.native_precision is not None:
-                self._attr_native_value = round(
-                    self._attr_native_value, self.entity_description.native_precision
-                )
+        value = get_sensor_data(data, self.entity_description.luxtronik_key.value)
+
+        if value is None:
+            self._attr_native_value = None
+        elif isinstance(value, (float, int)):
+            factor = self.entity_description.factor or 1
+            precision = self.entity_description.native_precision
+            value = float(value) * factor
+            if precision is not None:
+                value = round(value, precision)
+            self._attr_native_value = value
+        else:
+            self._attr_native_value = value
 
         self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def async_set_native_value(self, value: float) -> None:
-        """Update the current value."""
-        #     self._async_set_native_value(value)
+        self._pending_value = value
+        await self._debouncer.async_call()
 
-        # TODO: Debounce number input
-        # @debounce(0.5)
-        # async def _async_set_native_value(self, value: float) -> None:
+
+    async def _async_set_native_value(self):
+        if self._pending_value is None:
+            return
+        value = self._pending_value
+
         if self.entity_description.factor is not None:
             value = int(value / self.entity_description.factor)
         data = await self.coordinator.async_write(
