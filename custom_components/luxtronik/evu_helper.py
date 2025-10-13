@@ -1,3 +1,4 @@
+""" Helper class with all EVU logic"""
 from datetime import time
 import calendar
 from homeassistant.util import dt as dt_util
