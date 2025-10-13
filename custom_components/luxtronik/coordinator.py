@@ -392,18 +392,58 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if device_key == DeviceKey.domestic_water:
             return self.has_domestic_water
         if device_key == DeviceKey.cooling:
-            return self.detect_cooling_present()
+            return self.has_cooling
+            # return self.detect_cooling_present()
         raise NotImplementedError
+
+    def key_exists(self, luxtronik_key: str | LP | LC | LV) -> bool:
+        """Check if the given Luxtronik key exists in the coordinator's data by matching item.name."""
+        try:
+            key_str = str(luxtronik_key)
+            if not key_str or "." not in key_str or "{" in key_str:
+                return False
+
+            group, sensor_id = key_str.split(".", 1)
+            LOGGER.debug(
+                "Checking key existence: %s (group: %s, sensor_id: %s)",
+                key_str,
+                group,
+                sensor_id,
+            )
+
+            if group == "parameters":
+                items = self.data.parameters.parameters.items()
+            elif group == "calculations":
+                items = self.data.calculations.calculations.items()
+            elif group == "visibilities":
+                items = self.data.visibilities.visibilities.items()
+            else:
+                return False
+
+            return any(item.name == sensor_id for _, item in items)
+
+        except Exception as e:
+            LOGGER.warning("Error checking key existence for %s: %s", luxtronik_key, e)
+            return False
+
+        # except Exception as e:
+        #     LOGGER.debug("Key check failed for %s: %s", luxtronik_key, e)
+        #     return False
 
     @property
     def has_heating(self) -> bool:
         """Is heating activated."""
-        return bool(self.get_value(LV.V0023_FLOW_IN_TEMPERATURE))
+        return bool(self.get_value(LC.C0064_OPERATION_HOURS_HEATING) > 0)
 
     @property
     def has_domestic_water(self) -> bool:
         """Is domestic water activated."""
-        return bool(self.get_value(LV.V0029_DHW_TEMPERATURE))
+        return bool(self.get_value(LC.C0065_OPERATION_HOURS_DHW) > 0)
+
+    @property
+    def has_cooling(self) -> bool:
+        """Is domestic water activated."""
+        return bool(self.get_value(LC.C0066_OPERATION_HOURS_COOLING) > 0)
 
     def get_value(self, group_sensor_id: str | LP | LC | LV):
         """Get a sensor value from Luxtronik."""
@@ -415,22 +455,23 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def get_sensor_by_id(self, group_sensor_id: str):
         """Get a sensor object by id from Luxtronik."""
         try:
-            group = group_sensor_id.split(".")[0]
-            sensor_id = group_sensor_id.split(".")[1]
+            group, sensor_id = group_sensor_id.split(".", 1)
             return self.get_sensor(group, sensor_id)
-        except IndexError as error:
-            LOGGER.critical(group_sensor_id, error, exc_info=True)
+        except (IndexError, ValueError) as error:
+            LOGGER.error(
+                "Invalid group_sensor_id format: %s (%s)", group_sensor_id, error
+            )
+            return None
 
-    def get_sensor(self, group, sensor_id):
-        """Get sensor by configured sensor ID."""
-        sensor = None
+    def get_sensor(self, group: str, sensor_id: str):
+        """Get sensor by configured sensor ID from coordinator data."""
         if group == CONF_PARAMETERS:
-            sensor = self.client.parameters.get(sensor_id)
+            return self.data.parameters.get(sensor_id)
         if group == CONF_CALCULATIONS:
-            sensor = self.client.calculations.get(sensor_id)
+            return self.data.calculations.get(sensor_id)
         if group == CONF_VISIBILITIES:
-            sensor = self.client.visibilities.get(sensor_id)
-        return sensor
+            return self.data.visibilities.get(sensor_id)
+        return None
 
     def _detect_cooling_mk(self):
         """We iterate over the mk sensors, detect cooling and return a list of parameters that are may show cooling is enabled."""

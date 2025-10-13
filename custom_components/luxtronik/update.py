@@ -6,7 +6,7 @@ from __future__ import annotations
 import aiohttp
 import re
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
@@ -94,6 +94,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
 
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to Home Assistant."""
+        await super().async_added_to_hass()
         await self._request_available_firmware_version()
 
     @property
@@ -148,7 +149,8 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         if (
             self.__firmware_version_available_last_request is None
             or self.__firmware_version_available_last_request
-            < datetime.utcnow().timestamp() - MIN_TIME_BETWEEN_UPDATES.total_seconds()
+            < datetime.now(timezone.utc).timestamp()
+            - MIN_TIME_BETWEEN_UPDATES.total_seconds()
         ):
             await self._request_available_firmware_version()
 
@@ -175,9 +177,9 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                     )
                     filename = filename_match[0] if filename_match else None
 
-                    self.__firmware_version_available_last_request = (
-                        datetime.utcnow().timestamp()
-                    )
+                    self.__firmware_version_available_last_request = datetime.now(
+                        timezone.utc
+                    ).timestamp()
                     self.__firmware_version_available = self.extract_firmware_version(
                         filename
                     )

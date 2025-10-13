@@ -27,6 +27,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
 
@@ -45,7 +46,6 @@ from .const import (
     LuxMode,
     LuxOperationMode,
     LuxParameter,
-    LuxVisibility,
     SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
@@ -112,16 +112,14 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
-        # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.heating.value,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
+        # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         min_firmware_version=Version("3.90.1"),
     ),
@@ -136,9 +134,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
-        # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.heating.value,
         # luxtronik_key_target_temperature_high=LuxParameter,
@@ -147,7 +143,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
+        # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         max_firmware_version=Version("3.90.0"),
     ),
@@ -161,18 +157,14 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
-        # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.cooling.value,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
-        # luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
-        # luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0005_COOLING,
+        # visibility=LuxVisibility.V0005_COOLING,
         device_key=DeviceKey.cooling,
     ),
 ]
@@ -194,11 +186,22 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
+    unavailable_keys = [
+        i.luxtronik_key
+        for i in THERMOSTATS
+        if not coordinator.key_exists(i.luxtronik_key)
+    ]
+    if unavailable_keys:
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+
     async_add_entities(
         [
             LuxtronikThermostat(hass, entry, coordinator, description)
             for description in THERMOSTATS
-            if coordinator.entity_active(description)
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -284,12 +287,15 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self._enable_turn_on_off_backwards_compatibility = False
         self._attr_supported_features = description.supported_features
 
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
+        self._debouncer_set_temp = Debouncer(
+            hass,
+            LOGGER,
+            cooldown=0.5,
+            immediate=False,
+            function=self._async_write_temperature,
         )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
+        self._pending_temperature: float | None = None
 
     @callback
     def _handle_coordinator_update(
@@ -339,14 +345,23 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         super()._handle_coordinator_update()
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
-        """Set new target temperature."""
-        self._attr_target_temperature = kwargs[ATTR_TEMPERATURE]
+        """Set new target temperature with debounce."""
+        self._pending_temperature = kwargs[ATTR_TEMPERATURE]
+        await self._debouncer_set_temp.async_call()
+
+    async def _async_write_temperature(self):
+        """Write the pending temperature to the device."""
+        if self._pending_temperature is None:
+            return
+
         key_tar = self.entity_description.luxtronik_key_target_temperature
-        LOGGER.debug(f"async_set_temperature={key_tar},{self._attr_target_temperature}")
+        LOGGER.debug(
+            f"Debounced temperature write: {key_tar} = {self._pending_temperature}"
+        )
 
         if key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
-                key_tar.split(".")[1], self._attr_target_temperature
+                key_tar.split(".")[1], self._pending_temperature
             )
             self._handle_coordinator_update(data)
 

@@ -37,13 +37,22 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
+    unavailable_keys = [
+        i.luxtronik_key for i in SWITCHES if not coordinator.key_exists(i.luxtronik_key)
+    ]
+    if unavailable_keys:
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+
     async_add_entities(
         [
             LuxtronikSwitchEntity(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SWITCHES
-            if coordinator.entity_active(description)
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -69,12 +78,10 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
             description=description,
             device_info_ident=device_info_ident,
         )
+
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
 
     @callback
     def _handle_coordinator_update(
@@ -90,20 +97,8 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
 
         descr = self.entity_description
         state = get_sensor_data(data, descr.luxtronik_key.value)
+        self._attr_is_on = self.compute_is_on(state)
 
-        if isinstance(descr.on_state, bool) and state is not None:
-            state = bool(state)
-
-        # prev_attr_is_on = self._attr_is_on
-
-        self._attr_is_on = (
-            state != descr.on_state
-            if self.entity_description.inverted
-            else state == descr.on_state
-            or (descr.on_states is not None and state in descr.on_states)
-        )
-
-        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def async_turn_on(self, **kwargs: Any) -> None:

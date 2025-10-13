@@ -30,11 +30,13 @@ from .model import LuxtronikCoordinatorData
 
 
 def get_sensor_data(
-    sensors: LuxtronikCoordinatorData,
+    coordinator: LuxtronikCoordinatorData,
     luxtronik_key: str | LP | LC | LV,
     warn_unset=True,
 ) -> Any:
     """Get sensor data."""
+    if coordinator is None:
+        return None
     if luxtronik_key is None or "." not in luxtronik_key:
         if warn_unset:
             LOGGER.warning(
@@ -43,17 +45,15 @@ def get_sensor_data(
         return None
     elif "{" in luxtronik_key:
         return None
-    key = luxtronik_key.split(".")
-    group: str = key[0]
-    sensor_id: str = key[1]
-    if sensors is None:
-        return None
+
+    group, sensor_id = luxtronik_key.split(".", 1)
+
     if group == CONF_PARAMETERS:
-        sensor = sensors.parameters.get(sensor_id)
+        sensor = coordinator.parameters.get(sensor_id)
     elif group == CONF_CALCULATIONS:
-        sensor = sensors.calculations.get(sensor_id)
+        sensor = coordinator.calculations.get(sensor_id)
     elif group == CONF_VISIBILITIES:
-        sensor = sensors.visibilities.get(sensor_id)
+        sensor = coordinator.visibilities.get(sensor_id)
     else:
         raise NotImplementedError
     if sensor is None:
@@ -61,14 +61,13 @@ def get_sensor_data(
             "Get_sensor %s returns None",
             sensor_id,
         )
-
         return None
-    return correct_key_value(sensor.value, sensors, luxtronik_key)
+    return correct_key_value(sensor.value, coordinator, luxtronik_key)
 
 
 def correct_key_value(
     value: Any,
-    sensors: LuxtronikCoordinatorData | None,
+    coordinator: LuxtronikCoordinatorData | None,
     sensor_id: str | LP | LC | LV,
 ) -> Any:
     """Handle special value corrections."""
@@ -91,16 +90,16 @@ def correct_key_value(
     if (
         sensor_id == LC.C0080_STATUS
         and value == LuxOperationMode.heating
-        and not get_sensor_data(sensors, LC.C0044_COMPRESSOR)
-        and not get_sensor_data(sensors, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
+        and not get_sensor_data(coordinator, LC.C0044_COMPRESSOR)
+        and not get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
     ):
         return LuxOperationMode.no_request
     # region Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
     if (
         sensor_id == LC.C0117_STATUS_LINE_1
         and value == LuxStatus1Option.heatpump_coming
-        and int(get_sensor_data(sensors, LC.C0072_TIMER_SCB_ON)) < 10
-        and int(get_sensor_data(sensors, LC.C0071_TIMER_SCB_OFF)) > 0
+        and int(get_sensor_data(coordinator, LC.C0072_TIMER_SCB_ON)) < 10
+        and int(get_sensor_data(coordinator, LC.C0071_TIMER_SCB_OFF)) > 0
     ):
         return LuxStatus1Option.heatpump_shutdown
     # endregion Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
@@ -108,7 +107,7 @@ def correct_key_value(
     if (
         sensor_id == LC.C0117_STATUS_LINE_1
         and value == LuxStatus1Option.pump_forerun
-        and bool(get_sensor_data(sensors, LC.C0182_COMPRESSOR_HEATER))
+        and bool(get_sensor_data(coordinator, LC.C0182_COMPRESSOR_HEATER))
     ):
         return LuxStatus1Option.compressor_heater
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
@@ -117,7 +116,7 @@ def correct_key_value(
         sensor_id == LC.C0080_STATUS
         and value == LuxOperationMode.no_request
         and bool(
-            get_sensor_data(sensors, LC.C0119_STATUS_LINE_3)
+            get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
             == LuxStatus3Option.cooling.value
         )
     ):
@@ -128,16 +127,18 @@ def correct_key_value(
         sensor_id == LC.C0080_STATUS
         and value == LuxOperationMode.no_request
         and bool(
-            get_sensor_data(sensors, LC.C0119_STATUS_LINE_3)
+            get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
             in LuxStatus3Option.heating.value
         )
     ):
-        T_in = get_sensor_data(sensors, LC.C0010_FLOW_IN_TEMPERATURE)
-        T_out = get_sensor_data(sensors, LC.C0011_FLOW_OUT_TEMPERATURE)
-        T_heat_in = get_sensor_data(sensors, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-        T_heat_out = get_sensor_data(sensors, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE)
-        Flow_WQ = get_sensor_data(sensors, LC.C0173_HEAT_SOURCE_FLOW_RATE)
-        Pump = get_sensor_data(sensors, LC.C0043_PUMP_FLOW)
+        T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
+        T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
+        T_heat_in = get_sensor_data(coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
+        T_heat_out = get_sensor_data(
+            coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
+        )
+        Flow_WQ = get_sensor_data(coordinator, LC.C0173_HEAT_SOURCE_FLOW_RATE)
+        Pump = get_sensor_data(coordinator, LC.C0043_PUMP_FLOW)
         if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
             return LuxOperationMode.cooling
     # endregion Workaround Detect active cooling operation mode

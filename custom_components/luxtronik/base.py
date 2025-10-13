@@ -121,6 +121,10 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 )
             )
 
+            """Run when entity is added to Home Assistant."""
+            if self.coordinator.data:
+                self._handle_coordinator_update(self.coordinator.data)
+
         except Exception as err:
             LOGGER.error(
                 "Could not restore latest data (async_added_to_hass)",
@@ -138,11 +142,14 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             return True
         return self.next_update is None or self.next_update <= utcnow()
 
+    async def _data_update(self, event):
+        self._handle_coordinator_update()
+
     @callback
     def _handle_coordinator_update(self, force: bool = False) -> None:
         """Handle updated data from the coordinator."""
-        if not force and not self.should_update():
-            return
+        # if not force and not self.should_update():
+        #    return
 
         descr = self.entity_description
         value = self._get_value(descr.luxtronik_key)
@@ -152,6 +159,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             value = value.replace(tzinfo=time_zone)
 
         self._attr_state = value
+        # if self.entity_description.luxtronik_key == LC.C0146_APPROVAL_COOLING:
+        # LOGGER.info('[Base]Cooling Approval=%s',self._attr_state)
+        # LOGGER.info('[Base]on_state=%s',self.entity_description.on_state)
 
         icon_state = getattr(
             self,
@@ -171,11 +181,21 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._enrich_extra_attributes()
 
-        if descr.update_interval is not None:
-            self.next_update = dt_util.utcnow() + descr.update_interval
+        # if descr.update_interval is not None:
+        #    self.next_update = dt_util.utcnow() + descr.update_interval
 
         self.async_write_ha_state()
-        super()._handle_coordinator_update()
+
+    def compute_is_on(self, state: Any) -> bool:
+        descr = self.entity_description
+        if isinstance(descr.on_state, bool) and state is not None:
+            state = bool(state)
+        return (
+            state != descr.on_state
+            if descr.inverted
+            else state == descr.on_state
+            or (descr.on_states and state in descr.on_states)
+        )
 
     def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:

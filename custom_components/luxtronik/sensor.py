@@ -4,8 +4,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import date, datetime, time, timezone
-import calendar
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Any
 
@@ -24,6 +23,7 @@ from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
+    LOGGER,
     DeviceKey,
     LuxCalculation as LC,
     LuxOperationMode,
@@ -32,6 +32,7 @@ from .const import (
     SensorAttrKey as SA,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
+from .evu_helper import LuxtronikEVUTracker
 from .model import LuxtronikIndexSensorDescription, LuxtronikSensorDescription
 from .sensor_entities_predefined import SENSORS, SENSORS_INDEX, SENSORS_STATUS
 
@@ -53,13 +54,24 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
+    unavailable_keys = [
+        i.luxtronik_key
+        for i in SENSORS + SENSORS_STATUS
+        if not coordinator.key_exists(i.luxtronik_key)
+    ]
+    if unavailable_keys:
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+
     async_add_entities(
         [
             LuxtronikSensorEntity(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SENSORS
-            if coordinator.entity_active(description)
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -70,7 +82,10 @@ async def async_setup_entry(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SENSORS_STATUS
-            if coordinator.entity_active(description)
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -129,20 +144,14 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
             description=description,
             device_info_ident=device_info_ident,
         )
-        self._sensor_prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(
-            f"{self._sensor_prefix}_{description.key}"
-        )
+
+        self._sensor_prefix = prefix = entry.data[CONF_HA_SENSOR_PREFIX]
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        self._sensor_data = get_sensor_data(
-            coordinator.data, description.luxtronik_key.value
-        )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
-
-    def _handle_coordinator_update_internal(
-        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
         # if not self.should_update():
@@ -151,32 +160,20 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        self._attr_native_value = get_sensor_data(
-            data, use_key or self.entity_description.luxtronik_key.value
-        )
 
-        if self._attr_native_value is None:
-            pass
+        value = get_sensor_data(data, self.entity_description.luxtronik_key.value)
 
-        elif isinstance(self._attr_native_value, (float, int)) and (
-            self.entity_description.factor is not None
-            or self.entity_description.native_precision is not None
-        ):
-            float_value = float(self._attr_native_value)
-            if self.entity_description.factor is not None:
-                float_value *= self.entity_description.factor
-            if self.entity_description.native_precision is not None:
-                float_value = round(
-                    float_value, self.entity_description.native_precision
-                )
-            self._attr_native_value = float_value
-
-    @callback
-    def _handle_coordinator_update(
-        self, data: LuxtronikCoordinatorData | None = None, use_key: str | None = None
-    ) -> None:
-        """Handle updated data from the coordinator."""
-        self._handle_coordinator_update_internal(data, use_key)
+        if value is None:
+            self._attr_native_value = None
+        elif isinstance(value, (float, int)):
+            factor = self.entity_description.factor or 1
+            precision = self.entity_description.native_precision
+            value = float(value) * factor
+            if precision is not None:
+                value = round(value, precision)
+            self._attr_native_value = value
+        else:
+            self._attr_native_value = value
 
         self.async_write_ha_state()
         super()._handle_coordinator_update()
@@ -188,14 +185,9 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     entity_description: LuxtronikSensorDescription
 
     _coordinator: LuxtronikCoordinator
-    _last_state: StateType | date | datetime | Decimal = None
+    _evu_tracker: LuxtronikEVUTracker = LuxtronikEVUTracker()
 
-    _attr_cache: dict[SA, object] = {}
-    _attr_cache[SA.EVU_FIRST_START_TIME] = time.min
-    _attr_cache[SA.EVU_FIRST_END_TIME] = time.min
-    _attr_cache[SA.EVU_SECOND_START_TIME] = time.min
-    _attr_cache[SA.EVU_SECOND_END_TIME] = time.min
-    _attr_cache[SA.EVU_DAYS] = list()
+    _last_state: StateType | date | datetime | Decimal = None
 
     _unrecorded_attributes = frozenset(
         LuxtronikSensorEntity._unrecorded_attributes
@@ -211,62 +203,16 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         }
     )
 
-    async def _data_update(self, event):
-        self._handle_coordinator_update()
-
     @callback
     def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
         super()._handle_coordinator_update(data)
-        time_now = time(datetime.now().hour, datetime.now().minute)
-        evu = LuxOperationMode.evu.value
-        weekday = datetime.today().weekday()
-        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
-            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(",")
-        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
-            self._attr_cache[SA.EVU_DAYS] = list()
+        self._evu_tracker.update(self._attr_native_value)
+
         if self._attr_native_value is None or self._last_state is None:
             pass
-        elif self._attr_native_value == evu and str(self._last_state) != evu:
-            # evu start
-            if weekday not in self._attr_cache[SA.EVU_DAYS]:
-                self._attr_cache[SA.EVU_DAYS].append(weekday)
-            if (
-                self._attr_cache[SA.EVU_FIRST_START_TIME] == time.min
-                or (
-                    time_now.hour <= self._attr_cache[SA.EVU_FIRST_START_TIME].hour
-                    or (
-                        self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
-                        and time_now.hour
-                        < self._attr_cache[SA.EVU_SECOND_START_TIME].hour
-                    )
-                    or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
-                )
-                and (
-                    self._attr_cache[SA.EVU_FIRST_END_TIME].hour > time_now.hour
-                    or self._attr_cache[SA.EVU_FIRST_END_TIME] == time.min
-                )
-            ):
-                self._attr_cache[SA.EVU_FIRST_START_TIME] = time_now
-            else:
-                self._attr_cache[SA.EVU_SECOND_START_TIME] = time_now
-                if weekday not in self._attr_cache[SA.EVU_DAYS]:
-                    self._attr_cache[SA.EVU_DAYS].append(weekday)
-        elif self._attr_native_value != evu and str(self._last_state) == evu:
-            # evu end
-            if (
-                self._attr_cache[SA.EVU_FIRST_END_TIME] == time.min
-                or time_now.hour <= self._attr_cache[SA.EVU_FIRST_END_TIME].hour
-                or (
-                    self._attr_cache[SA.EVU_SECOND_START_TIME] != time.min
-                    and time_now < self._attr_cache[SA.EVU_SECOND_START_TIME]
-                )
-            ):
-                self._attr_cache[SA.EVU_FIRST_END_TIME] = time_now
-            else:
-                self._attr_cache[SA.EVU_SECOND_END_TIME] = time_now
 
         # region Workaround Luxtronik Bug
         else:
@@ -318,20 +264,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         attr = self._attr_extra_state_attributes
         attr[SA.STATUS_RAW] = self._attr_native_value
         attr[SA.STATUS_TEXT] = self._build_status_text()
-        attr[SA.EVU_MINUTES_UNTIL_NEXT_EVENT] = self._calc_next_evu_event_minutes_text()
-        attr[SA.EVU_FIRST_START_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_FIRST_START_TIME]
-        )
-        attr[SA.EVU_FIRST_END_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_FIRST_END_TIME]
-        )
-        attr[SA.EVU_SECOND_START_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_SECOND_START_TIME]
-        )
-        attr[SA.EVU_SECOND_END_TIME] = self._tm_txt(
-            self._attr_cache[SA.EVU_SECOND_END_TIME]
-        )
-        attr[SA.EVU_DAYS] = self._wd_txt(self._attr_cache[SA.EVU_DAYS])
+        attr.update(self._evu_tracker.get_attributes())
         self._enrich_extra_attributes()
         self.async_write_ha_state()
 
@@ -370,106 +303,12 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.{line_2_state}"
         )
         # Show evu end time if available
-        evu_event_minutes = self._calc_next_evu_event_minutes()
-        if evu_event_minutes is None:
-            pass
-        elif self.native_value == LuxOperationMode.evu.value:
-            text_locale = self.platform.platform_data.platform_translations.get(
-                f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_until"
-            )
-            evu_until = text_locale.format(evu_time=evu_event_minutes)
-            return f"{evu_until} {line_1} {line_2} {status_time}."
-        elif evu_event_minutes <= 30:
-            text_locale = self.platform.platform_data.platform_translations.get(
-                f"component.{DOMAIN}.entity.sensor.status.state_attributes.evu_text.state.evu_in"
-            )
-            evu_in = text_locale.format(evu_time=evu_event_minutes)
-            return f"{line_1} {line_2} {status_time}. {evu_in}"
-        return f"{line_1} {line_2} {status_time}."
-
-    def _calc_next_evu_event_minutes_text(self) -> str:
-        minutes = self._calc_next_evu_event_minutes()
-        return "" if minutes is None else str(minutes)
-
-    def _calc_next_evu_event_minutes(self) -> int | None:
-        evu_time = self._get_next_evu_event_time()
-        time_now = time(datetime.now().hour, datetime.now().minute)
-        if evu_time == time.min:
-            return None
-        evu_hours = (24 if evu_time < time_now else 0) + evu_time.hour
-        weekday = datetime.today().weekday()
-        if isinstance(self._attr_cache[SA.EVU_DAYS], str):
-            self._attr_cache[SA.EVU_DAYS] = self._attr_cache[SA.EVU_DAYS].split(",")
-        elif not isinstance(self._attr_cache[SA.EVU_DAYS], list):
-            self._attr_cache[SA.EVU_DAYS] = list()
-        evu_pause = 0
-        if (
-            self._attr_cache[SA.EVU_DAYS]
-            and weekday not in self._attr_cache[SA.EVU_DAYS]
-        ):
-            evu_pause += (24 - datetime.now().hour) * 60 - datetime.now().minute
-            evu_time = self._attr_cache[SA.EVU_FIRST_START_TIME]
-            for i in range(1, 7):
-                if weekday + i > 6:
-                    i = -7 + i
-                if weekday + i in self._attr_cache[SA.EVU_DAYS]:
-                    return evu_time.hour * 60 + evu_time.minute + evu_pause
-                else:
-                    evu_pause += 1440
-        else:
-            return (evu_hours - time_now.hour) * 60 + evu_time.minute - time_now.minute
-
-    def _get_next_evu_event_time(self) -> time:
-        event: time = time.min
-        time_now = time(datetime.now().hour, datetime.now().minute)
-        for evu_time in (
-            self._attr_cache[SA.EVU_FIRST_START_TIME],
-            self._attr_cache[SA.EVU_FIRST_END_TIME],
-            self._attr_cache[SA.EVU_SECOND_START_TIME],
-            self._attr_cache[SA.EVU_SECOND_END_TIME],
-        ):
-            if evu_time == time.min:
-                continue
-            if evu_time > time_now and (event == time.min or evu_time < event):
-                event = evu_time
-        if event == time.min:
-            for evu_time in (
-                self._attr_cache[SA.EVU_FIRST_START_TIME],
-                self._attr_cache[SA.EVU_FIRST_END_TIME],
-                self._attr_cache[SA.EVU_SECOND_START_TIME],
-                self._attr_cache[SA.EVU_SECOND_END_TIME],
-            ):
-                if evu_time == time.min:
-                    continue
-                if event == time.min or evu_time < event:
-                    event = evu_time
-        return event
-
-    def _tm_txt(self, value: time) -> str:
-        return "" if value == time.min else value.strftime("%H:%M")
-
-    def _wd_txt(self, value: list) -> str:
-        if not value:
-            return ""
-        days = []
-        for i in value:
-            days.append(calendar.day_name[i])
-        return ",".join(days)
-
-    def _restore_attr_value(self, value: Any | None) -> Any:
-        if value is not None:
-            if ":" in str(value):
-                vals = str(value).split(":")
-                return time(int(vals[0]), int(vals[1]))
-            vals = list()
-            for day in str(value).split(","):
-                for idx, name in enumerate(calendar.day_name):
-                    if day == name:
-                        vals.append(idx)
-                        break
-            if vals:
-                return vals
-        return time.min
+        suffix = self._evu_tracker.get_evu_status_suffix(self._attr_native_value)
+        return (
+            f"{line_1} {line_2} {status_time}. {suffix}"
+            if suffix
+            else f"{line_1} {line_2} {status_time}."
+        )
 
 
 class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
