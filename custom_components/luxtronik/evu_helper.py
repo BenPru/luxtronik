@@ -6,6 +6,7 @@ from .const import LuxOperationMode, SensorAttrKey as SA
 
 
 class LuxtronikEVUTracker:
+    """Luxtronik EVU tracker class"""
     def __init__(self):
         self._last_state = None
         self._cache = {
