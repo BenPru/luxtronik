@@ -45,9 +45,8 @@ def get_sensor_data(
         return None
     elif "{" in luxtronik_key:
         return None
-    key = luxtronik_key.split(".")
-    group: str = key[0]
-    sensor_id: str = key[1]
+
+    group, sensor_id = luxtronik_key.split(".", 1)
 
     if group == CONF_PARAMETERS:
         sensor = coordinator.parameters.get(sensor_id)

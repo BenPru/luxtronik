@@ -497,7 +497,7 @@ class LuxCalculation(StrEnum):
     )
     C0063_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitWP"
     C0064_OPERATION_HOURS_HEATING: Final = "calculations.ID_WEB_Zaehler_BetrZeitHz"
-    C0065_DHW_OPERATION_HOURS: Final = "calculations.ID_WEB_Zaehler_BetrZeitBW"
+    C0065_OPERATION_HOURS_DHW: Final = "calculations.ID_WEB_Zaehler_BetrZeitBW"
     C0066_OPERATION_HOURS_COOLING: Final = "calculations.ID_WEB_Zaehler_BetrZeitKue"
     C0067_TIMER_HEATPUMP_ON: Final = "calculations.ID_WEB_Time_WPein_akt"
     C0068_TIMER_ADD_HEAT_GENERATOR_ON: Final = "calculations.ID_WEB_Time_ZWE1_akt"

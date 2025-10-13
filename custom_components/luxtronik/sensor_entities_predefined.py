@@ -671,7 +671,7 @@ SENSORS: list[descr] = [
     ),
     descr(
         key=SensorKey.DHW_OPERATION_HOURS,
-        luxtronik_key=LC.C0065_DHW_OPERATION_HOURS,
+        luxtronik_key=LC.C0065_OPERATION_HOURS_DHW,
         device_key=DeviceKey.domestic_water,
         entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:timer-sand",
