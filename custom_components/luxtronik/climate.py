@@ -113,9 +113,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
-        # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.heating.value,
         # luxtronik_key_target_temperature_high=LuxParameter,
@@ -137,9 +135,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
-        # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.heating.value,
         # luxtronik_key_target_temperature_high=LuxParameter,
@@ -162,15 +158,11 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON  # noqa: W503
         | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
-        # luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
-        # luxtronik_key_has_target_temperature=LuxParameter
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.cooling.value,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
-        # luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
-        # luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
         #visibility=LuxVisibility.V0005_COOLING,
