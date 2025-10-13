@@ -8,13 +8,10 @@ If you like 🩷 this project, [sponsor it (click)](https://github.com/sponsors/
 * Backup your data before update (different config structure!). If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
 * This release has no more language selection. The HA backend language is used.
 * Some entities which can not detected automatically are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
-* The RBE Room Temperature Sensor is currently not implemented.
-* The update sensor "rings" for new firmware versions, but the "Install"-Button has no function. The Firmware has to be installed manually. An the Install-Button is necessary to get notified.
 * In the integration configuration you can set a ha sensor id for the indoor temperature value.
 
 > :warning: **Known Issues** :warning:  
-* Runtime warning "untimeWarning: coroutine ... was never awaited ...". [#116](https://github.com/BenPru/luxtronik/issues/116) [#138](https://github.com/BenPru/luxtronik/issues/138) [#108](https://github.com/BenPru/luxtronik/issues/108) Please don't create tickets for this!
-* Cooling is not full implemented! [#128]([url](https://github.com/BenPru/luxtronik/issues/128))
+* The update sensor "rings" for new firmware versions, but the "Install"-Button has no function. The Firmware has to be installed manually. An the Install-Button is necessary to get notified.
 
 This component has been created to be used with Home Assistant.
 
@@ -91,11 +88,14 @@ Your heatpump should be autodiscovered by home assistant.
 
 Press `Configure` and follow the steps to the end.
 
-#### Manual
+#### Semi-automatic
 
 'If auto discovery does not work, please give feedback with the first six chars of your luxtronik heatpump mac address, the original hostname, the manufacturer and model.
 
 To add the heatpump manually go to `Settings -> Devices & services -> Add integration` and add a new Luxtronik device.'
+The integration then will try to find any new Luxtronik based heatpumps.
+If one or more (not yet configured) Luxtronik based heatpumps are found, you can select to add it.
+In case no (not yet configured) Luxtronik based heatpumps are detected, you can specify the hostname/ip-address manually, and the integration will try to connect to it.
 
 Select Configure and review the settings.  
 <img src="https://user-images.githubusercontent.com/32298537/267698990-e317633e-e78a-4341-92fb-a7022214ec1b.png" width="500" />
