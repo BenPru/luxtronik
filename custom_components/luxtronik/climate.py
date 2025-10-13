@@ -46,7 +46,6 @@ from .const import (
     LuxMode,
     LuxOperationMode,
     LuxParameter,
-    LuxVisibility,
     SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
@@ -120,7 +119,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        #visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
+        # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         min_firmware_version=Version("3.90.1"),
     ),
@@ -144,7 +143,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        #visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
+        # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         max_firmware_version=Version("3.90.0"),
     ),
@@ -165,7 +164,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
-        #visibility=LuxVisibility.V0005_COOLING,
+        # visibility=LuxVisibility.V0005_COOLING,
         device_key=DeviceKey.cooling,
     ),
 ]
@@ -187,17 +186,22 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    unavailable_keys = [i.luxtronik_key for i in THERMOSTATS
-                        if not coordinator.key_exists(i.luxtronik_key)]
+    unavailable_keys = [
+        i.luxtronik_key
+        for i in THERMOSTATS
+        if not coordinator.key_exists(i.luxtronik_key)
+    ]
     if unavailable_keys:
-        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
             LuxtronikThermostat(hass, entry, coordinator, description)
             for description in THERMOSTATS
-            if (coordinator.entity_active(description) and
-                coordinator.key_exists(description.luxtronik_key) )
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -345,14 +349,15 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self._pending_temperature = kwargs[ATTR_TEMPERATURE]
         await self._debouncer_set_temp.async_call()
 
-
     async def _async_write_temperature(self):
         """Write the pending temperature to the device."""
         if self._pending_temperature is None:
             return
 
         key_tar = self.entity_description.luxtronik_key_target_temperature
-        LOGGER.debug(f"Debounced temperature write: {key_tar} = {self._pending_temperature}")
+        LOGGER.debug(
+            f"Debounced temperature write: {key_tar} = {self._pending_temperature}"
+        )
 
         if key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
             data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(

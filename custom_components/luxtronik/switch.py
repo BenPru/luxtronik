@@ -37,10 +37,11 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    unavailable_keys = [i.luxtronik_key for i in SWITCHES
-                        if not coordinator.key_exists(i.luxtronik_key)]
+    unavailable_keys = [
+        i.luxtronik_key for i in SWITCHES if not coordinator.key_exists(i.luxtronik_key)
+    ]
     if unavailable_keys:
-        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -48,8 +49,10 @@ async def async_setup_entry(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SWITCHES
-            if (coordinator.entity_active(description) and
-                coordinator.key_exists(description.luxtronik_key) )
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -79,7 +82,6 @@ class LuxtronikSwitchEntity(LuxtronikEntity, SwitchEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-
 
     @callback
     def _handle_coordinator_update(

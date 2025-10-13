@@ -46,10 +46,13 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    unavailable_keys = [i.luxtronik_key for i in NUMBER_SENSORS
-                        if not coordinator.key_exists(i.luxtronik_key)]
+    unavailable_keys = [
+        i.luxtronik_key
+        for i in NUMBER_SENSORS
+        if not coordinator.key_exists(i.luxtronik_key)
+    ]
     if unavailable_keys:
-        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -57,8 +60,10 @@ async def async_setup_entry(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in NUMBER_SENSORS
-            if (coordinator.entity_active(description) and
-                coordinator.key_exists(description.luxtronik_key) )
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -88,7 +93,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
-        
+
         self._attr_mode = description.mode
 
         # Debouncer for rate-limiting value updates
@@ -135,7 +140,6 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         self._pending_value = value
         await self._debouncer.async_call()
-
 
     async def _async_set_native_value(self):
         if self._pending_value is None:

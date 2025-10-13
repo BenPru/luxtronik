@@ -149,7 +149,8 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         if (
             self.__firmware_version_available_last_request is None
             or self.__firmware_version_available_last_request
-            < datetime.now(timezone.utc).timestamp() - MIN_TIME_BETWEEN_UPDATES.total_seconds()
+            < datetime.now(timezone.utc).timestamp()
+            - MIN_TIME_BETWEEN_UPDATES.total_seconds()
         ):
             await self._request_available_firmware_version()
 
@@ -176,9 +177,9 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                     )
                     filename = filename_match[0] if filename_match else None
 
-                    self.__firmware_version_available_last_request = (
-                        datetime.now(timezone.utc).timestamp()
-                    )
+                    self.__firmware_version_available_last_request = datetime.now(
+                        timezone.utc
+                    ).timestamp()
                     self.__firmware_version_available = self.extract_firmware_version(
                         filename
                     )

@@ -4,8 +4,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import date, datetime, time, timezone
-import calendar
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Any
 
@@ -27,7 +26,6 @@ from .const import (
     LOGGER,
     DeviceKey,
     LuxCalculation as LC,
-    LuxParameter as LP,
     LuxOperationMode,
     LuxStatus1Option,
     LuxStatus3Option,
@@ -56,10 +54,13 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    unavailable_keys = [i.luxtronik_key for i in SENSORS + SENSORS_STATUS 
-                        if not coordinator.key_exists(i.luxtronik_key)]
+    unavailable_keys = [
+        i.luxtronik_key
+        for i in SENSORS + SENSORS_STATUS
+        if not coordinator.key_exists(i.luxtronik_key)
+    ]
     if unavailable_keys:
-        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -67,8 +68,10 @@ async def async_setup_entry(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SENSORS
-            if (coordinator.entity_active(description) and
-                coordinator.key_exists(description.luxtronik_key) )
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -79,8 +82,10 @@ async def async_setup_entry(
                 hass, entry, coordinator, description, description.device_key
             )
             for description in SENSORS_STATUS
-            if (coordinator.entity_active(description) and
-                coordinator.key_exists(description.luxtronik_key) )
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )
@@ -198,7 +203,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         }
     )
 
-
     @callback
     def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
@@ -300,7 +304,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         )
         # Show evu end time if available
         suffix = self._evu_tracker.get_evu_status_suffix(self._attr_native_value)
-        return f"{line_1} {line_2} {status_time}. {suffix}" if suffix else f"{line_1} {line_2} {status_time}."
+        return (
+            f"{line_1} {line_2} {status_time}. {suffix}"
+            if suffix
+            else f"{line_1} {line_2} {status_time}."
+        )
 
 
 class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):

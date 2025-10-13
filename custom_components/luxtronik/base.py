@@ -148,7 +148,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     @callback
     def _handle_coordinator_update(self, force: bool = False) -> None:
         """Handle updated data from the coordinator."""
-        #if not force and not self.should_update():
+        # if not force and not self.should_update():
         #    return
 
         descr = self.entity_description
@@ -159,9 +159,9 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             value = value.replace(tzinfo=time_zone)
 
         self._attr_state = value
-        #if self.entity_description.luxtronik_key == LC.C0146_APPROVAL_COOLING:
-            #LOGGER.info('[Base]Cooling Approval=%s',self._attr_state)
-            #LOGGER.info('[Base]on_state=%s',self.entity_description.on_state)
+        # if self.entity_description.luxtronik_key == LC.C0146_APPROVAL_COOLING:
+        # LOGGER.info('[Base]Cooling Approval=%s',self._attr_state)
+        # LOGGER.info('[Base]on_state=%s',self.entity_description.on_state)
 
         icon_state = getattr(
             self,
@@ -181,7 +181,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
         self._enrich_extra_attributes()
 
-        #if descr.update_interval is not None:
+        # if descr.update_interval is not None:
         #    self.next_update = dt_util.utcnow() + descr.update_interval
 
         self.async_write_ha_state()
@@ -191,9 +191,10 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         if isinstance(descr.on_state, bool) and state is not None:
             state = bool(state)
         return (
-            state != descr.on_state 
+            state != descr.on_state
             if descr.inverted
-            else state == descr.on_state or (descr.on_states and state in descr.on_states)
+            else state == descr.on_state
+            or (descr.on_states and state in descr.on_states)
         )
 
     def _enrich_extra_attributes(self) -> None:

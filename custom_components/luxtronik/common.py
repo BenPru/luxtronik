@@ -134,7 +134,9 @@ def correct_key_value(
         T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
         T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
         T_heat_in = get_sensor_data(coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-        T_heat_out = get_sensor_data(coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE)
+        T_heat_out = get_sensor_data(
+            coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
+        )
         Flow_WQ = get_sensor_data(coordinator, LC.C0173_HEAT_SOURCE_FLOW_RATE)
         Pump = get_sensor_data(coordinator, LC.C0043_PUMP_FLOW)
         if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:

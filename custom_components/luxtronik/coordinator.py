@@ -393,7 +393,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.has_domestic_water
         if device_key == DeviceKey.cooling:
             return self.has_cooling
-            #return self.detect_cooling_present()
+            # return self.detect_cooling_present()
         raise NotImplementedError
 
     def key_exists(self, luxtronik_key: str | LP | LC | LV) -> bool:
@@ -404,7 +404,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 return False
 
             group, sensor_id = key_str.split(".", 1)
-            LOGGER.debug("Checking key existence: %s (group: %s, sensor_id: %s)", key_str, group, sensor_id)
+            LOGGER.debug(
+                "Checking key existence: %s (group: %s, sensor_id: %s)",
+                key_str,
+                group,
+                sensor_id,
+            )
 
             if group == "parameters":
                 items = self.data.parameters.parameters.items()
@@ -420,8 +425,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         except Exception as e:
             LOGGER.warning("Error checking key existence for %s: %s", luxtronik_key, e)
             return False
-
-
 
         # except Exception as e:
         #     LOGGER.debug("Key check failed for %s: %s", luxtronik_key, e)
@@ -455,7 +458,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             group, sensor_id = group_sensor_id.split(".", 1)
             return self.get_sensor(group, sensor_id)
         except (IndexError, ValueError) as error:
-            LOGGER.error("Invalid group_sensor_id format: %s (%s)", group_sensor_id, error)
+            LOGGER.error(
+                "Invalid group_sensor_id format: %s (%s)", group_sensor_id, error
+            )
             return None
 
     def get_sensor(self, group: str, sensor_id: str):

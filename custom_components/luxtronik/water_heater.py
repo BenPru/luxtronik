@@ -109,17 +109,22 @@ async def async_setup_entry(
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    unavailable_keys = [i.luxtronik_key for i in WATER_HEATERS
-                        if not coordinator.key_exists(i.luxtronik_key)]
+    unavailable_keys = [
+        i.luxtronik_key
+        for i in WATER_HEATERS
+        if not coordinator.key_exists(i.luxtronik_key)
+    ]
     if unavailable_keys:
-        LOGGER.warning('Not present in Luxtronik data, skipping: %s',unavailable_keys)
+        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
             LuxtronikWaterHeater(hass, entry, coordinator, description)
             for description in WATER_HEATERS
-            if (coordinator.entity_active(description) and
-                coordinator.key_exists(description.luxtronik_key) )
+            if (
+                coordinator.entity_active(description)
+                and coordinator.key_exists(description.luxtronik_key)
+            )
         ],
         True,
     )

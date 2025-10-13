@@ -1,4 +1,5 @@
-""" Helper class with all EVU logic"""
+"""Helper class with all EVU logic"""
+
 from datetime import time
 import calendar
 from homeassistant.util import dt as dt_util
@@ -7,6 +8,7 @@ from .const import LuxOperationMode, SensorAttrKey as SA
 
 class LuxtronikEVUTracker:
     """Luxtronik EVU tracker class"""
+
     def __init__(self):
         self._last_state = None
         self._cache = {
@@ -82,7 +84,11 @@ class LuxtronikEVUTracker:
             self._cache[SA.EVU_SECOND_END_TIME],
         ]
         future_events = [t for t in candidates if t > time_now and t != time.min]
-        return min(future_events) if future_events else self._fallback_event_time(candidates)
+        return (
+            min(future_events)
+            if future_events
+            else self._fallback_event_time(candidates)
+        )
 
     def _fallback_event_time(self, candidates: list[time]) -> time:
         valid_times = [t for t in candidates if t != time.min]

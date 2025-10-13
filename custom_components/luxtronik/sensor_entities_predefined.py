@@ -20,7 +20,6 @@ from .const import (
     UPDATE_INTERVAL_SLOW,
     UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
-    FirmwareVersionMinor,
     LuxCalculation as LC,
     LuxOperationMode,
     LuxParameter as LP,
@@ -366,7 +365,7 @@ SENSORS: list[descr] = [
         invisible_if_value=0.0,
         factor=0.1,
         native_precision=1,
-        #min_firmware_version_minor=FirmwareVersionMinor.minor_90,
+        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
@@ -479,7 +478,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfPower.WATT,
         entity_registry_enabled_default=False,
         native_precision=0,
-        #min_firmware_version_minor=FirmwareVersionMinor.minor_90,
+        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # endregion Main heatpump
     # region Heating
@@ -622,7 +621,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         factor=0.01,
-        #min_firmware_version_minor=FirmwareVersionMinor.minor_89,
+        # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
@@ -704,7 +703,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         factor=0.01,
-        #min_firmware_version_minor=FirmwareVersionMinor.minor_89,
+        # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     descr(
@@ -765,7 +764,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         factor=0.01,
-        #min_firmware_version_minor=FirmwareVersionMinor.minor_88,
+        # min_firmware_version_minor=FirmwareVersionMinor.minor_88,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
     # endregion Cooling
