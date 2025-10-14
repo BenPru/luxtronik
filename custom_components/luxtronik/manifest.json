@@ -41,7 +41,7 @@
   ],
   "requirements": [
     "luxtronik==0.3.14",
-    "getmac==0.8.2",
+    "getmac~=0.9.0",
     "packaging>=24.2"
   ],
   "version": "2025.10.08"
