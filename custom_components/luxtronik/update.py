@@ -6,6 +6,7 @@ from __future__ import annotations
 import aiohttp
 import re
 
+from awesomeversion import AwesomeVersion, AwesomeVersionStrategy
 from datetime import datetime, timedelta, timezone
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
@@ -107,7 +108,34 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         """Return the latest available firmware version."""
         if self.__firmware_version_available is None or self.installed_version is None:
             return None
-        return self.__firmware_version_available[: len(self.installed_version)]
+        return self.__firmware_version_available.split('-')[0]
+
+    @property
+    def update_available(self) -> bool:
+        """Return True if a newer firmware version is available."""
+        if not self.latest_version or not self.installed_version:
+            return False
+        return self.version_is_newer(self.latest_version, self.installed_version)
+
+    def version_is_newer(self, latest_version: str, installed_version: str) -> bool:
+        """Return True if latest_version is newer than installed_version."""
+
+        def normalize(version: str) -> str:
+            # Remove any leading non-digit characters
+            return re.sub(r"^[^\d]+", "", version)
+
+        latest = AwesomeVersion(
+            normalize(latest_version),
+            find_first_match=True,
+            ensure_strategy=[AwesomeVersionStrategy.SEMVER],
+        )
+        installed = AwesomeVersion(
+            normalize(installed_version),
+            find_first_match=True,
+            ensure_strategy=[AwesomeVersionStrategy.SEMVER],
+        )
+
+        return latest > installed
 
     @staticmethod
     def extract_firmware_version(filename: str | None) -> str | None:
@@ -120,7 +148,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         """
         if not filename:
             return None
-        match = re.search(r"V\d+\.\d+\.\d+(?:-\d+)?", filename)
+        match = re.search(r"[BV]\d+\.\d+\.\d+(?:-\d+)?", filename)
         return match.group(0) if match else None
 
     def release_notes(self) -> str | None:
