@@ -108,7 +108,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         """Return the latest available firmware version."""
         if self.__firmware_version_available is None or self.installed_version is None:
             return None
-        return self.__firmware_version_available.split('-')[0]
+        return self.__firmware_version_available.split("-")[0]
 
     @property
     def update_available(self) -> bool:
