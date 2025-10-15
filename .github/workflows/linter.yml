@@ -33,7 +33,7 @@ jobs:
       - name: Ruff auto fix  
         run: ruff check --fix-only # auto-fix
       - name: Commit changes # auto commit format changes.
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: format code with ruff"
       - name: Ruff check # report remaining issues
