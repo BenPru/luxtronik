@@ -167,26 +167,24 @@ class LuxStatus1Option(StrEnum):
 class LuxStatus3Option(StrEnum):
     """LuxStatus3 option heating etc."""
 
-    unknown: Final = ("unknown",)
-    none: Final = ("none",)
-    heating: Final = ("heating",)
-    no_request: Final = ("no_request",)
-    grid_switch_on_delay: Final = ("grid_switch_on_delay",)
-    cycle_lock: Final = ("cycle_lock",)
-    lock_time: Final = ("lock_time",)
-    domestic_water: Final = ("domestic_water",)
-    info_bake_out_program: Final = ("info_bake_out_program",)
-    defrost: Final = ("defrost",)
-    pump_forerun: Final = ("pump_forerun",)
-    thermal_desinfection: Final = ("thermal_desinfection",)
-    cooling: Final = ("cooling",)
-    swimming_pool_solar: Final = ("swimming_pool_solar",)
-    heating_external_energy_source: Final = ("heating_external_energy_source",)
-    domestic_water_external_energy_source: Final = (
-        "domestic_water_external_energy_source",
-    )
-    flow_monitoring: Final = ("flow_monitoring",)
-    second_heat_generator_1_active: Final = ("second_heat_generator_1_active",)
+    unknown: Final = "unknown"
+    none: Final = "none"
+    heating: Final = "heating"
+    no_request: Final = "no_request"
+    grid_switch_on_delay: Final = "grid_switch_on_delay"
+    cycle_lock: Final = "cycle_lock"
+    lock_time: Final = "lock_time"
+    domestic_water: Final = "domestic_water"
+    info_bake_out_program: Final = "info_bake_out_program"
+    defrost: Final = "defrost"
+    pump_forerun: Final = "pump_forerun"
+    thermal_desinfection: Final = "thermal_desinfection"
+    cooling: Final = "cooling"
+    swimming_pool_solar: Final = "swimming_pool_solar"
+    heating_external_energy_source: Final = "heating_external_energy_source"
+    domestic_water_external_energy_source: Final = "domestic_water_external_energy_source"
+    flow_monitoring: Final = "flow_monitoring"
+    second_heat_generator_1_active: Final = "second_heat_generator_1_active"
 
 
 class LuxMkTypes(Enum):

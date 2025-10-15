@@ -33,6 +33,7 @@ def get_sensor_data(
     coordinator: LuxtronikCoordinatorData,
     luxtronik_key: str | LP | LC | LV,
     warn_unset=True,
+    raw_value=False,
 ) -> Any:
     """Get sensor data."""
     if coordinator is None:
@@ -58,11 +59,12 @@ def get_sensor_data(
         raise NotImplementedError
     if sensor is None:
         LOGGER.warning(
-            "Get_sensor %s returns None",
-            sensor_id,
+            "Get_sensor %s (%s) returns None", 
+            sensor_id, 
+            luxtronik_key
         )
         return None
-    return correct_key_value(sensor.value, coordinator, luxtronik_key)
+    return sensor.value if raw_value else correct_key_value(sensor.value, coordinator, luxtronik_key)
 
 
 def correct_key_value(
@@ -71,9 +73,15 @@ def correct_key_value(
     sensor_id: str | LP | LC | LV,
 ) -> Any:
     """Handle special value corrections."""
-    # prevent dealing with None value below
-    if value is None:
+    # prevent dealing with None value, and skip unnecessary processing
+    if value is None or sensor_id is None or sensor_id not in [
+        LC.C0080_STATUS,
+        LC.C0100_ERROR_REASON,
+        LC.C0117_STATUS_LINE_1,
+        LC.C0119_STATUS_LINE_3,
+    ]:
         return value
+
     # fix 'states may not contain spaces ea for valid translations'
     if sensor_id in [
         LC.C0080_STATUS,
@@ -81,23 +89,17 @@ def correct_key_value(
         LC.C0119_STATUS_LINE_3,
     ]:
         value = value.replace(" ", "_").replace("/", "_").lower()
+
     if sensor_id in [
         LC.C0100_ERROR_REASON,
         # LP.P0716_0720_SWITCHOFF_REASON,
     ] and ((value == -1) or (value == "-1")):
         value = "minus_1"
 
-    if (
-        sensor_id == LC.C0080_STATUS
-        and value == LuxOperationMode.heating
-        and not get_sensor_data(coordinator, LC.C0044_COMPRESSOR)
-        and not get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
-    ):
-        return LuxOperationMode.no_request
     # region Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
     if (
         sensor_id == LC.C0117_STATUS_LINE_1
-        and value == LuxStatus1Option.heatpump_coming
+        and value == LuxStatus1Option.heatpump_coming.value
         and int(get_sensor_data(coordinator, LC.C0072_TIMER_SCB_ON)) < 10
         and int(get_sensor_data(coordinator, LC.C0071_TIMER_SCB_OFF)) > 0
     ):
@@ -106,42 +108,46 @@ def correct_key_value(
     # region Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
     if (
         sensor_id == LC.C0117_STATUS_LINE_1
-        and value == LuxStatus1Option.pump_forerun
+        and value == LuxStatus1Option.pump_forerun.value
         and bool(get_sensor_data(coordinator, LC.C0182_COMPRESSOR_HEATER))
     ):
         return LuxStatus1Option.compressor_heater
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
-    # region Workaround Detect passive cooling operation mode
+
     if (
         sensor_id == LC.C0080_STATUS
-        and value == LuxOperationMode.no_request
-        and bool(
-            get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
-            == LuxStatus3Option.cooling.value
-        )
-    ):
-        return LuxOperationMode.cooling
-    # endregion Workaround Detect passive cooling operation mode
-    # region Workaround Detect active cooling operation mode
-    if (
-        sensor_id == LC.C0080_STATUS
-        and value == LuxOperationMode.no_request
-        and bool(
-            get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
-            in LuxStatus3Option.heating.value
-        )
-    ):
-        T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
-        T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
-        T_heat_in = get_sensor_data(coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
-        T_heat_out = get_sensor_data(
-            coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
-        )
-        Flow_WQ = get_sensor_data(coordinator, LC.C0173_HEAT_SOURCE_FLOW_RATE)
-        Pump = get_sensor_data(coordinator, LC.C0043_PUMP_FLOW)
-        if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
+        and value == LuxOperationMode.no_request.value
+    ):    
+        status_line3 = get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3,raw_value=True)
+        if status_line3 is None:
+            LOGGER.warning("StatusLine3 is None!")
+
+        # region Workaround Detect passive cooling operation mode
+        if status_line3 is not None and status_line3 == LuxStatus3Option.cooling.value:
             return LuxOperationMode.cooling
-    # endregion Workaround Detect active cooling operation mode
+        # endregion Workaround Detect passive cooling operation mode
+
+        # region Workaround Detect active cooling operation mode
+        if status_line3 is not None and status_line3 == LuxStatus3Option.heating.value:
+            T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
+            T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
+            T_heat_in = get_sensor_data(coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
+            T_heat_out = get_sensor_data(
+                coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
+            )
+            Flow_WQ = get_sensor_data(coordinator, LC.C0173_HEAT_SOURCE_FLOW_RATE)
+            Pump = get_sensor_data(coordinator, LC.C0043_PUMP_FLOW)
+            if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
+                return LuxOperationMode.cooling
+        # endregion Workaround Detect active cooling operation mode
+
+    if (
+        sensor_id == LC.C0080_STATUS
+        and value == LuxOperationMode.heating.value
+        and not get_sensor_data(coordinator, LC.C0044_COMPRESSOR)
+        and not get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
+    ):
+        return LuxOperationMode.no_request
 
     # no changes needed, return sensor value
     return value
@@ -154,7 +160,7 @@ def state_as_number_or_none(state: State, default: float | None = None) -> float
     """
     if state is None:
         return default
-    if state.state in (STATE_UNAVAILABLE):
+    if state.state == STATE_UNAVAILABLE:
         return default  # state.state
     result = state_as_number(state)
     return default if not isinstance(result, float) or result is None else result
