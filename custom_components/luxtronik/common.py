@@ -58,13 +58,13 @@ def get_sensor_data(
     else:
         raise NotImplementedError
     if sensor is None:
-        LOGGER.warning(
-            "Get_sensor %s (%s) returns None", 
-            sensor_id, 
-            luxtronik_key
-        )
+        LOGGER.warning("Get_sensor %s (%s) returns None", sensor_id, luxtronik_key)
         return None
-    return sensor.value if raw_value else correct_key_value(sensor.value, coordinator, luxtronik_key)
+    return (
+        sensor.value
+        if raw_value
+        else correct_key_value(sensor.value, coordinator, luxtronik_key)
+    )
 
 
 def correct_key_value(
@@ -74,12 +74,17 @@ def correct_key_value(
 ) -> Any:
     """Handle special value corrections."""
     # prevent dealing with None value, and skip unnecessary processing
-    if value is None or sensor_id is None or sensor_id not in [
-        LC.C0080_STATUS,
-        LC.C0100_ERROR_REASON,
-        LC.C0117_STATUS_LINE_1,
-        LC.C0119_STATUS_LINE_3,
-    ]:
+    if (
+        value is None
+        or sensor_id is None
+        or sensor_id
+        not in [
+            LC.C0080_STATUS,
+            LC.C0100_ERROR_REASON,
+            LC.C0117_STATUS_LINE_1,
+            LC.C0119_STATUS_LINE_3,
+        ]
+    ):
         return value
 
     # fix 'states may not contain spaces ea for valid translations'
@@ -114,11 +119,10 @@ def correct_key_value(
         return LuxStatus1Option.compressor_heater
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
 
-    if (
-        sensor_id == LC.C0080_STATUS
-        and value == LuxOperationMode.no_request.value
-    ):    
-        status_line3 = get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3,raw_value=True)
+    if sensor_id == LC.C0080_STATUS and value == LuxOperationMode.no_request.value:
+        status_line3 = get_sensor_data(
+            coordinator, LC.C0119_STATUS_LINE_3, raw_value=True
+        )
         if status_line3 is None:
             LOGGER.warning("StatusLine3 is None!")
 
@@ -131,7 +135,9 @@ def correct_key_value(
         if status_line3 is not None and status_line3 == LuxStatus3Option.heating.value:
             T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
             T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
-            T_heat_in = get_sensor_data(coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE)
+            T_heat_in = get_sensor_data(
+                coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE
+            )
             T_heat_out = get_sensor_data(
                 coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
             )
