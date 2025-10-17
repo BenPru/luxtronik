@@ -2,15 +2,16 @@ from luxtronik.datatypes import HeatpumpCode, Celsius
 from luxtronik.parameters import Parameters
 
 
-# Define your custom parameters in a dictionary
-parameters_to_add = {
+# Define your new/updated custom parameters in a dictionary
+parameters_to_add_update = {
+    973: Celsius("ID_Einst_BW_max", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
     # Add more as needed
 }
 
 
 def update_Luxtronik_Parameters():
-    Parameters.parameters.update(parameters_to_add)
+    Parameters.parameters.update(parameters_to_add_update)
 
 
 def update_Luxtronik_HeatpumpCodes():

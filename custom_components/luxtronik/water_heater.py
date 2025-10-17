@@ -32,11 +32,11 @@ from .const import (
     DOMAIN,
     LOGGER,
     DeviceKey,
-    LuxCalculation,
+    LuxCalculation as LC,
     LuxMode,
     LuxOperationMode,
-    LuxParameter,
-    LuxVisibility,
+    LuxParameter as LP,
+    LuxVisibility as LV,
     SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
@@ -60,16 +60,16 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         supported_features=WaterHeaterEntityFeature.OPERATION_MODE
         | WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.AWAY_MODE,
-        luxtronik_key=LuxParameter.P0004_MODE_DHW,
-        luxtronik_key_current_temperature=LuxCalculation.C0017_DHW_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0002_DHW_TARGET_TEMPERATURE,
-        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_key=LP.P0004_MODE_DHW,
+        luxtronik_key_current_temperature=LC.C0017_DHW_TEMPERATURE,
+        luxtronik_key_target_temperature=LP.P0002_DHW_TARGET_TEMPERATURE,
+        luxtronik_key_current_action=LC.C0080_STATUS,
         luxtronik_action_heating=LuxOperationMode.domestic_water,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon="mdi:water-boiler",
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0029_DHW_TEMPERATURE,
+        visibility=LV.V0029_DHW_TEMPERATURE,
         max_firmware_version=Version("3.90.0"),
     ),
     LuxtronikWaterHeaterDescription(
@@ -78,16 +78,16 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         supported_features=WaterHeaterEntityFeature.OPERATION_MODE
         | WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.AWAY_MODE,
-        luxtronik_key=LuxParameter.P0004_MODE_DHW,
-        luxtronik_key_current_temperature=LuxCalculation.C0017_DHW_TEMPERATURE,
-        luxtronik_key_target_temperature=LuxParameter.P0105_DHW_TARGET_TEMPERATURE,
-        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_key=LP.P0004_MODE_DHW,
+        luxtronik_key_current_temperature=LC.C0017_DHW_TEMPERATURE,
+        luxtronik_key_target_temperature=LP.P0105_DHW_TARGET_TEMPERATURE,
+        luxtronik_key_current_action=LC.C0080_STATUS,
         luxtronik_action_heating=LuxOperationMode.domestic_water,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon="mdi:water-boiler",
         temperature_unit=UnitOfTemperature.CELSIUS,
-        visibility=LuxVisibility.V0029_DHW_TEMPERATURE,
+        visibility=LV.V0029_DHW_TEMPERATURE,
         min_firmware_version=Version("3.90.1"),
     ),
 ]
@@ -136,7 +136,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     entity_description: LuxtronikWaterHeaterDescription
 
     _attr_min_temp = 40.0
-    _attr_max_temp = 65.0
+    _attr_target_temperature_step = 0.5
 
     _last_operation_mode_before_away: str | None = None
     _current_action: str | None = None
@@ -171,6 +171,15 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             function=self._async_write_temperature,
         )
         self._pending_temperature: float | None = None
+
+    @property
+    def max_temp(self) -> float:
+        """Return the maximum temperature allowed."""
+        try:
+            value = get_sensor_data(self.coordinator.data, LP.P0973_MAX_DHW_TEMPERATURE)
+            return float(value)
+        except (TypeError, ValueError):
+            return 60.0  # fallback default
 
     @property
     def hvac_action(self) -> HVACAction | str | None:

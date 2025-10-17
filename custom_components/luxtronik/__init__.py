@@ -32,6 +32,7 @@ from .const import (
 
 # Apply global overrides before anything else
 from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
+from .common import convert_to_int_if_possible
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 
 # endregion Imports
@@ -90,7 +91,8 @@ def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
     async def write_parameter(service):
         """Write a parameter to the Luxtronik heatpump."""
         parameter = service.data.get(ATTR_PARAMETER)
-        value = service.data.get(ATTR_VALUE)
+        # convert to int needed for Unknown parameters
+        value = convert_to_int_if_possible(service.data.get(ATTR_VALUE))
         data = hass.data[DOMAIN].get(entry.entry_id)
         coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
         await coordinator.async_write(parameter, value)

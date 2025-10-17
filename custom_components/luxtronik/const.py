@@ -389,6 +389,7 @@ class LuxParameter(StrEnum):
     )
     # P0894_VENTILATION_MODE: Final = "parameters.ID_Einst_BA_Lueftung_akt" # "Automatic", "Party", "Holidays", "Off"
     P0966_COOLING_TARGET_TEMPERATURE_MK3: Final = "parameters.ID_Sollwert_KuCft3_akt"
+    P0973_MAX_DHW_TEMPERATURE: Final = "parameters.ID_Einst_BW_max"
     P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE: Final = (
         "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
     )
