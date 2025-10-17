@@ -201,6 +201,7 @@ async def async_get_mac_address(hass: HomeAssistant, host: str) -> str | None:
 
     return device_registry.format_mac(mac_address)
 
+
 def convert_to_int_if_possible(value: str) -> int | str:
     try:
         return int(value)
