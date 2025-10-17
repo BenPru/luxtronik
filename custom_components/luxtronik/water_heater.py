@@ -177,7 +177,9 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         """Return the maximum temperature allowed."""
         try:
             if key_exists(self.coordinator.data, LP.P0973_MAX_DHW_TEMPERATURE):
-                value = get_sensor_data(self.coordinator.data, LP.P0973_MAX_DHW_TEMPERATURE)
+                value = get_sensor_data(
+                    self.coordinator.data, LP.P0973_MAX_DHW_TEMPERATURE
+                )
                 return float(value)
         except (TypeError, ValueError):
             return 60.0  # fallback default

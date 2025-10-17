@@ -38,7 +38,9 @@ async def async_setup_entry(
         raise ConfigEntryNotReady
 
     unavailable_keys = [
-        i.luxtronik_key for i in SWITCHES if not key_exists(coordinator.data, i.luxtronik_key)
+        i.luxtronik_key
+        for i in SWITCHES
+        if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
         LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)

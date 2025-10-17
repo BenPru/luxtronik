@@ -398,7 +398,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             # return self.detect_cooling_present()
         raise NotImplementedError
 
-
     @property
     def has_heating(self) -> bool:
         """Is heating activated."""
