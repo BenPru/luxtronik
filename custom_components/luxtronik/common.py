@@ -28,6 +28,34 @@ from .model import LuxtronikCoordinatorData
 
 # endregion Imports
 
+def key_exists(coordinator: LuxtronikCoordinatorData, luxtronik_key: str | LP | LC | LV) -> bool:
+    """Check if the given Luxtronik key exists in the coordinator's data by matching item.name."""
+    try:
+        key_str = str(luxtronik_key)
+        if not key_str or "." not in key_str or "{" in key_str:
+            return False
+
+        group, sensor_id = key_str.split(".", 1)
+        LOGGER.debug(
+            "Checking key existence: %s (group: %s, sensor_id: %s)",
+            key_str,
+            group,
+            sensor_id,
+        )
+
+        if group == "parameters":
+            items = coordinator.parameters.parameters.items()
+        elif group == "calculations":
+            items = coordinator.calculations.calculations.items()
+        elif group == "visibilities":
+            items = coordinator.visibilities.visibilities.items()
+        else:
+            return False
+
+        return any(item.name == sensor_id for _, item in items)
+    except Exception as e:
+        LOGGER.error("Error checking key existence: %s", e)
+        return False
 
 def get_sensor_data(
     coordinator: LuxtronikCoordinatorData,

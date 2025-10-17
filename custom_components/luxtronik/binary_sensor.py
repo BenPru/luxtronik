@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
-from .common import get_sensor_data
+from .common import get_sensor_data, key_exists
 from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey, LOGGER
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikBinarySensorEntityDescription
@@ -37,7 +37,7 @@ async def async_setup_entry(
     unavailable_keys = [
         i.luxtronik_key
         for i in BINARY_SENSORS
-        if not coordinator.key_exists(i.luxtronik_key)
+        if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
         LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
@@ -50,7 +50,7 @@ async def async_setup_entry(
             for description in BINARY_SENSORS
             if (
                 coordinator.entity_active(description)
-                and coordinator.key_exists(description.luxtronik_key)
+                and key_exists(coordinator.data, description.luxtronik_key)
             )
         ],
         True,

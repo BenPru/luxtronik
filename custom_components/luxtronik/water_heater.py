@@ -25,7 +25,7 @@ from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
-from .common import get_sensor_data
+from .common import get_sensor_data, key_exists
 from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
@@ -112,7 +112,7 @@ async def async_setup_entry(
     unavailable_keys = [
         i.luxtronik_key
         for i in WATER_HEATERS
-        if not coordinator.key_exists(i.luxtronik_key)
+        if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
         LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
@@ -123,7 +123,7 @@ async def async_setup_entry(
             for description in WATER_HEATERS
             if (
                 coordinator.entity_active(description)
-                and coordinator.key_exists(description.luxtronik_key)
+                and key_exists(coordinator.data, description.luxtronik_key)
             )
         ],
         True,
@@ -176,8 +176,9 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     def max_temp(self) -> float:
         """Return the maximum temperature allowed."""
         try:
-            value = get_sensor_data(self.coordinator.data, LP.P0973_MAX_DHW_TEMPERATURE)
-            return float(value)
+            if key_exists(self.coordinator.data, LP.P0973_MAX_DHW_TEMPERATURE):
+                value = get_sensor_data(self.coordinator.data, LP.P0973_MAX_DHW_TEMPERATURE)
+                return float(value)
         except (TypeError, ValueError):
             return 60.0  # fallback default
 
