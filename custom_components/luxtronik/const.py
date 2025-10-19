@@ -32,6 +32,7 @@ PLATFORMS: list[str] = [
     Platform.UPDATE,
     Platform.WATER_HEATER,
     Platform.CLIMATE,
+    Platform.SELECT,
 ]
 UPDATE_INTERVAL_FAST: Final = timedelta(seconds=10)
 UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)
@@ -86,7 +87,7 @@ class UnitOfVolumeFlowRateExt(StrEnum):
 class DeviceKey(StrEnum):
     """Device keys."""
 
-    heatpump: Final = "heatpump"
+    heatpump: Final = "heatpump" 
     heating: Final = "heating"
     domestic_water: Final = "domestic_water"
     cooling: Final = "cooling"
@@ -271,6 +272,39 @@ LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]
 LUX_MODELS_NOVELAN = ["BW", "LA", "LD", "LI", "SI", "ZLW"]
 LUX_MODELS_OTHER = ["CB", "CI", "CN", "CS"]
 # endregion Lux Definitions
+
+
+class LuxDaySelectorParameter(StrEnum):
+    """Luxtronik parameters for day selector (TDI activation per weekday)."""
+
+    MONDAY: Final = "parameters.ID_Einst_BwTDI_akt_MO"
+    TUESDAY: Final = "parameters.ID_Einst_BwTDI_akt_DI"
+    WEDNESDAY: Final = "parameters.ID_Einst_BwTDI_akt_MI"
+    THURSDAY: Final = "parameters.ID_Einst_BwTDI_akt_DO"
+    FRIDAY: Final = "parameters.ID_Einst_BwTDI_akt_FR"
+    SATURDAY: Final = "parameters.ID_Einst_BwTDI_akt_SA"
+    SUNDAY: Final = "parameters.ID_Einst_BwTDI_akt_SO"
+
+DAY_NAME_TO_PARAM: Final[dict[str, LuxDaySelectorParameter]] = {
+    "Monday": LuxDaySelectorParameter.MONDAY,
+    "Tuesday": LuxDaySelectorParameter.TUESDAY,
+    "Wednesday": LuxDaySelectorParameter.WEDNESDAY,
+    "Thursday": LuxDaySelectorParameter.THURSDAY,
+    "Friday": LuxDaySelectorParameter.FRIDAY,
+    "Saturday": LuxDaySelectorParameter.SATURDAY,
+    "Sunday": LuxDaySelectorParameter.SUNDAY,
+}
+
+DAY_SELECTOR_OPTIONS: Final[list[str]] = [
+    "None",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+]
 
 # region Lux parameters
 
@@ -805,7 +839,7 @@ class SensorKey(StrEnum):
     PUMP_VENT_HUP = "pump_vent_hup"
     PUMP_VENT_TIMER_H = "pump_vent_timer_h"
     PUMP_VENT_ACTIVE = "pump_vent_active"
-
+    THERMAL_DESINFECTION_DAY = "thermal_desinfection_day"
 
 # endregion Keys
 
