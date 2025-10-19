@@ -69,8 +69,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                     )
                 else:
                     self._attr_extra_state_attributes[field] = value
-        if description.translation_key is None:
-            description.translation_key = description.key.value
         if description.entity_registry_enabled_default:
             description.entity_registry_enabled_default = coordinator.entity_visible(
                 description

@@ -558,6 +558,35 @@
                 "name": "Temperatura docelowa termostatu pokojowego"
             }
         },
+        "date": {
+            "away_dhw_startdate": {
+                "name": "Data rozpoczęcia trybu nieobecno\u015bci - ciep\u0142a woda"
+            },
+            "away_dhw_enddate": {
+                "name": "Data zako\u0144czenia trybu nieobecno\u015bci - ciep\u0142a woda"
+            },
+            "away_heating_startdate": {
+                "name": "Data rozpoczęcia trybu nieobecno\u015bci - ogrzewanie"
+            },
+            "away_heating_enddate": {
+                "name": "Data zako\u0144czenia trybu nieobecno\u015bci - ogrzewanie"
+            }
+        },
+        "select": {
+            "thermal_desinfection_day": {
+                "name": "Dzie\u0144 dezynfekcji termicznej",
+                "state": {
+                    "None": "Brak",
+                    "Monday": "Poniedzia\u0142ek",
+                    "Tuesday": "Wtorek",
+                    "Wednesday": "Środa",
+                    "Thursday": "Czwartek",
+                    "Friday": "Piątek",
+                    "Saturday": "Sobota",
+                    "Sunday": "Niedziela"
+                }
+            }
+        },
         "climate": {
             "heating": {
                 "name": "Ogrzewanie"

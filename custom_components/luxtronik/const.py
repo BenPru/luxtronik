@@ -33,6 +33,7 @@ PLATFORMS: list[str] = [
     Platform.WATER_HEATER,
     Platform.CLIMATE,
     Platform.SELECT,
+    Platform.DATE,
 ]
 UPDATE_INTERVAL_FAST: Final = timedelta(seconds=10)
 UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)
@@ -460,6 +461,10 @@ class LuxParameter(StrEnum):
     P1158_POWER_LIMIT_SWITCH: Final = "parameters.Unknown_Parameter_1158"
     P1159_POWER_LIMIT_VALUE: Final = "parameters.Unknown_Parameter_1159"
 
+    P0731_AWAY_HEATING_STARTDATE: Final = "parameters.ID_SU_FstdHz"
+    P0006_AWAY_HEATING_ENDDATE: Final = "parameters.ID_SU_FrkdHz"
+    P0732_AWAY_DHW_STARTDATE: Final = "parameters.ID_SU_FstdBw"
+    P0007_AWAY_DHW_ENDDATE: Final = "parameters.ID_SU_FrkdBw"
 
 # endregion Lux parameters
 
@@ -840,6 +845,12 @@ class SensorKey(StrEnum):
     PUMP_VENT_TIMER_H = "pump_vent_timer_h"
     PUMP_VENT_ACTIVE = "pump_vent_active"
     THERMAL_DESINFECTION_DAY = "thermal_desinfection_day"
+
+    AWAY_HEATING_STARTDATE = "away_heating_startdate"
+    AWAY_HEATING_ENDDATE = "away_heating_enddate"
+    AWAY_DHW_STARTDATE = "away_dhw_startdate"
+    AWAY_DHW_ENDDATE = "away_dhw_enddate"
+
 
 # endregion Keys
 
