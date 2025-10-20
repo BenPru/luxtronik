@@ -186,14 +186,15 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
     def compute_is_on(self, state: Any) -> bool:
         descr = self.entity_description
+
         if isinstance(descr.on_state, bool) and state is not None:
             state = bool(state)
-        return (
-            state != descr.on_state
-            if descr.inverted
-            else state == descr.on_state
-            or (descr.on_states and state in descr.on_states)
+
+        is_on = bool(
+            state == descr.on_state or (descr.on_states and state in descr.on_states)
         )
+
+        return not is_on if descr.inverted else is_on
 
     def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:
