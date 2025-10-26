@@ -1,4 +1,3 @@
-import datetime
 
 from luxtronik.datatypes import HeatpumpCode, Celsius, Timestamp, Percent, Percent2
 from luxtronik.parameters import Parameters
@@ -6,14 +5,14 @@ from luxtronik.parameters import Parameters
 
 # Define your new/updated custom parameters in a dictionary
 parameters_to_add_update = {
-    6: Timestamp("ID_SU_FrkdHz",True),
-    7: Timestamp("ID_SU_FrkdBw",True),
-    731: Timestamp("ID_SU_FstdHz",True),
-    732: Timestamp("ID_SU_FstdBw",True),
+    6: Timestamp("ID_SU_FrkdHz", True),
+    7: Timestamp("ID_SU_FrkdBw", True),
+    731: Timestamp("ID_SU_FstdHz", True),
+    732: Timestamp("ID_SU_FstdBw", True),
     973: Celsius("ID_Einst_BW_max", True),
     980: Percent2("ID_RBE_Einflussfaktor_RT_akt", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
-    1159: Percent("Unknown_Parameter_1159",True)
+    1159: Percent("Unknown_Parameter_1159", True),
     # Add more as needed
 }
 
