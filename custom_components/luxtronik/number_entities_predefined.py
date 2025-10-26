@@ -120,8 +120,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_min_value=0.0,
         native_max_value=30.0,
         native_step=0.1,
-        factor=0.1,
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # endregion Main heatpump
     # region Heating
