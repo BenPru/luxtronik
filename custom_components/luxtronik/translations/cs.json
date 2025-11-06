@@ -814,6 +814,35 @@
                 "name": "Rozd\u00edl pr\u016ftoku ob\u011bhov\u00e9ho \u010derpadla"
             }
         },
+        "date": {
+            "away_dhw_startdate": {
+                "name": "Datum za\u010d\u00e1tku re\u017eimu mimo domov - tepl\u00e1 voda"
+            },
+            "away_dhw_enddate": {
+                "name": "Datum konce re\u017eimu mimo domov - tepl\u00e1 voda"
+            },
+            "away_heating_startdate": {
+                "name": "Datum za\u010d\u00e1tku re\u017eimu mimo domov - vyt\u00e1p\u011bn\u00ed"
+            },
+            "away_heating_enddate": {
+                "name": "Datum konce re\u017eimu mimo domov - vyt\u00e1p\u011bn\u00ed"
+            }
+        },
+        "select": {
+            "thermal_desinfection_day": {
+                "name": "Den termick\u00e9 dezinfekce",
+                "state": {
+                    "None": "\u017d\u00e1dn\u00fd",
+                    "Monday": "Pond\u011bl\u00ed",
+                    "Tuesday": "\u00dater\u00fd",
+                    "Wednesday": "St\u0159eda",
+                    "Thursday": "\u010ctvrtek",
+                    "Friday": "P\u00e1tek",
+                    "Saturday": "Sobota",
+                    "Sunday": "Ned\u011ble"
+                }
+            }
+        },
         "climate": {
             "heating": {
                 "name": "Topen\u00ed"

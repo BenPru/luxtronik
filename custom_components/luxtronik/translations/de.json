@@ -819,6 +819,35 @@
                 "name": "Umw\u00e4lzpumpe Delta"
             }
         },
+        "date": {
+            "away_dhw_startdate": {
+                "name": "Abwesenheitsmodus Warmwasser Startdatum"
+            },
+            "away_dhw_enddate": {
+                "name": "Abwesenheitsmodus Warmwasser Enddatum"
+            },
+            "away_heating_startdate": {
+                "name": "Abwesenheitsmodus Heizung Startdatum"
+            },
+            "away_heating_enddate": {
+                "name": "Abwesenheitsmodus Heizung Enddatum"
+            }
+        },
+        "select": {
+            "thermal_desinfection_day": {
+                "name": "Tag der thermischen Desinfektion",
+                "state": {
+                    "None": "Keine",
+                    "Monday": "Montag",
+                    "Tuesday": "Dienstag",
+                    "Wednesday": "Mittwoch",
+                    "Thursday": "Donnerstag",
+                    "Friday": "Freitag",
+                    "Saturday": "Samstag",
+                    "Sunday": "Sonntag"
+                }
+            }
+        },
         "climate": {
             "heating": {
                 "name": "Heizung"

@@ -581,6 +581,25 @@
                 "name": "Circulation pump delta"
             }
         },
+        "date": {
+            "away_dhw_startdate": {
+                "name": "Away Mode DHW Start Date"
+            },
+            "away_dhw_enddate": {
+                "name": "Away Mode DHW End Date"
+            },
+            "away_heating_startdate": {
+                "name": "Away Mode Heating Start Date"
+            },
+            "away_heating_enddate": {
+                "name": "Away Mode Heating End Date"
+            }
+        },
+        "select": {
+            "thermal_desinfection_day": {
+                "name": "Thermal Desinfection Day"
+            }
+        },
         "climate": {
             "heating": {
                 "name": "Heating"

@@ -815,6 +815,35 @@
                 "name": "Circulatiepomp Delta"
             }
         },
+        "date": {
+            "away_dhw_startdate": {
+                "name": "Startdatum Warm-water vakantie modus"
+            },
+            "away_dhw_enddate": {
+                "name": "Einddatum Warm-water vakantie modus"
+            },
+            "away_heating_startdate": {
+                "name": "Startdatum Verwarming vakantie modus"
+            },
+            "away_heating_enddate": {
+                "name": "Einddatum Verwarming vakantie modus"
+            }
+        },
+        "select": {
+            "thermal_desinfection_day": {
+                "name": "Dag waarop de thermische desinfection wordt uitgevoerd",
+                "state": {
+                    "None": "Geen",
+                    "Monday": "Maandag",
+                    "Tuesday": "Dinsdag",
+                    "Wednesday": "Woensdag",
+                    "Thursday": "Donderdag",
+                    "Friday": "Vrijdag",
+                    "Saturday": "Zaterdag",
+                    "Sunday": "Zondag"
+                }
+            }
+        },
         "climate": {
             "heating": {
                 "name": "Verwarming"
