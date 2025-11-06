@@ -313,7 +313,7 @@ DAY_SELECTOR_OPTIONS: Final[list[str]] = [
 
 class LuxParameter(StrEnum):
     """Luxtronik parameter ids."""
-    
+
     UNSET: Final = "UNSET"
     P0001_HEATING_TARGET_CORRECTION: Final = "parameters.ID_Einst_WK_akt"
     P0002_DHW_TARGET_TEMPERATURE: Final = "parameters.ID_Einst_BWS_akt"
