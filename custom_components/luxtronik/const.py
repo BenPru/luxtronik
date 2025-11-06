@@ -88,7 +88,7 @@ class UnitOfVolumeFlowRateExt(StrEnum):
 class DeviceKey(StrEnum):
     """Device keys."""
 
-    heatpump: Final = "heatpump" 
+    heatpump: Final = "heatpump"
     heating: Final = "heating"
     domestic_water: Final = "domestic_water"
     cooling: Final = "cooling"
@@ -286,6 +286,7 @@ class LuxDaySelectorParameter(StrEnum):
     SATURDAY: Final = "parameters.ID_Einst_BwTDI_akt_SA"
     SUNDAY: Final = "parameters.ID_Einst_BwTDI_akt_SO"
 
+
 DAY_NAME_TO_PARAM: Final[dict[str, LuxDaySelectorParameter]] = {
     "Monday": LuxDaySelectorParameter.MONDAY,
     "Tuesday": LuxDaySelectorParameter.TUESDAY,
@@ -465,6 +466,7 @@ class LuxParameter(StrEnum):
     P0006_AWAY_HEATING_ENDDATE: Final = "parameters.ID_SU_FrkdHz"
     P0732_AWAY_DHW_STARTDATE: Final = "parameters.ID_SU_FstdBw"
     P0007_AWAY_DHW_ENDDATE: Final = "parameters.ID_SU_FrkdBw"
+
 
 # endregion Lux parameters
 

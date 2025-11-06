@@ -7,7 +7,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util import dt as dt_util
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists
@@ -21,6 +20,7 @@ from .const import (
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .date_entities_predefined import CALENDAR_ENTITIES
 from .model import LuxtronikDateEntityDescription
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -55,6 +55,7 @@ async def async_setup_entry(
         ],
         True,
     )
+
 
 class LuxtronikDateEntity(LuxtronikEntity, DateEntity):
     """Luxtronik Date Entity that supports user-editable dates."""
@@ -103,13 +104,11 @@ class LuxtronikDateEntity(LuxtronikEntity, DateEntity):
         self.async_write_ha_state()
         super()._handle_coordinator_update()
 
-
     async def async_set_value(self, value: date) -> None:
         """Handle user-set date from the UI."""
         self._attr_native_value = value
         timestamp = int(datetime.combine(value, datetime.min.time()).timestamp())
         await self.coordinator.async_write(
-            self.entity_description.luxtronik_key.value.split(".")[1],
-            timestamp
+            self.entity_description.luxtronik_key.value.split(".")[1], timestamp
         )
         self.async_write_ha_state()

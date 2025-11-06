@@ -1,6 +1,6 @@
 """Support for Luxtronik selectors"""
 
-from homeassistant.components.binary_sensor import ENTITY_ID_FORMAT, BinarySensorEntity
+from homeassistant.components.binary_sensor import ENTITY_ID_FORMAT
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -13,13 +13,13 @@ from .base import LuxtronikEntity
 from .common import get_sensor_data
 from .const import (
     DAY_SELECTOR_OPTIONS,
-    DOMAIN, 
-    CONF_COORDINATOR, 
-    CONF_HA_SENSOR_PREFIX, 
-    LuxDaySelectorParameter, 
+    DOMAIN,
+    CONF_COORDINATOR,
+    CONF_HA_SENSOR_PREFIX,
+    LuxDaySelectorParameter,
     DAY_NAME_TO_PARAM,
     DeviceKey,
-    SensorKey as SK
+    SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikEntityDescription
@@ -44,28 +44,29 @@ async def async_setup_entry(
         key=SK.THERMAL_DESINFECTION_DAY,
         device_key=DeviceKey.domestic_water,
         luxtronik_key=LuxDaySelectorParameter.MONDAY,  # Just one valid key for metadata
-    )    
+    )
     async_add_entities(
         [
             LuxtronikThermalDesinfectionDaySelector(
-                entry, coordinator,description, description.device_key
+                entry, coordinator, description, description.device_key
             )
-        ], 
-        True
+        ],
+        True,
     )
 
 
 class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
     """Luxtronik Thermal Desinfection Day Selector Entity."""
+
     def __init__(
-        self, 
+        self,
         entry: ConfigEntry,
         coordinator: LuxtronikCoordinator,
         description: LuxtronikEntityDescription,
         device_info_ident: DeviceKey,
-        ):
+    ):
         # No description needed for this custom entity
-        
+
         super().__init__(
             coordinator=coordinator,
             description=description,
@@ -89,7 +90,7 @@ class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
         """Handle updated data from the coordinator."""
         # if not self.should_update():
         #    return
-        
+
         super()._handle_coordinator_update()
         data = self.coordinator.data if data is None else data
         if data is None:
@@ -106,7 +107,6 @@ class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
         if self._attr_current_option != selected_day:
             self._attr_current_option = selected_day
             self.async_write_ha_state()
-
 
     async def async_select_option(self, option: str) -> None:
         """Handle selection of a new day."""
