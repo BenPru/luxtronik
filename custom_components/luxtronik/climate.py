@@ -21,7 +21,8 @@ from homeassistant.components.climate import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_TEMPERATURE,
-    PRECISION_HALVES,
+    # PRECISION_HALVES,
+    PRECISION_TENTHS,
     STATE_UNKNOWN,
     UnitOfTemperature,
 )
@@ -230,7 +231,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
 
     _last_hvac_mode_before_preset: str | None = None
 
-    _attr_precision = PRECISION_HALVES
+    _attr_precision = PRECISION_TENTHS
     _attr_target_temperature = 21.0
     _attr_target_temperature_high = 28.0
     _attr_target_temperature_low = 18.0
