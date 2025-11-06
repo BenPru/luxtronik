@@ -509,8 +509,7 @@ class LuxtronikConnectionError(HomeAssistantError):
 
 
 async def connect_and_get_coordinator(
-    hass: HomeAssistant, 
-    config: dict[str, Any]
+    hass: HomeAssistant, config: dict[str, Any]
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
 

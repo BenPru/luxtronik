@@ -1,4 +1,3 @@
-
 from luxtronik.datatypes import HeatpumpCode, Celsius, Timestamp, Percent, Percent2
 from luxtronik.parameters import Parameters
 
