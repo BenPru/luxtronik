@@ -111,7 +111,7 @@ class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         """Handle selection of a new day."""
         self._attr_current_option = option
-        data = self.coordinator.data if data is None else data
+        data = self.coordinator.data
         if data is None:
             return
 
@@ -121,10 +121,10 @@ class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
             current_value = int(get_sensor_data(data, param))
 
             if current_value != desired_value:
-                data = await self.coordinator.async_write(
+                updated_data = await self.coordinator.async_write(
                     param.split(".")[1], desired_value
                 )
-                self._handle_coordinator_update(data)
+                self._handle_coordinator_update(updated_data)
 
     async def async_update(self) -> None:
         """Read current day from heat pump and update selected option."""
