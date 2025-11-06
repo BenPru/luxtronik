@@ -100,11 +100,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             try:
                 await self.hass.async_add_executor_job(self.client.read)
                 LOGGER.debug("_async_update_data")
-                return LuxtronikCoordinatorData(
+                self.data = LuxtronikCoordinatorData(
                     parameters=self.client.parameters,
                     calculations=self.client.calculations,
                     visibilities=self.client.visibilities,
                 )
+                return self.data
             except Exception as err:
                 raise UpdateFailed(f"Error fetching data: {err}") from err
 
@@ -508,7 +509,8 @@ class LuxtronikConnectionError(HomeAssistantError):
 
 
 async def connect_and_get_coordinator(
-    hass: HomeAssistant, config: dict[str, Any]
+    hass: HomeAssistant, 
+    config: dict[str, Any]
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
 
