@@ -4,6 +4,8 @@
   "after_dependencies": [],
   "codeowners": [
     "@BenPru"
+    "@rhammen"
+    "@AJediIAm"
   ],
   "config_flow": true,
   "dependencies": [
