@@ -1,27 +1,25 @@
 # Luxtronik
 
-If you like 🩷 this project, [sponsor it (click)](https://github.com/sponsors/BenPru).
+This is a Home Assistant integration integration. 
 
-## Warning
+It is based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik). This component extends the original luxtronik integration with automatic discovery, UI Setup and Home Assistant entities like climate and water heater. 
 
-> :warning: **New Code-Base - PLEASE READ!** :warning:  
-* Backup your data before update (different config structure!). If you make a downgrade of this integration (<2023.9) restore your data backup (The entries for Luxtronik in ./storage/core.config_entries + core.device_registry + core.entity_registry should be enough.)! If not you get double entities!
-* This release has no more language selection. The HA backend language is used.
-* Some entities which can not detected automatically are hidden or disabled by default. In the devices you can find them and activate it. Please check this list before creating issues with entity whiches.
-* In the integration configuration you can set a ha sensor id for the indoor temperature value.
+If you like this project, give it a ⭐, or sponsor the developer:
+* Project creator: [BenPru](https://github.com/sponsors/BenPru).
+* Current developer: [rhammen](https://github.com/sponsors/rhammen).
 
-> :warning: **Known Issues** :warning:  
-* The update sensor "rings" for new firmware versions, but the "Install"-Button has no function. The Firmware has to be installed manually. An the Install-Button is necessary to get notified.
+Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs/contributors) who have contributed to this project!
+Every contribution counts :pray:
 
-This component has been created to be used with Home Assistant.
+## ⚠️ Warning
+Some of these settings can impact the performance of your heatpump. The project aims to protect your heatpump, but no guarantees can be given. Please be careful.
 
-> :warning: **Use at your own risk!** :warning:  
-> You can write config parameters to your heatpump, altering it's efficiency and functionality.  
-> Please be careful.
+## 📖 Documentation
+Consult your manual and don't change things if you don't know what it does. 
+Share your knowledge and help with updating this user documentation of this project. 
 
-Based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik) / [Bouni/python-luxtronik](https://github.com/Bouni/python-luxtronik). ❤️
-
-This component extends the original luxtronik component with automatic discovery of the heatpump und home assistant climate thermostat. The `Luxtronik` integration lets you monitor and control heat pump units containing a Luxtronik controller. It is used by various manufacturers such as:
+## 🔧 Compatibility
+The integration lets you monitor and control heat pump units containing a Luxtronik controller. It is used by various manufacturers such as:
 
 - Alpha Innotec
 - Siemens Novelan
@@ -33,6 +31,7 @@ This component extends the original luxtronik component with automatic discovery
 
 This integration works locally. It's only necessary to connect the Luxtronik controller to your network using an ethernet cable. No additional hard- or software is needed.
 
+## 📑 Table of Content
 1. [Installation](#1-installation)  
 1.1 [HACS (Recommended)](#11-hacs-recommended)  
 1.2 [Manual installation](#12-manual-installation)  
