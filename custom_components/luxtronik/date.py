@@ -79,6 +79,7 @@ class LuxtronikDateEntity(LuxtronikEntity, DateEntity):
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
+        self._attr_native_value = None
 
     @callback
     def _handle_coordinator_update(
