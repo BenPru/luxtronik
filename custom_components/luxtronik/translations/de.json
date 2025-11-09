@@ -723,7 +723,7 @@
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge"
             },
             "heat_source_output_temperature": {
-                "name": "Heizquelle Ausgang"
+                "name": "W\u00e4rmequelle Ausgang"
             },
             "pump_frequency": {
                 "name": "Pumpenfrequenz"
