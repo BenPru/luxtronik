@@ -3,8 +3,8 @@
   "name": "Luxtronik",
   "after_dependencies": [],
   "codeowners": [
-    "@BenPru"
-    "@rhammen"
+    "@BenPru",
+    "@rhammen",
     "@AJediIAm"
   ],
   "config_flow": true,
@@ -46,5 +46,5 @@
     "getmac~=0.9.0",
     "packaging>=24.2"
   ],
-  "version": "2025.11.09"
+  "version": "2025.11.10"
 }
