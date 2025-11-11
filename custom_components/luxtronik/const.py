@@ -461,6 +461,10 @@ class LuxParameter(StrEnum):
     )
     P1158_POWER_LIMIT_SWITCH: Final = "parameters.Unknown_Parameter_1158"
     P1159_POWER_LIMIT_VALUE: Final = "parameters.Unknown_Parameter_1159"
+    P1175_THERMAL_POWER_LIMIT_SWITCH: Final = "parameters.Unknown_Parameter_1175"
+    P1176_THERMAL_POWER_LIMIT_HEATING: Final = "parameters.Unknown_Parameter_1176"
+    P1177_THERMAL_POWER_LIMIT_WATER: Final = "parameters.Unknown_Parameter_1177"
+    P1178_THERMAL_POWER_LIMIT_COOLING: Final = "parameters.Unknown_Parameter_1178"
 
     P0731_AWAY_HEATING_STARTDATE: Final = "parameters.ID_SU_FstdHz"
     P0006_AWAY_HEATING_ENDDATE: Final = "parameters.ID_SU_FrkdHz"
@@ -760,6 +764,10 @@ class SensorKey(StrEnum):
     EFFICIENCY_PUMP_MINIMAL = "efficiency_pump_minimal"
     ELECTRICAL_POWER_LIMITATION_SWITCH = "electrical_power_limitation_switch"
     ELECTRICAL_POWER_LIMITATION_VALUE = "electrical_power_limitation_value"
+    THERMAL_POWER_LIMITATION_SWITCH = "thermal_power_limitation_switch"
+    THERMAL_POWER_LIMIT_HEATING = "thermal_power_limitation_heating"
+    THERMAL_POWER_LIMIT_WATER = "thermal_power_limitation_water"
+    THERMAL_POWER_LIMIT_COOLING = "thermal_power_limitation_cooling"
     PUMP_HEAT_CONTROL = "pump_heat_control"
     HEATING = "heating"
     PUMP_OPTIMIZATION = "pump_optimization"

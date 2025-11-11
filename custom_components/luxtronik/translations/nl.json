@@ -80,6 +80,9 @@
             "electrical_power_limitation_switch": {
                 "name": "Stroom limitatie"
             },
+            "thermal_power_limitation_switch": {
+                "name": "Max. thermal power"
+            },
             "pump_heat_control": {
                 "name": "Controle pompverwarming"
             },
@@ -122,6 +125,16 @@
             },
             "electrical_power_limitation_value": {
                 "name": "Stroom limiet"
+            },
+            "thermal_power_limitation_heating": {
+                "name": "Thermal power limit: Heating"
+            },
+            "thermal_power_limitation_water": {
+                "name": "Thermal power limit: Water"
+            }
+            ,
+            "thermal_power_limitation_cooling": {
+                "name": "Thermal power limit: Cooling"
             },
             "heating_threshold": {
                 "name": "Verwarmingslimiet"

@@ -80,6 +80,9 @@
             "electrical_power_limitation_switch": {
                 "name": "Power limitation"
             },
+            "thermal_power_limitation_switch": {
+                "name": "Max. thermal power"
+            },
             "pump_heat_control": {
                 "name": "Ovl\u00e1d\u00e1n\u00ed \u010derpadla pro oh\u0159ev"
             },
@@ -122,6 +125,16 @@
             },
             "electrical_power_limitation_value": {
                 "name": "Power limit"
+            },
+            "thermal_power_limitation_heating": {
+                "name": "Thermal power limit: Heating"
+            },
+            "thermal_power_limitation_water": {
+                "name": "Thermal power limit: Water"
+            }
+            ,
+            "thermal_power_limitation_cooling": {
+                "name": "Thermal power limit: Cooling"
             },
             "heating_threshold": {
                 "name": "Teplotn\u00ed mez pro vyt\u00e1p\u011bn\u00ed"
