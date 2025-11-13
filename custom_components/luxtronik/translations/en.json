@@ -119,6 +119,7 @@
         "select": {
             "heating_control_circuit_mode": {
                 "name": "Heating circuit control mode"
+            }
         },
         "number": {
             "release_second_heat_generator": {
