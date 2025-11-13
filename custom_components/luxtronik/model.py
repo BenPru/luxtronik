@@ -19,6 +19,7 @@ from homeassistant.components.climate import (
 )
 from homeassistant.components.date import DateEntityDescription
 from homeassistant.components.number import NumberEntityDescription, NumberMode
+from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.update import UpdateEntityDescription, UpdateDeviceClass
@@ -131,6 +132,14 @@ class LuxtronikNumberDescription(
     factor: float | None = None
     native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO
+
+
+@dataclass
+class LuxtronikSelectDescription(LuxtronikEntityDescription, SelectEntityDescription):
+    """Describes a Luxtronik select."""
+
+    platform = Platform.SELECT
+    update_interval = UPDATE_INTERVAL_VERY_SLOW
 
 
 @dataclass
