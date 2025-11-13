@@ -113,6 +113,16 @@
                 "name": "Firmware"
             }
         },
+        "select": {
+            "heating_control_circuit_mode": {
+                "name": "Heizkreis Kontroll Modus",
+                "state": {
+                    "0": "Laut Heizkurve steuern - Aussentemperatur-abhaengige Regelung",
+                    "1": "Manuell gesetzte Temperatur",
+                    "2": "AIn"
+                }
+            }
+        },
         "number": {
             "release_second_heat_generator": {
                 "name": "Freigabe ZWE"
@@ -233,6 +243,9 @@
             },
             "pump_vent_timer_h": {
                 "name": "Entl\u00fcftung Laufzeit"
+            },
+            "heating_flow_out_temperature_target": {
+                "name": "R\u00fccklauf Soll Temperatur"
             }
         },
         "sensor": {

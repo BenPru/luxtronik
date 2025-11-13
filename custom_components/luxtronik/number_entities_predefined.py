@@ -409,6 +409,22 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
     ),
+
+    LuxtronikNumberDescription(
+        key=SensorKey.HEATING_FLOW_OUT_TEMPERATURE_TARGET,
+        luxtronik_key=LP.P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET,
+        device_key=DeviceKey.heating,
+        icon="mdi:chart-bell-curve",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_min_value=0,
+        native_max_value=50,
+        native_step=0.1,
+        factor=0.1,
+        entity_category=EntityCategory.CONFIG,
+        entity_registry_enabled_default=False,
+    ),
+
     # 0% Regelung nur nach Außenemperatur
     # 100% 1K Temperaturdifferenz im Raum führt zu 1K Anpassung der Rücklauf-Solltemperatur <-- empf. Fussbodenheizung
     # 200% 1K Temperaturdifferenz im Raum führt zu 2K Anpassung der Rücklauf-Solltemperatur <-- empf. Radiatoren / Gebläsekonvektoren
