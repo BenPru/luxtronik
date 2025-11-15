@@ -52,6 +52,13 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
         # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
+    LuxtronikSwitchDescription(
+        key=SensorKey.THERMAL_POWER_LIMITATION_SWITCH,
+        luxtronik_key=LP.P1175_THERMAL_POWER_LIMIT_SWITCH,
+        icon="mdi:download-lock",
+        entity_category=EntityCategory.CONFIG,
+        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
+    ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,
     #     key="amount_counter_active",
