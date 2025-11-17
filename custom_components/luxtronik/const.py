@@ -82,7 +82,7 @@ SERVICE_WRITE_SCHEMA = vol.Schema(
 class UnitOfVolumeFlowRateExt(StrEnum):
     """Volume flow rate units."""
 
-    LITER_PER_HOUR = "l/h"
+    LITER_PER_HOUR = "L/h"
 
 
 class DeviceKey(StrEnum):
