@@ -80,6 +80,9 @@
             "electrical_power_limitation_switch": {
                 "name": "Leistungsbegrenzung"
             },
+            "thermal_power_limitation_switch": {
+                "name": "Therm. Leistung max"
+            },
             "pump_heat_control": {
                 "name": "Pumpenheizkontrolle"
             },
@@ -122,6 +125,16 @@
             },
             "electrical_power_limitation_value": {
                 "name": "Leistungslimit"
+            },
+            "thermal_power_limitation_heating": {
+                "name": "Therm. Leistung max: Heizung"
+            },
+            "thermal_power_limitation_water": {
+                "name": "Therm. Leistung max: Warmwasser"
+            }
+            ,
+            "thermal_power_limitation_cooling": {
+                "name": "Therm. Leistung max: Kühlung"
             },
             "heating_threshold": {
                 "name": "Heizgrenze"
