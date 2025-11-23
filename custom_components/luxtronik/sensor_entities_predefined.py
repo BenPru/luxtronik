@@ -350,7 +350,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         invisible_if_value=0.0,
         visibility=LV.V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
-        factor=0.1,
+        factor=0.01,
         native_precision=1,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
