@@ -171,7 +171,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=-5.0,
         native_max_value=5.0,
-        native_step=0.1,
+        native_step=0.5,
         mode=NumberMode.BOX,
         update_interval=None,
     ),
