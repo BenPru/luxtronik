@@ -283,7 +283,7 @@ class Luxtronik:
         )
 
     def _write(self):
-        for index, value in self.parameters.queue.items():       
+        for index, value in self.parameters.queue.items():
             if isinstance(value, float):
                 value = int(value)
 

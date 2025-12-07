@@ -113,4 +113,3 @@ class LuxtronikDateEntity(LuxtronikEntity, DateEntity):
             self.entity_description.luxtronik_key.value.split(".")[1], dt
         )
         self.async_write_ha_state()
-
