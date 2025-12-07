@@ -127,12 +127,10 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         latest = AwesomeVersion(
             normalize(latest_version),
             find_first_match=True,
-            ensure_strategy=[AwesomeVersionStrategy.SEMVER],
         )
         installed = AwesomeVersion(
             normalize(installed_version),
             find_first_match=True,
-            ensure_strategy=[AwesomeVersionStrategy.SEMVER],
         )
 
         return latest > installed
