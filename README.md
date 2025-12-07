@@ -1,8 +1,8 @@
 # Luxtronik
 
-This is a Home Assistant integration integration. 
+This is a Home Assistant integration for [Luxtronik heatpumps](https://www.alpha-innotec.com/en/products/accessories/control/luxtronik). 
 
-It is based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik). This component extends the original luxtronik integration with automatic discovery, UI Setup and Home Assistant entities like climate and water heater. 
+It is based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik). This component extends Bouni's Luxtronik integration with automatic discovery, UI Setup and predefined Home Assistant entities like climate and water heater. 
 
 If you like this project, give it a ⭐, or sponsor the developer:
 * Project creator: [BenPru](https://github.com/sponsors/BenPru).
@@ -12,7 +12,9 @@ Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs
 Every contribution counts :pray:
 
 ## ⚠️ Warning
-Some of these settings can impact the performance of your heatpump. The project aims to protect your heatpump, but no guarantees can be given. Please be careful.
+- Some of these settings can impact the performance of your heatpump. Misconfigurations may cause the controller to go into an error state, requiring a local reset. 
+- The project aims to protect your heatpump, by limiting the range of configuration to be safe. No guarantees can be given. 
+- Please be careful and consult the [Luxtronik manuals](https://www.alpha-innotec.com/en/products/ground-source-heat-pumps/wzs-series).
 
 ## 📖 Documentation
 Consult your manual and don't change things if you don't know what it does. 
@@ -29,7 +31,7 @@ The integration lets you monitor and control heat pump units containing a Luxtro
 - Nibe
 - Wolf Heiztechnik
 
-This integration works locally. It's only necessary to connect the Luxtronik controller to your network using an ethernet cable. No additional hard- or software is needed.
+This integration works locally. The Luxtronik controller need to be connected to your network using an ethernet cable. No internet access or additional hard- or software is needed.
 
 ## 📑 Table of Content
 1. [Installation](#1-installation)  
