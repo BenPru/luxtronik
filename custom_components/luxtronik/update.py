@@ -6,7 +6,7 @@ from __future__ import annotations
 import aiohttp
 import re
 
-from awesomeversion import AwesomeVersion, AwesomeVersionStrategy
+from awesomeversion import AwesomeVersion
 from datetime import datetime, timedelta, timezone
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
