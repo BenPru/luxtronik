@@ -52,6 +52,7 @@ async def async_setup_entry(
         key=SK.DOMESTIC_WATER,
         device_key=DeviceKey.domestic_water,
         luxtronik_key=LuxParameter.P0004_MODE_DHW,
+        name="DHW mode"
     )
 
     entities: list[LuxtronikEntity] = [
