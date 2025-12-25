@@ -29,6 +29,7 @@ from .common import get_sensor_data, key_exists
 from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
+    DEFAULT_DHW_MIN_TEMPERATURE,
     DOMAIN,
     LOGGER,
     DeviceKey,
@@ -135,7 +136,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
 
     entity_description: LuxtronikWaterHeaterDescription
 
-    _attr_min_temp = 40.0
+    _attr_min_temp = DEFAULT_DHW_MIN_TEMPERATURE
     _attr_target_temperature_step = 0.5
 
     _last_operation_mode_before_away: str | None = None
