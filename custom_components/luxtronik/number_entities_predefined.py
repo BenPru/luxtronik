@@ -15,6 +15,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
+    DEFAULT_DHW_MIN_TEMPERATURE,
     DeviceKey,
     LuxCalculation as LC,
     LuxParameter as LP,
@@ -492,7 +493,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         icon="mdi:thermometer-water",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        native_min_value=5.0,
+        native_min_value=DEFAULT_DHW_MIN_TEMPERATURE,
         native_max_value=65.0,
         native_step=0.5,
         max_firmware_version=Version("3.90.0"),
@@ -507,7 +508,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         icon="mdi:thermometer-water",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        native_min_value=5.0,
+        native_min_value=DEFAULT_DHW_MIN_TEMPERATURE,
         native_max_value=65.0,
         native_step=0.5,
         min_firmware_version=Version("3.90.1"),
