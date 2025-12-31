@@ -34,16 +34,22 @@ The integration lets you monitor and control heat pump units containing a Luxtro
 This integration works locally. The Luxtronik controller need to be connected to your network using an ethernet cable. No internet access or additional hard- or software is needed.
 
 ## 📑 Table of Content
-1. [Installation](#1-installation)  
-1.1 [HACS (Recommended)](#11-hacs-recommended)  
-1.2 [Manual installation](#12-manual-installation)  
-2. [Adding Luxtronik](#2-adding-luxtronik)  
+1. [Installation](#1-installation)
+1.1 [HACS (Recommended)](#11-hacs-recommended)
+1.2 [Adding Luxtronik](#12-adding-luxtronik)
+2. [Using Luxtronik](#2-using-luxtronik)
+2.1 [Heatpump](#21-heatpump)
+2.2 [Heating](#22-heating)
+2.3 [Cooling](#23-cooling)
+2.4 [DHW](#24-hdw)
 3. [Tips for using Luxtronik](#3-tips-for-using-luxtronik)  
 3.1 [Energy use](#31-energy-use)  
 3.2 [Additional sensors (advanced)](#32-additional-sensors-advanced)
-4. [Support / Creating tickets](#4-support-tickets)
+5. [Support / Creating tickets](#4-support-tickets)
 
-## 1. Installation
+## 1 Installation
+
+This integration is based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik). Both integrations can be used simultaneously, each with separate devices and entities.
 
 ### 1.1 HACS (recommended)
 
@@ -59,28 +65,23 @@ Or:
 5. Click 'Add'
 The new integration will appear as a new integration and under 'Explore & Download Repositories' in the bottom right
 
-Install the integration
+Install the integration:
 
 1. Click on the new integration or find it under 'Explore & Download Repositories' in the bottom right with the search word 'luxtronik'.
   * Choose the one with the blue download button: ![image](https://github.com/BenPru/luxtronik/assets/32298537/84a7e17f-1ae2-471b-8f79-ca9cdab1d249)
 2. Select 'download' at the bottom right.
 3. Restart Home Assistant
 
-### 1.2 Manual installation
+#### 1.1.1 Manual installation (Alternatieve)
 
-Add the integration to Home Assistant
+Add the integration to Home Assistant:
 
 1. Download the latest release of the Luxtronik integration from this repository
 2. In Home Assistant, create a folder 'config/custom_components'
-3. Add the Luxtronik integration to the 'custom_components' folder;
-4. Restart Home Assistant;
+3. Add the Luxtronik integration to the 'custom_components' folder
+4. Restart Home Assistant
 
-Install the integration
-
-1. Add the Luxtronik integration to Home Assistant (`Settings -> Devices & services -> Add integration`);
-2. Restart Home Assistant;
-
-## 2. Adding Luxtronik
+### 1.2 Adding Luxtronik
 
 #### Autodiscovery
 
@@ -103,12 +104,24 @@ Select Configure and review the settings.
 
 > ℹ️ Ensure the IP address is static. This can be configured in your router.'
 
-## 3. Tips for using Luxtronik
+## 2 Using Luxtronik 
 
 It's not always clear from the name alone what an entity exactly means and how it effects your heatpump. The main source of information is ofcourse the [Luxtronik Operating Manual](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf).
 
 Another great source is [FHEM - Luxtronik 2.0](https://wiki.fhem.de/wiki/Luxtronik_2.0). It's in German so use Google Translate.  
 It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carefully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information.
+
+Entities and actions are organized in 4 devices:
+
+### 2.1 Heatpump
+
+### 2.2 Heating
+
+### 2.3 Cooling
+
+### 2.4 HDW
+
+## 3 Tips for using Luxtronik
 
 ### 3.1 Energy use
 
