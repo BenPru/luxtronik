@@ -4,6 +4,9 @@
             "evu_unlocked": {
                 "name": "Czas blokady"
             },
+            "evu2": {
+                "name": "EVU2"
+            },
             "compressor": {
                 "name": "Kompresor"
             },
@@ -259,6 +262,15 @@
                             "evu_in": "Czas blokady za {evu_time} minut."
                         }
                     }
+                }
+            },
+            "smart_grid_status": {
+                "name": "Status SmartGrid",
+                "state": {
+                    "evu_locked": "Zablokowane EVU",
+                    "reduced_operation": "Praca obniżona",
+                    "normal_operation": "Praca normalna",
+                    "increased_operation": "Praca zwiększona"
                 }
             },
             "error_reason": {

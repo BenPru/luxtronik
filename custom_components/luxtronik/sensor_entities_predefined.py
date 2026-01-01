@@ -14,6 +14,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
+    LUX_SMART_GRID_ICON_MAP,
     LUX_STATE_ICON_MAP,
     SECOND_TO_HOUR_FACTOR,
     UPDATE_INTERVAL_NORMAL,
@@ -23,6 +24,7 @@ from .const import (
     LuxCalculation as LC,
     LuxOperationMode,
     LuxParameter as LP,
+    LuxSmartGridStatus,
     LuxStatus1Option,
     LuxStatus3Option,
     LuxSwitchoffReason,
@@ -54,6 +56,14 @@ SENSORS_STATUS: list[descr] = [
             attr(SA.EVU_DAYS, LC.UNSET, None, True),
         ),
         options=[e.value for e in LuxOperationMode],
+        update_interval=UPDATE_INTERVAL_NORMAL,
+    ),
+    descr(
+        key=SensorKey.SMART_GRID_STATUS,
+        luxtronik_key=LC.UNSET,  # Calculated from EVU and EVU2 inputs
+        icon_by_state=LUX_SMART_GRID_ICON_MAP,
+        device_class=SensorDeviceClass.ENUM,
+        options=[e.value for e in LuxSmartGridStatus],
         update_interval=UPDATE_INTERVAL_NORMAL,
     ),
 ]
