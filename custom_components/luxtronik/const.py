@@ -157,7 +157,9 @@ class LuxSmartGridStatus(StrEnum):
     locked: Final = "evu_locked"  # EVU=1, EVU2=0 - Status 1 - EVU lock
     reduced: Final = "reduced_operation"  # EVU=0, EVU2=0 - Status 2 - Reduced operation
     normal: Final = "normal_operation"  # EVU=0, EVU2=1 - Status 3 - Normal operation
-    increased: Final = "increased_operation"  # EVU=1, EVU2=1 - Status 4 - Increased operation
+    increased: Final = (
+        "increased_operation"  # EVU=1, EVU2=1 - Status 4 - Increased operation
+    )
 
 
 class LuxStatus1Option(StrEnum):

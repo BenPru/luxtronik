@@ -217,10 +217,16 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         if self.entity_description.key == SensorKey.SMART_GRID_STATUS:
             # Check if SmartGrid is enabled (P1030)
             from .const import LuxParameter as LP
+
             smartgrid_enabled = self._get_value(LP.P1030_SMART_GRID_SWITCH)
 
             # If SmartGrid is disabled, set sensor to unavailable
-            if not smartgrid_enabled or smartgrid_enabled in [False, 0, "false", "False"]:
+            if not smartgrid_enabled or smartgrid_enabled in [
+                False,
+                0,
+                "false",
+                "False",
+            ]:
                 self._attr_available = False
                 self._attr_native_value = None
             else:
@@ -239,17 +245,28 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                 # EVU=0, EVU2=1 → Status 3 (normal operation)
                 # EVU=1, EVU2=1 → Status 4 (increased operation)
                 if evu_on and not evu2_on:
-                    self._attr_native_value = LuxSmartGridStatus.locked.value  # Status 1
+                    self._attr_native_value = (
+                        LuxSmartGridStatus.locked.value
+                    )  # Status 1
                 elif not evu_on and not evu2_on:
-                    self._attr_native_value = LuxSmartGridStatus.reduced.value  # Status 2
+                    self._attr_native_value = (
+                        LuxSmartGridStatus.reduced.value
+                    )  # Status 2
                 elif not evu_on and evu2_on:
-                    self._attr_native_value = LuxSmartGridStatus.normal.value  # Status 3
+                    self._attr_native_value = (
+                        LuxSmartGridStatus.normal.value
+                    )  # Status 3
                 else:  # evu_on and evu2_on
-                    self._attr_native_value = LuxSmartGridStatus.increased.value  # Status 4
+                    self._attr_native_value = (
+                        LuxSmartGridStatus.increased.value
+                    )  # Status 4
 
                 # Set icon based on current state
                 descr = self.entity_description
-                if descr.icon_by_state and self._attr_native_value in descr.icon_by_state:
+                if (
+                    descr.icon_by_state
+                    and self._attr_native_value in descr.icon_by_state
+                ):
                     self._attr_icon = descr.icon_by_state.get(self._attr_native_value)
                 elif descr.icon:
                     self._attr_icon = descr.icon
