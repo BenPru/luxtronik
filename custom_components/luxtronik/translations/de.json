@@ -4,6 +4,9 @@
             "evu_unlocked": {
                 "name": "Sperrzeit Freigabe"
             },
+            "evu2": {
+                "name": "EVU2"
+            },
             "compressor": {
                 "name": "Verdichter"
             },
@@ -268,6 +271,15 @@
                             "evu_in": "Netzsperre in {evu_time} Minuten."
                         }
                     }
+                }
+            },
+            "smart_grid_status": {
+                "name": "SmartGrid Status",
+                "state": {
+                    "evu_locked": "EVU-Sperre",
+                    "reduced_operation": "abgesenkte Betriebsweise",
+                    "normal_operation": "Normalbetrieb",
+                    "increased_operation": "erhöhte Betriebsweise"
                 }
             },
             "error_reason": {

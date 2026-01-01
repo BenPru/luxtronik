@@ -4,6 +4,9 @@
             "evu_unlocked": {
                 "name": "HDO"
             },
+            "evu2": {
+                "name": "EVU2"
+            },
             "compressor": {
                 "name": "Kompresor"
             },
@@ -268,6 +271,15 @@
                             "evu_in": "HDO blokovace za {evu_time} minut."
                         }
                     }
+                }
+            },
+            "smart_grid_status": {
+                "name": "Stav SmartGrid",
+                "state": {
+                    "evu_locked": "Blokováno EVU",
+                    "reduced_operation": "Snížený provoz",
+                    "normal_operation": "Normální provoz",
+                    "increased_operation": "Zvýšený provoz"
                 }
             },
             "error_reason": {
