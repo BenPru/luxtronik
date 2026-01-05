@@ -193,7 +193,6 @@ class LuxtronikDhwModeSelector(LuxtronikEntity, SelectEntity):
             LuxMode.holidays.value,
         ]
         self._attr_current_option = LuxMode.off.value
-        self._attr_entity_category = EntityCategory.CONFIG
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_dhw_mode")
@@ -269,7 +268,6 @@ class LuxtronikHeatingModeSelector(LuxtronikEntity, SelectEntity):
             LuxMode.holidays.value,
         ]
         self._attr_current_option = LuxMode.off.value
-        self._attr_entity_category = EntityCategory.CONFIG
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_heating_mode")
