@@ -27,6 +27,7 @@ from .const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxOperationMode,
+    LuxParameter as LP,
     LuxSmartGridStatus,
     LuxStatus1Option,
     LuxStatus3Option,
@@ -89,6 +90,15 @@ async def async_setup_entry(
                 and (
                     description.luxtronik_key == LC.UNSET
                     or key_exists(coordinator.data, description.luxtronik_key)
+                )
+                and (
+                    # For SmartGrid status sensor, check if required parameters exist
+                    description.key != SensorKey.SMART_GRID_STATUS
+                    or (
+                        key_exists(coordinator.data, LP.P1030_SMART_GRID_SWITCH)
+                        and key_exists(coordinator.data, LC.C0031_EVU_UNLOCKED)
+                        and key_exists(coordinator.data, LC.C0185_EVU2)
+                    )
                 )
             )
         ],
