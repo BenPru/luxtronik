@@ -213,67 +213,8 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        # Calculate SmartGrid Status from EVU and EVU2 inputs
         if self.entity_description.key == SensorKey.SMART_GRID_STATUS:
-            # Check if SmartGrid is enabled (P1030)
-            from .const import LuxParameter as LP
-
-            smartgrid_enabled = self._get_value(LP.P1030_SMART_GRID_SWITCH)
-
-            # If SmartGrid is disabled, set sensor to unavailable
-            if not smartgrid_enabled or smartgrid_enabled in [
-                False,
-                0,
-                "false",
-                "False",
-            ]:
-                self._attr_available = False
-                self._attr_native_value = None
-            else:
-                self._attr_available = True
-
-                evu = self._get_value(LC.C0031_EVU_UNLOCKED)
-                evu2 = self._get_value(LC.C0185_EVU2)
-
-                # Convert to boolean (handle True/False/1/0/"true"/"false")
-                evu_on = evu in [True, 1, "true", "True"]
-                evu2_on = evu2 in [True, 1, "true", "True"]
-
-                # Determine SmartGrid status based on EVU and EVU2 inputs
-                # EVU=0, EVU2=0 → Status 2 (reduced operation)
-                # EVU=1, EVU2=0 → Status 1 (EVU locked)
-                # EVU=0, EVU2=1 → Status 3 (normal operation)
-                # EVU=1, EVU2=1 → Status 4 (increased operation)
-                if evu_on and not evu2_on:
-                    self._attr_native_value = (
-                        LuxSmartGridStatus.locked.value
-                    )  # Status 1
-                elif not evu_on and not evu2_on:
-                    self._attr_native_value = (
-                        LuxSmartGridStatus.reduced.value
-                    )  # Status 2
-                elif not evu_on and evu2_on:
-                    self._attr_native_value = (
-                        LuxSmartGridStatus.normal.value
-                    )  # Status 3
-                else:  # evu_on and evu2_on
-                    self._attr_native_value = (
-                        LuxSmartGridStatus.increased.value
-                    )  # Status 4
-
-                # Set icon based on current state
-                descr = self.entity_description
-                if (
-                    descr.icon_by_state
-                    and self._attr_native_value in descr.icon_by_state
-                ):
-                    self._attr_icon = descr.icon_by_state.get(self._attr_native_value)
-                elif descr.icon:
-                    self._attr_icon = descr.icon
-
-            # Don't call super() to avoid setting value to None (luxtronik_key=UNSET)
-            self._enrich_extra_attributes()
-            self.async_write_ha_state()
+            self._update_smart_grid_status()
         else:
             # For normal status sensors, use the parent's update logic
             super()._handle_coordinator_update(data)
@@ -378,6 +319,52 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             if suffix
             else f"{line_1} {line_2} {status_time}."
         )
+
+    def _update_smart_grid_status(self) -> None:
+        """Calculate and update SmartGrid status based on EVU and EVU2 inputs."""
+        from .const import LuxParameter as LP
+
+        # Check if SmartGrid is enabled (P1030)
+        smartgrid_enabled = self._get_value(LP.P1030_SMART_GRID_SWITCH)
+
+        # If SmartGrid is disabled, set sensor to unavailable
+        if not smartgrid_enabled or smartgrid_enabled in [False, 0, "false", "False"]:
+            self._attr_available = False
+            self._attr_native_value = None
+        else:
+            self._attr_available = True
+
+            evu = self._get_value(LC.C0031_EVU_UNLOCKED)
+            evu2 = self._get_value(LC.C0185_EVU2)
+
+            # Convert to boolean (handle True/False/1/0/"true"/"false")
+            evu_on = evu in [True, 1, "true", "True"]
+            evu2_on = evu2 in [True, 1, "true", "True"]
+
+            # Determine SmartGrid status based on EVU and EVU2 inputs
+            # EVU=0, EVU2=0 → Status 2 (reduced operation)
+            # EVU=1, EVU2=0 → Status 1 (EVU locked)
+            # EVU=0, EVU2=1 → Status 3 (normal operation)
+            # EVU=1, EVU2=1 → Status 4 (increased operation)
+            if evu_on and not evu2_on:
+                self._attr_native_value = LuxSmartGridStatus.locked.value  # Status 1
+            elif not evu_on and not evu2_on:
+                self._attr_native_value = LuxSmartGridStatus.reduced.value  # Status 2
+            elif not evu_on and evu2_on:
+                self._attr_native_value = LuxSmartGridStatus.normal.value  # Status 3
+            else:  # evu_on and evu2_on
+                self._attr_native_value = LuxSmartGridStatus.increased.value  # Status 4
+
+            # Set icon based on current state
+            descr = self.entity_description
+            if descr.icon_by_state and self._attr_native_value in descr.icon_by_state:
+                self._attr_icon = descr.icon_by_state.get(self._attr_native_value)
+            elif descr.icon:
+                self._attr_icon = descr.icon
+
+        # Don't call super() to avoid setting value to None (luxtronik_key=UNSET)
+        self._enrich_extra_attributes()
+        self.async_write_ha_state()
 
 
 class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
