@@ -225,9 +225,10 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         """Handle updated data from the coordinator."""
         if self.entity_description.key == SensorKey.SMART_GRID_STATUS:
             self._update_smart_grid_status()
-        else:
-            # For normal status sensors, use the parent's update logic
-            super()._handle_coordinator_update(data)
+            return
+
+        # For normal status sensors, use the parent's update logic
+        super()._handle_coordinator_update(data)
 
         self._evu_tracker.update(self._attr_native_value)
 
