@@ -71,7 +71,7 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         icon="mdi:water-boiler",
         temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LV.V0029_DHW_TEMPERATURE,
-        max_firmware_version=Version("3.90.0"),
+        max_firmware_version_minor=Version("88.2"),
     ),
     LuxtronikWaterHeaterDescription(
         key=SensorKey.DOMESTIC_WATER,
@@ -89,7 +89,7 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         icon="mdi:water-boiler",
         temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LV.V0029_DHW_TEMPERATURE,
-        min_firmware_version=Version("3.90.1"),
+        min_firmware_version_minor=Version("88.3"),
     ),
 ]
 # endregion Const

@@ -60,7 +60,7 @@ async def async_setup_entry(
     unavailable_keys = [
         i.luxtronik_key
         for i in SENSORS + SENSORS_STATUS
-        if not key_exists(coordinator.data, i.luxtronik_key)
+        if not key_exists(coordinator.data, i.luxtronik_key) and not i.luxtronik_key==LC.UNSET
     ]
     if unavailable_keys:
         LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
@@ -88,7 +88,7 @@ async def async_setup_entry(
             if (
                 coordinator.entity_active(description)
                 and (
-                    # Check if firmware supports the Luxtronik Paramater/Calculation key
+                    # Check if firmware supports the Luxtronik Parameter/Calculation key
                     key_exists(coordinator.data, description.luxtronik_key)
                     or
                     (

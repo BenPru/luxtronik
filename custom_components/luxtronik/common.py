@@ -34,6 +34,8 @@ def key_exists(
 ) -> bool:
     """Check if the given Luxtronik key exists in the coordinator's data by matching item.name."""
     try:
+        if luxtronik_key == LC.UNSET:
+            return False
         key_str = str(luxtronik_key)
         if not key_str or "." not in key_str or "{" in key_str:
             return False
@@ -69,6 +71,8 @@ def get_sensor_data(
 ) -> Any:
     """Get sensor data."""
     if coordinator is None:
+        return None
+    if luxtronik_key == LC.UNSET:
         return None
     if luxtronik_key is None or "." not in luxtronik_key:
         if warn_unset:

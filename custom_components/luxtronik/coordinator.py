@@ -266,14 +266,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> bool:
         """Check if the current firmware version is NOT compatible with the entity description."""
 
-        # Check minor version if specified
-        if (
-            description.min_firmware_version_minor is not None
-            and self.firmware_version_minor
-            < description.min_firmware_version_minor.value
-        ):
-            return True
-
         # Check minimum version if specified
         if (
             description.min_firmware_version is not None
@@ -285,6 +277,20 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if (
             description.max_firmware_version is not None
             and self.firmware_package_version > description.max_firmware_version
+        ):
+            return True
+        
+        # Check minimum minor version if specified
+        if (
+            description.min_firmware_version_minor is not None
+            and self.firmware_version_minor < description.min_firmware_version_minor
+        ):
+            return True
+
+        # Check maximum minor version if specified
+        if (
+            description.max_firmware_version_minor is not None
+            and self.firmware_version_minor > description.max_firmware_version_minor
         ):
             return True
 
@@ -319,12 +325,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return str(self.get_value(LC.C0081_FIRMWARE_VERSION))
 
     @property
-    def firmware_version_minor(self) -> int:
+    def firmware_version_minor(self) -> Version:
         """Return the heatpump firmware minor version."""
-        ver = self.firmware_version
+        ver = self.firmware_package_version
         if ver is None:
-            return 0
-        return int(re.sub("[^0-9]", "", ver.split(".")[1]))
+            return Version("0")
+        return Version(f'{ver.release[1]}.{ver.release[2]}')
 
     @property
     def firmware_package_version(self) -> Version:

@@ -31,7 +31,7 @@ from homeassistant.helpers.typing import StateType
 from .const import (
     UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
-    FirmwareVersionMinor,
+    #FirmwareVersionMinor,
     LuxCalculation,
     LuxOperationMode,
     LuxParameter,
@@ -89,7 +89,8 @@ class LuxtronikEntityDescription(EntityDescription):
     translation_key_name: str | None = None
     visibility: LuxVisibility = LuxVisibility.UNSET
     invisible_if_value: Any | None = None
-    min_firmware_version_minor: FirmwareVersionMinor | None = None
+    min_firmware_version_minor: Version | None = None
+    max_firmware_version_minor: Version | None = None
     min_firmware_version: Version | None = None
     max_firmware_version: Version | None = None
 
