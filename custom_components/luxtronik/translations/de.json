@@ -4,6 +4,9 @@
             "evu_unlocked": {
                 "name": "Sperrzeit Freigabe"
             },
+            "evu2": {
+                "name": "EVU2"
+            },
             "compressor": {
                 "name": "Verdichter"
             },
@@ -131,10 +134,9 @@
             },
             "thermal_power_limitation_water": {
                 "name": "Therm. Leistung max: Warmwasser"
-            }
-            ,
+            },
             "thermal_power_limitation_cooling": {
-                "name": "Therm. Leistung max: Kühlung"
+                "name": "Therm. Leistung max: K\u00fchlung"
             },
             "heating_threshold": {
                 "name": "Heizgrenze"
@@ -268,6 +270,15 @@
                             "evu_in": "Netzsperre in {evu_time} Minuten."
                         }
                     }
+                }
+            },
+            "smart_grid_status": {
+                "name": "SmartGrid Status",
+                "state": {
+                    "evu_locked": "EVU-Sperre",
+                    "reduced_operation": "abgesenkte Betriebsweise",
+                    "normal_operation": "Normalbetrieb",
+                    "increased_operation": "erh\u00f6hte Betriebsweise"
                 }
             },
             "error_reason": {
@@ -917,7 +928,7 @@
                 "description": "W\u00e4hlen Sie ein oder mehrere Ger\u00e4te zur Konfiguration aus. Bereits konfigurierte Ger\u00e4te: {configured}",
                 "data": {
                     "select_device_to_configure": "W\u00e4hlen Sie das Ger\u00e4t aus, das Sie konfigurieren m\u00f6chten"
-                    }
+                }
             },
             "options": {
                 "description": "Einstellungen f\u00fcr die Luxtronik-W\u00e4rmepumpe {name}.\nDiese Einstellungen k\u00f6nnen sp\u00e4ter unter Integrationen ge\u00e4ndert werden.",

@@ -4,6 +4,9 @@
             "evu_unlocked": {
                 "name": "Tijdvrijgave blokkeren"
             },
+            "evu2": {
+                "name": "EVU2"
+            },
             "compressor": {
                 "name": "Compressor"
             },
@@ -265,6 +268,15 @@
                             "evu_in": "Netwerksluiting over {evu_time} minuten."
                         }
                     }
+                }
+            },
+            "smart_grid_status": {
+                "name": "SmartGrid Status",
+                "state": {
+                    "evu_locked": "EVU geblokkeerd",
+                    "reduced_operation": "Verminderde werking",
+                    "normal_operation": "Normale werking",
+                    "increased_operation": "Verhoogde werking"
                 }
             },
             "error_reason": {

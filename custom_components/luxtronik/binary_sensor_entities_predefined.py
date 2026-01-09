@@ -10,9 +10,13 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
     LuxtronikBinarySensorEntityDescription(
         key=SensorKey.EVU_UNLOCKED,
         luxtronik_key=LC.C0031_EVU_UNLOCKED,
-        icon="mdi:lock",
-        device_class=BinarySensorDeviceClass.LOCK,
+        icon="mdi:transmission-tower",
         visibility=LV.V0121_EVU_LOCKED,
+    ),
+    LuxtronikBinarySensorEntityDescription(
+        key=SensorKey.EVU2,
+        luxtronik_key=LC.C0185_EVU2,
+        icon="mdi:transmission-tower",
     ),
     LuxtronikBinarySensorEntityDescription(
         key=SensorKey.COMPRESSOR,

@@ -151,6 +151,17 @@ class LuxMode(StrEnum):
     holidays: Final = "Holidays"
 
 
+class LuxSmartGridStatus(StrEnum):
+    """SmartGrid status based on EVU and EVU2 inputs."""
+
+    locked: Final = "evu_locked"  # EVU=1, EVU2=0 - Status 1 - EVU lock
+    reduced: Final = "reduced_operation"  # EVU=0, EVU2=0 - Status 2 - Reduced operation
+    normal: Final = "normal_operation"  # EVU=0, EVU2=1 - Status 3 - Normal operation
+    increased: Final = (
+        "increased_operation"  # EVU=1, EVU2=1 - Status 4 - Increased operation
+    )
+
+
 class LuxStatus1Option(StrEnum):
     """LuxStatus1 option defrost etc."""
 
@@ -269,6 +280,13 @@ LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]]
     LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
     LuxOperationMode.no_request.value: "mdi:snowflake-off",
     LuxOperationMode.cooling.value: "mdi:air-conditioner",
+}
+
+LUX_SMART_GRID_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
+    LuxSmartGridStatus.locked.value: "mdi:cancel",  # EVU lock - Blocked
+    LuxSmartGridStatus.reduced.value: "mdi:arrow-down-circle",  # Reduced operation
+    LuxSmartGridStatus.normal.value: "mdi:check-circle",  # Normal operation
+    LuxSmartGridStatus.increased.value: "mdi:arrow-up-circle",  # Increased operation
 }
 
 LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]
@@ -591,6 +609,7 @@ class LuxCalculation(StrEnum):
     C0180_HIGH_PRESSURE: Final = "calculations.ID_WEB_LIN_HD"
     C0181_LOW_PRESSURE: Final = "calculations.ID_WEB_LIN_ND"
     C0182_COMPRESSOR_HEATER: Final = "calculations.ID_WEB_LIN_VDH_out"
+    C0185_EVU2: Final = "calculations.ID_WEB_HZIO_EVU2"
     # C0187_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Soll"
     # C0188_CURRENT_OUTPUT: Final = "calculations.ID_WEB_SEC_Qh_Ist"
     C0204_HEAT_SOURCE_INPUT_TEMPERATURE: Final = "calculations.ID_WEB_Temperatur_TWE"
@@ -825,6 +844,8 @@ class SensorKey(StrEnum):
     )
     SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR = "solar_pump_max_temperature_collector"
     EVU_UNLOCKED = "evu_unlocked"
+    EVU2 = "evu2"
+    SMART_GRID_STATUS = "smart_grid_status"
     COMPRESSOR = "compressor"
     COMPRESSOR2 = "compressor2"
     PUMP_FLOW = "pump_flow"

@@ -4,6 +4,9 @@
             "evu_unlocked": {
                 "name": "Czas blokady"
             },
+            "evu2": {
+                "name": "EVU2"
+            },
             "compressor": {
                 "name": "Kompresor"
             },
@@ -131,8 +134,7 @@
             },
             "thermal_power_limitation_water": {
                 "name": "Thermal power limit: Water"
-            }
-            ,
+            },
             "thermal_power_limitation_cooling": {
                 "name": "Thermal power limit: Cooling"
             },
@@ -259,6 +261,15 @@
                             "evu_in": "Czas blokady za {evu_time} minut."
                         }
                     }
+                }
+            },
+            "smart_grid_status": {
+                "name": "Status SmartGrid",
+                "state": {
+                    "evu_locked": "Zablokowane EVU",
+                    "reduced_operation": "Praca obni\u017cona",
+                    "normal_operation": "Praca normalna",
+                    "increased_operation": "Praca zwi\u0119kszona"
                 }
             },
             "error_reason": {
@@ -573,13 +584,13 @@
         },
         "date": {
             "away_dhw_startdate": {
-                "name": "Data rozpoczęcia trybu nieobecno\u015bci - ciep\u0142a woda"
+                "name": "Data rozpocz\u0119cia trybu nieobecno\u015bci - ciep\u0142a woda"
             },
             "away_dhw_enddate": {
                 "name": "Data zako\u0144czenia trybu nieobecno\u015bci - ciep\u0142a woda"
             },
             "away_heating_startdate": {
-                "name": "Data rozpoczęcia trybu nieobecno\u015bci - ogrzewanie"
+                "name": "Data rozpocz\u0119cia trybu nieobecno\u015bci - ogrzewanie"
             },
             "away_heating_enddate": {
                 "name": "Data zako\u0144czenia trybu nieobecno\u015bci - ogrzewanie"
@@ -592,9 +603,9 @@
                     "None": "Brak",
                     "Monday": "Poniedzia\u0142ek",
                     "Tuesday": "Wtorek",
-                    "Wednesday": "Środa",
+                    "Wednesday": "\u015aroda",
                     "Thursday": "Czwartek",
-                    "Friday": "Piątek",
+                    "Friday": "Pi\u0105tek",
                     "Saturday": "Sobota",
                     "Sunday": "Niedziela"
                 }
@@ -653,7 +664,7 @@
             },
             "select_devices": {
                 "title": "Wybierz urz\u0105dzenia do skonfigurowania",
-                "description": "Wybierz jedno lub wi\u0119cej urz\u0105dze\u0144 do dodania. Ju\u017c skonfigurowane urz\u0105dzenia: {configured}",       
+                "description": "Wybierz jedno lub wi\u0119cej urz\u0105dze\u0144 do dodania. Ju\u017c skonfigurowane urz\u0105dzenia: {configured}",
                 "data": {
                     "select_device_to_configure": "Wybierz urz\u0105dzenie, kt\u00f3re chcesz skonfigurowa\u0107"
                 }

@@ -4,6 +4,9 @@
             "evu_unlocked": {
                 "name": "Locktime"
             },
+            "evu2": {
+                "name": "EVU2"
+            },
             "compressor": {
                 "name": "Compressor"
             },
@@ -271,6 +274,15 @@
                             "evu_in": "Locktime in {evu_time} minutes."
                         }
                     }
+                }
+            },
+            "smart_grid_status": {
+                "name": "SmartGrid Status",
+                "state": {
+                    "evu_locked": "EVU locked",
+                    "reduced_operation": "Reduced operation",
+                    "normal_operation": "Normal operation",
+                    "increased_operation": "Increased operation"
                 }
             },
             "error_reason": {
