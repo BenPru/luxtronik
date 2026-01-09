@@ -88,16 +88,17 @@ async def async_setup_entry(
             if (
                 coordinator.entity_active(description)
                 and (
-                    description.luxtronik_key == LC.UNSET
-                    or key_exists(coordinator.data, description.luxtronik_key)
-                )
-                and (
-                    # For SmartGrid status sensor, check if required parameters exist
-                    description.key != SensorKey.SMART_GRID_STATUS
-                    or (
-                        key_exists(coordinator.data, LP.P1030_SMART_GRID_SWITCH)
-                        and key_exists(coordinator.data, LC.C0031_EVU_UNLOCKED)
-                        and key_exists(coordinator.data, LC.C0185_EVU2)
+                    # Check if firmware supports the Luxtronik Paramater/Calculation key
+                    key_exists(coordinator.data, description.luxtronik_key)
+                    or
+                    (
+                        # For SmartGrid status sensor, check if required parameters exist
+                        description.key == SensorKey.SMART_GRID_STATUS
+                        and (
+                            key_exists(coordinator.data, LP.P1030_SMART_GRID_SWITCH)
+                            and key_exists(coordinator.data, LC.C0031_EVU_UNLOCKED)
+                            and key_exists(coordinator.data, LC.C0185_EVU2)
+                        )
                     )
                 )
             )
