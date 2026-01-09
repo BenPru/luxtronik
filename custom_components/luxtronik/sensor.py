@@ -90,8 +90,7 @@ async def async_setup_entry(
                 and (
                     # Check if firmware supports the Luxtronik Parameter/Calculation key
                     key_exists(coordinator.data, description.luxtronik_key)
-                    or
-                    (
+                    or (
                         # For SmartGrid status sensor, check if required parameters exist
                         description.key == SensorKey.SMART_GRID_STATUS
                         and (
