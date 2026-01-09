@@ -279,7 +279,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             and self.firmware_package_version > description.max_firmware_version
         ):
             return True
-        
+
         # Check minimum minor version if specified
         if (
             description.min_firmware_version_minor is not None
@@ -330,7 +330,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         ver = self.firmware_package_version
         if ver is None:
             return Version("0")
-        return Version(f'{ver.release[1]}.{ver.release[2]}')
+        return Version(f"{ver.release[1]}.{ver.release[2]}")
 
     @property
     def firmware_package_version(self) -> Version:

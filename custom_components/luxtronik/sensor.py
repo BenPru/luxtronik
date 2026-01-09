@@ -60,7 +60,8 @@ async def async_setup_entry(
     unavailable_keys = [
         i.luxtronik_key
         for i in SENSORS + SENSORS_STATUS
-        if not key_exists(coordinator.data, i.luxtronik_key) and not i.luxtronik_key==LC.UNSET
+        if not key_exists(coordinator.data, i.luxtronik_key)
+        and not i.luxtronik_key == LC.UNSET
     ]
     if unavailable_keys:
         LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)

@@ -31,7 +31,7 @@ from homeassistant.helpers.typing import StateType
 from .const import (
     UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
-    #FirmwareVersionMinor,
+    # FirmwareVersionMinor,
     LuxCalculation,
     LuxOperationMode,
     LuxParameter,
