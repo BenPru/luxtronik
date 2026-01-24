@@ -663,7 +663,7 @@
                     "flow_monitoring": "flowmonitoring",
                     "grid_switch_on_delay": "Vertraging bij inschakelen net",
                     "info_bake_out_program": "Informatie uit opwarmprogramma",
-                    "heating_external_engery_source": "Verwarming uit een externe energiebron",
+                    "heating_external_energy_source": "Verwarming uit een externe energiebron",
                     "domestic_water_external_energy_source": "Huishoudelijk water uit externe energiebron",
                     "second_heat_generator_1_active": "tweede warmteopwekker 1 actief"
                 }
