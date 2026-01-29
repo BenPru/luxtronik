@@ -585,6 +585,14 @@
                     "Saturday": "Sobota",
                     "Sunday": "Niedziela"
                 }
+            },
+            "heating_control_circuit_mode": {
+                "name": "Heating circuit control mode",
+                "state": {
+                    "0": "heating curve control - Controlled by outside temperature",
+                    "1": "Manual set temperature",
+                    "2": "Analog in"
+                }
             }
         },
         "climate": {

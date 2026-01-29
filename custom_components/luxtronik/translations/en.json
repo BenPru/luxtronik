@@ -116,11 +116,6 @@
                 "name": "Firmware"
             }
         },
-        "select": {
-            "heating_control_circuit_mode": {
-                "name": "Heating circuit control mode"
-            }
-        },
         "number": {
             "release_second_heat_generator": {
                 "name": "Release second heat generator"
@@ -606,6 +601,14 @@
         "select": {
             "thermal_desinfection_day": {
                 "name": "Thermal Desinfection Day"
+            },
+            "heating_control_circuit_mode": {
+                "name": "Heating circuit control mode",
+                "state": {
+                    "0": "heating curve control - Controlled by outside temperature",
+                    "1": "Manual set temperature",
+                    "2": "Analog in"
+                }
             }
         },
         "climate": {

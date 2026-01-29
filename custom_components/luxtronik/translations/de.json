@@ -113,16 +113,6 @@
                 "name": "Firmware"
             }
         },
-        "select": {
-            "heating_control_circuit_mode": {
-                "name": "Heizkreis Kontroll Modus",
-                "state": {
-                    "0": "Laut Heizkurve steuern - Aussentemperatur-abhaengige Regelung",
-                    "1": "Manuell gesetzte Temperatur",
-                    "2": "AIn"
-                }
-            }
-        },
         "number": {
             "release_second_heat_generator": {
                 "name": "Freigabe ZWE"
@@ -858,6 +848,14 @@
                     "Friday": "Freitag",
                     "Saturday": "Samstag",
                     "Sunday": "Sonntag"
+                }
+            },
+            "heating_control_circuit_mode": {
+                "name": "Heizkreis Kontroll Modus",
+                "state": {
+                    "0": "Laut Heizkurve steuern - Aussentemperatur-abhaengige Regelung",
+                    "1": "Manuell gesetzte Temperatur",
+                    "2": "AIn"
                 }
             }
         },
