@@ -79,12 +79,15 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         hass: HomeAssistant,
         client: Luxtronik,
         config: Mapping[str, Any],
+        entry_id: str | None = None,
     ) -> None:
         """Initialize Luxtronik Client."""
 
         self._lock = asyncio.Lock()
         self.client = client
         self._config = config
+        # store config entry id (stable per config entry) to use for device identifiers
+        self._entry_id = entry_id
         self.device_infos = dict[str, DeviceInfo]()
         self.update_reason_write = False
         super().__init__(
@@ -176,10 +179,22 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LOGGER.error("Luxtronik connection failed: %s", err)
             raise ConfigEntryNotReady from err
 
+        # Prefer the ConfigEntry.entry_id if a ConfigEntry was passed in.
+        entry_id: str | None = None
+        if isinstance(config_entry, ConfigEntry):
+            entry_id = config_entry.entry_id
+        else:
+            # If a caller passed a mapping that contains an entry_id key, try that
+            try:
+                entry_id = config.get("entry_id")  # type: ignore[assignment]
+            except Exception:
+                entry_id = None
+
         return LuxtronikCoordinator(
             hass=hass,
             client=client,
             config=config,
+            entry_id=entry_id,
         )
 
     def get_device(
@@ -201,21 +216,38 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         platform: EntityPlatform | None = None,
     ):
         host = config[CONF_HOST]
+        # Determine a stable id prefix for device identifiers:
+        # 1) prefer config entry id (self._entry_id)
+        # 2) fall back to ha_sensor_prefix (if present in config)
+        # 3) fall back to host_port
+        if getattr(self, "_entry_id", None):
+            id_prefix = self._entry_id
+        else:
+            ha_prefix = None
+            try:
+                ha_prefix = config.get("ha_sensor_prefix")
+            except Exception:
+                ha_prefix = None
+
+            if ha_prefix:
+                # strip leading token if present
+                id_prefix = str(ha_prefix).replace("luxtronik_", "")
+            else:
+                port = config.get(CONF_PORT, DEFAULT_PORT)
+                id_prefix = f"{host}_{port}".replace(".", "_")
+
         self.device_infos[DeviceKey.heatpump.value] = self._build_device_info(
-            DeviceKey.heatpump, host, platform
+            DeviceKey.heatpump, host, platform, id_prefix=id_prefix
         )
-        via = (
-            DOMAIN,
-            f"{self.unique_id}_{DeviceKey.heatpump.value}".lower(),
-        )
+        via = (DOMAIN, f"{id_prefix}_{DeviceKey.heatpump.value}".lower())
         self.device_infos[DeviceKey.heating.value] = self._build_device_info(
-            DeviceKey.heating, host, platform, via
+            DeviceKey.heating, host, platform, via, id_prefix=id_prefix
         )
         self.device_infos[DeviceKey.domestic_water.value] = self._build_device_info(
-            DeviceKey.domestic_water, host, platform, via
+            DeviceKey.domestic_water, host, platform, via, id_prefix=id_prefix
         )
         self.device_infos[DeviceKey.cooling.value] = self._build_device_info(
-            DeviceKey.cooling, host, platform, via
+            DeviceKey.cooling, host, platform, via, id_prefix=id_prefix
         )
 
     def _build_device_name(
@@ -233,32 +265,41 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         host: str,
         platform: EntityPlatform | None = None,
         via_device=None,
+        id_prefix: str | None = None,
     ) -> DeviceInfo:
+        """Build DeviceInfo using a stable id prefix.
+
+        Prefer id_prefix passed in; otherwise prefer the coordinator's entry_id,
+        then ha_sensor_prefix (from config), then unique_id as last resort.
+        """
+        # Determine final prefix
+        prefix = id_prefix
+        if not prefix:
+            prefix = getattr(self, "_entry_id", None)
+        if not prefix:
+            try:
+                prefix = self._config.get("ha_sensor_prefix")  # type: ignore[attr-defined]
+                if prefix:
+                    prefix = str(prefix).replace("luxtronik_", "")
+            except Exception:
+                prefix = None
+        if not prefix:
+            prefix = self.unique_id
+
+        identifier = f"{prefix}_{key.value}".lower()
+
         return DeviceInfo(
-            identifiers={
-                (
-                    DOMAIN,
-                    f"{self.unique_id}_{key.value}".lower(),
-                )
-            },
+            identifiers={(DOMAIN, identifier)},
             entry_type=None,
             name=self._build_device_name(key, platform),
             via_device=via_device,
             configuration_url=f"http://{host}/",
-            connections={
-                (
-                    DOMAIN,
-                    f"{self.unique_id}_{key.value}".lower(),
-                )
-            },
+            connections={(DOMAIN, identifier)},
             sw_version=self.firmware_version,
             model=self.model,
             suggested_area="",  # was "Utility room",
             hw_version=None,
             manufacturer=self.manufacturer,
-            # default_name=f"{text}",
-            # default_manufacturer=self.manufacturer,
-            # default_model=self.model,
         )
 
     def _is_version_not_compatible(
@@ -515,18 +556,19 @@ class LuxtronikConnectionError(HomeAssistantError):
 
 
 async def connect_and_get_coordinator(
-    hass: HomeAssistant, config: dict[str, Any]
+    hass: HomeAssistant, config: dict[str, Any] | ConfigEntry
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
 
-    if isinstance(config, ConfigEntry):
-        config = config.data
+    # Keep original config_entry if provided so that connect() can obtain entry_id
+    config_entry: ConfigEntry | None = config if isinstance(config, ConfigEntry) else None
+    cfg = config.data if isinstance(config, ConfigEntry) else config
 
-    host = config.get(CONF_HOST)
-    port = config.get(CONF_PORT, DEFAULT_PORT)
+    host = cfg.get(CONF_HOST)
+    port = cfg.get(CONF_PORT, DEFAULT_PORT)
 
     try:
-        coordinator = await LuxtronikCoordinator.connect(hass, config)
+        coordinator = await LuxtronikCoordinator.connect(hass, config_entry or cfg)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
         # ✅ Perform initial data fetch manually
