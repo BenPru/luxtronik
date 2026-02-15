@@ -243,7 +243,7 @@ class LuxSwitchoffReason(Enum):
     flow_rate: Final = 11  # Durchfluss
     undefined_12: Final = 12  # ???
     undefined_13: Final = 13  # ???
-    undefined_14: Final = 14  # ???
+    IO_pause: Final = 14
     undefined_15: Final = 15  # ???
     undefined_16: Final = 16  # ???
     undefined_17: Final = 17  # ???
@@ -253,8 +253,8 @@ class LuxSwitchoffReason(Enum):
     undefined_21: Final = 21  # ???
     undefined_22: Final = 22  # ???
     undefined_23: Final = 23  # ???
-    undefined_24: Final = 24  # ???
-    undefined_25: Final = 25  # ???
+    LPC: Final = 24
+    restart: Final = 25
     undefined_26: Final = 26  # ???
     undefined_27: Final = 27  # ???
     undefined_28: Final = 28  # ???

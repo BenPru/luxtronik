@@ -536,7 +536,9 @@
                     "8": "Untere Einsatzgrenze",
                     "9": "Keine Anforderung",
                     "11": "Durchfluss-W\u00e4rmequelle",
-                    "12": "Niederdruck-Pause"
+                    "12": "Niederdruck-Pause",
+                    "14": "Inverter-Pause",
+                    "25": "Neustart"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -556,7 +558,9 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause"
+                            "12": "Niederdruck-Pause",
+                            "14": "Inverter-Pause",
+                            "25": "Neustart"
                         }
                     },
                     "timestamp_1": {
@@ -576,7 +580,9 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause"
+                            "12": "Niederdruck-Pause",
+                            "14": "Inverter-Pause",
+                            "25": "Neustart"
                         }
                     },
                     "timestamp_2": {
@@ -596,7 +602,9 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause"
+                            "12": "Niederdruck-Pause",
+                            "14": "Inverter-Pause",
+                            "25": "Neustart"
                         }
                     },
                     "timestamp_3": {
@@ -616,7 +624,9 @@
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
                             "11": "Durchfluss-W\u00e4rmequelle",
-                            "12": "Niederdruck-Pause"
+                            "12": "Niederdruck-Pause",
+                            "14": "Inverter-Pause",
+                            "25": "Neustart"
                         }
                     },
                     "timestamp_4": {
