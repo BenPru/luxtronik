@@ -538,6 +538,7 @@
                     "11": "Durchfluss-W\u00e4rmequelle",
                     "12": "Niederdruck-Pause",
                     "14": "Inverter-Pause",
+                    "24": "LPC",
                     "25": "Neustart"
                 },
                 "state_attributes": {
@@ -560,6 +561,7 @@
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
                             "14": "Inverter-Pause",
+							"24": "LPC",
                             "25": "Neustart"
                         }
                     },
@@ -582,6 +584,7 @@
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
                             "14": "Inverter-Pause",
+							"24": "LPC",
                             "25": "Neustart"
                         }
                     },
@@ -604,6 +607,7 @@
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
                             "14": "Inverter-Pause",
+							"24": "LPC",
                             "25": "Neustart"
                         }
                     },
@@ -626,6 +630,7 @@
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
                             "14": "Inverter-Pause",
+							"24": "LPC",
                             "25": "Neustart"
                         }
                     },
