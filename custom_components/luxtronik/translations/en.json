@@ -378,7 +378,10 @@
                     "8": "Lower limitation of use",
                     "9": "no request",
                     "11": "flow rate",
-                    "12": "Low pressure pause"
+                    "12": "Low pressure pause",
+                    "14": "IO pause",
+                    "24": "LPC",
+                    "25": "Restart"
                 }
             },
             "status_line_1": {
