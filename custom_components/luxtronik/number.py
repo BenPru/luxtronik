@@ -83,7 +83,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
         description: LuxtronikNumberDescription,
         device_info_ident: DeviceKey,
     ) -> None:
-        """Init Luxtronik Switch."""
+        """Init Luxtronik Number entity"""
         super().__init__(
             coordinator=coordinator,
             description=description,

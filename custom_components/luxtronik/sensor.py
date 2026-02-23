@@ -154,7 +154,7 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         description: LuxtronikSensorDescription,
         device_info_ident: DeviceKey,
     ) -> None:
-        """Init Luxtronik Switch."""
+        """Init Luxtronik Sensor"""
         super().__init__(
             coordinator=coordinator,
             description=description,
@@ -181,6 +181,8 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
 
         if value is None:
             self._attr_native_value = None
+        elif self.entity_description.key.value == SensorKey.ERROR_REASON:
+            self._attr_native_value = value
         elif isinstance(value, (float, int)):
             factor = self.entity_description.factor or 1
             precision = self.entity_description.native_precision

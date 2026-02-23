@@ -149,7 +149,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         coordinator: LuxtronikCoordinator,
         description: LuxtronikWaterHeaterDescription,
     ) -> None:
-        """Init Luxtronik Switch."""
+        """Init Luxtronik Water-heater."""
         super().__init__(
             coordinator=coordinator,
             description=description,
