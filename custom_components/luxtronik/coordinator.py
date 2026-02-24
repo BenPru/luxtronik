@@ -332,7 +332,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         try:
             return Version(cleaned_version)
         except InvalidVersion:
-            LOGGER.warning("Invalid firmware version '%s' (cleaned: '%s')", ver, cleaned_version)
+            LOGGER.warning(
+                "Invalid firmware version '%s' (cleaned: '%s')", ver, cleaned_version
+            )
             return Version("0")
 
     @property
