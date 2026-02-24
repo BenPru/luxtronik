@@ -325,19 +325,29 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return str(self.get_value(LC.C0081_FIRMWARE_VERSION))
 
     @property
-    def firmware_version_minor(self) -> Version:
-        """Return the heatpump firmware minor version."""
-        ver = self.firmware_package_version
-        if ver is None:
+    def firmware_package_version(self) -> Version:
+        """Return the heatpump firmware version as a packaging Version."""
+        ver = self.firmware_version
+        cleaned_version = re.sub(r"^[^\d]+", "", ver or "")
+        try:
+            return Version(cleaned_version)
+        except InvalidVersion:
+            LOGGER.warning("Invalid firmware version '%s' (cleaned: '%s')", ver, cleaned_version)
             return Version("0")
-        return Version(f"{ver.release[1]}.{ver.release[2]}")
 
     @property
-    def firmware_package_version(self) -> Version:
-        """Return the heatpump firmware version."""
-        ver = self.firmware_version
-        cleaned_version = re.sub(r"^[^\d]+", "", ver)
-        return Version(cleaned_version)
+    def firmware_version_minor(self) -> Version:
+        """Return firmware 'minor' version as <minor>.<patch>.
+        Example:
+            - 3.90.1 -> 90.1
+            - 3.90   -> 90.0
+            - 3      -> 0.0
+        """
+        ver = self.firmware_package_version
+        rel = ver.release  # e.g. (3, 90) or (3, 90, 1)
+        minor = rel[1] if len(rel) > 1 else 0
+        patch = rel[2] if len(rel) > 2 else 0
+        return Version(f"{minor}.{patch}")
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
