@@ -329,8 +329,11 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         # )
         if self._attr_preset_mode == PRESET_NONE:  # or self._attr_is_aux_heat:
             self._last_hvac_mode_before_preset = None
+
         key = self.entity_description.luxtronik_key_current_temperature
-        if key.startswith("sensor."):
+        if key is None:
+            self._attr_current_temperature = None
+        elif key.startswith("sensor."):
             temp = self.hass.states.get(key)
             self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
         elif key != LuxCalculation.UNSET:
