@@ -72,7 +72,7 @@ Install the integration:
 2. Select 'download' at the bottom right.
 3. Restart Home Assistant
 
-#### 1.1.1 Manual installation (Alternatieve)
+#### 1.1.1 Manual installation (Alternative)
 
 Add the integration to Home Assistant:
 
