@@ -162,10 +162,10 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             else FIRMWARE_UPDATE_MANUAL_EN
         )
         return (
-            f"For your <a href=\"{release_url}\" target=\"_blank\" rel=\"noreferrer noopener\">"
+            f'For your <a href="{release_url}" target="_blank" rel="noreferrer noopener">'
             f"{self.coordinator.manufacturer} {self.coordinator.model} (Download ID {download_id})</a> a firmware update to "
-            f"<a href=\"{download_url}\" target=\"_blank\" rel=\"noreferrer noopener\">Firmware Version {self.__firmware_version_available}</a> is available.<br><br>"
-            f"<a href=\"{manual_url}\" target=\"_blank\" rel=\"noreferrer noopener\">Firmware Update Instructions</a><br><br>"
+            f'<a href="{download_url}" target="_blank" rel="noreferrer noopener">Firmware Version {self.__firmware_version_available}</a> is available.<br><br>'
+            f'<a href="{manual_url}" target="_blank" rel="noreferrer noopener">Firmware Update Instructions</a><br><br>'
             "The Install button below has no function. It only exists to provide this notification in Home Assistant.<br><br>"
             "Alpha Innotec doesn't provide a changelog.<br>Please contact support for more information."
         )
