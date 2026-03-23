@@ -31,7 +31,8 @@ jobs:
       - name: Ruff setup
         uses: astral-sh/ruff-action@v3
         with:
-          args: "--version" # replace default "check" to do setup only.
+          version: "latest"
+          #args: "--version" # replace default "check" to do setup only.
           github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
       - name: Ruff auto format
         run: ruff format # auto format
