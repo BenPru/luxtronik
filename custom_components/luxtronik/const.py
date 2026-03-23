@@ -112,6 +112,9 @@ MIN_TIME_BETWEEN_UPDATES_DOWNLOAD_PORTAL: Final = timedelta(hours=1)
 DOWNLOAD_PORTAL_URL: Final = (
     "https://www.heatpump24.com/software/fetchSoftware.php?softwareID="
 )
+CHANGELOG_URL: Final = (
+    "https://www.heatpump24.com/software/fetchSoftware.php?changeLog="
+)
 FIRMWARE_UPDATE_MANUAL_EN = (
     "https://www.alpha-innotec.com/en/services/customer-support/software-center"
 )
