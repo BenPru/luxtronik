@@ -24,6 +24,7 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     DOWNLOAD_PORTAL_URL,
+    CHANGELOG_URL,
     FIRMWARE_UPDATE_MANUAL_DE,
     FIRMWARE_UPDATE_MANUAL_EN,
     LANG_DE,
@@ -75,6 +76,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         UpdateEntityFeature.INSTALL | UpdateEntityFeature.RELEASE_NOTES
     )
     __firmware_version_available = None
+    __firmware_version_changelog = None
     __firmware_version_available_last_request = None
 
     def __init__(
@@ -167,7 +169,9 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             f'<a href="{download_url}" target="_blank" rel="noreferrer noopener">Firmware Version {self.__firmware_version_available}</a> is available.<br><br>'
             f'<a href="{manual_url}" target="_blank" rel="noreferrer noopener">Firmware Update Instructions</a><br><br>'
             "The Install button below has no function. It only exists to provide this notification in Home Assistant.<br><br>"
-            "Alpha Innotec doesn't provide a changelog.<br>Please contact support for more information."
+            "Please contact Alpha Innotec support for more information.<br><br>"
+            f"Change Log:<br><br>{self.__firmware_version_changelog}<br><br>"
+            "Please use Google Translate or similar, if necessary."
         )
 
     async def async_update(self) -> None:
@@ -206,9 +210,19 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                     self.__firmware_version_available_last_request = datetime.now(
                         timezone.utc
                     ).timestamp()
+
                     self.__firmware_version_available = self.extract_firmware_version(
                         filename
                     )
+
+                async with session.get(
+                    f"{CHANGELOG_URL}{download_id}", timeout=30
+                ) as response:
+                    if response.status != 200:
+                        raise Exception(f"HTTP error: {response.status}")
+
+                    self.__firmware_version_changelog = await response.text()
+
         except Exception:
             LOGGER.warning(
                 "Could not request download portal firmware version",
