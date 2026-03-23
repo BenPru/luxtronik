@@ -37,7 +37,7 @@ jobs:
         uses: astral-sh/ruff-action@v3
         with:
           github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
-          args: "check --select F,E,W,I,UP,B,SIM,ASYNC,HASS,T20,LOG,RUF"
+          args: "check --select F,E,W,I,UP,B,SIM,ASYNC,T20,LOG,RUF"
       
       - name: Ruff format
         uses: astral-sh/ruff-action@v3
