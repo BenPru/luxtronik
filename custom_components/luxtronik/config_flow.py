@@ -19,6 +19,7 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     CONFIG_ENTRY_VERSION,
+    DEFAULT_HOST,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
@@ -333,8 +334,10 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     },
                 )
 
-            if not await self._set_unique_id_or_abort(coordinator, config):
-                return self.async_abort(reason="already_configured")
+            await self.async_set_unique_id(coordinator.unique_id)
+            self._abort_if_unique_id_configured(
+                updates={CONF_HOST: host, CONF_PORT: int(port)}
+            )
 
             return self._create_entry(config, coordinator)
 
@@ -372,64 +375,67 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the user options step."""
+        errors: dict[str, str] = {}
+
+        current_host = self.config_entry.data.get(CONF_HOST, DEFAULT_HOST)
+        current_port = self.config_entry.data.get(CONF_PORT, DEFAULT_PORT)
+        current_indoor_temp = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
+
         try:
-            LOGGER.info("user_input: %s", user_input)
-
-            new_options = dict(self.options)
-
             if user_input is not None:
-                # User submitted the form
-                value = user_input.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
-                if value:
-                    new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = value
-                elif CONF_HA_SENSOR_INDOOR_TEMPERATURE in new_options:
-                    new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
+                host = user_input.get(CONF_HOST, current_host)
+                port = int(user_input.get(CONF_PORT, current_port))
 
-                LOGGER.info("new_options: %s", new_options)
+                config = {
+                    CONF_HOST: host,
+                    CONF_PORT: port,
+                    CONF_TIMEOUT: self.config_entry.data.get(
+                        CONF_TIMEOUT, DEFAULT_TIMEOUT
+                    ),
+                    CONF_MAX_DATA_LENGTH: self.config_entry.data.get(
+                        CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH
+                    ),
+                }
 
-                # Merge options from user_input into data
-                self.hass.config_entries.async_update_entry(
-                    self.config_entry,
-                    data=self.config_entry.data | user_input,
-                    options=new_options,
+                try:
+                    await connect_and_get_coordinator(self.hass, config)
+                except LuxtronikConnectionError:
+                    errors["base"] = "cannot_connect"
+                else:
+                    new_options = dict(self.options)
+                    value = user_input.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
+                    if value:
+                        new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = value
+                    elif CONF_HA_SENSOR_INDOOR_TEMPERATURE in new_options:
+                        new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
+
+                    self.hass.config_entries.async_update_entry(
+                        self.config_entry,
+                        data=self.config_entry.data | user_input,
+                        options=new_options,
+                    )
+                    await self.hass.config_entries.async_reload(
+                        self.config_entry.entry_id
+                    )
+                    return self.async_create_entry(title="", data={})
+
+                # Connection failed — keep user's input for re-display
+                current_host = host
+                current_port = port
+                current_indoor_temp = user_input.get(
+                    CONF_HA_SENSOR_INDOOR_TEMPERATURE, current_indoor_temp
                 )
 
-                # Reload the config entry to apply changes immediately
-                await self.hass.config_entries.async_reload(self.config_entry.entry_id)
-
-                return self.async_create_entry(title="", data={})
-
-            # User opened the form but didn't submit anything
-
-            config = {
-                CONF_HOST: self.config_entry.data.get(CONF_HOST),
-                CONF_PORT: self.config_entry.data.get(CONF_PORT, DEFAULT_PORT),
-                CONF_TIMEOUT: self.config_entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
-                CONF_MAX_DATA_LENGTH: self.config_entry.data.get(
-                    CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH
-                ),
-            }
-
-            try:
-                coordinator = await connect_and_get_coordinator(self.hass, config)
-            except LuxtronikConnectionError as err:
-                return self.async_abort(
-                    reason="cannot_connect",
-                    description_placeholders={
-                        "host": err.host,
-                        "connect_error": str(err.original),
-                    },
-                )
-
-            # Show form with current value
-            title = f"{coordinator.manufacturer} {coordinator.model} {coordinator.serial_number}"
-            name = f"{title} ({self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]})"
-            current_value = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
-
+            name = f"{current_host}:{current_port}"
             return self.async_show_form(
                 step_id="user",
-                data_schema=build_options_schema(current_value=current_value),
+                data_schema=build_options_schema(
+                    host=current_host,
+                    port=current_port,
+                    current_value=current_indoor_temp,
+                ),
                 description_placeholders={"name": name},
+                errors=errors,
             )
 
         except Exception as err:

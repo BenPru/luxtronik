@@ -707,16 +707,23 @@
                 "title": "Configure options for {name}",
                 "description": "Settings for the Luxtronik heat pump {name}.",
                 "data": {
+                    "host": "Host",
+                    "port": "Network Port",
                     "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature",
                     "control_mode_home_assistant": "Experimental!: Control thermostat on/off status by Home Assistant.",
                     "ha_sensor_prefix": "Prefix entity IDs"
                 },
                 "data_description": {
+                    "host": "Hostname or IP address",
+                    "port": "Normally 8889 or 8888",
                     "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
                     "control_mode_home_assistant": "When the Home Assistant Thermostat is in the Idle state, the Off state is reported to Luxtronik and Luxtronik cannot start this item.",
                     "ha_sensor_prefix": "Important if several heat pumps are used.\nIn the case of a single one, 'luxtronik' can simply be used."
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect to the Luxtronik heat pump. Please check the host and port."
         }
     }
 }
