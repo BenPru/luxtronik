@@ -172,7 +172,7 @@ class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
             )
         ):
             self._attr_cache[attr.key] = dt_util.utcnow().date()
-        result = self._attr_cache[attr.key] if attr.key in self._attr_cache else ""
+        result = self._attr_cache.get(attr.key, "")
 
         return str(result)
 

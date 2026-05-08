@@ -151,11 +151,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         host = config[CONF_HOST]
         port = config[CONF_PORT]
-        timeout = config[CONF_TIMEOUT] if CONF_TIMEOUT in config else DEFAULT_TIMEOUT
+        timeout = config.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
         max_data_length = (
-            config[CONF_MAX_DATA_LENGTH]
-            if CONF_MAX_DATA_LENGTH in config
-            else DEFAULT_MAX_DATA_LENGTH
+            config.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH)
         )
 
         client = Luxtronik(
@@ -285,14 +283,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return True
 
         # Check maximum minor version if specified
-        if (
+        return (
             description.max_firmware_version_minor is not None
-            and self.firmware_version_minor > description.max_firmware_version_minor
-        ):
-            return True
-
-        # If all checks pass or no version restrictions are specified
-        return False
+            and self.firmware_version_minor
+            > description.max_firmware_version_minor
+        )
 
     @property
     def serial_number(self) -> str:

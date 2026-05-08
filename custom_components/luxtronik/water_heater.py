@@ -247,7 +247,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:
         """Set new target operation mode."""
-        lux_mode = [k for k, v in OPERATION_MAPPING.items() if v == operation_mode][0]
+        lux_mode = next(k for k, v in OPERATION_MAPPING.items() if v == operation_mode)
         await self._async_set_lux_mode(lux_mode)
 
     async def async_turn_away_mode_on(self) -> None:
