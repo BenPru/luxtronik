@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from typing import Any
-from packaging.version import Version
 
 from homeassistant.components.climate import (
     ENTITY_ID_FORMAT,
@@ -31,9 +30,10 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
+from packaging.version import Version
 
 from .base import LuxtronikEntity
-from .common import get_sensor_data, state_as_number_or_none, key_exists
+from .common import get_sensor_data, key_exists, state_as_number_or_none
 from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,

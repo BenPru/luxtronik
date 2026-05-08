@@ -1,7 +1,7 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.core import HomeAssistant
+import pytest
 
 from custom_components.luxtronik.config_flow import (
     LuxtronikFlowHandler,

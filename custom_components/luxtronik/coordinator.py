@@ -4,23 +4,21 @@
 from __future__ import annotations
 
 import asyncio
-import re
-
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
-from packaging.version import Version, InvalidVersion
+import re
 from types import MappingProxyType
 from typing import Any, Concatenate, TypeVar
-from typing_extensions import ParamSpec
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.exceptions import ConfigEntryNotReady
+from packaging.version import InvalidVersion, Version
+from typing_extensions import ParamSpec
 
 from .common import correct_key_value
 from .const import (
@@ -29,8 +27,8 @@ from .const import (
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     DEFAULT_MAX_DATA_LENGTH,
-    DEFAULT_TIMEOUT,
     DEFAULT_PORT,
+    DEFAULT_TIMEOUT,
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,

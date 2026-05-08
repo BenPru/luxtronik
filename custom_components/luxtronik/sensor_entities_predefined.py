@@ -36,8 +36,8 @@ from .const import (
 )
 from .model import (
     LuxtronikEntityAttributeDescription as attr,
-    LuxtronikSensorDescription as descr,
     LuxtronikIndexSensorDescription as descr_index,
+    LuxtronikSensorDescription as descr,
 )
 
 # endregion Imports

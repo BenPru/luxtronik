@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 from enum import StrEnum
+from typing import Any
 
 from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
@@ -18,8 +18,8 @@ from homeassistant.util.dt import utcnow
 
 from .common import get_sensor_data
 from .const import (
-    DeviceKey,
     LOGGER,
+    DeviceKey,
     LuxCalculation as LC,
     LuxMode,
     LuxOperationMode,

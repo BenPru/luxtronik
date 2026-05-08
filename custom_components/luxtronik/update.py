@@ -3,11 +3,12 @@
 # region Imports
 from __future__ import annotations
 
-import aiohttp
-import re
-
-from awesomeversion import AwesomeVersion
 from datetime import datetime, timedelta, timezone
+import re
+from typing import Final
+
+import aiohttp
+from awesomeversion import AwesomeVersion
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
@@ -16,15 +17,13 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from typing import Final
-
 from .base import LuxtronikEntity
 from .const import (
+    CHANGELOG_URL,
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     DOWNLOAD_PORTAL_URL,
-    CHANGELOG_URL,
     FIRMWARE_UPDATE_MANUAL_DE,
     FIRMWARE_UPDATE_MANUAL_EN,
     LANG_DE,

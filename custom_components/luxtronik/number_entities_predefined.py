@@ -1,18 +1,17 @@
 """Luxtronik number sensors definitions."""
 
 # region Imports
-from packaging.version import Version
-
 from homeassistant.components.number import NumberMode
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import (
     PERCENTAGE,
     UnitOfElectricPotential,
+    UnitOfPower,
     UnitOfTemperature,
     UnitOfTime,
-    UnitOfPower,
 )
 from homeassistant.helpers.entity import EntityCategory
+from packaging.version import Version
 
 from .const import (
     DEFAULT_DHW_MIN_TEMPERATURE,
