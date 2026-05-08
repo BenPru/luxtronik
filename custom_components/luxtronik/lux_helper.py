@@ -99,7 +99,7 @@ def discover() -> list[tuple[str, int | None]]:
                     )
 
             # if the timeout triggers, go on and use the other broadcast port
-            except socket.timeout:
+            except TimeoutError:
                 break
         server.close()
     return results
@@ -237,7 +237,7 @@ class Luxtronik:
                         self._port,
                         self._socket_timeout,
                     )
-                except (socket.timeout, OSError) as err:
+                except (TimeoutError, OSError) as err:
                     LOGGER.error("Failed to connect: %s", err)
                     self._disconnect()
                     raise
@@ -352,14 +352,14 @@ class Luxtronik:
                     try:
                         raw = self._socket.recv(item_size)
                         data.append(struct.unpack(fmt, raw)[0])
-                    except (struct.error, socket.timeout) as err:
+                    except (TimeoutError, struct.error) as err:
                         LOGGER.debug("Error reading %s item: %s", label, err)
 
                 LOGGER.debug("Read %d %s items", length, label)
                 parser.parse(data)
                 return  # Success, exit after first successful attempt
 
-            except (socket.timeout, ConnectionResetError, OSError) as err:
+            except (TimeoutError, ConnectionResetError, OSError) as err:
                 LOGGER.warning(
                     "Error while reading %s (attempt %d/%d): %s",
                     label,
