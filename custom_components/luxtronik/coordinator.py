@@ -469,16 +469,16 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Detect and returns True if solar is present."""
         return (
             bool(self.get_value(LV.V0250_SOLAR))
-            or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
+            or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01
             or (
-                bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
-                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))  # noqa: W503
-                != 5.0  # noqa: W503
+                bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))
+                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))
+                != 5.0
             )
             or (
-                bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
-                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))  # noqa: W503
-                != 150.0  # noqa: W503
+                bool(self.get_value(LV.V0039_SOLAR_BUFFER))
+                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))
+                != 150.0
             )
         )
 

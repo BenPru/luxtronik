@@ -109,9 +109,9 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_HEAT,
         preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.PRESET_MODE
-        | ClimateEntityFeature.TURN_OFF  # noqa: W503
-        | ClimateEntityFeature.TURN_ON  # noqa: W503
-        | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
+        | ClimateEntityFeature.TURN_OFF
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
@@ -131,9 +131,9 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_HEAT,
         preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.PRESET_MODE
-        | ClimateEntityFeature.TURN_OFF  # noqa: W503
-        | ClimateEntityFeature.TURN_ON  # noqa: W503
-        | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
+        | ClimateEntityFeature.TURN_OFF
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
@@ -155,8 +155,8 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_COOL,
         preset_modes=[PRESET_NONE],
         supported_features=ClimateEntityFeature.TURN_OFF
-        | ClimateEntityFeature.TURN_ON  # noqa: W503
-        | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
