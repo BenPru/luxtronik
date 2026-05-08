@@ -4,9 +4,6 @@
 from __future__ import annotations
 
 from typing import Any
-from packaging.version import Version
-
-from typing_extensions import override
 
 from homeassistant.components.climate.const import HVACAction
 from homeassistant.components.water_heater import (
@@ -23,6 +20,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from packaging.version import Version
+from typing_extensions import override
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists

@@ -12,9 +12,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 
+from .common import async_get_mac_address
 from .const import CONF_COORDINATOR, DOMAIN
 from .coordinator import LuxtronikCoordinator
-from .common import async_get_mac_address
 
 # endregion Imports
 

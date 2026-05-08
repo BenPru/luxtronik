@@ -1,14 +1,14 @@
-import voluptuous as vol
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.helpers import selector
+import voluptuous as vol
 
 from .const import (
-    CONF_MAX_DATA_LENGTH,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
+    CONF_MAX_DATA_LENGTH,
     DEFAULT_HOST,
+    DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
-    DEFAULT_MAX_DATA_LENGTH,
 )
 
 

@@ -1,12 +1,11 @@
 """Support for Luxtronik classes."""
 
 # region Imports
-from typing import Any
-
 from functools import partial
 from ipaddress import IPv6Address, ip_address
-from getmac import get_mac_address
+from typing import Any
 
+from getmac import get_mac_address
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers import device_registry
