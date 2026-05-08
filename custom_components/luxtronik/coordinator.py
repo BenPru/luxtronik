@@ -545,4 +545,4 @@ async def connect_and_get_coordinator(
         return coordinator
     except Exception as err:
         LOGGER.error("Luxtronik connect to device %s:%s failed: %s", host, port, err)
-        raise LuxtronikConnectionError(host, port, err)
+        raise LuxtronikConnectionError(host, port, err) from err
