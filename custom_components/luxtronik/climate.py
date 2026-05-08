@@ -384,11 +384,11 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode."""
         self._attr_hvac_mode = hvac_mode
-        lux_mode = [
+        lux_mode = next(
             k
             for k, v in self.entity_description.hvac_mode_mapping.items()
             if v == hvac_mode.value
-        ][0]
+        )
         await self._async_set_lux_mode(lux_mode)
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
@@ -397,9 +397,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if preset_mode in [PRESET_COMFORT]:
             lux_mode = LuxMode.automatic
         elif preset_mode != PRESET_NONE:
-            lux_mode = [k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode][
-                0
-            ]
+            lux_mode = next(k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode)
             if self._last_hvac_mode_before_preset is None:
                 self._last_hvac_mode_before_preset = self._attr_hvac_mode
         elif self._last_hvac_mode_before_preset is not None:

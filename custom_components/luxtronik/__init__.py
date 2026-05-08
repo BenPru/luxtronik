@@ -382,10 +382,7 @@ async def _up_many(
 def _identifiers_exists(
     identifiers_list: list[set[tuple[str, str]]], identifiers: set[tuple[str, str]]
 ) -> bool:
-    for ident in identifiers_list:
-        if ident == identifiers:
-            return True
-    return False
+    return any(ident == identifiers for ident in identifiers_list)
 
 
 async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):
