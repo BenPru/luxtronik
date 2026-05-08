@@ -1,6 +1,5 @@
-from luxtronik.datatypes import HeatpumpCode, Celsius, Timestamp, Percent, Percent2
+from luxtronik.datatypes import Celsius, HeatpumpCode, Percent, Percent2, Timestamp
 from luxtronik.parameters import Parameters
-
 
 # Define your new/updated custom parameters in a dictionary
 parameters_to_add_update = {

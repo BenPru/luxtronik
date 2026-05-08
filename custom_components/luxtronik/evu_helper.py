@@ -1,8 +1,10 @@
 """Helper class with all EVU logic"""
 
-from datetime import time
 import calendar
+from datetime import time
+
 from homeassistant.util import dt as dt_util
+
 from .const import LuxOperationMode, SensorAttrKey as SA
 
 

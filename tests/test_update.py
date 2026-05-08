@@ -1,4 +1,5 @@
 import unittest
+
 from custom_components.luxtronik.update import LuxtronikUpdateEntity
 
 
