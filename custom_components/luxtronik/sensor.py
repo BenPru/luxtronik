@@ -4,7 +4,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, UTC
 from decimal import Decimal
 from typing import Any
 
@@ -420,7 +420,7 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
 
     def format_time(self, value_timestamp: int | None) -> datetime | None:
         if value_timestamp is not None and isinstance(value_timestamp, int):
-            value_timestamp = datetime.fromtimestamp(value_timestamp, timezone.utc)
+            value_timestamp = datetime.fromtimestamp(value_timestamp, UTC)
         if (
             value_timestamp is not None
             and isinstance(value_timestamp, datetime)
