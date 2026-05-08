@@ -3,7 +3,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import UTC, datetime, timedelta
 import re
 from typing import Final
 
@@ -178,8 +178,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         if (
             self.__firmware_version_available_last_request is None
             or self.__firmware_version_available_last_request
-            < datetime.now(UTC).timestamp()
-            - MIN_TIME_BETWEEN_UPDATES.total_seconds()
+            < datetime.now(UTC).timestamp() - MIN_TIME_BETWEEN_UPDATES.total_seconds()
         ):
             await self._request_available_firmware_version()
 
