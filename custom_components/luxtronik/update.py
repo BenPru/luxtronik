@@ -3,11 +3,12 @@
 # region Imports
 from __future__ import annotations
 
-import aiohttp
+from datetime import UTC, datetime, timedelta
 import re
+from typing import Final
 
+import aiohttp
 from awesomeversion import AwesomeVersion
-from datetime import datetime, timedelta, timezone
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
@@ -16,15 +17,13 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from typing import Final
-
 from .base import LuxtronikEntity
 from .const import (
+    CHANGELOG_URL,
     CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     DOWNLOAD_PORTAL_URL,
-    CHANGELOG_URL,
     FIRMWARE_UPDATE_MANUAL_DE,
     FIRMWARE_UPDATE_MANUAL_EN,
     LANG_DE,
@@ -179,8 +178,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         if (
             self.__firmware_version_available_last_request is None
             or self.__firmware_version_available_last_request
-            < datetime.now(timezone.utc).timestamp()
-            - MIN_TIME_BETWEEN_UPDATES.total_seconds()
+            < datetime.now(UTC).timestamp() - MIN_TIME_BETWEEN_UPDATES.total_seconds()
         ):
             await self._request_available_firmware_version()
 
@@ -208,7 +206,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                     filename = filename_match[0] if filename_match else None
 
                     self.__firmware_version_available_last_request = datetime.now(
-                        timezone.utc
+                        UTC
                     ).timestamp()
 
                     self.__firmware_version_available = self.extract_firmware_version(

@@ -3,10 +3,7 @@
 # region Imports
 from __future__ import annotations
 
-from typing import Any
-from packaging.version import Version
-
-from typing_extensions import override
+from typing import Any, override
 
 from homeassistant.components.climate.const import HVACAction
 from homeassistant.components.water_heater import (
@@ -23,6 +20,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from packaging.version import Version
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists
@@ -248,7 +246,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:
         """Set new target operation mode."""
-        lux_mode = [k for k, v in OPERATION_MAPPING.items() if v == operation_mode][0]
+        lux_mode = next(k for k, v in OPERATION_MAPPING.items() if v == operation_mode)
         await self._async_set_lux_mode(lux_mode)
 
     async def async_turn_away_mode_on(self) -> None:

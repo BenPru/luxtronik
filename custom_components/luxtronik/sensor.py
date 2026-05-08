@@ -4,7 +4,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -61,7 +61,7 @@ async def async_setup_entry(
         i.luxtronik_key
         for i in SENSORS + SENSORS_STATUS
         if not key_exists(coordinator.data, i.luxtronik_key)
-        and not i.luxtronik_key == LC.UNSET
+        and i.luxtronik_key != LC.UNSET
     ]
     if unavailable_keys:
         LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
@@ -420,7 +420,7 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
 
     def format_time(self, value_timestamp: int | None) -> datetime | None:
         if value_timestamp is not None and isinstance(value_timestamp, int):
-            value_timestamp = datetime.fromtimestamp(value_timestamp, timezone.utc)
+            value_timestamp = datetime.fromtimestamp(value_timestamp, UTC)
         if (
             value_timestamp is not None
             and isinstance(value_timestamp, datetime)

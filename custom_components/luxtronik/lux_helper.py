@@ -74,7 +74,7 @@ def discover() -> list[tuple[str, int | None]]:
                 # if the response starts with the magic nonsense
                 if res.startswith(LUXTRONIK_DISCOVERY_RESPONSE_PREFIX):
                     LOGGER.debug(
-                        f"Received valid Luxtronik response from {ip_address}: {str(res_list)}"
+                        f"Received valid Luxtronik response from {ip_address}: {res_list!s}"
                     )
                     try:
                         res_port: int | None = int(res_list[2])
@@ -95,11 +95,11 @@ def discover() -> list[tuple[str, int | None]]:
 
                 else:
                     LOGGER.debug(
-                        f"Skipping invalid response from {ip_address}: {str(res_list)}"
+                        f"Skipping invalid response from {ip_address}: {res_list!s}"
                     )
 
             # if the timeout triggers, go on and use the other broadcast port
-            except socket.timeout:
+            except TimeoutError:
                 break
         server.close()
     return results
@@ -237,7 +237,7 @@ class Luxtronik:
                         self._port,
                         self._socket_timeout,
                     )
-                except (socket.timeout, OSError) as err:
+                except (TimeoutError, OSError) as err:
                     LOGGER.error("Failed to connect: %s", err)
                     self._disconnect()
                     raise
@@ -352,14 +352,14 @@ class Luxtronik:
                     try:
                         raw = self._socket.recv(item_size)
                         data.append(struct.unpack(fmt, raw)[0])
-                    except (struct.error, socket.timeout) as err:
+                    except (TimeoutError, struct.error) as err:
                         LOGGER.debug("Error reading %s item: %s", label, err)
 
                 LOGGER.debug("Read %d %s items", length, label)
                 parser.parse(data)
                 return  # Success, exit after first successful attempt
 
-            except (socket.timeout, ConnectionResetError, OSError) as err:
+            except (TimeoutError, ConnectionResetError, OSError) as err:
                 LOGGER.warning(
                     "Error while reading %s (attempt %d/%d): %s",
                     label,

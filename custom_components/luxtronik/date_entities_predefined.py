@@ -9,7 +9,6 @@ from .model import (
     LuxtronikDateEntityDescription,
 )
 
-
 CALENDAR_ENTITIES: list[LuxtronikDateEntityDescription] = [
     LuxtronikDateEntityDescription(
         key=SK.AWAY_DHW_STARTDATE,

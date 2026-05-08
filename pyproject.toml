@@ -1,0 +1,38 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "F",      # Pyflakes
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "ASYNC",  # flake8-async
+    "T20",    # flake8-print
+    "LOG",    # flake8-logging
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "E501",   # Line too long - not enforced, formatter handles what it can
+    "RUF009",  # Mutable dataclass defaults - standard HA entity description pattern
+    "RUF012",  # Mutable class variable - standard HA entity pattern
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.codespell]
+skip = "custom_components/luxtronik/translations"
+ignore-words-list = "hass"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

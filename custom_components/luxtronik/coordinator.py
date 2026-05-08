@@ -4,23 +4,20 @@
 from __future__ import annotations
 
 import asyncio
-import re
-
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
-from packaging.version import Version, InvalidVersion
+import re
 from types import MappingProxyType
-from typing import Any, Concatenate, TypeVar
-from typing_extensions import ParamSpec
+from typing import Any, Concatenate, ParamSpec, TypeVar
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.exceptions import ConfigEntryNotReady
+from packaging.version import InvalidVersion, Version
 
 from .common import correct_key_value
 from .const import (
@@ -29,8 +26,8 @@ from .const import (
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     DEFAULT_MAX_DATA_LENGTH,
-    DEFAULT_TIMEOUT,
     DEFAULT_PORT,
+    DEFAULT_TIMEOUT,
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
@@ -50,7 +47,7 @@ _LuxtronikCoordinatorT = TypeVar("_LuxtronikCoordinatorT", bound="LuxtronikCoord
 _P = ParamSpec("_P")
 
 
-def catch_luxtronik_errors(
+def catch_luxtronik_errors[LuxtronikCoordinatorT: "LuxtronikCoordinator", **P](
     func: Callable[Concatenate[_LuxtronikCoordinatorT, _P], Awaitable[None]],
 ) -> Callable[Concatenate[_LuxtronikCoordinatorT, _P], Coroutine[Any, Any, None]]:
     """Catch Luxtronik errors."""
@@ -154,12 +151,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         host = config[CONF_HOST]
         port = config[CONF_PORT]
-        timeout = config[CONF_TIMEOUT] if CONF_TIMEOUT in config else DEFAULT_TIMEOUT
-        max_data_length = (
-            config[CONF_MAX_DATA_LENGTH]
-            if CONF_MAX_DATA_LENGTH in config
-            else DEFAULT_MAX_DATA_LENGTH
-        )
+        timeout = config.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
+        max_data_length = config.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH)
 
         client = Luxtronik(
             host=host,
@@ -288,14 +281,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return True
 
         # Check maximum minor version if specified
-        if (
+        return (
             description.max_firmware_version_minor is not None
             and self.firmware_version_minor > description.max_firmware_version_minor
-        ):
-            return True
-
-        # If all checks pass or no version restrictions are specified
-        return False
+        )
 
     @property
     def serial_number(self) -> str:
@@ -469,7 +458,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 LuxMkTypes.cooling.value,
                 LuxMkTypes.heating_cooling.value,
             ]:
-                cooling_mk = cooling_mk + [mk_sensor]
+                cooling_mk = [*cooling_mk, mk_sensor]
 
         return cooling_mk
 
@@ -477,16 +466,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Detect and returns True if solar is present."""
         return (
             bool(self.get_value(LV.V0250_SOLAR))
-            or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01  # noqa: W503
+            or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01
             or (
-                bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))  # noqa: W503
-                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))  # noqa: W503
-                != 5.0  # noqa: W503
+                bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))
+                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE)) != 5.0
             )
             or (
-                bool(self.get_value(LV.V0039_SOLAR_BUFFER))  # noqa: W503
-                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))  # noqa: W503
-                != 150.0  # noqa: W503
+                bool(self.get_value(LV.V0039_SOLAR_BUFFER))
+                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE)) != 150.0
             )
         )
 
@@ -548,4 +535,4 @@ async def connect_and_get_coordinator(
         return coordinator
     except Exception as err:
         LOGGER.error("Luxtronik connect to device %s:%s failed: %s", host, port, err)
-        raise LuxtronikConnectionError(host, port, err)
+        raise LuxtronikConnectionError(host, port, err) from err

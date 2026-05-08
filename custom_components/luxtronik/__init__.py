@@ -2,6 +2,7 @@
 
 # region Imports
 from __future__ import annotations
+
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -13,6 +14,7 @@ from homeassistant.helpers.entity_registry import (
     async_get,
 )
 
+from .common import convert_to_int_if_possible
 from .const import (
     ATTR_PARAMETER,
     ATTR_VALUE,
@@ -29,11 +31,10 @@ from .const import (
     SERVICE_WRITE_SCHEMA,
     SensorKey as SK,
 )
+from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 
 # Apply global overrides before anything else
 from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
-from .common import convert_to_int_if_possible
-from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 
 # endregion Imports
 
@@ -381,10 +382,7 @@ async def _up_many(
 def _identifiers_exists(
     identifiers_list: list[set[tuple[str, str]]], identifiers: set[tuple[str, str]]
 ) -> bool:
-    for ident in identifiers_list:
-        if ident == identifiers:
-            return True
-    return False
+    return any(ident == identifiers for ident in identifiers_list)
 
 
 async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):

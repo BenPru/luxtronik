@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from typing import Any
-from packaging.version import Version
 
 from homeassistant.components.climate import (
     ENTITY_ID_FORMAT,
@@ -31,9 +30,10 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
+from packaging.version import Version
 
 from .base import LuxtronikEntity
-from .common import get_sensor_data, state_as_number_or_none, key_exists
+from .common import get_sensor_data, key_exists, state_as_number_or_none
 from .const import (
     CONF_COORDINATOR,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
@@ -109,9 +109,9 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_HEAT,
         preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.PRESET_MODE
-        | ClimateEntityFeature.TURN_OFF  # noqa: W503
-        | ClimateEntityFeature.TURN_ON  # noqa: W503
-        | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
+        | ClimateEntityFeature.TURN_OFF
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
@@ -131,9 +131,9 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_HEAT,
         preset_modes=[PRESET_NONE, PRESET_AWAY, PRESET_BOOST],
         supported_features=ClimateEntityFeature.PRESET_MODE
-        | ClimateEntityFeature.TURN_OFF  # noqa: W503
-        | ClimateEntityFeature.TURN_ON  # noqa: W503
-        | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
+        | ClimateEntityFeature.TURN_OFF
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
@@ -155,8 +155,8 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         hvac_action_mapping=HVAC_ACTION_MAPPING_COOL,
         preset_modes=[PRESET_NONE],
         supported_features=ClimateEntityFeature.TURN_OFF
-        | ClimateEntityFeature.TURN_ON  # noqa: W503
-        | ClimateEntityFeature.TARGET_TEMPERATURE,  # noqa: W503
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
@@ -384,11 +384,11 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode."""
         self._attr_hvac_mode = hvac_mode
-        lux_mode = [
+        lux_mode = next(
             k
             for k, v in self.entity_description.hvac_mode_mapping.items()
             if v == hvac_mode.value
-        ][0]
+        )
         await self._async_set_lux_mode(lux_mode)
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
@@ -397,9 +397,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if preset_mode in [PRESET_COMFORT]:
             lux_mode = LuxMode.automatic
         elif preset_mode != PRESET_NONE:
-            lux_mode = [k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode][
-                0
-            ]
+            lux_mode = next(
+                k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode
+            )
             if self._last_hvac_mode_before_preset is None:
                 self._last_hvac_mode_before_preset = self._attr_hvac_mode
         elif self._last_hvac_mode_before_preset is not None:
