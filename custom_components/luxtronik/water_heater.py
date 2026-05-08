@@ -21,7 +21,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from packaging.version import Version
-from typing_extensions import override
+from typing import override
 
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists

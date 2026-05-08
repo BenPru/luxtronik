@@ -8,7 +8,7 @@ from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from functools import wraps
 import re
 from types import MappingProxyType
-from typing import Any, Concatenate, TypeVar
+from typing import Any, Concatenate, ParamSpec, TypeVar
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
@@ -18,7 +18,6 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from packaging.version import InvalidVersion, Version
-from typing_extensions import ParamSpec
 
 from .common import correct_key_value
 from .const import (
