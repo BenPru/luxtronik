@@ -74,7 +74,7 @@ def discover() -> list[tuple[str, int | None]]:
                 # if the response starts with the magic nonsense
                 if res.startswith(LUXTRONIK_DISCOVERY_RESPONSE_PREFIX):
                     LOGGER.debug(
-                        f"Received valid Luxtronik response from {ip_address}: {str(res_list)}"
+                        f"Received valid Luxtronik response from {ip_address}: {res_list!s}"
                     )
                     try:
                         res_port: int | None = int(res_list[2])
@@ -95,7 +95,7 @@ def discover() -> list[tuple[str, int | None]]:
 
                 else:
                     LOGGER.debug(
-                        f"Skipping invalid response from {ip_address}: {str(res_list)}"
+                        f"Skipping invalid response from {ip_address}: {res_list!s}"
                     )
 
             # if the timeout triggers, go on and use the other broadcast port
