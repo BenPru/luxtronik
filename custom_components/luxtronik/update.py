@@ -2,7 +2,8 @@
 
 # region Imports
 from __future__ import annotations
-from datetime import UTC, datetime, timedelta, timezone
+
+from datetime import datetime, timedelta, timezone, UTC
 import re
 from typing import Final
 
