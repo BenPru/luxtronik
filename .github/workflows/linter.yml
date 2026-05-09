@@ -4,17 +4,7 @@ on:
   push:
     branches:
       - "main"
-    paths:
-      - "custom_components/luxtronik/**"
-      - "tests/**"
-      - "pyproject.toml"
-      - ".github/workflows/linter.yml"
   pull_request:
-    paths:
-      - "custom_components/luxtronik/**"
-      - "tests/**"
-      - "pyproject.toml"
-      - ".github/workflows/linter.yml"
   workflow_dispatch:
 
 permissions:
@@ -24,6 +14,8 @@ jobs:
   ruff:
     name: Ruff
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # complete all jobs
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -31,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install Ruff
         run: pip install --upgrade ruff
@@ -45,6 +37,8 @@ jobs:
   codespell:
     name: CodeSpell
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # complete all jobs
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -52,7 +46,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install codespell
         run: pip install --upgrade codespell
