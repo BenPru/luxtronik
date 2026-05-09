@@ -1,23 +1,17 @@
-# This workflow executes several linters 
-# disable email notifications in your settings: 
-# https://github.com/settings/notifications
 name: Linter
 
-# Ruff is a commonly used and fast linter for home assistant.
 on:
   push:
-    branches: 
+    branches:
       - "main"
   pull_request:
   workflow_dispatch:
 
-# Allow Ruff to apply fixes
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  # Ruff format is a comprehensive formatting
-  run-ruff:
+  ruff:
     name: Ruff
     runs-on: ubuntu-latest
     strategy:
@@ -25,28 +19,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Ruff check
-        uses: astral-sh/ruff-action@v3
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
-      
-      - name: Ruff check HA
-        uses: astral-sh/ruff-action@v3
-        with:
-          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
-          args: "check --select F,E,W,I,UP,B,SIM,ASYNC,T20,LOG,RUF"
-      
-      - name: Ruff format
-        uses: astral-sh/ruff-action@v3
-        with:
-          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }} # optional to reduce api calls
-          args: "format --check --diff"
+          python-version: "3.14"
 
-  # CodeSpell performs a spellcheck. English only.      
-  run-codespell:
+      - name: Install Ruff
+        run: pip install --upgrade ruff
+
+      - name: Ruff format check
+        run: ruff format --check custom_components/luxtronik tests
+
+      - name: Ruff lint check
+        run: ruff check custom_components/luxtronik tests
+
+  codespell:
     name: CodeSpell
     runs-on: ubuntu-latest
     strategy:
@@ -54,8 +42,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: CodeSpell
-        uses: codespell-project/actions-codespell@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          skip: cs.json,de.json,nl.json,pl.json # skip these files
-          ignore_words_list: hass # skip these words
+          python-version: "3.14"
+
+      - name: Install codespell
+        run: pip install --upgrade codespell
+
+      - name: Run codespell
+        run: codespell custom_components/luxtronik tests
