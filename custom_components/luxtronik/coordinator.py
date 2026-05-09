@@ -152,7 +152,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         host = config[CONF_HOST]
         port = config[CONF_PORT]
         timeout = config.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
-        max_data_length = config.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH)
+        max_data_length = (
+            config.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH)
+        )
 
         client = Luxtronik(
             host=host,
@@ -283,7 +285,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         # Check maximum minor version if specified
         return (
             description.max_firmware_version_minor is not None
-            and self.firmware_version_minor > description.max_firmware_version_minor
+            and self.firmware_version_minor
+            > description.max_firmware_version_minor
         )
 
     @property
@@ -469,11 +472,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01
             or (
                 bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))
-                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE)) != 5.0
+                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE))
+                != 5.0
             )
             or (
                 bool(self.get_value(LV.V0039_SOLAR_BUFFER))
-                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE)) != 150.0
+                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE))
+                != 150.0
             )
         )
 

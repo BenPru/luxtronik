@@ -397,9 +397,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         if preset_mode in [PRESET_COMFORT]:
             lux_mode = LuxMode.automatic
         elif preset_mode != PRESET_NONE:
-            lux_mode = next(
-                k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode
-            )
+            lux_mode = next(k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode)
             if self._last_hvac_mode_before_preset is None:
                 self._last_hvac_mode_before_preset = self._attr_hvac_mode
         elif self._last_hvac_mode_before_preset is not None:
