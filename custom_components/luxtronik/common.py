@@ -158,9 +158,6 @@ def correct_key_value(
         status_line3 = get_sensor_data(
             coordinator, LC.C0119_STATUS_LINE_3, raw_value=True
         )
-        if status_line3 is None:
-            LOGGER.warning("StatusLine3 is None!")
-
         # region Workaround Detect passive cooling operation mode
         if status_line3 is not None and status_line3 == LuxStatus3Option.cooling.value:
             return LuxOperationMode.cooling
