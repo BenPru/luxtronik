@@ -12,7 +12,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
 from .common import get_sensor_data, key_exists
-from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey, LOGGER
+from .const import CONF_COORDINATOR, CONF_HA_SENSOR_PREFIX, DOMAIN, LOGGER, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikBinarySensorEntityDescription
 

@@ -1,6 +1,7 @@
-import pytest
 from homeassistant import data_entry_flow
 from homeassistant.core import HomeAssistant
+import pytest
+
 from custom_components.luxtronik.config_flow import LuxtronikOptionsFlowHandler
 from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
