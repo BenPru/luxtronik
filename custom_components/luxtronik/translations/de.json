@@ -966,16 +966,23 @@
                 "title": "Optionen f\u00fcr {name} konfigurieren",
                 "description": "Einstellungen f\u00fcr die Luxtronik-W\u00e4rmepumpe {name}.",
                 "data": {
+                    "host": "Host",
+                    "port": "Netzwerk-Port",
                     "ha_sensor_indoor_temperature": "Sensor-ID f\u00fcr die Raumtemperatur",
                     "control_mode_home_assistant": "Experimentell!: Thermostatstatus \u00fcber Home Assistant steuern.",
                     "ha_sensor_prefix": "Pr\u00e4fix f\u00fcr Entity-IDs"
                 },
                 "data_description": {
+                    "host": "Hostname oder IP-Adresse",
+                    "port": "Normalerweise 8889 oder 8888",
                     "ha_sensor_indoor_temperature": "Ein Thermostat zur Heizungssteuerung wird in Home Assistant erstellt. Die tats\u00e4chliche Temperatur wird von einem Home Assistant-Sensor gesetzt.\nWenn Luxtronik mit einem Hardware-Raumthermostat verbunden ist, sollte dieses Feld leer bleiben.",
                     "control_mode_home_assistant": "Wenn sich das Home Assistant-Thermostat im Leerlauf befindet, wird der Aus-Zustand an Luxtronik gemeldet und Luxtronik kann dieses Element nicht starten.",
                     "ha_sensor_prefix": "Wichtig bei Verwendung mehrerer W\u00e4rmepumpen. Bei einer einzelnen kann einfach 'luxtronik' verwendet werden."
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Verbindung zur Luxtronik-W\u00e4rmepumpe fehlgeschlagen. Bitte Host und Port \u00fcberpr\u00fcfen."
         }
     }
 }

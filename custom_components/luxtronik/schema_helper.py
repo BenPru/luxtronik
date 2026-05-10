@@ -29,10 +29,14 @@ def build_user_data_schema(
 
 
 def build_options_schema(
+    host: str = DEFAULT_HOST,
+    port: int = DEFAULT_PORT,
     current_value: str | None = None,
 ) -> vol.Schema:
     return vol.Schema(
         {
+            vol.Required(CONF_HOST, default=host): str,
+            vol.Required(CONF_PORT, default=port): int,
             vol.Optional(
                 CONF_HA_SENSOR_INDOOR_TEMPERATURE,
                 default=current_value,
@@ -41,6 +45,6 @@ def build_options_schema(
                 selector.EntitySelectorConfig(
                     domain="sensor", device_class="temperature"
                 )
-            )
+            ),
         }
     )
