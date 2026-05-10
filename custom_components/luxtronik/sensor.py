@@ -203,7 +203,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
     entity_description: LuxtronikSensorDescription
 
     _coordinator: LuxtronikCoordinator
-    _evu_tracker: LuxtronikEVUTracker = LuxtronikEVUTracker()
 
     _last_state: StateType | date | datetime | Decimal = None
 
@@ -220,6 +219,18 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             SA.EVU_DAYS,
         }
     )
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        coordinator: LuxtronikCoordinator,
+        description: LuxtronikSensorDescription,
+        device_info_ident: DeviceKey,
+    ) -> None:
+        """Init Luxtronik Status Sensor."""
+        super().__init__(hass, entry, coordinator, description, device_info_ident)
+        self._evu_tracker = LuxtronikEVUTracker()
 
     @callback
     def _handle_coordinator_update(
