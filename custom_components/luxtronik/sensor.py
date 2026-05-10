@@ -170,9 +170,6 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        # if not self.should_update():
-        #    return
-
         data = self.coordinator.data if data is None else data
         if data is None:
             return
