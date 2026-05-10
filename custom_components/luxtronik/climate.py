@@ -26,7 +26,6 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
@@ -179,13 +178,13 @@ async def async_setup_entry(
 
     data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
     if not data or CONF_COORDINATOR not in data:
-        raise ConfigEntryNotReady
+        return
 
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
 
     # Ensure coordinator has valid data before adding entities
     if not coordinator.last_update_success:
-        raise ConfigEntryNotReady
+        return
 
     unavailable_keys = [
         i.luxtronik_key

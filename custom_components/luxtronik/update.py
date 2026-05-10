@@ -13,7 +13,6 @@ from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -48,7 +47,7 @@ async def async_setup_entry(
 
     data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
     if not data or CONF_COORDINATOR not in data:
-        raise ConfigEntryNotReady
+        return
 
     coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
 
