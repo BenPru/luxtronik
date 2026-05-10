@@ -17,7 +17,9 @@ select = [
     "RUF",    # Ruff-specific rules
 ]
 ignore = [
-    "E501",   # Line too long - not enforced, formatter handles what it can
+    "E501",    # Line too long - not enforced, formatter handles what it can
+    "UP047",   # PEP 695 type params - unsafe auto-fix breaks decorator generics
+    "RUF005",  # Collection concatenation - stylistic, not a bug
     "RUF009",  # Mutable dataclass defaults - standard HA entity description pattern
     "RUF012",  # Mutable class variable - standard HA entity pattern
 ]
