@@ -39,7 +39,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     entity_description: LuxtronikEntityDescription
     next_update: datetime | None = None
 
-    _attr_cache: dict[SA, Any] = {}
     _entity_component_unrecorded_attributes = frozenset(
         {
             SA.LUXTRONIK_KEY,
@@ -54,6 +53,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     ) -> None:
         """Init LuxtronikEntity."""
         super().__init__(coordinator=coordinator)
+        self._attr_cache: dict[SA, Any] = {}
         self._device_info_ident = device_info_ident
         self._attr_extra_state_attributes = {
             SA.LUXTRONIK_KEY: f"{description.luxtronik_key.name[1:5]} {description.luxtronik_key.value}"
