@@ -79,24 +79,32 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.config_entries.async_update_entry(entry, title=new_title.strip())
 
-    setup_hass_services(hass, entry)
+    setup_hass_services(hass)
 
     LOGGER.info("Luxtronik integration setup completed for %s", entry.entry_id)
 
     return True
 
 
-def setup_hass_services(hass: HomeAssistant, entry: ConfigEntry):
-    """Home Assistant services."""
+def setup_hass_services(hass: HomeAssistant):
+    """Register Home Assistant services (once)."""
+
+    if hass.services.has_service(DOMAIN, SERVICE_WRITE):
+        return
 
     async def write_parameter(service):
         """Write a parameter to the Luxtronik heatpump."""
         parameter = service.data.get(ATTR_PARAMETER)
         # convert to int needed for Unknown parameters
         value = convert_to_int_if_possible(service.data.get(ATTR_VALUE))
-        data = hass.data[DOMAIN].get(entry.entry_id)
-        coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
-        await coordinator.async_write(parameter, value)
+        # Find the first available coordinator
+        domain_data = hass.data.get(DOMAIN, {})
+        for entry_data in domain_data.values():
+            if isinstance(entry_data, dict) and CONF_COORDINATOR in entry_data:
+                coordinator: LuxtronikCoordinator = entry_data[CONF_COORDINATOR]
+                await coordinator.async_write(parameter, value)
+                return
+        LOGGER.error("No active Luxtronik coordinator found for service call")
 
     hass.services.async_register(
         DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
@@ -109,6 +117,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data = hass.data[DOMAIN].pop(entry.entry_id)
         coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
         await coordinator.async_shutdown()
+
+    # Unregister service when no entries remain
+    if not hass.data.get(DOMAIN):
+        hass.services.async_remove(DOMAIN, SERVICE_WRITE)
 
     return unload_ok
 
