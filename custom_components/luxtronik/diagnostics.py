@@ -3,10 +3,10 @@
 # region Imports
 from __future__ import annotations
 
+from asyncio import timeout
 from collections.abc import Mapping
 from typing import Any
 
-from async_timeout import timeout
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME

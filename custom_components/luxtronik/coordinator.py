@@ -39,6 +39,7 @@ from .const import (
     LuxVisibility as LV,
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
+from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
 from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 
 # endregion Imports
@@ -132,11 +133,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.data
         except Exception as err:
             raise UpdateFailed(f"Write error: {err}") from err
-
-    def write(self, parameter, value) -> LuxtronikCoordinatorData:
-        """Write a parameter to the Luxtronik heatpump."""
-        LOGGER.info("Coordinator.write used, should not happen!")
-        return False
 
     @staticmethod
     async def connect(
@@ -403,23 +399,25 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.has_domestic_water
         if device_key == DeviceKey.cooling:
             return self.has_cooling
-            # return self.detect_cooling_present()
         raise NotImplementedError
 
     @property
     def has_heating(self) -> bool:
         """Is heating activated."""
-        return bool(self.get_value(LC.C0064_OPERATION_HOURS_HEATING) > 0)
+        val = self.get_value(LC.C0064_OPERATION_HOURS_HEATING)
+        return val is not None and val > 0
 
     @property
     def has_domestic_water(self) -> bool:
         """Is domestic water activated."""
-        return bool(self.get_value(LC.C0065_OPERATION_HOURS_DHW) > 0)
+        val = self.get_value(LC.C0065_OPERATION_HOURS_DHW)
+        return val is not None and val > 0
 
     @property
     def has_cooling(self) -> bool:
-        """Is domestic water activated."""
-        return bool(self.get_value(LC.C0066_OPERATION_HOURS_COOLING) > 0)
+        """Is cooling activated."""
+        val = self.get_value(LC.C0066_OPERATION_HOURS_COOLING)
+        return val is not None and val > 0
 
     def get_value(self, group_sensor_id: str | LP | LC | LV):
         """Get a sensor value from Luxtronik."""
@@ -493,7 +491,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Make sure a coordinator is shut down as well as its connection."""
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
-            # await self.client.disconnect()
             del self.client
         else:
             LOGGER.warning(
@@ -513,10 +510,19 @@ class LuxtronikConnectionError(HomeAssistantError):
         self.original = original
 
 
+_OVERRIDES_APPLIED = False
+
+
 async def connect_and_get_coordinator(
     hass: HomeAssistant, config: dict[str, Any]
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
+    global _OVERRIDES_APPLIED
+    if not _OVERRIDES_APPLIED:
+        update_Luxtronik_HeatpumpCodes()
+        update_Luxtronik_Parameters()
+        LOGGER.info("Custom HeatpumpCode and Parameters overrides applied.")
+        _OVERRIDES_APPLIED = True
 
     if isinstance(config, ConfigEntry):
         config = config.data

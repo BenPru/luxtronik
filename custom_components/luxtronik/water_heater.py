@@ -180,7 +180,8 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
                 )
                 return float(value)
         except (TypeError, ValueError):
-            return 60.0  # fallback default
+            return 60.0  # fallback on conversion error
+        return 60.0  # fallback when key missing
 
     @property
     def hvac_action(self) -> HVACAction | str | None:

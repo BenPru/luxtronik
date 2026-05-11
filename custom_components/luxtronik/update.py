@@ -7,12 +7,12 @@ from datetime import UTC, datetime, timedelta
 import re
 from typing import Final
 
-import aiohttp
 from awesomeversion import AwesomeVersion
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -189,36 +189,34 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
             return
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30
-                ) as response:
-                    if response.status != 200:
-                        raise Exception(f"HTTP error: {response.status}")
+            session = async_get_clientsession(self.hass)
+            async with session.get(
+                f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30
+            ) as response:
+                if response.status != 200:
+                    raise Exception(f"HTTP error: {response.status}")
 
-                    header_content_disposition = response.headers.get(
-                        "Content-Disposition", ""
-                    )
-                    filename_match = re.findall(
-                        "filename=(.+)", header_content_disposition
-                    )
-                    filename = filename_match[0] if filename_match else None
+                header_content_disposition = response.headers.get(
+                    "Content-Disposition", ""
+                )
+                filename_match = re.findall("filename=(.+)", header_content_disposition)
+                filename = filename_match[0] if filename_match else None
 
-                    self.__firmware_version_available_last_request = datetime.now(
-                        UTC
-                    ).timestamp()
+                self.__firmware_version_available_last_request = datetime.now(
+                    UTC
+                ).timestamp()
 
-                    self.__firmware_version_available = self.extract_firmware_version(
-                        filename
-                    )
+                self.__firmware_version_available = self.extract_firmware_version(
+                    filename
+                )
 
-                async with session.get(
-                    f"{CHANGELOG_URL}{download_id}", timeout=30
-                ) as response:
-                    if response.status != 200:
-                        raise Exception(f"HTTP error: {response.status}")
+            async with session.get(
+                f"{CHANGELOG_URL}{download_id}", timeout=30
+            ) as response:
+                if response.status != 200:
+                    raise Exception(f"HTTP error: {response.status}")
 
-                    self.__firmware_version_changelog = await response.text()
+                self.__firmware_version_changelog = await response.text()
 
         except Exception:
             LOGGER.warning(

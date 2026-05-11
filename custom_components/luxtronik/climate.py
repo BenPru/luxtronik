@@ -302,14 +302,10 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         """Handle updated data from the coordinator."""
-        # if not self.should_update():
-        #    return
-
         data = self.coordinator.data if data is None else data
         if data is None:
             return
 
-        # domain = self.entity_description.key.value
         mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
         self._attr_hvac_mode = (
             None if mode is None else self.entity_description.hvac_mode_mapping[mode]
@@ -323,10 +319,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             if lux_action is None
             else self.entity_description.hvac_action_mapping[lux_action]
         )
-        # self._attr_is_aux_heat = (
-        #     None if mode is None else mode == LuxMode.second_heatsource.value
-        # )
-        if self._attr_preset_mode == PRESET_NONE:  # or self._attr_is_aux_heat:
+        if self._attr_preset_mode == PRESET_NONE:
             self._last_hvac_mode_before_preset = None
 
         key = self.entity_description.luxtronik_key_current_temperature
@@ -337,7 +330,6 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
         elif key != LuxCalculation.UNSET:
             self._attr_current_temperature = get_sensor_data(data, key)
-        # LOGGER.info(f'[{domain}] self._attr_current_temperature={self._attr_current_temperature}')
 
         key_tar = self.entity_description.luxtronik_key_target_temperature
 
@@ -413,28 +405,6 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         data = await self.coordinator.async_write(lux_key.split(".")[1], lux_mode)
         self._handle_coordinator_update(data)
 
-    # async def async_turn_aux_heat_on(self) -> None:
-    #     """Turn auxiliary heater on."""
-    #     self._attr_is_aux_heat = True
-    #     if self._last_hvac_mode_before_preset is None:
-    #         self._last_hvac_mode_before_preset = self._attr_hvac_mode
-    #     await self._async_set_lux_mode(LuxMode.second_heatsource.value)
-
-    # async def async_turn_aux_heat_off(self) -> None:
-    #     """Turn auxiliary heater off."""
-    #     self._attr_is_aux_heat = False
-    #     if (self._last_hvac_mode_before_preset is None) or (
-    #         not self._last_hvac_mode_before_preset in HVAC_PRESET_MAPPING
-    #     ):
-    #         await self._async_set_lux_mode(LuxMode.automatic.value)
-    #     else:
-    #         lux_mode = [
-    #             k
-    #             for k, v in HVAC_PRESET_MAPPING.items()
-    #             if v == self._last_hvac_mode_before_preset
-    #         ][0]
-    #         await self._async_set_lux_mode(lux_mode)
-
     @property
     def extra_restore_state_data(self) -> LuxtronikClimateExtraStoredData:
         """Return luxtronik climate specific state data to be restored."""
@@ -442,6 +412,5 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             self._attr_target_temperature,
             self._attr_hvac_mode,
             self._attr_preset_mode,
-            # self._attr_is_aux_heat,
             self._last_hvac_mode_before_preset,
         )

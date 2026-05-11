@@ -1,7 +1,6 @@
 """Support for Luxtronik selectors"""
 
-from homeassistant.components.binary_sensor import ENTITY_ID_FORMAT
-from homeassistant.components.select import SelectEntity
+from homeassistant.components.select import ENTITY_ID_FORMAT, SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
