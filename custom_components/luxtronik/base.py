@@ -134,8 +134,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
 
     def should_update(self) -> bool:
         """Determine if the entity should update based on next_update."""
-        # if self.entity_description.luxtronik_key in [LP.P0049_PUMP_OPTIMIZATION,LC.C0017_DHW_TEMPERATURE]:
-        #    LOGGER.info("should_update,%s,%s,@ %s", self.entity_description.luxtronik_key, self.entity_description.update_interval,self.next_update)
         if self.entity_description.update_interval is None:
             return True
         return self.next_update is None or self.next_update <= utcnow()
@@ -146,9 +144,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     @callback
     def _handle_coordinator_update(self, force: bool = False) -> None:
         """Handle updated data from the coordinator."""
-        # if not force and not self.should_update():
-        #    return
-
         descr = self.entity_description
         value = self._get_value(descr.luxtronik_key)
 
@@ -157,9 +152,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             value = value.replace(tzinfo=time_zone)
 
         self._attr_state = value
-        # if self.entity_description.luxtronik_key == LC.C0146_APPROVAL_COOLING:
-        # LOGGER.info('[Base]Cooling Approval=%s',self._attr_state)
-        # LOGGER.info('[Base]on_state=%s',self.entity_description.on_state)
 
         icon_state = getattr(
             self,
@@ -178,9 +170,6 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
                 self._attr_icon += "-auto"
 
         self._enrich_extra_attributes()
-
-        # if descr.update_interval is not None:
-        #    self.next_update = dt_util.utcnow() + descr.update_interval
 
         self.async_write_ha_state()
 

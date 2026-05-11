@@ -39,6 +39,7 @@ from .const import (
     LuxVisibility as LV,
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
+from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
 from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 
 # endregion Imports
@@ -132,11 +133,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.data
         except Exception as err:
             raise UpdateFailed(f"Write error: {err}") from err
-
-    def write(self, parameter, value) -> LuxtronikCoordinatorData:
-        """Write a parameter to the Luxtronik heatpump."""
-        LOGGER.info("Coordinator.write used, should not happen!")
-        return False
 
     @staticmethod
     async def connect(
@@ -403,7 +399,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.has_domestic_water
         if device_key == DeviceKey.cooling:
             return self.has_cooling
-            # return self.detect_cooling_present()
         raise NotImplementedError
 
     @property
@@ -496,7 +491,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Make sure a coordinator is shut down as well as its connection."""
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
-            # await self.client.disconnect()
             del self.client
         else:
             LOGGER.warning(
@@ -516,10 +510,19 @@ class LuxtronikConnectionError(HomeAssistantError):
         self.original = original
 
 
+_OVERRIDES_APPLIED = False
+
+
 async def connect_and_get_coordinator(
     hass: HomeAssistant, config: dict[str, Any]
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
+    global _OVERRIDES_APPLIED
+    if not _OVERRIDES_APPLIED:
+        update_Luxtronik_HeatpumpCodes()
+        update_Luxtronik_Parameters()
+        LOGGER.info("Custom HeatpumpCode and Parameters overrides applied.")
+        _OVERRIDES_APPLIED = True
 
     if isinstance(config, ConfigEntry):
         config = config.data

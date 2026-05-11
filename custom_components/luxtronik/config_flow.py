@@ -130,7 +130,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 ]
 
                 LOGGER.info("Presenting selection form for available devices")
-                LOGGER.info(f"device_options_list={device_options_list}")
+                LOGGER.info("device_options_list=%s", device_options_list)
 
                 return self.async_show_form(
                     step_id="select_devices",
