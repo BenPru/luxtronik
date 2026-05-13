@@ -2,8 +2,8 @@
 
 from homeassistant.components.select import ENTITY_ID_FORMAT, SelectEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
