@@ -1,4 +1,4 @@
-from homeassistant.helpers.entity import EntityCategory
+from homeassistant.const import EntityCategory
 
 from .const import (
     DeviceKey,
