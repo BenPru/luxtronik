@@ -265,29 +265,29 @@ class LuxSwitchoffReason(Enum):
 
 
 LUX_STATE_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
-    LuxOperationMode.heating.value: "mdi:radiator",
-    LuxOperationMode.domestic_water.value: "mdi:waves",
-    LuxOperationMode.swimming_pool_solar.value: "mdi:pool",
-    LuxOperationMode.evu.value: "mdi:power-plug-off",
-    LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
-    LuxOperationMode.no_request.value: "mdi:hvac-off",  # "mdi:heat-pump-outline",  # "mdi:radiator-disabled",
-    LuxOperationMode.heating_external_source.value: "mdi:patio-heater",
-    LuxOperationMode.cooling.value: "mdi:air-conditioner",
+    LuxOperationMode.heating: "mdi:radiator",
+    LuxOperationMode.domestic_water: "mdi:waves",
+    LuxOperationMode.swimming_pool_solar: "mdi:pool",
+    LuxOperationMode.evu: "mdi:power-plug-off",
+    LuxOperationMode.defrost: "mdi:car-defrost-rear",
+    LuxOperationMode.no_request: "mdi:hvac-off",  # "mdi:heat-pump-outline",  # "mdi:radiator-disabled",
+    LuxOperationMode.heating_external_source: "mdi:patio-heater",
+    LuxOperationMode.cooling: "mdi:air-conditioner",
 }
 
 LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]] = {
-    LuxOperationMode.swimming_pool_solar.value: "mdi:pool",
-    LuxOperationMode.evu.value: "mdi:power-plug-off",
-    LuxOperationMode.defrost.value: "mdi:car-defrost-rear",
-    LuxOperationMode.no_request.value: "mdi:snowflake-off",
-    LuxOperationMode.cooling.value: "mdi:air-conditioner",
+    LuxOperationMode.swimming_pool_solar: "mdi:pool",
+    LuxOperationMode.evu: "mdi:power-plug-off",
+    LuxOperationMode.defrost: "mdi:car-defrost-rear",
+    LuxOperationMode.no_request: "mdi:snowflake-off",
+    LuxOperationMode.cooling: "mdi:air-conditioner",
 }
 
 LUX_SMART_GRID_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
-    LuxSmartGridStatus.locked.value: "mdi:cancel",  # EVU lock - Blocked
-    LuxSmartGridStatus.reduced.value: "mdi:arrow-down-circle",  # Reduced operation
-    LuxSmartGridStatus.normal.value: "mdi:check-circle",  # Normal operation
-    LuxSmartGridStatus.increased.value: "mdi:arrow-up-circle",  # Increased operation
+    LuxSmartGridStatus.locked: "mdi:cancel",  # EVU lock - Blocked
+    LuxSmartGridStatus.reduced: "mdi:arrow-down-circle",  # Reduced operation
+    LuxSmartGridStatus.normal: "mdi:check-circle",  # Normal operation
+    LuxSmartGridStatus.increased: "mdi:arrow-up-circle",  # Increased operation
 }
 
 LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]

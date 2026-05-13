@@ -58,46 +58,46 @@ MIN_TEMPERATURE = 8
 MAX_TEMPERATURE = 28
 
 HVAC_ACTION_MAPPING_HEAT: dict[str, str] = {
-    LuxOperationMode.heating.value: HVACAction.HEATING.value,
-    LuxOperationMode.domestic_water.value: HVACAction.IDLE.value,
-    LuxOperationMode.swimming_pool_solar.value: STATE_UNKNOWN,
-    LuxOperationMode.evu.value: HVACAction.IDLE.value,
-    LuxOperationMode.defrost.value: HVACAction.IDLE.value,
-    LuxOperationMode.no_request.value: HVACAction.IDLE.value,
-    LuxOperationMode.heating_external_source.value: HVACAction.HEATING.value,
-    LuxOperationMode.cooling.value: HVACAction.IDLE.value,
+    LuxOperationMode.heating: HVACAction.HEATING.value,
+    LuxOperationMode.domestic_water: HVACAction.IDLE.value,
+    LuxOperationMode.swimming_pool_solar: STATE_UNKNOWN,
+    LuxOperationMode.evu: HVACAction.IDLE.value,
+    LuxOperationMode.defrost: HVACAction.IDLE.value,
+    LuxOperationMode.no_request: HVACAction.IDLE.value,
+    LuxOperationMode.heating_external_source: HVACAction.HEATING.value,
+    LuxOperationMode.cooling: HVACAction.IDLE.value,
 }
 
 HVAC_ACTION_MAPPING_COOL: dict[str, str] = {
-    LuxOperationMode.heating.value: HVACAction.IDLE.value,
-    LuxOperationMode.domestic_water.value: HVACAction.IDLE.value,
-    LuxOperationMode.swimming_pool_solar.value: STATE_UNKNOWN,
-    LuxOperationMode.evu.value: HVACAction.IDLE.value,
-    LuxOperationMode.defrost.value: HVACAction.IDLE.value,
-    LuxOperationMode.no_request.value: HVACAction.IDLE.value,
-    LuxOperationMode.heating_external_source.value: HVACAction.IDLE.value,
-    LuxOperationMode.cooling.value: HVACAction.COOLING.value,
+    LuxOperationMode.heating: HVACAction.IDLE.value,
+    LuxOperationMode.domestic_water: HVACAction.IDLE.value,
+    LuxOperationMode.swimming_pool_solar: STATE_UNKNOWN,
+    LuxOperationMode.evu: HVACAction.IDLE.value,
+    LuxOperationMode.defrost: HVACAction.IDLE.value,
+    LuxOperationMode.no_request: HVACAction.IDLE.value,
+    LuxOperationMode.heating_external_source: HVACAction.IDLE.value,
+    LuxOperationMode.cooling: HVACAction.COOLING.value,
 }
 
 HVAC_MODE_MAPPING_HEAT: dict[str, str] = {
-    LuxMode.off.value: HVACMode.OFF.value,
-    LuxMode.automatic.value: HVACMode.HEAT.value,
-    LuxMode.second_heatsource.value: HVACMode.HEAT.value,
-    LuxMode.party.value: HVACMode.HEAT.value,
-    LuxMode.holidays.value: HVACMode.HEAT.value,
+    LuxMode.off: HVACMode.OFF.value,
+    LuxMode.automatic: HVACMode.HEAT.value,
+    LuxMode.second_heatsource: HVACMode.HEAT.value,
+    LuxMode.party: HVACMode.HEAT.value,
+    LuxMode.holidays: HVACMode.HEAT.value,
 }
 
 HVAC_MODE_MAPPING_COOL: dict[str, str] = {
-    LuxMode.off.value: HVACMode.OFF.value,
-    LuxMode.automatic.value: HVACMode.COOL.value,
+    LuxMode.off: HVACMode.OFF.value,
+    LuxMode.automatic: HVACMode.COOL.value,
 }
 
 HVAC_PRESET_MAPPING: dict[str, str] = {
-    LuxMode.off.value: PRESET_NONE,
-    LuxMode.automatic.value: PRESET_NONE,
-    LuxMode.party.value: PRESET_COMFORT,
-    LuxMode.second_heatsource.value: PRESET_BOOST,
-    LuxMode.holidays.value: PRESET_AWAY,
+    LuxMode.off: PRESET_NONE,
+    LuxMode.automatic: PRESET_NONE,
+    LuxMode.party: PRESET_COMFORT,
+    LuxMode.second_heatsource: PRESET_BOOST,
+    LuxMode.holidays: PRESET_AWAY,
 }
 
 THERMOSTATS: list[LuxtronikClimateDescription] = [
@@ -114,7 +114,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.heating.value,
+        luxtronik_action_active=LuxOperationMode.heating,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP,
@@ -136,7 +136,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.heating.value,
+        luxtronik_action_active=LuxOperationMode.heating,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
@@ -159,7 +159,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.cooling.value,
+        luxtronik_action_active=LuxOperationMode.cooling,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
@@ -366,9 +366,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     async def async_turn_on(self) -> None:
         await self.async_set_hvac_mode(
             HVACMode[
-                self.entity_description.hvac_mode_mapping[
-                    LuxMode.automatic.value
-                ].upper()
+                self.entity_description.hvac_mode_mapping[LuxMode.automatic].upper()
             ]
         )
 
@@ -397,7 +395,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             lux_mode = self._last_hvac_mode_before_preset
             self._last_hvac_mode_before_preset = None
         else:
-            lux_mode = LuxMode.off.value
+            lux_mode = LuxMode.off
         await self._async_set_lux_mode(lux_mode)
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:
