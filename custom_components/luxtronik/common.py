@@ -111,6 +111,7 @@ def correct_key_value(
     # prevent dealing with None value, and skip unnecessary processing
     if (
         value is None
+        or coordinator is None
         or sensor_id is None
         or sensor_id
         not in [
