@@ -6,9 +6,10 @@ from __future__ import annotations
 from typing import Any
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import AbortFlow, FlowResult
+from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.helpers import selector
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 import voluptuous as vol
@@ -75,7 +76,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     def _create_entry(
         self, config: dict[str, Any], coordinator: LuxtronikCoordinator
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         if CONF_HA_SENSOR_PREFIX not in config:
             config[CONF_HA_SENSOR_PREFIX] = f"luxtronik_{coordinator.unique_id}"
 
@@ -93,7 +94,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
         try:
             LOGGER.info("Starting async_step_user")
@@ -171,7 +172,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_select_devices(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle user selection of a discovered device."""
         if user_input is None:
             return await self.async_step_user()
@@ -198,7 +199,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_manual_entry(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle manual entry of host and port."""
         if user_input is None:
             LOGGER.info("Showing manual entry form")
@@ -272,7 +273,9 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 exc_info=err,
             )
 
-    async def async_step_dhcp(self, discovery_info: DhcpServiceInfo) -> FlowResult:
+    async def async_step_dhcp(
+        self, discovery_info: DhcpServiceInfo
+    ) -> ConfigFlowResult:
         """Prepare configuration for a DHCP discovered Luxtronik heatpump."""
         try:
             LOGGER.info(
@@ -366,13 +369,13 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Start the options flow."""
         return await self.async_step_user(user_input)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the user options step."""
         errors: dict[str, str] = {}
 
