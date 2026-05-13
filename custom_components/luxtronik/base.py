@@ -33,10 +33,13 @@ from .model import LuxtronikEntityAttributeDescription, LuxtronikEntityDescripti
 # endregion Imports
 
 
-class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
+class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    CoordinatorEntity[LuxtronikCoordinator],
+    RestoreEntity,
+):
     """Luxtronik base device."""
 
-    entity_description: LuxtronikEntityDescription
+    entity_description: DescriptionT
     next_update: datetime | None = None
 
     _entity_component_unrecorded_attributes = frozenset(
@@ -48,7 +51,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
     def __init__(
         self,
         coordinator: LuxtronikCoordinator,
-        description: LuxtronikEntityDescription,
+        description: DescriptionT,
         device_info_ident: DeviceKey,
     ) -> None:
         """Init LuxtronikEntity."""
@@ -73,7 +76,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             description.entity_registry_enabled_default = coordinator.entity_visible(
                 description
             )
-        self.entity_description = description
+        self.entity_description = description  # pyright: ignore[reportIncompatibleVariableOverride]
         self._attr_device_info = coordinator.get_device(device_info_ident)
 
         translation_key = (

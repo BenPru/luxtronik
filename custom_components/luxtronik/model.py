@@ -96,7 +96,7 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     state_class: str | None = None
 
 
-class LuxtronikSensorDescription(
+class LuxtronikSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     LuxtronikEntityDescription,
     SensorEntityDescription,
     frozen_or_thawed=True,
@@ -108,7 +108,7 @@ class LuxtronikSensorDescription(
     native_precision: int | None = None
 
 
-class LuxtronikIndexSensorDescription(
+class LuxtronikIndexSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     LuxtronikSensorDescription,
     SensorEntityDescription,
     frozen_or_thawed=True,

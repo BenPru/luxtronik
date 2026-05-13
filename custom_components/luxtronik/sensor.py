@@ -117,10 +117,9 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
+class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     """Luxtronik Sensor Entity."""
 
-    entity_description: LuxtronikSensorDescription
     _coordinator: LuxtronikCoordinator
 
     _unrecorded_attributes = frozenset(
@@ -193,10 +192,8 @@ class LuxtronikSensorEntity(LuxtronikEntity, SensorEntity):
         super()._handle_coordinator_update()
 
 
-class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
+class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
     """Luxtronik Status Sensor with extended attr."""
-
-    entity_description: LuxtronikSensorDescription
 
     _coordinator: LuxtronikCoordinator
 
@@ -388,11 +385,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
         self.async_write_ha_state()
 
 
-class LuxtronikIndexSensor(LuxtronikSensorEntity, SensorEntity):
+class LuxtronikIndexSensor(LuxtronikSensorEntity):
     _min_index = 0
     _max_index = 4
 
-    entity_description: LuxtronikIndexSensorDescription
+    entity_description: LuxtronikIndexSensorDescription  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
 
     @callback
     def _handle_coordinator_update(

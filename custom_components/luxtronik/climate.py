@@ -28,7 +28,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
+from homeassistant.helpers.restore_state import ExtraStoredData
 from packaging.version import Version
 
 from .base import LuxtronikEntity
@@ -222,11 +222,10 @@ class LuxtronikClimateExtraStoredData(ExtraStoredData):
         return asdict(self)
 
 
-class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
+class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     """The thermostat class for Luxtronik thermostats."""
 
     # region Attributes
-    entity_description: LuxtronikClimateDescription
 
     _last_hvac_mode_before_preset: str | None = None
 
