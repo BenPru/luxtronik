@@ -2,8 +2,8 @@
 
 from homeassistant.components.select import ENTITY_ID_FORMAT, SelectEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
@@ -60,28 +60,111 @@ async def async_setup_entry(
         name="Heating mode",
     )
 
-    entities: list[LuxtronikEntity] = [
+    heating_mk1_mode_description = LuxtronikEntityDescription(
+        key=SK.HEATING,
+        device_key=DeviceKey.heating,
+        luxtronik_key=LuxParameter.P0695_MODE_HZ_MK1,
+        name="Heating mode MK1",
+        entity_registry_enabled_default=False,
+    )
+
+    heating_mk2_mode_description = LuxtronikEntityDescription(
+        key=SK.HEATING,
+        device_key=DeviceKey.heating,
+        luxtronik_key=LuxParameter.P0696_MODE_HZ_MK2,
+        name="Heating mode MK2",
+        entity_registry_enabled_default=False,
+    )
+
+    heating_mk3_mode_description = LuxtronikEntityDescription(
+        key=SK.HEATING,
+        device_key=DeviceKey.heating,
+        luxtronik_key=LuxParameter.P0779_MODE_HZ_MK3,
+        name="Heating mode MK3",
+        entity_registry_enabled_default=False,
+    )
+
+    mode_options = [
+        LuxMode.off,
+        LuxMode.automatic,
+        LuxMode.second_heatsource,
+        LuxMode.party,
+        LuxMode.holidays,
+    ]
+
+    mode_mk_options = [
+        LuxMode.off,
+        LuxMode.automatic,
+        LuxMode.second_heatsource,
+        LuxMode.party,
+        LuxMode.holidays,
+    ]
+
+    entities: list[LuxtronikEntity[LuxtronikEntityDescription]] = [
         LuxtronikThermalDesinfectionDaySelector(
             entry,
             coordinator,
             thermal_desinfection_description,
             thermal_desinfection_description.device_key,
         ),
-        LuxtronikDhwModeSelector(
-            entry, coordinator, dhw_description, dhw_description.device_key
+
+        LuxtronikModeSelector(
+            entry=entry,
+            coordinator=coordinator,
+            description=dhw_description,
+            device_info_ident=DeviceKey.domestic_water,
+            lux_parameter=LuxParameter.P0004_MODE_DHW,
+            options=mode_options,
+            entity_suffix="dhw_mode",
         ),
-        LuxtronikHeatingModeSelector(
-            entry,
-            coordinator,
-            heating_mode_description,
-            heating_mode_description.device_key,
+
+        LuxtronikModeSelector(
+            entry=entry,
+            coordinator=coordinator,
+            description=heating_mode_description,
+            device_info_ident=DeviceKey.heating,
+            lux_parameter=LuxParameter.P0003_MODE_HEATING,
+            options=mode_options,
+            entity_suffix="heating_mode",
+        ),
+
+        LuxtronikModeSelector(
+            entry=entry,
+            coordinator=coordinator,
+            description=heating_mk1_mode_description,
+            device_info_ident=DeviceKey.heating,
+            lux_parameter=LuxParameter.P0695_MODE_HZ_MK1,
+            options=mode_mk_options,
+            entity_suffix="heating_mode_mk1",
+        ),
+
+        LuxtronikModeSelector(
+            entry=entry,
+            coordinator=coordinator,
+            description=heating_mk2_mode_description,
+            device_info_ident=DeviceKey.heating,
+            lux_parameter=LuxParameter.P0696_MODE_HZ_MK2,
+            options=mode_mk_options,
+            entity_suffix="heating_mode_mk2",
+        ),
+
+        LuxtronikModeSelector(
+            entry=entry,
+            coordinator=coordinator,
+            description=heating_mk3_mode_description,
+            device_info_ident=DeviceKey.heating,
+            lux_parameter=LuxParameter.P0779_MODE_HZ_MK3,
+            options=mode_mk_options,
+            entity_suffix="heating_mode_mk3",
         ),
     ]
 
     async_add_entities(entities, True)
 
 
-class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
+class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikEntityDescription], SelectEntity
+):
     """Luxtronik Thermal Desinfection Day Selector Entity."""
 
     def __init__(
@@ -167,151 +250,86 @@ class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
         self._attr_current_option = selected_day
 
 
-class LuxtronikDhwModeSelector(LuxtronikEntity, SelectEntity):
-    """Luxtronik Domestic Hot Water Mode Selector."""
+class LuxtronikModeSelector(LuxtronikEntity, SelectEntity):
+    """Generic Luxtronik Mode Selector."""
 
     def __init__(
         self,
+        *,
         entry: ConfigEntry,
         coordinator: LuxtronikCoordinator,
         description: LuxtronikEntityDescription,
         device_info_ident: DeviceKey,
+        lux_parameter: LuxParameter,
+        options: list[str],
+        entity_suffix: str,
     ) -> None:
         super().__init__(
             coordinator=coordinator,
             description=description,
             device_info_ident=device_info_ident,
         )
-        self._attr_options = [
-            LuxMode.off.value,
-            LuxMode.automatic.value,
-            LuxMode.second_heatsource.value,
-            LuxMode.party.value,
-            LuxMode.holidays.value,
-        ]
-        self._attr_current_option = LuxMode.off.value
+
+        self._lux_parameter = lux_parameter
+        self._attr_options = options
+        self._attr_current_option = None
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_dhw_mode")
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{entity_suffix}")
         self._attr_unique_id = self.entity_id
+
+    # ---------------------------------------------------------------------
 
     @callback
     def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
         super()._handle_coordinator_update()
+
         data = self.coordinator.data if data is None else data
         if data is None:
             return
 
-        param = LuxParameter.P0004_MODE_DHW.value
-        value = get_sensor_data(data, param)
-        LOGGER.debug("DHW mode raw value from coordinator: %r", value)
-
+        value = get_sensor_data(data, self._lux_parameter)
         current = str(value)
+
+        LOGGER.debug(
+            "%s raw value from coordinator: %r",
+            self.entity_id,
+            current,
+        )
 
         if current not in self._attr_options:
             LOGGER.warning(
-                "DHW mode value %r not in options %r", current, self._attr_options
+                "%s value %r not in options %r",
+                self.entity_id,
+                current,
+                self._attr_options,
             )
             return
 
         if self._attr_current_option != current:
-            LOGGER.debug(
-                "DHW mode changed: %r -> %r", self._attr_current_option, current
-            )
             self._attr_current_option = current
             self.async_write_ha_state()
+
+    # ---------------------------------------------------------------------
 
     async def async_select_option(self, option: str) -> None:
         if option not in self._attr_options:
             LOGGER.warning(
-                "DHW mode value %r not in options %r", option, self._attr_options
+                "Selected value %r not in options %r",
+                option,
+                self._attr_options,
             )
             return
 
-        self._attr_current_option = option
-        param = LuxParameter.P0004_MODE_DHW.value
+        LOGGER.debug("Setting %s to %r", self.entity_id, option)
 
-        LOGGER.debug("Setting DHW mode to %r", option)
+        self._attr_current_option = option
 
         updated_data = await self.coordinator.async_write(
-            param.split(".")[1],
+            self._lux_parameter.split(".")[1],
             option,
         )
         self._handle_coordinator_update(updated_data)
-
-
-class LuxtronikHeatingModeSelector(LuxtronikEntity, SelectEntity):
-    """Luxtronik Heating Mode Selector."""
-
-    def __init__(
-        self,
-        entry: ConfigEntry,
-        coordinator: LuxtronikCoordinator,
-        description: LuxtronikEntityDescription,
-        device_info_ident: DeviceKey,
-    ) -> None:
-        super().__init__(
-            coordinator=coordinator,
-            description=description,
-            device_info_ident=device_info_ident,
-        )
-        self._attr_options = [
-            LuxMode.off.value,
-            LuxMode.automatic.value,
-            LuxMode.second_heatsource.value,
-            LuxMode.party.value,
-            LuxMode.holidays.value,
-        ]
-        self._attr_current_option = LuxMode.off.value
-
-        prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_heating_mode")
-        self._attr_unique_id = self.entity_id
-
-    @callback
-    def _handle_coordinator_update(
-        self, data: LuxtronikCoordinatorData | None = None
-    ) -> None:
-        super()._handle_coordinator_update()
-        data = self.coordinator.data if data is None else data
-        if data is None:
-            return
-
-        param = LuxParameter.P0003_MODE_HEATING.value
-        value = get_sensor_data(data, param)
-        LOGGER.debug("Heating mode raw value from coordinator: %r", value)
-
-        current = str(value)
-
-        if current not in self._attr_options:
-            LOGGER.warning(
-                "Heating mode value %r not in options %r", current, self._attr_options
-            )
-            return
-
-        if self._attr_current_option != current:
-            LOGGER.debug(
-                "Heating mode changed: %r -> %r", self._attr_current_option, current
-            )
-            self._attr_current_option = current
-            self.async_write_ha_state()
-
-    async def async_select_option(self, option: str) -> None:
-        if option not in self._attr_options:
-            LOGGER.warning(
-                "Selected heating mode %r not in options %r", option, self._attr_options
-            )
-            return
-
-        self._attr_current_option = option
-        param = LuxParameter.P0003_MODE_HEATING.value
-
-        LOGGER.debug("Setting heating mode to %r", option)
-
-        updated_data = await self.coordinator.async_write(
-            param.split(".")[1],
-            option,
-        )
-        self._handle_coordinator_update(updated_data)
+        

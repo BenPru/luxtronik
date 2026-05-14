@@ -7,13 +7,13 @@ from datetime import UTC, datetime, timedelta
 import re
 from typing import Final
 
+from aiohttp import ClientTimeout
 from awesomeversion import AwesomeVersion
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_UNAVAILABLE
+from homeassistant.const import STATE_UNAVAILABLE, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import LuxtronikEntity
@@ -64,10 +64,10 @@ async def async_setup_entry(
     async_add_entities(entities, True)
 
 
-class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
+class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikUpdateEntityDescription], UpdateEntity
+):
     """Representation of Luxtronik firmware update entity."""
-
-    entity_description: LuxtronikUpdateEntityDescription
 
     _attr_title = "Luxtronik Firmware Version"
     _attr_supported_features: UpdateEntityFeature = (
@@ -191,7 +191,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         try:
             session = async_get_clientsession(self.hass)
             async with session.get(
-                f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30
+                f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=ClientTimeout(total=30)
             ) as response:
                 if response.status != 200:
                     raise Exception(f"HTTP error: {response.status}")
@@ -211,7 +211,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 )
 
             async with session.get(
-                f"{CHANGELOG_URL}{download_id}", timeout=30
+                f"{CHANGELOG_URL}{download_id}", timeout=ClientTimeout(total=30)
             ) as response:
                 if response.status != 200:
                     raise Exception(f"HTTP error: {response.status}")

@@ -44,11 +44,11 @@ from .model import LuxtronikWaterHeaterDescription
 
 # region Const
 OPERATION_MAPPING: dict[str, str] = {
-    LuxMode.off.value: STATE_OFF,
-    LuxMode.automatic.value: STATE_HEAT_PUMP,
-    LuxMode.second_heatsource.value: STATE_ELECTRIC,
-    LuxMode.party.value: STATE_PERFORMANCE,
-    LuxMode.holidays.value: STATE_HEAT_PUMP,
+    LuxMode.off: STATE_OFF,
+    LuxMode.automatic: STATE_HEAT_PUMP,
+    LuxMode.second_heatsource: STATE_ELECTRIC,
+    LuxMode.party: STATE_PERFORMANCE,
+    LuxMode.holidays: STATE_HEAT_PUMP,
 }
 
 WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
@@ -113,7 +113,9 @@ async def async_setup_entry(
         if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
-        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+        # Not all models/firmware versions support every parameter;
+        # missing keys are expected and not an error.
+        LOGGER.debug("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -128,10 +130,10 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
+class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikWaterHeaterDescription], WaterHeaterEntity
+):
     """Representation of an Luxtronik water heater."""
-
-    entity_description: LuxtronikWaterHeaterDescription
 
     _attr_min_temp = DEFAULT_DHW_MIN_TEMPERATURE
     _attr_target_temperature_step = 0.5
@@ -209,9 +211,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self._current_action = get_sensor_data(
             data, descr.luxtronik_key_current_action.value
         )
-        self._attr_is_away_mode_on = (
-            None if mode is None else mode == LuxMode.holidays.value
-        )
+        self._attr_is_away_mode_on = None if mode is None else mode == LuxMode.holidays
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
 
@@ -252,7 +252,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     async def async_turn_away_mode_on(self) -> None:
         """Turn away mode on."""
         self._last_operation_mode_before_away = self._attr_current_operation
-        await self._async_set_lux_mode(LuxMode.holidays.value)
+        await self._async_set_lux_mode(LuxMode.holidays)
 
     async def async_turn_away_mode_off(self) -> None:
         """Turn away mode off."""
@@ -260,6 +260,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             self._attr_operation_list is not None
             and self._last_operation_mode_before_away not in self._attr_operation_list
         ):
-            await self._async_set_lux_mode(LuxMode.automatic.value)
+            await self._async_set_lux_mode(LuxMode.automatic)
         else:
             await self.async_set_operation_mode(self._last_operation_mode_before_away)

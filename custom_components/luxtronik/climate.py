@@ -3,7 +3,7 @@
 # region Imports
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any
 
 from homeassistant.components.climate import (
@@ -28,7 +28,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
+from homeassistant.helpers.restore_state import ExtraStoredData
 from packaging.version import Version
 
 from .base import LuxtronikEntity
@@ -58,46 +58,46 @@ MIN_TEMPERATURE = 8
 MAX_TEMPERATURE = 28
 
 HVAC_ACTION_MAPPING_HEAT: dict[str, str] = {
-    LuxOperationMode.heating.value: HVACAction.HEATING.value,
-    LuxOperationMode.domestic_water.value: HVACAction.IDLE.value,
-    LuxOperationMode.swimming_pool_solar.value: STATE_UNKNOWN,
-    LuxOperationMode.evu.value: HVACAction.IDLE.value,
-    LuxOperationMode.defrost.value: HVACAction.IDLE.value,
-    LuxOperationMode.no_request.value: HVACAction.IDLE.value,
-    LuxOperationMode.heating_external_source.value: HVACAction.HEATING.value,
-    LuxOperationMode.cooling.value: HVACAction.IDLE.value,
+    LuxOperationMode.heating: HVACAction.HEATING.value,
+    LuxOperationMode.domestic_water: HVACAction.IDLE.value,
+    LuxOperationMode.swimming_pool_solar: STATE_UNKNOWN,
+    LuxOperationMode.evu: HVACAction.IDLE.value,
+    LuxOperationMode.defrost: HVACAction.IDLE.value,
+    LuxOperationMode.no_request: HVACAction.IDLE.value,
+    LuxOperationMode.heating_external_source: HVACAction.HEATING.value,
+    LuxOperationMode.cooling: HVACAction.IDLE.value,
 }
 
 HVAC_ACTION_MAPPING_COOL: dict[str, str] = {
-    LuxOperationMode.heating.value: HVACAction.IDLE.value,
-    LuxOperationMode.domestic_water.value: HVACAction.IDLE.value,
-    LuxOperationMode.swimming_pool_solar.value: STATE_UNKNOWN,
-    LuxOperationMode.evu.value: HVACAction.IDLE.value,
-    LuxOperationMode.defrost.value: HVACAction.IDLE.value,
-    LuxOperationMode.no_request.value: HVACAction.IDLE.value,
-    LuxOperationMode.heating_external_source.value: HVACAction.IDLE.value,
-    LuxOperationMode.cooling.value: HVACAction.COOLING.value,
+    LuxOperationMode.heating: HVACAction.IDLE.value,
+    LuxOperationMode.domestic_water: HVACAction.IDLE.value,
+    LuxOperationMode.swimming_pool_solar: STATE_UNKNOWN,
+    LuxOperationMode.evu: HVACAction.IDLE.value,
+    LuxOperationMode.defrost: HVACAction.IDLE.value,
+    LuxOperationMode.no_request: HVACAction.IDLE.value,
+    LuxOperationMode.heating_external_source: HVACAction.IDLE.value,
+    LuxOperationMode.cooling: HVACAction.COOLING.value,
 }
 
 HVAC_MODE_MAPPING_HEAT: dict[str, str] = {
-    LuxMode.off.value: HVACMode.OFF.value,
-    LuxMode.automatic.value: HVACMode.HEAT.value,
-    LuxMode.second_heatsource.value: HVACMode.HEAT.value,
-    LuxMode.party.value: HVACMode.HEAT.value,
-    LuxMode.holidays.value: HVACMode.HEAT.value,
+    LuxMode.off: HVACMode.OFF.value,
+    LuxMode.automatic: HVACMode.HEAT.value,
+    LuxMode.second_heatsource: HVACMode.HEAT.value,
+    LuxMode.party: HVACMode.HEAT.value,
+    LuxMode.holidays: HVACMode.HEAT.value,
 }
 
 HVAC_MODE_MAPPING_COOL: dict[str, str] = {
-    LuxMode.off.value: HVACMode.OFF.value,
-    LuxMode.automatic.value: HVACMode.COOL.value,
+    LuxMode.off: HVACMode.OFF.value,
+    LuxMode.automatic: HVACMode.COOL.value,
 }
 
 HVAC_PRESET_MAPPING: dict[str, str] = {
-    LuxMode.off.value: PRESET_NONE,
-    LuxMode.automatic.value: PRESET_NONE,
-    LuxMode.party.value: PRESET_COMFORT,
-    LuxMode.second_heatsource.value: PRESET_BOOST,
-    LuxMode.holidays.value: PRESET_AWAY,
+    LuxMode.off: PRESET_NONE,
+    LuxMode.automatic: PRESET_NONE,
+    LuxMode.party: PRESET_COMFORT,
+    LuxMode.second_heatsource: PRESET_BOOST,
+    LuxMode.holidays: PRESET_AWAY,
 }
 
 THERMOSTATS: list[LuxtronikClimateDescription] = [
@@ -114,11 +114,12 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.heating.value,
+        luxtronik_action_active=LuxOperationMode.heating,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
+        translation_key_name="heating_controller",
         # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         min_firmware_version=Version("3.90.1"),
@@ -136,13 +137,14 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
         luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.heating.value,
+        luxtronik_action_active=LuxOperationMode.heating,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
+        translation_key_name="cooling_controller",
         # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         max_firmware_version=Version("3.90.0"),
@@ -159,11 +161,12 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key=LuxParameter.P0108_MODE_COOLING,
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
-        luxtronik_action_active=LuxOperationMode.cooling.value,
+        luxtronik_action_active=LuxOperationMode.cooling,
         # luxtronik_key_target_temperature_high=LuxParameter,
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
+        translation_key_name="cooling_controller",
         # visibility=LuxVisibility.V0005_COOLING,
         device_key=DeviceKey.cooling,
     ),
@@ -192,7 +195,9 @@ async def async_setup_entry(
         if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
-        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+        # Not all models/firmware versions support every parameter;
+        # missing keys are expected and not an error.
+        LOGGER.debug("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -222,11 +227,10 @@ class LuxtronikClimateExtraStoredData(ExtraStoredData):
         return asdict(self)
 
 
-class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
+class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     """The thermostat class for Luxtronik thermostats."""
 
     # region Attributes
-    entity_description: LuxtronikClimateDescription
 
     _last_hvac_mode_before_preset: str | None = None
 
@@ -257,6 +261,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             device_info_ident=description.device_key,
         )
 
+        # ✅ IMPORTANT: start from base-processed description (has translation_key set)
+        description = self.entity_description
+
         domain = description.key.value
         configured_indoor_temp_sensor = entry.options.get(
             CONF_HA_SENSOR_INDOOR_TEMPERATURE,
@@ -264,23 +271,33 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         )
 
         if configured_indoor_temp_sensor is not None:
-            description.luxtronik_key_current_temperature = (
-                configured_indoor_temp_sensor
+            description = replace(
+                description,
+                luxtronik_key_current_temperature=configured_indoor_temp_sensor,
             )
             LOGGER.debug(
-                f"[INIT,{domain}] Using configured indoor temp sensor: {description.luxtronik_key_current_temperature}"
+                "[INIT,%s] Using configured indoor temp sensor: %s",
+                domain,
+                description.luxtronik_key_current_temperature,
             )
         elif description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
-            description.luxtronik_key_current_temperature = (
-                LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE
+            description = replace(
+                description,
+                luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
             )
             LOGGER.debug(
-                f"[INIT,{domain}] Using default indoor temp sensor: {description.luxtronik_key_current_temperature}"
+                "[INIT,%s] Using default indoor temp sensor: %s",
+                domain,
+                description.luxtronik_key_current_temperature,
             )
 
+        # ✅ Set the final description ONCE
+        self.entity_description = description
+
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key.value}")
         self._attr_unique_id = self.entity_id
+
         self._attr_temperature_unit = description.temperature_unit
         self._attr_hvac_modes = description.hvac_modes
         self._attr_preset_modes = description.preset_modes
@@ -366,9 +383,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
     async def async_turn_on(self) -> None:
         await self.async_set_hvac_mode(
             HVACMode[
-                self.entity_description.hvac_mode_mapping[
-                    LuxMode.automatic.value
-                ].upper()
+                self.entity_description.hvac_mode_mapping[LuxMode.automatic].upper()
             ]
         )
 
@@ -397,7 +412,7 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             lux_mode = self._last_hvac_mode_before_preset
             self._last_hvac_mode_before_preset = None
         else:
-            lux_mode = LuxMode.off.value
+            lux_mode = LuxMode.off
         await self._async_set_lux_mode(lux_mode)
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:

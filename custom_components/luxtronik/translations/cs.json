@@ -104,6 +104,9 @@
             "cooling": {
                 "name": "Chlazen\u00ed"
             },
+            "silent_mode": {
+                "name": "Tich\u00fd re\u017eim"
+            },
             "pump_vent_hup": {
                 "name": "Odv\u011btr\u00e1v\u00e1n\u00ed HUP"
             },
@@ -337,6 +340,8 @@
                     "765": "P\u0159eh\u0159\u00e1t\u00ed",
                     "766": "Hranice pou\u017eit\u00ed kompresoru",
                     "767": "Omezova\u010d teploty topn\u00e9ho t\u011blesa",
+                    "768": "Monitorov\u00e1n\u00ed pr\u016ftoku",
+                    "769": "\u0158\u00edzen\u00ed \u010derpadla",
                     "770": "N\u00edzk\u00e9 p\u0159eh\u0159\u00e1t\u00ed",
                     "771": "Vysok\u00e9 p\u0159eh\u0159\u00e1t\u00ed",
                     "776": "Meze pou\u017eit\u00ed kompresoru",
@@ -357,7 +362,7 @@
                     "791": "Ztr\u00e1ta ModBus spojen\u00ed",
                     "792": "P\u0159eru\u0161en\u00e9 LIN spojen\u00ed",
                     "793": "Z\u00e1va\u017en\u00e1 chyba m\u011bni\u010de",
-                    "-1": "Nezn\u00e1m\u00e1 chyba"
+                    "minus_1": "Nezn\u00e1m\u00e1 chyba"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -439,7 +444,7 @@
                             "791": "Deska SEC nen\u00ed del\u0161\u00ed dobu dostupn\u00e1. 791 se spust\u00ed, pokud byla nalezena deska HZIO (bez samostatn\u00e9ho k\u00f3dov\u00e1n\u00ed), ale nen\u00ed na n\u00ed rozpozn\u00e1na \u017e\u00e1dn\u00e1 deska SEC.",
                             "792": "Nelze naj\u00edt \u017e\u00e1dn\u00fd z\u00e1kladn\u00ed panel a \u017e\u00e1dn\u00e1 konfigurace.",
                             "793": "Chyba teploty v Inverteru.",
-                            "-1": "Nezn\u00e1m\u00e1 chyba"
+                            "minus_1": "Nezn\u00e1m\u00e1 chyba"
                         }
                     },
                     "remedy": {
@@ -537,6 +542,10 @@
                     "8": "N\u00edzk\u00e1 \u00farove\u0148 povolen\u00e9 teploty",
                     "9": "\u017d\u00e1dn\u00fd po\u017eadavek",
                     "11": "Pr\u016ftok v tepeln\u00e9m zdroji",
+                    "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                    "14": "Pauza invertoru",
+                    "24": "LPC",
+                    "25": "Restart",
                     "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
                 },
                 "state_attributes": {
@@ -557,6 +566,10 @@
                             "8": "N\u00edzk\u00e1 \u00farove\u0148 povolen\u00e9 teploty",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek",
                             "11": "Pr\u016ftok v tepeln\u00e9m zdroji",
+                            "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "14": "Pauza invertoru",
+                            "24": "LPC",
+                            "25": "Restart",
                             "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
                         }
                     },
@@ -577,11 +590,15 @@
                             "8": "Ni\u017e\u0161\u00ed limit provozu",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
                             "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
+                            "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "14": "Pauza invertoru",
+                            "24": "LPC",
+                            "25": "Restart",
                             "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
-                        },
-                        "timestamp_2": {
-                            "name": "P\u0159edp\u0159edposledn\u00ed \u010dasov\u00fd okam\u017eik"
                         }
+                    },
+                    "timestamp_2": {
+                        "name": "P\u0159edp\u0159edposledn\u00ed \u010dasov\u00fd okam\u017eik"
                     },
                     "code_3": {
                         "name": "T\u0159et\u00ed p\u0159edposledn\u00ed d\u016fvod vypnut\u00ed",
@@ -597,6 +614,10 @@
                             "8": "Ni\u017e\u0161\u00ed limit provozu",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
                             "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
+                            "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "14": "Pauza invertoru",
+                            "24": "LPC",
+                            "25": "Restart",
                             "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
                         }
                     },
@@ -617,6 +638,10 @@
                             "8": "Ni\u017e\u0161\u00ed limit provozu",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
                             "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
+                            "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "14": "Pauza invertoru",
+                            "24": "LPC",
+                            "25": "Restart",
                             "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
                         }
                     },
@@ -729,6 +754,9 @@
             "additional_heat_generator_operation_hours": {
                 "name": "Hodiny provozu dodate\u010dn\u00e9ho zdroje tepla"
             },
+            "additional_heat_generator2_operation_hours": {
+                "name": "Hodiny provozu dodate\u010dn\u00e9ho zdroje tepla 2"
+            },
             "analog_out1": {
                 "name": "Analogov\u00fd v\u00fdstup 1"
             },
@@ -738,8 +766,14 @@
             "current_heat_output": {
                 "name": "Aktu\u00e1ln\u00ed v\u00fdkon"
             },
+            "current_power_consumption": {
+                "name": "Aktu\u00e1ln\u00ed spot\u0159eba energie"
+            },
             "additional_heat_generator_amount_counter": {
                 "name": "Mno\u017estv\u00ed tepla dodate\u010dn\u00e9ho zdroje"
+            },
+            "second_heat_generator_amount_counter": {
+                "name": "Mno\u017estv\u00ed tepla druh\u00e9ho gener\u00e1toru"
             },
             "heat_source_output_temperature": {
                 "name": "Teplota v\u00fdstupu tepla"
@@ -819,6 +853,9 @@
             "operation_hours_cooling": {
                 "name": "Hodiny provozu chlazen\u00ed"
             },
+            "cooling_energy_input": {
+                "name": "Spot\u0159ebovan\u00e1 energie pro chlazen\u00ed"
+            },
             "room_thermostat_temperature": {
                 "name": "Teplota termostatu m\u00edstnosti"
             },
@@ -868,10 +905,10 @@
             }
         },
         "climate": {
-            "heating": {
+            "heating_controller": {
                 "name": "Topen\u00ed"
             },
-            "cooling": {
+            "cooling_controller": {
                 "name": "Chlazen\u00ed"
             }
         },
@@ -946,16 +983,23 @@
                 "title": "Nakonfigurujte mo\u017enosti pro {name}",
                 "description": "Nastaven\u00ed pro tepeln\u00e9 \u010derpadlo Luxtronik {name}.",
                 "data": {
+                    "host": "Adresa",
+                    "port": "S\u00ed\u0165ov\u00fd port",
                     "ha_sensor_indoor_temperature": "ID senzoru vnit\u0159n\u00ed teploty",
                     "control_mode_home_assistant": "Experiment\u00e1ln\u00ed!: \u0158\u00edzen\u00ed stavu termostatu pomoc\u00ed Home Assistant.",
                     "ha_sensor_prefix": "P\u0159edpona pro ID entit"
                 },
                 "data_description": {
+                    "host": "N\u00e1zev hostitele nebo IP adresa",
+                    "port": "Obvykle 8889 nebo 8888",
                     "ha_sensor_indoor_temperature": "Termostat pro \u0159\u00edzen\u00ed vyt\u00e1p\u011bn\u00ed je vytvo\u0159en v Home Assistant. Skute\u010dn\u00e1 teplota je nastavena senzorem Home Assistant.\nPokud je Luxtronik p\u0159ipojen k hardwarov\u00e9mu pokojov\u00e9mu termostatu, ponechte toto pole pr\u00e1zdn\u00e9.",
                     "control_mode_home_assistant": "Kdy\u017e je termostat Home Assistant v ne\u010dinn\u00e9m stavu, stav vypnut\u00ed je hl\u00e1\u0161en Luxtroniku a Luxtronik nem\u016f\u017ee tento prvek spustit.",
                     "ha_sensor_prefix": "D\u016fle\u017eit\u00e9 p\u0159i pou\u017eit\u00ed v\u00edce tepeln\u00fdch \u010derpadel. V p\u0159\u00edpad\u011b jednoho lze jednodu\u0161e pou\u017e\u00edt 'luxtronik'."
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Nepoda\u0159ilo se p\u0159ipojit k tepeln\u00e9mu \u010derpadlu Luxtronik. Zkontrolujte pros\u00edm hostitele a port."
         }
     }
 }

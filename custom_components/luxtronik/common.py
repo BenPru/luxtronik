@@ -111,6 +111,7 @@ def correct_key_value(
     # prevent dealing with None value, and skip unnecessary processing
     if (
         value is None
+        or coordinator is None
         or sensor_id is None
         or sensor_id
         not in [
@@ -139,7 +140,7 @@ def correct_key_value(
     # region Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
     if (
         sensor_id == LC.C0117_STATUS_LINE_1
-        and value == LuxStatus1Option.heatpump_coming.value
+        and value == LuxStatus1Option.heatpump_coming
         and int(get_sensor_data(coordinator, LC.C0072_TIMER_SCB_ON)) < 10
         and int(get_sensor_data(coordinator, LC.C0071_TIMER_SCB_OFF)) > 0
     ):
@@ -148,23 +149,23 @@ def correct_key_value(
     # region Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
     if (
         sensor_id == LC.C0117_STATUS_LINE_1
-        and value == LuxStatus1Option.pump_forerun.value
+        and value == LuxStatus1Option.pump_forerun
         and bool(get_sensor_data(coordinator, LC.C0182_COMPRESSOR_HEATER))
     ):
         return LuxStatus1Option.compressor_heater
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
 
-    if sensor_id == LC.C0080_STATUS and value == LuxOperationMode.no_request.value:
+    if sensor_id == LC.C0080_STATUS and value == LuxOperationMode.no_request:
         status_line3 = get_sensor_data(
             coordinator, LC.C0119_STATUS_LINE_3, raw_value=True
         )
         # region Workaround Detect passive cooling operation mode
-        if status_line3 is not None and status_line3 == LuxStatus3Option.cooling.value:
+        if status_line3 is not None and status_line3 == LuxStatus3Option.cooling:
             return LuxOperationMode.cooling
         # endregion Workaround Detect passive cooling operation mode
 
         # region Workaround Detect active cooling operation mode
-        if status_line3 is not None and status_line3 == LuxStatus3Option.heating.value:
+        if status_line3 is not None and status_line3 == LuxStatus3Option.heating:
             T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
             T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
             T_heat_in = get_sensor_data(
@@ -181,7 +182,7 @@ def correct_key_value(
 
     if (
         sensor_id == LC.C0080_STATUS
-        and value == LuxOperationMode.heating.value
+        and value == LuxOperationMode.heating
         and not get_sensor_data(coordinator, LC.C0044_COMPRESSOR)
         and not get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
     ):

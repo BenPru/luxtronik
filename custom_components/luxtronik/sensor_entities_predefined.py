@@ -3,6 +3,7 @@
 # region Imports
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import (
+    EntityCategory,
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfFrequency,
@@ -11,7 +12,6 @@ from homeassistant.const import (
     UnitOfTemperature,
     UnitOfTime,
 )
-from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     LUX_SMART_GRID_ICON_MAP,

@@ -194,20 +194,20 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         platform: EntityPlatform | None = None,
     ):
         host = config[CONF_HOST]
-        self.device_infos[DeviceKey.heatpump.value] = self._build_device_info(
+        self.device_infos[DeviceKey.heatpump] = self._build_device_info(
             DeviceKey.heatpump, host, platform
         )
         via = (
             DOMAIN,
-            f"{self.unique_id}_{DeviceKey.heatpump.value}".lower(),
+            f"{self.unique_id}_{DeviceKey.heatpump}".lower(),
         )
-        self.device_infos[DeviceKey.heating.value] = self._build_device_info(
+        self.device_infos[DeviceKey.heating] = self._build_device_info(
             DeviceKey.heating, host, platform, via
         )
-        self.device_infos[DeviceKey.domestic_water.value] = self._build_device_info(
+        self.device_infos[DeviceKey.domestic_water] = self._build_device_info(
             DeviceKey.domestic_water, host, platform, via
         )
-        self.device_infos[DeviceKey.cooling.value] = self._build_device_info(
+        self.device_infos[DeviceKey.cooling] = self._build_device_info(
             DeviceKey.cooling, host, platform, via
         )
 
