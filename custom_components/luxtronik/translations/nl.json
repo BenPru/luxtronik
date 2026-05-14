@@ -870,10 +870,10 @@
             }
         },
         "climate": {
-            "heating": {
+            "heating_controller": {
                 "name": "Verwarming"
             },
-            "cooling": {
+            "cooling_controller": {
                 "name": "Koeling"
             }
         },

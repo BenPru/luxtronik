@@ -39,7 +39,11 @@ from .const import (
     LuxVisibility as LV,
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
-from .lux_overrides import update_Luxtronik_HeatpumpCodes, update_Luxtronik_Parameters
+from .lux_overrides import (
+    isolate_instance_data,
+    update_Luxtronik_HeatpumpCodes,
+    update_Luxtronik_Parameters,
+)
 from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 
 # endregion Imports
@@ -535,12 +539,17 @@ async def connect_and_get_coordinator(
     hass: HomeAssistant, config: ConfigEntry | dict[str, Any]
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
-    global _overrides_applied
-    if not _overrides_applied:
+    global _OVERRIDES_APPLIED
+    # No lock needed: all override calls are synchronous (no await),
+    # so the event loop cannot preempt between the guard check and flag set.
+    if not _OVERRIDES_APPLIED:
         update_Luxtronik_HeatpumpCodes()
         update_Luxtronik_Parameters()
-        LOGGER.info("Custom HeatpumpCode and Parameters overrides applied.")
-        _overrides_applied = True
+        isolate_instance_data()
+        _OVERRIDES_APPLIED = True
+        LOGGER.info(
+            "Library overrides applied (HeatpumpCodes, Parameters, instance data isolation)."
+        )
 
     config_data: dict[str, Any] = dict(
         config.data if isinstance(config, ConfigEntry) else config

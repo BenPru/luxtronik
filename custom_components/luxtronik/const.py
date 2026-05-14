@@ -386,6 +386,7 @@ class LuxParameter(StrEnum):
     P0108_MODE_COOLING = "parameters.ID_Einst_BA_Kuehl_akt"
     P0110_COOLING_OUTDOOR_TEMP_THRESHOLD = "parameters.ID_Einst_KuehlFreig_akt"
     P0111_HEATING_NIGHT_LOWERING_TO_TEMPERATURE = "parameters.ID_Einst_TAbsMin_akt"
+    P0119_MODE_POOL = "parameters.ID_Ba_Sw_akt"
     P0122_SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE = "parameters.ID_Einst_TDC_Ein_akt"
     P0123_SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE = "parameters.ID_Einst_TDC_Aus_akt"
     P0130_MIXING_CIRCUIT2_TYPE = "parameters.ID_Einst_MK2Typ_akt"
@@ -398,6 +399,9 @@ class LuxParameter(StrEnum):
         "parameters.ID_Einst_TDC_Max_akt"
     )
     P0678_VENTING_HUP_ACTIVE = "parameters.ID_Einst_Entl_Typ_0"
+    P0695_MODE_HZ_MK1 = "parameters.ID_Ba_Hz_MK1_akt"
+    P0696_MODE_HZ_MK2 = "parameters.ID_Ba_Hz_MK2_akt"
+    P0779_MODE_HZ_MK3 = "parameters.ID_Ba_Hz_MK3_akt"
     P0699_HEATING_THRESHOLD = "parameters.ID_Einst_Heizgrenze"
     P0700_HEATING_THRESHOLD_TEMPERATURE = "parameters.ID_Einst_Heizgrenze_Temp"
     P0716_0720_SWITCHOFF_REASON = "parameters.ID_Switchoff_file_{ID}_0"  # e.g. ID_Switchoff_file_0_0 - ID_Switchoff_file_4_0
@@ -422,6 +426,7 @@ class LuxParameter(StrEnum):
     #  "879  ID_Waermemenge_SW                                           ": "0",
     #  "880  ID_Waermemenge_Datum                                        ": "1483648906", <-- Unix timestamp!  5.1.2017
 
+    P0881_MODE_SOLAR = "parameters.ID_Einst_Solar_akt"
     P0882_SOLAR_OPERATION_HOURS = "parameters.ID_BSTD_Solar"
     P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR = "parameters.ID_Einst_TDC_Koll_Max_akt"
     # P0894_VENTILATION_MODE: Final = "parameters.ID_Einst_BA_Lueftung_akt" # "Automatic", "Party", "Holidays", "Off"

@@ -1,10 +1,23 @@
-from luxtronik.datatypes import Celsius, HeatpumpCode, Percent, Percent2, Timestamp
+from copy import deepcopy
+
+from luxtronik.calculations import Calculations
+from luxtronik.datatypes import (
+    Celsius,
+    HeatpumpCode,
+    MixedCircuitMode,
+    Percent,
+    Percent2,
+    Timestamp,
+)
 from luxtronik.parameters import Parameters
+from luxtronik.visibilities import Visibilities
 
 # Define your new/updated custom parameters in a dictionary
 parameters_to_add_update = {
     6: Timestamp("ID_SU_FrkdHz", True),
     7: Timestamp("ID_SU_FrkdBw", True),
+    695: MixedCircuitMode("ID_Ba_Hz_MK1_akt", True),
+    696: MixedCircuitMode("ID_Ba_Hz_MK2_akt", True),
     731: Timestamp("ID_SU_FstdHz", True),
     732: Timestamp("ID_SU_FstdBw", True),
     973: Celsius("ID_Einst_BW_max", True),
@@ -17,6 +30,53 @@ parameters_to_add_update = {
 
 def update_Luxtronik_Parameters():
     Parameters.parameters.update(parameters_to_add_update)
+
+
+_INSTANCE_DATA_ISOLATED = False
+
+
+def isolate_instance_data():
+    """Patch library classes to use instance-level data dicts.
+
+    The upstream luxtronik library stores parameter/calculation/visibility
+    data in class-level dicts shared across all instances.  When multiple
+    heat pumps are configured, ``parse()`` on one instance overwrites
+    values read by another, causing data mixing (see issue #515).
+
+    This patches ``__init__`` so every new instance gets its own deep copy
+    of the class-level dict.
+    """
+    # No lock needed: called only from synchronous code path (no await),
+    # so the event loop cannot preempt between the guard check and flag set.
+    global _INSTANCE_DATA_ISOLATED
+    if _INSTANCE_DATA_ISOLATED:
+        return
+
+    _orig_params_init = Parameters.__init__
+
+    def _params_init(self, *args, **kwargs):
+        _orig_params_init(self, *args, **kwargs)
+        self.parameters = deepcopy(self.parameters)
+
+    Parameters.__init__ = _params_init
+
+    _orig_calcs_init = Calculations.__init__
+
+    def _calcs_init(self, *args, **kwargs):
+        _orig_calcs_init(self, *args, **kwargs)
+        self.calculations = deepcopy(self.calculations)
+
+    Calculations.__init__ = _calcs_init
+
+    _orig_vis_init = Visibilities.__init__
+
+    def _vis_init(self, *args, **kwargs):
+        _orig_vis_init(self, *args, **kwargs)
+        self.visibilities = deepcopy(self.visibilities)
+
+    Visibilities.__init__ = _vis_init
+
+    _INSTANCE_DATA_ISOLATED = True
 
 
 def update_Luxtronik_HeatpumpCodes():

@@ -51,7 +51,9 @@ async def async_setup_entry(
         if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
-        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+        # Not all models/firmware versions support every parameter;
+        # missing keys are expected and not an error.
+        LOGGER.debug("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -68,10 +70,9 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
+class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     """Luxtronik Number Entity."""
 
-    entity_description: LuxtronikNumberDescription
     _coordinator: LuxtronikCoordinator
 
     def __init__(

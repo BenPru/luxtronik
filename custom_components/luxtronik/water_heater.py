@@ -113,7 +113,9 @@ async def async_setup_entry(
         if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
-        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+        # Not all models/firmware versions support every parameter;
+        # missing keys are expected and not an error.
+        LOGGER.debug("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -128,10 +130,10 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
+class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikWaterHeaterDescription], WaterHeaterEntity
+):
     """Representation of an Luxtronik water heater."""
-
-    entity_description: LuxtronikWaterHeaterDescription
 
     _attr_min_temp = DEFAULT_DHW_MIN_TEMPERATURE
     _attr_target_temperature_step = 0.5

@@ -3,7 +3,7 @@
 # region Imports
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any
 
 from homeassistant.components.climate import (
@@ -28,7 +28,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
+from homeassistant.helpers.restore_state import ExtraStoredData
 from packaging.version import Version
 
 from .base import LuxtronikEntity
@@ -119,6 +119,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
+        translation_key_name="heating_controller",
         # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         min_firmware_version=Version("3.90.1"),
@@ -143,6 +144,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
+        translation_key_name="cooling_controller",
         # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
         max_firmware_version=Version("3.90.0"),
@@ -164,6 +166,7 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
+        translation_key_name="cooling_controller",
         # visibility=LuxVisibility.V0005_COOLING,
         device_key=DeviceKey.cooling,
     ),
@@ -192,7 +195,9 @@ async def async_setup_entry(
         if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
-        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+        # Not all models/firmware versions support every parameter;
+        # missing keys are expected and not an error.
+        LOGGER.debug("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -222,11 +227,10 @@ class LuxtronikClimateExtraStoredData(ExtraStoredData):
         return asdict(self)
 
 
-class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
+class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     """The thermostat class for Luxtronik thermostats."""
 
     # region Attributes
-    entity_description: LuxtronikClimateDescription
 
     _last_hvac_mode_before_preset: str | None = None
 
@@ -257,6 +261,9 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
             device_info_ident=description.device_key,
         )
 
+        # ✅ IMPORTANT: start from base-processed description (has translation_key set)
+        description = self.entity_description
+
         domain = description.key.value
         configured_indoor_temp_sensor = entry.options.get(
             CONF_HA_SENSOR_INDOOR_TEMPERATURE,
@@ -264,23 +271,33 @@ class LuxtronikThermostat(LuxtronikEntity, ClimateEntity, RestoreEntity):
         )
 
         if configured_indoor_temp_sensor is not None:
-            description.luxtronik_key_current_temperature = (
-                configured_indoor_temp_sensor
+            description = replace(
+                description,
+                luxtronik_key_current_temperature=configured_indoor_temp_sensor,
             )
             LOGGER.debug(
-                f"[INIT,{domain}] Using configured indoor temp sensor: {description.luxtronik_key_current_temperature}"
+                "[INIT,%s] Using configured indoor temp sensor: %s",
+                domain,
+                description.luxtronik_key_current_temperature,
             )
         elif description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
-            description.luxtronik_key_current_temperature = (
-                LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE
+            description = replace(
+                description,
+                luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
             )
             LOGGER.debug(
-                f"[INIT,{domain}] Using default indoor temp sensor: {description.luxtronik_key_current_temperature}"
+                "[INIT,%s] Using default indoor temp sensor: %s",
+                domain,
+                description.luxtronik_key_current_temperature,
             )
 
+        # ✅ Set the final description ONCE
+        self.entity_description = description
+
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key.value}")
         self._attr_unique_id = self.entity_id
+
         self._attr_temperature_unit = description.temperature_unit
         self._attr_hvac_modes = description.hvac_modes
         self._attr_preset_modes = description.preset_modes

@@ -39,7 +39,9 @@ async def async_setup_entry(
         if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
-        LOGGER.warning("Not present in Luxtronik data, skipping: %s", unavailable_keys)
+        # Not all models/firmware versions support every parameter;
+        # missing keys are expected and not an error.
+        LOGGER.debug("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
     async_add_entities(
         [
@@ -56,10 +58,8 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikDateEntity(LuxtronikEntity, DateEntity):
+class LuxtronikDateEntity(LuxtronikEntity[LuxtronikDateEntityDescription], DateEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     """Luxtronik Date Entity that supports user-editable dates."""
-
-    entity_description: LuxtronikDateEntityDescription
 
     def __init__(
         self,
