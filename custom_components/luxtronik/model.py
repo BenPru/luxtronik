@@ -19,7 +19,7 @@ from homeassistant.components.number import NumberEntityDescription, NumberMode
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.update import UpdateDeviceClass, UpdateEntityDescription
-from homeassistant.components.water_heater import WaterHeaterEntityFeature
+from homeassistant.components.water_heater import WaterHeaterEntityFeature, WaterHeaterEntityDescription
 from homeassistant.const import Platform, UnitOfTemperature
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.typing import StateType
@@ -38,16 +38,6 @@ from .const import (
     SensorAttrFormat,
     SensorAttrKey,
 )
-
-# fix breaking change due to typo in WaterHeaterEntityDescription (#132888)
-WaterHeaterEntityDescription = None
-
-try:
-    from homeassistant.components.water_heater import WaterHeaterEntityDescription
-except ImportError:
-    from homeassistant.components.water_heater import (
-        WaterHeaterEntityEntityDescription as WaterHeaterEntityDescription,
-    )
 
 # endregion Imports
 
@@ -75,7 +65,7 @@ class LuxtronikEntityAttributeDescription:
 class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     """Class describing Luxtronik entities."""
 
-    has_entity_name = True
+    has_entity_name: bool = True
 
     # Bug in python: Have to assign a value:
     platform = Platform.AIR_QUALITY
@@ -84,6 +74,7 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     icon_by_state: dict[StateType | date | datetime | Decimal, str] | None = None
     device_key: DeviceKey = DeviceKey.heatpump
     luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
+    translation_key: str | None = None
     translation_key_name: str | None = None
     visibility: LuxVisibility = LuxVisibility.UNSET
     invisible_if_value: Any | None = None
@@ -93,6 +84,7 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     max_firmware_version: Version | None = None
 
     extra_attributes: tuple[LuxtronikEntityAttributeDescription, ...] = ()
+    entity_registry_enabled_default: bool = True
     state_class: str | None = None
 
 
@@ -126,7 +118,7 @@ class LuxtronikNumberDescription(
     """Class describing Luxtronik number sensor entities."""
 
     platform = Platform.NUMBER
-    update_interval = UPDATE_INTERVAL_VERY_SLOW
+    update_interval: timedelta = UPDATE_INTERVAL_VERY_SLOW
     factor: float | None = None
     native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO
@@ -143,7 +135,7 @@ class LuxtronikBinarySensorEntityDescription(
     on_state: str | bool = True
     on_states: list[str] | None = None
     off_state: str | bool = False
-    inverted = False
+    inverted: bool = False
 
 
 class LuxtronikSwitchDescription(
@@ -154,11 +146,11 @@ class LuxtronikSwitchDescription(
     """Class describing Luxtronik switch entities."""
 
     platform = Platform.SWITCH
-    update_interval = UPDATE_INTERVAL_VERY_SLOW
+    update_interval : timedelta = UPDATE_INTERVAL_VERY_SLOW
     on_state: str | bool = True
     on_states: list[str] | None = None
     off_state: str | bool = False
-    inverted = False
+    inverted: bool = False
 
 
 class LuxtronikClimateDescription(
@@ -194,7 +186,9 @@ def metaclass_resolver(*classes):
 
 
 class LuxtronikWaterHeaterDescription(
-    metaclass_resolver(LuxtronikEntityDescription, WaterHeaterEntityDescription)
+    LuxtronikEntityDescription, 
+    WaterHeaterEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik water heater entities."""
 

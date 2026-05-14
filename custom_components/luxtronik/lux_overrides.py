@@ -1,10 +1,12 @@
-from luxtronik.datatypes import Celsius, HeatpumpCode, Percent, Percent2, Timestamp
+from luxtronik.datatypes import Celsius, HeatpumpCode, Percent, Percent2, Timestamp, MixedCircuitMode
 from luxtronik.parameters import Parameters
 
 # Define your new/updated custom parameters in a dictionary
 parameters_to_add_update = {
     6: Timestamp("ID_SU_FrkdHz", True),
     7: Timestamp("ID_SU_FrkdBw", True),
+    695: MixedCircuitMode("ID_Ba_Hz_MK1_akt", True),
+    696: MixedCircuitMode("ID_Ba_Hz_MK2_akt", True),    
     731: Timestamp("ID_SU_FstdHz", True),
     732: Timestamp("ID_SU_FstdBw", True),
     973: Celsius("ID_Einst_BW_max", True),
