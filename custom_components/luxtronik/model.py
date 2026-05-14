@@ -146,7 +146,7 @@ class LuxtronikSwitchDescription(
     """Class describing Luxtronik switch entities."""
 
     platform = Platform.SWITCH
-    update_interval : timedelta = UPDATE_INTERVAL_VERY_SLOW
+    update_interval: timedelta = UPDATE_INTERVAL_VERY_SLOW
     on_state: str | bool = True
     on_states: list[str] | None = None
     off_state: str | bool = False
@@ -186,7 +186,7 @@ def metaclass_resolver(*classes):
 
 
 class LuxtronikWaterHeaterDescription(
-    LuxtronikEntityDescription, 
+    LuxtronikEntityDescription,
     WaterHeaterEntityDescription,
     frozen_or_thawed=True,
 ):
