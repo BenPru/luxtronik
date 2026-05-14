@@ -8,7 +8,10 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
-from homeassistant.components.sensor import ENTITY_ID_FORMAT, SensorEntity
+from homeassistant.components.sensor import (
+    ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
+    SensorEntity,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback

@@ -67,7 +67,7 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
     """Representation of Luxtronik firmware update entity."""
 
     _attr_title = "Luxtronik Firmware Version"
-    _attr_supported_features: UpdateEntityFeature = (
+    _attr_supported_features: UpdateEntityFeature = (  # pyright: ignore[reportIncompatibleVariableOverride]
         UpdateEntityFeature.INSTALL | UpdateEntityFeature.RELEASE_NOTES
     )
     __firmware_version_available = None
@@ -96,12 +96,12 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
         await self._request_available_firmware_version()
 
     @property
-    def installed_version(self) -> str | None:
+    def installed_version(self) -> str | None:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Return the currently installed firmware version."""
         return self._attr_state
 
     @property
-    def latest_version(self) -> str | None:
+    def latest_version(self) -> str | None:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Return the latest available firmware version."""
         if self.__firmware_version_available is None or self.installed_version is None:
             return None

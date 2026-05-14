@@ -1,6 +1,9 @@
 """Support for Luxtronik selectors"""
 
-from homeassistant.components.select import ENTITY_ID_FORMAT, SelectEntity
+from homeassistant.components.select import (
+    ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
+    SelectEntity,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
@@ -104,7 +107,6 @@ async def async_setup_entry(
             thermal_desinfection_description,
             thermal_desinfection_description.device_key,
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -114,7 +116,6 @@ async def async_setup_entry(
             options=mode_options,
             entity_suffix="dhw_mode",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -124,7 +125,6 @@ async def async_setup_entry(
             options=mode_options,
             entity_suffix="heating_mode",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -134,7 +134,6 @@ async def async_setup_entry(
             options=mode_mk_options,
             entity_suffix="heating_mode_mk1",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -144,7 +143,6 @@ async def async_setup_entry(
             options=mode_mk_options,
             entity_suffix="heating_mode_mk2",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,

@@ -71,7 +71,7 @@ ATTR_VALUE: Final = "value"
 SERVICE_WRITE_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_PARAMETER): cv.string,
-        vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),
+        vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),  # pyright: ignore[reportAttributeAccessIssue]
     }
 )
 # endregion Conf

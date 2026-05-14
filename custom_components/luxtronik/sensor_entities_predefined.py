@@ -68,7 +68,7 @@ SENSORS_STATUS: list[descr] = [
     ),
 ]
 
-SENSORS_INDEX: list[descr] = [
+SENSORS_INDEX: list[descr_index] = [
     descr_index(
         key=SensorKey.SWITCHOFF_REASON,
         luxtronik_key=LP.P0716_0720_SWITCHOFF_REASON,
@@ -76,7 +76,7 @@ SENSORS_INDEX: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:electric-switch",
         device_class=SensorDeviceClass.ENUM,
-        options=[e.value for e in LuxSwitchoffReason],
+        options=[e.value for e in LuxSwitchoffReason],  # pyright: ignore[reportArgumentType]  # int values; converting both options and native_value to str is out of scope
     ),
 ]
 
