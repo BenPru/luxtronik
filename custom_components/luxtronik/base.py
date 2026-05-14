@@ -163,7 +163,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         else:
             self._attr_icon = descr.icon
 
-        if hasattr(self, "_attr_current_operation"):
+        if hasattr(self, "_attr_current_operation") and self._attr_icon is not None:
             if self._attr_current_operation == STATE_OFF:
                 self._attr_icon += "-off"
             elif self._attr_current_operation == STATE_HEAT_PUMP:
