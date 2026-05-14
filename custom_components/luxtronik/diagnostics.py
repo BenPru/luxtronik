@@ -48,7 +48,7 @@ async def async_get_config_entry_diagnostics(
     return diag_data
 
 
-def _dump_items(items: dict) -> dict:
+def _dump_items(items: dict[int, Any]) -> dict[str, str]:
     dump = {}
     for index, item in sorted(items.items()):
         dump[f"{index:<4d} {item.name:<60}"] = f"{item}"

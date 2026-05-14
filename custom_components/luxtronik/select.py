@@ -104,7 +104,6 @@ async def async_setup_entry(
             thermal_desinfection_description,
             thermal_desinfection_description.device_key,
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -114,7 +113,6 @@ async def async_setup_entry(
             options=mode_options,
             entity_suffix="dhw_mode",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -124,7 +122,6 @@ async def async_setup_entry(
             options=mode_options,
             entity_suffix="heating_mode",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -134,7 +131,6 @@ async def async_setup_entry(
             options=mode_mk_options,
             entity_suffix="heating_mode_mk1",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
@@ -144,7 +140,6 @@ async def async_setup_entry(
             options=mode_mk_options,
             entity_suffix="heating_mode_mk2",
         ),
-
         LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
