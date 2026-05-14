@@ -21,13 +21,12 @@ from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from packaging.version import Version
 
+from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists
 from .const import (
-    CONF_COORDINATOR,
     CONF_HA_SENSOR_PREFIX,
     DEFAULT_DHW_MIN_TEMPERATURE,
-    DOMAIN,
     LOGGER,
     DeviceKey,
     LuxCalculation as LC,
@@ -93,15 +92,13 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: LuxtronikConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Initialize DHW device from config entry."""
 
-    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
-    if not data or CONF_COORDINATOR not in data:
-        return
-
-    coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
+    coordinator = entry.runtime_data
 
     # Ensure coordinator has valid data before adding entities
     if not coordinator.last_update_success:
