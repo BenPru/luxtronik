@@ -905,10 +905,10 @@
             }
         },
         "climate": {
-            "heating": {
+            "heating_controller": {
                 "name": "Topen\u00ed"
             },
-            "cooling": {
+            "cooling_controller": {
                 "name": "Chlazen\u00ed"
             }
         },

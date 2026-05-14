@@ -612,10 +612,10 @@
             }
         },
         "climate": {
-            "heating": {
+            "heating_controller": {
                 "name": "Ogrzewanie"
             },
-            "cooling": {
+            "cooling_controller": {
                 "name": "Ch\u0142odzenie"
             }
         },

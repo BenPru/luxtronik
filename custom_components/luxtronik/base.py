@@ -3,6 +3,7 @@
 # region Imports
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
@@ -51,38 +52,53 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         description: LuxtronikEntityDescription,
         device_info_ident: DeviceKey,
     ) -> None:
-        """Init LuxtronikEntity."""
         super().__init__(coordinator=coordinator)
-        self._attr_cache: dict[SA, Any] = {}
-        self._device_info_ident = device_info_ident
-        self._attr_extra_state_attributes = {
-            SA.LUXTRONIK_KEY: f"{description.luxtronik_key.name[1:5]} {description.luxtronik_key.value}"
-        }
-        for field in description.__dataclass_fields__:
-            if field.startswith("luxtronik_key_"):
-                value = description.__getattribute__(field)
-                if value is None:
-                    pass
-                elif isinstance(value, StrEnum):
-                    self._attr_extra_state_attributes[field] = (
-                        f"{value.name[1:5]} {value.value}"
-                    )
-                else:
-                    self._attr_extra_state_attributes[field] = value
-        if description.entity_registry_enabled_default:
-            description.entity_registry_enabled_default = coordinator.entity_visible(
-                description
-            )
-        self.entity_description = description
-        self._attr_device_info = coordinator.get_device(device_info_ident)
 
+        # ✅ Build final description FIRST
         translation_key = (
             description.key.value
             if description.translation_key_name is None
             else description.translation_key_name
         )
-        description.translation_key = translation_key
-        description.has_entity_name = True
+
+        if description.entity_registry_enabled_default is not None:
+            description = replace(
+                description,
+                entity_registry_enabled_default=coordinator.entity_visible(description),
+            )
+
+        description = replace(
+            description,
+            translation_key=translation_key,
+        )
+
+        # ✅ Now assign once
+        self.entity_description = description
+
+        # --- everything below uses the FINAL description ---
+        self._attr_cache = {}
+        self._device_info_ident = device_info_ident
+        self._attr_device_info = coordinator.get_device(device_info_ident)
+
+        self._attr_extra_state_attributes = {
+            SA.LUXTRONIK_KEY: (
+                f"{description.luxtronik_key.name[1:5]} "
+                f"{description.luxtronik_key.value}"
+            )
+        }
+
+        for field in description.__dataclass_fields__:
+            if field.startswith("luxtronik_key_"):
+                value = getattr(description, field)
+                if value is None:
+                    continue
+                if isinstance(value, StrEnum):
+                    self._attr_extra_state_attributes[field] = (
+                        f"{value.name[1:5]} {value.value}"
+                    )
+                else:
+                    self._attr_extra_state_attributes[field] = value
+
         self._attr_state = self._get_value(description.luxtronik_key)
 
     async def async_added_to_hass(self) -> None:
@@ -183,7 +199,7 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             state == descr.on_state or (descr.on_states and state in descr.on_states)
         )
 
-        return not is_on if descr.inverted else is_on
+        return not is_on if getattr(descr, "inverted", False) else is_on
 
     def _enrich_extra_attributes(self) -> None:
         for attr in self.entity_description.extra_attributes:

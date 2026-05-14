@@ -888,10 +888,10 @@
             }
         },
         "climate": {
-            "heating": {
+            "heating_controller": {
                 "name": "Heizung"
             },
-            "cooling": {
+            "cooling_controller": {
                 "name": "K\u00fchlung"
             }
         },
