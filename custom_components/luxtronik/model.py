@@ -226,4 +226,3 @@ class LuxtronikDateEntityDescription(
     """Class describing Luxtronik date entities."""
 
     platform = Platform.DATE
-

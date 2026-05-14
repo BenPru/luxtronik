@@ -532,7 +532,7 @@ class LuxtronikConnectionError(HomeAssistantError):
         self.original = original
 
 
-_overrides_applied = False
+_OVERRIDES_APPLIED = False
 
 
 async def connect_and_get_coordinator(
