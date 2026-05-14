@@ -136,7 +136,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     @staticmethod
     async def connect(
-        hass: HomeAssistant, config_entry: ConfigEntry | dict
+        hass: HomeAssistant, config_entry: ConfigEntry | dict[str, Any]
     ) -> LuxtronikCoordinator:
         """Connect to heatpump."""
         config: dict[Any, Any] | MappingProxyType[str, Any] | None = None
@@ -178,8 +178,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> DeviceInfo:
         if key not in self.device_infos:
             self._create_device_infos(self.hass, self._config, platform)
-        device_info: DeviceInfo = self.device_infos.get(key)
-        if device_info["name"] == key:
+        device_info = self.device_infos.get(key)
+        if device_info is None:
+            return DeviceInfo(
+                identifiers={(DOMAIN, f"{self.unique_id}_{key.value}".lower())}
+            )
+        if device_info.get("name") == key:
             device_info["name"] = self._build_device_name(key, platform)
         return device_info
 
@@ -221,9 +225,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         key: DeviceKey,
         host: str,
         platform: EntityPlatform | None = None,
-        via_device=None,
+        via_device: tuple[str, str] | None = None,
     ) -> DeviceInfo:
-        return DeviceInfo(
+        device_info = DeviceInfo(
             identifiers={
                 (
                     DOMAIN,
@@ -232,7 +236,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             },
             entry_type=None,
             name=self._build_device_name(key, platform),
-            via_device=via_device,
             configuration_url=f"http://{host}/",
             connections={
                 (
@@ -249,6 +252,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             # default_manufacturer=self.manufacturer,
             # default_model=self.model,
         )
+        if via_device is not None:
+            device_info["via_device"] = via_device
+        return device_info
 
     def _is_version_not_compatible(
         self, description: LuxtronikEntityDescription
@@ -286,7 +292,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def serial_number(self) -> str:
         """Return the serial number."""
         serial_number_date = self.get_value(LP.P0874_SERIAL_NUMBER)
-        serial_number_hex = hex(int(self.get_value(LP.P0875_SERIAL_NUMBER_MODEL)))
+        serial_number_model = self.get_value(LP.P0875_SERIAL_NUMBER_MODEL)
+        serial_number_hex = (
+            hex(int(serial_number_model)) if serial_number_model is not None else "0"
+        )
         return f"{serial_number_date}-{serial_number_hex}".replace("x", "")
 
     @property
@@ -297,7 +306,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def model(self) -> str:
         """Return the heatpump model."""
-        return self.get_value(LC.C0078_MODEL_CODE)
+        return str(self.get_value(LC.C0078_MODEL_CODE) or "")
 
     @property
     def manufacturer(self) -> str | None:
@@ -424,7 +433,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         sensor = self.get_sensor_by_id(str(group_sensor_id))
         if sensor is None:
             return None
-        return correct_key_value(sensor.value, self.data, group_sensor_id)
+        value = sensor[1] if isinstance(sensor, tuple) else sensor.value
+        return correct_key_value(value, self.data, group_sensor_id)
 
     def get_sensor_by_id(self, group_sensor_id: str):
         """Get a sensor object by id from Luxtronik."""
@@ -462,23 +472,31 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def _detect_solar_present(self) -> bool:
         """Detect and returns True if solar is present."""
+        if bool(self.get_value(LV.V0250_SOLAR)):
+            return True
+        if (self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) or 0) > 0.01:
+            return True
+        collector_temp = self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE)
+        if (
+            bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))
+            and collector_temp is not None
+            and float(collector_temp) != 5.0
+        ):
+            return True
+        buffer_temp = self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE)
         return (
-            bool(self.get_value(LV.V0250_SOLAR))
-            or self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) > 0.01
-            or (
-                bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))
-                and float(self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE)) != 5.0
-            )
-            or (
-                bool(self.get_value(LV.V0039_SOLAR_BUFFER))
-                and float(self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE)) != 150.0
-            )
+            bool(self.get_value(LV.V0039_SOLAR_BUFFER))
+            and buffer_temp is not None
+            and float(buffer_temp) != 150.0
         )
 
     def _detect_dhw_circulation_pump_present(self) -> bool:
-        """Detect and returns True if solar is present."""
+        """Detect and returns True if DHW circulation pump is present."""
         try:
-            return int(self.get_value(LP.P0085_DHW_CHARGING_PUMP)) != 1
+            value = self.get_value(LP.P0085_DHW_CHARGING_PUMP)
+            if value is None:
+                return False
+            return int(value) != 1
         except Exception:  # pylint: disable=broad-except
             return False
 
@@ -510,28 +528,29 @@ class LuxtronikConnectionError(HomeAssistantError):
         self.original = original
 
 
-_OVERRIDES_APPLIED = False
+_overrides_applied = False
 
 
 async def connect_and_get_coordinator(
-    hass: HomeAssistant, config: dict[str, Any]
+    hass: HomeAssistant, config: ConfigEntry | dict[str, Any]
 ) -> LuxtronikCoordinator:
     """Try to connect to a Luxtronik device and return coordinator."""
-    global _OVERRIDES_APPLIED
-    if not _OVERRIDES_APPLIED:
+    global _overrides_applied
+    if not _overrides_applied:
         update_Luxtronik_HeatpumpCodes()
         update_Luxtronik_Parameters()
         LOGGER.info("Custom HeatpumpCode and Parameters overrides applied.")
-        _OVERRIDES_APPLIED = True
+        _overrides_applied = True
 
-    if isinstance(config, ConfigEntry):
-        config = config.data
+    config_data: dict[str, Any] = dict(
+        config.data if isinstance(config, ConfigEntry) else config
+    )
 
-    host = config.get(CONF_HOST)
-    port = config.get(CONF_PORT, DEFAULT_PORT)
+    host: str = config_data.get(CONF_HOST, "")
+    port = config_data.get(CONF_PORT, DEFAULT_PORT)
 
     try:
-        coordinator = await LuxtronikCoordinator.connect(hass, config)
+        coordinator = await LuxtronikCoordinator.connect(hass, config_data)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
         # ✅ Perform initial data fetch manually
