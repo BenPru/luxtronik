@@ -183,13 +183,13 @@ class LuxtronikDhwModeSelector(LuxtronikEntity, SelectEntity):
             device_info_ident=device_info_ident,
         )
         self._attr_options = [
-            LuxMode.off.value,
-            LuxMode.automatic.value,
-            LuxMode.second_heatsource.value,
-            LuxMode.party.value,
-            LuxMode.holidays.value,
+            LuxMode.off,
+            LuxMode.automatic,
+            LuxMode.second_heatsource,
+            LuxMode.party,
+            LuxMode.holidays,
         ]
-        self._attr_current_option = LuxMode.off.value
+        self._attr_current_option = LuxMode.off
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_dhw_mode")
@@ -204,7 +204,7 @@ class LuxtronikDhwModeSelector(LuxtronikEntity, SelectEntity):
         if data is None:
             return
 
-        param = LuxParameter.P0004_MODE_DHW.value
+        param = LuxParameter.P0004_MODE_DHW
         value = get_sensor_data(data, param)
         LOGGER.debug("DHW mode raw value from coordinator: %r", value)
 
@@ -231,7 +231,7 @@ class LuxtronikDhwModeSelector(LuxtronikEntity, SelectEntity):
             return
 
         self._attr_current_option = option
-        param = LuxParameter.P0004_MODE_DHW.value
+        param = LuxParameter.P0004_MODE_DHW
 
         LOGGER.debug("Setting DHW mode to %r", option)
 
@@ -258,13 +258,13 @@ class LuxtronikHeatingModeSelector(LuxtronikEntity, SelectEntity):
             device_info_ident=device_info_ident,
         )
         self._attr_options = [
-            LuxMode.off.value,
-            LuxMode.automatic.value,
-            LuxMode.second_heatsource.value,
-            LuxMode.party.value,
-            LuxMode.holidays.value,
+            LuxMode.off,
+            LuxMode.automatic,
+            LuxMode.second_heatsource,
+            LuxMode.party,
+            LuxMode.holidays,
         ]
-        self._attr_current_option = LuxMode.off.value
+        self._attr_current_option = LuxMode.off
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_heating_mode")
@@ -279,7 +279,7 @@ class LuxtronikHeatingModeSelector(LuxtronikEntity, SelectEntity):
         if data is None:
             return
 
-        param = LuxParameter.P0003_MODE_HEATING.value
+        param = LuxParameter.P0003_MODE_HEATING
         value = get_sensor_data(data, param)
         LOGGER.debug("Heating mode raw value from coordinator: %r", value)
 
@@ -306,7 +306,7 @@ class LuxtronikHeatingModeSelector(LuxtronikEntity, SelectEntity):
             return
 
         self._attr_current_option = option
-        param = LuxParameter.P0003_MODE_HEATING.value
+        param = LuxParameter.P0003_MODE_HEATING
 
         LOGGER.debug("Setting heating mode to %r", option)
 

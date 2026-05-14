@@ -266,13 +266,13 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             ]
             if sl1 in s1_workaround and sl3 in s3_workaround and not add_circ_pump:
                 # ignore pump forerun
-                self._attr_native_value = LuxOperationMode.no_request.value
+                self._attr_native_value = LuxOperationMode.no_request
             # endregion Workaround: Inverter heater is active but not the heatpump!
 
             # region Workaround Thermal desinfection with heatpump running
             if sl3 == LuxStatus3Option.thermal_desinfection:
                 # map thermal desinfection to Domestic Water iso Heating
-                self._attr_native_value = LuxOperationMode.domestic_water.value
+                self._attr_native_value = LuxOperationMode.domestic_water
             # endregion Workaround Thermal desinfection with heatpump running
 
             # region Workaround Thermal desinfection with (only) using 2nd heatsource
@@ -285,7 +285,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
                 AddHeat = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
                 if AddHeat and DHW_recirculation:
                     # more fixes to detect thermal desinfection sequences
-                    self._attr_native_value = LuxOperationMode.domestic_water.value
+                    self._attr_native_value = LuxOperationMode.domestic_water
             # endregion Workaround Thermal desinfection with (only) using 2nd heatsource
 
         # endregion Workaround Luxtronik Bug
@@ -368,13 +368,13 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity, SensorEntity):
             # EVU=0, EVU2=1 → Status 3 (normal operation)
             # EVU=1, EVU2=1 → Status 4 (increased operation)
             if evu_on and not evu2_on:
-                self._attr_native_value = LuxSmartGridStatus.locked.value  # Status 1
+                self._attr_native_value = LuxSmartGridStatus.locked  # Status 1
             elif not evu_on and not evu2_on:
-                self._attr_native_value = LuxSmartGridStatus.reduced.value  # Status 2
+                self._attr_native_value = LuxSmartGridStatus.reduced  # Status 2
             elif not evu_on and evu2_on:
-                self._attr_native_value = LuxSmartGridStatus.normal.value  # Status 3
+                self._attr_native_value = LuxSmartGridStatus.normal  # Status 3
             else:  # evu_on and evu2_on
-                self._attr_native_value = LuxSmartGridStatus.increased.value  # Status 4
+                self._attr_native_value = LuxSmartGridStatus.increased  # Status 4
 
             # Set icon based on current state
             descr = self.entity_description

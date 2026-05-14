@@ -26,7 +26,7 @@ class LuxtronikEVUTracker:
         now = dt_util.now()
         time_now = time(now.hour, now.minute)
         weekday = now.weekday()
-        evu = LuxOperationMode.evu.value
+        evu = LuxOperationMode.evu
 
         if current_value is None or self._last_state is None:
             self._last_state = current_value
@@ -119,7 +119,7 @@ class LuxtronikEVUTracker:
         evu_event_minutes = self.get_next_event_minutes()
         if evu_event_minutes is None:
             return ""
-        if current_value == LuxOperationMode.evu.value:
+        if current_value == LuxOperationMode.evu:
             return f"EVU until {evu_event_minutes} min"
         if evu_event_minutes <= 30:
             return f"EVU in {evu_event_minutes} min"

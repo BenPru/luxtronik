@@ -44,11 +44,11 @@ from .model import LuxtronikWaterHeaterDescription
 
 # region Const
 OPERATION_MAPPING: dict[str, str] = {
-    LuxMode.off.value: STATE_OFF,
-    LuxMode.automatic.value: STATE_HEAT_PUMP,
-    LuxMode.second_heatsource.value: STATE_ELECTRIC,
-    LuxMode.party.value: STATE_PERFORMANCE,
-    LuxMode.holidays.value: STATE_HEAT_PUMP,
+    LuxMode.off: STATE_OFF,
+    LuxMode.automatic: STATE_HEAT_PUMP,
+    LuxMode.second_heatsource: STATE_ELECTRIC,
+    LuxMode.party: STATE_PERFORMANCE,
+    LuxMode.holidays: STATE_HEAT_PUMP,
 }
 
 WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
@@ -209,9 +209,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
         self._current_action = get_sensor_data(
             data, descr.luxtronik_key_current_action.value
         )
-        self._attr_is_away_mode_on = (
-            None if mode is None else mode == LuxMode.holidays.value
-        )
+        self._attr_is_away_mode_on = None if mode is None else mode == LuxMode.holidays
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
 
@@ -252,7 +250,7 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
     async def async_turn_away_mode_on(self) -> None:
         """Turn away mode on."""
         self._last_operation_mode_before_away = self._attr_current_operation
-        await self._async_set_lux_mode(LuxMode.holidays.value)
+        await self._async_set_lux_mode(LuxMode.holidays)
 
     async def async_turn_away_mode_off(self) -> None:
         """Turn away mode off."""
@@ -260,6 +258,6 @@ class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
             self._attr_operation_list is not None
             and self._last_operation_mode_before_away not in self._attr_operation_list
         ):
-            await self._async_set_lux_mode(LuxMode.automatic.value)
+            await self._async_set_lux_mode(LuxMode.automatic)
         else:
             await self.async_set_operation_mode(self._last_operation_mode_before_away)
