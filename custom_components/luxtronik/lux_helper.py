@@ -160,9 +160,11 @@ def _is_socket_closed(sock: socket.socket) -> bool:
         LOGGER.exception(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
+        return True
+    last_timeout: float | None = None
     try:
-        # this will try to read bytes without blocking and also without removing them from buffer (peek only)
         last_timeout = sock.gettimeout()
+        # this will try to read bytes without blocking and also without removing them from buffer (peek only)
         sock.settimeout(None)
         data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
         if len(data) == 0:
@@ -184,7 +186,8 @@ def _is_socket_closed(sock: socket.socket) -> bool:
         )
         return False
     finally:
-        sock.settimeout(last_timeout)
+        if last_timeout is not None:
+            sock.settimeout(last_timeout)
     return False
 
 
@@ -251,16 +254,20 @@ class Luxtronik:
         self._read_write(write=True)
 
     def _read_write(self, write=False):
+        self.connect()
+
         try:
-            self.connect()
-        except Exception as err:
-            LOGGER.error("Connection failed during read/write: %s", err)
-            return
-
-        if write:
-            self._write()
-
-        self._read()
+            if write:
+                self._write()
+            self._read()
+        except OSError:
+            LOGGER.error("Socket error during read/write", exc_info=True)
+            self._disconnect()
+            raise
+        except struct.error:
+            LOGGER.error("Protocol/parse error during read/write", exc_info=True)
+            self._disconnect()
+            raise
 
     def _read(self):
         self._read_data(
@@ -283,6 +290,8 @@ class Luxtronik:
         )
 
     def _write(self):
+        if self._socket is None:
+            raise OSError("Cannot write: socket is not connected")
         for index, value in self.parameters.queue.items():
             if isinstance(value, float):
                 value = int(value)
@@ -318,6 +327,9 @@ class Luxtronik:
                         "Socket is not connected. Attempting to reconnect..."
                     )
                     self.connect()
+
+                if self._socket is None:
+                    raise OSError("Socket not connected after connect()")
 
                 self._socket.sendall(struct.pack(">ii", command, 0))
                 cmd = struct.unpack(">i", self._socket.recv(4))[0]
