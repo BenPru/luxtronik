@@ -72,8 +72,7 @@ class LuxtronikEntityAttributeDescription:
     restore_on_startup: bool = False
 
 
-@dataclass
-class LuxtronikEntityDescription(EntityDescription):
+class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     """Class describing Luxtronik entities."""
 
     has_entity_name = True
@@ -97,10 +96,10 @@ class LuxtronikEntityDescription(EntityDescription):
     state_class: str | None = None
 
 
-@dataclass
 class LuxtronikSensorDescription(
     LuxtronikEntityDescription,
     SensorEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik sensor entities."""
 
@@ -109,20 +108,20 @@ class LuxtronikSensorDescription(
     native_precision: int | None = None
 
 
-@dataclass
 class LuxtronikIndexSensorDescription(
     LuxtronikSensorDescription,
     SensorEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik index sensor entities."""
 
     luxtronik_key_timestamp: LuxParameter | LuxCalculation = LuxParameter.UNSET
 
 
-@dataclass
 class LuxtronikNumberDescription(
     LuxtronikEntityDescription,
     NumberEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik number sensor entities."""
 
@@ -133,10 +132,10 @@ class LuxtronikNumberDescription(
     mode: NumberMode = NumberMode.AUTO
 
 
-@dataclass
 class LuxtronikBinarySensorEntityDescription(
     LuxtronikEntityDescription,
     BinarySensorEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik binary sensor entities."""
 
@@ -147,10 +146,10 @@ class LuxtronikBinarySensorEntityDescription(
     inverted = False
 
 
-@dataclass
 class LuxtronikSwitchDescription(
     LuxtronikEntityDescription,
     SwitchEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik switch entities."""
 
@@ -162,10 +161,10 @@ class LuxtronikSwitchDescription(
     inverted = False
 
 
-@dataclass
 class LuxtronikClimateDescription(
     LuxtronikEntityDescription,
     ClimateEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik climate entities."""
 
@@ -194,7 +193,6 @@ def metaclass_resolver(*classes):
     return metaclass("_".join(cls.__name__ for cls in classes), classes, {})
 
 
-@dataclass
 class LuxtronikWaterHeaterDescription(
     metaclass_resolver(LuxtronikEntityDescription, WaterHeaterEntityDescription)
 ):
@@ -212,10 +210,10 @@ class LuxtronikWaterHeaterDescription(
     temperature_unit: str = UnitOfTemperature.CELSIUS
 
 
-@dataclass
 class LuxtronikUpdateEntityDescription(
     LuxtronikEntityDescription,
     UpdateEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik update entities."""
 
@@ -223,10 +221,10 @@ class LuxtronikUpdateEntityDescription(
     platform = Platform.UPDATE
 
 
-@dataclass
 class LuxtronikDateEntityDescription(
     LuxtronikEntityDescription,
     DateEntityDescription,
+    frozen_or_thawed=True,
 ):
     """Class describing Luxtronik date entities."""
 
