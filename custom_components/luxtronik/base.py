@@ -29,7 +29,11 @@ from .const import (
     SensorAttrKey as SA,
 )
 from .coordinator import LuxtronikCoordinator
-from .model import LuxtronikEntityAttributeDescription, LuxtronikEntityDescription
+from .model import (
+    LuxtronikCoordinatorData,
+    LuxtronikEntityAttributeDescription,
+    LuxtronikEntityDescription,
+)
 
 # endregion Imports
 
@@ -158,8 +162,16 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
         self._handle_coordinator_update()
 
     @callback
-    def _handle_coordinator_update(self, force: bool = False) -> None:
-        """Handle updated data from the coordinator."""
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """Handle updated data from the coordinator.
+
+        The data parameter is used by subclass overrides to pass freshly
+        written coordinator data (e.g. after async_write). The base
+        implementation always reads from self.coordinator.data via
+        _get_value. Subclasses may call super() with or without data.
+        """
         descr = self.entity_description
         value = self._get_value(descr.luxtronik_key)
 
