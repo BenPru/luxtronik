@@ -58,10 +58,11 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikBinarySensorEntity(LuxtronikEntity, BinarySensorEntity):
+class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikBinarySensorEntityDescription], BinarySensorEntity
+):
     """Luxtronik Binary Sensor Entity."""
 
-    entity_description: LuxtronikBinarySensorEntityDescription
     _coordinator: LuxtronikCoordinator
 
     def __init__(

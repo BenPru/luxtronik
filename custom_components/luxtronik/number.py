@@ -70,10 +70,9 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikNumberEntity(LuxtronikEntity, NumberEntity):
+class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     """Luxtronik Number Entity."""
 
-    entity_description: LuxtronikNumberDescription
     _coordinator: LuxtronikCoordinator
 
     def __init__(

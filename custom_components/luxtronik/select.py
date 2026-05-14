@@ -100,7 +100,7 @@ async def async_setup_entry(
         LuxMode.holidays,
     ]
 
-    entities: list[LuxtronikEntity] = [
+    entities: list[LuxtronikEntity[LuxtronikEntityDescription]] = [
         LuxtronikThermalDesinfectionDaySelector(
             entry,
             coordinator,
@@ -162,7 +162,9 @@ async def async_setup_entry(
     async_add_entities(entities, True)
 
 
-class LuxtronikThermalDesinfectionDaySelector(LuxtronikEntity, SelectEntity):
+class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikEntityDescription], SelectEntity
+):
     """Luxtronik Thermal Desinfection Day Selector Entity."""
 
     def __init__(

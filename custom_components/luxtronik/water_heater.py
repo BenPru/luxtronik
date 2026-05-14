@@ -130,10 +130,10 @@ async def async_setup_entry(
     )
 
 
-class LuxtronikWaterHeater(LuxtronikEntity, WaterHeaterEntity):
+class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikWaterHeaterDescription], WaterHeaterEntity
+):
     """Representation of an Luxtronik water heater."""
-
-    entity_description: LuxtronikWaterHeaterDescription
 
     _attr_min_temp = DEFAULT_DHW_MIN_TEMPERATURE
     _attr_target_temperature_step = 0.5
