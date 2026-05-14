@@ -1,7 +1,14 @@
 from copy import deepcopy
 
 from luxtronik.calculations import Calculations
-from luxtronik.datatypes import Celsius, HeatpumpCode, Percent, Percent2, Timestamp, MixedCircuitMode
+from luxtronik.datatypes import (
+    Celsius,
+    HeatpumpCode,
+    MixedCircuitMode,
+    Percent,
+    Percent2,
+    Timestamp,
+)
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
 

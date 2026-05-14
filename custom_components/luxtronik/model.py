@@ -19,7 +19,10 @@ from homeassistant.components.number import NumberEntityDescription, NumberMode
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.update import UpdateDeviceClass, UpdateEntityDescription
-from homeassistant.components.water_heater import WaterHeaterEntityFeature, WaterHeaterEntityDescription
+from homeassistant.components.water_heater import (
+    WaterHeaterEntityDescription,
+    WaterHeaterEntityFeature,
+)
 from homeassistant.const import Platform, UnitOfTemperature
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.typing import StateType
@@ -223,3 +226,4 @@ class LuxtronikDateEntityDescription(
     """Class describing Luxtronik date entities."""
 
     platform = Platform.DATE
+

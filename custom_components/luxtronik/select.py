@@ -332,4 +332,3 @@ class LuxtronikModeSelector(LuxtronikEntity, SelectEntity):
             option,
         )
         self._handle_coordinator_update(updated_data)
-        
