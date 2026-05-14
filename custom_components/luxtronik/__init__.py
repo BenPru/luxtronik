@@ -133,7 +133,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             coordinator = await connect_and_get_coordinator(hass, config_entry)
             if CONF_HA_SENSOR_PREFIX not in new_data:
                 new_data[CONF_HA_SENSOR_PREFIX] = "luxtronik"
-            await hass.config_entries.async_update_entry(
+            hass.config_entries.async_update_entry(
                 config_entry, data=new_data, version=2, unique_id=coordinator.unique_id
             )
             current_version = 2
@@ -355,7 +355,7 @@ async def _up_many(
             entity_id = f"{platform}.{prefix}_{ident}"
             new_ident = f"{platform}.{prefix}_{new_id}"
             try:
-                await ent_reg.async_update_entity(
+                ent_reg.async_update_entity(
                     entity_id, new_entity_id=new_ident, new_unique_id=new_ident
                 )
             except KeyError as err:
@@ -395,7 +395,7 @@ async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: Config
     )
     identifiers_list = []
     for device_info in coordinator.device_infos.values():
-        identifiers_list.append(device_info["identifiers"])
+        identifiers_list.append(device_info.get("identifiers", set()))
     for device_entry in devices:
         if not _identifiers_exists(identifiers_list, device_entry.identifiers):
             dr_instance.async_remove_device(device_entry.id)

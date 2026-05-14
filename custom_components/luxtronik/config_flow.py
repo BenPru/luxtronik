@@ -48,16 +48,24 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     _sensor_prefix = DOMAIN
     _title = "Luxtronik"
+    _all_devices: list[dict[str, Any]] = []
+    _available_devices: list[dict[str, Any]] = []
 
-    def _build_config(self, host: str, port: int) -> dict[str, Any]:
+    def _build_config(
+        self,
+        host: str,
+        port: int,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_data_length: int = DEFAULT_MAX_DATA_LENGTH,
+    ) -> dict[str, Any]:
         return {
             CONF_HOST: host,
             CONF_PORT: port,
-            CONF_TIMEOUT: DEFAULT_TIMEOUT,
-            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+            CONF_TIMEOUT: timeout,
+            CONF_MAX_DATA_LENGTH: max_data_length,
         }
 
-    async def _discover_devices(self) -> list[tuple[str, int]]:
+    async def _discover_devices(self) -> list[tuple[str, int | None]]:
         """Run device discovery in executor."""
         return await self.hass.async_add_executor_job(discover)
 
@@ -178,6 +186,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_user()
 
         device_str = user_input.get(SELECT_DEVICE_LABEL)
+        if device_str is None:
+            return self.async_abort(reason="unknown")
         host, port = device_str.split(":")
         config = self._build_config(host, int(port))
 
@@ -207,7 +217,12 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="manual_entry", data_schema=build_user_data_schema()
             )
 
-        config = self._build_config(user_input[CONF_HOST], int(user_input[CONF_PORT]))
+        config = self._build_config(
+            user_input[CONF_HOST],
+            int(user_input[CONF_PORT]),
+            float(user_input.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)),
+            int(user_input.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH)),
+        )
 
         try:
             coordinator = await connect_and_get_coordinator(self.hass, config)
@@ -246,7 +261,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     coord_legacy = await connect_and_get_coordinator(
                         self.hass, legacy_entry
                     )
-                    if self.context["unique_id"] == coord_legacy.unique_id:
+                    if self.context.get("unique_id") == coord_legacy.unique_id:
                         # Match Found! --> Migrate
                         # How to use .INTEGRATION or other instead of .USER?
                         legacy_entry.disabled_by = (
@@ -256,12 +271,13 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         await self.hass.config_entries.async_reload(
                             legacy_entry.entry_id
                         )
-                        self.context["data"][CONF_HA_SENSOR_PREFIX] = "luxtronik2"
+                        ctx_data: dict[str, Any] = self.context.setdefault("data", {})  # pyright: ignore[reportCallIssue, reportArgumentType]
+                        ctx_data[CONF_HA_SENSOR_PREFIX] = "luxtronik2"
                         if (
                             hasattr(legacy_entry, "data")
                             and CONF_HA_SENSOR_INDOOR_TEMPERATURE in legacy_entry.data
                         ):
-                            self.context["data"][CONF_HA_SENSOR_INDOOR_TEMPERATURE] = (
+                            ctx_data[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = (
                                 legacy_entry.data[CONF_HA_SENSOR_INDOOR_TEMPERATURE]
                             )
                         return
@@ -323,7 +339,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     DEFAULT_PORT,
                 )
 
-            config = self._build_config(host, int(port))
+            config = self._build_config(host, int(port or DEFAULT_PORT))
 
             try:
                 coordinator = await connect_and_get_coordinator(self.hass, config)
@@ -338,7 +354,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             await self.async_set_unique_id(coordinator.unique_id)
             self._abort_if_unique_id_configured(
-                updates={CONF_HOST: host, CONF_PORT: int(port)}
+                updates={CONF_HOST: host, CONF_PORT: int(port or DEFAULT_PORT)}
             )
 
             return self._create_entry(config, coordinator)
