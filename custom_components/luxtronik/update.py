@@ -7,6 +7,7 @@ from datetime import UTC, datetime, timedelta
 import re
 from typing import Final
 
+from aiohttp import ClientTimeout
 from awesomeversion import AwesomeVersion
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
@@ -191,7 +192,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
         try:
             session = async_get_clientsession(self.hass)
             async with session.get(
-                f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=30
+                f"{DOWNLOAD_PORTAL_URL}{download_id}", timeout=ClientTimeout(total=30)
             ) as response:
                 if response.status != 200:
                     raise Exception(f"HTTP error: {response.status}")
@@ -211,7 +212,7 @@ class LuxtronikUpdateEntity(LuxtronikEntity, UpdateEntity):
                 )
 
             async with session.get(
-                f"{CHANGELOG_URL}{download_id}", timeout=30
+                f"{CHANGELOG_URL}{download_id}", timeout=ClientTimeout(total=30)
             ) as response:
                 if response.status != 200:
                     raise Exception(f"HTTP error: {response.status}")
