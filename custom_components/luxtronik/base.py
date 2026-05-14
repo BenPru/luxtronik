@@ -208,6 +208,8 @@ class LuxtronikEntity(CoordinatorEntity[LuxtronikCoordinator], RestoreEntity):
             # Ensure timezone:
             time_zone = dt_util.get_time_zone(self.hass.config.time_zone)
             value = value.replace(tzinfo=time_zone)
+        if isinstance(value, datetime):
+            return str(value)
         if attr.format is None:
             return str(value)
         if attr.format == SensorAttrFormat.HOUR_MINUTE:

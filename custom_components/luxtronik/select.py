@@ -43,7 +43,7 @@ async def async_setup_entry(
     thermal_desinfection_description = LuxtronikEntityDescription(
         key=SK.THERMAL_DESINFECTION_DAY,
         device_key=DeviceKey.domestic_water,
-        luxtronik_key=LuxDaySelectorParameter.MONDAY,
+        luxtronik_key=LuxDaySelectorParameter.MONDAY,  # pyright: ignore[reportArgumentType]  # LuxDaySelectorParameter not in LuxParameter|LuxCalculation union; widening requires updating _get_value/get_sensor_data signatures
     )
 
     dhw_description = LuxtronikEntityDescription(
