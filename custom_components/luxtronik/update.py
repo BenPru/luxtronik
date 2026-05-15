@@ -8,13 +8,13 @@ import re
 from typing import Final
 
 from aiohttp import ClientTimeout
-from awesomeversion import AwesomeVersion
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from packaging.version import Version
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -121,16 +121,10 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
             # Remove any leading non-digit characters
             return re.sub(r"^[^\d]+", "", version)
 
-        latest = AwesomeVersion(
-            normalize(latest_version),
-            find_first_match=True,
-        )
-        installed = AwesomeVersion(
-            normalize(installed_version),
-            find_first_match=True,
-        )
-
-        return latest > installed
+        try:
+            return Version(normalize(latest_version)) > Version(normalize(installed_version))
+        except Exception:
+            return False
 
     @staticmethod
     def extract_firmware_version(filename: str | None) -> str | None:
