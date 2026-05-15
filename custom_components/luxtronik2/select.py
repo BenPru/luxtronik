@@ -97,7 +97,7 @@ async def async_setup_entry(
         entity_registry_enabled_default=False,
     )
 
-    mode_options = [
+    mode_options: list[LuxMode] = [
         LuxMode.off,
         LuxMode.automatic,
         LuxMode.second_heatsource,
@@ -105,14 +105,14 @@ async def async_setup_entry(
         LuxMode.holidays,
     ]
 
-    mode_mk_options = [
+    mode_mk_options: list[LuxMode] = [
         LuxMode.off,
         LuxMode.automatic,
         LuxMode.party,
         LuxMode.holidays,
     ]
 
-    entities: list[LuxtronikEntity[LuxtronikSelectEntityDescription]] = [
+    entities: list[LuxtronikThermalDesinfectionDaySelector | LuxtronikModeSelector] = [
         LuxtronikThermalDesinfectionDaySelector(
             entry,
             coordinator,

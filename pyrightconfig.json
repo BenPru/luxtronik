@@ -1,0 +1,9 @@
+{
+  "pythonVersion": "3.14",
+  "pythonPlatform": "Linux",
+  "typeCheckingMode": "basic",
+  "include": ["custom_components/luxtronik2"],
+  "exclude": ["tests"],
+  "reportMissingModuleSource": false,
+  "reportPrivateImportUsage": false
+}

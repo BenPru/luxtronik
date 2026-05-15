@@ -35,10 +35,10 @@ jobs:
         run: pip install --upgrade ruff
 
       - name: Run ruff check --fix
-        run: ruff check --fix custom_components/luxtronik tests
+        run: ruff check --fix custom_components/luxtronik2 tests
 
       - name: Run ruff format
-        run: ruff format custom_components/luxtronik tests
+        run: ruff format custom_components/luxtronik2 tests
 
       - name: Commit and push changes
         run: |

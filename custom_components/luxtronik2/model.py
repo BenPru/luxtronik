@@ -121,7 +121,7 @@ class LuxtronikNumberDescription(
     """Class describing Luxtronik number sensor entities."""
 
     platform = Platform.NUMBER
-    update_interval: timedelta = UPDATE_INTERVAL_VERY_SLOW
+    update_interval: timedelta | None = UPDATE_INTERVAL_VERY_SLOW
     factor: float | None = None
     native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO

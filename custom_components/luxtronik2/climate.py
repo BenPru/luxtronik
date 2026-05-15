@@ -257,7 +257,7 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
         # ✅ IMPORTANT: start from base-processed description (has translation_key set)
         description = self.entity_description
 
-        domain = description.key.value
+        domain = description.key.value  # pyright: ignore[reportAttributeAccessIssue]
         configured_indoor_temp_sensor = entry.options.get(
             CONF_HA_SENSOR_INDOOR_TEMPERATURE,
             entry.data.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE),
@@ -288,7 +288,7 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
         self.entity_description = description
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key.value}")
+        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key.value}")  # pyright: ignore[reportAttributeAccessIssue]
         self._attr_unique_id = self.entity_id
 
         self._attr_temperature_unit = description.temperature_unit

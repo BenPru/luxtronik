@@ -31,7 +31,7 @@ def mock_connect(monkeypatch):
         serial_number = "123456789"
 
     monkeypatch.setattr(
-        "custom_components.luxtronik.coordinator.LuxtronikCoordinator.connect",
+        "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
         lambda hass, config: MockCoordinator(),
     )
     return MockCoordinator()
