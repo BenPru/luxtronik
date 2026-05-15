@@ -377,7 +377,7 @@ class LuxParameter(StrEnum):
         "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
     P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET = (
-        "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperatur Rücklauf Soll --> Einstellung 103
+        "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperature Rücklauf Soll --> Einstellung 103
     )
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
     P0042_MIXING_CIRCUIT1_TYPE = "parameters.ID_Einst_MK1Typ_akt"
