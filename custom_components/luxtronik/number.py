@@ -161,6 +161,7 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
             return str(value)
         if (
             self._attr_state is not None
+            and self.entity_description.factor is not None
             and float(value)
             >= float(self._attr_state) * float(self.entity_description.factor)
             and (

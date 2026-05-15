@@ -14,7 +14,6 @@ from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
-from homeassistant.util.dt import dt as dt_util
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -172,11 +171,11 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         if data is None:
             return
 
-        value = get_sensor_data(data, self.entity_description.luxtronik_key.value)
+        value = get_sensor_data(data, self.entity_description.luxtronik_key)
 
         if value is None:
             self._attr_native_value = None
-        elif self.entity_description.key.value == SensorKey.ERROR_REASON:
+        elif self.entity_description.key == SensorKey.ERROR_REASON:
             self._attr_native_value = value
         elif isinstance(value, (float, int)):
             factor = self.entity_description.factor or 1
@@ -237,7 +236,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
         # For normal status sensors, use the parent's update logic
         super()._handle_coordinator_update(data)
 
-        self._evu_tracker.update(self._attr_native_value)
+        self._evu_tracker.update(
+            str(self._attr_native_value)
+            if self._attr_native_value is not None
+            else None
+        )
 
         if self._attr_native_value is None or self._last_state is None:
             pass
@@ -331,7 +334,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.{line_2_state}"
         )
         # Show evu end time if available
-        suffix = self._evu_tracker.get_evu_status_suffix(self._attr_native_value)
+        suffix = self._evu_tracker.get_evu_status_suffix(
+            str(self._attr_native_value)
+            if self._attr_native_value is not None
+            else None
+        )
         return (
             f"{line_1} {line_2} {status_time}. {suffix}"
             if suffix
@@ -423,13 +430,6 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity):
         self.async_write_ha_state()
 
     def format_time(self, value_timestamp: int | None) -> datetime | None:
-        if value_timestamp is not None and isinstance(value_timestamp, int):
-            value_timestamp = datetime.fromtimestamp(value_timestamp, UTC)
-        if (
-            value_timestamp is not None
-            and isinstance(value_timestamp, datetime)
-            and value_timestamp.tzinfo is None
-        ):
-            time_zone = dt_util.get_time_zone(self.hass.config.time_zone)
-            value_timestamp = value_timestamp.replace(tzinfo=time_zone)
-        return value_timestamp
+        if value_timestamp is None:
+            return None
+        return datetime.fromtimestamp(value_timestamp, UTC)
