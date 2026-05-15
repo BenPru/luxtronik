@@ -16,6 +16,7 @@ from homeassistant.components.climate import (
 )
 from homeassistant.components.date import DateEntityDescription
 from homeassistant.components.number import NumberEntityDescription, NumberMode
+from homeassistant.components.select import SelectEntityDescription
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.update import UpdateDeviceClass, UpdateEntityDescription
@@ -226,3 +227,12 @@ class LuxtronikDateEntityDescription(
     """Class describing Luxtronik date entities."""
 
     platform = Platform.DATE
+
+class LuxtronikSelectEntityDescription(
+    LuxtronikEntityDescription,
+    SelectEntityDescription,
+    frozen_or_thawed=True,
+):
+    """Class describing Luxtronik date entities."""
+
+    platform = Platform.SELECT

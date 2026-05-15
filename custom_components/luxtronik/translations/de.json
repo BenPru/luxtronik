@@ -246,6 +246,9 @@
             "heat_source_input_temperature_min": {
                 "name": "W\u00e4rmequelle Eingang Minimum"
             },
+            "heating_flow_out_temperature_target": {
+                "name": "Manuelle R\u00fccklauf Soll Temperatur"
+            },
             "pump_vent_timer_h": {
                 "name": "Entl\u00fcftung Laufzeit"
             }
@@ -884,6 +887,14 @@
                     "Friday": "Freitag",
                     "Saturday": "Samstag",
                     "Sunday": "Sonntag"
+                }
+            },
+            "heating_control_circuit_mode": {
+                "name": "Heizkreis Kontroll Modus",
+                "state": {
+                    "0": "Laut Heizkurve steuern - Aussentemperatur-abhaengige Regelung",
+                    "1": "Manuell gesetzte Temperatur",
+                    "2": "AIn"
                 }
             }
         },

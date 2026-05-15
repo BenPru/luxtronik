@@ -250,6 +250,9 @@
             "heat_source_input_temperature_min": {
                 "name": "Heat source input minimum"
             },
+            "heating_flow_out_temperature_target": {
+                "name": "Manual target flow out temperature"
+            },
             "pump_vent_timer_h": {
                 "name": "Venting runtime"
             }
@@ -626,6 +629,14 @@
         "select": {
             "thermal_desinfection_day": {
                 "name": "Thermal Desinfection Day"
+            },
+            "heating_control_circuit_mode": {
+                "name": "Heating circuit control mode",
+                "state": {
+                    "0": "heating curve control - Controlled by outside temperature",
+                    "1": "Manual set temperature",
+                    "2": "Analog in"
+                }
             }
         },
         "climate": {

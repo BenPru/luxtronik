@@ -249,6 +249,9 @@
             "heat_source_input_temperature_min": {
                 "name": "Minim\u00e1ln\u00ed vstupn\u00ed teplota zdroje tepla"
             },
+            "heating_flow_out_temperature_target": {
+                "name": "Manual target flow out temperature"
+            },
             "pump_vent_timer_h": {
                 "name": "Doba provozu odvzdu\u0161\u0148ov\u00e1n\u00ed"
             }
@@ -901,6 +904,14 @@
                     "Friday": "P\u00e1tek",
                     "Saturday": "Sobota",
                     "Sunday": "Ned\u011ble"
+                }
+            },
+            "heating_control_circuit_mode": {
+                "name": "Heating circuit control mode",
+                "state": {
+                    "0": "heating curve control - Controlled by outside temperature",
+                    "1": "Manual set temperature",
+                    "2": "Analog in"
                 }
             }
         },

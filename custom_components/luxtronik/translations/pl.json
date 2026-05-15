@@ -237,6 +237,9 @@
             "cooling_target_temperature_mk3": {
                 "name": "Docelowa temperatura ch\u0142odzenia"
             },
+            "heating_flow_out_temperature_target": {
+                "name": "Manual target flow out temperature"
+            },
             "pump_vent_timer_h": {
                 "name": "Czas pracy odpowietrzania"
             }
@@ -608,6 +611,14 @@
                     "Friday": "Pi\u0105tek",
                     "Saturday": "Sobota",
                     "Sunday": "Niedziela"
+                }
+            },
+            "heating_control_circuit_mode": {
+                "name": "Heating circuit control mode",
+                "state": {
+                    "0": "heating curve control - Controlled by outside temperature",
+                    "1": "Manual set temperature",
+                    "2": "Analog in"
                 }
             }
         },

@@ -14,7 +14,7 @@
                 "name": "Compressor 2"
             },
             "pump_flow": {
-                "name": "Brijncirculatiepomp"
+                "name": "Brine-circulatiepomp"
             },
             "compressor_heater": {
                 "name": "Compressorverwarming"
@@ -64,10 +64,10 @@
                 "name": "WP"
             },
             "heating": {
-                "name": "VW"
+                "name": "Verw"
             },
             "domestic_water": {
-                "name": "HW"
+                "name": "Warmwater"
             },
             "cooling": {
                 "name": "Koel"
@@ -233,7 +233,7 @@
                 "name": "Start vertraging"
             },
             "cooling_stop_delay_hours": {
-                "name": "Einde van de vertraging"
+                "name": "Vertragingstijd einde koeling"
             },
             "cooling_target_temperature_mk1": {
                 "name": "Verkoelend doel"
@@ -243,6 +243,9 @@
             },
             "cooling_target_temperature_mk3": {
                 "name": "Verkoelend doel"
+            },
+            "heating_flow_out_temperature_target": {
+                "name": "Handmatig doel uitstroom temperatuur"
             },
             "pump_vent_timer_h": {
                 "name": "Looptijd ontluchting"
@@ -866,6 +869,14 @@
                     "Friday": "Vrijdag",
                     "Saturday": "Zaterdag",
                     "Sunday": "Zondag"
+                }
+            },
+            "heating_control_circuit_mode": {
+                "name": "Verwarmingsmodus aansturing",
+                "state": {
+                    "0": "Verwarmingscurve aansturing - buitentemperatuur gestuurd",
+                    "1": "Handmatig ingestelde temperatuur",
+                    "2": "Analoge ingang"
                 }
             }
         },

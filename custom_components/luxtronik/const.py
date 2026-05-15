@@ -210,6 +210,12 @@ class LuxMkTypes(Enum):
     cooling = 3
     heating_cooling = 4
 
+class LuxHeatingControlModeTypes(StrEnum):
+    """LuxHeatingControlModeTypes etc."""
+
+    heating_curve_control = "0"
+    fixed_temperature = "1"
+    analog_in = "2"
 
 class LuxRoomThermostatType(Enum):
     """LuxMkTypes etc."""
@@ -370,6 +376,9 @@ class LuxParameter(StrEnum):
     P0022_HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE = (
         "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
+    P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET = (
+        "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperatur Rücklauf Soll --> Einstellung 103
+    )
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
     P0042_MIXING_CIRCUIT1_TYPE = "parameters.ID_Einst_MK1Typ_akt"
     P0047_DHW_THERMAL_DESINFECTION_TARGET = "parameters.ID_Einst_LGST_akt"
@@ -381,6 +390,7 @@ class LuxParameter(StrEnum):
     P0089_HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE = "parameters.ID_Einst_TRErhmax_akt"
     P0090_RELEASE_SECOND_HEAT_GENERATOR = "parameters.ID_Einst_ZWEFreig_akt"
     P0093_HEAT_SOURCE_INPUT_TEMPERATURE_MIN = "parameters.ID_Einst_TWQmin_akt"
+    P0103_HEATING_CONTROL_CIRCUIT_MODE = "parameters.ID_Einst_RTyp_akt"
     P0105_DHW_TARGET_TEMPERATURE = "parameters.ID_Soll_BWS_akt"
     # MODE_COOLING: Automatic or Off
     P0108_MODE_COOLING = "parameters.ID_Einst_BA_Kuehl_akt"
@@ -747,9 +757,11 @@ class SensorKey(StrEnum):
     THERMAL_POWER_LIMIT_COOLING = "thermal_power_limitation_cooling"
     PUMP_HEAT_CONTROL = "pump_heat_control"
     HEATING = "heating"
+    HEATING_MODE_SELECTOR = "heating_mode"
     PUMP_OPTIMIZATION = "pump_optimization"
     HEATING_THRESHOLD = "heating_threshold"
     DOMESTIC_WATER = "domestic_water"
+    DOMESTIC_WATER_MODE_SELECTOR = "dhw_mode"
     COOLING = "cooling"
     RELEASE_SECOND_HEAT_GENERATOR = "release_second_heat_generator"
     RELEASE_TIME_SECOND_HEAT_GENERATOR = "release_time_second_heat_generator"
@@ -757,6 +769,7 @@ class SensorKey(StrEnum):
     PUMP_OPTIMIZATION_TIME = "pump_optimization_time"
     HEATING_THRESHOLD_TEMPERATURE = "heating_threshold_temperature"
     HEATING_MIN_FLOW_OUT_TEMPERATURE = "heating_min_flow_out_temperature"
+    HEATING_CONTROL_CIRCUIT_MODE = "heating_control_circuit_mode"
     HEATING_CURVE_END_TEMPERATURE = "heating_curve_end_temperature"
     HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE = (
         "heating_curve_parallel_shift_temperature"
@@ -783,6 +796,7 @@ class SensorKey(StrEnum):
     HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE = (
         "heating_curve_circuit3_night_temperature"
     )
+    HEATING_FLOW_OUT_TEMPERATURE_TARGET = "heating_flow_out_temperature_target"
     HEATING_NIGHT_LOWERING_TO_TEMPERATURE = "heating_night_lowering_to_temperature"
     HEATING_HYSTERESIS = "heating_hysteresis"
     HEATING_MAX_FLOW_OUT_INCREASE_TEMPERATURE = (
@@ -790,6 +804,9 @@ class SensorKey(StrEnum):
     )
     HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED = "heating_maximum_circulation_pump_speed"
     HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR = "heating_room_temperature_impact_factor"
+    HEATING_MODE_MK1 = "heating_mode_mk1"
+    HEATING_MODE_MK2 = "heating_mode_mk2"
+    HEATING_MODE_MK3 = "heating_mode_mk3"
     DHW_TARGET_TEMPERATURE = "dhw_target_temperature"
     DHW_HYSTERESIS = "dhw_hysteresis"
     DHW_THERMAL_DESINFECTION_TARGET = "dhw_thermal_desinfection_target"

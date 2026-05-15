@@ -69,21 +69,22 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
             else description.translation_key_name
         )
 
-        if description.entity_registry_enabled_default is not None:
-            description = replace(
-                description,
-                entity_registry_enabled_default=coordinator.entity_visible(description),
-            )
-
         description = replace(
             description,
             translation_key=translation_key,
         )
 
+        if description.entity_registry_enabled_default is None:
+            description = replace(
+                description,
+                entity_registry_enabled_default=coordinator.entity_visible(description),
+            )
+
         # ✅ Now assign once
         self.entity_description = description
 
         # --- everything below uses the FINAL description ---
+        self._attr_translation_key = description.translation_key
         self._attr_cache = {}
         self._device_info_ident = device_info_ident
         self._attr_device_info = coordinator.get_device(device_info_ident)
