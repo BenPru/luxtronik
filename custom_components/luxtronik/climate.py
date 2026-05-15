@@ -31,13 +31,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData
 from packaging.version import Version
 
+from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists, state_as_number_or_none
 from .const import (
-    CONF_COORDINATOR,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
-    DOMAIN,
     LOGGER,
     LUX_STATE_ICON_MAP,
     LUX_STATE_ICON_MAP_COOL,
@@ -175,19 +174,13 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: LuxtronikConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Luxtronik climate entities dynamically through Luxtronik discovery."""
 
-    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
-    if not data or CONF_COORDINATOR not in data:
-        return
-
-    coordinator: LuxtronikCoordinator = data[CONF_COORDINATOR]
-
-    # Ensure coordinator has valid data before adding entities
-    if not coordinator.last_update_success:
-        return
+    coordinator = entry.runtime_data
 
     unavailable_keys = [
         i.luxtronik_key
