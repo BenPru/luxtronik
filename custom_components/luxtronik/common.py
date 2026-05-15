@@ -95,11 +95,8 @@ def get_sensor_data(
     if sensor is None:
         LOGGER.warning("Get_sensor %s (%s) returns None", sensor_id, luxtronik_key)
         return None
-    return (
-        sensor.value
-        if raw_value
-        else correct_key_value(sensor.value, coordinator, luxtronik_key)
-    )
+    value = sensor.value  # pyright: ignore[reportAttributeAccessIssue]
+    return value if raw_value else correct_key_value(value, coordinator, luxtronik_key)
 
 
 def correct_key_value(

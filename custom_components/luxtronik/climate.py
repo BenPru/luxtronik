@@ -324,7 +324,7 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
         self._attr_current_lux_operation = lux_action = get_sensor_data(
             data, self.entity_description.luxtronik_key_current_action.value
         )
-        self._attr_hvac_action = (
+        self._attr_hvac_action = (  # pyright: ignore[reportAttributeAccessIssue]
             None
             if lux_action is None
             else self.entity_description.hvac_action_mapping[lux_action]
@@ -382,7 +382,7 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode."""
-        self._attr_hvac_mode = hvac_mode
+        self._attr_hvac_mode = hvac_mode  # pyright: ignore[reportIncompatibleVariableOverride]
         lux_mode = next(
             k
             for k, v in self.entity_description.hvac_mode_mapping.items()

@@ -46,6 +46,7 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
 
     entity_description: DescriptionT
     next_update: datetime | None = None
+    _attr_state: Any = None  # Any: values come from luxtronik library (untyped)
 
     _entity_component_unrecorded_attributes = frozenset(
         {
@@ -63,7 +64,7 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
 
         # ✅ Build final description FIRST
         translation_key = (
-            description.key.value
+            description.key.value  # pyright: ignore[reportAttributeAccessIssue]
             if description.translation_key_name is None
             else description.translation_key_name
         )
@@ -195,9 +196,9 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
             self._attr_icon = descr.icon
 
         if hasattr(self, "_attr_current_operation") and self._attr_icon is not None:
-            if self._attr_current_operation == STATE_OFF:
+            if self._attr_current_operation == STATE_OFF:  # pyright: ignore[reportAttributeAccessIssue]
                 self._attr_icon += "-off"
-            elif self._attr_current_operation == STATE_HEAT_PUMP:
+            elif self._attr_current_operation == STATE_HEAT_PUMP:  # pyright: ignore[reportAttributeAccessIssue]
                 self._attr_icon += "-auto"
 
         self._enrich_extra_attributes()
@@ -207,11 +208,11 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
     def compute_is_on(self, state: Any) -> bool:
         descr = self.entity_description
 
-        if isinstance(descr.on_state, bool) and state is not None:
+        if isinstance(descr.on_state, bool) and state is not None:  # pyright: ignore[reportAttributeAccessIssue]
             state = bool(state)
 
         is_on = bool(
-            state == descr.on_state or (descr.on_states and state in descr.on_states)
+            state == descr.on_state or (descr.on_states and state in descr.on_states)  # pyright: ignore[reportAttributeAccessIssue]
         )
 
         return not is_on if getattr(descr, "inverted", False) else is_on

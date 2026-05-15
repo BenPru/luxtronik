@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from homeassistant.components.date import ENTITY_ID_FORMAT, DateEntity
+from homeassistant.components.date import (
+    ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
+    DateEntity,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
