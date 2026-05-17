@@ -32,7 +32,7 @@ combine-as-imports = true
 quote-style = "double"
 
 [tool.codespell]
-skip = "custom_components/luxtronik/translations"
+skip = "custom_components/luxtronik2/translations"
 ignore-words-list = "hass"
 
 [tool.pytest.ini_options]

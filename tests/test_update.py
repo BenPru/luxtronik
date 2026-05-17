@@ -1,6 +1,6 @@
 import unittest
 
-from custom_components.luxtronik.update import LuxtronikUpdateEntity
+from custom_components.luxtronik2.update import LuxtronikUpdateEntity
 
 
 class TestFirmwareVersionExtraction(unittest.TestCase):

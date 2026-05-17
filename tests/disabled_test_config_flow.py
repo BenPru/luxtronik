@@ -3,11 +3,11 @@ from unittest.mock import AsyncMock, MagicMock
 from homeassistant.core import HomeAssistant
 import pytest
 
-from custom_components.luxtronik.config_flow import (
+from custom_components.luxtronik2.config_flow import (
     LuxtronikFlowHandler,
     LuxtronikOptionsFlowHandler,
 )
-from custom_components.luxtronik.const import CONF_HOST, CONF_PORT
+from custom_components.luxtronik2.const import CONF_HOST, CONF_PORT
 
 
 @pytest.fixture
