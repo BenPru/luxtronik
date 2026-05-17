@@ -221,7 +221,7 @@
                 "name": "Verlagen naar buitentemperatuur"
             },
             "efficiency_pump_nominal": {
-                "name": "Rendement pomp nominaal"
+                "name": "Effici\u00ebntie pomp nominaal"
             },
             "efficiency_pump_minimal": {
                 "name": "Effici\u00ebntie pomp minimaal"
