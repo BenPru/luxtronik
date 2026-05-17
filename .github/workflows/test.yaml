@@ -1,7 +1,14 @@
 name: Luxtronik Integration Tests
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -27,9 +34,10 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest --cov=custom_components.luxtronik2 --cov-report=xml --cov-report=term tests/
+          pytest --cov=custom_components.luxtronik2 --cov-report=xml --cov-report=term-missing tests/
 
       - name: Upload coverage report
+        if: matrix.python-version == '3.14'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-report

@@ -139,7 +139,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             raise UpdateFailed(f"Write error: {err}") from err
 
     @staticmethod
-    async def connect(
+    async def connect(  # pragma: no cover
         hass: HomeAssistant, config_entry: ConfigEntry | dict[str, Any]
     ) -> LuxtronikCoordinator:
         """Connect to heatpump."""
@@ -558,7 +558,7 @@ async def connect_and_get_coordinator(
     host: str = config_data.get(CONF_HOST, "")
     port = config_data.get(CONF_PORT, DEFAULT_PORT)
 
-    try:
+    try:  # pragma: no cover
         coordinator = await LuxtronikCoordinator.connect(hass, config_data)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
