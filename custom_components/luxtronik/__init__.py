@@ -200,6 +200,11 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             await _async_update_config_entry(hass, config_entry, new_data, 8)
             current_version = 8
 
+        elif current_version == 8:
+            await _fix_select_entity_unique_ids(hass, config_entry)
+            await _async_update_config_entry(hass, config_entry, new_data, 9)
+            current_version = 9
+
     LOGGER.info("Migration to version %s successful", current_version)
     return True
 
@@ -367,6 +372,43 @@ async def _rename_curve_entities(hass: HomeAssistant, config_entry: ConfigEntry)
             ]
         },
     )
+
+
+async def _fix_select_entity_unique_ids(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> None:
+    """Fix select entity unique_ids incorrectly using binary_sensor prefix.
+
+    PR #563 fixed ENTITY_ID_FORMAT import in select.py from
+    homeassistant.components.binary_sensor to homeassistant.components.select,
+    changing unique_ids from binary_sensor.{prefix}_xxx to select.{prefix}_xxx.
+    Migrate old unique_ids to prevent duplicate entities.
+    """
+    prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
+    ent_reg = async_get(hass)
+    select_keys = [
+        SK.THERMAL_DESINFECTION_DAY,
+        SK.DOMESTIC_WATER_MODE_SELECTOR,
+        SK.HEATING_MODE_SELECTOR,
+    ]
+    for key in select_keys:
+        old_unique_id = f"binary_sensor.{prefix}_{key}"
+        new_unique_id = f"select.{prefix}_{key}"
+        entity_id = ent_reg.async_get_entity_id(P.SELECT, DOMAIN, old_unique_id)
+        if entity_id is not None:
+            try:
+                ent_reg.async_update_entity(entity_id, new_unique_id=new_unique_id)
+                LOGGER.info(
+                    "Migrated select entity unique_id: %s -> %s",
+                    old_unique_id,
+                    new_unique_id,
+                )
+            except ValueError as err:
+                LOGGER.warning(
+                    "Could not migrate select entity %s: %s",
+                    old_unique_id,
+                    err,
+                )
 
 
 async def _up_many(

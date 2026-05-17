@@ -97,7 +97,6 @@ async def async_setup_entry(
         entity_registry_enabled_default=False,
     )
 
-
     mode_options = [
         LuxMode.off,
         LuxMode.automatic,
