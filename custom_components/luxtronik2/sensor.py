@@ -279,11 +279,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
             # endregion Workaround Thermal desinfection with heatpump running
 
             # region Workaround Thermal desinfection with (only) using 2nd heatsource
-            s3_workaround: list[str | None] = [
+            s3_workaround_2: list[str | None] = [
                 LuxStatus3Option.no_request,
                 LuxStatus3Option.cycle_lock,
             ]
-            if sl3 in s3_workaround:
+            if sl3 in s3_workaround_2:
                 DHW_recirculation = self._get_value(LC.C0038_DHW_RECIRCULATION_PUMP)
                 AddHeat = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
                 if AddHeat and DHW_recirculation:
