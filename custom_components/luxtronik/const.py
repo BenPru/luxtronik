@@ -16,7 +16,7 @@ import voluptuous as vol
 
 # region Constants Main
 DOMAIN: Final = "luxtronik2"
-CONFIG_ENTRY_VERSION: Final = 8
+CONFIG_ENTRY_VERSION: Final = 9
 NICKNAME_PREFIX: Final = "Home Assistant"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
@@ -210,12 +210,14 @@ class LuxMkTypes(Enum):
     cooling = 3
     heating_cooling = 4
 
+
 class LuxHeatingControlModeTypes(StrEnum):
     """LuxHeatingControlModeTypes etc."""
 
     heating_curve_control = "0"
     fixed_temperature = "1"
     analog_in = "2"
+
 
 class LuxRoomThermostatType(Enum):
     """LuxMkTypes etc."""
@@ -376,9 +378,7 @@ class LuxParameter(StrEnum):
     P0022_HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE = (
         "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
-    P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET = (
-        "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperature Rücklauf Soll --> Einstellung 103
-    )
+    P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET = "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperature Rücklauf Soll --> Einstellung 103
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
     P0042_MIXING_CIRCUIT1_TYPE = "parameters.ID_Einst_MK1Typ_akt"
     P0047_DHW_THERMAL_DESINFECTION_TARGET = "parameters.ID_Einst_LGST_akt"

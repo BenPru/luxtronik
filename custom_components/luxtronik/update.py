@@ -122,7 +122,9 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
             return re.sub(r"^[^\d]+", "", version)
 
         try:
-            return Version(normalize(latest_version)) > Version(normalize(installed_version))
+            return Version(normalize(latest_version)) > Version(
+                normalize(installed_version)
+            )
         except Exception:
             return False
 

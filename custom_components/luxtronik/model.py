@@ -228,6 +228,7 @@ class LuxtronikDateEntityDescription(
 
     platform = Platform.DATE
 
+
 class LuxtronikSelectEntityDescription(
     LuxtronikEntityDescription,
     SelectEntityDescription,
