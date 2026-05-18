@@ -1,4 +1,6 @@
-"""Support for Luxtronik selectors"""
+"""Support for Luxtronik selectors."""
+
+from __future__ import annotations
 
 from homeassistant.components.select import (
     ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
@@ -33,13 +35,14 @@ async def async_setup_entry(
     entry: LuxtronikConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Luxtronik Select entities"""
-
+    """Set up Luxtronik Select entities."""
     coordinator = entry.runtime_data
 
     # Ensure coordinator has valid data before adding entities
     if not coordinator.last_update_success:
         return
+
+    # ---- Descriptions -------------------------------------------------
 
     thermal_desinfection_description = LuxtronikSelectEntityDescription(
         key=SK.THERMAL_DESINFECTION_DAY,
@@ -97,82 +100,80 @@ async def async_setup_entry(
         entity_registry_enabled_default=False,
     )
 
-    mode_options: list[LuxMode] = [
-        LuxMode.off,
-        LuxMode.automatic,
-        LuxMode.second_heatsource,
-        LuxMode.party,
-        LuxMode.holidays,
+    # ---- Options (always strings!) ------------------------------------
+
+    mode_options: list[str] = [
+        m.value
+        for m in (
+            LuxMode.off,
+            LuxMode.automatic,
+            LuxMode.second_heatsource,
+            LuxMode.party,
+            LuxMode.holidays,
+        )
     ]
 
-    mode_mk_options: list[LuxMode] = [
-        LuxMode.off,
-        LuxMode.automatic,
-        LuxMode.party,
-        LuxMode.holidays,
+    mode_mk_options: list[str] = [
+        m.value
+        for m in (
+            LuxMode.off,
+            LuxMode.automatic,
+            LuxMode.party,
+            LuxMode.holidays,
+        )
     ]
 
-    entities: list[LuxtronikThermalDesinfectionDaySelector | LuxtronikModeSelector] = [
+    heating_control_mode_options: list[str] = [
+        m.value for m in LuxHeatingControlModeTypes
+    ]
+
+    # ---- Build entities in a compact, data-driven way -----------------
+
+    entities: list[SelectEntity] = [
         LuxtronikThermalDesinfectionDaySelector(
-            entry,
-            coordinator,
-            thermal_desinfection_description,
-            thermal_desinfection_description.device_key,
-        ),
-        LuxtronikModeSelector(
             entry=entry,
             coordinator=coordinator,
-            description=dhw_description,
-            device_info_ident=DeviceKey.domestic_water,
-            lux_parameter=LuxParameter.P0004_MODE_DHW,
-            options=[str(x.value) for x in mode_mk_options],
-            entity_suffix="dhw_mode",
+            description=thermal_desinfection_description,
+            device_info_ident=thermal_desinfection_description.device_key,
         ),
-        LuxtronikModeSelector(
-            entry=entry,
-            coordinator=coordinator,
-            description=heating_mode_description,
-            device_info_ident=DeviceKey.heating,
-            lux_parameter=LuxParameter.P0003_MODE_HEATING,
-            options=[str(x.value) for x in mode_options],
-            entity_suffix="heating_mode",
-        ),
-        LuxtronikModeSelector(
-            entry=entry,
-            coordinator=coordinator,
-            description=heating_mk1_mode_description,
-            device_info_ident=DeviceKey.heating,
-            lux_parameter=LuxParameter.P0695_MODE_HZ_MK1,
-            options=[str(x.value) for x in mode_mk_options],
-            entity_suffix="heating_mode_mk1",
-        ),
-        LuxtronikModeSelector(
-            entry=entry,
-            coordinator=coordinator,
-            description=heating_mk2_mode_description,
-            device_info_ident=DeviceKey.heating,
-            lux_parameter=LuxParameter.P0696_MODE_HZ_MK2,
-            options=[str(x.value) for x in mode_mk_options],
-            entity_suffix="heating_mode_mk2",
-        ),
-        LuxtronikModeSelector(
-            entry=entry,
-            coordinator=coordinator,
-            description=heating_mk3_mode_description,
-            device_info_ident=DeviceKey.heating,
-            lux_parameter=LuxParameter.P0779_MODE_HZ_MK3,
-            options=[str(x.value) for x in mode_mk_options],
-            entity_suffix="heating_mode_mk3",
-        ),
-        LuxtronikModeSelector(
-            entry=entry,
-            coordinator=coordinator,
-            description=heating_control_mode_description,
-            device_info_ident=DeviceKey.heating,
-            lux_parameter=LuxParameter.P0103_HEATING_CONTROL_CIRCUIT_MODE,
-            options=[str(x.value) for x in LuxHeatingControlModeTypes],
-            entity_suffix="heating_control_circuit_mode",
-        ),
+        *[
+            LuxtronikModeSelector(
+                entry=entry,
+                coordinator=coordinator,
+                description=desc,
+                device_info_ident=desc.device_key,
+                lux_parameter=lux_param,
+                options=opts,
+            )
+            for (desc, lux_param, opts) in (
+                (dhw_description, LuxParameter.P0004_MODE_DHW, mode_mk_options),
+                (
+                    heating_mode_description,
+                    LuxParameter.P0003_MODE_HEATING,
+                    mode_options,
+                ),
+                (
+                    heating_mk1_mode_description,
+                    LuxParameter.P0695_MODE_HZ_MK1,
+                    mode_mk_options,
+                ),
+                (
+                    heating_mk2_mode_description,
+                    LuxParameter.P0696_MODE_HZ_MK2,
+                    mode_mk_options,
+                ),
+                (
+                    heating_mk3_mode_description,
+                    LuxParameter.P0779_MODE_HZ_MK3,
+                    mode_mk_options,
+                ),
+                (
+                    heating_control_mode_description,
+                    LuxParameter.P0103_HEATING_CONTROL_CIRCUIT_MODE,
+                    heating_control_mode_options,
+                ),
+            )
+        ],
     ]
 
     async_add_entities(entities, True)
@@ -185,11 +186,12 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
 
     def __init__(
         self,
+        *,
         entry: ConfigEntry,
         coordinator: LuxtronikCoordinator,
         description: LuxtronikSelectEntityDescription,
         device_info_ident: DeviceKey,
-    ):
+    ) -> None:
         super().__init__(
             coordinator=coordinator,
             description=description,
@@ -198,13 +200,10 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
 
         self._attr_options = DAY_SELECTOR_OPTIONS
         self._attr_current_option = "None"
-
-        # These are also set in the description, but keeping them explicit is fine
         self._attr_entity_category = EntityCategory.CONFIG
         self._attr_icon = "mdi:calendar"
 
-        self.coordinator = coordinator
-
+        # ---- DO NOT TOUCH: manual entity_id + unique_id approach --------
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_thermal_desinfection_day")
         self._attr_unique_id = self.entity_id
@@ -222,8 +221,7 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
         selected_day = "None"
         for day, param_enum in DAY_NAME_TO_PARAM.items():
             param = param_enum.value
-            value = get_sensor_data(data, param)
-            if str(value) == "1":
+            if str(get_sensor_data(data, param)) == "1":
                 selected_day = day
                 break
 
@@ -245,19 +243,21 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
 
             if current_value != desired_value:
                 updated_data = await self.coordinator.async_write(
-                    param.split(".")[1], desired_value
+                    param.split(".")[1],
+                    desired_value,
                 )
                 self._handle_coordinator_update(updated_data)
 
     async def async_update(self) -> None:
         """Read current day from heat pump and update selected option."""
         data = self.coordinator.data
-        selected_day = "None"
+        if data is None:
+            return
 
+        selected_day = "None"
         for day, param_enum in DAY_NAME_TO_PARAM.items():
             param = param_enum.value
-            value = get_sensor_data(data, param)
-            if str(value) == "1":
+            if str(get_sensor_data(data, param)) == "1":
                 selected_day = day
                 break
 
@@ -278,7 +278,6 @@ class LuxtronikModeSelector(
         device_info_ident: DeviceKey,
         lux_parameter: LuxParameter,
         options: list[str],
-        entity_suffix: str,
     ) -> None:
         super().__init__(
             coordinator=coordinator,
@@ -304,14 +303,9 @@ class LuxtronikModeSelector(
         if data is None:
             return
 
-        value = get_sensor_data(data, self._lux_parameter)
-        current = str(value)
+        current = str(get_sensor_data(data, self._lux_parameter))
 
-        LOGGER.debug(
-            "%s raw value from coordinator: %r",
-            self.entity_id,
-            current,
-        )
+        LOGGER.debug("%s raw value from coordinator: %r", self.entity_id, current)
 
         if current not in self._attr_options:
             LOGGER.warning(
