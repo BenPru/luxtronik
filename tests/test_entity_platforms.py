@@ -713,6 +713,7 @@ class TestSelectAsyncSetupEntry:
                 "ID_Einst_BwTDI_akt_FR": 0,
                 "ID_Einst_BwTDI_akt_SA": 0,
                 "ID_Einst_BwTDI_akt_SO": 0,
+                "ID_Einst_BwTDI_akt_AL": 0,
                 "ID_Ba_Hz_akt": "Automatic",
                 "ID_Ba_Bw_akt": "Automatic",
             }
@@ -749,6 +750,7 @@ class TestThermalDesinfectionDaySelector:
             "ID_Einst_BwTDI_akt_FR": 0,
             "ID_Einst_BwTDI_akt_SA": 0,
             "ID_Einst_BwTDI_akt_SO": 0,
+            "ID_Einst_BwTDI_akt_AL": 0,
         }
         if day_values:
             day_params.update(day_values)
@@ -786,10 +788,11 @@ class TestThermalDesinfectionDaySelector:
                 "ID_Einst_BwTDI_akt_FR": 0,
                 "ID_Einst_BwTDI_akt_SA": 0,
                 "ID_Einst_BwTDI_akt_SO": 0,
+                "ID_Einst_BwTDI_akt_AL": 0,
             }
         )
         entity._handle_coordinator_update(data)
-        assert entity._attr_current_option == "Monday"
+        assert entity._attr_current_option == "monday"
 
     def test_handle_coordinator_update_none_selected(self):
         entity, _ = self._make_tdi_selector()
@@ -802,10 +805,11 @@ class TestThermalDesinfectionDaySelector:
                 "ID_Einst_BwTDI_akt_FR": 0,
                 "ID_Einst_BwTDI_akt_SA": 0,
                 "ID_Einst_BwTDI_akt_SO": 0,
+                "ID_Einst_BwTDI_akt_AL": 0,
             }
         )
         entity._handle_coordinator_update(data)
-        assert entity._attr_current_option == "None"
+        assert entity._attr_current_option == "none"
 
     def test_handle_coordinator_update_none_data(self):
         entity, coord = self._make_tdi_selector()
@@ -825,17 +829,18 @@ class TestThermalDesinfectionDaySelector:
                 "ID_Einst_BwTDI_akt_FR": 0,
                 "ID_Einst_BwTDI_akt_SA": 0,
                 "ID_Einst_BwTDI_akt_SO": 0,
+                "ID_Einst_BwTDI_akt_AL": 0,
             }
         )
         coord.async_write = AsyncMock(return_value=updated_data)
-        await entity.async_select_option("Wednesday")
-        assert entity._attr_current_option == "Wednesday"
+        await entity.async_select_option("wednesday")
+        assert entity._attr_current_option == "wednesday"
 
     @pytest.mark.asyncio
     async def test_async_update(self):
         entity, _ = self._make_tdi_selector({"ID_Einst_BwTDI_akt_FR": 1})
         await entity.async_update()
-        assert entity._attr_current_option == "Friday"
+        assert entity._attr_current_option == "friday"
 
 
 # ===========================================================================

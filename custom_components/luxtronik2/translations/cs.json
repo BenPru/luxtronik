@@ -904,7 +904,7 @@
                     "friday": "P\u00e1tek",
                     "saturday": "Sobota",
                     "sunday": "Ned\u011ble",
-                    "continous": "Kontinu\u00e1ln\u011b"
+                    "continuous": "Kontinu\u00e1ln\u011b"
                 }
             },
             "heating_control_circuit_mode": {

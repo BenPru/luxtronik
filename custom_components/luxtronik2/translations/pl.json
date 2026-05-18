@@ -611,7 +611,7 @@
                     "friday": "Pi\u0105tek",
                     "saturday": "Sobota",
                     "sunday": "Niedziela",
-                    "continous": "Ciągły"
+                    "continuous": "Ciągły"
                 }
             },
             "heating_control_circuit_mode": {

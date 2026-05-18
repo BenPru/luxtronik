@@ -887,7 +887,7 @@
                     "friday": "Freitag",
                     "saturday": "Samstag",
                     "sunday": "Sonntag",
-                    "continous": "Kontinuierlich"
+                    "continuous": "Kontinuierlich"
                 }
             },
             "heating_control_circuit_mode": {

@@ -310,7 +310,7 @@ class LuxDaySelectorParameter(StrEnum):
     FRIDAY = "parameters.ID_Einst_BwTDI_akt_FR"
     SATURDAY = "parameters.ID_Einst_BwTDI_akt_SA"
     SUNDAY = "parameters.ID_Einst_BwTDI_akt_SO"
-    CONTINOUS = "parameters.ID_Einst_BwTDI_akt_AL"
+    CONTINUOUS = "parameters.ID_Einst_BwTDI_akt_AL"
 
 
 DAY_NAME_TO_PARAM: Final[dict[str, LuxDaySelectorParameter]] = {
@@ -321,7 +321,7 @@ DAY_NAME_TO_PARAM: Final[dict[str, LuxDaySelectorParameter]] = {
     "friday": LuxDaySelectorParameter.FRIDAY,
     "saturday": LuxDaySelectorParameter.SATURDAY,
     "sunday": LuxDaySelectorParameter.SUNDAY,
-    "continous": LuxDaySelectorParameter.CONTINOUS,
+    "continuous": LuxDaySelectorParameter.CONTINUOUS,
 }
 
 DAY_SELECTOR_OPTIONS: Final[list[str]] = [

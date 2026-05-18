@@ -869,7 +869,7 @@
                     "friday": "Vrijdag",
                     "saturday": "Zaterdag",
                     "sunday": "Zondag",
-                    "continous": "Continu"
+                    "continuous": "Continu"
                 }
             },
             "heating_control_circuit_mode": {
