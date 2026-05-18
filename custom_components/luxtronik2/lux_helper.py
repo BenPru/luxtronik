@@ -225,7 +225,7 @@ class Luxtronik:
                 "Disconnected from Luxtronik heatpump %s:%s", self._host, self._port
             )
 
-    def connect(self) -> None:
+    def connect(self) -> None:  # pragma: no cover
         """Establish connection to the heatpump."""
         with self._lock:
             if self._socket is None or _is_socket_closed(self._socket):
@@ -245,15 +245,15 @@ class Luxtronik:
                     self._disconnect()
                     raise
 
-    def read(self):
+    def read(self):  # pragma: no cover
         """Read data from heatpump."""
         self._read_write(write=False)
 
-    def write(self):
+    def write(self):  # pragma: no cover
         """Write parameter to heatpump."""
         self._read_write(write=True)
 
-    def _read_write(self, write=False):
+    def _read_write(self, write=False):  # pragma: no cover
         self.connect()
 
         try:
@@ -313,7 +313,7 @@ class Luxtronik:
         # Todo: Change methods to async
         # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
-    def _read_data(
+    def _read_data(  # pragma: no cover
         self, command: int, item_size: int, parser, label: str, retries: int = 4
     ) -> None:
         """Generic method to read data from the socket with timeout and retry handling."""

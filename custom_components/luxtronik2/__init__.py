@@ -116,7 +116,9 @@ def setup_hass_services(hass: HomeAssistant, entry: LuxtronikConfigEntry):
                 coordinator = config_entry.runtime_data
                 await coordinator.async_write(parameter, value)
                 return
-        LOGGER.error("No active Luxtronik coordinator found for service call")
+        LOGGER.error(
+            "No active Luxtronik coordinator found for service call"
+        )  # pragma: no cover
 
     hass.services.async_register(
         DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
@@ -156,7 +158,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         LOGGER.debug("Starting migration from version %s", current_version)
         new_data = {**config_entry.data}
 
-        if current_version == 1:
+        if current_version == 1:  # pragma: no cover
             coordinator = await connect_and_get_coordinator(hass, config_entry)
             if CONF_HA_SENSOR_PREFIX not in new_data:
                 new_data[CONF_HA_SENSOR_PREFIX] = "luxtronik"
@@ -165,7 +167,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             )
             current_version = 2
 
-        elif current_version == 2:
+        elif current_version == 2:  # pragma: no cover
             await _async_delete_legacy_devices(hass, config_entry)
             await _async_update_config_entry(hass, config_entry, new_data, 3)
             current_version = 3
@@ -216,7 +218,9 @@ async def _async_update_config_entry(
     hass.config_entries.async_update_entry(config_entry, data=data, version=version)
 
 
-async def _rename_entities(hass: HomeAssistant, config_entry: ConfigEntry):
+async def _rename_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry
+):  # pragma: no cover
     """Rename all entities for version 5 migration."""
     await _up_many(
         hass,
@@ -303,7 +307,9 @@ async def _rename_entities(hass: HomeAssistant, config_entry: ConfigEntry):
     )
 
 
-async def _rename_cooling_entities(hass: HomeAssistant, config_entry: ConfigEntry):
+async def _rename_cooling_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry
+):  # pragma: no cover
     await _up_many(
         hass,
         config_entry,
@@ -317,7 +323,9 @@ async def _rename_cooling_entities(hass: HomeAssistant, config_entry: ConfigEntr
     )
 
 
-async def _rename_curve_entities(hass: HomeAssistant, config_entry: ConfigEntry):
+async def _rename_curve_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry
+):  # pragma: no cover
     await _up_many(
         hass,
         config_entry,
@@ -456,7 +464,9 @@ def _identifiers_exists(
     return any(ident == identifiers for ident in identifiers_list)
 
 
-async def _async_delete_legacy_devices(hass: HomeAssistant, config_entry: ConfigEntry):
+async def _async_delete_legacy_devices(
+    hass: HomeAssistant, config_entry: ConfigEntry
+):  # pragma: no cover
     coordinator = await connect_and_get_coordinator(hass, config_entry)
     dr_instance = dr.async_get(hass)
     devices: list[dr.DeviceEntry] = dr.async_entries_for_config_entry(

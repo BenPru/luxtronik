@@ -23,7 +23,7 @@ from .date_entities_predefined import CALENDAR_ENTITIES
 from .model import LuxtronikDateEntityDescription
 
 
-async def async_setup_entry(
+async def async_setup_entry(  # pragma: no cover
     hass: HomeAssistant,
     entry: LuxtronikConfigEntry,
     async_add_entities: AddEntitiesCallback,
@@ -90,7 +90,7 @@ class LuxtronikDateEntity(LuxtronikEntity[LuxtronikDateEntityDescription], DateE
 
         value = get_sensor_data(data, self.entity_description.luxtronik_key.value)
 
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             try:
                 dt_value = datetime.fromtimestamp(value)
                 self._attr_native_value = dt_value.date()

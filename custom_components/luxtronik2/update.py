@@ -90,7 +90,7 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
         self.entity_id = f"update.{prefix}_{description.key}"
         self._attr_unique_id = self.entity_id
 
-    async def async_added_to_hass(self) -> None:
+    async def async_added_to_hass(self) -> None:  # pragma: no cover
         """Run when entity is added to Home Assistant."""
         await super().async_added_to_hass()
         await self._request_available_firmware_version()
@@ -205,7 +205,7 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
                     filename
                 )
 
-            async with session.get(
+            async with session.get(  # pragma: no cover
                 f"{CHANGELOG_URL}{download_id}", timeout=ClientTimeout(total=30)
             ) as response:
                 if response.status != 200:

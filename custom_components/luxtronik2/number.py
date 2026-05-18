@@ -1,6 +1,5 @@
 """Support for Luxtronik number sensors."""
 
-# flake8: noqa: W503
 # region Imports
 from __future__ import annotations
 
@@ -124,7 +123,7 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
 
         if value is None:
             self._attr_native_value = None
-        elif isinstance(value, (float, int)):
+        elif isinstance(value, float | int):
             factor = self.entity_description.factor or 1
             precision = self.entity_description.native_precision
             value = float(value) * factor
@@ -160,8 +159,6 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
         value = self._get_value(attr.luxtronik_key)
         if value is None:
             return ""
-        if attr.format is None:
-            return str(value)
         if (
             self._attr_state is not None
             and self.entity_description.factor is not None

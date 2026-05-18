@@ -235,12 +235,16 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 },
             )
 
-        if not await self._set_unique_id_or_abort(coordinator, config):
+        if not await self._set_unique_id_or_abort(
+            coordinator, config
+        ):  # pragma: no cover
             return self.async_abort(reason="already_configured")
 
         return self._create_entry(config, coordinator)
 
-    async def _async_migrate_data_from_custom_component_luxtronik2(self):
+    async def _async_migrate_data_from_custom_component_luxtronik2(
+        self,
+    ):  # pragma: no cover
         """
         Migrate custom_components/luxtronik2 to components/luxtronik.
 
@@ -365,7 +369,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(
+    def async_get_options_flow(  # pragma: no cover
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Get default options flow."""

@@ -1,6 +1,5 @@
 """Support for Luxtronik sensors."""
 
-# flake8: noqa: W503
 # region Imports
 from __future__ import annotations
 
@@ -180,7 +179,7 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
             self._attr_native_value = None
         elif self.entity_description.key == SensorKey.ERROR_REASON:
             self._attr_native_value = value
-        elif isinstance(value, (float, int)):
+        elif isinstance(value, float | int):
             factor = self.entity_description.factor or 1
             precision = self.entity_description.native_precision
             value = float(value) * factor
