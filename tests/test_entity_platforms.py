@@ -865,7 +865,6 @@ class TestLuxtronikModeSelector:
                 device_info_ident=DeviceKey.heating,
                 lux_parameter=LP.P0003_MODE_HEATING,
                 options=options,
-                entity_suffix="heating_mode",
             )
         _patch_entity_hass(entity)
         return entity, coord
