@@ -628,7 +628,18 @@
         },
         "select": {
             "thermal_desinfection_day": {
-                "name": "Thermal Desinfection Day"
+                "name": "Thermal Desinfection Day",
+                "state": {
+                    "none": "None",
+                    "monday": "Monday",
+                    "tuesday": "Tuesday",
+                    "wednesday": "Wednesday",
+                    "thursday": "Thursday",
+                    "friday": "Friday",
+                    "saturday": "Saturday",
+                    "sunday": "Sunday",
+                    "continous": "Continous"
+                }
             },
             "heating_control_circuit_mode": {
                 "name": "Heating circuit control mode",

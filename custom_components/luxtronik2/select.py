@@ -198,7 +198,7 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
         )
 
         self._attr_options = DAY_SELECTOR_OPTIONS
-        self._attr_current_option = "None"
+        self._attr_current_option = "none"
         self._attr_entity_category = EntityCategory.CONFIG
         self._attr_icon = "mdi:calendar"
 
@@ -217,7 +217,7 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
         if data is None:
             return
 
-        selected_day = "None"
+        selected_day = "none"
         for day, param_enum in DAY_NAME_TO_PARAM.items():
             param = param_enum.value
             if str(get_sensor_data(data, param)) == "1":
@@ -237,7 +237,7 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
 
         for day, param_enum in DAY_NAME_TO_PARAM.items():
             param = param_enum.value
-            desired_value = 1 if day == option else 0
+            desired_value = 0 if option == "none" else 1 if day == option else 0
             current_value = int(get_sensor_data(data, param))
 
             if current_value != desired_value:
@@ -253,7 +253,7 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
         if data is None:
             return
 
-        selected_day = "None"
+        selected_day = "none"
         for day, param_enum in DAY_NAME_TO_PARAM.items():
             param = param_enum.value
             if str(get_sensor_data(data, param)) == "1":

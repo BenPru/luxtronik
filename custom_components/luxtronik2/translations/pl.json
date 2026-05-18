@@ -603,14 +603,15 @@
             "thermal_desinfection_day": {
                 "name": "Dzie\u0144 dezynfekcji termicznej",
                 "state": {
-                    "None": "Brak",
-                    "Monday": "Poniedzia\u0142ek",
-                    "Tuesday": "Wtorek",
-                    "Wednesday": "\u015aroda",
-                    "Thursday": "Czwartek",
-                    "Friday": "Pi\u0105tek",
-                    "Saturday": "Sobota",
-                    "Sunday": "Niedziela"
+                    "none": "Brak",
+                    "monday": "Poniedzia\u0142ek",
+                    "tuesday": "Wtorek",
+                    "wednesday": "\u015aroda",
+                    "thursday": "Czwartek",
+                    "friday": "Pi\u0105tek",
+                    "saturday": "Sobota",
+                    "sunday": "Niedziela",
+                    "continous": "Ciągły"
                 }
             },
             "heating_control_circuit_mode": {

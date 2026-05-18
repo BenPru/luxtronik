@@ -861,14 +861,15 @@
             "thermal_desinfection_day": {
                 "name": "Dag waarop de thermische desinfection wordt uitgevoerd",
                 "state": {
-                    "None": "Geen",
-                    "Monday": "Maandag",
-                    "Tuesday": "Dinsdag",
-                    "Wednesday": "Woensdag",
-                    "Thursday": "Donderdag",
-                    "Friday": "Vrijdag",
-                    "Saturday": "Zaterdag",
-                    "Sunday": "Zondag"
+                    "none": "Geen",
+                    "monday": "Maandag",
+                    "tuesday": "Dinsdag",
+                    "wednesday": "Woensdag",
+                    "thursday": "Donderdag",
+                    "friday": "Vrijdag",
+                    "saturday": "Zaterdag",
+                    "sunday": "Zondag",
+                    "continous": "Continu"
                 }
             },
             "heating_control_circuit_mode": {
