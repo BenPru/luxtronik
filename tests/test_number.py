@@ -9,7 +9,7 @@ from conftest import make_coordinator_data
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 import pytest
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -22,11 +22,11 @@ from custom_components.luxtronik2.const import (
     SensorAttrKey as SA,
     SensorKey,
 )
-from custom_components.luxtronik2.model import (
+from custom_components.luxtronik.model import (
     LuxtronikEntityAttributeDescription,
     LuxtronikNumberDescription,
 )
-from custom_components.luxtronik2.number import LuxtronikNumberEntity
+from custom_components.luxtronik.number import LuxtronikNumberEntity
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",

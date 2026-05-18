@@ -34,7 +34,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest --cov=custom_components.luxtronik2 --cov-report=xml --cov-report=term-missing tests/
+          pytest --cov=custom_components.luxtronik --cov-report=xml --cov-report=term-missing tests/
 
       - name: Upload coverage report
         if: matrix.python-version == '3.14'

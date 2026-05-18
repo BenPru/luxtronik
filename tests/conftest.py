@@ -7,7 +7,7 @@ from typing import Any
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 import pytest
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -15,7 +15,7 @@ from custom_components.luxtronik2.const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
 )
-from custom_components.luxtronik2.model import LuxtronikCoordinatorData
+from custom_components.luxtronik.model import LuxtronikCoordinatorData
 
 # ---------------------------------------------------------------------------
 # Helpers for building fake luxtronik library objects

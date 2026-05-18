@@ -27,8 +27,9 @@ from homeassistant.components.water_heater import (
 from homeassistant.const import Platform, UnitOfTemperature
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.typing import StateType
-from luxtronik import Calculations, Parameters, Visibilities
 from packaging.version import Version
+
+from luxtronik import Calculations, Parameters, Visibilities
 
 from .const import (
     UPDATE_INTERVAL_VERY_SLOW,

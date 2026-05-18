@@ -18,7 +18,7 @@ from homeassistant.components.climate import (
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, UnitOfTemperature
 import pytest
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -32,7 +32,7 @@ from custom_components.luxtronik2.const import (
     LuxParameter as LP,
     SensorKey as SK,
 )
-from custom_components.luxtronik2.model import (
+from custom_components.luxtronik.model import (
     LuxtronikBinarySensorEntityDescription,
     LuxtronikClimateDescription,
     LuxtronikDateEntityDescription,
@@ -91,7 +91,7 @@ def _patch_entity_hass(entity):
 class TestSwitchAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_skips_when_no_update_success(self):
-        from custom_components.luxtronik2.switch import async_setup_entry
+        from custom_components.luxtronik.switch import async_setup_entry
 
         coord = _mock_coordinator(last_update_success=False)
         entry = _mock_entry()
@@ -103,7 +103,7 @@ class TestSwitchAsyncSetupEntry:
 
     @pytest.mark.asyncio
     async def test_adds_entities(self):
-        from custom_components.luxtronik2.switch import async_setup_entry
+        from custom_components.luxtronik.switch import async_setup_entry
 
         data = make_coordinator_data(
             parameters={
@@ -135,7 +135,7 @@ class TestSwitchAsyncSetupEntry:
 
 class TestLuxtronikSwitchEntity:
     def _make_switch(self, param_key="ID_Einst_Fernwartung_akt", value=0):
-        from custom_components.luxtronik2.switch import LuxtronikSwitchEntity
+        from custom_components.luxtronik.switch import LuxtronikSwitchEntity
 
         data = make_coordinator_data(parameters={param_key: value})
         coord = _mock_coordinator(data)
@@ -199,7 +199,7 @@ class TestLuxtronikSwitchEntity:
 class TestBinarySensorAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_adds_entities(self):
-        from custom_components.luxtronik2.binary_sensor import async_setup_entry
+        from custom_components.luxtronik.binary_sensor import async_setup_entry
 
         data = make_coordinator_data(
             calculations={
@@ -231,7 +231,7 @@ class TestBinarySensorAsyncSetupEntry:
 
 class TestLuxtronikBinarySensorEntity:
     def _make_binary_sensor(self, calc_key="ID_WEB_FreigabKuehl", value=0):
-        from custom_components.luxtronik2.binary_sensor import (
+        from custom_components.luxtronik.binary_sensor import (
             LuxtronikBinarySensorEntity,
         )
 
@@ -283,7 +283,7 @@ class TestLuxtronikBinarySensorEntity:
 class TestNumberAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_skips_when_no_update_success(self):
-        from custom_components.luxtronik2.number import async_setup_entry
+        from custom_components.luxtronik.number import async_setup_entry
 
         coord = _mock_coordinator(last_update_success=False)
         entry = _mock_entry()
@@ -295,7 +295,7 @@ class TestNumberAsyncSetupEntry:
 
     @pytest.mark.asyncio
     async def test_adds_entities(self):
-        from custom_components.luxtronik2.number import async_setup_entry
+        from custom_components.luxtronik.number import async_setup_entry
 
         data = make_coordinator_data(
             parameters={
@@ -326,7 +326,7 @@ class TestNumberAsyncSetupEntry:
 
 class TestLuxtronikNumberEntity:
     def _make_number(self, param_key="ID_Einst_BWS_akt", value=50.0, factor=None):
-        from custom_components.luxtronik2.number import LuxtronikNumberEntity
+        from custom_components.luxtronik.number import LuxtronikNumberEntity
 
         data = make_coordinator_data(parameters={param_key: value})
         coord = _mock_coordinator(data)
@@ -413,7 +413,7 @@ class TestLuxtronikNumberEntity:
 class TestDateAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_skips_when_no_update_success(self):
-        from custom_components.luxtronik2.date import async_setup_entry
+        from custom_components.luxtronik.date import async_setup_entry
 
         coord = _mock_coordinator(last_update_success=False)
         entry = _mock_entry()
@@ -431,7 +431,7 @@ class TestDateAsyncSetupEntry:
 
 class TestLuxtronikDateEntity:
     def _make_date_entity(self, param_key="ID_SU_FstdBw", value=1):
-        from custom_components.luxtronik2.date import LuxtronikDateEntity
+        from custom_components.luxtronik.date import LuxtronikDateEntity
 
         data = make_coordinator_data(parameters={param_key: value})
         coord = _mock_coordinator(data)
@@ -508,7 +508,7 @@ class TestLuxtronikDateEntity:
 class TestSensorAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_skips_when_no_update_success(self):
-        from custom_components.luxtronik2.sensor import async_setup_entry
+        from custom_components.luxtronik.sensor import async_setup_entry
 
         coord = _mock_coordinator(last_update_success=False)
         entry = _mock_entry()
@@ -520,7 +520,7 @@ class TestSensorAsyncSetupEntry:
 
     @pytest.mark.asyncio
     async def test_adds_entities(self):
-        from custom_components.luxtronik2.sensor import async_setup_entry
+        from custom_components.luxtronik.sensor import async_setup_entry
 
         data = make_coordinator_data(
             calculations={
@@ -549,7 +549,7 @@ class TestSensorAsyncSetupEntry:
 
 class TestLuxtronikSensorEntity:
     def _make_sensor(self, calc_key="ID_WEB_Temperatur_TRL", value=35.0, **desc_kw):
-        from custom_components.luxtronik2.sensor import LuxtronikSensorEntity
+        from custom_components.luxtronik.sensor import LuxtronikSensorEntity
 
         data = make_coordinator_data(calculations={calc_key: value})
         coord = _mock_coordinator(data)
@@ -618,7 +618,7 @@ class TestLuxtronikSensorEntity:
 
 class TestSmartGridSensor:
     def _make_smart_grid(self, evu=0, evu2=0, sg_enabled=1):
-        from custom_components.luxtronik2.sensor import LuxtronikStatusSensorEntity
+        from custom_components.luxtronik.sensor import LuxtronikStatusSensorEntity
 
         data = make_coordinator_data(
             calculations={
@@ -650,28 +650,28 @@ class TestSmartGridSensor:
     def test_smart_grid_locked(self):
         entity, _ = self._make_smart_grid(evu=1, evu2=0)
         entity._handle_coordinator_update()
-        from custom_components.luxtronik2.const import LuxSmartGridStatus
+        from custom_components.luxtronik.const import LuxSmartGridStatus
 
         assert entity._attr_native_value == LuxSmartGridStatus.locked
 
     def test_smart_grid_reduced(self):
         entity, _ = self._make_smart_grid(evu=0, evu2=0)
         entity._handle_coordinator_update()
-        from custom_components.luxtronik2.const import LuxSmartGridStatus
+        from custom_components.luxtronik.const import LuxSmartGridStatus
 
         assert entity._attr_native_value == LuxSmartGridStatus.reduced
 
     def test_smart_grid_normal(self):
         entity, _ = self._make_smart_grid(evu=0, evu2=1)
         entity._handle_coordinator_update()
-        from custom_components.luxtronik2.const import LuxSmartGridStatus
+        from custom_components.luxtronik.const import LuxSmartGridStatus
 
         assert entity._attr_native_value == LuxSmartGridStatus.normal
 
     def test_smart_grid_increased(self):
         entity, _ = self._make_smart_grid(evu=1, evu2=1)
         entity._handle_coordinator_update()
-        from custom_components.luxtronik2.const import LuxSmartGridStatus
+        from custom_components.luxtronik.const import LuxSmartGridStatus
 
         assert entity._attr_native_value == LuxSmartGridStatus.increased
 
@@ -690,7 +690,7 @@ class TestSmartGridSensor:
 class TestSelectAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_skips_when_no_update_success(self):
-        from custom_components.luxtronik2.select import async_setup_entry
+        from custom_components.luxtronik.select import async_setup_entry
 
         coord = _mock_coordinator(last_update_success=False)
         entry = _mock_entry()
@@ -702,7 +702,7 @@ class TestSelectAsyncSetupEntry:
 
     @pytest.mark.asyncio
     async def test_adds_entities(self):
-        from custom_components.luxtronik2.select import async_setup_entry
+        from custom_components.luxtronik.select import async_setup_entry
 
         data = make_coordinator_data(
             parameters={
@@ -738,7 +738,7 @@ class TestSelectAsyncSetupEntry:
 
 class TestThermalDesinfectionDaySelector:
     def _make_tdi_selector(self, day_values=None):
-        from custom_components.luxtronik2.select import (
+        from custom_components.luxtronik.select import (
             LuxtronikThermalDesinfectionDaySelector,
         )
 
@@ -757,7 +757,7 @@ class TestThermalDesinfectionDaySelector:
 
         data = make_coordinator_data(parameters=day_params)
         coord = _mock_coordinator(data)
-        from custom_components.luxtronik2.const import LuxDaySelectorParameter
+        from custom_components.luxtronik.const import LuxDaySelectorParameter
 
         desc = LuxtronikSelectEntityDescription(
             key=SK.THERMAL_DESINFECTION_DAY,
@@ -850,7 +850,7 @@ class TestThermalDesinfectionDaySelector:
 
 class TestLuxtronikModeSelector:
     def _make_mode_selector(self, param_key="ID_Ba_Hz_akt", value="Automatic"):
-        from custom_components.luxtronik2.select import LuxtronikModeSelector
+        from custom_components.luxtronik.select import LuxtronikModeSelector
 
         data = make_coordinator_data(parameters={param_key: value})
         coord = _mock_coordinator(data)
@@ -917,7 +917,7 @@ class TestLuxtronikModeSelector:
 class TestWaterHeaterAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_skips_when_no_update_success(self):
-        from custom_components.luxtronik2.water_heater import async_setup_entry
+        from custom_components.luxtronik.water_heater import async_setup_entry
 
         coord = _mock_coordinator(last_update_success=False)
         entry = _mock_entry()
@@ -929,7 +929,7 @@ class TestWaterHeaterAsyncSetupEntry:
 
     @pytest.mark.asyncio
     async def test_adds_entities(self):
-        from custom_components.luxtronik2.water_heater import async_setup_entry
+        from custom_components.luxtronik.water_heater import async_setup_entry
 
         data = make_coordinator_data(
             parameters={
@@ -972,7 +972,7 @@ class TestLuxtronikWaterHeater:
         from homeassistant.components.water_heater import WaterHeaterEntityFeature
         from homeassistant.const import UnitOfTemperature
 
-        from custom_components.luxtronik2.water_heater import LuxtronikWaterHeater
+        from custom_components.luxtronik.water_heater import LuxtronikWaterHeater
 
         data = make_coordinator_data(
             parameters={
@@ -1144,7 +1144,7 @@ class TestLuxtronikWaterHeater:
         entity, _ = self._make_water_heater()
 
         with patch(
-            "custom_components.luxtronik2.water_heater.key_exists",
+            "custom_components.luxtronik.water_heater.key_exists",
             return_value=False,
         ):
             assert entity.max_temp == 60.0
@@ -1158,7 +1158,7 @@ class TestLuxtronikWaterHeater:
 class TestClimateAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_adds_entities(self):
-        from custom_components.luxtronik2.climate import async_setup_entry
+        from custom_components.luxtronik.climate import async_setup_entry
 
         data = make_coordinator_data(
             parameters={
@@ -1196,8 +1196,8 @@ class TestClimateAsyncSetupEntry:
 
 class TestLuxtronikThermostat:
     def _make_thermostat(self, mode="Automatic", status="heating", target=21.0):
-        from custom_components.luxtronik2.climate import LuxtronikThermostat
-        from custom_components.luxtronik2.const import (
+        from custom_components.luxtronik.climate import LuxtronikThermostat
+        from custom_components.luxtronik.const import (
             LuxCalculation,
             LuxParameter,
         )

@@ -2,8 +2,8 @@ from homeassistant import data_entry_flow
 from homeassistant.core import HomeAssistant
 import pytest
 
-from custom_components.luxtronik2.config_flow import LuxtronikOptionsFlowHandler
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.config_flow import LuxtronikOptionsFlowHandler
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HOST,
     CONF_PORT,
@@ -31,7 +31,7 @@ def mock_connect(monkeypatch):
         serial_number = "123456789"
 
     monkeypatch.setattr(
-        "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
+        "custom_components.luxtronik.coordinator.LuxtronikCoordinator.connect",
         lambda hass, config: MockCoordinator(),
     )
     return MockCoordinator()

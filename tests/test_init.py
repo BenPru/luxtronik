@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.__init__ (migration, setup, unload, services)."""
+"""Tests for custom_components.luxtronik.__init__ (migration, setup, unload, services)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as 
 from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
 import pytest
 
-from custom_components.luxtronik2 import (
+from custom_components.luxtronik import (
     _async_update_config_entry,
     _fix_select_entity_unique_ids,
     _identifiers_exists,
@@ -20,7 +20,7 @@ from custom_components.luxtronik2 import (
     setup_hass_services,
     update_listener,
 )
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     ATTR_PARAMETER,
     ATTR_VALUE,
     CONF_HA_SENSOR_PREFIX,
@@ -131,7 +131,7 @@ class TestWriteParameterValidation:
 
 class TestConvertToIntInService:
     def test_int_conversion(self):
-        from custom_components.luxtronik2.common import convert_to_int_if_possible
+        from custom_components.luxtronik.common import convert_to_int_if_possible
 
         assert convert_to_int_if_possible("42") == 42
         assert convert_to_int_if_possible("not_a_number") == "not_a_number"
@@ -182,7 +182,7 @@ class TestUpMany:
         hass = MagicMock()
         entry = _mock_entry()
         ent_reg = MagicMock()
-        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+        with patch("custom_components.luxtronik.async_get", return_value=ent_reg):
             await _up_many(
                 hass,
                 entry,
@@ -196,7 +196,7 @@ class TestUpMany:
         entry = _mock_entry()
         ent_reg = MagicMock()
         ent_reg.async_update_entity.side_effect = KeyError("not found")
-        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+        with patch("custom_components.luxtronik.async_get", return_value=ent_reg):
             # Should not raise
             await _up_many(
                 hass,
@@ -210,7 +210,7 @@ class TestUpMany:
         entry = _mock_entry()
         ent_reg = MagicMock()
         ent_reg.async_update_entity.side_effect = ValueError("conflict")
-        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+        with patch("custom_components.luxtronik.async_get", return_value=ent_reg):
             await _up_many(
                 hass,
                 entry,
@@ -223,7 +223,7 @@ class TestUpMany:
         entry = _mock_entry()
         ent_reg = MagicMock()
         ent_reg.async_update_entity.side_effect = RuntimeError("unexpected")
-        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+        with patch("custom_components.luxtronik.async_get", return_value=ent_reg):
             await _up_many(
                 hass,
                 entry,
@@ -243,7 +243,7 @@ class TestFixSelectEntityUniqueIds:
         entry = _mock_entry()
         ent_reg = MagicMock()
         ent_reg.async_get_entity_id.return_value = "select.luxtronik2_old"
-        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+        with patch("custom_components.luxtronik.async_get", return_value=ent_reg):
             await _fix_select_entity_unique_ids(hass, entry)
         assert ent_reg.async_update_entity.call_count == 3  # 3 select keys
 
@@ -253,7 +253,7 @@ class TestFixSelectEntityUniqueIds:
         entry = _mock_entry()
         ent_reg = MagicMock()
         ent_reg.async_get_entity_id.return_value = None
-        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+        with patch("custom_components.luxtronik.async_get", return_value=ent_reg):
             await _fix_select_entity_unique_ids(hass, entry)
         ent_reg.async_update_entity.assert_not_called()
 
@@ -264,7 +264,7 @@ class TestFixSelectEntityUniqueIds:
         ent_reg = MagicMock()
         ent_reg.async_get_entity_id.return_value = "select.luxtronik2_old"
         ent_reg.async_update_entity.side_effect = ValueError("conflict")
-        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+        with patch("custom_components.luxtronik.async_get", return_value=ent_reg):
             await _fix_select_entity_unique_ids(hass, entry)
 
 
@@ -292,23 +292,23 @@ class TestAsyncMigrateEntry:
 
         with (
             patch(
-                "custom_components.luxtronik2._async_update_config_entry",
+                "custom_components.luxtronik._async_update_config_entry",
                 new_callable=AsyncMock,
             ) as mock_update,
             patch(
-                "custom_components.luxtronik2._rename_entities",
+                "custom_components.luxtronik._rename_entities",
                 new_callable=AsyncMock,
             ),
             patch(
-                "custom_components.luxtronik2._rename_cooling_entities",
+                "custom_components.luxtronik._rename_cooling_entities",
                 new_callable=AsyncMock,
             ),
             patch(
-                "custom_components.luxtronik2._rename_curve_entities",
+                "custom_components.luxtronik._rename_curve_entities",
                 new_callable=AsyncMock,
             ),
             patch(
-                "custom_components.luxtronik2._fix_select_entity_unique_ids",
+                "custom_components.luxtronik._fix_select_entity_unique_ids",
                 new_callable=AsyncMock,
             ),
         ):
@@ -327,23 +327,23 @@ class TestAsyncMigrateEntry:
 
         with (
             patch(
-                "custom_components.luxtronik2._async_update_config_entry",
+                "custom_components.luxtronik._async_update_config_entry",
                 new_callable=AsyncMock,
             ),
             patch(
-                "custom_components.luxtronik2._rename_entities",
+                "custom_components.luxtronik._rename_entities",
                 new_callable=AsyncMock,
             ),
             patch(
-                "custom_components.luxtronik2._rename_cooling_entities",
+                "custom_components.luxtronik._rename_cooling_entities",
                 new_callable=AsyncMock,
             ),
             patch(
-                "custom_components.luxtronik2._rename_curve_entities",
+                "custom_components.luxtronik._rename_curve_entities",
                 new_callable=AsyncMock,
             ),
             patch(
-                "custom_components.luxtronik2._fix_select_entity_unique_ids",
+                "custom_components.luxtronik._fix_select_entity_unique_ids",
                 new_callable=AsyncMock,
             ),
         ):
@@ -381,7 +381,7 @@ class TestAsyncSetupEntry:
         entry = _mock_entry()
         with (
             patch(
-                "custom_components.luxtronik2.connect_and_get_coordinator",
+                "custom_components.luxtronik.connect_and_get_coordinator",
                 new_callable=AsyncMock,
                 side_effect=Exception("Connection failed"),
             ),
@@ -401,7 +401,7 @@ class TestAsyncSetupEntry:
         coordinator.async_config_entry_first_refresh = AsyncMock()
 
         with patch(
-            "custom_components.luxtronik2.connect_and_get_coordinator",
+            "custom_components.luxtronik.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coordinator,
         ):
@@ -422,7 +422,7 @@ class TestAsyncSetupEntry:
         coordinator.async_config_entry_first_refresh = AsyncMock()
 
         with patch(
-            "custom_components.luxtronik2.connect_and_get_coordinator",
+            "custom_components.luxtronik.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coordinator,
         ):
@@ -445,7 +445,7 @@ class TestAsyncSetupEntry:
         coord = _mock_coordinator(hass)
 
         with patch(
-            "custom_components.luxtronik2.connect_and_get_coordinator",
+            "custom_components.luxtronik.connect_and_get_coordinator",
             return_value=coord,
         ):
             result = await async_setup_entry(hass, entry)
@@ -463,7 +463,7 @@ class TestAsyncSetupEntry:
 
         with (
             patch(
-                "custom_components.luxtronik2.connect_and_get_coordinator",
+                "custom_components.luxtronik.connect_and_get_coordinator",
                 side_effect=ConnectionRefusedError("refused"),
             ),
             pytest.raises(ConfigEntryNotReady),
@@ -481,7 +481,7 @@ class TestAsyncSetupEntry:
         coord.manufacturer = None
 
         with patch(
-            "custom_components.luxtronik2.connect_and_get_coordinator",
+            "custom_components.luxtronik.connect_and_get_coordinator",
             return_value=coord,
         ):
             await async_setup_entry(hass, entry)

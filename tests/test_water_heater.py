@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.water_heater constants and mappings."""
+"""Tests for custom_components.luxtronik.water_heater constants and mappings."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from homeassistant.components.water_heater import (
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_OFF
 import pytest
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -24,7 +24,7 @@ from custom_components.luxtronik2.const import (
     LuxMode,
     LuxOperationMode,
 )
-from custom_components.luxtronik2.water_heater import (
+from custom_components.luxtronik.water_heater import (
     OPERATION_MAPPING,
     WATER_HEATERS,
 )
@@ -113,7 +113,7 @@ def _patch_entity(entity):
 class TestWaterHeaterUnavailableKeys:
     @pytest.mark.asyncio
     async def test_unavailable_keys_logged(self):
-        from custom_components.luxtronik2.water_heater import async_setup_entry
+        from custom_components.luxtronik.water_heater import async_setup_entry
 
         coord = _mock_coordinator(make_coordinator_data())
         entry = MagicMock()
@@ -122,10 +122,10 @@ class TestWaterHeaterUnavailableKeys:
         added = []
         with (
             patch(
-                "custom_components.luxtronik2.water_heater.key_exists",
+                "custom_components.luxtronik.water_heater.key_exists",
                 return_value=False,
             ),
-            patch("custom_components.luxtronik2.water_heater.LOGGER") as mock_logger,
+            patch("custom_components.luxtronik.water_heater.LOGGER") as mock_logger,
         ):
             await async_setup_entry(
                 MagicMock(), entry, lambda entities, update: added.extend(entities)
@@ -140,7 +140,7 @@ class TestWaterHeaterUnavailableKeys:
 
 class TestWaterHeaterMaxTemp:
     def test_max_temp_from_data(self):
-        from custom_components.luxtronik2.water_heater import LuxtronikWaterHeater
+        from custom_components.luxtronik.water_heater import LuxtronikWaterHeater
 
         data = make_coordinator_data(parameters={"ID_Einst_BW_max": 65.0})
         coord = _mock_coordinator(data)
@@ -152,7 +152,7 @@ class TestWaterHeaterMaxTemp:
         assert result == 65.0
 
     def test_max_temp_fallback_on_missing_key(self):
-        from custom_components.luxtronik2.water_heater import LuxtronikWaterHeater
+        from custom_components.luxtronik.water_heater import LuxtronikWaterHeater
 
         data = make_coordinator_data(parameters={})
         coord = _mock_coordinator(data)
@@ -164,7 +164,7 @@ class TestWaterHeaterMaxTemp:
         assert result == 60.0
 
     def test_max_temp_fallback_on_conversion_error(self):
-        from custom_components.luxtronik2.water_heater import LuxtronikWaterHeater
+        from custom_components.luxtronik.water_heater import LuxtronikWaterHeater
 
         data = make_coordinator_data(parameters={"ID_Einst_BW_max": "not_a_number"})
         coord = _mock_coordinator(data)

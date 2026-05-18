@@ -5,12 +5,12 @@ on:
     branches:
       - "main"
     paths:
-      - "custom_components/luxtronik2/**"
+      - "custom_components/luxtronik/**"
       - ".github/workflows/typecheck.yml"
       - "pyrightconfig.json"
   pull_request:
     paths:
-      - "custom_components/luxtronik2/**"
+      - "custom_components/luxtronik/**"
       - ".github/workflows/typecheck.yml"
       - "pyrightconfig.json"
   workflow_dispatch:
@@ -38,4 +38,4 @@ jobs:
           pip install luxtronik==0.3.14 getmac~=0.9.0 packaging>=24.2
 
       - name: Run BasedPyright
-        run: basedpyright custom_components/luxtronik2
+        run: basedpyright custom_components/luxtronik

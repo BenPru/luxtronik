@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.select entity classes."""
+"""Tests for custom_components.luxtronik.select entity classes."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from conftest import make_coordinator_data
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 import pytest
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -19,8 +19,8 @@ from custom_components.luxtronik2.const import (
     LuxDaySelectorParameter,
     SensorKey,
 )
-from custom_components.luxtronik2.model import LuxtronikSelectEntityDescription
-from custom_components.luxtronik2.select import LuxtronikThermalDesinfectionDaySelector
+from custom_components.luxtronik.model import LuxtronikSelectEntityDescription
+from custom_components.luxtronik.select import LuxtronikThermalDesinfectionDaySelector
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",

@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.update (firmware update entity)."""
+"""Tests for custom_components.luxtronik.update (firmware update entity)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from conftest import make_coordinator_data
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_UNAVAILABLE
 import pytest
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -21,8 +21,8 @@ from custom_components.luxtronik2.const import (
     LuxCalculation as LC,
     SensorKey,
 )
-from custom_components.luxtronik2.model import LuxtronikUpdateEntityDescription
-from custom_components.luxtronik2.update import (
+from custom_components.luxtronik.model import LuxtronikUpdateEntityDescription
+from custom_components.luxtronik.update import (
     FIRMWARE_UPDATE_MANUAL_DE,
     FIRMWARE_UPDATE_MANUAL_EN,
     LANG_DE,
@@ -267,7 +267,7 @@ def test_manual_url_english():
 class TestUpdateAsyncSetupEntry:
     @pytest.mark.asyncio
     async def test_setup_creates_entity(self):
-        from custom_components.luxtronik2.update import async_setup_entry
+        from custom_components.luxtronik.update import async_setup_entry
 
         data = make_coordinator_data(calculations={"ID_WEB_SoftStand": "V3.90.1"})
         coord = _mock_coordinator(data)
@@ -383,7 +383,7 @@ class TestRequestAvailableFirmwareVersion:
         mock_session.get = MagicMock(side_effect=[mock_response_fw, mock_response_cl])
 
         with patch(
-            "custom_components.luxtronik2.update.async_get_clientsession",
+            "custom_components.luxtronik.update.async_get_clientsession",
             return_value=mock_session,
         ):
             await entity._request_available_firmware_version()
@@ -405,7 +405,7 @@ class TestRequestAvailableFirmwareVersion:
         mock_session.get = MagicMock(return_value=mock_response)
 
         with patch(
-            "custom_components.luxtronik2.update.async_get_clientsession",
+            "custom_components.luxtronik.update.async_get_clientsession",
             return_value=mock_session,
         ):
             await entity._request_available_firmware_version()
@@ -424,7 +424,7 @@ class TestRequestAvailableFirmwareVersion:
         mock_session.get = MagicMock(side_effect=Exception("Connection refused"))
 
         with patch(
-            "custom_components.luxtronik2.update.async_get_clientsession",
+            "custom_components.luxtronik.update.async_get_clientsession",
             return_value=mock_session,
         ):
             await entity._request_available_firmware_version()

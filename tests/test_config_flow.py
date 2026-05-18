@@ -8,11 +8,11 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.data_entry_flow import AbortFlow
 import pytest
 
-from custom_components.luxtronik2.config_flow import (
+from custom_components.luxtronik.config_flow import (
     LuxtronikFlowHandler,
     LuxtronikOptionsFlowHandler,
 )
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
@@ -21,7 +21,7 @@ from custom_components.luxtronik2.const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
 )
-from custom_components.luxtronik2.coordinator import LuxtronikConnectionError
+from custom_components.luxtronik.coordinator import LuxtronikConnectionError
 
 
 def _mock_coordinator():
@@ -199,7 +199,7 @@ class TestAsyncStepSelectDevices:
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         err = LuxtronikConnectionError("1.2.3.4", 8889, Exception("refused"))
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             side_effect=err,
         ):
@@ -217,7 +217,7 @@ class TestAsyncStepSelectDevices:
         flow._abort_if_unique_id_configured = MagicMock()
         coord = _mock_coordinator()
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coord,
         ):
@@ -237,7 +237,7 @@ class TestAsyncStepSelectDevices:
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         coord = _mock_coordinator()
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coord,
         ):
@@ -267,7 +267,7 @@ class TestAsyncStepManualEntry:
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         err = LuxtronikConnectionError("1.2.3.4", 8889, Exception("refused"))
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             side_effect=err,
         ):
@@ -283,7 +283,7 @@ class TestAsyncStepManualEntry:
         flow._abort_if_unique_id_configured = MagicMock()
         coord = _mock_coordinator()
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coord,
         ):
@@ -325,7 +325,7 @@ class TestAsyncStepDhcp:
         flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
         coord = _mock_coordinator()
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coord,
         ):
@@ -344,7 +344,7 @@ class TestAsyncStepDhcp:
         flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
         coord = _mock_coordinator()
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coord,
         ):
@@ -360,7 +360,7 @@ class TestAsyncStepDhcp:
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         err = LuxtronikConnectionError("1.2.3.4", 8889, Exception("refused"))
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             side_effect=err,
         ):
@@ -446,7 +446,7 @@ class TestOptionsFlow:
         flow.async_show_form = MagicMock(return_value={"type": "form"})
         err = LuxtronikConnectionError("1.2.3.4", 8889, Exception("refused"))
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             side_effect=err,
         ):
@@ -465,7 +465,7 @@ class TestOptionsFlow:
         flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
         coord = _mock_coordinator()
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coord,
         ):
@@ -484,7 +484,7 @@ class TestOptionsFlow:
         flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
         coord = _mock_coordinator()
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
             return_value=coord,
         ):
@@ -534,7 +534,7 @@ class TestConfigFlowIndoorTempReset:
         user_input = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
 
         with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            "custom_components.luxtronik.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
         ):
             await LuxtronikOptionsFlowHandler.async_step_user(handler, user_input)

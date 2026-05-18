@@ -1,8 +1,8 @@
-"""Tests for custom_components.luxtronik2.const."""
+"""Tests for custom_components.luxtronik.const."""
 
 from __future__ import annotations
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONFIG_ENTRY_VERSION,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
