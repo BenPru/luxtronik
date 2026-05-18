@@ -879,14 +879,15 @@
             "thermal_desinfection_day": {
                 "name": "Tag der thermischen Desinfektion",
                 "state": {
-                    "None": "Keine",
-                    "Monday": "Montag",
-                    "Tuesday": "Dienstag",
-                    "Wednesday": "Mittwoch",
-                    "Thursday": "Donnerstag",
-                    "Friday": "Freitag",
-                    "Saturday": "Samstag",
-                    "Sunday": "Sonntag"
+                    "none": "Keine",
+                    "monday": "Montag",
+                    "tuesday": "Dienstag",
+                    "wednesday": "Mittwoch",
+                    "thursday": "Donnerstag",
+                    "friday": "Freitag",
+                    "saturday": "Samstag",
+                    "sunday": "Sonntag",
+                    "continuous": "Kontinuierlich"
                 }
             },
             "heating_control_circuit_mode": {
