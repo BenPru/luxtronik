@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.schema_helper."""
+"""Tests for custom_components.luxtronik.schema_helper."""
 
 from __future__ import annotations
 
@@ -6,10 +6,10 @@ from homeassistant.const import CONF_HOST, CONF_PORT
 import pytest
 import voluptuous as vol
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     DEFAULT_PORT,
 )
-from custom_components.luxtronik2.schema_helper import (
+from custom_components.luxtronik.schema_helper import (
     build_options_schema,
     build_user_data_schema,
 )

@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.coordinator."""
+"""Tests for custom_components.luxtronik.coordinator."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 from packaging.version import Version
 import pytest
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     DEFAULT_PORT,
     DeviceKey,
     LuxCalculation as LC,
@@ -20,12 +20,12 @@ from custom_components.luxtronik2.const import (
     LuxParameter as LP,
     LuxVisibility as LV,
 )
-from custom_components.luxtronik2.coordinator import (
+from custom_components.luxtronik.coordinator import (
     LuxtronikConnectionError,
     LuxtronikCoordinator,
     catch_luxtronik_errors,
 )
-from custom_components.luxtronik2.model import (
+from custom_components.luxtronik.model import (
     LuxtronikCoordinatorData,
     LuxtronikEntityDescription,
 )
@@ -875,7 +875,7 @@ class TestConnectAndGetCoordinator:
     @pytest.fixture(autouse=True)
     def _reset_overrides_flag(self):
         """Reset the global _OVERRIDES_APPLIED flag before each test."""
-        import custom_components.luxtronik2.coordinator as coord_mod
+        import custom_components.luxtronik.coordinator as coord_mod
 
         coord_mod._OVERRIDES_APPLIED = False
         yield
@@ -883,12 +883,12 @@ class TestConnectAndGetCoordinator:
 
     @pytest.mark.asyncio
     async def test_connect_failure_raises_connection_error(self):
-        from custom_components.luxtronik2.coordinator import connect_and_get_coordinator
+        from custom_components.luxtronik.coordinator import connect_and_get_coordinator
 
         config = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
 
         with patch(
-            "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
+            "custom_components.luxtronik.coordinator.LuxtronikCoordinator.connect",
             side_effect=ConnectionRefusedError("refused"),
         ):
             with pytest.raises(LuxtronikConnectionError) as exc_info:
@@ -898,23 +898,23 @@ class TestConnectAndGetCoordinator:
 
     @pytest.mark.asyncio
     async def test_overrides_applied_once(self):
-        from custom_components.luxtronik2.coordinator import connect_and_get_coordinator
+        from custom_components.luxtronik.coordinator import connect_and_get_coordinator
 
         config = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
 
         with (
             patch(
-                "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
+                "custom_components.luxtronik.coordinator.LuxtronikCoordinator.connect",
                 side_effect=ConnectionRefusedError("refused"),
             ),
             patch(
-                "custom_components.luxtronik2.coordinator.update_Luxtronik_HeatpumpCodes"
+                "custom_components.luxtronik.coordinator.update_Luxtronik_HeatpumpCodes"
             ) as mock_hpc,
             patch(
-                "custom_components.luxtronik2.coordinator.update_Luxtronik_Parameters"
+                "custom_components.luxtronik.coordinator.update_Luxtronik_Parameters"
             ) as mock_params,
             patch(
-                "custom_components.luxtronik2.coordinator.isolate_instance_data"
+                "custom_components.luxtronik.coordinator.isolate_instance_data"
             ) as mock_iso,
         ):
             # First call applies overrides

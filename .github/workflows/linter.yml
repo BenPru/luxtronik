@@ -35,10 +35,10 @@ jobs:
         run: pip install --upgrade ruff
 
       - name: Run ruff check --fix
-        run: ruff check --fix custom_components/luxtronik2 tests
+        run: ruff check --fix custom_components/luxtronik tests
 
       - name: Run ruff format
-        run: ruff format custom_components/luxtronik2 tests
+        run: ruff format custom_components/luxtronik tests
 
       - name: Commit and push changes
         run: |
@@ -70,10 +70,10 @@ jobs:
         run: pip install --upgrade ruff
 
       - name: Ruff format check
-        run: ruff format --check custom_components/luxtronik2 tests
+        run: ruff format --check custom_components/luxtronik tests
 
       - name: Ruff lint check
-        run: ruff check custom_components/luxtronik2 tests
+        run: ruff check custom_components/luxtronik tests
 
   codespell:
     name: CodeSpell
@@ -93,4 +93,4 @@ jobs:
         run: pip install --upgrade codespell
 
       - name: Run codespell
-        run: codespell custom_components/luxtronik2 tests
+        run: codespell custom_components/luxtronik tests

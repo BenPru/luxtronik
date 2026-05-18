@@ -1,12 +1,12 @@
-"""Tests for custom_components.luxtronik2.evu_helper."""
+"""Tests for custom_components.luxtronik.evu_helper."""
 
 from __future__ import annotations
 
 from datetime import time
 from unittest.mock import patch
 
-from custom_components.luxtronik2.const import LuxOperationMode, SensorAttrKey as SA
-from custom_components.luxtronik2.evu_helper import LuxtronikEVUTracker
+from custom_components.luxtronik.const import LuxOperationMode, SensorAttrKey as SA
+from custom_components.luxtronik.evu_helper import LuxtronikEVUTracker
 
 
 class TestEVUTrackerInit:
@@ -31,7 +31,7 @@ class TestEVUTrackerUpdate:
         tracker.update(None)
         assert tracker._last_state is None
 
-    @patch("custom_components.luxtronik2.evu_helper.dt_util")
+    @patch("custom_components.luxtronik.evu_helper.dt_util")
     def test_evu_start_recorded(self, mock_dt):
         from datetime import datetime
 
@@ -44,7 +44,7 @@ class TestEVUTrackerUpdate:
         assert 0 in tracker._evu_days  # Monday
         assert tracker._evu_first_start == time(10, 30)
 
-    @patch("custom_components.luxtronik2.evu_helper.dt_util")
+    @patch("custom_components.luxtronik.evu_helper.dt_util")
     def test_evu_end_recorded(self, mock_dt):
         from datetime import datetime
 
@@ -62,7 +62,7 @@ class TestEVUTrackerGetNextEventMinutes:
         tracker = LuxtronikEVUTracker()
         assert tracker.get_next_event_minutes() is None
 
-    @patch("custom_components.luxtronik2.evu_helper.dt_util")
+    @patch("custom_components.luxtronik.evu_helper.dt_util")
     def test_next_event_in_future(self, mock_dt):
         from datetime import datetime
 
@@ -143,14 +143,14 @@ class TestEVUTrackerGetAttributes:
         # Simulate EVU activation at 14:00 (after first slot)
         tracker._last_state = "heating"
         fake_pm = dt_cls(2024, 1, 2, 14, 0)
-        with patch("custom_components.luxtronik2.evu_helper.dt_util") as mock_dt:
+        with patch("custom_components.luxtronik.evu_helper.dt_util") as mock_dt:
             mock_dt.now.return_value = fake_pm
             tracker.update(LuxOperationMode.evu)
         assert tracker._evu_second_start == time(14, 0)
 
         # Simulate EVU deactivation at 16:00
         fake_pm_end = dt_cls(2024, 1, 2, 16, 0)
-        with patch("custom_components.luxtronik2.evu_helper.dt_util") as mock_dt:
+        with patch("custom_components.luxtronik.evu_helper.dt_util") as mock_dt:
             mock_dt.now.return_value = fake_pm_end
             tracker.update("heating")
         assert tracker._evu_second_end == time(16, 0)
@@ -179,7 +179,7 @@ class TestShouldUseFirstSlot:
 
 
 class TestEVUHelperMultiDayGap:
-    @patch("custom_components.luxtronik2.evu_helper.dt_util")
+    @patch("custom_components.luxtronik.evu_helper.dt_util")
     def test_multi_day_gap_adds_1440(self, mock_dt):
         from datetime import datetime
 
@@ -194,7 +194,7 @@ class TestEVUHelperMultiDayGap:
         assert minutes is not None
         assert minutes > 1440  # At least one full day skipped
 
-    @patch("custom_components.luxtronik2.evu_helper.dt_util")
+    @patch("custom_components.luxtronik.evu_helper.dt_util")
     def test_weekday_in_evu_days_returns_minutes(self, mock_dt):
         from datetime import datetime
 

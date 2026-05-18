@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from custom_components.luxtronik2.binary_sensor_entities_predefined import (
+from custom_components.luxtronik.binary_sensor_entities_predefined import (
     BINARY_SENSORS,
 )
-from custom_components.luxtronik2.date_entities_predefined import CALENDAR_ENTITIES
-from custom_components.luxtronik2.number_entities_predefined import NUMBER_SENSORS
-from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
-from custom_components.luxtronik2.switch_entities_predefined import SWITCHES
+from custom_components.luxtronik.date_entities_predefined import CALENDAR_ENTITIES
+from custom_components.luxtronik.number_entities_predefined import NUMBER_SENSORS
+from custom_components.luxtronik.sensor_entities_predefined import SENSORS
+from custom_components.luxtronik.switch_entities_predefined import SWITCHES
 
 
 class TestBinarySensorPredefined:

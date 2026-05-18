@@ -1,11 +1,11 @@
-"""Tests for custom_components.luxtronik2.recorder."""
+"""Tests for custom_components.luxtronik.recorder."""
 
 from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from custom_components.luxtronik2.const import SensorAttrKey
-from custom_components.luxtronik2.recorder import exclude_attributes
+from custom_components.luxtronik.const import SensorAttrKey
+from custom_components.luxtronik.recorder import exclude_attributes
 
 
 class TestExcludeAttributes:

@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.lux_overrides."""
+"""Tests for custom_components.luxtronik.lux_overrides."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from luxtronik.visibilities import Visibilities
 
 class TestUpdateLuxtronikHeatpumpCodes:
     def test_codes_updated(self):
-        from custom_components.luxtronik2.lux_overrides import (
+        from custom_components.luxtronik.lux_overrides import (
             update_Luxtronik_HeatpumpCodes,
         )
 
@@ -24,7 +24,7 @@ class TestUpdateLuxtronikHeatpumpCodes:
 
 class TestUpdateLuxtronikParameters:
     def test_parameters_updated(self):
-        from custom_components.luxtronik2.lux_overrides import (
+        from custom_components.luxtronik.lux_overrides import (
             update_Luxtronik_Parameters,
         )
 
@@ -37,8 +37,8 @@ class TestIsolateInstanceData:
     def test_instance_data_isolated(self):
         """After isolate_instance_data(), each instance gets its own copy of data dicts."""
         # Reset the guard flag so we can test
-        import custom_components.luxtronik2.lux_overrides as overrides_module
-        from custom_components.luxtronik2.lux_overrides import isolate_instance_data
+        import custom_components.luxtronik.lux_overrides as overrides_module
+        from custom_components.luxtronik.lux_overrides import isolate_instance_data
 
         original_flag = overrides_module._INSTANCE_DATA_ISOLATED
         overrides_module._INSTANCE_DATA_ISOLATED = False
@@ -63,8 +63,8 @@ class TestIsolateInstanceData:
 
     def test_idempotent(self):
         """Calling isolate_instance_data() twice is safe."""
-        import custom_components.luxtronik2.lux_overrides as overrides_module
-        from custom_components.luxtronik2.lux_overrides import isolate_instance_data
+        import custom_components.luxtronik.lux_overrides as overrides_module
+        from custom_components.luxtronik.lux_overrides import isolate_instance_data
 
         original_flag = overrides_module._INSTANCE_DATA_ISOLATED
         overrides_module._INSTANCE_DATA_ISOLATED = False

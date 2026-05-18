@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.lux_helper."""
+"""Tests for custom_components.luxtronik.lux_helper."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from custom_components.luxtronik2.const import DEFAULT_MAX_DATA_LENGTH, DEFAULT_PORT
-from custom_components.luxtronik2.lux_helper import (
+from custom_components.luxtronik.const import DEFAULT_MAX_DATA_LENGTH, DEFAULT_PORT
+from custom_components.luxtronik.lux_helper import (
     LUXTRONIK_DISCOVERY_MAGIC_PACKET,
     LUXTRONIK_DISCOVERY_RESPONSE_PREFIX,
     Luxtronik,
@@ -139,7 +139,7 @@ class TestLuxtronikClient:
         # safe mode should be passed through to Parameters
         assert client.parameters is not None
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_connect_success(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -151,7 +151,7 @@ class TestLuxtronikClient:
         mock_sock.settimeout.assert_called_with(10.0)
         mock_sock.connect.assert_called_with(("192.168.1.100", DEFAULT_PORT))
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_connect_failure(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -167,7 +167,7 @@ class TestLuxtronikClient:
         client._disconnect()  # should not raise
 
     @patch(
-        "custom_components.luxtronik2.lux_helper._is_socket_closed", return_value=False
+        "custom_components.luxtronik.lux_helper._is_socket_closed", return_value=False
     )
     def test_disconnect_closes_socket(self, mock_is_closed):
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
@@ -181,7 +181,7 @@ class TestLuxtronikClient:
         assert client._socket is None
 
     @patch(
-        "custom_components.luxtronik2.lux_helper._is_socket_closed", return_value=True
+        "custom_components.luxtronik.lux_helper._is_socket_closed", return_value=True
     )
     def test_disconnect_already_closed_socket(self, mock_is_closed):
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
@@ -206,7 +206,7 @@ class TestLuxtronikClient:
 
 
 class TestDiscover:
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_discover_finds_heatpump(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -234,7 +234,7 @@ class TestDiscover:
         results = discover()
         assert ("192.168.1.100", 8889) in results
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_discover_timeout_no_results(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -244,7 +244,7 @@ class TestDiscover:
         results = discover()
         assert results == []
 
-    @patch("custom_components.luxtronik2.lux_helper.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket")
     def test_discovery_valid_port(self, mock_socket_module):
         sock_instance = MagicMock()
         mock_socket_module.socket.return_value = sock_instance
@@ -266,7 +266,7 @@ class TestDiscover:
         results = discover()
         assert ("192.168.1.200", 8888) in results
 
-    @patch("custom_components.luxtronik2.lux_helper.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket")
     def test_discovery_invalid_port(self, mock_socket_module):
         sock_instance = MagicMock()
         mock_socket_module.socket.return_value = sock_instance
@@ -286,7 +286,7 @@ class TestDiscover:
         results = discover()
         assert len([r for r in results if r[0] == "192.168.1.200"]) == 0
 
-    @patch("custom_components.luxtronik2.lux_helper.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket")
     def test_discovery_invalid_response_prefix(self, mock_socket_module):
         sock_instance = MagicMock()
         mock_socket_module.socket.return_value = sock_instance
@@ -388,7 +388,7 @@ class TestIsSocketClosed:
 
 
 class TestLuxtronikReadWrite:
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_write_os_error_disconnects(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -404,7 +404,7 @@ class TestLuxtronikReadWrite:
         ):
             client._read_write(write=False)
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_write_struct_error_disconnects(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -425,7 +425,7 @@ class TestLuxtronikReadWrite:
         with pytest.raises(OSError, match="Cannot write"):
             client._write()
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_write_sends_parameters(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -442,7 +442,7 @@ class TestLuxtronikReadWrite:
         mock_sock.sendall.assert_called_once()
         assert client.parameters.queue == {}
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_write_skips_invalid_params(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -456,7 +456,7 @@ class TestLuxtronikReadWrite:
 
         mock_sock.sendall.assert_not_called()
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_write_converts_float_to_int(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
@@ -473,10 +473,10 @@ class TestLuxtronikReadWrite:
 
 
 class TestLuxtronikReadData:
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_data_oversized_length(self, mock_socket_class):
         """Data with length > max_data_length should be skipped."""
-        from custom_components.luxtronik2.lux_helper import (
+        from custom_components.luxtronik.lux_helper import (
             LUXTRONIK_PARAMETERS_READ,
             LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
         )
@@ -504,10 +504,10 @@ class TestLuxtronikReadData:
 
         parser.parse.assert_not_called()
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_data_success_parameters(self, mock_socket_class):
         """Successfully reads parameter data."""
-        from custom_components.luxtronik2.lux_helper import (
+        from custom_components.luxtronik.lux_helper import (
             LUXTRONIK_PARAMETERS_READ,
             LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
         )
@@ -538,10 +538,10 @@ class TestLuxtronikReadData:
 
         parser.parse.assert_called_once_with([100, 200])
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_data_calculations_has_stat_field(self, mock_socket_class):
         """Calculations read includes extra stat field."""
-        from custom_components.luxtronik2.lux_helper import (
+        from custom_components.luxtronik.lux_helper import (
             LUXTRONIK_CALCULATIONS_READ,
             LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
         )
@@ -571,10 +571,10 @@ class TestLuxtronikReadData:
 
         parser.parse.assert_called_once_with([42])
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_data_visibilities_zero_length_disconnects(self, mock_socket_class):
         """Visibilities with length <= 0 forces disconnect."""
-        from custom_components.luxtronik2.lux_helper import (
+        from custom_components.luxtronik.lux_helper import (
             LUXTRONIK_SOCKET_READ_SIZE_CHAR,
             LUXTRONIK_VISIBILITIES_READ,
         )
@@ -603,11 +603,11 @@ class TestLuxtronikReadData:
         parser.parse.assert_not_called()
         assert client._socket is None  # disconnected
 
-    @patch("custom_components.luxtronik2.lux_helper.time.sleep")
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.time.sleep")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_data_retry_on_timeout(self, mock_socket_class, mock_sleep):
         """Retries on TimeoutError."""
-        from custom_components.luxtronik2.lux_helper import (
+        from custom_components.luxtronik.lux_helper import (
             LUXTRONIK_PARAMETERS_READ,
             LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
         )
@@ -647,10 +647,10 @@ class TestLuxtronikReadData:
         parser.parse.assert_called_once_with([99])
         mock_sleep.assert_called_once_with(1)
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_data_unexpected_error_disconnects(self, mock_socket_class):
         """Unexpected errors disconnect and return."""
-        from custom_components.luxtronik2.lux_helper import (
+        from custom_components.luxtronik.lux_helper import (
             LUXTRONIK_PARAMETERS_READ,
             LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
         )
@@ -674,7 +674,7 @@ class TestLuxtronikReadData:
 
         parser.parse.assert_not_called()
 
-    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    @patch("custom_components.luxtronik.lux_helper.socket.socket")
     def test_read_calls_all_three_groups(self, mock_socket_class):
         """_read calls _read_data for parameters, calculations, visibilities."""
         mock_sock = MagicMock()

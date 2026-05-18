@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.common."""
+"""Tests for custom_components.luxtronik.common."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 from conftest import make_coordinator_data
 import pytest
 
-from custom_components.luxtronik2.common import (
+from custom_components.luxtronik.common import (
     async_get_mac_address,
     convert_to_int_if_possible,
     correct_key_value,
@@ -15,7 +15,7 @@ from custom_components.luxtronik2.common import (
     key_exists,
     state_as_number_or_none,
 )
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     LuxCalculation as LC,
     LuxOperationMode,
     LuxStatus1Option,

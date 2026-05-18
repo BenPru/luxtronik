@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.base (LuxtronikEntity)."""
+"""Tests for custom_components.luxtronik.base (LuxtronikEntity)."""
 
 from __future__ import annotations
 
@@ -16,8 +16,8 @@ from homeassistant.const import (
 )
 import pytest
 
-from custom_components.luxtronik2.base import LuxtronikEntity
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.base import LuxtronikEntity
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -33,13 +33,13 @@ from custom_components.luxtronik2.const import (
     SensorAttrKey as SA,
     SensorKey,
 )
-from custom_components.luxtronik2.model import (
+from custom_components.luxtronik.model import (
     LuxtronikClimateDescription,
     LuxtronikEntityAttributeDescription,
     LuxtronikIndexSensorDescription,
     LuxtronikSensorDescription,
 )
-from custom_components.luxtronik2.sensor import LuxtronikSensorEntity
+from custom_components.luxtronik.sensor import LuxtronikSensorEntity
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",
@@ -187,7 +187,7 @@ class TestComputeIsOn:
     def _make_entity_with_on_state(
         self, on_state, state=None, inverted=False, on_states=None
     ):
-        from custom_components.luxtronik2.model import LuxtronikSwitchDescription
+        from custom_components.luxtronik.model import LuxtronikSwitchDescription
 
         desc = LuxtronikSwitchDescription(
             key=SensorKey.HEATING,
@@ -197,7 +197,7 @@ class TestComputeIsOn:
             inverted=inverted,
             on_states=on_states,
         )
-        from custom_components.luxtronik2.switch import LuxtronikSwitchEntity
+        from custom_components.luxtronik.switch import LuxtronikSwitchEntity
 
         hass = MagicMock()
         entry = _mock_entry()
@@ -400,7 +400,7 @@ class TestAsyncAddedToHass:
         # Prevent _handle_coordinator_update from overwriting
         entity.coordinator.data = None
 
-        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+        with patch("custom_components.luxtronik.base.async_dispatcher_connect"):
             await LuxtronikEntity.async_added_to_hass(entity)
 
         assert entity._attr_state == "25.5"
@@ -436,7 +436,7 @@ class TestAsyncAddedToHass:
         entity.platform = MagicMock()
         entity.coordinator.data = None
 
-        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+        with patch("custom_components.luxtronik.base.async_dispatcher_connect"):
             await LuxtronikEntity.async_added_to_hass(entity)
 
         assert entity._attr_cache[SA.TIMER_HEATPUMP_ON] == "restored_value"
@@ -466,7 +466,7 @@ class TestAsyncAddedToHass:
         entity.entity_id = "sensor.test_entity"
         entity.platform = MagicMock()
 
-        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+        with patch("custom_components.luxtronik.base.async_dispatcher_connect"):
             await LuxtronikEntity.async_added_to_hass(entity)
 
         assert entity._attr_target_temperature == 22.0

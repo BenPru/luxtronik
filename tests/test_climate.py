@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.climate constants and mappings."""
+"""Tests for custom_components.luxtronik.climate constants and mappings."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from homeassistant.components.climate import (
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 import pytest
 
-from custom_components.luxtronik2.climate import (
+from custom_components.luxtronik.climate import (
     HVAC_ACTION_MAPPING_COOL,
     HVAC_ACTION_MAPPING_HEAT,
     HVAC_MODE_MAPPING_COOL,
@@ -29,7 +29,7 @@ from custom_components.luxtronik2.climate import (
     LuxtronikClimateExtraStoredData,
     LuxtronikThermostat,
 )
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
@@ -192,7 +192,7 @@ class TestClimateUnavailableKeys:
     @pytest.mark.asyncio
     async def test_unavailable_keys_logged(self):
         """When a thermostat key is missing from data, it's logged."""
-        from custom_components.luxtronik2.climate import async_setup_entry
+        from custom_components.luxtronik.climate import async_setup_entry
 
         coord = _mock_coordinator(make_coordinator_data())
         entry = MagicMock()
@@ -200,10 +200,8 @@ class TestClimateUnavailableKeys:
 
         added = []
         with (
-            patch(
-                "custom_components.luxtronik2.climate.key_exists", return_value=False
-            ),
-            patch("custom_components.luxtronik2.climate.LOGGER") as mock_logger,
+            patch("custom_components.luxtronik.climate.key_exists", return_value=False),
+            patch("custom_components.luxtronik.climate.LOGGER") as mock_logger,
         ):
             await async_setup_entry(
                 MagicMock(), entry, lambda entities, update: added.extend(entities)

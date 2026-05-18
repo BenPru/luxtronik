@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 from conftest import make_coordinator_data
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_UNAVAILABLE
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -24,10 +24,10 @@ from custom_components.luxtronik2.const import (
     SensorAttrKey as SA,
     SensorKey,
 )
-from custom_components.luxtronik2.model import (
+from custom_components.luxtronik.model import (
     LuxtronikSensorDescription,
 )
-from custom_components.luxtronik2.sensor import (
+from custom_components.luxtronik.sensor import (
     LuxtronikIndexSensor,
     LuxtronikSensorEntity,
     LuxtronikStatusSensorEntity,
@@ -306,7 +306,7 @@ class TestSmartGridStatus:
         assert entity._attr_native_value == LuxSmartGridStatus.increased
 
     def test_smartgrid_icon_by_state(self):
-        from custom_components.luxtronik2.const import LUX_SMART_GRID_ICON_MAP
+        from custom_components.luxtronik.const import LUX_SMART_GRID_ICON_MAP
 
         desc = LuxtronikSensorDescription(
             key=SensorKey.SMART_GRID_STATUS,
@@ -483,7 +483,7 @@ class TestSensorHelpers:
 
 class TestIndexSensor:
     def _make_index_sensor(self):
-        from custom_components.luxtronik2.sensor_entities_predefined import (
+        from custom_components.luxtronik.sensor_entities_predefined import (
             SENSORS_INDEX,
         )
 

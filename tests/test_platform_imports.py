@@ -5,7 +5,7 @@ from __future__ import annotations
 
 class TestBinarySensorModuleImport:
     def test_module_imports(self):
-        from custom_components.luxtronik2.binary_sensor import (
+        from custom_components.luxtronik.binary_sensor import (
             LuxtronikBinarySensorEntity,
             async_setup_entry,
         )
@@ -16,7 +16,7 @@ class TestBinarySensorModuleImport:
 
 class TestSwitchModuleImport:
     def test_module_imports(self):
-        from custom_components.luxtronik2.switch import (
+        from custom_components.luxtronik.switch import (
             LuxtronikSwitchEntity,
             async_setup_entry,
         )
@@ -27,34 +27,34 @@ class TestSwitchModuleImport:
 
 class TestSensorModuleImport:
     def test_module_imports(self):
-        from custom_components.luxtronik2.sensor import async_setup_entry
+        from custom_components.luxtronik.sensor import async_setup_entry
 
         assert callable(async_setup_entry)
 
 
 class TestNumberModuleImport:
     def test_module_imports(self):
-        from custom_components.luxtronik2.number import async_setup_entry
+        from custom_components.luxtronik.number import async_setup_entry
 
         assert callable(async_setup_entry)
 
 
 class TestSelectModuleImport:
     def test_module_imports(self):
-        from custom_components.luxtronik2.select import async_setup_entry
+        from custom_components.luxtronik.select import async_setup_entry
 
         assert callable(async_setup_entry)
 
 
 class TestDateModuleImport:
     def test_module_imports(self):
-        from custom_components.luxtronik2.date import async_setup_entry
+        from custom_components.luxtronik.date import async_setup_entry
 
         assert callable(async_setup_entry)
 
 
 class TestConfigFlowModuleImport:
     def test_module_imports(self):
-        from custom_components.luxtronik2.config_flow import LuxtronikFlowHandler
+        from custom_components.luxtronik.config_flow import LuxtronikFlowHandler
 
         assert LuxtronikFlowHandler is not None

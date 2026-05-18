@@ -1,16 +1,16 @@
-"""Tests for custom_components.luxtronik2.model."""
+"""Tests for custom_components.luxtronik.model."""
 
 from __future__ import annotations
 
 from conftest import make_coordinator_data
 from homeassistant.const import Platform
 
-from custom_components.luxtronik2.const import (
+from custom_components.luxtronik.const import (
     DeviceKey,
     LuxParameter,
     LuxVisibility,
 )
-from custom_components.luxtronik2.model import (
+from custom_components.luxtronik.model import (
     LuxtronikBinarySensorEntityDescription,
     LuxtronikClimateDescription,
     LuxtronikDateEntityDescription,
@@ -187,7 +187,7 @@ class TestLuxtronikDateEntityDescription:
 
 class TestLuxtronikEntityAttributeDescription:
     def test_defaults(self):
-        from custom_components.luxtronik2.const import SensorAttrKey
+        from custom_components.luxtronik.const import SensorAttrKey
 
         desc = LuxtronikEntityAttributeDescription(
             key=SensorAttrKey.LUXTRONIK_KEY,

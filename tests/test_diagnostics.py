@@ -1,4 +1,4 @@
-"""Tests for custom_components.luxtronik2.diagnostics."""
+"""Tests for custom_components.luxtronik.diagnostics."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ from conftest import FakeSensorItem
 from homeassistant.const import CONF_HOST
 import pytest
 
-from custom_components.luxtronik2.const import DEFAULT_PORT
-from custom_components.luxtronik2.diagnostics import _dump_items
+from custom_components.luxtronik.const import DEFAULT_PORT
+from custom_components.luxtronik.diagnostics import _dump_items
 
 
 class TestDumpItems:
@@ -43,7 +43,7 @@ class TestDumpItems:
 class TestAsyncGetConfigEntryDiagnostics:
     @pytest.mark.asyncio
     async def test_returns_diagnostics(self):
-        from custom_components.luxtronik2.diagnostics import (
+        from custom_components.luxtronik.diagnostics import (
             async_get_config_entry_diagnostics,
         )
 
@@ -77,7 +77,7 @@ class TestAsyncGetConfigEntryDiagnostics:
 
     @pytest.mark.asyncio
     async def test_no_mac(self):
-        from custom_components.luxtronik2.diagnostics import (
+        from custom_components.luxtronik.diagnostics import (
             async_get_config_entry_diagnostics,
         )
 
@@ -106,7 +106,7 @@ class TestAsyncGetConfigEntryDiagnostics:
 class TestDiagnosticsNoDataKey:
     @pytest.mark.asyncio
     async def test_entry_data_without_data_key(self):
-        from custom_components.luxtronik2.diagnostics import (
+        from custom_components.luxtronik.diagnostics import (
             async_get_config_entry_diagnostics,
         )
 
