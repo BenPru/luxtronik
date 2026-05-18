@@ -186,7 +186,6 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
 
     def __init__(
         self,
-        *,
         entry: ConfigEntry,
         coordinator: LuxtronikCoordinator,
         description: LuxtronikSelectEntityDescription,
@@ -271,7 +270,6 @@ class LuxtronikModeSelector(
 
     def __init__(
         self,
-        *,
         entry: ConfigEntry,
         coordinator: LuxtronikCoordinator,
         description: LuxtronikSelectEntityDescription,
