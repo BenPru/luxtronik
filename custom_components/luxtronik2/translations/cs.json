@@ -268,14 +268,6 @@
                     "heating_external_source": "Vyt\u00e1p\u011bn\u00ed z extern\u00edho zdroje",
                     "cooling": "Chlazen\u00ed",
                     "no_request": "Klidov\u00fd re\u017eim"
-                },
-                "state_attributes": {
-                    "evu_text": {
-                        "state": {
-                            "evu_until": "Zb\u00fdv\u00e1 {evu_time} minut do konce HDO blokace.",
-                            "evu_in": "HDO blokovace za {evu_time} minut."
-                        }
-                    }
                 }
             },
             "smart_grid_status": {

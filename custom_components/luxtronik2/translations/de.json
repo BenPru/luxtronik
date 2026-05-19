@@ -265,14 +265,6 @@
                     "heating_external_source": "Heizt aus externer Quelle",
                     "cooling": "K\u00fchlen",
                     "no_request": "Leerlauf (keine Anforderung)"
-                },
-                "state_attributes": {
-                    "evu_text": {
-                        "state": {
-                            "evu_until": "Noch {evu_time} Minuten Netzsperre.",
-                            "evu_in": "Netzsperre in {evu_time} Minuten."
-                        }
-                    }
                 }
             },
             "smart_grid_status": {
