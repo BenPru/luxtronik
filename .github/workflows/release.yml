@@ -54,4 +54,4 @@ jobs:
           name: Release ${{ env.VERSION }}
           generate_release_notes: true
           prerelease: true # This forces the release to be marked as a pre-release
-          files: Luxtronik2.zip
+          files: luxtronik2.zip
