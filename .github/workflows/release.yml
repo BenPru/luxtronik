@@ -1,0 +1,57 @@
+name: Create HACS Pre-release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Version Number
+        id: version
+        run: |
+          VERSION=$(date +'%Y.%m.%d')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          
+      - name: Update manifest.json
+        run: |
+          MANIFEST_PATH="custom_components/luxtronik2/manifest.json"
+          jq --arg ver "$VERSION" '.version = $ver' $MANIFEST_PATH > tmp.json
+          mv tmp.json $MANIFEST_PATH
+
+      - name: Validate HACS Compliance
+        uses: hacs/action@main
+        with:
+          category: integration
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add custom_components/luxtronik2/manifest.json
+          
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: bump version to ${{ env.VERSION }}"
+          git push
+
+      - name: Zip integration
+        run: |
+          cd custom_components
+          zip -r ../luxtronik2.zip Luxtronik2/
+
+      # UPDATED: Create the release as a pre-release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          generate_release_notes: true
+          prerelease: true # This forces the release to be marked as a pre-release
+          files: Luxtronik2.zip
