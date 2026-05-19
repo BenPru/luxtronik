@@ -3,8 +3,14 @@ name: Luxtronik Integration Tests
 on:
   push:
     branches: [main]
+    paths:
+      - 'custom_components/luxtronik2/**'
+      - 'tests/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'custom_components/luxtronik2/**'
+      - 'tests/**'
   workflow_dispatch:
 
 permissions:
