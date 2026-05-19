@@ -263,14 +263,6 @@
                     "heating_external_source": "Warmte van externe bron",
                     "cooling": "Koelen",
                     "no_request": "Inactief (geen verzoek)"
-                },
-                "state_attributes": {
-                    "evu_text": {
-                        "state": {
-                            "evu_until": "Er zijn nog {evu_time} minuten netwerksluiting.",
-                            "evu_in": "Netwerksluiting over {evu_time} minuten."
-                        }
-                    }
                 }
             },
             "smart_grid_status": {

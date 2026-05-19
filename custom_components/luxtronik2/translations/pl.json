@@ -256,14 +256,6 @@
                     "heating_external_source": "Zewn\u0119trzne \u017ar\u00f3d\u0142o ogrzewania",
                     "cooling": "Ch\u0142odzenie",
                     "no_request": "Brak zapotrzebowania"
-                },
-                "state_attributes": {
-                    "evu_text": {
-                        "state": {
-                            "evu_until": "Czas blokady d\u0142u\u017cszy o {evu_time} minut.2",
-                            "evu_in": "Czas blokady za {evu_time} minut."
-                        }
-                    }
                 }
             },
             "smart_grid_status": {

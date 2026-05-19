@@ -269,14 +269,6 @@
                     "heating_external_source": "Heating external source",
                     "cooling": "Cooling",
                     "no_request": "Idle (no request)"
-                },
-                "state_attributes": {
-                    "evu_text": {
-                        "state": {
-                            "evu_until": "{evu_time} minutes more locktime.",
-                            "evu_in": "Locktime in {evu_time} minutes."
-                        }
-                    }
                 }
             },
             "smart_grid_status": {
