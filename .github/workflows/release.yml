@@ -44,7 +44,7 @@ jobs:
       - name: Zip integration
         run: |
           cd custom_components
-          zip -r ../luxtronik2.zip Luxtronik2/
+          zip -r ../luxtronik2.zip luxtronik2/
 
       # UPDATED: Create the release as a pre-release
       - name: Create GitHub Release
