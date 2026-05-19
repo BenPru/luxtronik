@@ -18,9 +18,15 @@ jobs:
       - name: Generate Version Number
         id: version
         run: |
-          VERSION=$(date +'%Y.%m.%d')
+          BASE=$(date +'%Y.%m.%d')
+          VERSION=$BASE
+          SUFFIX=1
+          while git ls-remote --tags origin "refs/tags/$VERSION" | grep -q .; do
+            VERSION="${BASE}.${SUFFIX}"
+            SUFFIX=$((SUFFIX + 1))
+          done
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          
+
       - name: Update manifest.json
         run: |
           MANIFEST_PATH="custom_components/luxtronik2/manifest.json"
@@ -37,7 +43,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add custom_components/luxtronik2/manifest.json
-          
+
           git diff --quiet && git diff --staged --quiet || git commit -m "chore: bump version to ${{ env.VERSION }}"
           git push
 
