@@ -5,5 +5,5 @@ pytest-cov
 ruff
 # Runtime dependencies from manifest.json (needed for test collection)
 luxtronik==0.3.14
-getmac~=0.9.0
+getmac~=0.9.5
 packaging>=26.2
