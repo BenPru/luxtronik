@@ -20,7 +20,7 @@ jobs:
         run: |
           VERSION=$(date +'%Y.%m.%d')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          
+
       - name: Update manifest.json
         run: |
           MANIFEST_PATH="custom_components/luxtronik2/manifest.json"
@@ -37,14 +37,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add custom_components/luxtronik2/manifest.json
-          
+
           git diff --quiet && git diff --staged --quiet || git commit -m "chore: bump version to ${{ env.VERSION }}"
           git push
 
       - name: Zip integration
         run: |
-          cd custom_components
-          zip -r ../luxtronik2.zip luxtronik2/
+          cd custom_components/luxtronik2
+          zip -r ../../luxtronik2.zip .
 
       # UPDATED: Create the release as a pre-release
       - name: Create GitHub Release
