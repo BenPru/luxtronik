@@ -3,6 +3,8 @@
 # region Imports
 from __future__ import annotations
 
+from typing import Any
+
 from homeassistant.components.binary_sensor import ENTITY_ID_FORMAT, BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -12,7 +14,7 @@ from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
 from .common import get_sensor_data, key_exists
-from .const import CONF_HA_SENSOR_PREFIX, LOGGER, DeviceKey
+from .const import CONF_HA_SENSOR_PREFIX, LOGGER, DeviceKey, SensorKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikBinarySensorEntityDescription
 
@@ -100,3 +102,65 @@ class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportInco
         #    LOGGER.info('on_state=%s',descr.on_state)
 
         super()._handle_coordinator_update()
+
+    def compute_is_on(self, state: Any) -> bool:  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+        """Compute the is_on state, with special handling for shared registers.
+
+        Special handling for DISTURBANCE_OUTPUT (C0049 / ID_WEB_ZW2SSTout):
+        This register is shared between ZWE2 (Additional Heat Generator 2) activation
+        and SST (Collective Fault Signal). To disambiguate:
+        - If disturbance_output is ON and error_reason changed at the same time or after,
+          it's a real fault
+        - If disturbance_output is ON but error_reason hasn't changed, it's just ZWE2
+          activation noise (e.g., during thermal disinfection cycles)
+
+        See: https://github.com/BenPru/luxtronik/issues/532
+        """
+        descr = self.entity_description
+
+        # Special handling for DISTURBANCE_OUTPUT (C0049 / ID_WEB_ZW2SSTout)
+        if descr.key == SensorKey.DISTURBANCE_OUTPUT and state is True:
+            # Get entity IDs for cross-reference checks
+            disturbance_entity_id = self.entity_id
+            # Construct error_reason entity ID using same prefix pattern
+            error_reason_entity_id = disturbance_entity_id.replace(
+                f"_{SensorKey.DISTURBANCE_OUTPUT.value}",
+                f"_{SensorKey.ERROR_REASON.value}",
+            )
+
+            # Get state objects to check last_changed timestamps
+            disturbance_state = self.hass.states.get(disturbance_entity_id)
+            error_state = self.hass.states.get(error_reason_entity_id)
+
+            if disturbance_state and error_state:
+                try:
+                    disturbance_changed = disturbance_state.last_changed
+                    error_changed = error_state.last_changed
+
+                    # If error_reason changed BEFORE disturbance_output,
+                    # then the disturbance output is just ZWE2 noise, not a fault
+                    if disturbance_changed and error_changed:
+                        if error_changed < disturbance_changed:
+                            LOGGER.debug(
+                                "DISTURBANCE_OUTPUT active but error_reason hasn't changed "
+                                "since output activation (error: %s, disturbance: %s), "
+                                "treating as ZWE2 operation, not a fault",
+                                error_changed,
+                                disturbance_changed,
+                            )
+                            return False
+                except (AttributeError, TypeError) as e:
+                    LOGGER.debug(
+                        "Could not compare timestamps for DISTURBANCE_OUTPUT fault detection: %s",
+                        e,
+                    )
+
+        # Default computation
+        if isinstance(descr.on_state, bool) and state is not None:  # pyright: ignore[reportAttributeAccessIssue]
+            state = bool(state)
+
+        is_on = bool(
+            state == descr.on_state or (descr.on_states and state in descr.on_states)  # pyright: ignore[reportAttributeAccessIssue]
+        )
+
+        return not is_on if getattr(descr, "inverted", False) else is_on
