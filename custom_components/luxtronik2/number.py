@@ -30,6 +30,8 @@ from .number_entities_predefined import NUMBER_SENSORS
 
 # endregion Imports
 
+PARALLEL_UPDATES = 1
+
 
 async def async_setup_entry(
     hass: HomeAssistant,

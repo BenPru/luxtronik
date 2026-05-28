@@ -41,6 +41,8 @@ from .model import LuxtronikWaterHeaterDescription
 
 # endregion Imports
 
+PARALLEL_UPDATES = 1
+
 # region Const
 OPERATION_MAPPING: dict[str, str] = {
     LuxMode.off: STATE_OFF,

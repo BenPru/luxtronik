@@ -18,6 +18,8 @@ from .model import LuxtronikBinarySensorEntityDescription
 
 # endregion Imports
 
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant,

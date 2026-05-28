@@ -22,6 +22,8 @@ from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .date_entities_predefined import CALENDAR_ENTITIES
 from .model import LuxtronikDateEntityDescription
 
+PARALLEL_UPDATES = 1
+
 
 async def async_setup_entry(  # pragma: no cover
     hass: HomeAssistant,
