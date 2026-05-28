@@ -84,7 +84,7 @@
                 "name": "Stroom limitatie"
             },
             "thermal_power_limitation_switch": {
-                "name": "Max. thermal power"
+                "name": "Max. thermisch vermogen"
             },
             "pump_heat_control": {
                 "name": "Controle pompverwarming"
@@ -103,6 +103,9 @@
             },
             "cooling": {
                 "name": "Koeling"
+            },
+            "silent_mode": {
+                "name": "Stille modus"
             },
             "pump_vent_hup": {
                 "name": "Ontluchting HUP"
@@ -130,14 +133,14 @@
                 "name": "Stroom limiet"
             },
             "thermal_power_limitation_heating": {
-                "name": "Thermal power limit: Heating"
+                "name": "Thermisch vermogenslimiet: Verwarming"
             },
             "thermal_power_limitation_water": {
-                "name": "Thermal power limit: Water"
+                "name": "Thermisch vermogenslimiet: Water"
             }
             ,
             "thermal_power_limitation_cooling": {
-                "name": "Thermal power limit: Cooling"
+                "name": "Thermisch vermogenslimiet: Koeling"
             },
             "heating_threshold": {
                 "name": "Verwarmingslimiet"
@@ -962,6 +965,14 @@
                     "ha_sensor_prefix": "Belangrijk bij gebruik van meerdere warmtepompen. Bij \u00e9\u00e9n enkele kan gewoon 'luxtronik' worden gebruikt."
                 }
             }
+        }
+    },
+    "exceptions": {
+        "invalid_parameter_name": {
+            "message": "Ongeldige parameternaam: {parameter}"
+        },
+        "parameter_not_writable": {
+            "message": "Parameter {parameter} geweigerd \u2014 alleen parameters met prefixen {prefixes} zijn schrijfbaar"
         }
     }
 }

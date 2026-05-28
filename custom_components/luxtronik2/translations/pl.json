@@ -78,10 +78,10 @@
                 "name": "Pompa wydajna"
             },
             "electrical_power_limitation_switch": {
-                "name": "Power limitation"
+                "name": "Ograniczenie mocy"
             },
             "thermal_power_limitation_switch": {
-                "name": "Max. thermal power"
+                "name": "Maks. moc cieplna"
             },
             "pump_heat_control": {
                 "name": "Sterowanie ogrzewaniem pompy"
@@ -100,6 +100,9 @@
             },
             "cooling": {
                 "name": "Ch\u0142odzenie"
+            },
+            "silent_mode": {
+                "name": "Tryb cichy"
             },
             "pump_vent_hup": {
                 "name": "Wentylacja HUP"
@@ -127,16 +130,16 @@
                 "name": "Pr\u00f3g ogrzewania"
             },
             "electrical_power_limitation_value": {
-                "name": "Power limit"
+                "name": "Limit mocy"
             },
             "thermal_power_limitation_heating": {
-                "name": "Thermal power limit: Heating"
+                "name": "Limit mocy cieplnej: Ogrzewanie"
             },
             "thermal_power_limitation_water": {
-                "name": "Thermal power limit: Water"
+                "name": "Limit mocy cieplnej: Ciep\u0142a woda"
             },
             "thermal_power_limitation_cooling": {
-                "name": "Thermal power limit: Cooling"
+                "name": "Limit mocy cieplnej: Ch\u0142odzenie"
             },
             "heating_target_correction": {
                 "name": "Korekcja celu grzewczego"
@@ -238,7 +241,7 @@
                 "name": "Docelowa temperatura ch\u0142odzenia"
             },
             "heating_flow_out_temperature_target": {
-                "name": "Manual target flow out temperature"
+                "name": "R\u0119czna docelowa temperatura wyp\u0142ywu"
             },
             "pump_vent_timer_h": {
                 "name": "Czas pracy odpowietrzania"
@@ -350,10 +353,161 @@
                         "name": "Czas"
                     },
                     "cause": {
-                        "name": "Przyczyna"
+                        "name": "Przyczyna",
+                        "state": {
+                            "701": "Presostat niskiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142 wielokrotnie (LW) lub d\u0142u\u017cej ni\u017c 20 sekund (SW).",
+                            "702": "Tylko w urz\u0105dzeniach L/W: Niskie ci\u015bnienie w obiegu ch\u0142odniczym zadzia\u0142a\u0142o. Po pewnym czasie automatyczny restart pompy ciep\u0142a.",
+                            "703": "Tylko w urz\u0105dzeniach L/W: Je\u015bli pompa ciep\u0142a pracuje i temperatura zasilania < 5 \u00b0C, rozpoznawana jest ochrona przed zamarzaniem.",
+                            "704": "Przekroczono maksymaln\u0105 temperatur\u0119 gor\u0105cego gazu w obiegu ch\u0142odniczym. Automatyczny restart pompy ciep\u0142a po gg:mm.",
+                            "705": "Tylko w urz\u0105dzeniach L/W: Zadzia\u0142a\u0142o zabezpieczenie silnika wentylatora.",
+                            "706": "Tylko w urz\u0105dzeniach S/W i W/W: Zadzia\u0142a\u0142o zabezpieczenie silnika pompy solanki, wody studziennej lub spr\u0119\u017carki.",
+                            "707": "Przerwa lub zwarcie w mostku koduj\u0105cym w pompie ciep\u0142a po pierwszym uruchomieniu.",
+                            "708": "Przerwa lub zwarcie czujnika powrotu.",
+                            "709": "Przerwa lub zwarcie czujnika zasilania.\nBrak wy\u0142\u0105czenia awaryjnego w urz\u0105dzeniach S/W i W/W.",
+                            "710": "Przerwa lub zwarcie czujnika gor\u0105cego gazu w obiegu ch\u0142odniczym.",
+                            "711": "Przerwa lub zwarcie czujnika temperatury zewn\u0119trznej.\nBrak wy\u0142\u0105czenia awaryjnego. Warto\u015b\u0107 sta\u0142a na -5 \u00b0C.",
+                            "712": "Przerwa lub zwarcie czujnika ciep\u0142ej wody.\nBrak wy\u0142\u0105czenia awaryjnego.",
+                            "713": "Przerwa lub zwarcie czujnika \u017ar\u00f3d\u0142a ciep\u0142a (wej\u015bcie).",
+                            "714": "Przekroczono granice termiczne pracy pompy ciep\u0142a.\nPrzygotowywanie ciep\u0142ej wody zablokowane na gg:mm.",
+                            "715": "Presostat wysokiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142. Po pewnym czasie automatyczny restart pompy ciep\u0142a.",
+                            "716": "Presostat wysokiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142 wielokrotnie.",
+                            "717": "Wy\u0142\u0105cznik przep\u0142ywu w urz\u0105dzeniach W/W zadzia\u0142a\u0142 podczas czasu wst\u0119pnego p\u0142ukania lub pracy.",
+                            "718": "Tylko w urz\u0105dzeniach L/W: Temperatura zewn\u0119trzna przekroczy\u0142a dopuszczaln\u0105 warto\u015b\u0107 maksymaln\u0105.",
+                            "719": "Tylko w urz\u0105dzeniach L/W: Temperatura zewn\u0119trzna spad\u0142a poni\u017cej dopuszczalnej warto\u015bci minimalnej.",
+                            "720": "Tylko w urz\u0105dzeniach S/W i W/W: Temperatura na wyj\u015bciu parownika wielokrotnie spad\u0142a poni\u017cej warto\u015bci bezpiecznej. Automatyczny restart pompy ciep\u0142a po gg:mm.",
+                            "721": "Presostat niskiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142. Po pewnym czasie automatyczny restart pompy ciep\u0142a (SW i WW).",
+                            "722": "R\u00f3\u017cnica temperatur w trybie grzewczym jest ujemna (=b\u0142\u0119dna).",
+                            "723": "R\u00f3\u017cnica temperatur w trybie ciep\u0142ej wody jest ujemna (=b\u0142\u0119dna).",
+                            "724": "R\u00f3\u017cnica temperatur w obiegu grzewczym podczas rozmra\u017cania > 15 K (=zagro\u017cenie zamarzaniem).",
+                            "725": "Awaria przygotowywania ciep\u0142ej wody, \u017c\u0105dana temperatura zasobnika jest znacznie ni\u017csza.",
+                            "726": "Przerwa lub zwarcie czujnika obiegu mieszaj\u0105cego 1.",
+                            "727": "Presostat ci\u015bnienia solanki zadzia\u0142a\u0142 podczas czasu wst\u0119pnego p\u0142ukania lub pracy.",
+                            "728": "Przerwa lub zwarcie czujnika \u017ar\u00f3d\u0142a ciep\u0142a na wyj\u015bciu.",
+                            "729": "Spr\u0119\u017carka bez mocy po w\u0142\u0105czeniu.",
+                            "730": "Program wygrzewania nie osi\u0105gn\u0105\u0142 poziomu temperatury zasilania w okre\u015blonym czasie. Program wygrzewania kontynuuje prac\u0119.",
+                            "732": "Temperatura wody grzewczej wielokrotnie spad\u0142a poni\u017cej 16 \u00b0C.",
+                            "733": "Wej\u015bcie alarmowe anody obcego pr\u0105du zadzia\u0142a\u0142o.",
+                            "734": "B\u0142\u0105d 733 utrzymuje si\u0119 od ponad dw\u00f3ch tygodni, przygotowywanie ciep\u0142ej wody jest zablokowane.",
+                            "735": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika zewn\u0119trznego \u017ar\u00f3d\u0142a energii.",
+                            "736": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika kolektora s\u0142onecznego.",
+                            "737": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika zasobnika solarnego.",
+                            "738": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika obiegu mieszaj\u0105cego 2.",
+                            "750": "Przerwa lub zwarcie zewn\u0119trznego czujnika powrotu.",
+                            "751": "Przeka\u017anik kolejno\u015bci faz zadzia\u0142a\u0142.",
+                            "752": "Przeka\u017anik kolejno\u015bci faz lub wy\u0142\u0105cznik przep\u0142ywu zadzia\u0142a\u0142.",
+                            "755": "Modu\u0142 slave nie odpowiada\u0142 przez ponad 5 minut.",
+                            "756": "Modu\u0142 master nie odpowiada\u0142 przez ponad 5 minut.",
+                            "757": "Presostat niskiego ci\u015bnienia w urz\u0105dzeniu do ciep\u0142ej wody zadzia\u0142a\u0142 wielokrotnie lub d\u0142u\u017cej ni\u017c 20 sekund.",
+                            "758": "Rozmra\u017canie zosta\u0142o 5-krotnie z rz\u0119du zako\u0144czone z powodu zbyt niskiej temperatury zasilania.",
+                            "759": "Dezynfekcja termiczna nie mog\u0142a zosta\u0107 prawid\u0142owo przeprowadzona 3-krotnie z rz\u0119du.",
+                            "760": "Rozmra\u017canie zosta\u0142o 5-krotnie z rz\u0119du zako\u0144czone po maksymalnym czasie (silny wiatr na parownik).",
+                            "761": "Przekroczenie limitu czasu LIN.",
+                            "762": "B\u0142\u0105d czujnika T\u00fc (wlot spr\u0119\u017carki).",
+                            "763": "B\u0142\u0105d czujnika T\u00fc1 (wlot parownika).",
+                            "764": "B\u0142\u0105d czujnika grzejnika spr\u0119\u017carki.",
+                            "765": "Przegrzanie poni\u017cej 2K d\u0142u\u017cej ni\u017c 5 minut.",
+                            "766": "Praca 5 minut poza zakresem zastosowania spr\u0119\u017carki.",
+                            "767": "STB grza\u0142ki na SEC zosta\u0142 aktywowany.",
+                            "770": "Przegrzanie utrzymuje si\u0119 d\u0142ugotrwale poni\u017cej warto\u015bci granicznej.",
+                            "771": "Przegrzanie utrzymuje si\u0119 d\u0142ugotrwale powy\u017cej warto\u015bci granicznej.",
+                            "776": "Spr\u0119\u017carka pracuje d\u0142ugotrwale poza swoim zakresem zastosowania.",
+                            "777": "Zaw\u00f3r rozpr\u0119\u017cny uszkodzony.",
+                            "778": "Czujnik niskiego ci\u015bnienia uszkodzony.",
+                            "779": "Czujnik wysokiego ci\u015bnienia uszkodzony.",
+                            "780": "Czujnik EVI uszkodzony.",
+                            "781": "Czujnik temperatury cieczy przed zaworem rozpr\u0119\u017cnym uszkodzony.",
+                            "782": "Czujnik temperatury gazu zasysanego EVI uszkodzony.",
+                            "783": "Komunikacja mi\u0119dzy SEC a falownikiem zak\u0142\u00f3cona.",
+                            "784": "Falownik zablokowany.",
+                            "785": "Wykryto b\u0142\u0105d na p\u0142ycie SEC.",
+                            "786": "Zak\u0142\u00f3cenie komunikacji mi\u0119dzy SEC a HZIO wykryte przez SEC.",
+                            "787": "Spr\u0119\u017carka zg\u0142asza b\u0142\u0105d.",
+                            "788": "B\u0142\u0105d w falowniku.",
+                            "789": "Panel sterowania nie m\u00f3g\u0142 wykry\u0107 kodowania. Albo po\u0142\u0105czenie LIN jest przerwane, albo rezystor koduj\u0105cy nie jest rozpoznawany.",
+                            "790": "B\u0142\u0105d w zasilaniu falownika/spr\u0119\u017carki.",
+                            "791": "P\u0142yta SEC nie jest dost\u0119pna od d\u0142u\u017cszego czasu. 791 jest wyzwalany, gdy znaleziono p\u0142yt\u0119 HZIO (bez osobnego kodowania), ale nie rozpoznano na niej p\u0142yty SEC.",
+                            "792": "Nie znaleziono p\u0142yty g\u0142\u00f3wnej ani \u017cadnej konfiguracji.",
+                            "793": "B\u0142\u0105d temperatury w falowniku.",
+                            "minus_1": "Nieznany b\u0142\u0105d"
+                        }
                     },
                     "remedy": {
-                        "name": "Rozwi\u0105zanie"
+                        "name": "Rozwi\u0105zanie",
+                        "state": {
+                            "701": "Sprawd\u017a pomp\u0119 ciep\u0142a pod k\u0105tem nieszczelno\u015bci, punkt prze\u0142\u0105czania presostatu, rozmra\u017canie i minimaln\u0105 temperatur\u0119 powietrza.",
+                            "702": "Sprawd\u017a pomp\u0119 ciep\u0142a pod k\u0105tem nieszczelno\u015bci, punkt prze\u0142\u0105czania presostatu, rozmra\u017canie i minimaln\u0105 temperatur\u0119 powietrza.",
+                            "703": "Sprawd\u017a wydajno\u015b\u0107 pompy ciep\u0142a, zaw\u00f3r rozmra\u017caj\u0105cy i instalacj\u0119 grzewcz\u0105.",
+                            "704": "Sprawd\u017a ilo\u015b\u0107 czynnika ch\u0142odniczego, parowanie, przegrzanie, zasilanie, powr\u00f3t i minimaln\u0105 temperatur\u0119 \u017ar\u00f3d\u0142a ciep\u0142a.",
+                            "705": "Sprawd\u017a wentylator.",
+                            "706": "Sprawd\u017a ustawione warto\u015bci, spr\u0119\u017cark\u0119, BOSUP.",
+                            "707": "Sprawd\u017a rezystor koduj\u0105cy w pompie ciep\u0142a, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "708": "Sprawd\u017a czujnik powrotu, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "709": "Sprawd\u017a czujnik zasilania, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "710": "Sprawd\u017a czujnik gor\u0105cego gazu, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "711": "Sprawd\u017a czujnik temperatury zewn\u0119trznej, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "712": "Sprawd\u017a czujnik ciep\u0142ej wody, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "713": "Sprawd\u017a czujnik \u017ar\u00f3d\u0142a ciep\u0142a, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "714": "Sprawd\u017a przep\u0142yw ciep\u0142ej wody, wymiennik ciep\u0142a, temperatur\u0119 ciep\u0142ej wody i pomp\u0119 obiegow\u0105 ciep\u0142ej wody.",
+                            "715": "Sprawd\u017a przep\u0142yw wody grzewczej, przep\u0142yw nadmiarowy, temperatur\u0119 i kondensacj\u0119.",
+                            "716": "Sprawd\u017a przep\u0142yw wody grzewczej, przep\u0142yw nadmiarowy, temperatur\u0119 i kondensacj\u0119.",
+                            "717": "Sprawd\u017a przep\u0142yw, punkt prze\u0142\u0105czania DFS, filtr, odpowietrzenie.",
+                            "718": "Sprawd\u017a temperatur\u0119 zewn\u0119trzn\u0105 i ustawion\u0105 warto\u015b\u0107.",
+                            "719": "Sprawd\u017a temperatur\u0119 zewn\u0119trzn\u0105 i ustawion\u0105 warto\u015b\u0107.",
+                            "720": "Sprawd\u017a przep\u0142yw, filtr, odpowietrzenie, temperatur\u0119.",
+                            "721": "Sprawd\u017a punkt prze\u0142\u0105czania presostatu, przep\u0142yw po stronie \u017ar\u00f3d\u0142a ciep\u0142a.",
+                            "722": "Sprawd\u017a dzia\u0142anie i umiejscowienie czujnik\u00f3w zasilania i powrotu.",
+                            "723": "Sprawd\u017a dzia\u0142anie i umiejscowienie czujnik\u00f3w zasilania i powrotu.",
+                            "724": "Sprawd\u017a dzia\u0142anie i umiejscowienie czujnik\u00f3w zasilania i powrotu, wydajno\u015b\u0107 HUP, przep\u0142yw nadmiarowy i obiegi grzewcze.",
+                            "725": "Sprawd\u017a pomp\u0119 obiegow\u0105 CWU, nape\u0142nienie zasobnika, zawory odcinaj\u0105ce i zaw\u00f3r tr\u00f3jdro\u017cny. Odpowietrz wod\u0119 grzewcz\u0105 i CWU.",
+                            "726": "Sprawd\u017a czujnik obiegu mieszaj\u0105cego, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "727": "Sprawd\u017a ci\u015bnienie solanki i presostat ci\u015bnienia solanki.",
+                            "728": "Sprawd\u017a czujnik \u017ar\u00f3d\u0142a ciep\u0142a, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "729": "Sprawd\u017a pole wiruj\u0105ce i spr\u0119\u017cark\u0119.",
+                            "730": "Sprawd\u017a zapotrzebowanie na moc podczas wygrzewania.",
+                            "732": "Sprawd\u017a mieszacz i pomp\u0119 obiegow\u0105 ogrzewania.",
+                            "733": "Sprawd\u017a przew\u00f3d po\u0142\u0105czeniowy anody i potencjostat. Nape\u0142nij zasobnik CWU.",
+                            "734": "Tymczasowo potwierd\u017a b\u0142\u0105d, aby przywr\u00f3ci\u0107 przygotowywanie ciep\u0142ej wody. Napraw b\u0142\u0105d 733.",
+                            "735": "Sprawd\u017a czujnik zewn\u0119trznego \u017ar\u00f3d\u0142a energii, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "736": "Sprawd\u017a czujnik kolektora s\u0142onecznego, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "737": "Sprawd\u017a czujnik zasobnika solarnego, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "738": "Sprawd\u017a czujnik obiegu mieszaj\u0105cego 2, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "750": "Sprawd\u017a zewn\u0119trzny czujnik powrotu, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "751": "Sprawd\u017a pole wiruj\u0105ce i przeka\u017anik kolejno\u015bci faz.",
+                            "752": "Patrz b\u0142\u0105d nr 751 i nr 717.",
+                            "755": "Sprawd\u017a po\u0142\u0105czenie sieciowe, prze\u0142\u0105cznik i adresy IP. W razie potrzeby ponownie uruchom wyszukiwanie pompy ciep\u0142a.",
+                            "756": "Sprawd\u017a po\u0142\u0105czenie sieciowe, prze\u0142\u0105cznik i adresy IP. W razie potrzeby ponownie uruchom wyszukiwanie pompy ciep\u0142a.",
+                            "757": "Przy 3-krotnym wyst\u0105pieniu tej usterki urz\u0105dzenie mo\u017ce odblokowa\u0107 wy\u0142\u0105cznie autoryzowany serwis!",
+                            "758": "Sprawd\u017a przep\u0142yw i czujnik zasilania.",
+                            "759": "Sprawd\u017a ustawienia drugiego \u017ar\u00f3d\u0142a ciep\u0142a i ogranicznik temperatury bezpiecze\u0144stwa.",
+                            "760": "Chro\u0144 wentylator i parownik przed silnym wiatrem.",
+                            "761": "Sprawd\u017a kabel/styk.",
+                            "762": "Sprawd\u017a czujnik, ewentualnie wymie\u0144.",
+                            "763": "Sprawd\u017a czujnik, ewentualnie wymie\u0144.",
+                            "764": "Sprawd\u017a czujnik, ewentualnie wymie\u0144.",
+                            "765": "Przy pierwszym uruchomieniu: sprawd\u017a pole wiruj\u0105ce, w przeciwnym razie zadzwo\u0144 do serwisu.",
+                            "766": "Sprawd\u017a pole wiruj\u0105ce.",
+                            "767": "Sprawd\u017a grza\u0142k\u0119 i ponownie wci\u015bnij bezpiecznik.",
+                            "770": "Sprawd\u017a czujnik temperatury, czujnik ci\u015bnienia i zaw\u00f3r rozpr\u0119\u017cny.",
+                            "771": "Sprawd\u017a czujnik temperatury, czujnik ci\u015bnienia, nape\u0142nienie i zaw\u00f3r rozpr\u0119\u017cny.",
+                            "776": "Sprawd\u017a termodynamik\u0119.",
+                            "777": "Sprawd\u017a zaw\u00f3r rozpr\u0119\u017cny, kabel po\u0142\u0105czeniowy i ewentualnie p\u0142yt\u0119 SEC.",
+                            "778": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "779": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "780": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "781": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "782": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
+                            "783": "Sprawd\u017a kabel po\u0142\u0105czeniowy, kondensatory przeciwzak\u0142\u00f3ceniowe i okablowanie.",
+                            "784": "Wy\u0142\u0105cz ca\u0142\u0105 instalacj\u0119 na 2 minuty z zasilania. Przy powtarzaj\u0105cym si\u0119 b\u0142\u0119dzie sprawd\u017a falownik i spr\u0119\u017cark\u0119.",
+                            "785": "Wymie\u0144 p\u0142yt\u0119 SEC.",
+                            "786": "Sprawd\u017a po\u0142\u0105czenie kablowe HZ/IO p\u0142yty SEC.",
+                            "787": "Potwierd\u017a usterk\u0119. Je\u015bli b\u0142\u0105d wyst\u0119puje wielokrotnie, wezwij autoryzowany serwis.",
+                            "788": "Sprawd\u017a falownik.",
+                            "789": "Sprawd\u017a kabel po\u0142\u0105czeniowy LIN/rezystor koduj\u0105cy.",
+                            "790": "Sprawd\u017a okablowanie, falownik i spr\u0119\u017cark\u0119.",
+                            "791": "Je\u015bli dotyczy konfiguracji SEC, sprawd\u017a kabel ModBus mi\u0119dzy HZIO a p\u0142yt\u0105 SEC. Sprawd\u017a r\u00f3wnie\u017c p\u0142yt\u0119 SEC, czy wszystko miga prawid\u0142owo. Je\u015bli to NIE jest konfiguracja z p\u0142yt\u0105 SEC (np. urz\u0105dzenie P184), sprawd\u017a rezystor koduj\u0105cy HZIO.",
+                            "792": "Sprawd\u017a wtyczk\u0119 koduj\u0105c\u0105 na p\u0142ycie LIN.",
+                            "793": "B\u0142\u0105d usuwa si\u0119 samoczynnie."
+                        }
                     }
                 }
             },
@@ -361,7 +515,7 @@
                 "name": "Pow\u00f3d wy\u0142\u0105czenia",
                 "state": {
                     "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
-                    "1": "Zaburzenie ro\u015blin",
+                    "1": "Zak\u0142\u00f3cenie instalacji",
                     "2": "Tryb pracy drugiego generatora ciep\u0142a",
                     "3": "Blokada EVU",
                     "4": "",
@@ -370,7 +524,108 @@
                     "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
                     "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                     "9": "nieaktywny",
-                    "11": "Przep\u0142yw"
+                    "11": "Przep\u0142yw",
+                    "12": "Pauza niskiego ci\u015bnienia",
+                    "14": "Pauza falownika",
+                    "24": "LPC",
+                    "25": "Restart"
+                },
+                "state_attributes": {
+                    "timestamp": {
+                        "name": "Czas"
+                    },
+                    "code_1": {
+                        "name": "Przedostatnie wy\u0142\u0105czenie",
+                        "state": {
+                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
+                            "1": "Zak\u0142\u00f3cenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "3": "Blokada EVU",
+                            "4": "",
+                            "5": "Odszranianie powietrzem",
+                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
+                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
+                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "9": "nieaktywny",
+                            "11": "Przep\u0142yw",
+                            "12": "Pauza niskiego ci\u015bnienia",
+                            "14": "Pauza falownika",
+                            "24": "LPC",
+                            "25": "Restart"
+                        }
+                    },
+                    "timestamp_1": {
+                        "name": "Przedostatni czas"
+                    },
+                    "code_2": {
+                        "name": "Trzecie od ko\u0144ca wy\u0142\u0105czenie",
+                        "state": {
+                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
+                            "1": "Zak\u0142\u00f3cenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "3": "Blokada EVU",
+                            "4": "",
+                            "5": "Odszranianie powietrzem",
+                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
+                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
+                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "9": "nieaktywny",
+                            "11": "Przep\u0142yw",
+                            "12": "Pauza niskiego ci\u015bnienia",
+                            "14": "Pauza falownika",
+                            "24": "LPC",
+                            "25": "Restart"
+                        }
+                    },
+                    "timestamp_2": {
+                        "name": "Trzeci od ko\u0144ca czas"
+                    },
+                    "code_3": {
+                        "name": "Czwarte od ko\u0144ca wy\u0142\u0105czenie",
+                        "state": {
+                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
+                            "1": "Zak\u0142\u00f3cenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "3": "Blokada EVU",
+                            "4": "",
+                            "5": "Odszranianie powietrzem",
+                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
+                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
+                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "9": "nieaktywny",
+                            "11": "Przep\u0142yw",
+                            "12": "Pauza niskiego ci\u015bnienia",
+                            "14": "Pauza falownika",
+                            "24": "LPC",
+                            "25": "Restart"
+                        }
+                    },
+                    "timestamp_3": {
+                        "name": "Czwarty od ko\u0144ca czas"
+                    },
+                    "code_4": {
+                        "name": "Pi\u0105te od ko\u0144ca wy\u0142\u0105czenie",
+                        "state": {
+                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
+                            "1": "Zak\u0142\u00f3cenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "3": "Blokada EVU",
+                            "4": "",
+                            "5": "Odszranianie powietrzem",
+                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
+                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
+                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "9": "nieaktywny",
+                            "11": "Przep\u0142yw",
+                            "12": "Pauza niskiego ci\u015bnienia",
+                            "14": "Pauza falownika",
+                            "24": "LPC",
+                            "25": "Restart"
+                        }
+                    },
+                    "timestamp_4": {
+                        "name": "Pi\u0105ty od ko\u0144ca czas"
+                    }
                 }
             },
             "status_line_1": {
@@ -607,11 +862,11 @@
                 }
             },
             "heating_control_circuit_mode": {
-                "name": "Heating circuit control mode",
+                "name": "Tryb sterowania obiegiem grzewczym",
                 "state": {
-                    "0": "heating curve control - Controlled by outside temperature",
-                    "1": "Manual set temperature",
-                    "2": "Analog in"
+                    "0": "Sterowanie krzyw\u0105 grzewcz\u0105 - wed\u0142ug temperatury zewn\u0119trznej",
+                    "1": "R\u0119cznie ustawiona temperatura",
+                    "2": "Wej\u015bcie analogowe"
                 }
             }
         },
@@ -656,10 +911,10 @@
                     "max_data_length": "Max data package length"
                 },
                 "data_description": {
-                    "host": "Hostname or IP address",
-                    "port": "Normally 8889 or 8888",
-                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
-                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
+                    "host": "Nazwa hosta lub adres IP",
+                    "port": "Zwykle 8889 lub 8888",
+                    "timeout": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 limit czasu.",
+                    "max_data_length": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 d\u0142ugo\u015b\u0107 pakietu danych."
                 }
             },
             "manual_entry": {
@@ -704,6 +959,14 @@
                     "ha_sensor_prefix": "Wa\u017cne przy u\u017cyciu wielu pomp ciep\u0142a. W przypadku jednej mo\u017cna po prostu u\u017cy\u0107 'luxtronik'."
                 }
             }
+        }
+    },
+    "exceptions": {
+        "invalid_parameter_name": {
+            "message": "Nieprawid\u0142owa nazwa parametru: {parameter}"
+        },
+        "parameter_not_writable": {
+            "message": "Parametr {parameter} odrzucony \u2014 tylko parametry z prefiksami {prefixes} s\u0105 zapisywalne"
         }
     }
 }

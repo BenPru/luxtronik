@@ -642,8 +642,25 @@ class TestWriteParameterService:
             ATTR_VALUE: "42",
         }
 
-        with pytest.raises(ServiceValidationError):
+        with pytest.raises(ServiceValidationError) as exc_info:
             await handler(service)
+        assert exc_info.value.translation_key == "parameter_not_writable"
+        assert exc_info.value.translation_domain == DOMAIN
+        assert exc_info.value.translation_placeholders == {
+            "parameter": "ID_Forbidden_param",
+            "prefixes": ", ".join(
+                (
+                    "ID_Einst_",
+                    "ID_Ba_",
+                    "ID_Soll_",
+                    "ID_Sollwert_",
+                    "ID_SU_",
+                    "ID_RBE_",
+                    "Unknown_Parameter_",
+                    "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
+                )
+            ),
+        }
 
     @pytest.mark.asyncio
     async def test_write_invalid_parameter_name(self):
@@ -660,5 +677,8 @@ class TestWriteParameterService:
             ATTR_VALUE: "42",
         }
 
-        with pytest.raises(ServiceValidationError):
+        with pytest.raises(ServiceValidationError) as exc_info:
             await handler(service)
+        assert exc_info.value.translation_key == "invalid_parameter_name"
+        assert exc_info.value.translation_domain == DOMAIN
+        assert exc_info.value.translation_placeholders == {"parameter": "None"}
