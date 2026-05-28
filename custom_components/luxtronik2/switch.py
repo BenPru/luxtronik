@@ -20,6 +20,8 @@ from .switch_entities_predefined import SWITCHES
 
 # endregion Imports
 
+PARALLEL_UPDATES = 1
+
 
 async def async_setup_entry(
     hass: HomeAssistant,

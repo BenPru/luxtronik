@@ -41,6 +41,8 @@ from .sensor_entities_predefined import SENSORS, SENSORS_INDEX, SENSORS_STATUS
 
 # endregion Imports
 
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant,

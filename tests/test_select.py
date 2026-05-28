@@ -81,3 +81,62 @@ class TestSelectDataNone:
         entity.coordinator.data = None
         await entity.async_select_option("Monday")
         # Should return early without error
+
+
+# ===========================================================================
+# select.py — async_update
+# ===========================================================================
+
+
+class TestThermalDesinfectionAsyncUpdate:
+    def _make_entity(self, coord=None):
+        desc = LuxtronikSelectEntityDescription(
+            key=SensorKey.THERMAL_DESINFECTION_DAY,
+            device_key=DeviceKey.domestic_water,
+            luxtronik_key=LuxDaySelectorParameter.MONDAY,  # pyright: ignore[reportArgumentType]
+        )
+        if coord is None:
+            coord = _mock_coordinator()
+        entry = _mock_entry()
+        entity = LuxtronikThermalDesinfectionDaySelector(
+            entry, coord, desc, DeviceKey.domestic_water
+        )
+        _patch_entity(entity)
+        return entity
+
+    @pytest.mark.asyncio
+    async def test_async_update_data_none(self):
+        entity = self._make_entity()
+        entity.coordinator.data = None
+        await entity.async_update()
+        # Should return early, current_option unchanged
+
+    @pytest.mark.asyncio
+    async def test_async_update_no_day_selected(self):
+        coord = _mock_coordinator()
+        entity = self._make_entity(coord)
+        # All day parameters return "0" by default (mock)
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setattr(
+                "custom_components.luxtronik2.select.get_sensor_data",
+                lambda data, key: "0",
+            )
+            await entity.async_update()
+        assert entity._attr_current_option == "none"
+
+    @pytest.mark.asyncio
+    async def test_async_update_day_selected(self):
+        coord = _mock_coordinator()
+        entity = self._make_entity(coord)
+        wednesday_param = LuxDaySelectorParameter.WEDNESDAY.value
+
+        def fake_sensor_data(data, key):
+            return "1" if key == wednesday_param else "0"
+
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setattr(
+                "custom_components.luxtronik2.select.get_sensor_data",
+                fake_sensor_data,
+            )
+            await entity.async_update()
+        assert entity._attr_current_option == "wednesday"

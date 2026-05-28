@@ -52,6 +52,8 @@ from .model import LuxtronikClimateDescription
 
 # endregion Imports
 
+PARALLEL_UPDATES = 1
+
 # region Const
 MIN_TEMPERATURE = 8
 MAX_TEMPERATURE = 28

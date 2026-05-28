@@ -36,6 +36,8 @@ from .model import LuxtronikUpdateEntityDescription
 
 # endregion Imports
 
+PARALLEL_UPDATES = 0
+
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(hours=1)
 
 
