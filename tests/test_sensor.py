@@ -306,14 +306,11 @@ class TestSmartGridStatus:
         assert entity._attr_native_value == LuxSmartGridStatus.increased
 
     def test_smartgrid_icon_by_state(self):
-        from custom_components.luxtronik2.const import LUX_SMART_GRID_ICON_MAP
-
+        """SmartGrid sensor no longer sets _attr_icon — icons come from icons.json."""
         desc = LuxtronikSensorDescription(
             key=SensorKey.SMART_GRID_STATUS,
             luxtronik_key=LC.UNSET,
             device_key=DeviceKey.heatpump,
-            icon="mdi:default",
-            icon_by_state=LUX_SMART_GRID_ICON_MAP,
         )
         data = make_coordinator_data(
             parameters={
@@ -335,10 +332,8 @@ class TestSmartGridStatus:
         entity = _make_status_sensor(data, desc)
         entity._handle_coordinator_update()
         assert entity._attr_native_value == LuxSmartGridStatus.normal
-        if LuxSmartGridStatus.normal in LUX_SMART_GRID_ICON_MAP:
-            assert (
-                entity._attr_icon == LUX_SMART_GRID_ICON_MAP[LuxSmartGridStatus.normal]
-            )
+        # Icon is resolved from icons.json, not set in code
+        assert not hasattr(entity, "_attr_icon") or entity._attr_icon is None
 
 
 # ===========================================================================
@@ -536,7 +531,8 @@ class TestIndexSensor:
 
 
 class TestSensorSmartGridIconFallback:
-    def test_icon_fallback_when_no_icon_by_state_match(self):
+    def test_icon_not_set_when_no_icon_by_state(self):
+        """SmartGrid sensor delegates icon resolution to icons.json."""
         data = make_coordinator_data(
             parameters={"ID_Einst_SmartGrid": 1},
             calculations={
@@ -548,8 +544,6 @@ class TestSensorSmartGridIconFallback:
             key=SensorKey.SMART_GRID_STATUS,
             luxtronik_key=LC.UNSET,
             device_key=DeviceKey.heatpump,
-            icon="mdi:grid",
-            icon_by_state={"nonexistent_state": "mdi:other"},  # no match for "normal"
         )
         coord = _mock_coordinator(data)
         entry = _mock_entry()
@@ -558,4 +552,5 @@ class TestSensorSmartGridIconFallback:
         )
         _patch_entity(entity)
         entity._handle_coordinator_update(data)
-        assert entity._attr_icon == "mdi:grid"
+        # Icon is resolved from icons.json, not set in code
+        assert not hasattr(entity, "_attr_icon") or entity._attr_icon is None

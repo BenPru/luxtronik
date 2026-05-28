@@ -287,13 +287,6 @@ LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]]
     LuxOperationMode.cooling: "mdi:air-conditioner",
 }
 
-LUX_SMART_GRID_ICON_MAP: Final[dict[StateType | date | datetime | Decimal, str]] = {
-    LuxSmartGridStatus.locked: "mdi:cancel",  # EVU lock - Blocked
-    LuxSmartGridStatus.reduced: "mdi:arrow-down-circle",  # Reduced operation
-    LuxSmartGridStatus.normal: "mdi:check-circle",  # Normal operation
-    LuxSmartGridStatus.increased: "mdi:arrow-up-circle",  # Increased operation
-}
-
 LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]
 LUX_MODELS_NOVELAN = ["BW", "LA", "LD", "LI", "SI", "ZLW"]
 LUX_MODELS_OTHER = ["CB", "CI", "CN", "CS"]

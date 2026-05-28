@@ -126,6 +126,9 @@
             "release_second_heat_generator": {
                 "name": "Vrijgave van tweede warmtegenerator"
             },
+            "release_time_second_heat_generator": {
+                "name": "Vrijgavetijd tweede warmtegenerator"
+            },
             "pump_optimization": {
                 "name": "Pompoptimalisatie"
             },

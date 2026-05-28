@@ -126,6 +126,9 @@
             "release_second_heat_generator": {
                 "name": "Freigabe ZWE"
             },
+            "release_time_second_heat_generator": {
+                "name": "Freigabezeit ZWE"
+            },
             "pump_optimization": {
                 "name": "Pumpenoptimierung"
             },

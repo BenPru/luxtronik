@@ -123,6 +123,9 @@
             "release_second_heat_generator": {
                 "name": "Zwolni\u0107 drugi generator ciep\u0142a"
             },
+            "release_time_second_heat_generator": {
+                "name": "Czas zwolnienia drugiego generatora ciep\u0142a"
+            },
             "pump_optimization": {
                 "name": "Optymalizacja pompy"
             },
