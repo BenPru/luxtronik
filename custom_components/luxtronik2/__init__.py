@@ -86,7 +86,11 @@ def setup_hass_services(hass: HomeAssistant, entry: LuxtronikConfigEntry):
         """Write a parameter to the Luxtronik heatpump."""
         parameter = service.data.get(ATTR_PARAMETER)
         if not parameter or not isinstance(parameter, str):
-            raise ServiceValidationError(f"Invalid parameter name: {parameter}")
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="invalid_parameter_name",
+                translation_placeholders={"parameter": str(parameter)},
+            )
 
         # convert to int needed for Unknown parameters
         value = convert_to_int_if_possible(service.data.get(ATTR_VALUE))
@@ -104,8 +108,12 @@ def setup_hass_services(hass: HomeAssistant, entry: LuxtronikConfigEntry):
         )
         if not parameter.startswith(writable_prefixes):
             raise ServiceValidationError(
-                f"Parameter '{parameter}' rejected — only parameters with "
-                f"prefixes {writable_prefixes} are writable"
+                translation_domain=DOMAIN,
+                translation_key="parameter_not_writable",
+                translation_placeholders={
+                    "parameter": parameter,
+                    "prefixes": ", ".join(writable_prefixes),
+                },
             )
 
         # Find the first available coordinator

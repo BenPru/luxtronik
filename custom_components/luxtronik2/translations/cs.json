@@ -81,10 +81,10 @@
                 "name": "\u00da\u010dinnost \u010derpadla"
             },
             "electrical_power_limitation_switch": {
-                "name": "Power limitation"
+                "name": "Omezen\u00ed v\u00fdkonu"
             },
             "thermal_power_limitation_switch": {
-                "name": "Max. thermal power"
+                "name": "Max. tepeln\u00fd v\u00fdkon"
             },
             "pump_heat_control": {
                 "name": "Ovl\u00e1d\u00e1n\u00ed \u010derpadla pro oh\u0159ev"
@@ -130,16 +130,16 @@
                 "name": "Optimalizace \u010derpadla"
             },
             "electrical_power_limitation_value": {
-                "name": "Power limit"
+                "name": "Limit v\u00fdkonu"
             },
             "thermal_power_limitation_heating": {
-                "name": "Thermal power limit: Heating"
+                "name": "Limit tepeln\u00e9ho v\u00fdkonu: Vyt\u00e1p\u011bn\u00ed"
             },
             "thermal_power_limitation_water": {
-                "name": "Thermal power limit: Water"
+                "name": "Limit tepeln\u00e9ho v\u00fdkonu: TUV"
             },
             "thermal_power_limitation_cooling": {
-                "name": "Thermal power limit: Cooling"
+                "name": "Limit tepeln\u00e9ho v\u00fdkonu: Chlazen\u00ed"
             },
             "heating_threshold": {
                 "name": "Teplotn\u00ed mez pro vyt\u00e1p\u011bn\u00ed"
@@ -250,7 +250,7 @@
                 "name": "Minim\u00e1ln\u00ed vstupn\u00ed teplota zdroje tepla"
             },
             "heating_flow_out_temperature_target": {
-                "name": "Manual target flow out temperature"
+                "name": "Manu\u00e1ln\u00ed c\u00edlov\u00e1 teplota v\u00fdstupn\u00ed vody"
             },
             "pump_vent_timer_h": {
                 "name": "Doba provozu odvzdu\u0161\u0148ov\u00e1n\u00ed"
@@ -900,11 +900,11 @@
                 }
             },
             "heating_control_circuit_mode": {
-                "name": "Heating circuit control mode",
+                "name": "Re\u017eim regulace topn\u00e9ho okruhu",
                 "state": {
-                    "0": "heating curve control - Controlled by outside temperature",
-                    "1": "Manual set temperature",
-                    "2": "Analog in"
+                    "0": "Regulace topnou k\u0159ivkou - \u0158\u00edzen\u00e9 venkovn\u00ed teplotou",
+                    "1": "Manu\u00e1ln\u011b nastaven\u00e1 teplota",
+                    "2": "Analogov\u00fd vstup"
                 }
             }
         },
@@ -949,10 +949,10 @@
                     "max_data_length": "Max data package length"
                 },
                 "data_description": {
-                    "host": "Hostname or IP address",
-                    "port": "Normally 8889 or 8888",
-                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
-                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
+                    "host": "N\u00e1zev hostitele nebo IP adresa",
+                    "port": "Obvykle 8889 nebo 8888",
+                    "timeout": "Pokud je s\u00ed\u0165 nebo tepeln\u00e9 \u010derpadlo pomal\u00e9, m\u016f\u017eete upravit timeout.",
+                    "max_data_length": "Pokud je s\u00ed\u0165 nebo tepeln\u00e9 \u010derpadlo pomal\u00e9, m\u016f\u017eete upravit d\u00e9lku datov\u00e9ho paketu."
                 }
             },
             "manual_entry": {
@@ -1004,6 +1004,14 @@
         },
         "error": {
             "cannot_connect": "Nepoda\u0159ilo se p\u0159ipojit k tepeln\u00e9mu \u010derpadlu Luxtronik. Zkontrolujte pros\u00edm hostitele a port."
+        }
+    },
+    "exceptions": {
+        "invalid_parameter_name": {
+            "message": "Neplatn\u00fd n\u00e1zev parametru: {parameter}"
+        },
+        "parameter_not_writable": {
+            "message": "Parametr {parameter} odm\u00edtnut \u2014 zapisovat lze pouze parametry s p\u0159edponami {prefixes}"
         }
     }
 }

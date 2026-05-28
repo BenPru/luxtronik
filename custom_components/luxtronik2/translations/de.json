@@ -104,6 +104,9 @@
             "cooling": {
                 "name": "K\u00fchlung"
             },
+            "silent_mode": {
+                "name": "Fl\u00fcsterbetrieb"
+            },
             "pump_vent_hup": {
                 "name": "Entl\u00fcften HUP"
             },
@@ -932,10 +935,10 @@
                     "max_data_length": "Max data package length"
                 },
                 "data_description": {
-                    "host": "Hostname or IP address",
-                    "port": "Normally 8889 or 8888",
-                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
-                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
+                    "host": "Hostname oder IP-Adresse",
+                    "port": "Normalerweise 8889 oder 8888",
+                    "timeout": "Wenn das Netzwerk oder die W\u00e4rmepumpe langsam ist, k\u00f6nnen Sie den Timeout anpassen.",
+                    "max_data_length": "Wenn das Netzwerk oder die W\u00e4rmepumpe langsam ist, k\u00f6nnen Sie die Datenpaketl\u00e4nge anpassen."
                 }
             },
             "manual_entry": {
@@ -987,6 +990,14 @@
         },
         "error": {
             "cannot_connect": "Verbindung zur Luxtronik-W\u00e4rmepumpe fehlgeschlagen. Bitte Host und Port \u00fcberpr\u00fcfen."
+        }
+    },
+    "exceptions": {
+        "invalid_parameter_name": {
+            "message": "Ung\u00fcltiger Parametername: {parameter}"
+        },
+        "parameter_not_writable": {
+            "message": "Parameter {parameter} abgelehnt \u2014 nur Parameter mit Pr\u00e4fixen {prefixes} sind beschreibbar"
         }
     }
 }

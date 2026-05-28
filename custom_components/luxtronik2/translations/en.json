@@ -739,5 +739,13 @@
         "error": {
             "cannot_connect": "Failed to connect to the Luxtronik heat pump. Please check the host and port."
         }
+    },
+    "exceptions": {
+        "invalid_parameter_name": {
+            "message": "Invalid parameter name: {parameter}"
+        },
+        "parameter_not_writable": {
+            "message": "Parameter {parameter} rejected \u2014 only parameters with prefixes {prefixes} are writable"
+        }
     }
 }
