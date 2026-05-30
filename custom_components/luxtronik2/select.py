@@ -51,7 +51,6 @@ async def async_setup_entry(
         device_key=DeviceKey.domestic_water,
         luxtronik_key=LuxDaySelectorParameter.MONDAY,  # pyright: ignore[reportArgumentType]
         name="Thermal disinfection day",
-        icon="mdi:calendar",
         entity_category=EntityCategory.CONFIG,
     )
 
@@ -202,7 +201,6 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
         self._attr_options = DAY_SELECTOR_OPTIONS
         self._attr_current_option = "none"
         self._attr_entity_category = EntityCategory.CONFIG
-        self._attr_icon = "mdi:calendar"
 
         # ---- DO NOT TOUCH: manual entity_id + unique_id approach --------
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]

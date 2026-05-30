@@ -8,8 +8,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from homeassistant.components.water_heater import STATE_HEAT_PUMP
-from homeassistant.const import STATE_OFF, UnitOfTemperature, UnitOfTime
+from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -186,21 +185,16 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
 
         self._attr_state = value
 
-        icon_state = getattr(
-            self,
-            "_attr_is_on",
-            getattr(self, "_attr_current_lux_operation", self._attr_state),
-        )
-        if descr.icon_by_state and icon_state in descr.icon_by_state:
-            self._attr_icon = descr.icon_by_state.get(icon_state)
-        else:
-            self._attr_icon = descr.icon
-
-        if hasattr(self, "_attr_current_operation") and self._attr_icon is not None:
-            if self._attr_current_operation == STATE_OFF:  # pyright: ignore[reportAttributeAccessIssue]
-                self._attr_icon += "-off"
-            elif self._attr_current_operation == STATE_HEAT_PUMP:  # pyright: ignore[reportAttributeAccessIssue]
-                self._attr_icon += "-auto"
+        if descr.icon_by_state:
+            icon_state = getattr(
+                self,
+                "_attr_is_on",
+                getattr(self, "_attr_current_lux_operation", self._attr_state),
+            )
+            if icon_state in descr.icon_by_state:
+                self._attr_icon = descr.icon_by_state.get(icon_state)
+            else:
+                self._attr_icon = descr.icon
 
         self._enrich_extra_attributes()
 

@@ -126,6 +126,9 @@
             "release_second_heat_generator": {
                 "name": "Release second heat generator"
             },
+            "release_time_second_heat_generator": {
+                "name": "Release time second heat generator"
+            },
             "pump_optimization": {
                 "name": "Pump optimization"
             },

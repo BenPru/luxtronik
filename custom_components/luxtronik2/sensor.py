@@ -384,13 +384,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
             else:  # evu_on and evu2_on
                 self._attr_native_value = LuxSmartGridStatus.increased  # Status 4
 
-            # Set icon based on current state
-            descr = self.entity_description
-            if descr.icon_by_state and self._attr_native_value in descr.icon_by_state:
-                self._attr_icon = descr.icon_by_state.get(self._attr_native_value)
-            elif descr.icon:
-                self._attr_icon = descr.icon
-
         # Don't call super() to avoid setting value to None (luxtronik_key=UNSET)
         self._enrich_extra_attributes()
         self.async_write_ha_state()

@@ -126,6 +126,9 @@
             "release_second_heat_generator": {
                 "name": "Odem\u010den\u00ed druh\u00e9ho gener\u00e1toru tepla"
             },
+            "release_time_second_heat_generator": {
+                "name": "\u010cas odem\u010den\u00ed druh\u00e9ho gener\u00e1toru tepla"
+            },
             "pump_optimization": {
                 "name": "Optimalizace \u010derpadla"
             },

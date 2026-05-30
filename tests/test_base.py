@@ -6,12 +6,10 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from conftest import make_coordinator_data
-from homeassistant.components.water_heater import STATE_HEAT_PUMP
 from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
     CONF_TIMEOUT,
-    STATE_OFF,
     UnitOfTime,
 )
 import pytest
@@ -486,34 +484,60 @@ class TestAsyncAddedToHass:
 # ===========================================================================
 
 
-class TestIconCurrentOperation:
-    def test_icon_off_suffix(self):
-        """When _attr_current_operation is STATE_OFF, icon gets -off suffix."""
+class TestIconByState:
+    def test_icon_by_state_sets_icon(self):
+        """When icon_by_state matches current state, _attr_icon is set."""
         data = make_coordinator_data(calculations={"ID_WEB_Temperatur_TRL": 25.0})
         desc = LuxtronikSensorDescription(
             key=SensorKey.FLOW_OUT_TEMPERATURE,
             luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
             device_key=DeviceKey.heatpump,
             icon="mdi:water",
+            icon_by_state={25.0: "mdi:water-check"},
         )
         entity = _make_sensor_entity(data, desc)
-        entity._attr_current_operation = STATE_OFF
         LuxtronikEntity._handle_coordinator_update(entity, data)
-        assert entity._attr_icon == "mdi:water-off"
+        assert entity._attr_icon == "mdi:water-check"
 
-    def test_icon_auto_suffix(self):
-        """When _attr_current_operation is STATE_HEAT_PUMP, icon gets -auto suffix."""
-        data = make_coordinator_data(calculations={"ID_WEB_Temperatur_TRL": 25.0})
+    def test_icon_by_state_fallback_to_icon(self):
+        """When icon_by_state doesn't match, falls back to descr.icon."""
+        data = make_coordinator_data(calculations={"ID_WEB_Temperatur_TRL": 99.0})
         desc = LuxtronikSensorDescription(
             key=SensorKey.FLOW_OUT_TEMPERATURE,
             luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
             device_key=DeviceKey.heatpump,
             icon="mdi:water",
+            icon_by_state={25.0: "mdi:water-check"},
         )
         entity = _make_sensor_entity(data, desc)
-        entity._attr_current_operation = STATE_HEAT_PUMP
         LuxtronikEntity._handle_coordinator_update(entity, data)
-        assert entity._attr_icon == "mdi:water-auto"
+        assert entity._attr_icon == "mdi:water"
+
+    def test_icon_by_state_clears_stale_icon(self):
+        """When icon_by_state doesn't match and descr.icon is None, stale icon is cleared."""
+        data = make_coordinator_data(calculations={"ID_WEB_Temperatur_TRL": 99.0})
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            icon_by_state={25.0: "mdi:water-check"},
+        )
+        entity = _make_sensor_entity(data, desc)
+        entity._attr_icon = "mdi:water-check"  # simulate previous match
+        LuxtronikEntity._handle_coordinator_update(entity, data)
+        assert entity._attr_icon is None
+
+    def test_no_icon_set_without_icon_by_state(self):
+        """When icon_by_state is not set, _attr_icon is not touched (icons.json handles it)."""
+        data = make_coordinator_data(calculations={"ID_WEB_Temperatur_TRL": 25.0})
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+        )
+        entity = _make_sensor_entity(data, desc)
+        LuxtronikEntity._handle_coordinator_update(entity, data)
+        assert not hasattr(entity, "_attr_icon") or entity._attr_icon is None
 
 
 # ===========================================================================

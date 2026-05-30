@@ -1,0 +1,195 @@
+{
+  "entity": {
+    "sensor": {
+      "status": {
+        "state": {
+          "heating": "mdi:radiator",
+          "hot_water": "mdi:waves",
+          "swimming_pool_solar": "mdi:pool",
+          "evu": "mdi:power-plug-off",
+          "defrost": "mdi:car-defrost-rear",
+          "no_request": "mdi:hvac-off",
+          "heating_external_source": "mdi:patio-heater",
+          "cooling": "mdi:air-conditioner"
+        }
+      },
+      "smart_grid_status": {
+        "state": {
+          "evu_locked": "mdi:cancel",
+          "reduced_operation": "mdi:arrow-down-circle",
+          "normal_operation": "mdi:check-circle",
+          "increased_operation": "mdi:arrow-up-circle"
+        }
+      },
+      "switchoff_reason": { "default": "mdi:electric-switch" },
+      "status_time": { "default": "mdi:timer-sand" },
+      "status_line_1": { "default": "mdi:numeric-1-circle" },
+      "status_line_2": { "default": "mdi:numeric-2-circle" },
+      "status_line_3": { "default": "mdi:numeric-3-circle" },
+      "heat_source_input_temperature": { "default": "mdi:thermometer" },
+      "outdoor_temperature": { "default": "mdi:thermometer" },
+      "outdoor_temperature_average": { "default": "mdi:thermometer" },
+      "compressor1_impulses": { "default": "mdi:pulse" },
+      "compressor1_operation_hours": { "default": "mdi:timer-sand" },
+      "compressor2_impulses": { "default": "mdi:pulse" },
+      "compressor2_operation_hours": { "default": "mdi:timer-sand" },
+      "operation_hours": { "default": "mdi:timer-sand" },
+      "heat_amount_counter": { "default": "mdi:lightning-bolt-circle" },
+      "heat_amount_flow_rate": { "default": "mdi:water-sync" },
+      "heat_source_flow_rate": { "default": "mdi:water-sync" },
+      "hot_gas_temperature": { "default": "mdi:thermometer" },
+      "suction_compressor_temperature": { "default": "mdi:thermometer" },
+      "suction_evaporator_temperature": { "default": "mdi:thermometer" },
+      "compressor_heating_temperature": { "default": "mdi:thermometer" },
+      "overheating_temperature": { "default": "mdi:thermometer" },
+      "overheating_target_temperature": { "default": "mdi:thermometer" },
+      "high_pressure": { "default": "mdi:gauge-full" },
+      "low_pressure": { "default": "mdi:gauge-low" },
+      "additional_heat_generator_operation_hours": { "default": "mdi:timer-sand" },
+      "additional_heat_generator2_operation_hours": { "default": "mdi:timer-sand" },
+      "additional_heat_generator_amount_counter": { "default": "mdi:lightning-bolt-circle" },
+      "second_heat_generator_amount_counter": { "default": "mdi:lightning-bolt-circle" },
+      "analog_out1": { "default": "mdi:alpha-v-circle-outline" },
+      "analog_out2": { "default": "mdi:alpha-v-circle-outline" },
+      "current_heat_output": { "default": "mdi:lightning-bolt-circle" },
+      "pump_frequency": { "default": "mdi:sine-wave" },
+      "pump_flow_delta_target": { "default": "mdi:delta" },
+      "pump_flow_delta": { "default": "mdi:delta" },
+      "circulation_pump_delta_target": { "default": "mdi:delta" },
+      "circulation_pump_delta": { "default": "mdi:delta" },
+      "heat_source_output_temperature": { "default": "mdi:thermometer" },
+      "error_reason": { "default": "mdi:alert" },
+      "current_power_consumption": { "default": "mdi:lightning-bolt-circle" },
+      "flow_in_temperature": { "default": "mdi:waves-arrow-right" },
+      "flow_in_circuit1_temperature": { "default": "mdi:waves-arrow-right" },
+      "flow_in_circuit2_temperature": { "default": "mdi:waves-arrow-right" },
+      "flow_in_circuit3_temperature": { "default": "mdi:waves-arrow-right" },
+      "flow_in_circuit1_target_temperature": { "default": "mdi:thermometer" },
+      "flow_in_circuit2_target_temperature": { "default": "mdi:thermometer" },
+      "flow_in_circuit3_target_temperature": { "default": "mdi:thermometer" },
+      "flow_out_temperature": { "default": "mdi:waves-arrow-left" },
+      "flow_out_temperature_target": { "default": "mdi:thermometer" },
+      "operation_hours_heating": { "default": "mdi:timer-sand" },
+      "heat_amount_heating": { "default": "mdi:lightning-bolt-circle" },
+      "heat_energy_input": { "default": "mdi:circle-slice-3" },
+      "flow_out_temperature_external": { "default": "mdi:waves-arrow-right" },
+      "room_thermostat_temperature": { "default": "mdi:thermometer" },
+      "room_thermostat_temperature_target": { "default": "mdi:thermometer" },
+      "dhw_temperature": { "default": "mdi:coolant-temperature" },
+      "dhw_operation_hours": { "default": "mdi:timer-sand" },
+      "dhw_heat_amount": { "default": "mdi:lightning-bolt-circle" },
+      "dhw_energy_input": { "default": "mdi:circle-slice-3" },
+      "solar_collector_temperature": { "default": "mdi:solar-panel-large" },
+      "solar_buffer_temperature": { "default": "mdi:propane-tank-outline" },
+      "operation_hours_solar": { "default": "mdi:timer-sand" },
+      "operation_hours_cooling": { "default": "mdi:timer-sand" },
+      "cooling_energy_input": { "default": "mdi:circle-slice-3" }
+    },
+    "number": {
+      "release_second_heat_generator": { "default": "mdi:lock-minus" },
+      "release_time_second_heat_generator": { "default": "mdi:lock-clock" },
+      "efficiency_pump_nominal": { "default": "mdi:leaf-circle-outline" },
+      "efficiency_pump_minimal": { "default": "mdi:leaf" },
+      "heat_source_input_temperature_min": { "default": "mdi:download-lock" },
+      "electrical_power_limitation_value": { "default": "mdi:download" },
+      "thermal_power_limitation_heating": { "default": "mdi:heat-wave" },
+      "thermal_power_limitation_water": { "default": "mdi:waves" },
+      "thermal_power_limitation_cooling": { "default": "mdi:snowflake" },
+      "heating_target_correction": { "default": "mdi:plus-minus-variant" },
+      "pump_optimization": { "default": "mdi:timer-settings" },
+      "heating_threshold": { "default": "mdi:download-outline" },
+      "heating_min_flow_out_temperature": { "default": "mdi:waves-arrow-left" },
+      "heating_curve_end_temperature": { "default": "mdi:chart-bell-curve" },
+      "heating_curve_parallel_shift_temperature": { "default": "mdi:vector-curve" },
+      "heating_curve_night_temperature": { "default": "mdi:delta" },
+      "heating_curve_circuit1_end_temperature": { "default": "mdi:chart-bell-curve" },
+      "heating_curve_circuit1_parallel_shift_temperature": { "default": "mdi:vector-curve" },
+      "heating_curve_circuit1_night_temperature": { "default": "mdi:delta" },
+      "heating_curve_circuit2_end_temperature": { "default": "mdi:chart-bell-curve" },
+      "heating_curve_circuit2_parallel_shift_temperature": { "default": "mdi:vector-curve" },
+      "heating_curve_circuit2_night_temperature": { "default": "mdi:delta" },
+      "heating_curve_circuit3_end_temperature": { "default": "mdi:chart-bell-curve" },
+      "heating_curve_circuit3_parallel_shift_temperature": { "default": "mdi:vector-curve" },
+      "heating_curve_circuit3_night_temperature": { "default": "mdi:delta" },
+      "heating_night_lowering_to_temperature": { "default": "mdi:thermometer-low" },
+      "heating_hysteresis": { "default": "mdi:thermometer" },
+      "heating_max_flow_out_increase_temperature": { "default": "mdi:thermometer" },
+      "heating_maximum_circulation_pump_speed": { "default": "mdi:speedometer" },
+      "heating_flow_out_temperature_target": { "default": "mdi:chart-bell-curve" },
+      "heating_room_temperature_impact_factor": { "default": "mdi:thermometer-chevron-up" },
+      "pump_vent_timer_h": { "default": "mdi:timer-settings" },
+      "dhw_target_temperature": { "default": "mdi:thermometer-water" },
+      "dhw_hysteresis": { "default": "mdi:thermometer" },
+      "dhw_thermal_desinfection_target": { "default": "mdi:thermometer-high" },
+      "solar_pump_on_difference_temperature": { "default": "mdi:pump" },
+      "solar_pump_off_difference_temperature": { "default": "mdi:pump-off" },
+      "solar_pump_off_max_difference_temperature_boiler": { "default": "mdi:water-boiler-alert" },
+      "solar_pump_max_temperature_collector": { "default": "mdi:solar-panel-large" },
+      "cooling_threshold_temperature": { "default": "mdi:sun-thermometer" },
+      "cooling_start_delay_hours": { "default": "mdi:clock-start" },
+      "cooling_stop_delay_hours": { "default": "mdi:clock-end" },
+      "cooling_target_temperature_mk1": { "default": "mdi:sun-thermometer" },
+      "cooling_target_temperature_mk2": { "default": "mdi:sun-thermometer" },
+      "cooling_target_temperature_mk3": { "default": "mdi:sun-thermometer" }
+    },
+    "switch": {
+      "remote_maintenance": { "default": "mdi:remote-desktop" },
+      "efficiency_pump": { "default": "mdi:leaf-circle" },
+      "smartgrid": { "default": "mdi:grid" },
+      "pump_heat_control": { "default": "mdi:pump" },
+      "electrical_power_limitation_switch": { "default": "mdi:download-lock" },
+      "thermal_power_limitation_switch": { "default": "mdi:download-lock" },
+      "heating": {
+        "state": {
+          "on": "mdi:radiator",
+          "off": "mdi:radiator-off"
+        }
+      },
+      "pump_optimization": { "default": "mdi:tune" },
+      "heating_threshold": { "default": "mdi:download-outline" },
+      "pump_vent_hup": { "default": "mdi:pump" },
+      "pump_vent_active": { "default": "mdi:pump" },
+      "domestic_water": {
+        "state": {
+          "on": "mdi:water-boiler-auto",
+          "off": "mdi:water-boiler-off"
+        }
+      },
+      "cooling": { "default": "mdi:snowflake" }
+    },
+    "binary_sensor": {
+      "evu_unlocked": { "default": "mdi:transmission-tower" },
+      "evu2": { "default": "mdi:transmission-tower" },
+      "compressor": { "default": "mdi:arrow-collapse-all" },
+      "compressor2": { "default": "mdi:arrow-collapse-all" },
+      "pump_flow": { "default": "mdi:pump" },
+      "compressor_heater": { "default": "mdi:heat-wave" },
+      "defrost_valve": {
+        "state": {
+          "on": "mdi:valve-open",
+          "off": "mdi:valve-closed"
+        }
+      },
+      "additional_heat_generator": { "default": "mdi:patio-heater" },
+      "circulation_pump_heating": { "default": "mdi:car-turbocharger" },
+      "additional_circulation_pump": { "default": "mdi:pump" },
+      "dhw_recirculation_pump": { "default": "mdi:pump" },
+      "dhw_circulation_pump": { "default": "mdi:pump" },
+      "dhw_charging_pump": { "default": "mdi:pump" },
+      "solar_pump": { "default": "mdi:pump" },
+      "approval_cooling": { "default": "mdi:lock" }
+    },
+    "water_heater": {
+      "domestic_water": {
+        "default": "mdi:water-boiler",
+        "state": {
+          "off": "mdi:water-boiler-off",
+          "heat_pump": "mdi:water-boiler-auto"
+        }
+      }
+    },
+    "select": {
+      "thermal_desinfection_day": { "default": "mdi:calendar" }
+    }
+  }
+}
