@@ -243,12 +243,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> str:
         if platform is None:
             return str(key.value)
-        return (
-            platform.platform_data.platform_translations.get(
-                f"component.{DOMAIN}.entity.device.{key.value}.name"
-            )
-            or str(key.value)
-        )
+        return platform.platform_data.platform_translations.get(
+            f"component.{DOMAIN}.entity.device.{key.value}.name"
+        ) or str(key.value)
 
     def _build_device_info(
         self,
