@@ -174,6 +174,14 @@ class TestCoordinatorProperties:
         thermostat_type = coord.room_thermostat_type
         assert thermostat_type == LuxRoomThermostatType.smart
 
+        coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": 99})
+        thermostat_type = coord.room_thermostat_type
+        assert thermostat_type is None
+
+        coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": "unknown"})
+        thermostat_type = coord.room_thermostat_type
+        assert thermostat_type is None
+
 
 # ===========================================================================
 # device_key_active

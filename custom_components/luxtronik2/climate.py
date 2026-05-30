@@ -114,8 +114,6 @@ THERMOSTATS_SMART: list[LuxtronikClimateDescription] = [
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.heating,
-        # luxtronik_key_target_temperature_high=LuxParameter,
-        # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
         translation_key_name="heating_controller",
@@ -135,8 +133,6 @@ THERMOSTATS_SMART: list[LuxtronikClimateDescription] = [
         luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.cooling,
-        # luxtronik_key_target_temperature_high=LuxParameter,
-        # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
         translation_key_name="cooling_controller",
@@ -166,7 +162,7 @@ THERMOSTATS_OTHER: list[LuxtronikClimateDescription] = [
         temperature_unit=UnitOfTemperature.CELSIUS,
         min_temp=-5.0,
         max_temp=5.0,
-        translation_key_name="cooling_controller",
+        translation_key_name="heating_controller",
         # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
     ),
@@ -183,8 +179,6 @@ THERMOSTATS_OTHER: list[LuxtronikClimateDescription] = [
         luxtronik_key_target_temperature=LuxParameter.P0110_COOLING_OUTDOOR_TEMP_THRESHOLD,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.cooling,
-        # luxtronik_key_target_temperature_high=LuxParameter,
-        # luxtronik_key_target_temperature_low=LuxParameter,
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
         translation_key_name="cooling_controller",
@@ -211,8 +205,6 @@ async def async_setup_entry(
     is_smart_thermostat = False
     if isinstance(rt, LuxRoomThermostatType):
         is_smart_thermostat = rt == LuxRoomThermostatType.smart
-    elif isinstance(rt, int):
-        is_smart_thermostat = rt == LuxRoomThermostatType.smart.value
 
     LOGGER.info(
         "Detected room thermostat type: %s (smart=%s)",
