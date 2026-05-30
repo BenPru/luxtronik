@@ -26,6 +26,8 @@ from custom_components.luxtronik2.climate import (
     MAX_TEMPERATURE,
     MIN_TEMPERATURE,
     THERMOSTATS,
+    THERMOSTATS_OTHER,
+    THERMOSTATS_SMART,
     LuxtronikClimateExtraStoredData,
     LuxtronikThermostat,
 )
@@ -104,21 +106,6 @@ class TestHVACPresetMapping:
 
     def test_second_heatsource_preset(self):
         assert HVAC_PRESET_MAPPING[LuxMode.second_heatsource] == PRESET_BOOST
-
-
-from custom_components.luxtronik2.climate import (
-    HVAC_ACTION_MAPPING_COOL,
-    HVAC_ACTION_MAPPING_HEAT,
-    HVAC_MODE_MAPPING_COOL,
-    HVAC_MODE_MAPPING_HEAT,
-    HVAC_PRESET_MAPPING,
-    MAX_TEMPERATURE,
-    MIN_TEMPERATURE,
-    THERMOSTATS_OTHER,
-    THERMOSTATS_SMART,
-    LuxtronikClimateExtraStoredData,
-    LuxtronikThermostat,
-)
 
 
 class TestThermostats:
