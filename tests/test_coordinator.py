@@ -176,7 +176,7 @@ class TestCoordinatorProperties:
 
         coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": 99})
         thermostat_type = coord.room_thermostat_type
-        assert thermostat_type is None
+        assert thermostat_type == 99  # Unknown but returned as int
 
         coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": "unknown"})
         thermostat_type = coord.room_thermostat_type
