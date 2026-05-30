@@ -375,6 +375,7 @@ class LuxParameter(StrEnum):
         "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
     P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET = "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperature Rücklauf Soll --> Einstellung 103
+    P0033_ROOM_THERMOSTAT_TYPE = "parameters.ID_Einst_RFVEinb_akt"  # 0 = none, 1=RFV, 2=RFV-K, 3=RFV-DK, 4=RBE, 5=Smart
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
     P0042_MIXING_CIRCUIT1_TYPE = "parameters.ID_Einst_MK1Typ_akt"
     P0047_DHW_THERMAL_DESINFECTION_TARGET = "parameters.ID_Einst_LGST_akt"
@@ -387,7 +388,6 @@ class LuxParameter(StrEnum):
     P0090_RELEASE_SECOND_HEAT_GENERATOR = "parameters.ID_Einst_ZWEFreig_akt"
     P0093_HEAT_SOURCE_INPUT_TEMPERATURE_MIN = "parameters.ID_Einst_TWQmin_akt"
     P0103_HEATING_CONTROL_CIRCUIT_MODE = "parameters.ID_Einst_RTyp_akt"
-    P0033_ROOM_THERMOSTAT_TYPE = "parameters.ID_Einst_RFVEinb_akt"
     P0105_DHW_TARGET_TEMPERATURE = "parameters.ID_Soll_BWS_akt"
     # MODE_COOLING: Automatic or Off
     P0108_MODE_COOLING = "parameters.ID_Einst_BA_Kuehl_akt"

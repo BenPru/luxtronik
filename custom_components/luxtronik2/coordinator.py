@@ -88,8 +88,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._lock = asyncio.Lock()
         self.client = client
         self._config = config
-        # Room thermostat type derived from parameters.ID_Einst_RFVEinb_akt
-        self.room_thermostat_type: LuxRoomThermostatType | int | None = None
         self.device_infos = dict[str, DeviceInfo]()
         self.update_reason_write = False
         super().__init__(
@@ -110,26 +108,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     calculations=self.client.calculations,
                     visibilities=self.client.visibilities,
                 )
-                # Derived runtime config: room thermostat type
-                try:
-                    raw = self.get_value(LP.P0033_ROOM_THERMOSTAT_TYPE)
-                    if raw is None:
-                        self.room_thermostat_type = None
-                    else:
-                        try:
-                            num = int(raw)
-                        except Exception:
-                            num = None
-                        if num is None:
-                            self.room_thermostat_type = None
-                        else:
-                            try:
-                                self.room_thermostat_type = LuxRoomThermostatType(num)
-                            except Exception:
-                                # Unknown numeric type - keep raw int for callers
-                                self.room_thermostat_type = num
-                except Exception:  # don't break update on this
-                    self.room_thermostat_type = None
+
                 return self.data
             except Exception as err:
                 raise UpdateFailed(f"Error fetching data: {err}") from err
@@ -371,6 +350,28 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         minor = rel[1] if len(rel) > 1 else 0
         patch = rel[2] if len(rel) > 2 else 0
         return Version(f"{minor}.{patch}")
+
+    @property
+    def room_thermostat_type(self) -> LuxRoomThermostatType | int | None:
+        """Derived runtime room thermostat type from parameter P0033.
+
+        Returns LuxRoomThermostatType enum when recognized, raw int when
+        unknown numeric, or None when not set or on error.
+        """
+        try:
+            raw = self.get_value(LP.P0033_ROOM_THERMOSTAT_TYPE)
+            if raw is None:
+                return None
+            try:
+                num = int(raw)
+            except Exception:
+                return None
+            try:
+                return LuxRoomThermostatType(num)
+            except Exception:
+                return num
+        except Exception:
+            return None
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
