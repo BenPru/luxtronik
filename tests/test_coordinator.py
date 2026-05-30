@@ -18,6 +18,7 @@ from custom_components.luxtronik2.const import (
     LuxCalculation as LC,
     LuxMkTypes,
     LuxParameter as LP,
+    LuxRoomThermostatType,
     LuxVisibility as LV,
 )
 from custom_components.luxtronik2.coordinator import (
@@ -163,6 +164,15 @@ class TestCoordinatorProperties:
         sn = coord.serial_number
         assert "20230101" in sn
         assert "ff" in sn.lower()  # hex(255) = 0xff
+
+    def test_room_thermostat_type(self):
+        coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": 4})
+        thermostat_type = coord.room_thermostat_type
+        assert thermostat_type == LuxRoomThermostatType.rbe
+
+        coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": 5})
+        thermostat_type = coord.room_thermostat_type
+        assert thermostat_type == LuxRoomThermostatType.smart
 
 
 # ===========================================================================
