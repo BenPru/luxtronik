@@ -36,6 +36,7 @@ from .const import (
     LuxCalculation as LC,
     LuxMkTypes,
     LuxParameter as LP,
+    LuxRoomThermostatType,
     LuxVisibility as LV,
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
@@ -107,6 +108,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     calculations=self.client.calculations,
                     visibilities=self.client.visibilities,
                 )
+
                 return self.data
             except Exception as err:
                 raise UpdateFailed(f"Error fetching data: {err}") from err
@@ -222,7 +224,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return str(key.value)
         return platform.platform_data.platform_translations.get(
             f"component.{DOMAIN}.entity.device.{key.value}.name"
-        )
+        ) or str(key.value)
 
     def _build_device_info(
         self,
@@ -348,6 +350,28 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         minor = rel[1] if len(rel) > 1 else 0
         patch = rel[2] if len(rel) > 2 else 0
         return Version(f"{minor}.{patch}")
+
+    @property
+    def room_thermostat_type(self) -> LuxRoomThermostatType | int | None:
+        """Derived runtime room thermostat type from parameter P0033.
+
+        Returns LuxRoomThermostatType enum when recognized, raw int when
+        unknown numeric, or None when not set or on error.
+        """
+        try:
+            raw = self.get_value(LP.P0033_ROOM_THERMOSTAT_TYPE)
+            if raw is None:
+                return None
+            try:
+                num = int(raw)
+            except Exception:
+                return None
+            try:
+                return LuxRoomThermostatType(num)
+            except Exception:
+                return num
+        except Exception:
+            return None
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""

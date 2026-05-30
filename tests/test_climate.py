@@ -26,6 +26,8 @@ from custom_components.luxtronik2.climate import (
     MAX_TEMPERATURE,
     MIN_TEMPERATURE,
     THERMOSTATS,
+    THERMOSTATS_OTHER,
+    THERMOSTATS_SMART,
     LuxtronikClimateExtraStoredData,
     LuxtronikThermostat,
 )
@@ -107,15 +109,26 @@ class TestHVACPresetMapping:
 
 
 class TestThermostats:
-    def test_thermostat_count(self):
-        assert len(THERMOSTATS) >= 3  # heating new, heating old, cooling
+    def test_smart_thermostat_count(self):
+        assert len(THERMOSTATS_SMART) == 2  # 1 heating + 1 cooling
 
-    def test_heating_thermostat_exists(self):
-        heating = [t for t in THERMOSTATS if t.device_key == DeviceKey.heating]
-        assert len(heating) >= 1
+    def test_other_thermostat_count(self):
+        assert len(THERMOSTATS_OTHER) == 2  # 1 heating + 1 cooling
 
-    def test_cooling_thermostat_exists(self):
-        cooling = [t for t in THERMOSTATS if t.device_key == DeviceKey.cooling]
+    def test_heating_thermostat_exists_smart(self):
+        heating = [t for t in THERMOSTATS_SMART if t.device_key == DeviceKey.heating]
+        assert len(heating) == 1
+
+    def test_cooling_thermostat_exists_smart(self):
+        cooling = [t for t in THERMOSTATS_SMART if t.device_key == DeviceKey.cooling]
+        assert len(cooling) == 1
+
+    def test_heating_thermostat_exists_other(self):
+        heating = [t for t in THERMOSTATS_OTHER if t.device_key == DeviceKey.heating]
+        assert len(heating) == 1
+
+    def test_cooling_thermostat_exists_other(self):
+        cooling = [t for t in THERMOSTATS_OTHER if t.device_key == DeviceKey.cooling]
         assert len(cooling) == 1
 
     def test_temperature_bounds(self):

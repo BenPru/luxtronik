@@ -175,6 +175,8 @@ class LuxtronikClimateDescription(
     luxtronik_key_target_temperature: LuxParameter | LuxCalculation = LuxParameter.UNSET
     luxtronik_key_correction_factor: LuxParameter = LuxParameter.UNSET
     luxtronik_key_correction_target: LuxParameter = LuxParameter.UNSET
+    min_temp: float | None = None
+    max_temp: float | None = None
     temperature_unit: str = UnitOfTemperature.CELSIUS
 
 

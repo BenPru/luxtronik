@@ -224,11 +224,11 @@ class LuxRoomThermostatType(Enum):
 
     none = 0
     # TODO: Validate types:
-    # RFV: Final = 1
-    # RFV_K: Final = 2
-    # RFV_DK: Final = 3
-    # RBE: Final = 4
-    # Smart: Final = 5
+    rfv = 1
+    rfv_k = 2
+    rfv_dk = 3
+    rbe = 4
+    smart = 5
 
 
 class LuxSwitchoffReason(Enum):
@@ -375,6 +375,7 @@ class LuxParameter(StrEnum):
         "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
     P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET = "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperature Rücklauf Soll --> Einstellung 103
+    P0033_ROOM_THERMOSTAT_TYPE = "parameters.ID_Einst_RFVEinb_akt"  # 0 = none, 1=RFV, 2=RFV-K, 3=RFV-DK, 4=RBE, 5=Smart
     # P0036_SECOND_HEAT_GENERATOR: Final = "parameters.ID_Einst_ZWE1Art_akt"  #  = 1 --> Heating and domestic water - Is second heat generator activated 1=electrical heater
     P0042_MIXING_CIRCUIT1_TYPE = "parameters.ID_Einst_MK1Typ_akt"
     P0047_DHW_THERMAL_DESINFECTION_TARGET = "parameters.ID_Einst_LGST_akt"
@@ -834,6 +835,7 @@ class SensorKey(StrEnum):
     APPROVAL_COOLING = "approval_cooling"
     ROOM_THERMOSTAT_TEMPERATURE = "room_thermostat_temperature"
     ROOM_THERMOSTAT_TEMPERATURE_TARGET = "room_thermostat_temperature_target"
+    ROOM_THERMOSTAT_TYPE = "room_thermostat_type"
     COOLING_START_DELAY_HOURS = "cooling_start_delay_hours"
     COOLING_STOP_DELAY_HOURS = "cooling_stop_delay_hours"
     COOLING_OUTDOOR_TEMP_THRESHOLD = "cooling_threshold_temperature"
