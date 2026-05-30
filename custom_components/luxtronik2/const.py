@@ -224,11 +224,11 @@ class LuxRoomThermostatType(Enum):
 
     none = 0
     # TODO: Validate types:
-    # RFV: Final = 1
-    # RFV_K: Final = 2
-    # RFV_DK: Final = 3
-    # RBE: Final = 4
-    # Smart: Final = 5
+    rfv = 1
+    rfv_k = 2
+    rfv_dk = 3
+    rbe = 4
+    smart = 5
 
 
 class LuxSwitchoffReason(Enum):
@@ -387,6 +387,7 @@ class LuxParameter(StrEnum):
     P0090_RELEASE_SECOND_HEAT_GENERATOR = "parameters.ID_Einst_ZWEFreig_akt"
     P0093_HEAT_SOURCE_INPUT_TEMPERATURE_MIN = "parameters.ID_Einst_TWQmin_akt"
     P0103_HEATING_CONTROL_CIRCUIT_MODE = "parameters.ID_Einst_RTyp_akt"
+    P0033_ROOM_THERMOSTAT_TYPE = "parameters.ID_Einst_RFVEinb_akt"
     P0105_DHW_TARGET_TEMPERATURE = "parameters.ID_Soll_BWS_akt"
     # MODE_COOLING: Automatic or Off
     P0108_MODE_COOLING = "parameters.ID_Einst_BA_Kuehl_akt"
@@ -834,6 +835,7 @@ class SensorKey(StrEnum):
     APPROVAL_COOLING = "approval_cooling"
     ROOM_THERMOSTAT_TEMPERATURE = "room_thermostat_temperature"
     ROOM_THERMOSTAT_TEMPERATURE_TARGET = "room_thermostat_temperature_target"
+    ROOM_THERMOSTAT_TYPE = "room_thermostat_type"
     COOLING_START_DELAY_HOURS = "cooling_start_delay_hours"
     COOLING_STOP_DELAY_HOURS = "cooling_stop_delay_hours"
     COOLING_OUTDOOR_TEMP_THRESHOLD = "cooling_threshold_temperature"

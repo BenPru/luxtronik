@@ -36,6 +36,7 @@ from .const import (
     LuxCalculation as LC,
     LuxMkTypes,
     LuxParameter as LP,
+    LuxRoomThermostatType,
     LuxVisibility as LV,
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
@@ -87,6 +88,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._lock = asyncio.Lock()
         self.client = client
         self._config = config
+        # Room thermostat type derived from parameters.ID_Einst_RFVEinb_akt
+        self.room_thermostat_type: LuxRoomThermostatType | int | None = None
         self.device_infos = dict[str, DeviceInfo]()
         self.update_reason_write = False
         super().__init__(
@@ -107,6 +110,26 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     calculations=self.client.calculations,
                     visibilities=self.client.visibilities,
                 )
+                # Derived runtime config: room thermostat type
+                try:
+                    raw = self.get_value(LP.P0033_ROOM_THERMOSTAT_TYPE)
+                    if raw is None:
+                        self.room_thermostat_type = None
+                    else:
+                        try:
+                            num = int(raw)
+                        except Exception:
+                            num = None
+                        if num is None:
+                            self.room_thermostat_type = None
+                        else:
+                            try:
+                                self.room_thermostat_type = LuxRoomThermostatType(num)
+                            except Exception:
+                                # Unknown numeric type - keep raw int for callers
+                                self.room_thermostat_type = num
+                except Exception:  # don't break update on this
+                    self.room_thermostat_type = None
                 return self.data
             except Exception as err:
                 raise UpdateFailed(f"Error fetching data: {err}") from err
@@ -220,8 +243,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> str:
         if platform is None:
             return str(key.value)
-        return platform.platform_data.platform_translations.get(
-            f"component.{DOMAIN}.entity.device.{key.value}.name"
+        return (
+            platform.platform_data.platform_translations.get(
+                f"component.{DOMAIN}.entity.device.{key.value}.name"
+            )
+            or str(key.value)
         )
 
     def _build_device_info(

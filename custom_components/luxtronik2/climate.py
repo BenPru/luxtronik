@@ -29,7 +29,6 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData
-from packaging.version import Version
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -45,6 +44,7 @@ from .const import (
     LuxMode,
     LuxOperationMode,
     LuxParameter,
+    LuxRoomThermostatType,
     SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
@@ -99,7 +99,7 @@ HVAC_PRESET_MAPPING: dict[str, str] = {
     LuxMode.holidays: PRESET_AWAY,
 }
 
-THERMOSTATS: list[LuxtronikClimateDescription] = [
+THERMOSTATS_SMART: list[LuxtronikClimateDescription] = [
     LuxtronikClimateDescription(
         key=SensorKey.HEATING,
         hvac_modes=[HVACMode.HEAT, HVACMode.OFF],
@@ -121,8 +121,31 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         translation_key_name="heating_controller",
         # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
-        min_firmware_version=Version("3.90.1"),
     ),
+    LuxtronikClimateDescription(
+        key=SensorKey.COOLING,
+        hvac_modes=[HVACMode.COOL, HVACMode.OFF],
+        hvac_mode_mapping=HVAC_MODE_MAPPING_COOL,
+        hvac_action_mapping=HVAC_ACTION_MAPPING_COOL,
+        preset_modes=[PRESET_NONE],
+        supported_features=ClimateEntityFeature.TURN_OFF
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TARGET_TEMPERATURE,
+        luxtronik_key=LuxParameter.P0108_MODE_COOLING,
+        luxtronik_key_target_temperature=LuxParameter.P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT,
+        luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
+        luxtronik_action_active=LuxOperationMode.cooling,
+        # luxtronik_key_target_temperature_high=LuxParameter,
+        # luxtronik_key_target_temperature_low=LuxParameter,
+        icon_by_state=LUX_STATE_ICON_MAP_COOL,
+        temperature_unit=UnitOfTemperature.CELSIUS,
+        translation_key_name="cooling_controller",
+        # visibility=LuxVisibility.V0005_COOLING,
+        device_key=DeviceKey.cooling,
+    ),
+]
+
+THERMOSTATS_OTHER: list[LuxtronikClimateDescription] = [
     LuxtronikClimateDescription(
         key=SensorKey.HEATING,
         hvac_modes=[HVACMode.HEAT, HVACMode.OFF],
@@ -134,19 +157,18 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         | ClimateEntityFeature.TURN_ON
         | ClimateEntityFeature.TARGET_TEMPERATURE,
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,
-        luxtronik_key_target_temperature=LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET,
+        luxtronik_key_target_temperature=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         luxtronik_key_current_action=LuxCalculation.C0080_STATUS,
         luxtronik_action_active=LuxOperationMode.heating,
-        # luxtronik_key_target_temperature_high=LuxParameter,
-        # luxtronik_key_target_temperature_low=LuxParameter,
         luxtronik_key_correction_factor=LuxParameter.P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR,
         luxtronik_key_correction_target=LuxParameter.P0001_HEATING_TARGET_CORRECTION,
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
+        min_temp=-5.0,
+        max_temp=5.0,
         translation_key_name="cooling_controller",
         # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
-        max_firmware_version=Version("3.90.0"),
     ),
     LuxtronikClimateDescription(
         key=SensorKey.COOLING,
@@ -170,6 +192,8 @@ THERMOSTATS: list[LuxtronikClimateDescription] = [
         device_key=DeviceKey.cooling,
     ),
 ]
+
+THERMOSTATS: list[LuxtronikClimateDescription] = THERMOSTATS_SMART + THERMOSTATS_OTHER
 # endregion Const
 
 
@@ -181,6 +205,22 @@ async def async_setup_entry(
     """Set up Luxtronik climate entities dynamically through Luxtronik discovery."""
 
     coordinator = entry.runtime_data
+
+    # Determine room thermostat type from coordinator (enum or raw int)
+    rt = getattr(coordinator, "room_thermostat_type", None)
+    is_smart_thermostat = False
+    if isinstance(rt, LuxRoomThermostatType):
+        is_smart_thermostat = rt == LuxRoomThermostatType.smart
+    elif isinstance(rt, int):
+        is_smart_thermostat = rt == LuxRoomThermostatType.smart.value
+
+    LOGGER.info(
+        "Detected room thermostat type: %s (smart=%s)",
+        rt,
+        is_smart_thermostat,
+    )
+
+    THERMOSTATS = THERMOSTATS_SMART if is_smart_thermostat else THERMOSTATS_OTHER
 
     unavailable_keys = [
         i.luxtronik_key
@@ -294,6 +334,12 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
         self._attr_temperature_unit = description.temperature_unit
         self._attr_hvac_modes = description.hvac_modes
         self._attr_preset_modes = description.preset_modes
+        min_temp = getattr(description, "min_temp", None)
+        if min_temp is not None:
+            self._attr_min_temp = min_temp
+        max_temp = getattr(description, "max_temp", None)
+        if max_temp is not None:
+            self._attr_max_temp = max_temp
         self._enable_turn_on_off_backwards_compatibility = False
         self._attr_supported_features = description.supported_features
 
@@ -337,7 +383,9 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
             self._attr_current_temperature = None
         elif key.startswith("sensor."):
             temp = self.hass.states.get(key)
-            self._attr_current_temperature = state_as_number_or_none(temp, 0.0)
+            self._attr_current_temperature = (
+                state_as_number_or_none(temp, 0.0) if temp is not None else None
+            )
         elif key != LuxCalculation.UNSET:
             self._attr_current_temperature = get_sensor_data(data, key)
 
