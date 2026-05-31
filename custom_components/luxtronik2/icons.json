@@ -10,7 +10,7 @@
           "defrost": "mdi:snowflake-melt",
           "no_request": "mdi:hvac-off",
           "heating_external_source": "mdi:water-boiler",
-          "cooling": "mdi:snowflake-variant"
+          "cooling": "mdi:snowflake"
         }
       },
       "smart_grid_status": {
@@ -75,7 +75,7 @@
       "flow_out_temperature_external": { "default": "mdi:waves-arrow-right" },
       "room_thermostat_temperature": { "default": "mdi:thermometer" },
       "room_thermostat_temperature_target": { "default": "mdi:thermometer" },
-      "dhw_temperature": { "default": "mdi:water-thermometer" },
+      "dhw_temperature": { "default": "mdi:water-pump" },
       "dhw_operation_hours": { "default": "mdi:timer-sand" },
       "dhw_heat_amount": { "default": "mdi:lightning-bolt-circle" },
       "dhw_energy_input": { "default": "mdi:lightning-bolt" },
@@ -112,14 +112,14 @@
       "heating_curve_circuit3_parallel_shift_temperature": { "default": "mdi:vector-curve" },
       "heating_curve_circuit3_night_temperature": { "default": "mdi:weather-night" },
       "heating_night_lowering_to_temperature": { "default": "mdi:thermometer-chevron-down" },
-      "heating_hysteresis": { "default": "mdi:thermometer" },
+      "heating_hysteresis": { "default": "mdi:thermometer-minus" },
       "heating_max_flow_out_increase_temperature": { "default": "mdi:thermometer" },
       "heating_maximum_circulation_pump_speed": { "default": "mdi:speedometer" },
       "heating_flow_out_temperature_target": { "default": "mdi:chart-bell-curve" },
       "heating_room_temperature_impact_factor": { "default": "mdi:thermometer-chevron-up" },
       "pump_vent_timer_h": { "default": "mdi:timer-settings" },
       "dhw_target_temperature": { "default": "mdi:water-pump" },
-      "dhw_hysteresis": { "default": "mdi:thermometer" },
+      "dhw_hysteresis": { "default": "mdi:thermometer-minus" },
       "dhw_thermal_desinfection_target": { "default": "mdi:thermometer-plus" },
       "solar_pump_on_difference_temperature": { "default": "mdi:water-boiler" },
       "solar_pump_off_difference_temperature": { "default": "mdi:water-boiler-off" },
@@ -151,8 +151,8 @@
       "pump_vent_active": { "default": "mdi:pump" },
       "domestic_water": {
         "state": {
-          "on": "mdi:water-boiler-auto",
-          "off": "mdi:water-boiler-off"
+          "on": "mdi:water-pump",
+          "off": "mdi:water-pump-off"
         }
       },
       "cooling": { "default": "mdi:snowflake" }
@@ -216,7 +216,7 @@
           "heat_pump": "mdi:radiator"
         }
       },
-      "cool_cooling": {
+      "cooling": {
         "state": {
           "off": "mdi:snowflake-off",
           "heat_pump": "mdi:snowflake"
@@ -233,7 +233,15 @@
       }
     },
     "select": {
-      "thermal_desinfection_day": { "default": "mdi:calendar" }
+      "thermal_desinfection_day": { "default": "mdi:calendar" },
+      "dhw_mode": {
+        "state": {
+          "off": "mdi:water-boiler-off",
+          "automatic": "mdi:water-boiler-auto",
+          "party": "mdi:power-plug",
+          "holiday": "mdi:bad-checked"
+        }
+       }
     }
   }
 }
