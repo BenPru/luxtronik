@@ -6,7 +6,7 @@
           "heating": "mdi:radiator",
           "hot_water": "mdi:water-pump",
           "swimming_pool_solar": "mdi:pool",
-          "evu": "mdi:solar-power",
+          "evu": "mdi:contrast-circle",
           "defrost": "mdi:snowflake-melt",
           "no_request": "mdi:hvac-off",
           "heating_external_source": "mdi:water-boiler",
@@ -135,7 +135,7 @@
     "switch": {
       "remote_maintenance": { "default": "mdi:remote-desktop" },
       "efficiency_pump": { "default": "mdi:leaf-circle" },
-      "smartgrid": { "default": "mdi:grid" },
+      "smartgrid": { "default": "mdi:alpha-a-circle" },
       "pump_heat_control": { "default": "mdi:pump" },
       "electrical_power_limitation_switch": { "default": "mdi:download-lock" },
       "thermal_power_limitation_switch": { "default": "mdi:download-lock" },
@@ -158,8 +158,8 @@
       "cooling": { "default": "mdi:snowflake" }
     },
     "binary_sensor": {
-      "evu_unlocked": { "default": "mdi:transmission-tower" },
-      "evu2": { "default": "mdi:transmission-tower" },
+      "evu_unlocked": { "default": "mdi:numeric-1-circle" },
+      "evu2": { "default": "mdi:numeric-2-circle" },
       "compressor": { "default": "mdi:arrow-collapse-all" },
       "compressor2": { "default": "mdi:arrow-collapse-all" },
       "pump_flow": { "default": "mdi:pump" },
