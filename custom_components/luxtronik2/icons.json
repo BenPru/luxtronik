@@ -15,7 +15,7 @@
       },
       "smart_grid_status": {
         "state": {
-          "evu_locked": "mdi:cancel",
+          "evu_locked": "mdi:close-circle",
           "reduced_operation": "mdi:arrow-down-circle",
           "normal_operation": "mdi:check-circle",
           "increased_operation": "mdi:arrow-up-circle"
@@ -170,7 +170,7 @@
           "off": "mdi:valve-closed"
         }
       },
-      "additional_heat_generator": { "default": "mdi:patio-heater" },
+      "additional_heat_generator": { "default": "mdi:water-boiler" },
       "circulation_pump_heating": { "default": "mdi:car-turbocharger" },
       "additional_circulation_pump": { "default": "mdi:pump" },
       "dhw_recirculation_pump": { "default": "mdi:pump" },
