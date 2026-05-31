@@ -4,13 +4,13 @@
       "status": {
         "state": {
           "heating": "mdi:radiator",
-          "hot_water": "mdi:waves",
+          "hot_water": "mdi:water-pump",
           "swimming_pool_solar": "mdi:pool",
-          "evu": "mdi:power-plug-off",
-          "defrost": "mdi:car-defrost-rear",
+          "evu": "mdi:solar-power",
+          "defrost": "mdi:snowflake-melt",
           "no_request": "mdi:hvac-off",
-          "heating_external_source": "mdi:patio-heater",
-          "cooling": "mdi:air-conditioner"
+          "heating_external_source": "mdi:water-boiler",
+          "cooling": "mdi:snowflake-variant"
         }
       },
       "smart_grid_status": {
