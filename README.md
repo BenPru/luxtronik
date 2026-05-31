@@ -119,6 +119,27 @@ Entities and actions are organized in 4 devices:
 
 ### 2.3 Cooling
 
+If your heat pump supports cooling (active or passive), it will appear as a separate device. 
+
+<img width="507" height="48" alt="image" src="https://github.com/user-attachments/assets/3446b66b-5cb9-4bdd-8cfa-02e7dfb5e0dc" />
+
+Cooling is controled using the "cooling" [climate entity](https://www.home-assistant.io/integrations/climate/)
+
+<img width="174" height="102" alt="image" src="https://github.com/user-attachments/assets/a935b390-6c9d-47d4-8173-c9233ed07e2f" />
+
+The climate entity allows you to control the state. 
+It shows the current temperature and the minimal outdoor temperature required to unlock cooling. 
+
+<img width="329" height="334" alt="image" src="https://github.com/user-attachments/assets/4e641df7-8a50-4e38-9c74-b13cc495bf59" />
+
+Cooling is unlocked based on a number of factors such as outdoor temperature, room temperature and start delay. Consult your manual for details. 
+
+<img width="171" height="64" alt="image" src="https://github.com/user-attachments/assets/1de49d8c-a505-4414-8a12-06c5ab202270" />
+
+The actual cooling target temperature can be found in the configuration section. This is the target water temperature send into the underfloor heating. If the target temperature is set too low, condensation can form on surfaces and on the pipes inside the heatpump. 
+A brine heatpump should not use a target temperature below 18C to avoid damaging the heat pump. 
+If you get cold feed (pun intended), slightly raise the cooling target temperature. 
+
 ### 2.4 HDW
 
 ## 3 Tips for using Luxtronik
