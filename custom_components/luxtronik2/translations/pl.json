@@ -243,6 +243,9 @@
             "cooling_target_temperature_mk3": {
                 "name": "Docelowa temperatura ch\u0142odzenia"
             },
+            "cooling_min_flow_out_temperature": {
+                "name": "Minimalna temperatura zasilania ch\u0142odzenia"
+            },
             "heating_flow_out_temperature_target": {
                 "name": "R\u0119czna docelowa temperatura wyp\u0142ywu"
             },

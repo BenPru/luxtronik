@@ -250,6 +250,9 @@
             "cooling_target_temperature_mk3": {
                 "name": "Cooling target temperature"
             },
+            "cooling_min_flow_out_temperature": {
+                "name": "Cooling minimum flow temperature"
+            },
             "heat_source_input_temperature_min": {
                 "name": "Heat source input minimum"
             },

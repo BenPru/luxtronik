@@ -655,5 +655,19 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         visibility=LP.P0780_MIXING_CIRCUIT3_TYPE,
     ),
+    LuxtronikNumberDescription(
+        key=SensorKey.COOLING_MIN_FLOW_OUT_TEMPERATURE,
+        luxtronik_key=LP.P0852_COOLING_MIN_FLOW_OUT_TEMPERATURE,
+        device_key=DeviceKey.cooling,
+        device_class=NumberDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_min_value=17.0,
+        native_max_value=25.0,
+        native_step=0.5,
+        entity_category=EntityCategory.CONFIG,
+        mode=NumberMode.BOX,
+        factor=0.1,
+        visibility=LV.V0005_COOLING,
+    ),
     # endregion Cooling
 ]

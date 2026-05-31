@@ -250,6 +250,9 @@
             "cooling_target_temperature_mk3": {
                 "name": "Verkoelend doel"
             },
+            "cooling_min_flow_out_temperature": {
+                "name": "Minimale aanvoertemperatuur koeling"
+            },
             "heating_flow_out_temperature_target": {
                 "name": "Handmatig doel uitstroom temperatuur"
             },

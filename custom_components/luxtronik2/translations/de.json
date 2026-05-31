@@ -249,6 +249,9 @@
             "cooling_target_temperature_mk3": {
                 "name": "K\u00fchlung Ziel"
             },
+            "cooling_min_flow_out_temperature": {
+                "name": "K\u00fchlung minimale Vorlauftemperatur"
+            },
             "heat_source_input_temperature_min": {
                 "name": "W\u00e4rmequelle Eingang Minimum"
             },
