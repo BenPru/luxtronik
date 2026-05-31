@@ -212,14 +212,14 @@
     "climate": {
       "heating": {
         "state": {
-          "off": "mdi:radiator-off",
-          "heat_pump": "mdi:radiator"
+          "on": "mdi:radiator",
+          "off": "mdi:radiator-off"
         }
       },
       "cooling": {
         "state": {
-          "off": "mdi:snowflake-off",
-          "heat_pump": "mdi:snowflake"
+          "on": "mdi:snowflake",
+          "off": "mdi:snowflake-off"
         }
       }
     },
