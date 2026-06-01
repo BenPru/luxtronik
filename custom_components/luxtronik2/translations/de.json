@@ -1013,5 +1013,11 @@
         "parameter_not_writable": {
             "message": "Parameter {parameter} abgelehnt \u2014 nur Parameter mit Pr\u00e4fixen {prefixes} sind beschreibbar"
         }
+    },
+    "issues": {
+        "connection_failed": {
+            "title": "Verbindung zur Luxtronik-W\u00e4rmepumpe fehlgeschlagen",
+            "description": "Die Integration konnte keine Verbindung zur Luxtronik-W\u00e4rmepumpe unter **{host}:{port}** herstellen.\n\nFehler: `{error}`\n\nBitte \u00fcberpr\u00fcfen Sie, ob die W\u00e4rmepumpe eingeschaltet ist, die Netzwerkverbindung funktioniert und Host/Port korrekt sind. Sie k\u00f6nnen die Verbindungseinstellungen \u00fcber die Option **Neu konfigurieren** im Integrationsmenü aktualisieren."
+        }
     }
 }

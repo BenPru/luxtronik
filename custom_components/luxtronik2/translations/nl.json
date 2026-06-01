@@ -995,5 +995,11 @@
         "parameter_not_writable": {
             "message": "Parameter {parameter} geweigerd \u2014 alleen parameters met prefixen {prefixes} zijn schrijfbaar"
         }
+    },
+    "issues": {
+        "connection_failed": {
+            "title": "Kan geen verbinding maken met Luxtronik-warmtepomp",
+            "description": "De integratie kon geen verbinding maken met de Luxtronik-warmtepomp op **{host}:{port}**.\n\nFout: `{error}`\n\nControleer of de warmtepomp is ingeschakeld, de netwerkverbinding werkt en de host/poort correct zijn. U kunt de verbindingsinstellingen bijwerken via de optie **Opnieuw configureren** in het integratiemenu."
+        }
     }
 }

@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import device_registry as dr, issue_registry as ir
 from homeassistant.helpers.entity_registry import (
     async_get,
 )
@@ -47,7 +47,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
         await coordinator.async_config_entry_first_refresh()
     except Exception as err:
         LOGGER.error("Luxtronik connection failed: %s", err)
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            f"connection_failed_{entry.entry_id}",
+            is_fixable=False,
+            is_persistent=False,
+            severity=ir.IssueSeverity.ERROR,
+            translation_key="connection_failed",
+            translation_placeholders={
+                "host": str(config.get(CONF_HOST, "unknown")),
+                "port": str(config.get(CONF_PORT, "")),
+                "error": str(err),
+            },
+        )
         raise ConfigEntryNotReady from err
+
+    # Clear any previous connection failure issue
+    ir.async_delete_issue(hass, DOMAIN, f"connection_failed_{entry.entry_id}")
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
