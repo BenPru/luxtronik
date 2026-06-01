@@ -249,6 +249,9 @@
             "cooling_target_temperature_mk3": {
                 "name": "po\u017eadovan\u00e1 teplota chlazen\u00ed MK3"
             },
+            "cooling_min_flow_out_temperature": {
+                "name": "Minim\u00e1ln\u00ed teplota p\u0159\u00edvodu chlazen\u00ed"
+            },
             "heat_source_input_temperature_min": {
                 "name": "Minim\u00e1ln\u00ed vstupn\u00ed teplota zdroje tepla"
             },

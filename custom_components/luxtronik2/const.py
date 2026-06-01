@@ -435,6 +435,7 @@ class LuxParameter(StrEnum):
     P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE = (
         "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
     )
+    P0993_COOLING_MIN_FLOW_OUT_TEMPERATURE = "parameters.ID_Einst_min_VL_Kuehl"
     P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR = (
         "parameters.ID_RBE_Einflussfaktor_RT_akt"
     )
@@ -835,6 +836,7 @@ class SensorKey(StrEnum):
     COOLING_TARGET_TEMPERATURE_MK1 = "cooling_target_temperature_mk1"
     COOLING_TARGET_TEMPERATURE_MK2 = "cooling_target_temperature_mk2"
     COOLING_TARGET_TEMPERATURE_MK3 = "cooling_target_temperature_mk3"
+    COOLING_MIN_FLOW_OUT_TEMPERATURE = "cooling_min_flow_out_temperature"
     SMART_GRID_SWITCH = "smartgrid"
     SWITCHOFF_REASON = "switchoff_reason"
     SILENT_MODE = "silent_mode"
