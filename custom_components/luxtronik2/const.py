@@ -409,7 +409,6 @@ class LuxParameter(StrEnum):
     P0780_MIXING_CIRCUIT3_TYPE = "parameters.ID_Einst_MK3Typ_akt"
     P0850_COOLING_START_DELAY_HOURS = "parameters.ID_Einst_Kuhl_Zeit_Ein_akt"
     P0851_COOLING_STOP_DELAY_HOURS = "parameters.ID_Einst_Kuhl_Zeit_Aus_akt"
-    P0852_COOLING_MIN_FLOW_OUT_TEMPERATURE = "parameters.ID_Einst_min_VL_Kuehl"
     P0860_REMOTE_MAINTENANCE = "parameters.ID_Einst_Fernwartung_akt"
     P0864_PUMP_OPTIMIZATION_TIME = "parameters.ID_Einst_Popt_Nachlauf_akt"
     P0867_EFFICIENCY_PUMP_NOMINAL = "parameters.ID_Einst_Effizienzpumpe_Nominal_akt"
@@ -436,6 +435,7 @@ class LuxParameter(StrEnum):
     P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE = (
         "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
     )
+    P0993_COOLING_MIN_FLOW_OUT_TEMPERATURE = "parameters.ID_Einst_min_VL_Kuehl"
     P0980_HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR = (
         "parameters.ID_RBE_Einflussfaktor_RT_akt"
     )

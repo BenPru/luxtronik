@@ -657,7 +657,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_MIN_FLOW_OUT_TEMPERATURE,
-        luxtronik_key=LP.P0852_COOLING_MIN_FLOW_OUT_TEMPERATURE,
+        luxtronik_key=LP.P0993_COOLING_MIN_FLOW_OUT_TEMPERATURE,
         device_key=DeviceKey.cooling,
         device_class=NumberDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
