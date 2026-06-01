@@ -490,6 +490,48 @@ class TestAsyncSetupEntry:
         title = call_args.kwargs.get("title", "")
         assert "Luxtronik @" in title
 
+    @pytest.mark.asyncio
+    async def test_connection_failure_creates_repair_issue(self):
+        """Connection failure creates a repair issue and raises ConfigEntryNotReady."""
+        hass = MagicMock()
+        entry = _mock_entry()
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                side_effect=ConnectionRefusedError("refused"),
+            ),
+            patch("custom_components.luxtronik2.ir.async_create_issue") as mock_create,
+            pytest.raises(ConfigEntryNotReady),
+        ):
+            await async_setup_entry(hass, entry)
+
+        mock_create.assert_called_once()
+        call_kwargs = mock_create.call_args[1]
+        assert call_kwargs["translation_key"] == "connection_failed"
+        assert call_kwargs["severity"].value == "error"
+        assert entry.data[CONF_HOST] in call_kwargs["translation_placeholders"]["host"]
+
+    @pytest.mark.asyncio
+    async def test_successful_setup_clears_connection_issue(self):
+        """Successful setup clears any previous connection failure issue."""
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.services.has_service.return_value = True
+        entry = _mock_entry()
+        coord = _mock_coordinator(hass)
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                return_value=coord,
+            ),
+            patch("custom_components.luxtronik2.ir.async_delete_issue") as mock_delete,
+        ):
+            await async_setup_entry(hass, entry)
+
+        mock_delete.assert_any_call(hass, DOMAIN, f"connection_failed_{entry.entry_id}")
+
 
 # ===========================================================================
 # async_unload_entry

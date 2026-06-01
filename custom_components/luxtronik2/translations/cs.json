@@ -1016,5 +1016,11 @@
         "parameter_not_writable": {
             "message": "Parametr {parameter} odm\u00edtnut \u2014 zapisovat lze pouze parametry s p\u0159edponami {prefixes}"
         }
+    },
+    "issues": {
+        "connection_failed": {
+            "title": "Nelze se p\u0159ipojit k tepeln\u00e9mu \u010derpadlu Luxtronik",
+            "description": "Integrace se nemohla p\u0159ipojit k tepeln\u00e9mu \u010derpadlu Luxtronik na adrese **{host}:{port}**.\n\nChyba: `{error}`\n\nZkontrolujte pros\u00edm, \u017ee je tepeln\u00e9 \u010derpadlo zapnut\u00e9, s\u00ed\u0165ov\u00e9 p\u0159ipojen\u00ed funguje a host/port jsou spr\u00e1vn\u00e9. Nastaven\u00ed p\u0159ipojen\u00ed m\u016f\u017eete aktualizovat pomoc\u00ed volby **P\u0159ekonfigurovat** v nab\u00eddce integrace."
+        }
     }
 }

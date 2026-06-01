@@ -750,5 +750,11 @@
         "parameter_not_writable": {
             "message": "Parameter {parameter} rejected \u2014 only parameters with prefixes {prefixes} are writable"
         }
+    },
+    "issues": {
+        "connection_failed": {
+            "title": "Cannot connect to Luxtronik heat pump",
+            "description": "The integration could not connect to the Luxtronik heat pump at **{host}:{port}**.\n\nError: `{error}`\n\nPlease check that the heat pump is powered on, the network connection is working, and the host/port are correct. You can update the connection settings via the **Reconfigure** option in the integration menu."
+        }
     }
 }
