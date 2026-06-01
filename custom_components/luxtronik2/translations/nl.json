@@ -897,6 +897,8 @@
         "abort": {
             "cannot_connect": "De verbinding met Luxtronik op {host} is mislukt.\nFout: {connect_error}",
             "already_configured": "Dit apparaat is al geconfigureerd.",
+            "reconfigure_successful": "Configuratie succesvol bijgewerkt.",
+            "unique_id_mismatch": "Het apparaat op het nieuwe adres heeft een andere identiteit dan het momenteel geconfigureerde apparaat.",
             "already_in_progress": "De configuratiestroom is al actief.",
             "devices_configured": "Alle geselecteerde apparaten zijn al geconfigureerd.",
             "options_error": "Er is een fout opgetreden bij het laden van de opties.",
@@ -907,6 +909,7 @@
         "error": {
             "address": "Ongeldig extern adres. Het adres moet een IP-adres of een oplosbare hostnaam zijn.",
             "address_in_use": "De gekozen poort is al in gebruik op dit systeem.",
+            "cannot_connect": "Verbinding mislukt. Controleer de host en poort.",
             "unknown": "Onverwachte fout"
         },
         "step": {
@@ -949,6 +952,22 @@
                     "control_mode_home_assistant": "Wanneer de Home Assistant-thermostaat in de idle-status staat, wordt de uit-status aan Luxtronik gemeld en kan Luxtronik dit item niet starten.",
                     "ha_sensor_prefix": "Belangrijk bij gebruik van meerdere warmtepompen. Bij \u00e9\u00e9n enkele kan gewoon 'luxtronik' worden gebruikt."
                 }
+            },
+            "reconfigure": {
+                "title": "Luxtronik-verbinding opnieuw configureren",
+                "description": "Werk de verbindingsinstellingen bij voor de Luxtronik warmtepomp.",
+                "data": {
+                    "host": "Host",
+                    "port": "Netwerkpoort",
+                    "timeout": "Netwerk-socket-timeout (sec.)",
+                    "max_data_length": "Maximale datapakketlengte"
+                },
+                "data_description": {
+                    "host": "Hostname of IP-adres",
+                    "port": "Normaal 8889 of 8888",
+                    "timeout": "Als het netwerk of de warmtepomp langzaam reageert kan de timeout hierop aangepast worden.",
+                    "max_data_length": "Als het netwerk of de warmtepomp langzaam reageert kan de datapakketlengte aangepast worden."
+                }
             }
         }
     },
@@ -958,14 +977,10 @@
                 "title": "Opties configureren voor {name}",
                 "description": "Instellingen voor de Luxtronik warmtepomp {name}.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
-                    "control_mode_home_assistant": "Experimenteel!: Thermostaatstatus regelen via Home Assistant.",
-                    "ha_sensor_prefix": "Voorvoegsel voor entiteit-ID's"
+                    "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
-                    "control_mode_home_assistant": "Wanneer de Home Assistant-thermostaat in de idle-status staat, wordt de uit-status aan Luxtronik gemeld en kan Luxtronik dit item niet starten.",
-                    "ha_sensor_prefix": "Belangrijk bij gebruik van meerdere warmtepompen. Bij \u00e9\u00e9n enkele kan gewoon 'luxtronik' worden gebruikt."
+                    "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg."
                 }
             }
         }

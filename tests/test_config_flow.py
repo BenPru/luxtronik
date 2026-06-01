@@ -1,7 +1,8 @@
-"""Tests for config_flow.py — ConfigFlow and OptionsFlow."""
+"""Tests for config_flow.py — ConfigFlow, OptionsFlow, and ReconfigureFlow."""
 
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
@@ -440,62 +441,56 @@ class TestOptionsFlow:
         flow.async_show_form.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_step_user_connection_error(self):
-        flow = _make_options_flow()
-        flow.hass = MagicMock()
-        flow.async_show_form = MagicMock(return_value={"type": "form"})
-        err = LuxtronikConnectionError("1.2.3.4", 8889, Exception("refused"))
-        with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
-            new_callable=AsyncMock,
-            side_effect=err,
-        ):
-            await flow.async_step_user({CONF_HOST: "1.2.3.4", CONF_PORT: 8889})
-        flow.async_show_form.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_step_user_success(self):
+    async def test_step_user_saves_indoor_temp(self):
         entry = MagicMock()
         entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
         entry.options = {}
-        entry.entry_id = "test"
+        entry.title = "Test HP"
         flow = _make_options_flow(entry)
         flow.hass = MagicMock()
-        flow.hass.config_entries.async_reload = AsyncMock()
         flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
-        coord = _mock_coordinator()
-        with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
-            new_callable=AsyncMock,
-            return_value=coord,
-        ):
-            await flow.async_step_user({CONF_HOST: "1.2.3.4", CONF_PORT: 8889})
+        await flow.async_step_user(
+            {CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.indoor_temp"}
+        )
         flow.async_create_entry.assert_called_once()
+        call_kwargs = flow.async_create_entry.call_args[1]
+        assert (
+            call_kwargs["data"][CONF_HA_SENSOR_INDOOR_TEMPERATURE]
+            == "sensor.indoor_temp"
+        )
 
     @pytest.mark.asyncio
-    async def test_step_user_with_indoor_temp(self):
+    async def test_step_user_clears_indoor_temp(self):
         entry = MagicMock()
         entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
-        entry.options = {}
-        entry.entry_id = "test"
+        entry.options = {CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.old"}
+        entry.title = "Test HP"
         flow = _make_options_flow(entry)
         flow.hass = MagicMock()
-        flow.hass.config_entries.async_reload = AsyncMock()
         flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
-        coord = _mock_coordinator()
-        with patch(
-            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
-            new_callable=AsyncMock,
-            return_value=coord,
-        ):
-            await flow.async_step_user(
-                {
-                    CONF_HOST: "1.2.3.4",
-                    CONF_PORT: 8889,
-                    CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.indoor_temp",
-                }
-            )
+        await flow.async_step_user({})
         flow.async_create_entry.assert_called_once()
+        call_kwargs = flow.async_create_entry.call_args[1]
+        assert call_kwargs["data"].get(CONF_HA_SENSOR_INDOOR_TEMPERATURE) is None
+
+    @pytest.mark.asyncio
+    async def test_step_user_clears_legacy_indoor_temp_from_data(self):
+        """Clearing works even when the value only exists in config_entry.data."""
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.legacy",
+        }
+        entry.options = {}
+        entry.title = "Test HP"
+        flow = _make_options_flow(entry)
+        flow.hass = MagicMock()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+        await flow.async_step_user({})
+        flow.async_create_entry.assert_called_once()
+        call_kwargs = flow.async_create_entry.call_args[1]
+        assert call_kwargs["data"][CONF_HA_SENSOR_INDOOR_TEMPERATURE] is None
 
     @pytest.mark.asyncio
     async def test_step_user_exception_aborts(self):
@@ -508,7 +503,7 @@ class TestOptionsFlow:
 
 
 # ===========================================================================
-# config_flow.py — indoor_temp None reset (line 432)
+# config_flow.py — indoor_temp None reset
 # ===========================================================================
 
 _ENTRY_DATA = {
@@ -523,25 +518,126 @@ _ENTRY_DATA = {
 class TestConfigFlowIndoorTempReset:
     @pytest.mark.asyncio
     async def test_indoor_temp_reset_to_none(self):
-        handler = MagicMock(spec=LuxtronikOptionsFlowHandler)
-        handler.options = {CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.old"}
-        handler.config_entry = MagicMock()
-        handler.config_entry.data = _ENTRY_DATA.copy()
-        handler.config_entry.entry_id = "test_id"
-        handler.hass = MagicMock()
-        handler.hass.config_entries.async_reload = AsyncMock()
+        entry = MagicMock()
+        entry.data = _ENTRY_DATA.copy()
+        entry.options = {CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.old"}
+        entry.title = "Test HP"
+        flow = _make_options_flow(entry)
+        flow.hass = MagicMock()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
 
-        user_input = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
+        user_input: dict[str, Any] = {}
+        await flow.async_step_user(user_input)
 
+        flow.async_create_entry.assert_called_once()
+        call_kwargs = flow.async_create_entry.call_args[1]
+        assert call_kwargs["data"].get(CONF_HA_SENSOR_INDOOR_TEMPERATURE) is None
+
+
+# ===========================================================================
+# async_step_reconfigure
+# ===========================================================================
+
+
+class TestAsyncStepReconfigure:
+    @pytest.mark.asyncio
+    async def test_no_input_shows_form(self):
+        flow = LuxtronikFlowHandler()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        await flow.async_step_reconfigure(None)
+        flow.async_show_form.assert_called_once()
+        assert flow.async_show_form.call_args[1]["step_id"] == "reconfigure"
+
+    @pytest.mark.asyncio
+    async def test_connection_error_shows_form_with_error(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        err = LuxtronikConnectionError("5.6.7.8", 8889, Exception("refused"))
+        user_input = {CONF_HOST: "5.6.7.8", CONF_PORT: 8889}
         with patch(
             "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
+            side_effect=err,
         ):
-            await LuxtronikOptionsFlowHandler.async_step_user(handler, user_input)
+            await flow.async_step_reconfigure(user_input)
+        flow.async_show_form.assert_called_once()
+        call_kwargs = flow.async_show_form.call_args[1]
+        assert call_kwargs["errors"] == {"base": "cannot_connect"}
+        # Form must preserve user's attempted values, not revert to entry data
+        schema = call_kwargs["data_schema"]
+        defaults = {k.schema: k.default() for k in schema.schema}
+        assert defaults[CONF_HOST] == "5.6.7.8"
 
-        handler.hass.config_entries.async_update_entry.assert_called_once()
-        call_kwargs = handler.hass.config_entries.async_update_entry.call_args
-        updated_options = call_kwargs.kwargs.get(
-            "options", call_kwargs[1].get("options", {})
+    @pytest.mark.asyncio
+    async def test_successful_reconfigure(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_set_unique_id = AsyncMock()
+        flow._abort_if_unique_id_mismatch = MagicMock()
+        flow.async_update_reload_and_abort = MagicMock(
+            return_value={"type": "abort", "reason": "reconfigure_successful"}
         )
-        assert updated_options.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE) is None
+        coord = _mock_coordinator()
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coord,
+        ):
+            result = await flow.async_step_reconfigure(
+                {CONF_HOST: "5.6.7.8", CONF_PORT: 8889}
+            )
+        assert result["type"] == "abort"
+        assert result["reason"] == "reconfigure_successful"
+        flow.async_update_reload_and_abort.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_unique_id_mismatch_aborts(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_set_unique_id = AsyncMock()
+        flow._abort_if_unique_id_mismatch = MagicMock(
+            side_effect=AbortFlow("unique_id_mismatch")
+        )
+        coord = _mock_coordinator()
+        with (
+            patch(
+                "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+                return_value=coord,
+            ),
+            pytest.raises(AbortFlow, match="unique_id_mismatch"),
+        ):
+            await flow.async_step_reconfigure({CONF_HOST: "5.6.7.8", CONF_PORT: 8889})

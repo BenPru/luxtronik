@@ -929,6 +929,8 @@
         "abort": {
             "cannot_connect": "Nepoda\u0159ilo se p\u0159ipojit k Luxtronik na adrese {host}.\\nChyba: {connect_error}",
             "already_configured": "Toto za\u0159\u00edzen\u00ed je ji\u017e nakonfigurov\u00e1no.",
+            "reconfigure_successful": "Konfigurace \u00fasp\u011b\u0161n\u011b aktualizov\u00e1na.",
+            "unique_id_mismatch": "Za\u0159\u00edzen\u00ed na nov\u00e9 adrese m\u00e1 jinou identitu ne\u017e aktu\u00e1ln\u011b nakonfigurovan\u00e9 za\u0159\u00edzen\u00ed.",
             "already_in_progress": "Konfigura\u010dn\u00ed proces ji\u017e prob\u00edh\u00e1.",
             "devices_configured": "V\u0161echna vybran\u00e1 za\u0159\u00edzen\u00ed jsou ji\u017e nakonfigurov\u00e1na.",
             "options_error": "P\u0159i na\u010d\u00edt\u00e1n\u00ed mo\u017enost\u00ed do\u0161lo k chyb\u011b.",
@@ -939,6 +941,7 @@
         "error": {
             "address": "Neplatn\u00e1 vzd\u00e1len\u00e1 adresa. Adresa mus\u00ed b\u00fdt IP adresa nebo rozpoznateln\u00fd n\u00e1zev hostitele.",
             "address_in_use": "Zvolen\u00fd port je ji\u017e v tomto syst\u00e9mu pou\u017e\u00edv\u00e1n.",
+            "cannot_connect": "P\u0159ipojen\u00ed se nezda\u0159ilo. Zkontrolujte pros\u00edm host a port.",
             "unknown": "Neo\u010dek\u00e1van\u00e1 chyba"
         },
         "step": {
@@ -981,6 +984,22 @@
                     "control_mode_home_assistant": "Kdy\u017e je termostat Home Assistant v ne\u010dinn\u00e9m stavu, stav vypnut\u00ed je hl\u00e1\u0161en Luxtroniku a Luxtronik nem\u016f\u017ee tento prvek spustit.",
                     "ha_sensor_prefix": "D\u016fle\u017eit\u00e9 p\u0159i pou\u017eit\u00ed v\u00edce tepeln\u00fdch \u010derpadel. V p\u0159\u00edpad\u011b jednoho lze jednodu\u0161e pou\u017e\u00edt 'luxtronik'."
                 }
+            },
+            "reconfigure": {
+                "title": "P\u0159ekonfigurovat p\u0159ipojen\u00ed Luxtronik",
+                "description": "Aktualizujte nastaven\u00ed p\u0159ipojen\u00ed pro tepeln\u00e9 \u010derpadlo Luxtronik.",
+                "data": {
+                    "host": "Host",
+                    "port": "S\u00ed\u0165ov\u00fd port",
+                    "timeout": "\u010casov\u00fd limit s\u00ed\u0165ov\u00e9ho socketu (s)",
+                    "max_data_length": "Maxim\u00e1ln\u00ed d\u00e9lka datov\u00e9ho paketu"
+                },
+                "data_description": {
+                    "host": "N\u00e1zev hostitele nebo IP adresa",
+                    "port": "Obvykle 8889 nebo 8888",
+                    "timeout": "Pokud je s\u00ed\u0165 nebo tepeln\u00e9 \u010derpadlo pomal\u00e9, m\u016f\u017eete upravit timeout.",
+                    "max_data_length": "Pokud je s\u00ed\u0165 nebo tepeln\u00e9 \u010derpadlo pomal\u00e9, m\u016f\u017eete upravit d\u00e9lku datov\u00e9ho paketu."
+                }
             }
         }
     },
@@ -990,23 +1009,12 @@
                 "title": "Nakonfigurujte mo\u017enosti pro {name}",
                 "description": "Nastaven\u00ed pro tepeln\u00e9 \u010derpadlo Luxtronik {name}.",
                 "data": {
-                    "host": "Adresa",
-                    "port": "S\u00ed\u0165ov\u00fd port",
-                    "ha_sensor_indoor_temperature": "ID senzoru vnit\u0159n\u00ed teploty",
-                    "control_mode_home_assistant": "Experiment\u00e1ln\u00ed!: \u0158\u00edzen\u00ed stavu termostatu pomoc\u00ed Home Assistant.",
-                    "ha_sensor_prefix": "P\u0159edpona pro ID entit"
+                    "ha_sensor_indoor_temperature": "ID senzoru vnit\u0159n\u00ed teploty"
                 },
                 "data_description": {
-                    "host": "N\u00e1zev hostitele nebo IP adresa",
-                    "port": "Obvykle 8889 nebo 8888",
-                    "ha_sensor_indoor_temperature": "Termostat pro \u0159\u00edzen\u00ed vyt\u00e1p\u011bn\u00ed je vytvo\u0159en v Home Assistant. Skute\u010dn\u00e1 teplota je nastavena senzorem Home Assistant.\nPokud je Luxtronik p\u0159ipojen k hardwarov\u00e9mu pokojov\u00e9mu termostatu, ponechte toto pole pr\u00e1zdn\u00e9.",
-                    "control_mode_home_assistant": "Kdy\u017e je termostat Home Assistant v ne\u010dinn\u00e9m stavu, stav vypnut\u00ed je hl\u00e1\u0161en Luxtroniku a Luxtronik nem\u016f\u017ee tento prvek spustit.",
-                    "ha_sensor_prefix": "D\u016fle\u017eit\u00e9 p\u0159i pou\u017eit\u00ed v\u00edce tepeln\u00fdch \u010derpadel. V p\u0159\u00edpad\u011b jednoho lze jednodu\u0161e pou\u017e\u00edt 'luxtronik'."
+                    "ha_sensor_indoor_temperature": "Termostat pro \u0159\u00edzen\u00ed vyt\u00e1p\u011bn\u00ed je vytvo\u0159en v Home Assistant. Skute\u010dn\u00e1 teplota je nastavena senzorem Home Assistant.\nPokud je Luxtronik p\u0159ipojen k hardwarov\u00e9mu pokojov\u00e9mu termostatu, ponechte toto pole pr\u00e1zdn\u00e9."
                 }
             }
-        },
-        "error": {
-            "cannot_connect": "Nepoda\u0159ilo se p\u0159ipojit k tepeln\u00e9mu \u010derpadlu Luxtronik. Zkontrolujte pros\u00edm hostitele a port."
         }
     },
     "exceptions": {

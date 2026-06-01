@@ -182,6 +182,15 @@ class TestCoordinatorProperties:
         thermostat_type = coord.room_thermostat_type
         assert thermostat_type is None
 
+    def test_room_thermostat_type_missing_param(self):
+        coord = _make_coordinator()  # No P0033 parameter
+        assert coord.room_thermostat_type is None
+
+    def test_room_thermostat_type_get_value_raises(self):
+        coord = _make_coordinator()
+        with patch.object(coord, "get_value", side_effect=Exception("boom")):
+            assert coord.room_thermostat_type is None
+
 
 # ===========================================================================
 # device_key_active
