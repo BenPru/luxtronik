@@ -894,6 +894,8 @@
         "abort": {
             "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 z Luxtronik pod adresem {host}.\\nB\u0142\u0105d: {connect_error}",
             "already_configured": "To urz\u0105dzenie jest ju\u017c skonfigurowane.",
+            "reconfigure_successful": "Konfiguracja zosta\u0142a pomy\u015blnie zaktualizowana.",
+            "unique_id_mismatch": "Urz\u0105dzenie pod nowym adresem ma inn\u0105 to\u017csamo\u015b\u0107 ni\u017c aktualnie skonfigurowane urz\u0105dzenie.",
             "already_in_progress": "Proces konfiguracji jest ju\u017c w toku.",
             "devices_configured": "Wszystkie wybrane urz\u0105dzenia s\u0105 ju\u017c skonfigurowane.",
             "options_error": "Wyst\u0105pi\u0142 b\u0142\u0105d podczas \u0142adowania opcji.",
@@ -904,6 +906,7 @@
         "error": {
             "address": "Nieprawid\u0142owy adres zdalny. Adres musi by\u0107 adresem IP lub rozpoznawaln\u0105 nazw\u0105 hosta.",
             "address_in_use": "Wybrany port jest ju\u017c u\u017cywany w tym systemie.",
+            "cannot_connect": "Po\u0142\u0105czenie nie powiod\u0142o si\u0119. Sprawd\u017a host i port.",
             "unknown": "Nieoczekiwany b\u0142\u0105d"
         },
         "step": {
@@ -946,6 +949,22 @@
                     "control_mode_home_assistant": "Gdy termostat Home Assistant jest w stanie bezczynno\u015bci, stan wy\u0142\u0105czenia jest zg\u0142aszany do Luxtronik i Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
                     "ha_sensor_prefix": "Wa\u017cne przy u\u017cyciu wielu pomp ciep\u0142a. W przypadku jednej mo\u017cna po prostu u\u017cy\u0107 'luxtronik'."
                 }
+            },
+            "reconfigure": {
+                "title": "Rekonfiguracja po\u0142\u0105czenia Luxtronik",
+                "description": "Zaktualizuj ustawienia po\u0142\u0105czenia dla pompy ciep\u0142a Luxtronik.",
+                "data": {
+                    "host": "Host",
+                    "port": "Port sieciowy",
+                    "timeout": "Limit czasu gniazda sieciowego (s)",
+                    "max_data_length": "Maksymalna d\u0142ugo\u015b\u0107 pakietu danych"
+                },
+                "data_description": {
+                    "host": "Nazwa hosta lub adres IP",
+                    "port": "Zwykle 8889 lub 8888",
+                    "timeout": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 limit czasu.",
+                    "max_data_length": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 d\u0142ugo\u015b\u0107 pakietu danych."
+                }
             }
         }
     },
@@ -955,14 +974,10 @@
                 "title": "Skonfiguruj opcje dla {name}",
                 "description": "Ustawienia dla pompy ciep\u0142a Luxtronik {name}.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "ID czujnika temperatury wewn\u0119trznej",
-                    "control_mode_home_assistant": "Eksperymentalne!: Sterowanie statusem termostatu przez Home Assistant.",
-                    "ha_sensor_prefix": "Prefiks dla identyfikator\u00f3w encji"
+                    "ha_sensor_indoor_temperature": "ID czujnika temperatury wewn\u0119trznej"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, pozostaw to pole puste.",
-                    "control_mode_home_assistant": "Gdy termostat Home Assistant jest w stanie bezczynno\u015bci, stan wy\u0142\u0105czenia jest zg\u0142aszany do Luxtronik i Luxtronik nie mo\u017ce uruchomi\u0107 tego elementu.",
-                    "ha_sensor_prefix": "Wa\u017cne przy u\u017cyciu wielu pomp ciep\u0142a. W przypadku jednej mo\u017cna po prostu u\u017cy\u0107 'luxtronik'."
+                    "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, pozostaw to pole puste."
                 }
             }
         }

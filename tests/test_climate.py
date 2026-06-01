@@ -42,6 +42,7 @@ from custom_components.luxtronik2.const import (
     DeviceKey,
     LuxMode,
     LuxOperationMode,
+    LuxRoomThermostatType,
 )
 
 
@@ -222,6 +223,25 @@ class TestClimateUnavailableKeys:
                 MagicMock(), entry, lambda entities, update: added.extend(entities)
             )
             mock_logger.debug.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_smart_thermostat_branch(self):
+        """When room_thermostat_type is smart, THERMOSTATS_SMART is used."""
+        from custom_components.luxtronik2.climate import async_setup_entry
+
+        coord = _mock_coordinator(make_coordinator_data())
+        coord.room_thermostat_type = LuxRoomThermostatType.smart
+        entry = MagicMock()
+        entry.runtime_data = coord
+
+        added = []
+        with patch(
+            "custom_components.luxtronik2.climate.key_exists", return_value=True
+        ):
+            await async_setup_entry(
+                MagicMock(), entry, lambda entities, update: added.extend(entities)
+            )
+        assert len(added) == len(THERMOSTATS_SMART)
 
 
 # ===========================================================================

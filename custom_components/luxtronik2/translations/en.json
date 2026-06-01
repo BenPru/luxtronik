@@ -666,6 +666,8 @@
         "abort": {
             "cannot_connect": "Failed to connect to Luxtronik at {host}.\\nError: {connect_error}",
             "already_configured": "This device is already configured.",
+            "reconfigure_successful": "Configuration updated successfully.",
+            "unique_id_mismatch": "The device at the new address has a different identity than the currently configured device.",
             "already_in_progress": "The configuration flow is already in progress.",
             "devices_configured": "All selected devices are already configured.",
             "options_error": "An error occurred while loading the options.",
@@ -676,6 +678,7 @@
         "error": {
             "address": "Invalid remote-address insert. The address has to be an IP address or a resolvable hostname.",
             "address_in_use": "The chosen listen port is already in use on this system.",
+            "cannot_connect": "Failed to connect. Please check the host and port.",
             "unknown": "Unexpected error"
         },
         "step": {
@@ -718,6 +721,22 @@
                     "control_mode_home_assistant": "When the Home Assistant Thermostat is in the Idle state, the Off state is reported to Luxtronik and Luxtronik cannot start this item.",
                     "ha_sensor_prefix": "Important if several heat pumps are used.\nIn the case of a single one, 'luxtronik' can simply be used."
                 }
+            },
+            "reconfigure": {
+                "title": "Reconfigure Luxtronik connection",
+                "description": "Update the connection settings for the Luxtronik heat pump.",
+                "data": {
+                    "host": "Host",
+                    "port": "Network Port",
+                    "timeout": "Network socket timeout (Sec.)",
+                    "max_data_length": "Max data package length"
+                },
+                "data_description": {
+                    "host": "Hostname or IP address",
+                    "port": "Normally 8889 or 8888",
+                    "timeout": "If the network or the heatpump is slow, you can fine-tune the timeout.",
+                    "max_data_length": "If the network or the heatpump is slow, you can fine-tune the data package length."
+                }
             }
         }
     },
@@ -727,23 +746,12 @@
                 "title": "Configure options for {name}",
                 "description": "Settings for the Luxtronik heat pump {name}.",
                 "data": {
-                    "host": "Host",
-                    "port": "Network Port",
-                    "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature",
-                    "control_mode_home_assistant": "Experimental!: Control thermostat on/off status by Home Assistant.",
-                    "ha_sensor_prefix": "Prefix entity IDs"
+                    "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature"
                 },
                 "data_description": {
-                    "host": "Hostname or IP address",
-                    "port": "Normally 8889 or 8888",
-                    "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
-                    "control_mode_home_assistant": "When the Home Assistant Thermostat is in the Idle state, the Off state is reported to Luxtronik and Luxtronik cannot start this item.",
-                    "ha_sensor_prefix": "Important if several heat pumps are used.\nIn the case of a single one, 'luxtronik' can simply be used."
+                    "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty."
                 }
             }
-        },
-        "error": {
-            "cannot_connect": "Failed to connect to the Luxtronik heat pump. Please check the host and port."
         }
     },
     "exceptions": {

@@ -60,8 +60,6 @@ class TestBuildOptionsSchema:
 
     def test_with_current_value(self):
         schema = build_options_schema(
-            host="10.0.0.1",
-            port=8888,
             current_value="sensor.indoor_temp",
         )
         assert isinstance(schema, vol.Schema)

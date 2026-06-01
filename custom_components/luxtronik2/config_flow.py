@@ -367,6 +367,58 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             LOGGER.error("Unhandled DHCP discovery error", exc_info=err)
             return self.async_abort(reason="unknown")
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle reconfiguration of the integration."""
+        reconfigure_entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            entry_data = reconfigure_entry.data
+            config = self._build_config(
+                user_input[CONF_HOST],
+                int(user_input[CONF_PORT]),
+                float(
+                    user_input.get(
+                        CONF_TIMEOUT,
+                        entry_data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
+                    )
+                ),
+                int(
+                    user_input.get(
+                        CONF_MAX_DATA_LENGTH,
+                        entry_data.get(CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH),
+                    )
+                ),
+            )
+
+            try:
+                coordinator = await connect_and_get_coordinator(self.hass, config)
+            except LuxtronikConnectionError:
+                errors["base"] = "cannot_connect"
+            else:
+                await self.async_set_unique_id(coordinator.unique_id)
+                self._abort_if_unique_id_mismatch()
+                return self.async_update_reload_and_abort(
+                    reconfigure_entry,
+                    data_updates=config,
+                )
+
+        form_defaults = {**reconfigure_entry.data, **(user_input or {})}
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=build_user_data_schema(
+                host=form_defaults.get(CONF_HOST, DEFAULT_HOST),
+                port=form_defaults.get(CONF_PORT, DEFAULT_PORT),
+                timeout=form_defaults.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
+                max_data_length=form_defaults.get(
+                    CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH
+                ),
+            ),
+            errors=errors,
+        )
+
     @staticmethod
     @callback
     def async_get_options_flow(  # pragma: no cover
@@ -397,67 +449,28 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle the user options step."""
-        errors: dict[str, str] = {}
-
-        current_host = self.config_entry.data.get(CONF_HOST, DEFAULT_HOST)
-        current_port = self.config_entry.data.get(CONF_PORT, DEFAULT_PORT)
-        current_indoor_temp = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
-
         try:
             if user_input is not None:
-                host = user_input.get(CONF_HOST, current_host)
-                port = int(user_input.get(CONF_PORT, current_port))
+                new_options = dict(self.options)
+                value = user_input.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
+                if value:
+                    new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = value
+                elif (
+                    CONF_HA_SENSOR_INDOOR_TEMPERATURE in new_options
+                    or CONF_HA_SENSOR_INDOOR_TEMPERATURE in self.config_entry.data
+                ):
+                    new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
 
-                config = {
-                    CONF_HOST: host,
-                    CONF_PORT: port,
-                    CONF_TIMEOUT: self.config_entry.data.get(
-                        CONF_TIMEOUT, DEFAULT_TIMEOUT
-                    ),
-                    CONF_MAX_DATA_LENGTH: self.config_entry.data.get(
-                        CONF_MAX_DATA_LENGTH, DEFAULT_MAX_DATA_LENGTH
-                    ),
-                }
+                return self.async_create_entry(title="", data=new_options)
 
-                try:
-                    await connect_and_get_coordinator(self.hass, config)
-                except LuxtronikConnectionError:
-                    errors["base"] = "cannot_connect"
-                else:
-                    new_options = dict(self.options)
-                    value = user_input.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
-                    if value:
-                        new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = value
-                    elif CONF_HA_SENSOR_INDOOR_TEMPERATURE in new_options:
-                        new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
+            current_indoor_temp = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
 
-                    self.hass.config_entries.async_update_entry(
-                        self.config_entry,
-                        data=self.config_entry.data | user_input,
-                        options=new_options,
-                    )
-                    await self.hass.config_entries.async_reload(
-                        self.config_entry.entry_id
-                    )
-                    return self.async_create_entry(title="", data={})
-
-                # Connection failed — keep user's input for re-display
-                current_host = host
-                current_port = port
-                current_indoor_temp = user_input.get(
-                    CONF_HA_SENSOR_INDOOR_TEMPERATURE, current_indoor_temp
-                )
-
-            name = f"{current_host}:{current_port}"
             return self.async_show_form(
                 step_id="user",
                 data_schema=build_options_schema(
-                    host=current_host,
-                    port=current_port,
                     current_value=current_indoor_temp,
                 ),
-                description_placeholders={"name": name},
-                errors=errors,
+                description_placeholders={"name": self.config_entry.title},
             )
 
         except Exception as err:
