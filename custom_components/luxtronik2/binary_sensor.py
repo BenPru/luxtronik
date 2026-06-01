@@ -139,16 +139,19 @@ class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportInco
 
                     # If error_reason changed BEFORE disturbance_output,
                     # then the disturbance output is just ZWE2 noise, not a fault
-                    if disturbance_changed and error_changed:
-                        if error_changed < disturbance_changed:
-                            LOGGER.debug(
-                                "DISTURBANCE_OUTPUT active but error_reason hasn't changed "
-                                "since output activation (error: %s, disturbance: %s), "
-                                "treating as ZWE2 operation, not a fault",
-                                error_changed,
-                                disturbance_changed,
-                            )
-                            return False
+                    if (
+                        disturbance_changed
+                        and error_changed
+                        and error_changed < disturbance_changed
+                    ):
+                        LOGGER.debug(
+                            "DISTURBANCE_OUTPUT active but error_reason hasn't changed "
+                            "since output activation (error: %s, disturbance: %s), "
+                            "treating as ZWE2 operation, not a fault",
+                            error_changed,
+                            disturbance_changed,
+                        )
+                        return False
                 except (AttributeError, TypeError) as e:
                     LOGGER.debug(
                         "Could not compare timestamps for DISTURBANCE_OUTPUT fault detection: %s",
