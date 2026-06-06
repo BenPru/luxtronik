@@ -2,6 +2,7 @@
   "entity": {
     "sensor": {
       "status": {
+        "default": "mdi:information",
         "state": {
           "heating": "mdi:radiator",
           "hot_water": "mdi:water-pump",
@@ -14,11 +15,13 @@
         }
       },
       "smart_grid_status": {
+        "default": "mdi:check-circle",
         "state": {
           "evu_locked": "mdi:close-circle",
           "reduced_operation": "mdi:arrow-down-circle",
           "normal_operation": "mdi:check-circle",
-          "increased_operation": "mdi:arrow-up-circle"
+          "increased_operation": "mdi:arrow-up-circle",
+          "unknown": "mdi:help-circle"
         }
       },
       "switchoff_reason": { "default": "mdi:electric-switch" },
@@ -88,11 +91,11 @@
     "number": {
       "release_second_heat_generator": { "default": "mdi:lock-minus" },
       "release_time_second_heat_generator": { "default": "mdi:lock-clock" },
-      "efficiency_pump_nominal": { "default": "mdi:leaf-circle-outline" },
-      "efficiency_pump_minimal": { "default": "mdi:leaf" },
+      "efficiency_pump_nominal": { "default": "mdi:leaf-circle" },
+      "efficiency_pump_minimal": { "default": "mdi:leaf-circle-outline" },
       "heat_source_input_temperature_min": { "default": "mdi:download-lock" },
       "electrical_power_limitation_value": { "default": "mdi:download" },
-      "thermal_power_limitation_heating": { "default": "mdi:heat-wave" },
+      "thermal_power_limitation_heating": { "default": "mdi:radiator" },
       "thermal_power_limitation_water": { "default": "mdi:water-pump" },
       "thermal_power_limitation_cooling": { "default": "mdi:snowflake" },
       "heating_target_correction": { "default": "mdi:plus-minus-variant" },
@@ -140,6 +143,7 @@
       "electrical_power_limitation_switch": { "default": "mdi:download-lock" },
       "thermal_power_limitation_switch": { "default": "mdi:download-lock" },
       "heating": {
+        "default": "mdi:radiator",
         "state": {
           "on": "mdi:radiator",
           "off": "mdi:radiator-off"
@@ -151,6 +155,7 @@
       "pump_vent_active": { "default": "mdi:pump" },
       "domestic_water": {
         "state": {
+          "default": "mdi:water-pump",
           "on": "mdi:water-pump",
           "off": "mdi:water-pump-off"
         }
@@ -162,9 +167,16 @@
       "evu2": { "default": "mdi:numeric-2-circle" },
       "compressor": { "default": "mdi:arrow-collapse-all" },
       "compressor2": { "default": "mdi:arrow-collapse-all" },
-      "pump_flow": { "default": "mdi:pump" },
+      "pump_flow": { 
+        "default": "mdi:pump",
+        "state": {
+          "on": "mdi:pump",
+          "off": "mdi:pump-off"
+        }
+      },
       "compressor_heater": { "default": "mdi:heat-wave" },
       "defrost_valve": {
+        "default": "mdi:valve",
         "state": {
           "on": "mdi:valve-open",
           "off": "mdi:valve-closed"
@@ -173,36 +185,42 @@
       "additional_heat_generator": { "default": "mdi:water-boiler" },
       "circulation_pump_heating": { "default": "mdi:car-turbocharger" },
       "additional_circulation_pump": { 
+        "default": "mdi:pump",
         "state": {
           "on": "mdi:pump",
           "off": "mdi:pump-off"
         }
       },
       "dhw_recirculation_pump": { 
+        "default": "mdi:pump",
         "state": {
           "on": "mdi:pump",
           "off": "mdi:pump-off"
         }
       },
       "dhw_circulation_pump": { 
+        "default": "mdi:pump",  
         "state": {
           "on": "mdi:pump",
           "off": "mdi:pump-off"
         }
       },
       "dhw_charging_pump": { 
+        "default": "mdi:pump",
         "state": {
           "on": "mdi:pump",
           "off": "mdi:pump-off"
         }
       },
       "solar_pump": { 
+        "default": "mdi:pump",
         "state": {
           "on": "mdi:pump",
           "off": "mdi:pump-off"
         }
       },
       "approval_cooling": { 
+        "default": "mdi:snowflake",
         "state": {
           "on": "mdi:snowflake-check",
           "off": "mdi:snowflake-off"
@@ -211,12 +229,14 @@
     },
     "climate": {
       "heating": {
+        "default": "mdi:radiator",
         "state": {
           "on": "mdi:radiator",
           "off": "mdi:radiator-off"
         }
       },
-      "cooling": {
+      "cooling": { 
+        "default": "mdi:snowflake",
         "state": {
           "on": "mdi:snowflake",
           "off": "mdi:snowflake-off"
