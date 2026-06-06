@@ -75,7 +75,7 @@
       "operation_hours_heating": { "default": "mdi:timer-sand" },
       "heat_amount_heating": { "default": "mdi:lightning-bolt-circle" },
       "heat_energy_input": { "default": "mdi:lightning-bolt" },
-      "flow_out_temperature_external": { "default": "mdi:waves-arrow-right" },
+      "flow_out_temperature_external": { "default": "mdi:waves-arrow-left" },
       "room_thermostat_temperature": { "default": "mdi:thermometer" },
       "room_thermostat_temperature_target": { "default": "mdi:thermometer" },
       "dhw_temperature": { "default": "mdi:water-pump" },
@@ -123,11 +123,11 @@
       "pump_vent_timer_h": { "default": "mdi:timer-settings" },
       "dhw_target_temperature": { "default": "mdi:water-pump" },
       "dhw_hysteresis": { "default": "mdi:thermometer-minus" },
-      "dhw_thermal_desinfection_target": { "default": "mdi:thermometer-plus" },
+      "dhw_thermal_desinfection_target": { "default": "mdi:shield-bug" },
       "solar_pump_on_difference_temperature": { "default": "mdi:water-boiler" },
       "solar_pump_off_difference_temperature": { "default": "mdi:water-boiler-off" },
       "solar_pump_off_max_difference_temperature_boiler": { "default": "mdi:water-boiler-alert" },
-      "solar_pump_max_temperature_collector": { "default": "mdi:solar-power-variante" },
+      "solar_pump_max_temperature_collector": { "default": "mdi:solar-power-variant" },
       "cooling_threshold_temperature": { "default": "mdi:sun-thermometer" },
       "cooling_start_delay_hours": { "default": "mdi:clock-start" },
       "cooling_stop_delay_hours": { "default": "mdi:clock-end" },
@@ -255,13 +255,14 @@
     "select": {
       "thermal_desinfection_day": { "default": "mdi:calendar" },
       "dhw_mode": {
+        "default": "mdi:water-pump",
         "state": {
           "off": "mdi:water-boiler-off",
           "automatic": "mdi:water-boiler-auto",
           "party": "mdi:power-plug",
-          "holiday": "mdi:bad-checked"
+          "holiday": "mdi:bag-suitcase"
         }
-       }
+      }
     }
   }
 }
