@@ -32,7 +32,7 @@ class TestUpdateLuxtronikParameters:
         update_Luxtronik_Parameters()
         # Check that custom parameters are now in the class-level dict
         assert 1148 in Parameters.parameters
-        assert Parameters.parameters[1148].name == "ID_Einst_RFVEinb_akt"
+        assert Parameters.parameters[1148].name == "HEATING_TARGET_TEMP_ROOM_THERMOSTAT"
 
         assert 258 in Calculations.calculations
         assert Calculations.calculations[258].name == "RBE_Version"
