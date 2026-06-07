@@ -206,7 +206,10 @@ async def async_setup_entry(
     rt = getattr(coordinator, "room_thermostat_type", None)
     is_smart_thermostat = False
     if isinstance(rt, LuxRoomThermostatType):
-        is_smart_thermostat = rt == LuxRoomThermostatType.smart
+        is_smart_thermostat = rt in (
+            LuxRoomThermostatType.smart,
+            LuxRoomThermostatType.rbe_plus,
+        )
 
     LOGGER.info(
         "Detected room thermostat type: %s (smart=%s)",

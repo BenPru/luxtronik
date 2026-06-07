@@ -229,6 +229,7 @@ class LuxRoomThermostatType(Enum):
     rfv_dk = 3
     rbe = 4
     smart = 5
+    rbe_plus = 90
 
 
 class LuxSwitchoffReason(Enum):
@@ -373,7 +374,6 @@ class LuxParameter(StrEnum):
     P0042_MIXING_CIRCUIT1_TYPE = "parameters.ID_Einst_MK1Typ_akt"
     P0047_DHW_THERMAL_DESINFECTION_TARGET = "parameters.ID_Einst_LGST_akt"
     P0049_PUMP_OPTIMIZATION = "parameters.ID_Einst_Popt_akt"
-    # P0033_ROOM_THERMOSTAT_TYPE: Final = "parameters.ID_Einst_RFVEinb_akt"  # != 0 --> Has_Room_Temp
     P0074_DHW_HYSTERESIS = "parameters.ID_Einst_BWS_Hyst_akt"
     P0085_DHW_CHARGING_PUMP = "parameters.ID_Einst_BWZIP_akt"  # has_domestic_water_circulation_pump int() != 1
     P0088_HEATING_HYSTERESIS = "parameters.ID_Einst_HRHyst_akt"
@@ -596,7 +596,7 @@ class LuxCalculation(StrEnum):
     # 243: Kelvin("HUP_Temp_Spread_Ist"), / 10, measurement, delta - ait_hup_delta
     # 254 Flow Rate
     C0257_CURRENT_HEAT_OUTPUT = "calculations.Heat_Output"
-    # 258 RBE Version
+    C0258_RBE_VERSION = "calculations.RBE_Version"
     C0268_CURRENT_POWER_CONSUMPTION = "calculations.Unknown_Calculation_268"
 
 

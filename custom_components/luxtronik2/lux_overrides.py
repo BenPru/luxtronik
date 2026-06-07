@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from luxtronik.calculations import Calculations
 from luxtronik.datatypes import (
+    Base,
     Celsius,
     HeatpumpCode,
     MixedCircuitMode,
@@ -11,6 +12,21 @@ from luxtronik.datatypes import (
 )
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
+
+
+class MajorMinorVersion(Base):
+    """MajorMinorVersion datatype, converts from and to a RBEVersion"""
+
+    datatype_class = "version"
+
+    @classmethod
+    def from_heatpump(cls, value):
+        if value > 0:
+            major = value // 100
+            minor = value % 100
+            return f"{major}.{minor:02d}"
+        return "0"
+
 
 # Define your new/updated custom parameters in a dictionary
 parameters_to_add_update = {
@@ -27,9 +43,14 @@ parameters_to_add_update = {
     # Add more as needed
 }
 
+calculations_to_add_update = {
+    258: MajorMinorVersion("ID_RBE_Version", False),
+}
+
 
 def update_Luxtronik_Parameters():
     Parameters.parameters.update(parameters_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
+    Calculations.calculations.update(calculations_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 
 _INSTANCE_DATA_ISOLATED = False

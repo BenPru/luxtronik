@@ -366,6 +366,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 num = int(raw)
             except Exception:
                 return None
+            if num == LuxRoomThermostatType.rbe.value:
+                rbe_version = Version(self.get_value(LC.C0258_RBE_VERSION) or "0")
+                if rbe_version >= Version("2.0.0"):
+                    return LuxRoomThermostatType.rbe_plus
+                else:
+                    return LuxRoomThermostatType.rbe
+
             try:
                 return LuxRoomThermostatType(num)
             except Exception:
