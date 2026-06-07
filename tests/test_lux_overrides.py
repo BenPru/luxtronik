@@ -35,6 +35,7 @@ class TestUpdateLuxtronikParameters:
 
         assert 258 in Calculations.calculations
         assert Calculations.calculations[258].name == "RBE_Version"
+        assert Calculations.calculations[258].from_heatpump(205) == "2.05"
 
 
 class TestIsolateInstanceData:

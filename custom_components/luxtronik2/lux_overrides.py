@@ -19,8 +19,7 @@ class MajorMinorVersion(Base):
 
     datatype_class = "version"
 
-    @classmethod
-    def from_heatpump(cls, value):
+    def from_heatpump(self, value):
         if value > 0:
             major = value // 100
             minor = value % 100
