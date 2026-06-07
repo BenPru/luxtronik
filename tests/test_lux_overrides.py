@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from conftest import make_coordinator
 from luxtronik.calculations import Calculations
 from luxtronik.datatypes import HeatpumpCode
 from luxtronik.parameters import Parameters
@@ -31,6 +32,13 @@ class TestUpdateLuxtronikParameters:
         update_Luxtronik_Parameters()
         # Check that custom parameters are now in the class-level dict
         assert 1148 in Parameters.parameters
+        assert Parameters.parameters[1148].name == "ID_Einst_RFVEinb_akt"
+
+        assert 258 in Calculations.calculations
+        assert Calculations.calculations[258].name == "RBE_Version"
+
+        coord = make_coordinator(calculations={"RBE_Version": 403})
+        assert coord.get_value("calculations.RBE_Version") == "4.03"
 
 
 class TestIsolateInstanceData:
