@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 import pytest
@@ -15,9 +14,6 @@ from custom_components.luxtronik2.const import (
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
     DOMAIN,
-)
-from custom_components.luxtronik2.coordinator import (
-    LuxtronikCoordinator,
 )
 from custom_components.luxtronik2.model import LuxtronikCoordinatorData
 
@@ -87,40 +83,6 @@ def make_coordinator_data(
         calculations=FakeSensorGroup(calculations or {}),
         visibilities=FakeSensorGroup(visibilities or {}),
     )
-
-
-def make_coordinator(
-    hass=None,
-    parameters: dict[str, Any] | None = None,
-    calculations: dict[str, Any] | None = None,
-    visibilities: dict[str, Any] | None = None,
-) -> LuxtronikCoordinator:
-    """Build a coordinator with fake data for unit tests."""
-    if hass is None:
-        hass = MagicMock()
-        hass.async_add_executor_job = AsyncMock(
-            side_effect=lambda fn, *a, **kw: fn(*a, **kw)
-        )
-
-    client = MagicMock()
-    data = make_coordinator_data(
-        parameters=parameters or {},
-        calculations=calculations or {},
-        visibilities=visibilities or {},
-    )
-    client.parameters = data.parameters
-    client.calculations = data.calculations
-    client.visibilities = data.visibilities
-
-    config = {
-        CONF_HOST: "192.168.1.100",
-        CONF_PORT: DEFAULT_PORT,
-    }
-
-    with patch("homeassistant.helpers.frame.report_usage"):
-        coordinator = LuxtronikCoordinator(hass=hass, client=client, config=config)
-    coordinator.data = data
-    return coordinator
 
 
 # ---------------------------------------------------------------------------

@@ -482,6 +482,10 @@ class TestCoordinatorGetValue:
         coord = _make_coordinator()
         assert coord.get_value("parameters.nonexistent") is None
 
+    def test_get_value_with_MajorMinorVersion(self):
+        coord = _make_coordinator(calculations={"RBE_Version": 403})
+        assert coord.get_value("calculations.RBE_Version") == "4.03"
+
     def test_get_sensor_by_id_invalid_format(self):
         coord = _make_coordinator()
         assert coord.get_sensor_by_id("no_dot_here") is None

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from conftest import make_coordinator
 from luxtronik.calculations import Calculations
 from luxtronik.datatypes import HeatpumpCode
 from luxtronik.parameters import Parameters
@@ -36,9 +35,6 @@ class TestUpdateLuxtronikParameters:
 
         assert 258 in Calculations.calculations
         assert Calculations.calculations[258].name == "RBE_Version"
-
-        coord = make_coordinator(calculations={"RBE_Version": 403})
-        assert coord.get_value("calculations.RBE_Version") == "4.03"
 
 
 class TestIsolateInstanceData:
