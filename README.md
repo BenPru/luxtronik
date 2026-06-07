@@ -158,7 +158,7 @@ Advanced entities:
 > **ℹ️ Note:** It is not possible to trigger a thermal disinfection cycle on demand. It can be emulated by raising the *DHW Target Temperature*. 
 
 #### 3.1.2 Automating DHW
-Automations for DHW typically use the water heater entity or the Party/Boost mode. Common scenarios include pre-heating before showers, using excess solar energy to heat the tank, or scheduling anti‑legionella cycles.
+Automations for DHW typically use the water heater entity or the Party/Boost mode. Common scenarios include pre-heating before showers, using excess solar energy to heat the tank.
 
 <details>
 <summary>⚙️ Example: Preheat DHW using solar power</summary>
@@ -167,29 +167,31 @@ description: "Boost DHW when solar production is high"
 trigger:
   - platform: numeric_state
     entity_id: sensor.solar_power
-    above: 200
-    for: "00:10:00"
+    above: 2000
+    for: "00:05:00"
     id: "solar_high"
+    - platform: numeric_state
+    entity_id: sensor.solar_power
+    below: 2000
+    for: "00:10:00"
 action:
   - if:
-      - condition: trigger
-        id: "solar_high"
+    - condition: trigger
+      id: "solar_high"
     then:
       - action: water_heater.set_temperature
         target:
           entity_id: water_heater.luxtronik_dhw
         data:
-          temperature: 60
+          temperature: 58
     else:
       - action: water_heater.set_temperature
         target:
           entity_id: water_heater.luxtronik_dhw
         data:
-          temperature: 55
+          temperature: 54
 ```
 </details>
-
-The amount of DHW heating can be controlled by the target temperature or by triggering the Party/Boost mode when a quick reheat is required.
 
 ---
 
