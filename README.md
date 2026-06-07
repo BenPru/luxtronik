@@ -137,11 +137,59 @@ action:
 The amount of cooling can be controlled with *Cooling Target Temperature* when the heatpump is configured to cool based on fixed temperature ([page 17](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf)).
 
 ### 2.4 DHW (Domestic Hot Water)
-Controls the boiler/tank for your tap water.
+This device controls the boiler/tank for your tap water.
 
-**Most important entities & actions:**
-- **Water Heater Entity (`water_heater.dhw`):** Use this to set the target hot water temperature and see the current temperature inside the tank.
-- **DHW Operation Mode:** Choose between Automatic, Party (instant heat), or Off.
+Basic entities:
+| Name | Entity Type | Units | Description |
+| :--- | :--- | :--- | :--- |
+| **Domestic Water** | Water Heater | °C | The water heater entity combines several of the entities below into a combined water heater entity. It shows the *Domestic Hot Water* temperature and allows setting the *Target* temperature. It has 4 operating modes (Automatic / Party / Holiday / Off). The away mode sets the operating *Mode* to Holiday or the last known state. |
+| **Mode** | Select | - | Sets the operating *Mode*: Automatic / Party / Holiday / Off. Automatic is for standard operation. Party is for increased hot water. Holiday and Off suspend operations. |
+| **Mode Automatic** | Switch | on/off | Sets the operating mode to Off or last known state. |
+| **DHW Target Temperature** | Number | °C | Set the DHW target temperature. |
+| **DHW Current Temperature** | Sensor | °C | The current DHW temperature. |
+
+Advanced entities:
+| Name | Entity Type | Units | Description |
+| :--- | :--- | :--- | :--- |
+| **Hysteresis** | Number | °C | The difference between the *DHW Current Temperature* and *DHW Target Temperature* before the water is heated up gain to the *DHW Target Temperature*. |
+| **Thermal Desinfection Target Temperature** | Number | °C | Target temperature for Thermal Disinfection cycle. |
+| **Thermal Desinfection Day** | Select | Day | The day on which the thermal disinfection cycle is performed. |
+
+> **ℹ️ Note:** It is not possible to trigger a thermal disinfection cycle on demand. It can be emulated by raising the *DHW Target Temperature*. 
+
+#### 3.1.2 Automating DHW
+Automations for DHW typically use the water heater entity or the Party/Boost mode. Common scenarios include pre-heating before showers, using excess solar energy to heat the tank, or scheduling anti‑legionella cycles.
+
+<details>
+<summary>⚙️ Example: Preheat DHW using solar power</summary>
+```yaml
+description: "Boost DHW when solar production is high"
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.solar_power
+    above: 200
+    for: "00:10:00"
+    id: "solar_high"
+action:
+  - if:
+      - condition: trigger
+        id: "solar_high"
+    then:
+      - action: water_heater.set_temperature
+        target:
+          entity_id: water_heater.luxtronik_dhw
+        data:
+          temperature: 60
+    else:
+      - action: water_heater.set_temperature
+        target:
+          entity_id: water_heater.luxtronik_dhw
+        data:
+          temperature: 55
+```
+</details>
+
+The amount of DHW heating can be controlled by the target temperature or by triggering the Party/Boost mode when a quick reheat is required.
 
 ---
 
