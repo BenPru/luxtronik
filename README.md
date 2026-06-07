@@ -81,18 +81,25 @@ This device controls the space heating functionality (e.g., underfloor heating o
 ### 2.3 Cooling
 If your heat pump supports active or passive cooling, this device manages it.
 
+Basic entities:
 | Name | Entity Type | Units | Description |
 | :--- | :--- | :--- | :--- |
-| **Cooling** | Climate | &deg;C | The climate entity combines several of the entities below into a combined climate entity. It shows the current temperature and controls the *Cooling Mode* and *Cooling Target Temperature*. |
+| **Cooling** | Climate | &deg;C | The climate entity combines several of the entities below into a combined climate entity. It shows the current temperature and controls the *Cooling Mode* and *Cooling Target Temperature* (in case no thermostat is present) or *Room Thermostat Target* (in case a thermostat is present). |
 | **Cooling Mode** | Select / Switch | on/off | Controls the state. "Off" disables cooling, while "Automatic" allows cooling depending on the "Approval" and "Delay" entities. |
 | **Cooling Target Temperature** | Number | &deg;C | The target water temperature sent into the underfloor heating. Note: It does not function as the target room temperature. |
-| **Approval** | Binary Sensor | - | Indicates if cooling is approved by the heat pump based on various factors such as outdoor temperature and room temperature. |
+| **Approval** | Binary Sensor | - | Indicates if cooling is unlocked by the heat pump based on various factors such as outdoor temperature and room temperature. |
+
+Advanced entities:
+| Name | Entity Type | Units | Description |
+| :--- | :--- | :--- | :--- |
 | **Cooling Minimal Flow Temperature** | Number | &deg;C | The minimal water temperature used for activating cooling. Default 18&deg;C. Lowering this value can cause condensation and damage to brine/water heatpumps. |
 | **Minimal Outdoor Temperature** | Number | &deg;C | The minimal outdoor temperature needed used to activate cooling given the Start Delay and Stop Delay. |
 | **Start Delay** | Number | h | Duration the minimal outdoor temperature must be exceeded before cooling starts. |
 | **Stop Delay** | Number | h | Duration the minimal outdoor temperature must no longer be met before cooling stops. |
 
 > **⚠️ Important:** If the cooling target temperature is set too low, condensation can form on floor tiles, pipes, and inside the heat pump. A brine heat pump should generally not use a target temperature below 18°C to avoid damage. Consult your manual for details.
+
+> **ℹ️ Note:** The Energy input may not work as expected. This is a limitation of the Luxtronik firmware. 
 
 ### 2.4 DHW (Domestic Hot Water)
 Controls the boiler/tank for your tap water.
