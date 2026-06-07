@@ -58,7 +58,7 @@ Click the button below to automatically add the custom repository to HACS:
 
 ---
 
-## 2. Using Luxtronik
+## 2 Using Luxtronik
 
 Entities and actions are organized into four logical devices in Home Assistant to keep things structured. Here is an overview of what each device does and how to use the most common entities.
 
@@ -84,22 +84,57 @@ If your heat pump supports active or passive cooling, this device manages it.
 Basic entities:
 | Name | Entity Type | Units | Description |
 | :--- | :--- | :--- | :--- |
-| **Cooling** | Climate | &deg;C | The climate entity combines several of the entities below into a combined climate entity. It shows the current temperature and controls the *Cooling Mode* and *Cooling Target Temperature* (in case no thermostat is present) or *Room Thermostat Target* (in case a thermostat is present). |
-| **Cooling Mode** | Select / Switch | on/off | Controls the state. "Off" disables cooling, while "Automatic" allows cooling depending on the "Approval" and "Delay" entities. |
-| **Cooling Target Temperature** | Number | &deg;C | The target water temperature sent into the underfloor heating. Note: It does not function as the target room temperature. |
-| **Approval** | Binary Sensor | - | Indicates if cooling is unlocked by the heat pump based on various factors such as outdoor temperature and room temperature. |
+| **Cooling** | Climate | &deg;C | The climate entity combines several of the entities below into a combined climate entity. It shows the current temperature and controls the *Cooling Mode* and *Cooling Target Temperature* (in case no thermostat is present) or *Room Thermostat Target* (in case a thermostat is present). Note: Cooling does not aim for the target temperature in the same way heating does. |
+| **Cooling** | Select / Switch | on/off | Controls the state. "Off" disables cooling, while "On" allows cooling depending on the *Approval*, *Minimal Outdoor Temperture* and *Room Thermostat Target Temperature* entities. |
+| **Cooling Target Temperature** | Number | &deg;C | The target water temperature sent into the house. This value is ignored if cooling is based on outdoor temperature. |
+| **Approval** | Binary Sensor | - | Indicates if cooling is unlocked by the heat pump based on various factors such as outdoor temperature and room temperature. Consult the manual for more details |
 
 Advanced entities:
 | Name | Entity Type | Units | Description |
 | :--- | :--- | :--- | :--- |
-| **Cooling Minimal Flow Temperature** | Number | &deg;C | The minimal water temperature used for activating cooling. Default 18&deg;C. Lowering this value can cause condensation and damage to brine/water heatpumps. |
-| **Minimal Outdoor Temperature** | Number | &deg;C | The minimal outdoor temperature needed used to activate cooling given the Start Delay and Stop Delay. |
+| **Cooling Minimal Flow Temperature** | Number | &deg;C | The minimal water temperature used for activating cooling. Default 18&deg;C. |
+| **Minimal Outdoor Temperature** | Number | &deg;C | The minimal outdoor temperature which needs to be exceeded for a) the duration of the *start delay* or b) by 5&deg;C. |
 | **Start Delay** | Number | h | Duration the minimal outdoor temperature must be exceeded before cooling starts. |
 | **Stop Delay** | Number | h | Duration the minimal outdoor temperature must no longer be met before cooling stops. |
 
 > **⚠️ Important:** If the cooling target temperature is set too low, condensation can form on floor tiles, pipes, and inside the heat pump. A brine heat pump should generally not use a target temperature below 18°C to avoid damage. Consult your manual for details.
 
-> **ℹ️ Note:** The Energy input may not work as expected. This is a limitation of the Luxtronik firmware. 
+> **ℹ️ Note:** The Energy input may not work as expected. This is a limitation of the Luxtronik firmware.
+
+#### 3.1.1 Automating Cooling
+It's important to understand your setup and configurations in order to correctly automate cooling using Home Assistant. A properly configured heatpump can work well on it's own and requires little intervention. 
+
+It is not possible to force cooling to start. This is controlled by the heatpump based on the *Approval* and *Minimal Outdoor Temperature settings*. "Pausing" cooling can be done by switching *Cooling* to off. 
+<details>
+<summary>⚙️ Example: Cooling using solar power</summary>
+```yaml
+description: "Toggle Luxtronik cooling based on solar power"
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.solar_power
+    above: 200
+    for: "00:10:00"
+    id: "solar_high"
+  - platform: numeric_state
+    entity_id: sensor.solar_power
+    below: 200
+    for: "00:10:00"
+action:
+  - if:
+      - condition: trigger
+        id: "solar_high"
+    then:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.luxtronik_cooling
+    else:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.luxtronik_cooling
+```
+</details>
+
+The amount of cooling can be controlled with *Cooling Target Temperature* when the heatpump is configured to cool based on fixed temperature ([page 17](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf)).
 
 ### 2.4 DHW (Domestic Hot Water)
 Controls the boiler/tank for your tap water.
@@ -118,13 +153,7 @@ Here are a few practical examples of how to automate your Luxtronik heat pump:
 
 **1. Boost hot water before taking a bath:**
 Trigger the "Party" mode on the DHW device when you need extra hot water quickly.
-```yaml
-action: select.select_option
-target:
-  entity_id: select.luxtronik_dhw_mode
-data:
-  option: Party
-```
+
 
 **2. Reduce heating target while away:**
 Use the target correction entity to temporarily lower the heating curve by 2 degrees when nobody is home.
