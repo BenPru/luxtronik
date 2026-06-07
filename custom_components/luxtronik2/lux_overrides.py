@@ -44,7 +44,7 @@ parameters_to_add_update = {
 }
 
 calculations_to_add_update = {
-    258: MajorMinorVersion("ID_RBE_Version", False),
+    258: MajorMinorVersion("RBE_Version", False),
 }
 
 
