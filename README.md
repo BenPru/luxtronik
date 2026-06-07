@@ -1,224 +1,169 @@
-# Luxtronik
+# Luxtronik Home Assistant Integration
 
-This is a Home Assistant integration for [Luxtronik heatpumps](https://www.alpha-innotec.com/en/products/accessories/control/luxtronik). 
+This is a Home Assistant integration for [Luxtronik heat pumps](https://www.alpha-innotec.com/en/products/accessories/control/luxtronik).
 
-It is based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik). This component extends Bouni's Luxtronik integration with automatic discovery, UI Setup and predefined Home Assistant entities like climate and water heater. 
+It is based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik) which provides the groundwork for this integration. This integration extends the Bouni integration with with predefined entities and a full UI setup. Bouni en BenPru can run side by side.
 
-If you like this project, give it a ⭐, or sponsor the developer:
+If you like this project, give it a ⭐, or sponsor the developers:
 * Project creator: [BenPru](https://github.com/sponsors/BenPru).
 * Current developer: [rhammen](https://github.com/sponsors/rhammen).
 
-Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs/contributors) who have contributed to this project!
-Every contribution counts :pray:
+It takes a lot of time and effort to keep up with changes (Home Assistant and Luxtronik Firmware). BenPru has handed over the project to the community fos us to maintain. This means the project depends on you to submit issues and work with the community's developers to improve the integration. 
+
+Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs/contributors) who have contributed to this project. 
 
 ## ⚠️ Warning
-- Some of these settings can impact the performance of your heatpump. Misconfigurations may cause the controller to go into an error state, requiring a local reset. 
-- The project aims to protect your heatpump, by limiting the range of configuration to be safe. No guarantees can be given. 
-- Please be careful and consult the [Luxtronik manuals](https://www.alpha-innotec.com/en/products/ground-source-heat-pumps/wzs-series).
+Some settings exposed by this integration can impact the performance of your heat pump. Misconfigurations may cause the controller to go into an error state, requiring a local manual reset. 
 
-## 📖 Documentation
-Consult your manual and don't change things if you don't know what it does. 
-Share your knowledge and help with updating this user documentation of this project. 
+This project aims to protect your heat pump by limiting the configuration range to safe values. However, **no guarantees can be given**. Please be careful, consult your [Luxtronik manual](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf), and avoid changing settings you do not fully understand.
 
 ## 🔧 Compatibility
-The integration lets you monitor and control heat pump units containing a Luxtronik controller. It is used by various manufacturers such as:
+The integration lets you monitor and control heat pump units containing a Luxtronik controller. It **works locally** without internet access. Just plugin the ethernet cable and you're good to go.  
 
-- Alpha Innotec
-- Siemens Novelan
-- Roth
-- Elco
-- Buderus
-- Nibe
-- Wolf Heiztechnik
+It is used by manufacturers such as:
+- Alpha Innotec, 
+- Siemens, 
+- Novelan, 
+- Roth, 
+- Elco, 
+- Buderus, 
+- Nibe, 
+- Wolf Heiztechnik.
 
-This integration works locally. The Luxtronik controller need to be connected to your network using an ethernet cable. No internet access or additional hard- or software is needed.
 
-## 📑 Table of Content
-1. [Installation](#1-installation)
-1.1 [HACS (Recommended)](#11-hacs-recommended)
-1.2 [Adding Luxtronik](#12-adding-luxtronik)
-2. [Using Luxtronik](#2-using-luxtronik)
-2.1 [Heatpump](#21-heatpump)
-2.2 [Heating](#22-heating)
-2.3 [Cooling](#23-cooling)
-2.4 [DHW](#24-hdw)
-3. [Tips for using Luxtronik](#3-tips-for-using-luxtronik)  
-3.1 [Energy use](#31-energy-use)  
-3.2 [Additional sensors (advanced)](#32-additional-sensors-advanced)
-5. [Support / Creating tickets](#4-support-tickets)
+---
 
-## 1 Installation
+## 1. Installation
 
-This integration is based on [Bouni/luxtronik](https://github.com/Bouni/luxtronik). Both integrations can be used simultaneously, each with separate devices and entities.
+### Step 1: Add the repository to HACS
 
-### 1.1 HACS (recommended)
-
-Add the custom repo to HACS:
+Click the button below to automatically add the custom repository to HACS:
 
 [![Open your Home Assistant instance and show the add HACS repository dialog with a specific repository pre-filled.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BenPru&repository=Luxtronik&category=integration)
 
-Or:
-1. Go to 'HACS > Integration'
-2. Select 'Custom repositories' from the top right menu
-3. Under Repository, enter '<https://github.com/BenPru/luxtronik>'
-4. Under Category, select 'Integration'
-5. Click 'Add'
-The new integration will appear as a new integration and under 'Explore & Download Repositories' in the bottom right
+*(Alternatively: Open HACS, go to Integrations, click the three dots in the top right, select "Custom repositories", enter `https://github.com/BenPru/luxtronik`, and select "Integration" as the category).*
 
-Install the integration:
+### Step 2: Install the Integration
 
-1. Click on the new integration or find it under 'Explore & Download Repositories' in the bottom right with the search word 'luxtronik'.
-  * Choose the one with the blue download button: ![image](https://github.com/BenPru/luxtronik/assets/32298537/84a7e17f-1ae2-471b-8f79-ca9cdab1d249)
-2. Select 'download' at the bottom right.
-3. Restart Home Assistant
+1. Open HACS in Home Assistant.
+2. In Home Assistant, go to **Integrations** -> **Explore & Download Repositories**.
+3. Search for **Luxtronik**. Check that it's the BenPru integration by clicking on it. 
+4. Click on the integration, then click **Download** at the bottom right.
+5. **Restart** Home Assistant to load the new integration files.
 
-#### 1.1.1 Manual installation (Alternative)
+### Step 3: Add the Luxtronik Device(s)
 
-Add the integration to Home Assistant:
+1. **Auto-discovery:** Home Assistant should automatically discover your heat pump. Check the **Settings -> Devices & Services** page and click **Configure**.
+2. **Manual Addition:** If auto-discovery fails, click **Add Integration** in the bottom right corner, search for **Luxtronik**, and enter the IP address of your heat pump manually. *(Tip: Ensure the heat pump has a static IP in your router).*
 
-1. Download the latest release of the Luxtronik integration from this repository
-2. In Home Assistant, create a folder 'config/custom_components'
-3. Add the Luxtronik integration to the 'custom_components' folder
-4. Restart Home Assistant
+---
 
-### 1.2 Adding Luxtronik
+## 2. Using Luxtronik
 
-#### Autodiscovery
-
-Your heatpump should be autodiscovered by home assistant.  
-<img src="https://user-images.githubusercontent.com/5879533/178813978-bd8f13ff-ed27-4fa8-bfd0-6ff86a6e9786.png" width="300" />
-
-Press `Configure` and follow the steps to the end.
-
-#### Semi-automatic
-
-'If auto discovery does not work, please give feedback with the first six chars of your luxtronik heatpump mac address, the original hostname, the manufacturer and model.
-
-To add the heatpump manually go to `Settings -> Devices & services -> Add integration` and add a new Luxtronik device.'
-The integration then will try to find any new Luxtronik based heatpumps.
-If one or more (not yet configured) Luxtronik based heatpumps are found, you can select to add it.
-In case no (not yet configured) Luxtronik based heatpumps are detected, you can specify the hostname/ip-address manually, and the integration will try to connect to it.
-
-Select Configure and review the settings.  
-<img src="https://user-images.githubusercontent.com/32298537/267698990-e317633e-e78a-4341-92fb-a7022214ec1b.png" width="500" />
-
-> ℹ️ Ensure the IP address is static. This can be configured in your router.'
-
-## 2 Using Luxtronik 
-
-It's not always clear from the name alone what an entity exactly means and how it effects your heatpump. The main source of information is ofcourse the [Luxtronik Operating Manual](https://mw.ait-group.net/files/docs/EN/A0220/83055400.pdf).
-
-Another great source is [FHEM - Luxtronik 2.0](https://wiki.fhem.de/wiki/Luxtronik_2.0). It's in German so use Google Translate.  
-It contains details about the various parameters and how to use them to optimize your heatpump efficiency. Read carefully though. Make small incremental changes and monitor your progress in Home Assistant. You don't want to miss out on this information.
-
-Entities and actions are organized in 4 devices:
+Entities and actions are organized into four logical devices in Home Assistant to keep things structured. Here is an overview of what each device does and how to use the most common entities.
 
 ### 2.1 Heatpump
+This device represents the physical heat pump unit. It contains sensors and diagnostic entities such as electrical power consumption, thermal power output, operating hours, and current status.
+
+**Most important entities:**
+- **Status:** Shows whether the heat pump is heating, cooling, making hot water, or idle.
+- **Power Consumption Sensors:** Ideal for tracking energy usage if your model supports it.
+- **Errors/Lockouts:** Alerts if your heat pump is in an error state.
 
 ### 2.2 Heating
+This device controls the space heating functionality (e.g., underfloor heating or radiators).
+
+**Most important entities & actions:**
+- **Heating Climate Entity (`climate.heating`):** The primary thermostat to view the current operation mode and adjust the target temperature.
+- **Heating Operation Mode:** Choose between Automatic, Second Heatsource, Party (boost), Holidays (reduced), or Off.
+- **Target Temperature Correction:** Quickly bump the heating target up or down by a few degrees without altering the main heating curve.
 
 ### 2.3 Cooling
+If your heat pump supports active or passive cooling, this device manages it.
 
-| Description | Screenshot |
-| --- | --- |
-| Cooling is controlled using the "cooling" [climate entity](https://www.home-assistant.io/integrations/climate/). The "Cooling" switch under configurations is an alternative way to control the state. "Off" will disable cooling while "Cool" will allow cooling depending on the "Approval" and "start / stop delay" entities. | ![Cooling device](https://github.com/user-attachments/assets/3446b66b-5cb9-4bdd-8cfa-02e7dfb5e0dc) |
-| The "Cooling" climate entity allows you to control the state and target temperature. It is not possible to force the heatpump to start cooling at any time. The thermostat shows the current temperature and the minimal outdoor temperature required to unlock cooling. | ![Cooling climate entity](https://github.com/user-attachments/assets/a935b390-6c9d-47d4-8173-c9233ed07e2f) |
-| Cooling is approved by the heatpump based on various factors such as outdoor temperature and room temperature. Consult your manual for details. If cooling is approved, it will start after the minimal outdoor temperature has been exceeded for the duration set by the start delay, and stop once the minimal outdoor temperature is no longer met for the duration set by the stop delay. | ![Cooling approval](https://github.com/user-attachments/assets/1de49d8c-a505-4414-8a12-06c5ab202270) |
-| The actual cooling target temperature can be found in the configuration section. This is the target water temperature sent into the underfloor heating, not the target for the indoor temperature.  | ![Cooling thermostat](https://github.com/user-attachments/assets/4e641df7-8a50-4e38-9c74-b13cc495bf59) |
+| Name | Entity Type | Units | Description |
+| :--- | :--- | :--- | :--- |
+| **Cooling** | Climate | &deg;C | The climate entity combines several of the entities below into a combined climate entity. It shows the current temperature and controls the *Cooling Mode* and *Cooling Target Temperature*. |
+| **Cooling Mode** | Select / Switch | on/off | Controls the state. "Off" disables cooling, while "Automatic" allows cooling depending on the "Approval" and "Delay" entities. |
+| **Cooling Target Temperature** | Number | &deg;C | The target water temperature sent into the underfloor heating. Note: It does not function as the target room temperature. |
+| **Approval** | Binary Sensor | - | Indicates if cooling is approved by the heat pump based on various factors such as outdoor temperature and room temperature. |
+| **Cooling Minimal Flow Temperature** | Number | &deg;C | The minimal water temperature used for activating cooling. Default 18&deg;C. Lowering this value can cause condensation and damage to brine/water heatpumps. |
+| **Minimal Outdoor Temperature** | Number | &deg;C | The minimal outdoor temperature needed used to activate cooling given the Start Delay and Stop Delay. |
+| **Start Delay** | Number | h | Duration the minimal outdoor temperature must be exceeded before cooling starts. |
+| **Stop Delay** | Number | h | Duration the minimal outdoor temperature must no longer be met before cooling stops. |
 
-⚠️ If the target temperature is set too low, condensation can form on floortiles, pipes and inside the heatpump. A brine heatpump should not use a target temperature below 18°C to avoid damage. Consult your manual for details. 
+> **⚠️ Important:** If the cooling target temperature is set too low, condensation can form on floor tiles, pipes, and inside the heat pump. A brine heat pump should generally not use a target temperature below 18°C to avoid damage. Consult your manual for details.
 
-### 2.4 HDW
+### 2.4 DHW (Domestic Hot Water)
+Controls the boiler/tank for your tap water.
 
-## 3 Tips for using Luxtronik
+**Most important entities & actions:**
+- **Water Heater Entity (`water_heater.dhw`):** Use this to set the target hot water temperature and see the current temperature inside the tank.
+- **DHW Operation Mode:** Choose between Automatic, Party (instant heat), or Off.
 
-### 3.1 Energy use
+---
 
-Not all heatpumps have build in electrical electrical energy metering and instead only show the energy produced in heat, not the energy consumed in electricity. Adding a (strong) energy meter is a nice addition to measure the SCOP of your device. Shelly energy meters are recommended since they offer offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) and a [variety of in-line or clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) with various protection mechanisms.
+## 3. Automations & Advanced Usage
 
-### 3.2 Additional sensors (advanced)
+### 3.1 Common Automations
 
-If you miss a sensor please have a look in the devices under "+n entities not shown". Not all entities can autodetect by the integration. You can enable the entities by your self.
+Here are a few practical examples of how to automate your Luxtronik heat pump:
 
-The most useful sensors and parameters are created automatically. But if you miss a sensor you can add it manually via yaml configuration like the original module from [Bouni/luxtronik](https://github.com/Bouni/luxtronik).
-
-A short description of many of the available sensors can be found here [Loxwiki - Luxtronik Java Web Interface](https://loxwiki.atlassian.net/wiki/spaces/LOX/pages/1533935933/Java+Webinterface)
-
-#### Parameter IDs
-
-Take these files as a reference to figure out which IDs to use:
-
-- <https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/parameters.py>
-- <https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/calculations.py>
-- <https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/visibilities.py>
-
-#### Service
-
-In order to change parameters on the Luxtronik controller, you can use the following service:
-
+**1. Boost hot water before taking a bath:**
+Trigger the "Party" mode on the DHW device when you need extra hot water quickly.
 ```yaml
-Domain: luxtronik2
-Service: write
-Service Data: {"parameter": "ID_Ba_Hz_akt", "value": "Automatic"}
+action: select.select_option
+target:
+  entity_id: select.luxtronik_dhw_mode
+data:
+  option: Party
 ```
 
-- parameter
-  - description: ID of the parameter.
-  - type: string
-- value
-  - description: Value you want to set the parameter to.
-  - type: [string, float]
+**2. Reduce heating target while away:**
+Use the target correction entity to temporarily lower the heating curve by 2 degrees when nobody is home.
+```yaml
+action: number.set_value
+target:
+  entity_id: number.luxtronik_heating_target_correction
+data:
+  value: -2.0
+```
 
-Only a small number of the over 1100 parameters have a known function and only these can be written, these are:
+**3. Solar PV optimization (Simple):**
+If your solar panels are producing excess energy, increase the DHW target temperature so the heat pump acts as a thermal battery.
+```yaml
+action: water_heater.set_temperature
+target:
+  entity_id: water_heater.luxtronik_dhw
+data:
+  temperature: 55
+```
 
-- `ID_Ba_Hz_akt` The mode of operation of the heating circuit, possible values are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
-- `ID_Ba_Bw_akt` The mode of operation of the hot water circuit, possible values are "Automatic", "Second heatsource", "Party", "Holidays", "Off"
-- `ID_Soll_BWS_akt` The set point for hot water generation, for example 50.0 for 50.0°C
-- `ID_Einst_BA_Kuehl_akt` The mode of operation of the cooling circuit, possible values are "Automatic", "Off"
-- `ID_Einst_KuehlFreig_akt` The outdoor temperature from where on the cooling should start to operate, for example 24.0
-- `ID_Ba_Sw_akt` The mode of operation of the swimming pool heating circuit, possible values are "Automatic", "Party", "Holidays", "Off"
-- `ID_Einst_TDC_Max_akt` Max. temperature difference of the hot water buffer tank, for example 70.0
-- `ID_Sollwert_KuCft1_akt` Cooling set point for mixer circuit 1, for example 19.0
-- `ID_Sollwert_KuCft2_akt` Cooling set point for mixer circuit 2, for example 19.0
-- `ID_Sollwert_AtDif1_akt` Cooling working temperature difference 1, for example 5.0
-- `ID_Sollwert_AtDif2_akt` Cooling working temperature difference 2, for example 5.0
-- `ID_Ba_Hz_MK3_akt` The mode of operation of the heating mixer circuit 3, possible values are "Automatic", "Party", "Holidays", "Off"
-- `ID_Einst_Kuhl_Zeit_Ein_akt` Cooling outdoor temperature overrun, for example 0.0
-- `ID_Einst_Kuhl_Zeit_Aus_akt` Cooling outdoor temperature underrun, for example 0.0
-- `ID_Einst_Solar_akt` Mode of operation for solar heat generation, "Automatic", "Second heatsource", "Party", "Holidays", "Off"
-- `ID_Einst_BA_Lueftung_akt` Mode of operation of the integrated ventilation unit, posisble values are "Automatic", "Party", "Holidays", "Off"
-- `ID_Sollwert_KuCft3_akt` Cooling set point for mixer circuit 3, for example 20.0
-- `ID_Sollwert_AtDif3_akt` Cooling working temperature difference 3, for example 5.0
+### 3.2 Advanced Entities (Configuration)
 
-> ℹ️ Before changing a parameter it smart to first read the current value and note it somewhere in case you want to set it back to its original value.
-All parameters can be configured as sensors and read that way.
+To protect your system from accidental misconfiguration, several advanced configuration parameters are **disabled by default**. They can be enabled manually from the Home Assistant entity registry if you need them.
 
-## 4 Troubleshooting
+**These advanced entities include:**
+- **Thermal & Electrical Power Limits:** Used to throttle the heat pump's maximum power output.
+- **Heating Curve Parameters:** (End temperature, Parallel shift, Night offset) These define how the heat pump reacts to outdoor temperatures. They are typically configured once during commissioning by your installer.
+- **Heating Threshold Temperature:** The outdoor temperature above which the heating completely stops.
+- **Second Heat Generator Settings:** Rules for when the backup electric heater is allowed to engage.
 
-In case of issues, perform the following steps first.
-1. *Restart the heatpump*. Perform a full powercycle. This solves most connectivity issues.
-2. *Download the latest (beta) version if this integration*.
-   1. Go to `HACS` > `Luxtronik`.
-   2. From the 3-dot menu, select `Redownload`.
-   3. Expend `Need a different version` and select the latest pre-release.
-   4. Select `Download`
-   5. Restart Home Assistant.
-3. *Check the system logs*. If the integration isn't working, check the system logs first.
+> **Tip:** Do not modify the heating curve or power limits frequently via automations. Heat pumps are slow-reacting systems and perform best when left running with stable parameters.
 
-### Asking for help
-If you can't figure it out on your own, consult the community. Do a thorough search first before asking for help.
-1. *Use the HA Community Forum*. For basic questions regarding the functionality of your heatpump or the integration, the [HA community forum](https://community.home-assistant.io/t/writing-a-component-for-luxtronik-heatpumps/35796) is the best place to start.
-2. *Use the Discussions*. For more in-depth questions, check the [GitHub Discussions](https://github.com/BenPru/luxtronik/discussions).
- 
-### Support Tickets
-If something is broken and you can't fix it with the help of the community, [create a support issue](https://github.com/BenPru/luxtronik/issues). Always include a diagnostic file as issue attachment:
-![image](https://github.com/BenPru/luxtronik/assets/32298537/89c26414-0304-438f-9204-79cf0a338db3)
+### 3.3 Energy Use
 
-## Some Screenshots
+Not all heat pumps have built-in electrical energy metering. Some only show the thermal energy produced but not the electricity consumed. 
+If you want to accurately measure the SCOP (Seasonal Coefficient of Performance) of your device, consider adding an external energy meter. Devices like Shelly offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) or [in-line/clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) that integrate perfectly with Home Assistant.
 
-![image](https://user-images.githubusercontent.com/32298537/178588098-09e960f0-f849-475c-9afa-cf4a78e5d76d.png)
-![image](https://user-images.githubusercontent.com/32298537/178588218-56f914f0-1ec5-4851-84ff-1d53bf8d4c1d.png)
-![image](https://user-images.githubusercontent.com/32298537/178588500-2ec97e7f-c542-492c-9db0-3fcb68e1fe5c.png)
-![image](https://user-images.githubusercontent.com/32298537/178588584-3a1004ff-dc8f-47bf-9c32-1d9aae0a3aeb.png)
-![image](https://user-images.githubusercontent.com/32298537/178588670-0af53cc6-086d-4545-b3d0-0208043c188f.png)
-![image](https://user-images.githubusercontent.com/32298537/178588738-6588f1c8-1840-4961-a4f8-c956df5f600c.png)
+---
+
+## 4. Troubleshooting
+
+In case of connectivity or data issues, please perform the following steps first:
+1. **Restart the heat pump.** Perform a full power cycle by turning off the physical switch, waiting a few moments, and turning it back on. This solves most Luxtronik controller network issues.
+2. Ensure the heat pump has a **Static IP address** configured in your router.
+3. Update to the **latest (beta) version** of this integration in HACS.
+4. If issues persist, enable debug logging for this integration and check the Home Assistant logs.
+
+*For detailed parameter reference, see the [Loxwiki Luxtronik Java Web Interface](https://loxwiki.atlassian.net/wiki/spaces/LOX/pages/1533935933/Java+Webinterface) or the [Bouni/python-luxtronik](https://github.com/Bouni/python-luxtronik/blob/master/luxtronik/parameters.py) repository.*

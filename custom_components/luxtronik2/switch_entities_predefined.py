@@ -44,6 +44,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         key=SensorKey.ELECTRICAL_POWER_LIMITATION_SWITCH,
         luxtronik_key=LP.P1158_POWER_LIMIT_SWITCH,
         entity_category=EntityCategory.CONFIG,
+        entity_registry_enabled_default=False,
         visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
         # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
@@ -51,6 +52,7 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         key=SensorKey.THERMAL_POWER_LIMITATION_SWITCH,
         luxtronik_key=LP.P1175_THERMAL_POWER_LIMIT_SWITCH,
         entity_category=EntityCategory.CONFIG,
+        entity_registry_enabled_default=False,
         # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # LuxtronikSwitchDescription(
@@ -119,7 +121,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         device_key=DeviceKey.cooling,
         luxtronik_key=LP.P0108_MODE_COOLING,
         key=SensorKey.COOLING,
-        entity_category=EntityCategory.CONFIG,
         device_class=None,
         on_state=LuxMode.automatic,
         off_state=LuxMode.off,

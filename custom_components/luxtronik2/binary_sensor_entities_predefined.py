@@ -117,7 +117,7 @@ BINARY_SENSORS: list[LuxtronikBinarySensorEntityDescription] = [
         key=SensorKey.APPROVAL_COOLING,
         luxtronik_key=LC.C0146_APPROVAL_COOLING,
         device_key=DeviceKey.cooling,
-        device_class=BinarySensorDeviceClass.LOCK,
+        device_class=None,
     ),
     # endregion Cooling
 ]
