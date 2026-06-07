@@ -20,11 +20,9 @@ class MajorMinorVersion(Base):
     datatype_class = "version"
 
     def from_heatpump(self, value):
-        if value > 0:
-            major = value // 100
-            minor = value % 100
-            return f"{major}.{minor:02d}"
-        return "0"
+        major = value // 100
+        minor = value % 100
+        return f"{major}.{minor:02d}"
 
 
 # Define your new/updated custom parameters in a dictionary
