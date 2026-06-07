@@ -170,6 +170,12 @@ class TestCoordinatorProperties:
         thermostat_type = coord.room_thermostat_type
         assert thermostat_type == LuxRoomThermostatType.rbe
 
+        coord = _make_coordinator(
+            parameters={"ID_Einst_RFVEinb_akt": 4}, calculations={"RBE_Version": "4.03"}
+        )
+        thermostat_type = coord.room_thermostat_type
+        assert thermostat_type == LuxRoomThermostatType.rbe_plus
+
         coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": 5})
         thermostat_type = coord.room_thermostat_type
         assert thermostat_type == LuxRoomThermostatType.smart
