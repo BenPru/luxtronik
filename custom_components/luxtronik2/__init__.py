@@ -75,16 +75,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     # Trigger a refresh again now that all platforms have registered
     # await coordinator.async_refresh()
 
-    # 🛠️ Update title
+    # 🛠️ Update title on initial setup only
+    host = config.get(CONF_HOST)
+    port = config.get(CONF_PORT)
+
     if coordinator.manufacturer is not None:
-        new_title = (
-            f"{coordinator.manufacturer} @ {config[CONF_HOST]}:{config[CONF_PORT]}"
-        )
+        new_title = f"{coordinator.manufacturer} @ {host}:{port}"
     else:
-        new_title = f"Luxtronik @ {config[CONF_HOST]}:{config[CONF_PORT]}"
+        new_title = f"Luxtronik @ {host}:{port}"
+
     LOGGER.info("new_title: %s", new_title)
 
-    hass.config_entries.async_update_entry(entry, title=new_title.strip())
+    # Preserve any user-provided title. Only auto-update when the existing
+    # title is empty. If the title already matches `new_title`, do nothing.
+    # Otherwise, assume the user renamed the entry and preserve it.
+    # Only treat existing title as valid when it's an explicit string value.
+
+    old_title = entry.title if isinstance(entry.title, str) else ""
+
+    if not old_title:
+        hass.config_entries.async_update_entry(entry, title=new_title.strip())
+    else:
+        if old_title == new_title.strip():
+            LOGGER.debug("Config entry title already up-to-date: %s", old_title)
+        else:
+            LOGGER.debug("Preserve user-set config entry title: %s", old_title)
 
     setup_hass_services(hass, entry)
 
