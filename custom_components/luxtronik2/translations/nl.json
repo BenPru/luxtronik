@@ -884,11 +884,11 @@
             "pv_mode_selector": {
                 "name": "PV Mode",
                 "state": {
-                    "Automatic": "Automatisch",
-                    "PV_Off": "PV uit",
-                    "Pool_Off": "Pool uit",
-                    "Pool_Party": "Pool party",
-                    "Pool_Holidays": "Pool vakantie"
+                    "automatic": "Automatisch",
+                    "pv_off": "PV uit",
+                    "pool_off": "Pool uit",
+                    "pool_party": "Pool party",
+                    "pool_holidays": "Pool vakantie"
                 }
             }
         },

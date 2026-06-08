@@ -916,11 +916,11 @@
             "pv_mode_selector": {
                 "name": "PV re\u017eim",
                 "state": {
-                    "Automatic": "Automaticky",
-                    "PV_Off": "PV vypnuto",
-                    "Pool_Off": "Pool vypnuto",
-                    "Pool_Party": "Pool p\u00e1rty",
-                    "Pool_Holidays": "Pool pr\u00e1zdniny"
+                    "automatic": "Automaticky",
+                    "pv_off": "PV vypnuto",
+                    "pool_off": "Pool vypnuto",
+                    "pool_party": "Pool p\u00e1rty",
+                    "pool_holidays": "Pool pr\u00e1zdniny"
                 }
             }
         },

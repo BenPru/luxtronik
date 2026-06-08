@@ -878,11 +878,11 @@
             "pv_mode_selector": {
                 "name": "Tryb PV",
                 "state": {
-                    "Automatic": "Automatyczny",
-                    "PV_Off": "PV wy\u0142\u0105czony",
-                    "Pool_Off": "Basen wy\u0142\u0105czony",
-                    "Pool_Party": "Impreza basenowa",
-                    "Pool_Holidays": "Wakacje basenowe"
+                    "automatic": "Automatyczny",
+                    "pv_off": "PV wy\u0142\u0105czony",
+                    "pool_off": "Basen wy\u0142\u0105czony",
+                    "pool_party": "Impreza basenowa",
+                    "pool_holidays": "Wakacje basenowe"
                 }
             }
         },

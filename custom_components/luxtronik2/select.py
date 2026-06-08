@@ -22,6 +22,7 @@ from .const import (
     DAY_SELECTOR_OPTIONS,
     LOGGER,
     DeviceKey,
+    LuxParameter as LP,
     LuxPoolPVMode,
     SensorKey as SK,
 )
@@ -226,6 +227,8 @@ class LuxtronikModeSelector(
         coordinator: LuxtronikCoordinator,
         description: LuxtronikSelectEntityDescription,
         device_info_ident: DeviceKey,
+        lux_parameter: str | LP | None = None,
+        options: list[str] | None = None,
     ) -> None:
         super().__init__(
             coordinator=coordinator,
@@ -233,8 +236,10 @@ class LuxtronikModeSelector(
             device_info_ident=device_info_ident,
         )
 
-        self._lux_parameter = description.luxtronik_key
-        self._attr_options = list(description.options or [])
+        self._lux_parameter = (
+            description.luxtronik_key if lux_parameter is None else lux_parameter
+        )
+        self._attr_options = list(options or description.options or [])
         self._attr_current_option = None
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]

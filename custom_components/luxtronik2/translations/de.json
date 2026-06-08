@@ -902,11 +902,11 @@
             "pv_mode_selector": {
                 "name": "PV Modus",
                 "state": {
-                    "Automatic": "Automatisch",
-                    "PV_Off": "PV aus",
-                    "Pool_Off": "Pool aus",
-                    "Pool_Party": "Pool-Party",
-                    "Pool_Holidays": "Pool-Ferien"
+                    "automatic": "Automatisch",
+                    "pv_off": "PV aus",
+                    "pool_off": "Pool aus",
+                    "pool_party": "Pool-Party",
+                    "pool_holidays": "Pool-Ferien"
                 }
             }
         },

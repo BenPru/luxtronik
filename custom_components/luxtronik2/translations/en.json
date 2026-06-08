@@ -650,11 +650,11 @@
             "pv_mode_selector": {
                 "name": "PV Mode",
                 "state": {
-                    "Automatic": "Automatic",
-                    "PV_Off": "PV Off",
-                    "Pool_Off": "Pool Off",
-                    "Pool_Party": "Pool Party",
-                    "Pool_Holidays": "Pool Holidays"
+                    "automatic": "Automatic",
+                    "pv_off": "PV Off",
+                    "pool_off": "Pool Off",
+                    "pool_party": "Pool Party",
+                    "pool_holidays": "Pool Holidays"
                 }
             }
         },
