@@ -89,7 +89,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     # Preserve any user-provided title. Only auto-update when the existing
     # title is empty. If the title already matches `new_title`, do nothing.
     # Otherwise, assume the user renamed the entry and preserve it.
-    old_title = entry.title or ""
+    # Only treat existing title as valid when it's an explicit string value.
+
+    old_title = entry.title if isinstance(entry.title, str) else ""
 
     if not old_title:
         hass.config_entries.async_update_entry(entry, title=new_title.strip())
