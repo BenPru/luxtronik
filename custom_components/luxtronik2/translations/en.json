@@ -646,6 +646,16 @@
                     "1": "Manual set temperature",
                     "2": "Analog in"
                 }
+            },
+            "pv_mode_selector": {
+                "name": "PV Mode",
+                "state": {
+                    "Automatic": "Automatic",
+                    "PV_Off": "PV Off",
+                    "Pool_Off": "Pool Off",
+                    "Pool_Party": "Pool Party",
+                    "Pool_Holidays": "Pool Holidays"
+                }
             }
         },
         "climate": {

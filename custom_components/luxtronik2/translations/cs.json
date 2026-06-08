@@ -912,6 +912,16 @@
                     "1": "Manu\u00e1ln\u011b nastaven\u00e1 teplota",
                     "2": "Analogov\u00fd vstup"
                 }
+            },
+            "pv_mode_selector": {
+                "name": "PV re\u017eim",
+                "state": {
+                    "Automatic": "Automaticky",
+                    "PV_Off": "PV vypnuto",
+                    "Pool_Off": "Pool vypnuto",
+                    "Pool_Party": "Pool p\u00e1rty",
+                    "Pool_Holidays": "Pool pr\u00e1zdniny"
+                }
             }
         },
         "climate": {

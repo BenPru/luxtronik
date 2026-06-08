@@ -8,6 +8,7 @@ from luxtronik.datatypes import (
     MixedCircuitMode,
     Percent,
     Percent2,
+    SelectionBase,
     Timestamp,
 )
 from luxtronik.parameters import Parameters
@@ -25,10 +26,25 @@ class MajorMinorVersion(Base):
         return f"{major}.{minor:02d}"
 
 
+class PoolPVMode(SelectionBase):
+    """PoolPVMode datatype, converts from and to a PoolPVMode"""
+
+    measurement_type = "selection"
+
+    codes = {
+        0: "Automatic",
+        1: "PV_Off",
+        2: "Pool_Party",
+        3: "Pool_Holidays",
+        4: "Pool_Off",
+    }
+
+
 # Define your new/updated custom parameters in a dictionary
 parameters_to_add_update = {
     6: Timestamp("ID_SU_FrkdHz", True),
     7: Timestamp("ID_SU_FrkdBw", True),
+    119: PoolPVMode("ID_Ba_Sw_akt", True),
     695: MixedCircuitMode("ID_Ba_Hz_MK1_akt", True),
     696: MixedCircuitMode("ID_Ba_Hz_MK2_akt", True),
     731: Timestamp("ID_SU_FstdHz", True),

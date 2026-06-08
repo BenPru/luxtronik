@@ -898,6 +898,16 @@
                     "1": "Manuell gesetzte Temperatur",
                     "2": "AIn"
                 }
+            },
+            "pv_mode_selector": {
+                "name": "PV Modus",
+                "state": {
+                    "Automatic": "Automatisch",
+                    "PV_Off": "PV aus",
+                    "Pool_Off": "Pool aus",
+                    "Pool_Party": "Pool-Party",
+                    "Pool_Holidays": "Pool-Ferien"
+                }
             }
         },
         "climate": {

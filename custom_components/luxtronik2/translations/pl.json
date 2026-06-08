@@ -874,6 +874,16 @@
                     "1": "R\u0119cznie ustawiona temperatura",
                     "2": "Wej\u015bcie analogowe"
                 }
+            },
+            "pv_mode_selector": {
+                "name": "Tryb PV",
+                "state": {
+                    "Automatic": "Automatyczny",
+                    "PV_Off": "PV wy\u0142\u0105czony",
+                    "Pool_Off": "Basen wy\u0142\u0105czony",
+                    "Pool_Party": "Impreza basenowa",
+                    "Pool_Holidays": "Wakacje basenowe"
+                }
             }
         },
         "climate": {

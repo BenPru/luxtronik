@@ -152,6 +152,16 @@ class LuxMode(StrEnum):
     holidays = "Holidays"
 
 
+class LuxPoolPVMode(StrEnum):
+    """Luxmodes off etc."""
+
+    automatic = "Automatic"
+    pv_off = "PV_Off"
+    pool_off = "Pool_Off"
+    pool_party = "Pool_Party"
+    pool_holidays = "Pool_Holidays"
+
+
 class LuxSmartGridStatus(StrEnum):
     """SmartGrid status based on EVU and EVU2 inputs."""
 
@@ -223,7 +233,6 @@ class LuxRoomThermostatType(Enum):
     """LuxMkTypes etc."""
 
     none = 0
-    # TODO: Validate types:
     rfv = 1
     rfv_k = 2
     rfv_dk = 3
@@ -386,7 +395,7 @@ class LuxParameter(StrEnum):
     P0108_MODE_COOLING = "parameters.ID_Einst_BA_Kuehl_akt"
     P0110_COOLING_OUTDOOR_TEMP_THRESHOLD = "parameters.ID_Einst_KuehlFreig_akt"
     P0111_HEATING_NIGHT_LOWERING_TO_TEMPERATURE = "parameters.ID_Einst_TAbsMin_akt"
-    P0119_MODE_POOL = "parameters.ID_Ba_Sw_akt"
+    P0119_MODE_PV = "parameters.ID_Ba_Sw_akt"
     P0122_SOLAR_PUMP_ON_DIFFERENCE_TEMPERATURE = "parameters.ID_Einst_TDC_Ein_akt"
     P0123_SOLAR_PUMP_OFF_DIFFERENCE_TEMPERATURE = "parameters.ID_Einst_TDC_Aus_akt"
     P0130_MIXING_CIRCUIT2_TYPE = "parameters.ID_Einst_MK2Typ_akt"
@@ -844,6 +853,7 @@ class SensorKey(StrEnum):
     PUMP_VENT_TIMER_H = "pump_vent_timer_h"
     PUMP_VENT_ACTIVE = "pump_vent_active"
     THERMAL_DESINFECTION_DAY = "thermal_desinfection_day"
+    PV_MODE_SELECTOR = "pv_mode_selector"
 
     AWAY_HEATING_STARTDATE = "away_heating_startdate"
     AWAY_HEATING_ENDDATE = "away_heating_enddate"
