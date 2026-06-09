@@ -908,6 +908,53 @@
                     "pool_party": "Pool-Party",
                     "pool_holidays": "Pool-Ferien"
                 }
+            },
+            "heating_mode": {
+                "name": "Heizmodus",
+                "state": {
+                    "off": "Aus",
+                    "automatic": "Automatisch",
+                    "second_heatsource": "Zweiter W\u00e4rmeerzeuger",
+                    "party": "Hochleistung",
+                    "holidays": "Ferien"
+                }
+            },
+            "dhw_mode": {
+                "name": "Warmwasser-Modus",
+                "state": {
+                    "off": "Aus",
+                    "automatic": "Automatisch",
+                    "second_heatsource": "Zweiter W\u00e4rmeerzeuger",
+                    "party": "Hochleistung",
+                    "holidays": "Ferien"
+                }
+            },
+            "heating_mode_mk1": {
+                "name": "Heizmodus MK1",
+                "state": {
+                    "off": "Aus",
+                    "automatic": "Automatisch",
+                    "party": "Hochleistung",
+                    "holidays": "Ferien"
+                }
+            },
+            "heating_mode_mk2": {
+                "name": "Heizmodus MK2",
+                "state": {
+                    "off": "Aus",
+                    "automatic": "Automatisch",
+                    "party": "Hochleistung",
+                    "holidays": "Ferien"
+                }
+            },
+            "heating_mode_mk3": {
+                "name": "Heizmodus MK3",
+                "state": {
+                    "off": "Aus",
+                    "automatic": "Automatisch",
+                    "party": "Hochleistung",
+                    "holidays": "Ferien"
+                }
             }
         },
         "climate": {

@@ -922,6 +922,53 @@
                     "pool_party": "Pool p\u00e1rty",
                     "pool_holidays": "Pool pr\u00e1zdniny"
                 }
+            },
+            "heating_mode": {
+                "name": "Re\u017eim vyt\u00e1p\u011bn\u00ed",
+                "state": {
+                    "off": "Vypnuto",
+                    "automatic": "Automaticky",
+                    "second_heatsource": "Druh\u00fd zdroj tepla",
+                    "party": "P\u00e1rty",
+                    "holidays": "Dovolen\u00e1"
+                }
+            },
+            "dhw_mode": {
+                "name": "Re\u017eim tepl\u00e9 vody",
+                "state": {
+                    "off": "Vypnuto",
+                    "automatic": "Automaticky",
+                    "second_heatsource": "Druh\u00fd zdroj tepla",
+                    "party": "P\u00e1rty",
+                    "holidays": "Dovolen\u00e1"
+                }
+            },
+            "heating_mode_mk1": {
+                "name": "Re\u017eim vyt\u00e1p\u011bn\u00ed MK1",
+                "state": {
+                    "off": "Vypnuto",
+                    "automatic": "Automaticky",
+                    "party": "P\u00e1rty",
+                    "holidays": "Dovolen\u00e1"
+                }
+            },
+            "heating_mode_mk2": {
+                "name": "Re\u017eim vyt\u00e1p\u011bn\u00ed MK2",
+                "state": {
+                    "off": "Vypnuto",
+                    "automatic": "Automaticky",
+                    "party": "P\u00e1rty",
+                    "holidays": "Dovolen\u00e1"
+                }
+            },
+            "heating_mode_mk3": {
+                "name": "Re\u017eim vyt\u00e1p\u011bn\u00ed MK3",
+                "state": {
+                    "off": "Vypnuto",
+                    "automatic": "Automaticky",
+                    "party": "P\u00e1rty",
+                    "holidays": "Dovolen\u00e1"
+                }
             }
         },
         "climate": {

@@ -885,6 +885,54 @@
                     "pool_holidays": "Wakacje basenowe"
                 }
             }
+            ,
+            "heating_mode": {
+                "name": "Tryb ogrzewania",
+                "state": {
+                    "off": "Wy\u0142\u0105czony",
+                    "automatic": "Automatyczny",
+                    "second_heatsource": "Drugie \u017ar\u00f3d\u0142o ciep\u0142a",
+                    "party": "Tryb imprezowy",
+                    "holidays": "Tryb wakacyjny"
+                }
+            },
+            "dhw_mode": {
+                "name": "Tryb ciep\u0142ej wody",
+                "state": {
+                    "off": "Wy\u0142\u0105czony",
+                    "automatic": "Automatyczny",
+                    "second_heatsource": "Drugie \u017ar\u00f3d\u0142o ciep\u0142a",
+                    "party": "Tryb imprezowy",
+                    "holidays": "Tryb wakacyjny"
+                }
+            },
+            "heating_mode_mk1": {
+                "name": "Tryb ogrzewania MK1",
+                "state": {
+                    "off": "Wy\u0142\u0105czony",
+                    "automatic": "Automatyczny",
+                    "party": "Tryb imprezowy",
+                    "holidays": "Tryb wakacyjny"
+                }
+            },
+            "heating_mode_mk2": {
+                "name": "Tryb ogrzewania MK2",
+                "state": {
+                    "off": "Wy\u0142\u0105czony",
+                    "automatic": "Automatyczny",
+                    "party": "Tryb imprezowy",
+                    "holidays": "Tryb wakacyjny"
+                }
+            },
+            "heating_mode_mk3": {
+                "name": "Tryb ogrzewania MK3",
+                "state": {
+                    "off": "Wy\u0142\u0105czony",
+                    "automatic": "Automatyczny",
+                    "party": "Tryb imprezowy",
+                    "holidays": "Tryb wakacyjny"
+                }
+            }
         },
         "climate": {
             "heating_controller": {

@@ -657,6 +657,54 @@
                     "pool_holidays": "Pool Holidays"
                 }
             }
+            ,
+            "heating_mode": {
+                "name": "Heating mode",
+                "state": {
+                    "off": "Off",
+                    "automatic": "Automatic",
+                    "second_heatsource": "Second heatsource",
+                    "party": "Party",
+                    "holidays": "Holidays"
+                }
+            },
+            "dhw_mode": {
+                "name": "DHW mode",
+                "state": {
+                    "off": "Off",
+                    "automatic": "Automatic",
+                    "second_heatsource": "Second heatsource",
+                    "party": "Party",
+                    "holidays": "Holidays"
+                }
+            },
+            "heating_mode_mk1": {
+                "name": "Heating mode MK1",
+                "state": {
+                    "off": "Off",
+                    "automatic": "Automatic",
+                    "party": "Party",
+                    "holidays": "Holidays"
+                }
+            },
+            "heating_mode_mk2": {
+                "name": "Heating mode MK2",
+                "state": {
+                    "off": "Off",
+                    "automatic": "Automatic",
+                    "party": "Party",
+                    "holidays": "Holidays"
+                }
+            },
+            "heating_mode_mk3": {
+                "name": "Heating mode MK3",
+                "state": {
+                    "off": "Off",
+                    "automatic": "Automatic",
+                    "party": "Party",
+                    "holidays": "Holidays"
+                }
+            }
         },
         "climate": {
             "heating_controller": {
