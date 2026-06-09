@@ -67,7 +67,7 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         device_key=DeviceKey.domestic_water,
         luxtronik_key=LuxParameter.P0004_MODE_DHW,
         name="DHW mode",
-        options=mode_mk_options,
+        options=mode_options,
     ),
     LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_SELECTOR,
