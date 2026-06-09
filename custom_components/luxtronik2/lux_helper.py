@@ -44,23 +44,40 @@ LUXTRONIK_CALCULATIONS_READ = 3004
 LUXTRONIK_VISIBILITIES_READ = 3005
 
 
-def discover() -> list[tuple[str, int | None]]:
-    """Broadcast discovery for Luxtronik heat pumps."""
+def discover(
+    broadcast_addresses: list[str] | None = None,
+) -> list[tuple[str, int | None]]:
+    """Broadcast discovery for Luxtronik heat pumps.
 
+    When ``broadcast_addresses`` is provided, the magic packet is sent
+    to each address (one per network interface, in the caller's case).
+    Multi-homed Home Assistant hosts need this: a single broadcast to
+    ``255.255.255.255`` only goes out the kernel's default route,
+    missing devices that live on other subnets.
+
+    Default ``None`` preserves the legacy single-broadcast behavior so
+    external callers (the python-luxtronik library, the command-line
+    helper, etc.) keep working unchanged.
+    """
+
+    targets: list[str] = (
+        list(broadcast_addresses) if broadcast_addresses else ["255.255.255.255"]
+    )
     results: list[tuple[str, int | None]] = []
 
     # pylint: disable=too-many-nested-blocks
     for port in LUXTRONIK_DISCOVERY_PORTS:
-        LOGGER.info("Send discovery packets to port %s", port)
+        LOGGER.info("Send discovery packets to port %s on %s", port, targets)
         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         server.bind(("", port))
         server.settimeout(LUXTRONIK_DISCOVERY_TIMEOUT)
 
-        # send AIT magic broadcast packet
+        # send AIT magic broadcast packet to every target broadcast address
         magic_bytes = LUXTRONIK_DISCOVERY_MAGIC_PACKET.encode()
-        server.sendto(magic_bytes, ("255.255.255.255", port))
-        LOGGER.debug("Sending broadcast request %s", magic_bytes)
+        for target in targets:
+            server.sendto(magic_bytes, (target, port))
+            LOGGER.debug("Sent broadcast request to %s:%s", target, port)
 
         while True:
             try:
