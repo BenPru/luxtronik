@@ -33,6 +33,10 @@ from .select_entities_predefined import SELECT_ENTITIES
 PARALLEL_UPDATES = 1
 
 
+def _normalize_select_option(value: str) -> str:
+    return value.strip().lower().replace(" ", "_")
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: LuxtronikConfigEntry,
@@ -239,7 +243,12 @@ class LuxtronikModeSelector(
         self._lux_parameter = (
             description.luxtronik_key if lux_parameter is None else lux_parameter
         )
-        self._attr_options = list(options or description.options or [])
+        raw_options = list(options or description.options or [])
+        self._option_to_raw = {
+            _normalize_select_option(raw_option): raw_option
+            for raw_option in raw_options
+        }
+        self._attr_options = list(self._option_to_raw)
         self._attr_current_option = None
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
@@ -256,15 +265,21 @@ class LuxtronikModeSelector(
         if data is None:
             return
 
-        current = str(get_sensor_data(data, self._lux_parameter))
+        current_raw = str(get_sensor_data(data, self._lux_parameter))
+        current = _normalize_select_option(current_raw)
 
-        LOGGER.debug("%s raw value from coordinator: %r", self.entity_id, current)
+        LOGGER.debug(
+            "%s raw value from coordinator: %r, normalized value: %r",
+            self.entity_id,
+            current_raw,
+            current,
+        )
 
         if current not in self._attr_options:
             LOGGER.warning(
                 "%s value %r not in options %r",
                 self.entity_id,
-                current,
+                current_raw,
                 self._attr_options,
             )
             return
@@ -285,9 +300,10 @@ class LuxtronikModeSelector(
         LOGGER.debug("Setting %s to %r", self.entity_id, option)
 
         self._attr_current_option = option
+        raw_option = self._option_to_raw.get(option, option)
 
         updated_data = await self.coordinator.async_write(
             str(self._lux_parameter).split(".")[1],
-            option,
+            raw_option,
         )
         self._handle_coordinator_update(updated_data)

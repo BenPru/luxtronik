@@ -890,6 +890,53 @@
                     "pool_party": "Pool party",
                     "pool_holidays": "Pool vakantie"
                 }
+            },
+            "heating_mode": {
+                "name": "Verwarmingsmodus",
+                "state": {
+                    "off": "Uit",
+                    "automatic": "Automatisch",
+                    "second_heatsource": "Tweede warmtebron",
+                    "party": "Party",
+                    "holidays": "Vakantie"
+                }
+            },
+            "dhw_mode": {
+                "name": "Warmwatermodus",
+                "state": {
+                    "off": "Uit",
+                    "automatic": "Automatisch",
+                    "second_heatsource": "Tweede warmtebron",
+                    "party": "Party",
+                    "holidays": "Vakantie"
+                }
+            },
+            "heating_mode_mk1": {
+                "name": "Verwarmingsmodus MK1",
+                "state": {
+                    "off": "Uit",
+                    "automatic": "Automatisch",
+                    "party": "Party",
+                    "holidays": "Vakantie"
+                }
+            },
+            "heating_mode_mk2": {
+                "name": "Verwarmingsmodus MK2",
+                "state": {
+                    "off": "Uit",
+                    "automatic": "Automatisch",
+                    "party": "Party",
+                    "holidays": "Vakantie"
+                }
+            },
+            "heating_mode_mk3": {
+                "name": "Verwarmingsmodus MK3",
+                "state": {
+                    "off": "Uit",
+                    "automatic": "Automatisch",
+                    "party": "Party",
+                    "holidays": "Vakantie"
+                }
             }
         },
         "climate": {

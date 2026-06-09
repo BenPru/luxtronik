@@ -878,11 +878,21 @@ class TestLuxtronikModeSelector:
         entity, _ = self._make_mode_selector()
         assert SK.HEATING_MODE_SELECTOR in entity.entity_id
 
+    def test_options_are_normalized(self):
+        entity, _ = self._make_mode_selector()
+        assert entity._attr_options == [
+            "off",
+            "automatic",
+            "second_heatsource",
+            "party",
+            "holidays",
+        ]
+
     def test_handle_coordinator_update_valid(self):
         entity, _ = self._make_mode_selector(value="Automatic")
         data = make_coordinator_data(parameters={"ID_Ba_Hz_akt": "Automatic"})
         entity._handle_coordinator_update(data)
-        assert entity._attr_current_option == "Automatic"
+        assert entity._attr_current_option == "automatic"
 
     def test_handle_coordinator_update_invalid_option(self):
         entity, _ = self._make_mode_selector(value="InvalidMode")
@@ -899,8 +909,8 @@ class TestLuxtronikModeSelector:
     @pytest.mark.asyncio
     async def test_select_valid_option(self):
         entity, coord = self._make_mode_selector()
-        await entity.async_select_option("Off")
-        coord.async_write.assert_called_once()
+        await entity.async_select_option("off")
+        coord.async_write.assert_called_once_with("ID_Ba_Hz_akt", "Off")
 
     @pytest.mark.asyncio
     async def test_select_invalid_option(self):
