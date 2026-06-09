@@ -880,6 +880,16 @@
                     "1": "Handmatig ingestelde temperatuur",
                     "2": "Analoge ingang"
                 }
+            },
+            "pv_mode_selector": {
+                "name": "PV Mode",
+                "state": {
+                    "automatic": "Automatisch",
+                    "pv_off": "PV uit",
+                    "pool_off": "Pool uit",
+                    "pool_party": "Pool party",
+                    "pool_holidays": "Pool vakantie"
+                }
             }
         },
         "climate": {
