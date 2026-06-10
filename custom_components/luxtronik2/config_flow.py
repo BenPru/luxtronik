@@ -69,11 +69,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _discover_devices(self) -> list[tuple[str, int | None]]:
         """Run device discovery in executor.
 
-        Enumerates every enabled IPv4 adapter via HA's network helper and
-        broadcasts on each. Without this, a single broadcast to
-        ``255.255.255.255`` only goes out the kernel's default route,
-        which misses heatpumps reachable from HA but not via that route
-        (multi-homed hosts: extra NICs, VLANs, Docker bridges).
+        Enumerates every enabled IPv4 adapter via HA's network helper, vs
+        just the default adapter we'd get if we passed ``255.255.255.255``.
         """
         broadcasts = await network.async_get_ipv4_broadcast_addresses(self.hass)
         broadcast_addresses = [str(addr) for addr in broadcasts]

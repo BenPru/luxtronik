@@ -49,15 +49,8 @@ def discover(
 ) -> list[tuple[str, int | None]]:
     """Broadcast discovery for Luxtronik heat pumps.
 
-    When ``broadcast_addresses`` is provided, the magic packet is sent
-    to each address (one per network interface, in the caller's case).
-    Multi-homed Home Assistant hosts need this: a single broadcast to
-    ``255.255.255.255`` only goes out the kernel's default route,
-    missing devices that live on other subnets.
-
-    Default ``None`` preserves the legacy single-broadcast behavior so
-    external callers (the python-luxtronik library, the command-line
-    helper, etc.) keep working unchanged.
+    If you omit ``broadcast_addresses``, fallback to the OS-selected
+    default route.
     """
 
     targets: list[str] = (
