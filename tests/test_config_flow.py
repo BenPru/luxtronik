@@ -33,6 +33,19 @@ def _mock_coordinator():
     return coord
 
 
+@pytest.fixture(autouse=True)
+def _stub_network_broadcasts():
+    # _discover_devices calls network.async_get_ipv4_broadcast_addresses(hass);
+    # tests use a MagicMock hass, so the real helper crashes on storage load.
+    with patch(
+        "custom_components.luxtronik2.config_flow.network."
+        "async_get_ipv4_broadcast_addresses",
+        new_callable=AsyncMock,
+        return_value=[],
+    ):
+        yield
+
+
 # ===========================================================================
 # LuxtronikFlowHandler helpers
 # ===========================================================================

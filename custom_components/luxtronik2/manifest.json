@@ -9,7 +9,8 @@
   ],
   "config_flow": true,
   "dependencies": [
-    "http"
+    "http",
+    "network"
   ],
   "dhcp": [
     {

@@ -306,6 +306,64 @@ class TestDiscover:
         results = discover()
         assert ("192.168.1.200", None) not in results
 
+    @patch("custom_components.luxtronik2.lux_helper.socket")
+    def test_discover_default_uses_global_broadcast(self, mock_socket_module):
+        """Without an explicit address list, sendto targets 255.255.255.255."""
+        sock_instance = MagicMock()
+        mock_socket_module.socket.return_value = sock_instance
+        mock_socket_module.AF_INET = 2
+        mock_socket_module.SOCK_DGRAM = 2
+        mock_socket_module.IPPROTO_UDP = 17
+        mock_socket_module.SOL_SOCKET = 1
+        mock_socket_module.SO_BROADCAST = 6
+        sock_instance.recvfrom.side_effect = TimeoutError
+
+        discover()
+
+        target_addrs = {call.args[1][0] for call in sock_instance.sendto.call_args_list}
+        assert target_addrs == {"255.255.255.255"}
+
+    @patch("custom_components.luxtronik2.lux_helper.socket")
+    def test_discover_broadcasts_on_every_supplied_address(self, mock_socket_module):
+        """Per-interface broadcasts: each address gets the magic packet on each port."""
+        sock_instance = MagicMock()
+        mock_socket_module.socket.return_value = sock_instance
+        mock_socket_module.AF_INET = 2
+        mock_socket_module.SOCK_DGRAM = 2
+        mock_socket_module.IPPROTO_UDP = 17
+        mock_socket_module.SOL_SOCKET = 1
+        mock_socket_module.SO_BROADCAST = 6
+        sock_instance.recvfrom.side_effect = TimeoutError
+
+        broadcasts = ["192.168.1.255", "192.168.120.255", "10.0.0.255"]
+        discover(broadcast_addresses=broadcasts)
+
+        # Each address should appear at least once per broadcast port.
+        target_addrs = [call.args[1][0] for call in sock_instance.sendto.call_args_list]
+        for addr in broadcasts:
+            assert target_addrs.count(addr) >= 1, (
+                f"{addr} was not broadcast to; calls: {target_addrs}"
+            )
+        # No fallback to 255.255.255.255 when explicit list is supplied.
+        assert "255.255.255.255" not in target_addrs
+
+    @patch("custom_components.luxtronik2.lux_helper.socket")
+    def test_discover_empty_address_list_falls_back_to_global(self, mock_socket_module):
+        """An empty list is treated like None: fall back to 255.255.255.255."""
+        sock_instance = MagicMock()
+        mock_socket_module.socket.return_value = sock_instance
+        mock_socket_module.AF_INET = 2
+        mock_socket_module.SOCK_DGRAM = 2
+        mock_socket_module.IPPROTO_UDP = 17
+        mock_socket_module.SOL_SOCKET = 1
+        mock_socket_module.SO_BROADCAST = 6
+        sock_instance.recvfrom.side_effect = TimeoutError
+
+        discover(broadcast_addresses=[])
+
+        target_addrs = {call.args[1][0] for call in sock_instance.sendto.call_args_list}
+        assert target_addrs == {"255.255.255.255"}
+
 
 # ===========================================================================
 # _is_socket_closed

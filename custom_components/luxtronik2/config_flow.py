@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any
 
 from homeassistant import config_entries
+from homeassistant.components import network
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import callback
@@ -66,8 +67,14 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         }
 
     async def _discover_devices(self) -> list[tuple[str, int | None]]:
-        """Run device discovery in executor."""
-        return await self.hass.async_add_executor_job(discover)
+        """Run device discovery in executor.
+
+        Enumerates every enabled IPv4 adapter via HA's network helper, vs
+        just the default adapter we'd get if we passed ``255.255.255.255``.
+        """
+        broadcasts = await network.async_get_ipv4_broadcast_addresses(self.hass)
+        broadcast_addresses = [str(addr) for addr in broadcasts]
+        return await self.hass.async_add_executor_job(discover, broadcast_addresses)
 
     async def _set_unique_id_or_abort(
         self, coordinator: LuxtronikCoordinator, config: dict[str, Any]
