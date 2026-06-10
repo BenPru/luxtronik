@@ -74,9 +74,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """
         broadcasts = await network.async_get_ipv4_broadcast_addresses(self.hass)
         broadcast_addresses = [str(addr) for addr in broadcasts]
-        return await self.hass.async_add_executor_job(
-            discover, broadcast_addresses
-        )
+        return await self.hass.async_add_executor_job(discover, broadcast_addresses)
 
     async def _set_unique_id_or_abort(
         self, coordinator: LuxtronikCoordinator, config: dict[str, Any]
