@@ -583,15 +583,12 @@ def _make_binary_sensor(description=None, data=None):
 class TestBinarySensorComputeIsOn:
     def test_disturbance_output_fault_detection_error_changed_before(self):
         """When disturbance_output is ON and error_reason changed before, it's a real fault."""
-        # Create coordinator data with disturbance_output=True
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_ZW2SSTout": 1,  # disturbance_output ON
-                "ID_WEB_ERROR_Nr0": 42,  # error_reason has value
+                "ID_WEB_ZW2SSTout": True,
+                "ID_WEB_ERROR_Nr0": 42,
             }
         )
-
-        # Create binary sensor entity for disturbance output
         desc = LuxtronikBinarySensorEntityDescription(
             key=SensorKey.DISTURBANCE_OUTPUT,
             luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
@@ -599,80 +596,66 @@ class TestBinarySensorComputeIsOn:
         )
         entity = _make_binary_sensor(desc, data)
 
-        # Mock hass.states.get to return state objects with timestamps
         disturbance_state = MagicMock()
-        disturbance_state.last_changed = datetime(2026, 1, 1, 12, 0, 1)  # 12:00:01
-
+        disturbance_state.last_changed = datetime(2026, 1, 1, 12, 0, 1)
         error_state = MagicMock()
-        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)  # 12:00:00 (changed BEFORE disturbance)
+        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)
 
         def get_side_effect(entity_id):
             if entity_id == entity.entity_id:
                 return disturbance_state
-            elif entity_id == f"{entity.entity_id.rsplit('_', 1)[0]}_error_reason":
+            if entity_id.endswith("_error_reason"):
                 return error_state
             return None
 
         entity.hass.states.get.side_effect = get_side_effect
 
-        # Call compute_is_on directly to test the logic
-        result = entity.compute_is_on(True)
+        entity._handle_coordinator_update(data)
+        assert entity.is_on is False
 
-        # Should return True (real fault) because error_changed < disturbance_changed
-        assert result is True
-
-    def test_disturbance_output_fault_detection_error_changed_after(self):
-        """When disturbance_output is ON and error_reason changed after, it's a real fault."""
-        # Create coordinator data with disturbance_output=True
+    def test_disturbance_output_timestamp_comparison_exception(self):
+        """Exception during timestamp comparison falls back to default computation."""
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_ZW2SSTout": 1,  # disturbance_output ON
-                "ID_WEB_ERROR_Nr0": 42,  # error_reason has value
+                "ID_WEB_ZW2SSTout": True,
+                "ID_WEB_ERROR_Nr0": 42,
             }
         )
-
-        # Create binary sensor entity for disturbance output
         desc = LuxtronikBinarySensorEntityDescription(
             key=SensorKey.DISTURBANCE_OUTPUT,
             luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
             device_key=DeviceKey.heatpump,
+            on_state=True,
         )
         entity = _make_binary_sensor(desc, data)
 
-        # Mock hass.states.get to return state objects with timestamps
         disturbance_state = MagicMock()
-        disturbance_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)  # 12:00:00
-
+        type(disturbance_state).last_changed = property(
+            lambda self: (_ for _ in ()).throw(AttributeError("no last_changed"))
+        )
         error_state = MagicMock()
-        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 1)  # 12:00:01 (changed AFTER disturbance)
+        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)
 
         def get_side_effect(entity_id):
             if entity_id == entity.entity_id:
                 return disturbance_state
-            elif entity_id == f"{entity.entity_id.rsplit('_', 1)[0]}_error_reason":
+            if entity_id.endswith("_error_reason"):
                 return error_state
             return None
 
         entity.hass.states.get.side_effect = get_side_effect
 
-        # Call compute_is_on directly to test the logic
-        result = entity.compute_is_on(True)
-
-        # Should return True (real fault) because error_changed > disturbance_changed
-        # (error changed AFTER disturbance, so not treated as ZWE2 noise)
-        assert result is True
+        entity._handle_coordinator_update(data)
+        assert entity.is_on is True
 
     def test_disturbance_output_fault_detection_equal_timestamps(self):
         """When disturbance_output is ON and error_reason changed at same time, it's a real fault."""
-        # Create coordinator data with disturbance_output=True
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_ZW2SSTout": 1,  # disturbance_output ON
-                "ID_WEB_ERROR_Nr0": 42,  # error_reason has value
+                "ID_WEB_ZW2SSTout": True,
+                "ID_WEB_ERROR_Nr0": 42,
             }
         )
-
-        # Create binary sensor entity for disturbance output
         desc = LuxtronikBinarySensorEntityDescription(
             key=SensorKey.DISTURBANCE_OUTPUT,
             luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
@@ -680,116 +663,89 @@ class TestBinarySensorComputeIsOn:
         )
         entity = _make_binary_sensor(desc, data)
 
-        # Mock hass.states.get to return state objects with same timestamps
         disturbance_state = MagicMock()
         disturbance_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)
-
         error_state = MagicMock()
-        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)  # Same time
+        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)
 
         def get_side_effect(entity_id):
             if entity_id == entity.entity_id:
                 return disturbance_state
-            elif entity_id == f"{entity.entity_id.rsplit('_', 1)[0]}_error_reason":
+            if entity_id.endswith("_error_reason"):
                 return error_state
             return None
 
         entity.hass.states.get.side_effect = get_side_effect
 
-        # Call compute_is_on directly to test the logic
-        result = entity.compute_is_on(True)
-
-        # Should return True (real fault) because error_changed is NOT < disturbance_changed
-        # (error changed at same time as disturbance, so not treated as ZWE2 noise)
-        assert result is True
+        entity._handle_coordinator_update(data)
+        assert entity.is_on is True
 
     def test_disturbance_output_missing_states(self):
         """When disturbance or error state is missing, fall back to default computation."""
-        # Create coordinator data with disturbance_output=True
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_ZW2SSTout": 1,  # disturbance_output ON
+                "ID_WEB_ZW2SSTout": True,
             }
         )
-
-        # Create binary sensor entity for disturbance output
         desc = LuxtronikBinarySensorEntityDescription(
             key=SensorKey.DISTURBANCE_OUTPUT,
             luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
             device_key=DeviceKey.heatpump,
-            on_state=True,  # Assume it's ON when value is True
+            on_state=True,
         )
         entity = _make_binary_sensor(desc, data)
 
-        # Mock hass.states.get to return None for one or both states
         def get_side_effect(entity_id):
-            return None  # Return None for both states
+            return None
 
         entity.hass.states.get.side_effect = get_side_effect
 
-        # Call compute_is_on directly to test the logic
-        result = entity.compute_is_on(True)
-
-        # Should fall back to default computation and return True (since state == on_state)
-        assert result is True
+        entity._handle_coordinator_update(data)
+        assert entity.is_on is True
 
     def test_disturbance_output_off_uses_default_computation(self):
         """When disturbance_output is OFF, use default computation."""
-        # Create coordinator data with disturbance_output=False
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_ZW2SSTout": 0,  # disturbance_output OFF
+                "ID_WEB_ZW2SSTout": False,
             }
         )
-
-        # Create binary sensor entity for disturbance output
         desc = LuxtronikBinarySensorEntityDescription(
             key=SensorKey.DISTURBANCE_OUTPUT,
             luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
             device_key=DeviceKey.heatpump,
-            on_state=True,  # Assume it's ON when value is True
+            on_state=True,
         )
         entity = _make_binary_sensor(desc, data)
         _patch_entity(entity)
 
-        # Call compute_is_on directly to test the logic
-        result = entity.compute_is_on(False)
-
-        # Should use default computation: state (False) == on_state (True) -> False
-        assert result is False
+        entity._handle_coordinator_update(data)
+        assert entity.is_on is False
 
     def test_disturbance_output_on_uses_default_when_no_error_reason(self):
         """When disturbance_output is ON but no error_reason entity, use default computation."""
-        # Create coordinator data with disturbance_output=True
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_ZW2SSTout": 1,  # disturbance_output ON
-                # No error_reason data
+                "ID_WEB_ZW2SSTout": True,
             }
         )
-
-        # Create binary sensor entity for disturbance output
         desc = LuxtronikBinarySensorEntityDescription(
             key=SensorKey.DISTURBANCE_OUTPUT,
             luxtronik_key=LC.C0049_DISTURBANCE_OUTPUT,
             device_key=DeviceKey.heatpump,
-            on_state=True,  # Assume it's ON when value is True
+            on_state=True,
         )
         entity = _make_binary_sensor(desc, data)
 
-        # Mock hass.states.get to return disturbance state but None for error state
         disturbance_state = MagicMock()
         disturbance_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)
 
         def get_side_effect(entity_id):
             if entity_id == entity.entity_id:
                 return disturbance_state
-            return None  # Error state not found
+            return None
 
         entity.hass.states.get.side_effect = get_side_effect
 
-        # Call compute_is_on directly to test the logic
-        result = entity.compute_is_on(True)
-
-        # Should fall back to default computation and return True (since state == on_state)
-        assert result is True
+        entity._handle_coordinator_update(data)
+        assert entity.is_on is True

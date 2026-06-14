@@ -122,6 +122,7 @@ class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportInco
 
         # Special handling for DISTURBANCE_OUTPUT (C0049 / ID_WEB_ZW2SSTout)
         if descr.key == SensorKey.DISTURBANCE_OUTPUT and state is True:
+            LOGGER.debug("Entering special handling for DISTURBANCE_OUTPUT")
             # Get entity IDs for cross-reference checks
             disturbance_entity_id = self.entity_id
             # Construct error_reason entity ID using same prefix pattern
@@ -133,11 +134,14 @@ class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportInco
             # Get state objects to check last_changed timestamps
             disturbance_state = self.hass.states.get(disturbance_entity_id)
             error_state = self.hass.states.get(error_reason_entity_id)
+            LOGGER.debug("Disturbance state: %s, Error state: %s", disturbance_state, error_state)
 
             if disturbance_state and error_state:
+                LOGGER.debug("Both states are available for DISTURBANCE_OUTPUT")
                 try:
                     disturbance_changed = disturbance_state.last_changed
                     error_changed = error_state.last_changed
+                    LOGGER.debug("Disturbance changed: %s, Error changed: %s", disturbance_changed, error_changed)
 
                     # If error_reason changed BEFORE disturbance_output,
                     # then the disturbance output is just ZWE2 noise, not a fault
