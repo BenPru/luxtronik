@@ -532,6 +532,68 @@ class TestAsyncSetupEntry:
 
         mock_delete.assert_any_call(hass, DOMAIN, f"connection_failed_{entry.entry_id}")
 
+    @pytest.mark.asyncio
+    async def test_preserves_existing_matching_title(self):
+        """Existing title matching new_title logs already up-to-date message."""
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.config_entries.async_update_entry = MagicMock()
+        hass.services.has_service = MagicMock(return_value=True)
+        entry = _mock_entry()
+        coord = _mock_coordinator(hass)
+        coord.manufacturer = "Alpha Innotec"
+        entry.data = {
+            **entry.data,
+            CONF_HOST: "192.168.1.100",
+            CONF_PORT: DEFAULT_PORT,
+        }
+        entry.title = "Alpha Innotec @ 192.168.1.100:8889"
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                return_value=coord,
+            ),
+            patch("custom_components.luxtronik2.LOGGER") as mock_logger,
+        ):
+            await async_setup_entry(hass, entry)
+
+        hass.config_entries.async_update_entry.assert_not_called()
+        mock_logger.debug.assert_any_call(
+            "Config entry title already up-to-date: %s", "Alpha Innotec @ 192.168.1.100:8889"
+        )
+
+    @pytest.mark.asyncio
+    async def test_preserves_user_renamed_title(self):
+        """User-renamed title different from new_title is preserved."""
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.config_entries.async_update_entry = MagicMock()
+        hass.services.has_service = MagicMock(return_value=True)
+        entry = _mock_entry()
+        coord = _mock_coordinator(hass)
+        coord.manufacturer = "Alpha Innotec"
+        entry.data = {
+            **entry.data,
+            CONF_HOST: "192.168.1.100",
+            CONF_PORT: DEFAULT_PORT,
+        }
+        entry.title = "My Custom Heatpump Name"
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                return_value=coord,
+            ),
+            patch("custom_components.luxtronik2.LOGGER") as mock_logger,
+        ):
+            await async_setup_entry(hass, entry)
+
+        hass.config_entries.async_update_entry.assert_not_called()
+        mock_logger.debug.assert_any_call(
+            "Preserve user-set config entry title: %s", "My Custom Heatpump Name"
+        )
+
 
 # ===========================================================================
 # async_unload_entry

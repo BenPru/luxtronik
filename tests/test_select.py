@@ -17,10 +17,15 @@ from custom_components.luxtronik2.const import (
     DOMAIN,
     DeviceKey,
     LuxDaySelectorParameter,
+    LuxPoolPVMode,
     SensorKey,
 )
 from custom_components.luxtronik2.model import LuxtronikSelectEntityDescription
-from custom_components.luxtronik2.select import LuxtronikThermalDesinfectionDaySelector
+from custom_components.luxtronik2.select import (
+    LuxtronikThermalDesinfectionDaySelector,
+    _build_pv_mode_selector_description,
+    build_select_descriptions,
+)
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",
@@ -140,3 +145,111 @@ class TestThermalDesinfectionAsyncUpdate:
             )
             await entity.async_update()
         assert entity._attr_current_option == "wednesday"
+
+
+# ===========================================================================
+# _build_pv_mode_selector_description
+# ===========================================================================
+
+
+class TestBuildPVModeSelectorDescription:
+    def test_pv_off_value_returns_reduced_options(self):
+        """When value is pv_off, only automatic and pv_off options are returned."""
+        coord = _mock_coordinator()
+        coord.get_value.return_value = LuxPoolPVMode.pv_off
+        desc = LuxtronikSelectEntityDescription(
+            key=SensorKey.PV_MODE_SELECTOR,
+            device_key=DeviceKey.heatpump,
+            luxtronik_key="test_key",
+            options=["automatic", "pv_off", "pool_party", "pool_holidays", "pool_off"],
+        )
+
+        result = _build_pv_mode_selector_description(coord, desc)
+
+        assert result.options == [m.value for m in (LuxPoolPVMode.automatic, LuxPoolPVMode.pv_off)]
+
+    def test_pool_mode_value_returns_all_pool_options(self):
+        """When value is pool_party/pool_holidays/pool_off, all pool options are returned."""
+        coord = _mock_coordinator()
+        for pool_value in (
+            LuxPoolPVMode.pool_party,
+            LuxPoolPVMode.pool_holidays,
+            LuxPoolPVMode.pool_off,
+        ):
+            coord.get_value.return_value = pool_value
+            desc = LuxtronikSelectEntityDescription(
+                key=SensorKey.PV_MODE_SELECTOR,
+                device_key=DeviceKey.heatpump,
+                luxtronik_key="test_key",
+                options=["automatic", "pv_off", "pool_party", "pool_holidays", "pool_off"],
+            )
+
+            result = _build_pv_mode_selector_description(coord, desc)
+
+            assert result.options == [
+                m.value
+                for m in (
+                    LuxPoolPVMode.automatic,
+                    LuxPoolPVMode.pool_off,
+                    LuxPoolPVMode.pool_party,
+                    LuxPoolPVMode.pool_holidays,
+                )
+            ]
+
+    def test_automatic_value_returns_original_description(self):
+        """When value is automatic, original description is returned unchanged."""
+        coord = _mock_coordinator()
+        coord.get_value.return_value = LuxPoolPVMode.automatic
+        desc = LuxtronikSelectEntityDescription(
+            key=SensorKey.PV_MODE_SELECTOR,
+            device_key=DeviceKey.heatpump,
+            luxtronik_key="test_key",
+            options=["automatic", "pv_off", "pool_party", "pool_holidays", "pool_off"],
+        )
+
+        result = _build_pv_mode_selector_description(coord, desc)
+
+        assert result is desc
+
+    def test_unknown_value_returns_original_description(self):
+        """When value is unknown, original description is returned unchanged."""
+        coord = _mock_coordinator()
+        coord.get_value.return_value = "unknown_mode"
+        desc = LuxtronikSelectEntityDescription(
+            key=SensorKey.PV_MODE_SELECTOR,
+            device_key=DeviceKey.heatpump,
+            luxtronik_key="test_key",
+            options=["automatic", "pv_off", "pool_party", "pool_holidays", "pool_off"],
+        )
+
+        result = _build_pv_mode_selector_description(coord, desc)
+
+        assert result is desc
+
+
+# ===========================================================================
+# build_select_descriptions
+# ===========================================================================
+
+
+class TestBuildSelectDescriptions:
+    def test_builds_descriptions_with_pv_mode_adjusted(self):
+        """build_select_descriptions adjusts PV mode options based on current value."""
+        coord = _mock_coordinator()
+        coord.get_value.return_value = LuxPoolPVMode.pv_off
+
+        descriptions = build_select_descriptions(coord)
+
+        pv_desc = next(d for d in descriptions if d.key == SensorKey.PV_MODE_SELECTOR)
+        assert pv_desc.options == [m.value for m in (LuxPoolPVMode.automatic, LuxPoolPVMode.pv_off)]
+
+    def test_non_pv_descriptions_unchanged(self):
+        """Non-PV mode descriptions are returned unchanged."""
+        coord = _mock_coordinator()
+        coord.get_value.return_value = LuxPoolPVMode.automatic
+
+        descriptions = build_select_descriptions(coord)
+
+        for d in descriptions:
+            if d.key != SensorKey.PV_MODE_SELECTOR:
+                assert d.options is not None
