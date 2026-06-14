@@ -136,3 +136,4 @@ dmypy.json
 
 #Mac
 .DS_Store
+check_coverage.py
