@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from custom_components.luxtronik2.const import (
+    CONF_UPDATE_INTERVAL,
     CONFIG_ENTRY_VERSION,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
+    DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     PLATFORMS,
+    UPDATE_INTERVAL_OPTIONS,
     DeviceKey,
     LuxCalculation,
     LuxMkTypes,
@@ -171,3 +174,23 @@ class TestLuxVisibility:
 class TestSensorKey:
     def test_firmware(self):
         assert SensorKey.FIRMWARE is not None
+
+
+class TestUpdateIntervalConstants:
+    def test_default_update_interval(self):
+        assert DEFAULT_UPDATE_INTERVAL == "30 seconds"
+
+    def test_update_interval_options_keys_and_timedeltas(self):
+        assert set(UPDATE_INTERVAL_OPTIONS.keys()) == {
+            "10 seconds",
+            "30 seconds",
+            "1 minute (default)",
+            "5 minutes",
+        }
+        assert UPDATE_INTERVAL_OPTIONS["10 seconds"].total_seconds() == 10
+        assert UPDATE_INTERVAL_OPTIONS["30 seconds"].total_seconds() == 30
+        assert UPDATE_INTERVAL_OPTIONS["1 minute (default)"].total_seconds() == 60
+        assert UPDATE_INTERVAL_OPTIONS["5 minutes"].total_seconds() == 300
+
+    def test_conf_update_interval_constant(self):
+        assert CONF_UPDATE_INTERVAL == "update_interval"
