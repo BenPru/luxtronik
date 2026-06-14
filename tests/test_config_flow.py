@@ -17,6 +17,7 @@ from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
+    CONF_UPDATE_INTERVAL,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
@@ -487,6 +488,20 @@ class TestOptionsFlow:
         assert call_kwargs["data"].get(CONF_HA_SENSOR_INDOOR_TEMPERATURE) is None
 
     @pytest.mark.asyncio
+    async def test_step_user_saves_update_interval(self):
+        entry = MagicMock()
+        entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+        entry.options = {}
+        entry.title = "Test HP"
+        flow = _make_options_flow(entry)
+        flow.hass = MagicMock()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+        await flow.async_step_user({CONF_UPDATE_INTERVAL: "1 minute (default)"})
+        flow.async_create_entry.assert_called_once()
+        call_kwargs = flow.async_create_entry.call_args[1]
+        assert call_kwargs["data"][CONF_UPDATE_INTERVAL] == "1 minute (default)"
+
+    @pytest.mark.asyncio
     async def test_step_user_clears_legacy_indoor_temp_from_data(self):
         """Clearing works even when the value only exists in config_entry.data."""
         entry = MagicMock()
@@ -624,8 +639,8 @@ class TestAsyncStepReconfigure:
             result = await flow.async_step_reconfigure(
                 {CONF_HOST: "5.6.7.8", CONF_PORT: 8889}
             )
-        assert result["type"] == "abort"
-        assert result["reason"] == "reconfigure_successful"
+        assert result.get("type") == "abort"
+        assert result.get("reason") == "reconfigure_successful"
         flow.async_update_reload_and_abort.assert_called_once()
 
     @pytest.mark.asyncio

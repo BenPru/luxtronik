@@ -33,6 +33,16 @@ PLATFORMS: list[str] = [
     Platform.SELECT,
     Platform.DATE,
 ]
+CONF_UPDATE_INTERVAL: Final = "update_interval"
+
+DEFAULT_UPDATE_INTERVAL: Final = timedelta(seconds=60)
+UPDATE_INTERVAL_OPTIONS: Final = {
+    "10 seconds": timedelta(seconds=10),
+    "30 seconds": timedelta(seconds=30),
+    "1 minute (default)": timedelta(seconds=60),
+    "5 minutes": timedelta(minutes=5),
+}
+
 UPDATE_INTERVAL_FAST: Final = timedelta(seconds=10)
 UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)
 UPDATE_INTERVAL_SLOW: Final = timedelta(minutes=3)

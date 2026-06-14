@@ -13,7 +13,9 @@ from packaging.version import Version
 import pytest
 
 from custom_components.luxtronik2.const import (
+    CONF_UPDATE_INTERVAL,
     DEFAULT_PORT,
+    DEFAULT_UPDATE_INTERVAL,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -81,6 +83,7 @@ def _make_coordinator_direct(data=None):
     coord.update_reason_write = False
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
+    coord.update_interval = DEFAULT_UPDATE_INTERVAL
     if data is None:
         data = LuxtronikCoordinatorData(
             parameters={"ID_WEB_WP_BZ_akt": (0, 0)},
@@ -89,6 +92,61 @@ def _make_coordinator_direct(data=None):
         )
     coord.data = data
     return coord
+
+
+class TestUpdateIntervalConfig:
+    def test_default_update_interval_when_missing(self):
+        coord = _make_coordinator()
+        with patch.object(coord, "_async_update_data", new_callable=AsyncMock):
+            pass
+        assert coord.update_interval is not None
+        assert coord.update_interval == DEFAULT_UPDATE_INTERVAL
+
+    def test_custom_update_interval_from_config(self):
+        config = {
+            CONF_HOST: "192.168.1.100",
+            CONF_PORT: DEFAULT_PORT,
+            CONF_UPDATE_INTERVAL: "1 minute (default)",
+        }
+        with patch("homeassistant.helpers.frame.report_usage"):
+            coord = LuxtronikCoordinator(
+                hass=MagicMock(), client=MagicMock(), config=config
+            )
+        assert coord.update_interval is not None
+        assert coord.update_interval.total_seconds() == 60
+
+    def test_unknown_update_interval_falls_back_to_default(self):
+        config = {
+            CONF_HOST: "192.168.1.100",
+            CONF_PORT: DEFAULT_PORT,
+            CONF_UPDATE_INTERVAL: "not_a_real_option",
+        }
+        with patch("homeassistant.helpers.frame.report_usage"):
+            coord = LuxtronikCoordinator(
+                hass=MagicMock(), client=MagicMock(), config=config
+            )
+        assert coord.update_interval is not None
+        assert coord.update_interval.total_seconds() == 60
+
+    def test_all_known_intervals_map_correctly(self):
+        expected = {
+            "10 seconds": 10,
+            "30 seconds": 30,
+            "1 minute (default)": 60,
+            "5 minutes": 300,
+        }
+        for label, seconds in expected.items():
+            config = {
+                CONF_HOST: "192.168.1.100",
+                CONF_PORT: DEFAULT_PORT,
+                CONF_UPDATE_INTERVAL: label,
+            }
+            with patch("homeassistant.helpers.frame.report_usage"):
+                coord = LuxtronikCoordinator(
+                    hass=MagicMock(), client=MagicMock(), config=config
+                )
+            assert coord.update_interval is not None
+            assert coord.update_interval.total_seconds() == seconds
 
 
 # ===========================================================================
@@ -490,7 +548,8 @@ class TestCoordinatorGetValue:
         coord = _make_coordinator(parameters={"ID_Ba_Hz_akt": "Automatic"})
         sensor = coord.get_sensor("parameters", "ID_Ba_Hz_akt")
         assert sensor is not None
-        assert sensor.value == "Automatic"
+        value = sensor[1] if isinstance(sensor, tuple) else sensor.value
+        assert value == "Automatic"
 
     def test_get_sensor_unknown_group(self):
         coord = _make_coordinator()

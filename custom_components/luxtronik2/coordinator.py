@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
+from datetime import timedelta
 from functools import wraps
 import re
 from types import MappingProxyType
@@ -24,14 +25,16 @@ from .const import (
     CONF_CALCULATIONS,
     CONF_MAX_DATA_LENGTH,
     CONF_PARAMETERS,
+    CONF_UPDATE_INTERVAL,
     CONF_VISIBILITIES,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
+    DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
-    UPDATE_INTERVAL_NORMAL,
+    UPDATE_INTERVAL_OPTIONS,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -90,19 +93,37 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._config = config
         self.device_infos = dict[str, DeviceInfo]()
         self.update_reason_write = False
+
+        update_interval: timedelta = DEFAULT_UPDATE_INTERVAL
+        raw = config.get(CONF_UPDATE_INTERVAL)
+        if isinstance(raw, str) and raw in UPDATE_INTERVAL_OPTIONS:
+            update_interval = UPDATE_INTERVAL_OPTIONS[raw]
+
         super().__init__(
             hass,
             LOGGER,
             name=DOMAIN,
             update_method=self._async_update_data,
-            update_interval=UPDATE_INTERVAL_NORMAL,
+            update_interval=update_interval,
+        )
+
+        LOGGER.info(
+            "Coordinator update interval=%s s",
+            self.update_interval.total_seconds()
+            if self.update_interval is not None
+            else None,
         )
 
     async def _async_update_data(self) -> LuxtronikCoordinatorData:
         async with self._lock:
             try:
                 await self.hass.async_add_executor_job(self.client.read)
-                LOGGER.debug("_async_update_data")
+                LOGGER.debug(
+                    "Update coordinator data  (Async, interval=%s s)",
+                    self.update_interval.total_seconds()
+                    if self.update_interval is not None
+                    else None,
+                )
                 self.data = LuxtronikCoordinatorData(
                     parameters=self.client.parameters,
                     calculations=self.client.calculations,
@@ -545,10 +566,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
             del self.client
-        else:
-            LOGGER.warning(
-                "LuxtronikCoordinator has no 'client' attribute during shutdown."
-            )
 
 
 class LuxtronikConnectionError(HomeAssistantError):
@@ -585,6 +602,8 @@ async def connect_and_get_coordinator(
     config_data: dict[str, Any] = dict(
         config.data if isinstance(config, ConfigEntry) else config
     )
+    if isinstance(config, ConfigEntry):
+        config_data.update(dict(config.options))
 
     host: str = config_data.get(CONF_HOST, "")
     port = config_data.get(CONF_PORT, DEFAULT_PORT)
@@ -593,9 +612,8 @@ async def connect_and_get_coordinator(
         coordinator = await LuxtronikCoordinator.connect(hass, config_data)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
-        # ✅ Perform initial data fetch manually
-        await coordinator._async_update_data()
-        LOGGER.info("Initial data fetched for coordinator")
+        # no need to fetch first data manually here,
+        # already done by async_config_entry_first_refresh() in __init.py:47__
 
         return coordinator
     except Exception as err:
