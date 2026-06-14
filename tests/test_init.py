@@ -560,7 +560,8 @@ class TestAsyncSetupEntry:
 
         hass.config_entries.async_update_entry.assert_not_called()
         mock_logger.debug.assert_any_call(
-            "Config entry title already up-to-date: %s", "Alpha Innotec @ 192.168.1.100:8889"
+            "Config entry title already up-to-date: %s",
+            "Alpha Innotec @ 192.168.1.100:8889",
         )
 
     @pytest.mark.asyncio

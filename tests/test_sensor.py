@@ -604,7 +604,9 @@ class TestBinarySensorComputeIsOn:
         disturbance_state.last_changed = datetime(2026, 1, 1, 12, 0, 1)  # 12:00:01
 
         error_state = MagicMock()
-        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)  # 12:00:00 (changed BEFORE disturbance)
+        error_state.last_changed = datetime(
+            2026, 1, 1, 12, 0, 0
+        )  # 12:00:00 (changed BEFORE disturbance)
 
         def get_side_effect(entity_id):
             if entity_id == entity.entity_id:
@@ -644,7 +646,9 @@ class TestBinarySensorComputeIsOn:
         disturbance_state.last_changed = datetime(2026, 1, 1, 12, 0, 0)  # 12:00:00
 
         error_state = MagicMock()
-        error_state.last_changed = datetime(2026, 1, 1, 12, 0, 1)  # 12:00:01 (changed AFTER disturbance)
+        error_state.last_changed = datetime(
+            2026, 1, 1, 12, 0, 1
+        )  # 12:00:01 (changed AFTER disturbance)
 
         def get_side_effect(entity_id):
             if entity_id == entity.entity_id:
