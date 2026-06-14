@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
+from datetime import timedelta
 from functools import wraps
 import re
 from types import MappingProxyType
@@ -33,7 +34,6 @@ from .const import (
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
-    UPDATE_INTERVAL_NORMAL,
     UPDATE_INTERVAL_OPTIONS,
     DeviceKey,
     LuxCalculation as LC,
@@ -94,9 +94,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.device_infos = dict[str, DeviceInfo]()
         self.update_reason_write = False
 
-        update_interval = UPDATE_INTERVAL_NORMAL
-        raw = config.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
-        update_interval = UPDATE_INTERVAL_OPTIONS.get(str(raw), update_interval)
+        update_interval: timedelta = DEFAULT_UPDATE_INTERVAL
+        raw = config.get(CONF_UPDATE_INTERVAL)
+        if isinstance(raw, str) and raw in UPDATE_INTERVAL_OPTIONS:
+            update_interval = UPDATE_INTERVAL_OPTIONS[raw]
 
         super().__init__(
             hass,

@@ -35,7 +35,7 @@ PLATFORMS: list[str] = [
 ]
 CONF_UPDATE_INTERVAL: Final = "update_interval"
 
-DEFAULT_UPDATE_INTERVAL: Final = "1 minute (default)"
+DEFAULT_UPDATE_INTERVAL: Final = timedelta(seconds=60)
 UPDATE_INTERVAL_OPTIONS: Final = {
     "10 seconds": timedelta(seconds=10),
     "30 seconds": timedelta(seconds=30),

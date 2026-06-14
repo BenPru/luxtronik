@@ -15,6 +15,7 @@ import pytest
 from custom_components.luxtronik2.const import (
     CONF_UPDATE_INTERVAL,
     DEFAULT_PORT,
+    DEFAULT_UPDATE_INTERVAL,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -82,6 +83,7 @@ def _make_coordinator_direct(data=None):
     coord.update_reason_write = False
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
+    coord.update_interval = DEFAULT_UPDATE_INTERVAL
     if data is None:
         data = LuxtronikCoordinatorData(
             parameters={"ID_WEB_WP_BZ_akt": (0, 0)},
@@ -98,7 +100,7 @@ class TestUpdateIntervalConfig:
         with patch.object(coord, "_async_update_data", new_callable=AsyncMock):
             pass
         assert coord.update_interval is not None
-        assert coord.update_interval.total_seconds() == 30
+        assert coord.update_interval == DEFAULT_UPDATE_INTERVAL
 
     def test_custom_update_interval_from_config(self):
         config = {
@@ -130,7 +132,7 @@ class TestUpdateIntervalConfig:
         expected = {
             "10 seconds": 10,
             "30 seconds": 30,
-            "1 minute": 60,
+            "1 minute (default)": 60,
             "5 minutes": 300,
         }
         for label, seconds in expected.items():

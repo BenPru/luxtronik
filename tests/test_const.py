@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 from custom_components.luxtronik2.const import (
     CONF_UPDATE_INTERVAL,
     CONFIG_ENTRY_VERSION,
@@ -178,7 +180,7 @@ class TestSensorKey:
 
 class TestUpdateIntervalConstants:
     def test_default_update_interval(self):
-        assert DEFAULT_UPDATE_INTERVAL == "30 seconds"
+        assert timedelta(seconds=60) == DEFAULT_UPDATE_INTERVAL
 
     def test_update_interval_options_keys_and_timedeltas(self):
         assert set(UPDATE_INTERVAL_OPTIONS.keys()) == {
