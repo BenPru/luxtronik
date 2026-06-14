@@ -134,14 +134,20 @@ class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportInco
             # Get state objects to check last_changed timestamps
             disturbance_state = self.hass.states.get(disturbance_entity_id)
             error_state = self.hass.states.get(error_reason_entity_id)
-            LOGGER.debug("Disturbance state: %s, Error state: %s", disturbance_state, error_state)
+            LOGGER.debug(
+                "Disturbance state: %s, Error state: %s", disturbance_state, error_state
+            )
 
             if disturbance_state and error_state:
                 LOGGER.debug("Both states are available for DISTURBANCE_OUTPUT")
                 try:
                     disturbance_changed = disturbance_state.last_changed
                     error_changed = error_state.last_changed
-                    LOGGER.debug("Disturbance changed: %s, Error changed: %s", disturbance_changed, error_changed)
+                    LOGGER.debug(
+                        "Disturbance changed: %s, Error changed: %s",
+                        disturbance_changed,
+                        error_changed,
+                    )
 
                     # If error_reason changed BEFORE disturbance_output,
                     # then the disturbance output is just ZWE2 noise, not a fault
