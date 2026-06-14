@@ -52,7 +52,9 @@ def build_options_schema(
             vol.Optional(
                 CONF_UPDATE_INTERVAL,
                 default=current_interval or DEFAULT_UPDATE_INTERVAL,
-                description={"suggested_value": current_interval or DEFAULT_UPDATE_INTERVAL},
+                description={
+                    "suggested_value": current_interval or DEFAULT_UPDATE_INTERVAL
+                },
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=interval_options,
