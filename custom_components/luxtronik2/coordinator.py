@@ -19,7 +19,7 @@ from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from packaging.version import InvalidVersion, Version
 
-from .common import correct_key_value
+from .common import normalize_sensor_value
 from .const import (
     CONF_CALCULATIONS,
     CONF_MAX_DATA_LENGTH,
@@ -469,7 +469,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if sensor is None:
             return None
         value = sensor[1] if isinstance(sensor, tuple) else sensor.value
-        return correct_key_value(value, self.data, group_sensor_id)
+        return normalize_sensor_value(value, self.data, group_sensor_id)
 
     def get_sensor_by_id(self, group_sensor_id: str):
         """Get a sensor object by id from Luxtronik."""
