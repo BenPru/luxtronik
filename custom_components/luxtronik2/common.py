@@ -184,6 +184,7 @@ def normalize_sensor_value(
             in [
                 LuxStatus3Option.no_request,
                 LuxStatus3Option.cycle_lock,
+                LuxStatus3Option.heating,
             ]
             and get_sensor_data(coordinator, LC.C0038_DHW_RECIRCULATION_PUMP)
             and get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
