@@ -126,9 +126,6 @@ LANG_EN: Final = "en"
 LANG_DE: Final = "de"
 
 
-PRESET_SECOND_HEATSOURCE: Final = "second_heatsource"
-
-
 class LuxOperationMode(StrEnum):
     """Lux Operation modes heating, hot water etc."""
 

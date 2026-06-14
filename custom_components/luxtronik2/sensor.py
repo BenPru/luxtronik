@@ -3,8 +3,7 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
-from decimal import Decimal
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -15,7 +14,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import StateType
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -26,11 +24,8 @@ from .const import (
     LOGGER,
     DeviceKey,
     LuxCalculation as LC,
-    LuxOperationMode,
     LuxParameter as LP,
     LuxSmartGridStatus,
-    LuxStatus1Option,
-    LuxStatus3Option,
     SensorAttrKey as SA,
     SensorKey,
 )
@@ -200,8 +195,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
 
     _coordinator: LuxtronikCoordinator
 
-    _last_state: StateType | date | datetime | Decimal = None
-
     _unrecorded_attributes = frozenset(
         LuxtronikSensorEntity._unrecorded_attributes
         | {
@@ -245,56 +238,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
             if self._attr_native_value is not None
             else None
         )
-
-        if self._attr_native_value is None or self._last_state is None:
-            pass
-
-        # region Workaround Luxtronik Bug
-        else:
-            # region Workaround: Inverter heater is active but not the heatpump!
-            # Status shows heating but status 3 = no request!
-            sl1 = self._get_value(LC.C0117_STATUS_LINE_1)
-            sl3 = self._get_value(LC.C0119_STATUS_LINE_3)
-            add_circ_pump = self._get_value(LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
-            s1_workaround: list[str] = [
-                LuxStatus1Option.heatpump_idle,
-                LuxStatus1Option.pump_forerun,
-                LuxStatus1Option.heatpump_coming,
-            ]
-            s3_workaround: list[str | None] = [
-                LuxStatus3Option.no_request,
-                LuxStatus3Option.unknown,
-                LuxStatus3Option.none,
-                LuxStatus3Option.grid_switch_on_delay,
-                None,
-            ]
-            if sl1 in s1_workaround and sl3 in s3_workaround and not add_circ_pump:
-                # ignore pump forerun
-                self._attr_native_value = LuxOperationMode.no_request
-            # endregion Workaround: Inverter heater is active but not the heatpump!
-
-            # region Workaround Thermal desinfection with heatpump running
-            if sl3 == LuxStatus3Option.thermal_desinfection:
-                # map thermal desinfection to Domestic Water iso Heating
-                self._attr_native_value = LuxOperationMode.domestic_water
-            # endregion Workaround Thermal desinfection with heatpump running
-
-            # region Workaround Thermal desinfection with (only) using 2nd heatsource
-            s3_workaround_2: list[str | None] = [
-                LuxStatus3Option.no_request,
-                LuxStatus3Option.cycle_lock,
-            ]
-            if sl3 in s3_workaround_2:
-                DHW_recirculation = self._get_value(LC.C0038_DHW_RECIRCULATION_PUMP)
-                AddHeat = self._get_value(LC.C0048_ADDITIONAL_HEAT_GENERATOR)
-                if AddHeat and DHW_recirculation:
-                    # more fixes to detect thermal desinfection sequences
-                    self._attr_native_value = LuxOperationMode.domestic_water
-            # endregion Workaround Thermal desinfection with (only) using 2nd heatsource
-
-        # endregion Workaround Luxtronik Bug
-
-        self._last_state = self._attr_native_value
 
         attr = self._attr_extra_state_attributes
         attr[SA.STATUS_RAW] = self._attr_native_value

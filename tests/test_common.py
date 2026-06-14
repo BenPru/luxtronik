@@ -10,9 +10,9 @@ import pytest
 from custom_components.luxtronik2.common import (
     async_get_mac_address,
     convert_to_int_if_possible,
-    correct_key_value,
     get_sensor_data,
     key_exists,
+    normalize_sensor_value,
     state_as_number_or_none,
 )
 from custom_components.luxtronik2.const import (
@@ -104,6 +104,10 @@ class TestGetSensorData:
         data = make_coordinator_data(parameters={"ID_Ba_Hz_akt": "Automatic"})
         assert get_sensor_data(data, "parameters.ID_Ba_Hz_akt") == "Automatic"
 
+    def test_get_calculation_value_boolean(self):
+        data = make_coordinator_data(calculations={"ID_WEB_SH_BWW": True})
+        assert get_sensor_data(data, "calculations.ID_WEB_SH_BWW") is True
+
     def test_get_calculation_value(self):
         data = make_coordinator_data(calculations={"ID_WEB_Temperatur_TVL": 30.0})
         assert get_sensor_data(data, "calculations.ID_WEB_Temperatur_TVL") == 30.0
@@ -129,54 +133,60 @@ class TestGetSensorData:
 
 
 # ===========================================================================
-# correct_key_value
+# normalize_sensor_value
 # ===========================================================================
 
 
-class TestCorrectKeyValue:
+class TestNormalizeSensorValue:
     def test_none_value_passthrough(self):
-        assert correct_key_value(None, make_coordinator_data(), LC.C0080_STATUS) is None
+        assert (
+            normalize_sensor_value(None, make_coordinator_data(), LC.C0080_STATUS)
+            is None
+        )
 
     def test_none_coordinator_passthrough(self):
-        assert correct_key_value("heating", None, LC.C0080_STATUS) == "heating"
+        assert normalize_sensor_value("heating", None, LC.C0080_STATUS) == "heating"
 
     def test_none_sensor_id_passthrough(self):
-        assert correct_key_value("heating", make_coordinator_data(), None) == "heating"
+        assert (
+            normalize_sensor_value("heating", make_coordinator_data(), None)
+            == "heating"
+        )
 
     def test_unrelated_sensor_passthrough(self):
         data = make_coordinator_data()
-        assert correct_key_value(42.0, data, "parameters.ID_Ba_Hz_akt") == 42.0
+        assert normalize_sensor_value(42.0, data, "parameters.ID_Ba_Hz_akt") == 42.0
 
     def test_status_spaces_replaced(self):
         data = make_coordinator_data()
-        result = correct_key_value("some value", data, LC.C0080_STATUS)
+        result = normalize_sensor_value("some value", data, LC.C0080_STATUS)
         assert " " not in result
         assert result == "some_value"
 
     def test_status_slashes_replaced(self):
         data = make_coordinator_data()
-        result = correct_key_value("a/b", data, LC.C0117_STATUS_LINE_1)
+        result = normalize_sensor_value("a/b", data, LC.C0117_STATUS_LINE_1)
         assert "/" not in result
         assert result == "a_b"
 
     def test_status_line_lowered(self):
         data = make_coordinator_data()
-        result = correct_key_value("HEATING", data, LC.C0119_STATUS_LINE_3)
+        result = normalize_sensor_value("HEATING", data, LC.C0119_STATUS_LINE_3)
         assert result == "heating"
 
     def test_error_reason_minus1_int(self):
         data = make_coordinator_data()
-        result = correct_key_value(-1, data, LC.C0100_ERROR_REASON)
+        result = normalize_sensor_value(-1, data, LC.C0100_ERROR_REASON)
         assert result == "minus_1"
 
     def test_error_reason_minus1_str(self):
         data = make_coordinator_data()
-        result = correct_key_value("-1", data, LC.C0100_ERROR_REASON)
+        result = normalize_sensor_value("-1", data, LC.C0100_ERROR_REASON)
         assert result == "minus_1"
 
     def test_error_reason_normal(self):
         data = make_coordinator_data()
-        result = correct_key_value(5, data, LC.C0100_ERROR_REASON)
+        result = normalize_sensor_value(5, data, LC.C0100_ERROR_REASON)
         assert result == 5
 
     def test_status_line1_heatpump_coming_workaround(self):
@@ -187,7 +197,7 @@ class TestCorrectKeyValue:
                 "ID_WEB_Time_SSPAUS_akt": 100,
             }
         )
-        result = correct_key_value(
+        result = normalize_sensor_value(
             LuxStatus1Option.heatpump_coming, data, LC.C0117_STATUS_LINE_1
         )
         assert result == LuxStatus1Option.heatpump_shutdown
@@ -199,7 +209,7 @@ class TestCorrectKeyValue:
                 "ID_WEB_LIN_VDH_out": True,  # C0182_COMPRESSOR_HEATER
             }
         )
-        result = correct_key_value(
+        result = normalize_sensor_value(
             LuxStatus1Option.pump_forerun, data, LC.C0117_STATUS_LINE_1
         )
         assert result == LuxStatus1Option.compressor_heater
@@ -211,7 +221,9 @@ class TestCorrectKeyValue:
                 "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.cooling,
             }
         )
-        result = correct_key_value(LuxOperationMode.no_request, data, LC.C0080_STATUS)
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
         assert result == LuxOperationMode.cooling
 
     def test_status_no_request_active_cooling_detected(self):
@@ -227,7 +239,9 @@ class TestCorrectKeyValue:
                 "ID_WEB_VBOout": True,  # C0043 pump flow (True)
             }
         )
-        result = correct_key_value(LuxOperationMode.no_request, data, LC.C0080_STATUS)
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
         assert result == LuxOperationMode.cooling
 
     def test_status_no_request_not_active_cooling(self):
@@ -243,8 +257,46 @@ class TestCorrectKeyValue:
                 "ID_WEB_VBOout": True,
             }
         )
-        result = correct_key_value(LuxOperationMode.no_request, data, LC.C0080_STATUS)
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
         assert result == LuxOperationMode.no_request
+
+    def test_status_line3_thermal_desinfection_maps_to_domestic_water(self):
+        """If status_line3 is thermal_desinfection, C0080_STATUS becomes domestic_water."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.thermal_desinfection,
+            }
+        )
+        result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
+        assert result == LuxOperationMode.domestic_water
+
+    def test_pump_forerun_status_line1_with_no_request_line3_maps_to_no_request(self):
+        """If pump forerun and no_request line3 while no add circ pump, C0080_STATUS becomes no_request."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.pump_forerun,
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_ZUPout": False,
+            }
+        )
+        result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
+        assert result == LuxOperationMode.no_request
+
+    def test_thermal_desinfection_on_second_heat_source_maps_to_domestic_water(self):
+        """If line3 is no_request/cycle_lock with AddHeat and recirculation, return domestic_water."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_BUPout": True,
+                "ID_WEB_ZW1out": True,
+            }
+        )
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.domestic_water
 
     def test_heating_without_compressor_and_additional_heat(self):
         """If heating mode but compressor & additional heat generator off → no_request."""
@@ -254,7 +306,7 @@ class TestCorrectKeyValue:
                 "ID_WEB_ZW1out": False,  # C0048_ADDITIONAL_HEAT_GENERATOR -> False
             }
         )
-        result = correct_key_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
+        result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
         assert result == LuxOperationMode.no_request
 
 
