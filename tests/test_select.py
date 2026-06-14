@@ -166,7 +166,9 @@ class TestBuildPVModeSelectorDescription:
 
         result = _build_pv_mode_selector_description(coord, desc)
 
-        assert result.options == [m.value for m in (LuxPoolPVMode.automatic, LuxPoolPVMode.pv_off)]
+        assert result.options == [
+            m.value for m in (LuxPoolPVMode.automatic, LuxPoolPVMode.pv_off)
+        ]
 
     def test_pool_mode_value_returns_all_pool_options(self):
         """When value is pool_party/pool_holidays/pool_off, all pool options are returned."""
@@ -181,7 +183,13 @@ class TestBuildPVModeSelectorDescription:
                 key=SensorKey.PV_MODE_SELECTOR,
                 device_key=DeviceKey.heatpump,
                 luxtronik_key="test_key",
-                options=["automatic", "pv_off", "pool_party", "pool_holidays", "pool_off"],
+                options=[
+                    "automatic",
+                    "pv_off",
+                    "pool_party",
+                    "pool_holidays",
+                    "pool_off",
+                ],
             )
 
             result = _build_pv_mode_selector_description(coord, desc)
@@ -241,7 +249,9 @@ class TestBuildSelectDescriptions:
         descriptions = build_select_descriptions(coord)
 
         pv_desc = next(d for d in descriptions if d.key == SensorKey.PV_MODE_SELECTOR)
-        assert pv_desc.options == [m.value for m in (LuxPoolPVMode.automatic, LuxPoolPVMode.pv_off)]
+        assert pv_desc.options == [
+            m.value for m in (LuxPoolPVMode.automatic, LuxPoolPVMode.pv_off)
+        ]
 
     def test_non_pv_descriptions_unchanged(self):
         """Non-PV mode descriptions are returned unchanged."""
