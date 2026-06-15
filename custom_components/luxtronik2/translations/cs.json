@@ -210,6 +210,9 @@
             "dhw_hysteresis": {
                 "name": "Hystereze TUV"
             },
+            "dhw_frequency_control": {
+                "name": "Inverter Frekvence TUV (Hz, 0 = Automaticky)"
+            },
             "heating_room_temperature_impact_factor": {
                 "name": "Faktor vlivu teploty m\u00edstnosti na vyt\u00e1p\u011bn\u00ed"
             },

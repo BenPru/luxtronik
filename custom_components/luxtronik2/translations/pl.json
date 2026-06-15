@@ -207,6 +207,9 @@
             "dhw_hysteresis": {
                 "name": "Histereza ciep\u0142ej wody"
             },
+            "dhw_frequency_control": {
+                "name": "Cz\u0119stotliwo\u015b\u0107 Falownika CW (Hz, 0 = Automatycznie)"
+            },
             "heating_room_temperature_impact_factor": {
                 "name": "Wsp\u00f3\u0142czynnik wp\u0142ywu temperatury pokojowej"
             },

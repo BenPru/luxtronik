@@ -80,3 +80,24 @@ class TestIsolateInstanceData:
             assert overrides_module._INSTANCE_DATA_ISOLATED is True
         finally:
             overrides_module._INSTANCE_DATA_ISOLATED = original_flag
+
+
+class TestSecondsToHours:
+    def test_from_heatpump_rounds_to_nearest_half_hour(self):
+        from custom_components.luxtronik2.lux_overrides import SecondsToHours
+
+        converter = SecondsToHours("Extra_DHW_duration", True)
+        assert converter.from_heatpump(0) == 0.0
+        assert converter.from_heatpump(900) == 0.0
+        assert converter.from_heatpump(1800) == 0.5
+        assert converter.from_heatpump(2700) == 1.0
+        assert converter.from_heatpump(3600) == 1.0
+        assert converter.from_heatpump(5400) == 1.5
+
+    def test_to_heatpump_preserves_half_hour_steps(self):
+        from custom_components.luxtronik2.lux_overrides import SecondsToHours
+
+        converter = SecondsToHours("Extra_DHW_duration", True)
+        assert converter.to_heatpump(0.5) == 1800
+        assert converter.to_heatpump(1.0) == 3600
+        assert converter.to_heatpump(1.5) == 5400

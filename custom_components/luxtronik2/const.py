@@ -454,6 +454,7 @@ class LuxParameter(StrEnum):
     )
     P1030_SMART_GRID_SWITCH = "parameters.ID_Einst_SmartGrid"
     P1033_PUMP_HEAT_CONTROL = "parameters.ID_Einst_P155_PumpHeatCtrl"
+    P1045_DHW_FREQUENCY_CONTROL = "parameters.ID_Einst_P155_DHW_Freq"
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = "parameters.ID_Waermemenge_ZWE"
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
@@ -466,6 +467,8 @@ class LuxParameter(StrEnum):
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
     P1139_COOLING_ENERGY_INPUT = "parameters.Unknown_Parameter_1139"
     P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = "parameters.Unknown_Parameter_1140"
+    P1146_EXTRA_DHW_TARGET_TEMPERATURE = "parameters.Extra_DHW_target_temp"
+    P1147_EXTRA_DHW_DURATION = "parameters.Extra_DHW_duration"
     P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT = (
         "parameters.HEATING_TARGET_TEMP_ROOM_THERMOSTAT"
     )
@@ -827,6 +830,7 @@ class SensorKey(StrEnum):
     DHW_RECIRCULATION_PUMP = "dhw_recirculation_pump"
     DHW_CIRCULATION_PUMP = "dhw_circulation_pump"
     DHW_CHARGING_PUMP = "dhw_charging_pump"
+    DHW_FREQUENCY_CONTROL = "dhw_frequency_control"
     SOLAR_PUMP = "solar_pump"
     COMPRESSOR_HEATER = "compressor_heater"
     DEFROST_VALVE = "defrost_valve"
@@ -859,6 +863,9 @@ class SensorKey(StrEnum):
     AWAY_HEATING_ENDDATE = "away_heating_enddate"
     AWAY_DHW_STARTDATE = "away_dhw_startdate"
     AWAY_DHW_ENDDATE = "away_dhw_enddate"
+
+    EXTRA_DHW_TARGET_TEMPERATURE = "extra_dhw_target_temperature"
+    EXTRA_DHW_DURATION = "extra_dhw_duration"
 
 
 # endregion Keys

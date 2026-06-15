@@ -211,6 +211,9 @@
             "dhw_hysteresis": {
                 "name": "Hysteresis"
             },
+            "dhw_frequency_control": {
+                "name": "Inverter Frequency WW (Hz, 0 = Automatic)"
+            },
             "heating_room_temperature_impact_factor": {
                 "name": "Room temperature impact factor"
             },
