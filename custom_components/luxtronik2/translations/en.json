@@ -140,8 +140,7 @@
             },
             "thermal_power_limitation_water": {
                 "name": "Thermal power limit: Water"
-            }
-            ,
+            },
             "thermal_power_limitation_cooling": {
                 "name": "Thermal power limit: Cooling"
             },
@@ -211,6 +210,9 @@
             "dhw_hysteresis": {
                 "name": "Hysteresis"
             },
+            "dhw_manual_frequency": {
+                "name": "DHW target frequency"
+            },
             "heating_room_temperature_impact_factor": {
                 "name": "Room temperature impact factor"
             },
@@ -261,6 +263,18 @@
             },
             "pump_vent_timer_h": {
                 "name": "Venting runtime"
+            },
+            "extra_dhw_target_temperature": {
+                "name": "Extra DHW target temperature"
+            },
+            "extra_dhw_duration": {
+                "name": "Extra DHW duration"
+            },
+            "heating_threshold_temperature": {
+                "name": "Heating threshold temperature"
+            },
+            "pump_optimization_time": {
+                "name": "Pump optimization time"
             }
         },
         "sensor": {
@@ -656,8 +670,7 @@
                     "pool_party": "Pool Party",
                     "pool_holidays": "Pool Holidays"
                 }
-            }
-            ,
+            },
             "heating_mode": {
                 "name": "Heating mode",
                 "state": {
@@ -762,7 +775,7 @@
             },
             "select_devices": {
                 "title": "Select Devices to Configure",
-                "description": "Select one or more devices to add. Already configured devices: {configured}",               
+                "description": "Select one or more devices to add. Already configured devices: {configured}",
                 "data": {
                     "select_device_to_configure": "Select the device you want to configure"
                 }

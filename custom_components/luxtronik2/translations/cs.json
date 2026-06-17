@@ -210,6 +210,9 @@
             "dhw_hysteresis": {
                 "name": "Hystereze TUV"
             },
+            "dhw_frequency_control": {
+                "name": "Inverter Frekvence TUV (Hz, 0 = Automaticky)"
+            },
             "heating_room_temperature_impact_factor": {
                 "name": "Faktor vlivu teploty m\u00edstnosti na vyt\u00e1p\u011bn\u00ed"
             },
@@ -260,6 +263,21 @@
             },
             "pump_vent_timer_h": {
                 "name": "Doba provozu odvzdu\u0161\u0148ov\u00e1n\u00ed"
+            },
+            "dhw_manual_frequency": {
+                "name": "DHW extra frekvence"
+            },
+            "extra_dhw_target_temperature": {
+                "name": "Extra Warmwasser Solltemperatur"
+            },
+            "extra_dhw_duration": {
+                "name": "Extra Warmwasser Dauer"
+            },
+            "heating_threshold_temperature": {
+                "name": "Heizgrenze Temperatur"
+            },
+            "pump_optimization_time": {
+                "name": "Doba trv\u00e1n\u00ed optimalizace \u010derpadla"
             }
         },
         "sensor": {

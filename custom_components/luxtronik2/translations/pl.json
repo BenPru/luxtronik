@@ -54,6 +54,30 @@
             },
             "motor_protection": {
                 "name": "Ochrona silnika"
+            },
+            "compressor2": {
+                "name": "Spr\u0119\u017carka 2"
+            },
+            "cooling_energy_input": {
+                "name": "Energia zu\u017cyta na ch\u0142odzenie"
+            },
+            "current_power_consumption": {
+                "name": "Pob\u00f3r mocy"
+            },
+            "second_heat_generator_amount_counter": {
+                "name": "Ilo\u015b\u0107 ciep\u0142a drugiego generatora"
+            },
+            "circulation_pump_delta": {
+                "name": "Cyrkulacyjna pompdelta"
+            },
+            "circulation_pump_delta_target": {
+                "name": "Cyrkulacyjna pompdelta docelowa"
+            },
+            "pump_flow_delta": {
+                "name": "Delta przep\u0142ywu pompy"
+            },
+            "pump_flow_delta_target": {
+                "name": "Delta docelowa przep\u0142ywu pompy"
             }
         },
         "device": {
@@ -207,6 +231,9 @@
             "dhw_hysteresis": {
                 "name": "Histereza ciep\u0142ej wody"
             },
+            "dhw_manual_frequency": {
+                "name": "DHW cz\u0119stotliwo\u015b\u0107 docelowa"
+            },
             "heating_room_temperature_impact_factor": {
                 "name": "Wsp\u00f3\u0142czynnik wp\u0142ywu temperatury pokojowej"
             },
@@ -251,6 +278,24 @@
             },
             "pump_vent_timer_h": {
                 "name": "Czas pracy odpowietrzania"
+            },
+            "extra_dhw_target_temperature": {
+                "name": "Extra docelowa temperatura CW"
+            },
+            "extra_dhw_duration": {
+                "name": "Extra czas CW"
+            },
+            "heating_threshold_temperature": {
+                "name": "Temperatura progu grzewczego"
+            },
+            "pump_optimization_time": {
+                "name": "Czas optimizacji pompy"
+            },
+            "heat_source_input_temperature_min": {
+                "name": "Minimalna temperatura wej\u015bcia \u017ar\u00f3d\u0142a ciep\u0142a"
+            },
+            "cooling_threshold_temperature": {
+                "name": "Temperatura progu ch\u0142odzenia"
             }
         },
         "sensor": {
@@ -836,6 +881,30 @@
             },
             "room_thermostat_temperature_target": {
                 "name": "Temperatura docelowa termostatu pokojowego"
+            },
+            "compressor2": {
+                "name": "Spr\u0119\u017carka 2"
+            },
+            "cooling_energy_input": {
+                "name": "Energia zu\u017cyta na ch\u0142odzenie"
+            },
+            "current_power_consumption": {
+                "name": "Pob\u00f3r mocy"
+            },
+            "second_heat_generator_amount_counter": {
+                "name": "Ilo\u015b\u0107 ciep\u0142a drugiego generatora"
+            },
+            "circulation_pump_delta": {
+                "name": "Cyrkulacyjna pompdelta"
+            },
+            "circulation_pump_delta_target": {
+                "name": "Cyrkulacyjna pompdelta docelowa"
+            },
+            "pump_flow_delta": {
+                "name": "Delta przep\u0142ywu pompy"
+            },
+            "pump_flow_delta_target": {
+                "name": "Delta docelowa przep\u0142ywu pompy"
             }
         },
         "date": {
@@ -864,7 +933,7 @@
                     "friday": "Pi\u0105tek",
                     "saturday": "Sobota",
                     "sunday": "Niedziela",
-                    "continuous": "Ciągły"
+                    "continuous": "Ci\u0105g\u0142y"
                 }
             },
             "heating_control_circuit_mode": {
@@ -884,8 +953,7 @@
                     "pool_party": "Impreza basenowa",
                     "pool_holidays": "Wakacje basenowe"
                 }
-            }
-            ,
+            },
             "heating_mode": {
                 "name": "Tryb ogrzewania",
                 "state": {

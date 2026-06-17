@@ -234,6 +234,117 @@ class TestNumberFormattedData:
 
 
 # ===========================================================================
+# DHW MANUAL FREQUENCY
+# ===========================================================================
+
+
+class TestDHWManualFrequency:
+    def _make_freq_entity(self, data=None, raw_value=0):
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        if data is None:
+            data = make_coordinator_data(
+                parameters={"ID_Einst_P155_DHW_Freq": raw_value}
+            )
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.DHW_MANUAL_FREQUENCY,
+            luxtronik_key=LP.P1045_DHW_FREQUENCY_CONTROL,
+            device_key=DeviceKey.domestic_water,
+        )
+        entity = _make_number_entity(data, desc)
+        entity._handle_coordinator_update(data)
+        return entity
+
+    def test_state_returns_zero_for_automatic(self):
+        entity = self._make_freq_entity(raw_value=0)
+        assert entity.state == 0
+
+    def test_state_returns_hz_for_manual(self):
+        entity = self._make_freq_entity(raw_value=25)
+        # Simulate what the real FrequencyAutomatic datatype would produce
+        entity._attr_native_value = 45
+        assert entity.state == 45
+
+    def test_extra_state_attributes_automatic(self):
+        entity = self._make_freq_entity(raw_value=0)
+        assert entity.extra_state_attributes == {"mode": "Automatic"}
+
+    def test_extra_state_attributes_manual(self):
+        entity = self._make_freq_entity(raw_value=25)
+        entity._attr_native_value = 45
+        assert entity.extra_state_attributes == {"mode": "Manual at 45 Hz"}
+
+    def test_extra_state_attributes_none_value(self):
+        data = make_coordinator_data(parameters={"ID_Einst_P155_DHW_Freq": None})
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.DHW_MANUAL_FREQUENCY,
+            luxtronik_key=LP.P1045_DHW_FREQUENCY_CONTROL,
+            device_key=DeviceKey.domestic_water,
+        )
+        entity = _make_number_entity(data, desc)
+        entity._handle_coordinator_update(data)
+        assert entity.extra_state_attributes == {}
+
+    def test_extra_state_attributes_other_keys_returns_empty(self):
+        data = make_coordinator_data(parameters={"ID_Einst_WK_akt": 50})
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.HEATING_TARGET_CORRECTION,
+            luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
+            device_key=DeviceKey.heating,
+        )
+        entity = _make_number_entity(data, desc)
+        assert entity.extra_state_attributes == {}
+
+    @pytest.mark.asyncio
+    async def test_rejects_invalid_frequency_between_0_and_21(self):
+        entity = self._make_freq_entity()
+        entity._debouncer = MagicMock()
+        entity._debouncer.async_call = AsyncMock()
+        await entity.async_set_native_value(5.0)
+        assert entity._pending_value is None
+        entity.coordinator.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_accepts_zero(self):
+        entity = self._make_freq_entity()
+        entity._debouncer = MagicMock()
+        entity._debouncer.async_call = AsyncMock()
+        await entity.async_set_native_value(0.0)
+        assert entity._pending_value == 0.0
+        entity._debouncer.async_call.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_accepts_twenty_one(self):
+        entity = self._make_freq_entity()
+        entity._debouncer = MagicMock()
+        entity._debouncer.async_call = AsyncMock()
+        await entity.async_set_native_value(21.0)
+        assert entity._pending_value == 21.0
+        entity._debouncer.async_call.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_writes_raw_value(self):
+        entity = self._make_freq_entity()
+        entity._pending_value = 45.0
+        await entity._async_set_native_value()
+        entity.coordinator.async_write.assert_awaited_once_with(
+            "ID_Einst_P155_DHW_Freq", 45.0
+        )
+
+    @pytest.mark.asyncio
+    async def test_writes_zero_raw_value(self):
+        entity = self._make_freq_entity()
+        entity._pending_value = 0.0
+        await entity._async_set_native_value()
+        entity.coordinator.async_write.assert_awaited_once_with(
+            "ID_Einst_P155_DHW_Freq", 0
+        )
+
+
+# ===========================================================================
 # _is_past
 # ===========================================================================
 

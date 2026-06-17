@@ -26,6 +26,37 @@ class MajorMinorVersion(Base):
         return f"{major}.{minor:02d}"
 
 
+class SecondsToHours(Base):
+    """Seconds to hours datatype, converts from and to hours."""
+
+    measurement_type = "hours"
+
+    def from_heatpump(self, value):
+        # Round to the nearest half hour so UI values stay in 0.5-hour increments.
+        return round(value / 1800) / 2
+
+    def to_heatpump(self, value):
+        return int(value * 3600)
+
+
+class FrequencyAutomatic(Base):
+    """Frequency with Automatic mode (0=Auto, 1-101=21-121 Hz)."""
+
+    measurement_type = "frequency"
+
+    def from_heatpump(self, value):
+        # 0 stays 0 (Automatic), 1-101 maps to 20-120 Hz
+        if value == 0:
+            return 0
+        return value + 20  # 1 → 21 Hz, 2 → 22 Hz, ..., 101 → 121 Hz
+
+    def to_heatpump(self, value):
+        # 0 stays 0 (Automatic), 21-121 Hz maps to 1-101
+        if value == 0:
+            return 0
+        return int(value - 20)  # 21 → 1, 22 → 2, ..., 121 → 101
+
+
 class PoolPVMode(SelectionBase):
     """PoolPVMode datatype, converts from and to a PoolPVMode"""
 
@@ -51,6 +82,9 @@ parameters_to_add_update = {
     732: Timestamp("ID_SU_FstdBw", True),
     973: Celsius("ID_Einst_BW_max", True),
     980: Percent2("ID_RBE_Einflussfaktor_RT_akt", True),
+    1045: FrequencyAutomatic("ID_Einst_P155_DHW_Freq", True),
+    1146: Celsius("Extra_DHW_target_temp", True),
+    1147: SecondsToHours("Extra_DHW_duration", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
     1159: Percent("Unknown_Parameter_1159", True),
     # Add more as needed

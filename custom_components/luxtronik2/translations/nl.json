@@ -38,7 +38,7 @@
                 "name": "Extra circulatiepomp"
             },
             "dhw_recirculation_pump": {
-                "name": "Circulatiepomp"
+                "name": "Recirculatiepomp"
             },
             "dhw_circulation_pump": {
                 "name": "Circulatiepomp"
@@ -57,6 +57,15 @@
             },
             "motor_protection": {
                 "name": "Motorbeveiliging"
+            },
+            "cooling_energy_input": {
+                "name": "Gebruikte energie koeling"
+            },
+            "current_power_consumption": {
+                "name": "Stroomverbruik"
+            },
+            "second_heat_generator_amount_counter": {
+                "name": "Tweede warmtebron warmtemenge"
             }
         },
         "device": {
@@ -140,8 +149,7 @@
             },
             "thermal_power_limitation_water": {
                 "name": "Thermisch vermogenslimiet: Water"
-            }
-            ,
+            },
             "thermal_power_limitation_cooling": {
                 "name": "Thermisch vermogenslimiet: Koeling"
             },
@@ -211,6 +219,9 @@
             "dhw_hysteresis": {
                 "name": "Hysterese"
             },
+            "dhw_manual_frequency": {
+                "name": "DHW doel frequentie"
+            },
             "heating_room_temperature_impact_factor": {
                 "name": "Be\u00efnvloedende factor voor de kamertemperatuur"
             },
@@ -258,6 +269,21 @@
             },
             "pump_vent_timer_h": {
                 "name": "Looptijd ontluchting"
+            },
+            "extra_dhw_target_temperature": {
+                "name": "Extra warm water doeltemperatuur"
+            },
+            "extra_dhw_duration": {
+                "name": "Extra warm water duur"
+            },
+            "heating_threshold_temperature": {
+                "name": "Verwarmingsdrempel temperatuur"
+            },
+            "pump_optimization_time": {
+                "name": "Pomp optimalisatie tijd"
+            },
+            "heat_source_input_temperature_min": {
+                "name": "Warmtebron invoer minimum temperatuur"
             }
         },
         "sensor": {
@@ -842,6 +868,15 @@
             },
             "circulation_pump_delta": {
                 "name": "Circulatiepomp Delta"
+            },
+            "cooling_energy_input": {
+                "name": "Gebruikte energie koeling"
+            },
+            "current_power_consumption": {
+                "name": "Stroomverbruik"
+            },
+            "second_heat_generator_amount_counter": {
+                "name": "Tweede warmtebron warmtemenge"
             }
         },
         "date": {
