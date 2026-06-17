@@ -101,3 +101,31 @@ class TestSecondsToHours:
         assert converter.to_heatpump(0.5) == 1800
         assert converter.to_heatpump(1.0) == 3600
         assert converter.to_heatpump(1.5) == 5400
+
+
+class TestFrequencyAutomatic:
+    from custom_components.luxtronik2.lux_overrides import FrequencyAutomatic
+
+    converter = FrequencyAutomatic("ID_Einst_P155_DHW_Freq", True)
+
+    def test_from_heatpump_zero_is_automatic(self):
+        assert self.converter.from_heatpump(0) == 0
+
+    def test_from_heatpump_maps_1_to_21hz(self):
+        assert self.converter.from_heatpump(1) == 21
+
+    def test_from_heatpump_maps_101_to_121hz(self):
+        assert self.converter.from_heatpump(101) == 121
+
+    def test_to_heatpump_zero_stays_zero(self):
+        assert self.converter.to_heatpump(0) == 0
+
+    def test_to_heatpump_maps_21hz_to_1(self):
+        assert self.converter.to_heatpump(21) == 1
+
+    def test_to_heatpump_maps_121hz_to_101(self):
+        assert self.converter.to_heatpump(121) == 101
+
+    def test_roundtrip_45hz(self):
+        raw = self.converter.to_heatpump(45)
+        assert self.converter.from_heatpump(raw) == 45

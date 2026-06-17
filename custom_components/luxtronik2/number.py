@@ -141,8 +141,8 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
 
     async def async_set_native_value(self, value: float) -> None:
         if (
-            self.entity_description.key == SensorKey.DHW_FREQUENCY_CONTROL
-            and 0 < value < 20
+            self.entity_description.key == SensorKey.DHW_MANUAL_FREQUENCY
+            and 0 < value < 21
         ):
             LOGGER.warning(
                 "DHW frequency control accepts only 0 (Automatic) or 20-120 Hz; rejecting %s",
@@ -167,12 +167,19 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
 
     @property
     def state(self) -> str | float | None:
-        if (
-            self.entity_description.key == SensorKey.DHW_FREQUENCY_CONTROL
-            and self._attr_native_value == 0
-        ):
-            return "Automatic"
-        return super().state
+        return self._attr_native_value
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str]:
+        """Return human-readable mode for DHW manual frequency entity."""
+        if self.entity_description.key != SensorKey.DHW_MANUAL_FREQUENCY:
+            return {}
+        val = self._attr_native_value
+        if val == 0:
+            return {"mode": "Automatic"}
+        if val is not None:
+            return {"mode": f"Manual at {int(val)} Hz"}
+        return {}
 
     def formatted_data(self, attr: LuxtronikEntityAttributeDescription) -> str:
         """Calculate the attribute value."""

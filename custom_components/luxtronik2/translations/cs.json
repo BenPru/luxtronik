@@ -263,6 +263,21 @@
             },
             "pump_vent_timer_h": {
                 "name": "Doba provozu odvzdu\u0161\u0148ov\u00e1n\u00ed"
+            },
+            "dhw_manual_frequency": {
+                "name": "DHW extra frekvence"
+            },
+            "extra_dhw_target_temperature": {
+                "name": "Extra Warmwasser Solltemperatur"
+            },
+            "extra_dhw_duration": {
+                "name": "Extra Warmwasser Dauer"
+            },
+            "heating_threshold_temperature": {
+                "name": "Heizgrenze Temperatur"
+            },
+            "pump_optimization_time": {
+                "name": "Doba trv\u00e1n\u00ed optimalizace \u010derpadla"
             }
         },
         "sensor": {

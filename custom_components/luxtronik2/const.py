@@ -830,7 +830,7 @@ class SensorKey(StrEnum):
     DHW_RECIRCULATION_PUMP = "dhw_recirculation_pump"
     DHW_CIRCULATION_PUMP = "dhw_circulation_pump"
     DHW_CHARGING_PUMP = "dhw_charging_pump"
-    DHW_FREQUENCY_CONTROL = "dhw_frequency_control"
+    DHW_MANUAL_FREQUENCY = "dhw_manual_frequency"
     SOLAR_PUMP = "solar_pump"
     COMPRESSOR_HEATER = "compressor_heater"
     DEFROST_VALVE = "defrost_valve"
