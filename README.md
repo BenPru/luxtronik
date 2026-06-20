@@ -1,3 +1,10 @@
+[![Release](https://img.shields.io/github/v/release/BenPru/luxtronik?label=latest-release&color=green&logo=github)](https://github.com/BenPru/luxtronik/releases/latest)
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/BenPru/luxtronik/latest/total)
+[![Pre-release](https://img.shields.io/github/v/release/BenPru/luxtronik?include_prereleases&label=pre-release&color=orange&logo=github)](https://github.com/BenPru/luxtronik/releases)
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads-pre/BenPru/luxtronik/latest/total?label=downloads@pre-release&color=orange)
+![GitHub License](https://img.shields.io/github/license/benpru/luxtronik)
+
+
 # Luxtronik Home Assistant Integration
 
 This is a Home Assistant integration for [Luxtronik heat pumps](https://www.alpha-innotec.com/en/products/accessories/control/luxtronik).
