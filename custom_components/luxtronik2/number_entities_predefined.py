@@ -5,6 +5,7 @@ from homeassistant.components.number import NumberDeviceClass, NumberMode
 from homeassistant.const import (
     PERCENTAGE,
     EntityCategory,
+    UnitOfFrequency,
     UnitOfPower,
     UnitOfTemperature,
     UnitOfTime,
@@ -560,7 +561,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         key=SensorKey.DHW_MANUAL_FREQUENCY,
         luxtronik_key=LP.P1045_DHW_FREQUENCY_CONTROL,
         device_key=DeviceKey.domestic_water,
-        native_unit_of_measurement="Hz",
+        device_class=NumberDeviceClass.FREQUENCY,
+        native_unit_of_measurement=UnitOfFrequency.HERTZ,
         native_min_value=0.0,
         native_max_value=121.0,
         native_step=1,
