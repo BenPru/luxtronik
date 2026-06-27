@@ -249,11 +249,17 @@
             "heating_night_lowering_to_temperature": {
                 "name": "Obni\u017cenie temperatury ogrzewania w nocy"
             },
-            "efficiency_pump_nominal": {
-                "name": "Nominalna wydajno\u015b\u0107 pompy"
+            "efficiency_pump_nominal_voltage": {
+                "name": "Nominalne napi\u0119cie pompy wydajno\u015bciowej"
             },
-            "efficiency_pump_minimal": {
-                "name": "Minimalna wydajno\u015b\u0107 pompy"
+            "efficiency_pump_nominal_percentage": {
+                "name": "Nominalne procento pompy wydajno\u015bciowej"
+            },
+            "efficiency_pump_minimal_voltage": {
+                "name": "Minimalne napi\u0119cie pompy wydajno\u015bciowej"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Minimalne procento pompy wydajno\u015bciowej"
             },
             "cooling_start_delay_hours": {
                 "name": "Op\u00f3\u017anienie startu"

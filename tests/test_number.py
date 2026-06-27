@@ -6,7 +6,14 @@ from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
 from conftest import make_coordinator_data
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
+from homeassistant.components.number import NumberDeviceClass, NumberMode
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PORT,
+    CONF_TIMEOUT,
+    PERCENTAGE,
+    UnitOfElectricPotential,
+)
 import pytest
 
 from custom_components.luxtronik2.const import (
@@ -15,6 +22,7 @@ from custom_components.luxtronik2.const import (
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
+    DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     DeviceKey,
     LuxParameter as LP,
@@ -22,7 +30,9 @@ from custom_components.luxtronik2.const import (
     SensorAttrKey as SA,
     SensorKey,
 )
+from custom_components.luxtronik2.coordinator import LuxtronikCoordinator
 from custom_components.luxtronik2.model import (
+    LuxtronikCoordinatorData,
     LuxtronikEntityAttributeDescription,
     LuxtronikNumberDescription,
 )
@@ -75,6 +85,28 @@ def _make_number_entity(data=None, description=None):
     entity = LuxtronikNumberEntity(hass, entry, coord, description, DeviceKey.heating)
     _patch_entity(entity)
     return entity
+
+
+def _make_coordinator_direct(data=None):
+    """Create a real coordinator with data for visibility tests."""
+    coord = object.__new__(LuxtronikCoordinator)
+    coord._lock = MagicMock()
+    coord.hass = MagicMock()
+    coord.client = MagicMock()
+    coord._config = {"host": "1.2.3.4", "port": 8889}
+    coord.device_infos = {}
+    coord.update_reason_write = False
+    coord.async_request_refresh = MagicMock()
+    coord.async_refresh = MagicMock()
+    coord.update_interval = DEFAULT_UPDATE_INTERVAL
+    if data is None:
+        data = LuxtronikCoordinatorData(
+            parameters={"ID_WEB_WP_BZ_akt": (0, 0)},
+            calculations={"ID_WEB_WP_BZ_akt": (0, 0)},
+            visibilities={"ID_WEB_Sichtbar_Solar": (0, 1)},
+        )
+    coord.data = data
+    return coord
 
 
 # ===========================================================================
@@ -370,3 +402,88 @@ class TestIsPast:
     def test_invalid_date_string(self):
         entity = _make_number_entity()
         assert entity._is_past("not-a-date") is True
+
+
+class TestEfficiencyPump:
+    def test_efficiency_pump_voltage(self):
+        data = make_coordinator_data(
+            parameters={"ID_Einst_Effizienzpumpe_Nominal_akt": 500}
+        )
+        desc_volt = LuxtronikNumberDescription(
+            key=SensorKey.EFFICIENCY_PUMP_NOMINAL_VOLTAGE,
+            luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            translation_key_name=SensorKey.EFFICIENCY_PUMP_NOMINAL_VOLTAGE,
+            device_class=NumberDeviceClass.VOLTAGE,
+            native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+            native_min_value=3,
+            native_max_value=10,
+            native_step=0.1,
+            factor=0.01,
+            mode=NumberMode.BOX,
+        )
+
+        entity = _make_number_entity(data, desc_volt)
+        entity._handle_coordinator_update(data)
+
+        assert entity._attr_native_value == 5.0
+
+    def test_efficiency_pump_percentage(self):
+        data = make_coordinator_data(
+            parameters={"ID_Einst_Effizienzpumpe_Nominal_akt": 50}
+        )
+        desc_percent = LuxtronikNumberDescription(
+            key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
+            luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            translation_key_name=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
+            device_class=NumberDeviceClass.SPEED,
+            native_unit_of_measurement=PERCENTAGE,
+            native_min_value=0,
+            native_max_value=100,
+            native_step=1,
+            mode=NumberMode.BOX,
+        )
+        entity = _make_number_entity(data, desc_percent)
+        entity._handle_coordinator_update(data)
+
+        assert entity._attr_native_value == 50.0
+
+    def test_efficiency_pump_visibility_formula_high_value(self):
+        data = make_coordinator_data(
+            parameters={"ID_Einst_Effizienzpumpe_Nominal_akt": 500}
+        )
+        desc_volt = LuxtronikNumberDescription(
+            key=SensorKey.EFFICIENCY_PUMP_NOMINAL_VOLTAGE,
+            luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility_formula="> 100",
+        )
+        desc_percent = LuxtronikNumberDescription(
+            key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
+            luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility_formula="<= 100",
+        )
+        # Real coordinator to evaluate visibility formulas
+        coord = _make_coordinator_direct(data)
+        assert coord.entity_visible(desc_volt) is True
+        assert coord.entity_visible(desc_percent) is False
+
+    def test_efficiency_pump_visibility_formula_low_value(self):
+        data = make_coordinator_data(
+            parameters={"ID_Einst_Effizienzpumpe_Nominal_akt": 50}
+        )
+        desc_volt = LuxtronikNumberDescription(
+            key=SensorKey.EFFICIENCY_PUMP_NOMINAL_VOLTAGE,
+            luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility_formula="> 100",
+        )
+        desc_percent = LuxtronikNumberDescription(
+            key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
+            luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+            visibility_formula="<= 100",
+        )
+        coord = _make_coordinator_direct(data)
+        assert coord.entity_visible(desc_volt) is False
+        assert coord.entity_visible(desc_percent) is True

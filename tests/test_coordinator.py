@@ -396,6 +396,54 @@ class TestEntityVisible:
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         assert coord.entity_visible(desc) is False
 
+    def test_visibility_formula_numeric_greater_than(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=11)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "> 10"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_numeric_less_than(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=9)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "> 10"
+        assert coord.entity_visible(desc) is False
+
+    def test_visibility_formula_boolean_true(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=True)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "== True"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_boolean_false(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=False)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "== True"
+        assert coord.entity_visible(desc) is False
+
+    def test_visibility_formula_none_value_falls_back(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=None)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "> 10"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_invalid_falls_back(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=11)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "invalid"
+        assert coord.entity_visible(desc) is True
+
 
 # ===========================================================================
 # entity_active

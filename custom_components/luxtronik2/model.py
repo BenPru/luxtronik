@@ -80,6 +80,7 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     translation_key: str | None = None
     translation_key_name: str | None = None
     visibility: LuxVisibility | LuxParameter = LuxVisibility.UNSET
+    visibility_formula: str | None = None
     invisible_if_value: Any | None = None
     min_firmware_version_minor: Version | None = None
     max_firmware_version_minor: Version | None = None
