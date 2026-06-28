@@ -442,12 +442,16 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 bool_value = bool(value)
             return op_func(bool_value, threshold)
         except Exception:
-            LOGGER.warning(
-                "Could not evaluate visibility formula %s with value %s",
-                formula,
-                value,
-            )
-            return None
+            try:
+                threshold = str(threshold_str)
+                return op_func(str(value), threshold)
+            except Exception:
+                LOGGER.warning(
+                    "Could not evaluate visibility formula %s with value %s",
+                    formula,
+                    value,
+                )
+                return None
 
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
@@ -502,10 +506,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         if not self.device_key_active(description.device_key):
             return False
-        if description.invisible_if_value is not None:
-            return description.invisible_if_value != self.get_value(
-                description.luxtronik_key
-            )
+        if description.entity_active_formula is not None:
+            active_value = self.get_value(description.luxtronik_key)
+            if active_value is not None:
+                formula_result = self._evaluate_visibility_formula(
+                    active_value, description.entity_active_formula
+                )
+                if formula_result is not None:
+                    return formula_result
         return True
 
     def device_key_active(self, device_key: DeviceKey) -> bool:

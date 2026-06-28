@@ -6,7 +6,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Any
 
 from homeassistant.components.binary_sensor import BinarySensorEntityDescription
 from homeassistant.components.climate import (
@@ -81,7 +80,7 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     translation_key_name: str | None = None
     visibility: LuxVisibility | LuxParameter = LuxVisibility.UNSET
     visibility_formula: str | None = None
-    invisible_if_value: Any | None = None
+    entity_active_formula: str | None = None
     min_firmware_version_minor: Version | None = None
     max_firmware_version_minor: Version | None = None
     min_firmware_version: Version | None = None
