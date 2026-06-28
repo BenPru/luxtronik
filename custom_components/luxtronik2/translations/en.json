@@ -228,11 +228,17 @@
             "heating_night_lowering_to_temperature": {
                 "name": "Heating night lowering to temperature"
             },
-            "efficiency_pump_nominal": {
-                "name": "Efficiency pump nominal"
+            "efficiency_pump_nominal_voltage": {
+                "name": "Efficiency pump nominal voltage"
             },
-            "efficiency_pump_minimal": {
-                "name": "Efficiency pump minimal"
+            "efficiency_pump_nominal_percentage": {
+                "name": "Efficiency pump nominal percentage"
+            },
+            "efficiency_pump_minimal_voltage": {
+                "name": "Efficiency pump minimal voltage"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Efficiency pump minimal percentage"
             },
             "cooling_threshold_temperature": {
                 "name": "Minimal outdoor temperature"

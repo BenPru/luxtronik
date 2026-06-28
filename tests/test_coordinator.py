@@ -7,6 +7,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from conftest import make_coordinator_data
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from packaging.version import Version
@@ -396,6 +397,91 @@ class TestEntityVisible:
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         assert coord.entity_visible(desc) is False
 
+    def test_visibility_formula_numeric_greater_than(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=11)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "> 10"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_numeric_less_than(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=9)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "> 10"
+        assert coord.entity_visible(desc) is False
+
+    def test_visibility_formula_boolean_true(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=True)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "== True"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_boolean_false(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=False)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "== True"
+        assert coord.entity_visible(desc) is False
+
+    def test_visibility_formula_none_value_falls_back(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=None)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "> 10"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_unsupported_operator(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=15)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "~ 10"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_boolean_false_threshold(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=False)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "== False"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_string_value_boolean(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value="true")
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "== True"
+        assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_operator_raises_exception(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=10)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "== something"
+
+        def _raise(*_args, **_kwargs):
+            raise RuntimeError("operator failed")
+
+        with patch.object(coord, "_VISIBILITY_FORMULA_OPERATORS", {"==": _raise}):
+            assert coord.entity_visible(desc) is True
+
+    def test_visibility_formula_invalid_falls_back(self):
+        coord = _make_coordinator_direct()
+        coord.get_value = MagicMock(return_value=11)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.visibility_formula = "invalid"
+        assert coord.entity_visible(desc) is True
+
 
 # ===========================================================================
 # entity_active
@@ -445,7 +531,7 @@ class TestEntityActive:
         )
         assert coord.entity_active(desc) is False
 
-    def test_invisible_if_value_match(self):
+    def test_entity_active_formula_match(self):
         coord = _make_coordinator(
             calculations={
                 "ID_WEB_SoftStand": "V3.90.1",
@@ -456,7 +542,22 @@ class TestEntityActive:
         desc = LuxtronikEntityDescription(
             key="test",
             luxtronik_key=LP.P0003_MODE_HEATING,
-            invisible_if_value="Off",
+            entity_active_formula="== Off",
+        )
+        assert coord.entity_active(desc) is True
+
+    def test_entity_active_formula_no_match(self):
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_SoftStand": "V3.90.1",
+                "ID_WEB_Zaehler_BetrZeitHz": 100,
+            },
+            parameters={"ID_Ba_Hz_akt": "On"},
+        )
+        desc = LuxtronikEntityDescription(
+            key="test",
+            luxtronik_key=LP.P0003_MODE_HEATING,
+            entity_active_formula="== Off",
         )
         assert coord.entity_active(desc) is False
 
@@ -501,7 +602,7 @@ class TestEntityActive:
         desc.device_key = DeviceKey.heating
         assert coord.entity_active(desc) is False
 
-    def test_invisible_if_value_matches(self):
+    def test_entity_active_formula_value_matches(self):
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)
         coord.device_key_active = MagicMock(return_value=True)
@@ -509,11 +610,11 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.invisible_if_value = 42
+        desc.entity_active_formula = "== 42"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
-        assert coord.entity_active(desc) is False
+        assert coord.entity_active(desc) is True
 
-    def test_invisible_if_value_no_match(self):
+    def test_entity_active_formula_value_no_match(self):
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)
         coord.device_key_active = MagicMock(return_value=True)
@@ -521,9 +622,9 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.invisible_if_value = 42
+        desc.entity_active_formula = "== 42"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
-        assert coord.entity_active(desc) is True
+        assert coord.entity_active(desc) is False
 
 
 # ===========================================================================
@@ -1016,7 +1117,19 @@ class TestConnectAndGetCoordinator:
             assert mock_params.call_count == 1
             assert mock_iso.call_count == 1
 
-            # Second call skips overrides
-            with pytest.raises(LuxtronikConnectionError):
-                await connect_and_get_coordinator(MagicMock(), config)
-            assert mock_hpc.call_count == 1  # not called again
+    @pytest.mark.asyncio
+    async def test_config_entry_options_merged(self):
+        from custom_components.luxtronik2.coordinator import connect_and_get_coordinator
+
+        config_entry = MagicMock(spec=ConfigEntry)
+        config_entry.data = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
+        config_entry.options = {"update_interval": "5 minutes"}
+
+        with (
+            patch(
+                "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
+                side_effect=ConnectionRefusedError("refused"),
+            ),
+            pytest.raises(LuxtronikConnectionError),
+        ):
+            await connect_and_get_coordinator(MagicMock(), config_entry)

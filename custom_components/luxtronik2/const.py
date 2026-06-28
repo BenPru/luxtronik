@@ -756,9 +756,13 @@ class SensorKey(StrEnum):
     OPERATION_HOURS_SOLAR = "operation_hours_solar"
     DHW_OPERATION_HOURS = "dhw_operation_hours"
     REMOTE_MAINTENANCE = "remote_maintenance"
+
     EFFICIENCY_PUMP = "efficiency_pump"
-    EFFICIENCY_PUMP_NOMINAL = "efficiency_pump_nominal"
-    EFFICIENCY_PUMP_MINIMAL = "efficiency_pump_minimal"
+    EFFICIENCY_PUMP_NOMINAL_VOLTAGE = "efficiency_pump_nominal_voltage"
+    EFFICIENCY_PUMP_MINIMAL_VOLTAGE = "efficiency_pump_minimal_voltage"
+    EFFICIENCY_PUMP_NOMINAL_PERCENTAGE = "efficiency_pump_nominal_percentage"
+    EFFICIENCY_PUMP_MINIMAL_PERCENTAGE = "efficiency_pump_minimal_percentage"
+
     ELECTRICAL_POWER_LIMITATION_SWITCH = "electrical_power_limitation_switch"
     ELECTRICAL_POWER_LIMITATION_VALUE = "electrical_power_limitation_value"
     THERMAL_POWER_LIMITATION_SWITCH = "thermal_power_limitation_switch"

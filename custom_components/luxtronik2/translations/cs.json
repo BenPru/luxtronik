@@ -228,11 +228,17 @@
             "heating_night_lowering_to_temperature": {
                 "name": "Sn\u00ed\u017een\u00ed teploty na noc"
             },
-            "efficiency_pump_nominal": {
-                "name": "Nomin\u00e1ln\u00ed \u00fa\u010dinnost \u010derpadla"
+            "efficiency_pump_nominal_voltage": {
+                "name": "Nominální napětí účinného čerpadla"
             },
-            "efficiency_pump_minimal": {
-                "name": "Minim\u00e1ln\u00ed \u00fa\u010dinnost \u010derpadla"
+            "efficiency_pump_nominal_percentage": {
+                "name": "Nominální procento účinného čerpadla"
+            },
+            "efficiency_pump_minimal_voltage": {
+                "name": "Minimální napětí účinného čerpadla"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Minimální procento účinného čerpadla"
             },
             "cooling_threshold_temperature": {
                 "name": "Minim\u00e1ln\u00ed teplota pro chlazen\u00ed"

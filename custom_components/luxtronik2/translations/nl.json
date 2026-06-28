@@ -237,11 +237,17 @@
             "heating_night_lowering_to_temperature": {
                 "name": "Verlagen naar buitentemperatuur"
             },
-            "efficiency_pump_nominal": {
-                "name": "Effici\u00ebntie pomp nominaal"
+            "efficiency_pump_nominal_voltage": {
+                "name": "Effici\u00ebntie pomp nominaal spanning"
             },
-            "efficiency_pump_minimal": {
-                "name": "Effici\u00ebntie pomp minimaal"
+            "efficiency_pump_nominal_percentage": {
+                "name": "Effici\u00ebntie pomp nominaal percentage"
+            },
+            "efficiency_pump_minimal_voltage": {
+                "name": "Effici\u00ebntie pomp minimaal spanning"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Effici\u00ebntie pomp minimaal percentage"
             },
             "cooling_threshold_temperature": {
                 "name": "Minimale buitentemperatuur"

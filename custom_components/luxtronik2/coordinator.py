@@ -7,9 +7,10 @@ import asyncio
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from datetime import timedelta
 from functools import wraps
+import operator
 import re
 from types import MappingProxyType
-from typing import Any, Concatenate, ParamSpec, TypeVar
+from typing import Any, Concatenate, Final, ParamSpec, TypeVar
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
@@ -401,6 +402,54 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         except Exception:
             return None
 
+    _VISIBILITY_FORMULA_OPERATORS: Final[dict[str, Callable[[Any, Any], bool]]] = {
+        ">": operator.gt,
+        ">=": operator.ge,
+        "<": operator.lt,
+        "<=": operator.le,
+        "==": operator.eq,
+        "!=": operator.ne,
+    }
+
+    def _evaluate_visibility_formula(self, value: Any, formula: str) -> bool | None:
+        parts = formula.strip().split()
+        if len(parts) != 2:
+            LOGGER.warning("Invalid visibility formula: %s", formula)
+            return None
+        op_str, threshold_str = parts
+        op_func = self._VISIBILITY_FORMULA_OPERATORS.get(op_str)
+        if op_func is None:
+            LOGGER.warning("Unsupported operator in visibility formula: %s", formula)
+            return None
+        try:
+            threshold = float(threshold_str)
+            return op_func(float(value), threshold)
+        except (ValueError, TypeError):
+            pass
+        try:
+            if threshold_str.lower() == "true":
+                threshold = True
+            elif threshold_str.lower() == "false":
+                threshold = False
+            else:
+                raise ValueError
+            if isinstance(value, str):
+                bool_value = value.lower() == "true"
+            else:
+                bool_value = bool(value)
+            return op_func(bool_value, threshold)
+        except Exception:
+            try:
+                threshold = str(threshold_str)
+                return op_func(str(value), threshold)
+            except Exception:
+                LOGGER.warning(
+                    "Could not evaluate visibility formula %s with value %s",
+                    formula,
+                    value,
+                )
+                return None
+
     def entity_visible(self, description: LuxtronikEntityDescription) -> bool:
         """Is description visible."""
         if description.visibility == LV.UNSET:
@@ -423,6 +472,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if visibility_result is None:
             LOGGER.warning("Could not load visibility %s", description.visibility)
             return True
+        if description.visibility_formula is not None:
+            formula_result = self._evaluate_visibility_formula(
+                visibility_result, description.visibility_formula
+            )
+            if formula_result is not None:
+                return formula_result
         return visibility_result > 0
 
     def entity_active(self, description: LuxtronikEntityDescription) -> bool:
@@ -448,10 +503,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
         if not self.device_key_active(description.device_key):
             return False
-        if description.invisible_if_value is not None:
-            return description.invisible_if_value != self.get_value(
-                description.luxtronik_key
-            )
+        if description.entity_active_formula is not None:
+            active_value = self.get_value(description.luxtronik_key)
+            if active_value is not None:
+                formula_result = self._evaluate_visibility_formula(
+                    active_value, description.entity_active_formula
+                )
+                if formula_result is not None:
+                    return formula_result
         return True
 
     def device_key_active(self, device_key: DeviceKey) -> bool:

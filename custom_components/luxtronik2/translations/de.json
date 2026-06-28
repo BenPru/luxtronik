@@ -234,11 +234,17 @@
             "heating_night_lowering_to_temperature": {
                 "name": "Absenkung bis Aussentemperatur"
             },
-            "efficiency_pump_nominal": {
-                "name": "Effizienzpumpe Nominal"
+            "efficiency_pump_nominal_voltage": {
+                "name": "Effizienzpumpe Nominal Spannung"
             },
-            "efficiency_pump_minimal": {
-                "name": "Effizienzpumpe Minimal"
+            "efficiency_pump_nominal_percentage": {
+                "name": "Effizienzpumpe Nominal Prozent"
+            },
+            "efficiency_pump_minimal_voltage": {
+                "name": "Effizienzpumpe Minimal Spannung"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Effizienzpumpe Minimal Prozent"
             },
             "cooling_threshold_temperature": {
                 "name": "minimale Au\u00dfentemperatur"
