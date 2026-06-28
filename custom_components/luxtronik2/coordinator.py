@@ -78,9 +78,6 @@ def catch_luxtronik_errors(
     return wrapper
 
 
-
-
-
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 

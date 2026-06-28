@@ -471,9 +471,7 @@ class TestEntityVisible:
         def _raise(*_args, **_kwargs):
             raise RuntimeError("operator failed")
 
-        with patch.object(
-            coord, "_VISIBILITY_FORMULA_OPERATORS", {"==": _raise}
-        ):
+        with patch.object(coord, "_VISIBILITY_FORMULA_OPERATORS", {"==": _raise}):
             assert coord.entity_visible(desc) is True
 
     def test_visibility_formula_invalid_falls_back(self):
@@ -1127,8 +1125,11 @@ class TestConnectAndGetCoordinator:
         config_entry.data = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
         config_entry.options = {"update_interval": "5 minutes"}
 
-        with patch(
-            "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
-            side_effect=ConnectionRefusedError("refused"),
-        ), pytest.raises(LuxtronikConnectionError):
+        with (
+            patch(
+                "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
+                side_effect=ConnectionRefusedError("refused"),
+            ),
+            pytest.raises(LuxtronikConnectionError),
+        ):
             await connect_and_get_coordinator(MagicMock(), config_entry)
