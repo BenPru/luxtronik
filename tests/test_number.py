@@ -13,6 +13,7 @@ from homeassistant.const import (
     CONF_TIMEOUT,
     PERCENTAGE,
     UnitOfElectricPotential,
+    UnitOfTemperature,
 )
 import pytest
 
@@ -379,6 +380,88 @@ class TestDHWManualFrequency:
 # ===========================================================================
 # _is_past
 # ===========================================================================
+
+
+class TestCoolingTargetTemperatureDynamicMinMax:
+    def test_dynamic_min_value_from_parameter(self):
+        data = make_coordinator_data(parameters={"ID_Einst_min_VL_Kuehl": 15.0})
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.COOLING_TARGET_TEMPERATURE_MK1,
+            luxtronik_key=LP.P0132_COOLING_TARGET_TEMPERATURE_MK1,
+            device_key=DeviceKey.cooling,
+            device_class=NumberDeviceClass.TEMPERATURE,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+            native_min_value=18.0,
+            native_max_value=30.0,
+            native_step=0.5,
+            mode=NumberMode.BOX,
+            visibility=LP.P0042_MIXING_CIRCUIT1_TYPE,
+            min_value_luxtronik_key=LP.P0993_COOLING_MIN_FLOW_OUT_TEMPERATURE,
+        )
+        entity = _make_number_entity(data, desc)
+        assert entity.native_min_value == 15.0
+        assert entity.native_max_value == 30.0
+
+    def test_fallback_to_static_min_when_parameter_missing(self):
+        data = make_coordinator_data()
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.COOLING_TARGET_TEMPERATURE_MK1,
+            luxtronik_key=LP.P0132_COOLING_TARGET_TEMPERATURE_MK1,
+            device_key=DeviceKey.cooling,
+            device_class=NumberDeviceClass.TEMPERATURE,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+            native_min_value=18.0,
+            native_max_value=30.0,
+            native_step=0.5,
+            mode=NumberMode.BOX,
+            min_value_luxtronik_key=LP.P0993_COOLING_MIN_FLOW_OUT_TEMPERATURE,
+        )
+        entity = _make_number_entity(data, desc)
+        assert entity.native_min_value == 18.0
+        assert entity.native_max_value == 30.0
+
+    def test_invalid_dynamic_min_falls_back_to_static(self):
+        data = make_coordinator_data(
+            parameters={"ID_Einst_min_VL_Kuehl": "not_a_number"}
+        )
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.COOLING_TARGET_TEMPERATURE_MK1,
+            luxtronik_key=LP.P0132_COOLING_TARGET_TEMPERATURE_MK1,
+            device_key=DeviceKey.cooling,
+            device_class=NumberDeviceClass.TEMPERATURE,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+            native_min_value=18.0,
+            native_max_value=30.0,
+            native_step=0.5,
+            mode=NumberMode.BOX,
+            min_value_luxtronik_key=LP.P0993_COOLING_MIN_FLOW_OUT_TEMPERATURE,
+        )
+        entity = _make_number_entity(data, desc)
+        assert entity.native_min_value == 18.0
+        assert entity.native_max_value == 30.0
+
+    def test_invalid_dynamic_max_falls_back_to_static(self):
+        data = make_coordinator_data(
+            parameters={
+                "ID_Einst_MK1Typ_akt": "not_a_number",
+            }
+        )
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.COOLING_TARGET_TEMPERATURE_MK1,
+            luxtronik_key=LP.P0132_COOLING_TARGET_TEMPERATURE_MK1,
+            device_key=DeviceKey.cooling,
+            device_class=NumberDeviceClass.TEMPERATURE,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+            native_min_value=18.0,
+            native_max_value=30.0,
+            native_step=0.5,
+            mode=NumberMode.BOX,
+            min_value_luxtronik_key=LP.P0993_COOLING_MIN_FLOW_OUT_TEMPERATURE,
+            max_value_luxtronik_key=LP.P0042_MIXING_CIRCUIT1_TYPE,
+        )
+        entity = _make_number_entity(data, desc)
+        assert entity.native_min_value == 18.0
+        assert entity.native_max_value == 30.0
 
 
 class TestIsPast:

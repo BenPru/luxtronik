@@ -166,6 +166,32 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
         self._handle_coordinator_update(data)
 
     @property
+    def native_min_value(self) -> float:
+        """Return the minimum value."""
+        min_key = self.entity_description.min_value_luxtronik_key
+        if min_key is not None:
+            try:
+                value = get_sensor_data(self.coordinator.data, min_key)
+                if value is not None:
+                    return float(value)
+            except (TypeError, ValueError):
+                pass
+        return self.entity_description.native_min_value
+
+    @property
+    def native_max_value(self) -> float:
+        """Return the maximum value."""
+        max_key = self.entity_description.max_value_luxtronik_key
+        if max_key is not None:
+            try:
+                value = get_sensor_data(self.coordinator.data, max_key)
+                if value is not None:
+                    return float(value)
+            except (TypeError, ValueError):
+                pass
+        return self.entity_description.native_max_value
+
+    @property
     def state(self) -> str | float | None:
         return self._attr_native_value
 
