@@ -125,6 +125,9 @@ class LuxtronikNumberDescription(
     factor: float | None = None
     native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO
+    min_value_luxtronik_key: LuxParameter | None = None
+    max_value_luxtronik_key: LuxParameter | None = None
+    entity_active_formula: str | None = None
 
 
 class LuxtronikBinarySensorEntityDescription(
