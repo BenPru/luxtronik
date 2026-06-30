@@ -82,6 +82,7 @@ parameters_to_add_update = {
     732: Timestamp("ID_SU_FstdBw", True),
     973: Celsius("ID_Einst_BW_max", True),
     980: Percent2("ID_RBE_Einflussfaktor_RT_akt", True),
+    993: Celsius("ID_Einst_min_VL_Kuehl", True),
     1045: FrequencyAutomatic("ID_Einst_P155_DHW_Freq", True),
     1146: Celsius("Extra_DHW_target_temp", True),
     1147: SecondsToHours("Extra_DHW_duration", True),

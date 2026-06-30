@@ -755,7 +755,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        factor=0.1,
         visibility=LV.V0005_COOLING,
     ),
     # endregion Cooling
