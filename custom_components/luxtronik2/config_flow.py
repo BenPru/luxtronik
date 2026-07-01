@@ -202,6 +202,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             coordinator = await connect_and_get_coordinator(self.hass, config)
+            await coordinator.async_config_entry_first_refresh()
         except LuxtronikConnectionError as err:
             return self.async_abort(
                 reason="cannot_connect",
@@ -235,6 +236,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             coordinator = await connect_and_get_coordinator(self.hass, config)
+            await coordinator.async_config_entry_first_refresh()
         except LuxtronikConnectionError as err:
             return self.async_abort(
                 reason="cannot_connect",
@@ -385,6 +387,11 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             entry_data = reconfigure_entry.data
+            LOGGER.debug(
+                "Reconfigure submitted with user_input=%s and existing entry_data=%s",
+                user_input,
+                entry_data,
+            )
             config = self._build_config(
                 user_input[CONF_HOST],
                 int(user_input[CONF_PORT]),
@@ -401,18 +408,55 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     )
                 ),
             )
+            LOGGER.debug("Reconfigure built config=%s", config)
 
             try:
                 coordinator = await connect_and_get_coordinator(self.hass, config)
-            except LuxtronikConnectionError:
-                errors["base"] = "cannot_connect"
-            else:
-                await self.async_set_unique_id(coordinator.unique_id)
-                self._abort_if_unique_id_mismatch()
-                return self.async_update_reload_and_abort(
-                    reconfigure_entry,
-                    data_updates=config,
+                await coordinator.async_config_entry_first_refresh()
+            except LuxtronikConnectionError as err:
+                LOGGER.warning(
+                    "Reconfigure connection failed for host=%s port=%s: %s",
+                    config[CONF_HOST],
+                    config[CONF_PORT],
+                    err,
                 )
+                errors["base"] = "cannot_connect"
+            except Exception as err:  # pylint: disable=broad-except
+                LOGGER.exception("Unexpected exception during reconfigure connect")
+                errors["base"] = "unknown"
+            else:
+                LOGGER.debug(
+                    "Reconfigure connected and refreshed successfully; entry unique_id=%s, coordinator unique_id=%s",
+                    reconfigure_entry.unique_id,
+                    coordinator.unique_id,
+                )
+                try:
+                    await self.async_set_unique_id(coordinator.unique_id)
+                    if reconfigure_entry.unique_id is None:
+                        LOGGER.debug(
+                            "Reconfigure updating entry without existing unique_id"
+                        )
+                        return self.async_update_reload_and_abort(
+                            reconfigure_entry,
+                            unique_id=coordinator.unique_id,
+                            data_updates=config,
+                        )
+                    self._abort_if_unique_id_mismatch()
+                    LOGGER.debug("Reconfigure unique_id matches; updating entry")
+                    return self.async_update_reload_and_abort(
+                        reconfigure_entry,
+                        unique_id=coordinator.unique_id,
+                        data_updates=config,
+                    )
+                except AbortFlow as err:
+                    LOGGER.warning(
+                        "Reconfigure aborted during unique_id check: %s",
+                        err,
+                    )
+                    raise
+                except Exception as err:  # pylint: disable=broad-except
+                    LOGGER.exception("Unexpected exception during reconfigure update")
+                    errors["base"] = "unknown"
 
         form_defaults = {**reconfigure_entry.data, **(user_input or {})}
         return self.async_show_form(
