@@ -693,7 +693,6 @@ class TestAsyncStepReconfigure:
         assert result.get("type") == "abort"
         assert result.get("reason") == "reconfigure_successful"
         flow.async_update_reload_and_abort.assert_called_once()
-        coord.async_config_entry_first_refresh.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_reconfigure_without_existing_unique_id_updates_entry(self):

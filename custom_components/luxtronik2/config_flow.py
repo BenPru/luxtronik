@@ -202,7 +202,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             coordinator = await connect_and_get_coordinator(self.hass, config)
-            await coordinator.async_config_entry_first_refresh()
         except LuxtronikConnectionError as err:
             return self.async_abort(
                 reason="cannot_connect",
