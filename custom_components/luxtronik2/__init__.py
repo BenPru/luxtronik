@@ -44,7 +44,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
 
     try:
         coordinator = await connect_and_get_coordinator(hass, entry)
-        await coordinator.async_config_entry_first_refresh()
     except Exception as err:
         LOGGER.error("Luxtronik connection failed: %s", err)
         ir.async_create_issue(

@@ -617,6 +617,53 @@ class TestAsyncStepReconfigure:
         assert defaults[CONF_HOST] == "5.6.7.8"
 
     @pytest.mark.asyncio
+    async def test_connect_exception_shows_unknown_error(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        user_input = {CONF_HOST: "5.6.7.8", CONF_PORT: 8889}
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            side_effect=Exception("boom"),
+        ):
+            await flow.async_step_reconfigure(user_input)
+        flow.async_show_form.assert_called_once()
+        assert flow.async_show_form.call_args[1]["errors"] == {"base": "unknown"}
+
+    @pytest.mark.asyncio
+    async def test_update_exception_shows_unknown_error(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        flow.async_set_unique_id = AsyncMock(side_effect=Exception("boom"))
+        coord = _mock_coordinator()
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coord,
+        ):
+            await flow.async_step_reconfigure({CONF_HOST: "5.6.7.8", CONF_PORT: 8889})
+        flow.async_show_form.assert_called_once()
+        assert flow.async_show_form.call_args[1]["errors"] == {"base": "unknown"}
+
+    @pytest.mark.asyncio
     async def test_successful_reconfigure(self):
         flow = LuxtronikFlowHandler()
         flow.hass = MagicMock()
@@ -646,7 +693,6 @@ class TestAsyncStepReconfigure:
         assert result.get("type") == "abort"
         assert result.get("reason") == "reconfigure_successful"
         flow.async_update_reload_and_abort.assert_called_once()
-        coord.async_config_entry_first_refresh.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_reconfigure_without_existing_unique_id_updates_entry(self):
