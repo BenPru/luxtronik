@@ -24,9 +24,11 @@ def build_user_data_schema(
     return vol.Schema(
         {
             vol.Required(CONF_HOST, default=host): str,
-            vol.Required(CONF_PORT, default=port): int,
+            vol.Required(CONF_PORT, default=port): vol.Coerce(int),
             vol.Optional(CONF_TIMEOUT, default=timeout): vol.Coerce(float),
-            vol.Optional(CONF_MAX_DATA_LENGTH, default=max_data_length): int,
+            vol.Optional(CONF_MAX_DATA_LENGTH, default=max_data_length): vol.Coerce(
+                int
+            ),
         }
     )
 

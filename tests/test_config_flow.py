@@ -231,6 +231,7 @@ class TestAsyncStepSelectDevices:
         flow.async_set_unique_id = AsyncMock()
         flow._abort_if_unique_id_configured = MagicMock()
         coord = _mock_coordinator()
+        coord.async_config_entry_first_refresh = AsyncMock()
         with patch(
             "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
@@ -251,6 +252,7 @@ class TestAsyncStepSelectDevices:
         )
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         coord = _mock_coordinator()
+        coord.async_config_entry_first_refresh = AsyncMock()
         with patch(
             "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
@@ -297,6 +299,7 @@ class TestAsyncStepManualEntry:
         flow.async_set_unique_id = AsyncMock()
         flow._abort_if_unique_id_configured = MagicMock()
         coord = _mock_coordinator()
+        coord.async_config_entry_first_refresh = AsyncMock()
         with patch(
             "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
@@ -614,6 +617,53 @@ class TestAsyncStepReconfigure:
         assert defaults[CONF_HOST] == "5.6.7.8"
 
     @pytest.mark.asyncio
+    async def test_connect_exception_shows_unknown_error(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        user_input = {CONF_HOST: "5.6.7.8", CONF_PORT: 8889}
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            side_effect=Exception("boom"),
+        ):
+            await flow.async_step_reconfigure(user_input)
+        flow.async_show_form.assert_called_once()
+        assert flow.async_show_form.call_args[1]["errors"] == {"base": "unknown"}
+
+    @pytest.mark.asyncio
+    async def test_update_exception_shows_unknown_error(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        flow.async_set_unique_id = AsyncMock(side_effect=Exception("boom"))
+        coord = _mock_coordinator()
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coord,
+        ):
+            await flow.async_step_reconfigure({CONF_HOST: "5.6.7.8", CONF_PORT: 8889})
+        flow.async_show_form.assert_called_once()
+        assert flow.async_show_form.call_args[1]["errors"] == {"base": "unknown"}
+
+    @pytest.mark.asyncio
     async def test_successful_reconfigure(self):
         flow = LuxtronikFlowHandler()
         flow.hass = MagicMock()
@@ -631,6 +681,7 @@ class TestAsyncStepReconfigure:
             return_value={"type": "abort", "reason": "reconfigure_successful"}
         )
         coord = _mock_coordinator()
+        coord.async_config_entry_first_refresh = AsyncMock()
         with patch(
             "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
             new_callable=AsyncMock,
@@ -644,6 +695,49 @@ class TestAsyncStepReconfigure:
         flow.async_update_reload_and_abort.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_reconfigure_without_existing_unique_id_updates_entry(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        entry.unique_id = None
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_set_unique_id = AsyncMock()
+        flow._abort_if_unique_id_mismatch = MagicMock(
+            side_effect=AbortFlow("unique_id_mismatch")
+        )
+        flow.async_update_reload_and_abort = MagicMock(
+            return_value={"type": "abort", "reason": "reconfigure_successful"}
+        )
+        coord = _mock_coordinator()
+        coord.async_config_entry_first_refresh = AsyncMock()
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coord,
+        ):
+            result = await flow.async_step_reconfigure(
+                {CONF_HOST: "5.6.7.8", CONF_PORT: 8889}
+            )
+        assert result.get("type") == "abort"
+        assert result.get("reason") == "reconfigure_successful"
+        flow.async_update_reload_and_abort.assert_called_once_with(
+            entry,
+            unique_id=coord.unique_id,
+            data_updates={
+                CONF_HOST: "5.6.7.8",
+                CONF_PORT: 8889,
+                CONF_TIMEOUT: DEFAULT_TIMEOUT,
+                CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+            },
+        )
+
+    @pytest.mark.asyncio
     async def test_unique_id_mismatch_aborts(self):
         flow = LuxtronikFlowHandler()
         flow.hass = MagicMock()
@@ -654,12 +748,14 @@ class TestAsyncStepReconfigure:
             CONF_TIMEOUT: DEFAULT_TIMEOUT,
             CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
         }
+        entry.unique_id = "old_id"
         flow._get_reconfigure_entry = MagicMock(return_value=entry)
         flow.async_set_unique_id = AsyncMock()
         flow._abort_if_unique_id_mismatch = MagicMock(
             side_effect=AbortFlow("unique_id_mismatch")
         )
         coord = _mock_coordinator()
+        coord.async_config_entry_first_refresh = AsyncMock()
         with (
             patch(
                 "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",

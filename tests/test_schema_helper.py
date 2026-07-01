@@ -45,6 +45,24 @@ class TestBuildUserDataSchema:
         assert result[CONF_HOST] == "192.168.1.100"
         assert result[CONF_PORT] == DEFAULT_PORT
 
+    def test_schema_coerces_string_inputs_from_ui(self):
+        schema = build_user_data_schema()
+        result = cast(
+            dict[str, Any],
+            schema(
+                {
+                    CONF_HOST: "192.168.1.100",
+                    CONF_PORT: "8889",
+                    "timeout": "30.5",
+                    "max_data_length": "5000",
+                }
+            ),
+        )
+        assert result[CONF_HOST] == "192.168.1.100"
+        assert result[CONF_PORT] == 8889
+        assert result["timeout"] == 30.5
+        assert result["max_data_length"] == 5000
+
     def test_schema_uses_defaults(self):
         schema = build_user_data_schema()
         result = cast(dict[str, Any], schema({}))
