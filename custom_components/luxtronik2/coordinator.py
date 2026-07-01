@@ -671,8 +671,20 @@ async def connect_and_get_coordinator(
         coordinator = await LuxtronikCoordinator.connect(hass, config_data)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
-        await coordinator.async_config_entry_first_refresh()
-        LOGGER.debug("Initial coordinator refresh completed for %s:%s", host, port)
+        if isinstance(config, ConfigEntry):
+            await coordinator.async_config_entry_first_refresh()
+            LOGGER.debug(
+                "Initial coordinator refresh completed for %s:%s via config entry",
+                host,
+                port,
+            )
+        else:
+            await coordinator.async_refresh()
+            LOGGER.debug(
+                "Initial coordinator refresh completed for %s:%s via direct config",
+                host,
+                port,
+            )
 
         return coordinator
     except Exception as err:

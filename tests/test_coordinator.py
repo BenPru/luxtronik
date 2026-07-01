@@ -1118,11 +1118,12 @@ class TestConnectAndGetCoordinator:
             assert mock_iso.call_count == 1
 
     @pytest.mark.asyncio
-    async def test_initial_refresh_is_performed(self):
+    async def test_initial_refresh_uses_async_refresh_for_dict_config(self):
         from custom_components.luxtronik2.coordinator import connect_and_get_coordinator
 
         config = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
         coordinator = MagicMock()
+        coordinator.async_refresh = AsyncMock()
         coordinator.async_config_entry_first_refresh = AsyncMock()
 
         with patch(
@@ -1133,7 +1134,32 @@ class TestConnectAndGetCoordinator:
             result = await connect_and_get_coordinator(MagicMock(), config)
 
         assert result is coordinator
+        coordinator.async_refresh.assert_awaited_once()
+        coordinator.async_config_entry_first_refresh.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_initial_refresh_uses_config_entry_first_refresh_for_config_entry(
+        self,
+    ):
+        from custom_components.luxtronik2.coordinator import connect_and_get_coordinator
+
+        config_entry = MagicMock(spec=ConfigEntry)
+        config_entry.data = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
+        config_entry.options = {}
+        coordinator = MagicMock()
+        coordinator.async_refresh = AsyncMock()
+        coordinator.async_config_entry_first_refresh = AsyncMock()
+
+        with patch(
+            "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
+            new_callable=AsyncMock,
+            return_value=coordinator,
+        ):
+            result = await connect_and_get_coordinator(MagicMock(), config_entry)
+
+        assert result is coordinator
         coordinator.async_config_entry_first_refresh.assert_awaited_once()
+        coordinator.async_refresh.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_config_entry_options_merged(self):
