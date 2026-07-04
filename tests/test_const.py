@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from datetime import timedelta
+import re
+
+from luxtronik.parameters import Parameters
 
 from custom_components.luxtronik2.const import (
     CONF_UPDATE_INTERVAL,
@@ -26,6 +29,7 @@ from custom_components.luxtronik2.const import (
     LuxVisibility,
     SensorKey,
 )
+from custom_components.luxtronik2.lux_overrides import update_Luxtronik_Parameters
 
 
 class TestConstants:
@@ -196,3 +200,85 @@ class TestUpdateIntervalConstants:
 
     def test_conf_update_interval_constant(self):
         assert CONF_UPDATE_INTERVAL == "update_interval"
+
+
+class TestLuxParameterMatchesLibrary:
+    """Guard LuxParameter against drifting from the luxtronik library + our overrides.
+
+    Each member must follow `P<4-digit-number>_<description> = "parameters.<name>"`,
+    where <number> and <name> both resolve to the *same* entry in
+    Parameters.parameters once library overrides are applied. This catches two
+    real classes of bug: a member's number pointing at the wrong upstream
+    parameter (its name won't match), and a member referencing a number that
+    was never registered anywhere (library or lux_overrides).
+    """
+
+    NAME_PATTERN = re.compile(r"^P(\d{4})(?:_\d{4})?_[A-Z0-9]+(?:_[A-Z0-9]+)*$")
+
+    # Parameter numbers with no backing entry in the luxtronik library or in
+    # lux_overrides.parameters_to_add_update. These entities currently always
+    # read/write None. Known gap, tracked for a follow-up fix - do not add new
+    # numbers here; register new parameters properly instead (see
+    # lux_overrides.parameters_to_add_update).
+    KNOWN_MISSING_PARAMETERS = frozenset()
+
+    def test_members_match_library_and_overrides(self):
+        update_Luxtronik_Parameters()
+
+        problems = []
+        for member in LuxParameter:
+            if member is LuxParameter.UNSET:
+                continue
+
+            match = self.NAME_PATTERN.match(member.name)
+            if match is None:
+                problems.append(
+                    f"{member.name}: name doesn't match P<NNNN>_<DESCRIPTION>"
+                )
+                continue
+
+            if not member.value.startswith("parameters."):
+                problems.append(
+                    f"{member.name}: value {member.value!r} missing 'parameters.' prefix"
+                )
+                continue
+
+            raw_name = member.value.removeprefix("parameters.")
+            if "{ID}" in raw_name:
+                continue  # templated multi-index parameter, resolved dynamically
+
+            number = int(match.group(1))
+            if number in self.KNOWN_MISSING_PARAMETERS:
+                continue
+
+            parameter = Parameters.parameters.get(number)
+            if parameter is None:
+                problems.append(
+                    f"{member.name}: parameter {number} has no backing entry in "
+                    f"Parameters.parameters (library or lux_overrides)"
+                )
+                continue
+            if parameter.name != raw_name:
+                problems.append(
+                    f"{member.name}: parameter {number} is registered as "
+                    f"{parameter.name!r} but LuxParameter expects {raw_name!r}"
+                )
+
+        assert not problems, "LuxParameter / library mismatches:\n" + "\n".join(
+            problems
+        )
+
+    def test_known_missing_parameters_are_still_missing(self):
+        """Fail loudly once a known-broken parameter gets registered, as a nudge
+        to remove it from KNOWN_MISSING_PARAMETERS and let the main check cover it."""
+        update_Luxtronik_Parameters()
+
+        now_present = {
+            number
+            for number in self.KNOWN_MISSING_PARAMETERS
+            if Parameters.parameters.get(number) is not None
+        }
+        assert not now_present, (
+            f"Parameters {sorted(now_present)} are now registered - remove them "
+            "from KNOWN_MISSING_PARAMETERS so the main consistency test verifies them"
+        )

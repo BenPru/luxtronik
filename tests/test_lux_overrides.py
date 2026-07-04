@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from luxtronik.calculations import Calculations
-from luxtronik.datatypes import HeatpumpCode
+from luxtronik.datatypes import Celsius, HeatpumpCode, Unknown
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
+import pytest
 
 
 class TestUpdateLuxtronikHeatpumpCodes:
@@ -36,6 +37,56 @@ class TestUpdateLuxtronikParameters:
         assert 258 in Calculations.calculations
         assert Calculations.calculations[258].name == "RBE_Version"
         assert Calculations.calculations[258].from_heatpump(205) == "2.05"
+
+    def test_parameters_to_add_update_keeps_explicit_names(self):
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        Parameters.parameters[973] = Unknown("Existing_Name", True)
+
+        update_Luxtronik_Parameters()
+
+        updated = Parameters.parameters[973]
+        assert isinstance(updated, Celsius)
+        assert updated.name == "ID_Einst_BW_max"
+
+    def test_bulk_class_updates_can_target_numeric_ranges(self):
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameter_Classes,
+        )
+
+        Parameters.parameters[973] = Unknown("ID_Einst_BW_max", True)
+        Parameters.parameters[980] = Unknown("ID_RBE_Einflussfaktor_RT_akt", True)
+
+        update_Luxtronik_Parameter_Classes(range(973, 981), Celsius)
+
+        assert isinstance(Parameters.parameters[973], Celsius)
+        assert Parameters.parameters[973].name == "ID_Einst_BW_max"
+        assert isinstance(Parameters.parameters[980], Celsius)
+        assert Parameters.parameters[980].name == "ID_RBE_Einflussfaktor_RT_akt"
+
+    def test_bulk_class_updates_skip_unknown_numbers(self):
+        """A number with no existing upstream entry is silently skipped, not created."""
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameter_Classes,
+        )
+
+        Parameters.parameters.pop(999999, None)
+        Parameters.parameters[973] = Unknown("ID_Einst_BW_max", True)
+
+        update_Luxtronik_Parameter_Classes([999999, 973], Celsius)
+
+        assert 999999 not in Parameters.parameters
+        assert isinstance(Parameters.parameters[973], Celsius)
+
+    def test_bulk_class_updates_rejects_non_base_datatype(self):
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameter_Classes,
+        )
+
+        with pytest.raises(TypeError):
+            update_Luxtronik_Parameter_Classes([973], str)
 
 
 class TestIsolateInstanceData:

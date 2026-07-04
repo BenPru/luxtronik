@@ -84,6 +84,31 @@ SERVICE_WRITE_SCHEMA = vol.Schema(
         vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),  # pyright: ignore[reportAttributeAccessIssue]
     }
 )
+
+# Raw parameter name prefixes/names the write_parameter service accepts.
+# Keep in sync with lux_overrides.parameters_to_add_update: every custom
+# (non-"ID_"-prefixed) invented name used there needs an entry here too,
+# or the service will reject writes to it.
+WRITABLE_PARAMETER_PREFIXES: Final = (
+    "ID_Einst_",
+    "ID_Ba_",
+    "ID_Soll_",
+    "ID_Sollwert_",
+    "ID_SU_",
+    "ID_RBE_",
+    "Unknown_Parameter_",
+    "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
+    "ELECTRICAL_POWER_LIMIT_VALUE",
+    "HEAT_ENERGY_INPUT",
+    "DHW_ENERGY_INPUT",
+    "COOLING_ENERGY_INPUT",
+    "SECOND_HEAT_GENERATOR_AMOUNT_COUNTER",
+    "POWER_LIMIT_SWITCH",
+    "THERMAL_POWER_LIMIT_SWITCH",
+    "THERMAL_POWER_LIMIT_HEATING",
+    "THERMAL_POWER_LIMIT_WATER",
+    "THERMAL_POWER_LIMIT_COOLING",
+)
 # endregion Conf
 
 # region Lux Definitions
@@ -365,23 +390,23 @@ class LuxParameter(StrEnum):
         "parameters.ID_Einst_HzMK1ABS_akt"  # 0
     )
     # luxtronik*_heating_curve_circuit2*
-    P0017_HEATING_CURVE_CIRCUIT2_END_TEMPERATURE = (
+    P0141_HEATING_CURVE_CIRCUIT2_END_TEMPERATURE = (
         "parameters.ID_Einst_HzMK2E_akt"  # 260
     )
-    P0018_HEATING_CURVE_CIRCUIT2_PARALLEL_SHIFT_TEMPERATURE = (
+    P0142_HEATING_CURVE_CIRCUIT2_PARALLEL_SHIFT_TEMPERATURE = (
         "parameters.ID_Einst_HzMK2ANH_akt"  # 290
     )
-    P0019_HEATING_CURVE_CIRCUIT2_NIGHT_TEMPERATURE = (
+    P0143_HEATING_CURVE_CIRCUIT2_NIGHT_TEMPERATURE = (
         "parameters.ID_Einst_HzMK2ABS_akt"  # 0
     )
     # luxtronik*_heating_curve_circuit3*
-    P0020_HEATING_CURVE_CIRCUIT3_END_TEMPERATURE = (
+    P0774_HEATING_CURVE_CIRCUIT3_END_TEMPERATURE = (
         "parameters.ID_Einst_HzMK3E_akt"  # 270
     )
-    P0021_HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE = (
+    P0775_HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE = (
         "parameters.ID_Einst_HzMK3ANH_akt"  # 290
     )
-    P0022_HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE = (
+    P0776_HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE = (
         "parameters.ID_Einst_HzMK3ABS_akt"  # 0
     )
     P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET = "parameters.ID_Einst_HzFtRl_akt"  # Heizung feste Temperature Rücklauf Soll --> Einstellung 103
@@ -411,7 +436,7 @@ class LuxParameter(StrEnum):
     P0149_FLOW_IN_TEMPERATURE_MAX_ALLOWED = "parameters.ID_Einst_TVLmax_akt"
     P0155_VENTING_TIME_HOURS = "parameters.ID_Einst_Entl_time_akt"
     P0158_VENTING_ACTIVE = "parameters.ID_Einst_Entl_akt"
-    P0289_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER = (
+    P0124_SOLAR_PUMP_OFF_MAX_DIFFERENCE_TEMPERATURE_BOILER = (
         "parameters.ID_Einst_TDC_Max_akt"
     )
     P0678_VENTING_HUP_ACTIVE = "parameters.ID_Einst_Entl_Typ_0"
@@ -469,22 +494,24 @@ class LuxParameter(StrEnum):
     P1119_LAST_DEFROST_TIMESTAMP = (
         "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
     )
-    P1136_HEAT_ENERGY_INPUT = "parameters.Unknown_Parameter_1136"
-    P1137_DHW_ENERGY_INPUT = "parameters.Unknown_Parameter_1137"
+    P1136_HEAT_ENERGY_INPUT = "parameters.HEAT_ENERGY_INPUT"
+    P1137_DHW_ENERGY_INPUT = "parameters.DHW_ENERGY_INPUT"
     # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
-    P1139_COOLING_ENERGY_INPUT = "parameters.Unknown_Parameter_1139"
-    P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = "parameters.Unknown_Parameter_1140"
+    P1139_COOLING_ENERGY_INPUT = "parameters.COOLING_ENERGY_INPUT"
+    P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = (
+        "parameters.SECOND_HEAT_GENERATOR_AMOUNT_COUNTER"
+    )
     P1146_EXTRA_DHW_TARGET_TEMPERATURE = "parameters.Extra_DHW_target_temp"
     P1147_EXTRA_DHW_DURATION = "parameters.Extra_DHW_duration"
     P1148_HEATING_TARGET_TEMP_ROOM_THERMOSTAT = (
         "parameters.HEATING_TARGET_TEMP_ROOM_THERMOSTAT"
     )
-    P1158_POWER_LIMIT_SWITCH = "parameters.Unknown_Parameter_1158"
-    P1159_POWER_LIMIT_VALUE = "parameters.Unknown_Parameter_1159"
-    P1175_THERMAL_POWER_LIMIT_SWITCH = "parameters.Unknown_Parameter_1175"
-    P1176_THERMAL_POWER_LIMIT_HEATING = "parameters.Unknown_Parameter_1176"
-    P1177_THERMAL_POWER_LIMIT_WATER = "parameters.Unknown_Parameter_1177"
-    P1178_THERMAL_POWER_LIMIT_COOLING = "parameters.Unknown_Parameter_1178"
+    P1158_POWER_LIMIT_SWITCH = "parameters.POWER_LIMIT_SWITCH"
+    P1159_POWER_LIMIT_VALUE = "parameters.ELECTRICAL_POWER_LIMIT_VALUE"
+    P1175_THERMAL_POWER_LIMIT_SWITCH = "parameters.THERMAL_POWER_LIMIT_SWITCH"
+    P1176_THERMAL_POWER_LIMIT_HEATING = "parameters.THERMAL_POWER_LIMIT_HEATING"
+    P1177_THERMAL_POWER_LIMIT_WATER = "parameters.THERMAL_POWER_LIMIT_WATER"
+    P1178_THERMAL_POWER_LIMIT_COOLING = "parameters.THERMAL_POWER_LIMIT_COOLING"
 
     P0731_AWAY_HEATING_STARTDATE = "parameters.ID_SU_FstdHz"
     P0006_AWAY_HEATING_ENDDATE = "parameters.ID_SU_FrkdHz"

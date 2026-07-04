@@ -28,6 +28,7 @@ from .const import (
     PLATFORMS,
     SERVICE_WRITE,
     SERVICE_WRITE_SCHEMA,
+    WRITABLE_PARAMETER_PREFIXES,
     SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
@@ -127,23 +128,13 @@ def setup_hass_services(hass: HomeAssistant, entry: LuxtronikConfigEntry):
         value = convert_to_int_if_possible(service.data.get(ATTR_VALUE))
 
         # Only allow writing to known writable parameter prefixes
-        writable_prefixes = (
-            "ID_Einst_",
-            "ID_Ba_",
-            "ID_Soll_",
-            "ID_Sollwert_",
-            "ID_SU_",
-            "ID_RBE_",
-            "Unknown_Parameter_",
-            "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
-        )
-        if not parameter.startswith(writable_prefixes):
+        if not parameter.startswith(WRITABLE_PARAMETER_PREFIXES):
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
                 translation_key="parameter_not_writable",
                 translation_placeholders={
                     "parameter": parameter,
-                    "prefixes": ", ".join(writable_prefixes),
+                    "prefixes": ", ".join(WRITABLE_PARAMETER_PREFIXES),
                 },
             )
 

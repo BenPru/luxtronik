@@ -3,13 +3,18 @@ from copy import deepcopy
 from luxtronik.calculations import Calculations
 from luxtronik.datatypes import (
     Base,
+    Bool,
     Celsius,
+    Energy,
     HeatpumpCode,
+    Kelvin,
     MixedCircuitMode,
     Percent,
     Percent2,
+    Power,
     SelectionBase,
     Timestamp,
+    Unknown,
 )
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
@@ -83,11 +88,27 @@ parameters_to_add_update = {
     973: Celsius("ID_Einst_BW_max", True),
     980: Percent2("ID_RBE_Einflussfaktor_RT_akt", True),
     993: Celsius("ID_Einst_min_VL_Kuehl", True),
+    979: Celsius("ID_Einst_Minimale_Ruecklaufsolltemperatur", True),
     1045: FrequencyAutomatic("ID_Einst_P155_DHW_Freq", True),
     1146: Celsius("Extra_DHW_target_temp", True),
     1147: SecondsToHours("Extra_DHW_duration", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
-    1159: Percent("Unknown_Parameter_1159", True),
+    1159: Percent("ELECTRICAL_POWER_LIMIT_VALUE", True),
+    # Read-only sensors confirmed against Bouni/python-luxtronik's in-progress
+    # parameter definitions (not yet released). Their "kWh/10" unit note means
+    # an additional /10 is needed on top of Energy's own /10 scaling, which is
+    # exactly what the matching sensor descriptions already apply via factor=0.01.
+    1136: Energy("HEAT_ENERGY_INPUT", False),
+    1137: Energy("DHW_ENERGY_INPUT", False),
+    1139: Energy("COOLING_ENERGY_INPUT", False),
+    1140: Unknown("SECOND_HEAT_GENERATOR_AMOUNT_COUNTER", False),
+    # Bouni/python-luxtronik's in-progress definitions mark these read-only,
+    # but our switch/number entities treat them as user-writable by design.
+    1158: Bool("POWER_LIMIT_SWITCH", True),
+    1175: Bool("THERMAL_POWER_LIMIT_SWITCH", True),
+    1176: Power("THERMAL_POWER_LIMIT_HEATING", True),
+    1177: Power("THERMAL_POWER_LIMIT_WATER", True),
+    1178: Power("THERMAL_POWER_LIMIT_COOLING", True),
     # Add more as needed
 }
 
@@ -96,9 +117,50 @@ calculations_to_add_update = {
 }
 
 
+def _update_entry(existing, override, *, preserve_existing_name=False):
+    """Replace an entry by number while optionally preserving the existing name."""
+    name = override.name
+    if preserve_existing_name and getattr(existing, "name", None) is not None:
+        name = existing.name
+
+    updated = override.__class__(name, override.writeable)
+    if hasattr(existing, "value"):
+        updated.value = existing.value
+    return updated
+
+
 def update_Luxtronik_Parameters():
     Parameters.parameters.update(parameters_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
     Calculations.calculations.update(calculations_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
+
+    # example bulk update of parameter classes for a range of numbers
+    Celsius_numbers = [14, 15, 16, 141, 142, 143, 774, 775, 776] + [17, 47, 90, 93, 111]
+    update_Luxtronik_Parameter_Classes(Celsius_numbers, Celsius)
+
+    # Kelvin temperature-difference parameters stored as tenths.
+    delta_temperature_numbers = [88, 89]
+    update_Luxtronik_Parameter_Classes(delta_temperature_numbers, Kelvin)
+
+
+def update_Luxtronik_Parameter_Classes(numbers, datatype_class):
+    """Update only the class for a list or range of parameter numbers.
+
+    This is intended for parameters that already exist in the upstream library
+    and only need their datatype changed, e.g. from Unknown to Celsius.
+    """
+    if not isinstance(datatype_class, type) or not issubclass(datatype_class, Base):
+        raise TypeError("datatype_class must be a Base subclass")
+
+    for number in numbers:
+        existing = Parameters.parameters.get(number)
+        if existing is None:
+            continue
+
+        Parameters.parameters[number] = _update_entry(
+            existing,
+            datatype_class(getattr(existing, "name", str(number)), existing.writeable),
+            preserve_existing_name=True,
+        )
 
 
 _INSTANCE_DATA_ISOLATED = False
