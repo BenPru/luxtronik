@@ -515,21 +515,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def device_key_active(self, device_key: DeviceKey) -> bool:
         """Is device key activated."""
-        if device_key == DeviceKey.heatpump:
+        if device_key in (DeviceKey.heatpump, DeviceKey.heating):
             return True
-        if device_key == DeviceKey.heating:
-            return self.has_heating
         if device_key == DeviceKey.domestic_water:
             return self.has_domestic_water
         if device_key == DeviceKey.cooling:
             return self.has_cooling
         raise NotImplementedError
-
-    @property
-    def has_heating(self) -> bool:
-        """Is heating activated."""
-        val = self.get_value(LC.C0064_OPERATION_HOURS_HEATING)
-        return val is not None and val > 0
 
     @property
     def has_domestic_water(self) -> bool:
@@ -541,7 +533,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def has_cooling(self) -> bool:
         """Is cooling activated."""
         val = self.get_value(LC.C0066_OPERATION_HOURS_COOLING)
-        return val is not None and val > 0
+        if val is not None and val > 0:
+            return True
+        return self.detect_cooling_present()
 
     def get_value(self, group_sensor_id: str | LP | LC | LV):
         """Get a sensor value from Luxtronik."""

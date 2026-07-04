@@ -271,9 +271,10 @@ class TestDeviceKeyActive:
         coord = _make_coordinator(calculations={"ID_WEB_Zaehler_BetrZeitHz": 100})
         assert coord.device_key_active(DeviceKey.heating) is True
 
-    def test_heating_inactive(self):
+    def test_heating_always_active_without_usage_hours(self):
+        """Heating device should show up even if heating has never run yet (#655)."""
         coord = _make_coordinator(calculations={"ID_WEB_Zaehler_BetrZeitHz": 0})
-        assert coord.device_key_active(DeviceKey.heating) is False
+        assert coord.device_key_active(DeviceKey.heating) is True
 
     def test_domestic_water_active(self):
         coord = _make_coordinator(calculations={"ID_WEB_Zaehler_BetrZeitBW": 100})
@@ -290,6 +291,14 @@ class TestDeviceKeyActive:
     def test_cooling_inactive(self):
         coord = _make_coordinator(calculations={"ID_WEB_Zaehler_BetrZeitKue": 0})
         assert coord.device_key_active(DeviceKey.cooling) is False
+
+    def test_cooling_active_without_usage_hours_when_configured(self):
+        """Cooling device should show up even if cooling has never run yet (#655)."""
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitKue": 0},
+            parameters={"ID_Einst_MK1Typ_akt": 3},  # LuxMkTypes.cooling.value
+        )
+        assert coord.device_key_active(DeviceKey.cooling) is True
 
     def test_unknown_device_key_raises(self):
         coord = _make_coordinator()
