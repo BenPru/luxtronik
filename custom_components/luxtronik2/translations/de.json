@@ -1051,19 +1051,6 @@
                     "select_device_to_configure": "W\u00e4hlen Sie das Ger\u00e4t aus, das Sie konfigurieren m\u00f6chten"
                 }
             },
-            "options": {
-                "description": "Einstellungen f\u00fcr die Luxtronik-W\u00e4rmepumpe {name}.\nDiese Einstellungen k\u00f6nnen sp\u00e4ter unter Integrationen ge\u00e4ndert werden.",
-                "data": {
-                    "ha_sensor_indoor_temperature": "Sensor-ID f\u00fcr die Raumtemperatur",
-                    "control_mode_home_assistant": "Experimentell!: Thermostatstatus \u00fcber Home Assistant steuern.",
-                    "ha_sensor_prefix": "Pr\u00e4fix f\u00fcr Entity-IDs"
-                },
-                "data_description": {
-                    "ha_sensor_indoor_temperature": "Ein Thermostat zur Heizungssteuerung wird in Home Assistant erstellt. Die tats\u00e4chliche Temperatur wird von einem Home Assistant-Sensor gesetzt.\nWenn Luxtronik mit einem Hardware-Raumthermostat verbunden ist, sollte dieses Feld leer bleiben.",
-                    "control_mode_home_assistant": "Wenn sich das Home Assistant-Thermostat im Leerlauf befindet, wird der Aus-Zustand an Luxtronik gemeldet und Luxtronik kann dieses Element nicht starten.",
-                    "ha_sensor_prefix": "Wichtig bei Verwendung mehrerer W\u00e4rmepumpen. Bei einer einzelnen kann einfach 'luxtronik' verwendet werden."
-                }
-            },
             "reconfigure": {
                 "title": "Luxtronik-Verbindung neu konfigurieren",
                 "description": "Aktualisieren Sie die Verbindungseinstellungen f\u00fcr die Luxtronik-W\u00e4rmepumpe.",
@@ -1088,10 +1075,12 @@
                 "title": "Optionen f\u00fcr {name} konfigurieren",
                 "description": "Einstellungen f\u00fcr die Luxtronik-W\u00e4rmepumpe {name}.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "Sensor-ID f\u00fcr die Raumtemperatur"
+                    "ha_sensor_indoor_temperature": "Sensor-ID f\u00fcr die Raumtemperatur",
+                    "update_interval": "Aktualisierungsintervall"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "Ein Thermostat zur Heizungssteuerung wird in Home Assistant erstellt. Die tats\u00e4chliche Temperatur wird von einem Home Assistant-Sensor gesetzt.\nWenn Luxtronik mit einem Hardware-Raumthermostat verbunden ist, sollte dieses Feld leer bleiben."
+                    "ha_sensor_indoor_temperature": "Ein Thermostat zur Heizungssteuerung wird in Home Assistant erstellt. Die tats\u00e4chliche Temperatur wird von einem Home Assistant-Sensor gesetzt.\nWenn Luxtronik mit einem Hardware-Raumthermostat verbunden ist, sollte dieses Feld leer bleiben.",
+                    "update_interval": "Wie oft die W\u00e4rmepumpe nach neuen Daten abgefragt wird."
                 }
             }
         }
