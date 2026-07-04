@@ -4,13 +4,12 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable, Coroutine, Mapping
+from collections.abc import Callable, Mapping
 from datetime import timedelta
-from functools import wraps
 import operator
 import re
 from types import MappingProxyType
-from typing import Any, Concatenate, Final, ParamSpec, TypeVar
+from typing import Any, Final
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
@@ -52,30 +51,6 @@ from .lux_overrides import (
 from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 
 # endregion Imports
-
-_LuxtronikCoordinatorT = TypeVar("_LuxtronikCoordinatorT", bound="LuxtronikCoordinator")
-_P = ParamSpec("_P")
-
-
-def catch_luxtronik_errors(
-    func: Callable[Concatenate[_LuxtronikCoordinatorT, _P], Awaitable[None]],
-) -> Callable[Concatenate[_LuxtronikCoordinatorT, _P], Coroutine[Any, Any, None]]:
-    """Catch Luxtronik errors."""
-
-    @wraps(func)
-    async def wrapper(
-        self: _LuxtronikCoordinatorT,
-        *args: _P.args,
-        **kwargs: _P.kwargs,
-    ) -> None:
-        """Catch Luxtronik errors and log message."""
-        try:
-            await func(self, *args, **kwargs)
-        except Exception as err:  # pylint: disable=broad-except
-            LOGGER.error("Command error: %s", err)
-        await self.async_request_refresh()
-
-    return wrapper
 
 
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
@@ -160,7 +135,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
             return self.data
         except Exception as err:
-            raise UpdateFailed(f"Write error: {err}") from err
+            raise LuxtronikWriteError(f"Write error: {err}") from err
 
     @staticmethod
     async def connect(  # pragma: no cover
@@ -318,8 +293,21 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     @property
     def serial_number(self) -> str:
-        """Return the serial number."""
+        """Return the serial number.
+
+        Raises:
+            LuxtronikSerialNumberError: if the serial number date (P0874) is
+                unavailable. This feeds `unique_id`, so it must be treated as
+                a hard error rather than silently identifying the device
+                with an empty/placeholder value.
+
+        """
         serial_number_date = self.get_value(LP.P0874_SERIAL_NUMBER)
+        if serial_number_date is None:
+            raise LuxtronikSerialNumberError(
+                "Serial number (P0874) is not available - coordinator data "
+                "may not be populated yet"
+            )
         serial_number_model = self.get_value(LP.P0875_SERIAL_NUMBER_MODEL)
         serial_number_hex = (
             hex(int(serial_number_model)) if serial_number_model is not None else "0"
@@ -558,6 +546,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     def get_sensor(self, group: str, sensor_id: str):
         """Get sensor by configured sensor ID from coordinator data."""
+        if self.data is None:
+            return None
         if group == CONF_PARAMETERS:
             return self.data.parameters.get(sensor_id)
         if group == CONF_CALCULATIONS:
@@ -618,6 +608,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Make sure a coordinator is shut down as well as its connection."""
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
+            await self.hass.async_add_executor_job(self.client.disconnect)
             del self.client
 
 
@@ -631,6 +622,19 @@ class LuxtronikConnectionError(HomeAssistantError):
         self.host = host
         self.port = port
         self.original = original
+
+
+class LuxtronikWriteError(HomeAssistantError):
+    """Raised when writing a parameter to the Luxtronik device fails."""
+
+
+class LuxtronikSerialNumberError(HomeAssistantError):
+    """Raised when the heatpump's serial number cannot be determined.
+
+    The serial number feeds `unique_id`, so treating it as "not available
+    yet" and falling back to an empty value would risk two different
+    devices ending up with colliding (empty) device/entry identifiers.
+    """
 
 
 _OVERRIDES_APPLIED = False
@@ -674,6 +678,15 @@ async def connect_and_get_coordinator(
             )
         else:
             await coordinator.async_refresh()
+            if not coordinator.last_update_success:
+                # async_refresh() (unlike async_config_entry_first_refresh())
+                # swallows update failures instead of raising. Without this
+                # check we'd hand back a coordinator with no data, and the
+                # failure would only surface later as a confusing error when
+                # something (e.g. unique_id) tries to read a sensor value.
+                raise RuntimeError(
+                    f"Initial data refresh did not succeed for {host}:{port}"
+                )
             LOGGER.debug(
                 "Initial coordinator refresh completed for %s:%s via direct config",
                 host,

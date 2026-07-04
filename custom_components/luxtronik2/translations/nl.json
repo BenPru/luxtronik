@@ -997,6 +997,7 @@
     "config": {
         "abort": {
             "cannot_connect": "De verbinding met Luxtronik op {host} is mislukt.\nFout: {connect_error}",
+            "cannot_identify": "Verbonden met het apparaat op {host}, maar het serienummer kon niet worden gelezen om het te identificeren.\nFout: {error}",
             "already_configured": "Dit apparaat is al geconfigureerd.",
             "reconfigure_successful": "Configuratie succesvol bijgewerkt.",
             "unique_id_mismatch": "Het apparaat op het nieuwe adres heeft een andere identiteit dan het momenteel geconfigureerde apparaat.",
@@ -1011,6 +1012,7 @@
             "address": "Ongeldig extern adres. Het adres moet een IP-adres of een oplosbare hostnaam zijn.",
             "address_in_use": "De gekozen poort is al in gebruik op dit systeem.",
             "cannot_connect": "Verbinding mislukt. Controleer de host en poort.",
+            "cannot_identify": "Verbonden met het apparaat, maar het serienummer kon niet worden gelezen om het te identificeren.",
             "unknown": "Onverwachte fout"
         },
         "step": {

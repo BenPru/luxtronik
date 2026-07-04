@@ -169,6 +169,20 @@ class TestLuxtronikClient:
     @patch(
         "custom_components.luxtronik2.lux_helper._is_socket_closed", return_value=False
     )
+    def test_public_disconnect_closes_socket(self, mock_is_closed):
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        client._socket = mock_sock
+
+        client.disconnect()
+
+        mock_sock.close.assert_called_once()
+        assert client._socket is None
+
+    @patch(
+        "custom_components.luxtronik2.lux_helper._is_socket_closed", return_value=False
+    )
     def test_disconnect_closes_socket(self, mock_is_closed):
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
         mock_sock = MagicMock()

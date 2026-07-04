@@ -27,7 +27,8 @@ from custom_components.luxtronik2.const import (
 from custom_components.luxtronik2.coordinator import (
     LuxtronikConnectionError,
     LuxtronikCoordinator,
-    catch_luxtronik_errors,
+    LuxtronikSerialNumberError,
+    LuxtronikWriteError,
 )
 from custom_components.luxtronik2.model import (
     LuxtronikCoordinatorData,
@@ -223,6 +224,11 @@ class TestCoordinatorProperties:
         sn = coord.serial_number
         assert "20230101" in sn
         assert "ff" in sn.lower()  # hex(255) = 0xff
+
+    def test_serial_number_missing_date_raises(self):
+        coord = _make_coordinator()
+        with pytest.raises(LuxtronikSerialNumberError):
+            _ = coord.serial_number
 
     def test_room_thermostat_type(self):
         coord = _make_coordinator(parameters={"ID_Einst_RFVEinb_akt": 4})
@@ -665,6 +671,11 @@ class TestCoordinatorGetValue:
         coord = _make_coordinator()
         assert coord.get_sensor("unknown_group", "some_key") is None
 
+    def test_get_sensor_no_data_yet(self):
+        coord = _make_coordinator()
+        coord.data = None
+        assert coord.get_sensor("parameters", "some_key") is None
+
 
 # ===========================================================================
 # async operations
@@ -727,33 +738,6 @@ class TestCoordinatorAsync:
 
 
 # ===========================================================================
-# catch_luxtronik_errors decorator
-# ===========================================================================
-
-
-class TestCatchLuxtronikErrors:
-    @pytest.mark.asyncio
-    async def test_catches_exception_and_refreshes(self):
-        @catch_luxtronik_errors
-        async def failing_method(self):
-            raise ValueError("test error")
-
-        coord = _make_coordinator_direct()
-        await failing_method(coord)
-        coord.async_request_refresh.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def test_calls_refresh_on_success(self):
-        @catch_luxtronik_errors
-        async def success_method(self):
-            pass
-
-        coord = _make_coordinator_direct()
-        await success_method(coord)
-        coord.async_request_refresh.assert_awaited_once()
-
-
-# ===========================================================================
 # _async_update_data (direct coordinator)
 # ===========================================================================
 
@@ -808,7 +792,7 @@ class TestAsyncWrite:
         coord.hass.async_add_executor_job = AsyncMock(
             side_effect=Exception("write fail")
         )
-        with pytest.raises(UpdateFailed):
+        with pytest.raises(LuxtronikWriteError):
             await coord.async_write("param", 1)
 
 
@@ -821,12 +805,17 @@ class TestAsyncShutdownDirect:
     @pytest.mark.asyncio
     async def test_shutdown_with_client(self):
         coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock(
+            side_effect=lambda fn, *a, **kw: fn(*a, **kw)
+        )
+        client = coord.client
         with patch(
             "homeassistant.helpers.update_coordinator.DataUpdateCoordinator.async_shutdown",
             new_callable=AsyncMock,
         ):
             await coord.async_shutdown()
         assert not hasattr(coord, "client")
+        client.disconnect.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_shutdown_without_client(self):
@@ -1145,6 +1134,26 @@ class TestConnectAndGetCoordinator:
         assert result is coordinator
         coordinator.async_refresh.assert_awaited_once()
         coordinator.async_config_entry_first_refresh.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_initial_refresh_failure_raises_connection_error(self):
+        """async_refresh() swallows failures; connect_and_get_coordinator must not."""
+        from custom_components.luxtronik2.coordinator import connect_and_get_coordinator
+
+        config = {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
+        coordinator = MagicMock()
+        coordinator.async_refresh = AsyncMock()
+        coordinator.last_update_success = False
+
+        with (
+            patch(
+                "custom_components.luxtronik2.coordinator.LuxtronikCoordinator.connect",
+                new_callable=AsyncMock,
+                return_value=coordinator,
+            ),
+            pytest.raises(LuxtronikConnectionError),
+        ):
+            await connect_and_get_coordinator(MagicMock(), config)
 
     @pytest.mark.asyncio
     async def test_initial_refresh_uses_config_entry_first_refresh_for_config_entry(
