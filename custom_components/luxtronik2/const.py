@@ -42,6 +42,15 @@ UPDATE_INTERVAL_OPTIONS: Final = {
     "1 minute (default)": timedelta(seconds=60),
     "5 minutes": timedelta(minutes=5),
 }
+# The UPDATE_INTERVAL_OPTIONS key matching DEFAULT_UPDATE_INTERVAL. The options
+# flow's CONF_UPDATE_INTERVAL field is a SelectSelector whose default/suggested
+# value must be one of these string keys - DEFAULT_UPDATE_INTERVAL itself is a
+# timedelta and isn't JSON-serializable when used there.
+DEFAULT_UPDATE_INTERVAL_OPTION: Final = next(
+    key
+    for key, value in UPDATE_INTERVAL_OPTIONS.items()
+    if value == DEFAULT_UPDATE_INTERVAL
+)
 
 UPDATE_INTERVAL_FAST: Final = timedelta(seconds=10)
 UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)

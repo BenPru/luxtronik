@@ -25,7 +25,7 @@ from .const import (
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
-    DEFAULT_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL_OPTION,
     DOMAIN,
     LOGGER,
 )
@@ -512,7 +512,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
                     new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
 
                 update_interval = user_input.get(
-                    CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                    CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_OPTION
                 )
                 new_options[CONF_UPDATE_INTERVAL] = update_interval
 
@@ -520,7 +520,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
 
             current_indoor_temp = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
             current_interval = self._get_value(
-                CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_OPTION
             )
 
             return self.async_show_form(

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any, cast
 
 from homeassistant.const import CONF_HOST, CONF_PORT
+import homeassistant.helpers.config_validation as cv
 import pytest
 import voluptuous as vol
+import voluptuous_serialize
 
 from custom_components.luxtronik2.const import (
     DEFAULT_PORT,
@@ -92,3 +95,18 @@ class TestBuildOptionsSchema:
             current_interval="1 minute",
         )
         assert isinstance(schema, vol.Schema)
+
+    def test_default_schema_is_json_serializable(self):
+        """Regression test for issue #656.
+
+        A config entry that has never saved options before (current_interval=None,
+        the common case) must not fall back to the raw DEFAULT_UPDATE_INTERVAL
+        timedelta - the frontend serializes this schema to JSON to render the
+        "Configure" form, and a timedelta default/suggested_value crashes that
+        with a 500 (TypeError: Object of type timedelta is not JSON serializable).
+        """
+        schema = build_options_schema()
+        converted = voluptuous_serialize.convert(
+            schema, custom_serializer=cv.custom_serializer
+        )
+        json.dumps(converted)  # must not raise
