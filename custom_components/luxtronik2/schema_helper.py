@@ -10,7 +10,7 @@ from .const import (
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
-    DEFAULT_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL_OPTION,
     UPDATE_INTERVAL_OPTIONS,
 )
 
@@ -53,9 +53,10 @@ def build_options_schema(
             ),
             vol.Optional(
                 CONF_UPDATE_INTERVAL,
-                default=current_interval or DEFAULT_UPDATE_INTERVAL,
+                default=current_interval or DEFAULT_UPDATE_INTERVAL_OPTION,
                 description={
-                    "suggested_value": current_interval or DEFAULT_UPDATE_INTERVAL
+                    "suggested_value": current_interval
+                    or DEFAULT_UPDATE_INTERVAL_OPTION
                 },
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(

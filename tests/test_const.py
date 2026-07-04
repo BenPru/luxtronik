@@ -14,6 +14,7 @@ from custom_components.luxtronik2.const import (
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
     DEFAULT_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL_OPTION,
     DOMAIN,
     PLATFORMS,
     UPDATE_INTERVAL_OPTIONS,
@@ -197,6 +198,19 @@ class TestUpdateIntervalConstants:
         assert UPDATE_INTERVAL_OPTIONS["30 seconds"].total_seconds() == 30
         assert UPDATE_INTERVAL_OPTIONS["1 minute (default)"].total_seconds() == 60
         assert UPDATE_INTERVAL_OPTIONS["5 minutes"].total_seconds() == 300
+
+    def test_default_update_interval_option_is_a_valid_key(self):
+        """DEFAULT_UPDATE_INTERVAL_OPTION must be a string key of
+        UPDATE_INTERVAL_OPTIONS, not the DEFAULT_UPDATE_INTERVAL timedelta
+        itself - the options flow's SelectSelector default must match one of
+        its own option values or the schema fails to serialize (see #656).
+        """
+        assert isinstance(DEFAULT_UPDATE_INTERVAL_OPTION, str)
+        assert DEFAULT_UPDATE_INTERVAL_OPTION in UPDATE_INTERVAL_OPTIONS
+        assert (
+            UPDATE_INTERVAL_OPTIONS[DEFAULT_UPDATE_INTERVAL_OPTION]
+            == DEFAULT_UPDATE_INTERVAL
+        )
 
     def test_conf_update_interval_constant(self):
         assert CONF_UPDATE_INTERVAL == "update_interval"
