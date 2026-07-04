@@ -367,7 +367,13 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             await self.async_set_unique_id(coordinator.unique_id)
             self._abort_if_unique_id_configured(
-                updates={CONF_HOST: host, CONF_PORT: int(port or DEFAULT_PORT)}
+                updates={CONF_HOST: host, CONF_PORT: int(port or DEFAULT_PORT)},
+                # Our own update listener (see __init__.py) already reloads the
+                # entry on any data/options change, so core scheduling its own
+                # reload here as well is redundant and triggers a deprecation
+                # warning ("has an update listener and should use it for
+                # scheduling a reload"), which will start failing in 2026.12.
+                reload_on_update=False,
             )
 
             return self._create_entry(config, coordinator)
