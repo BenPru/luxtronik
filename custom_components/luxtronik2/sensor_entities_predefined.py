@@ -575,7 +575,9 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        factor=0.01,
+        # Energy.from_heatpump() already divides by 10; this factor supplies
+        # the remaining /10 noted for this parameter ("kWh/10" raw unit).
+        factor=0.1,
         # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
@@ -650,7 +652,9 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        factor=0.01,
+        # Energy.from_heatpump() already divides by 10; this factor supplies
+        # the remaining /10 noted for this parameter ("kWh/10" raw unit).
+        factor=0.1,
         # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),
@@ -706,7 +710,9 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        factor=0.01,
+        # Energy.from_heatpump() already divides by 10; this factor supplies
+        # the remaining /10 noted for this parameter ("kWh/10" raw unit).
+        factor=0.1,
         # min_firmware_version_minor=FirmwareVersionMinor.minor_88,
         update_interval=UPDATE_INTERVAL_VERY_SLOW,
     ),

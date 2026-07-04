@@ -97,7 +97,7 @@ parameters_to_add_update = {
     # Read-only sensors confirmed against Bouni/python-luxtronik's in-progress
     # parameter definitions (not yet released). Their "kWh/10" unit note means
     # an additional /10 is needed on top of Energy's own /10 scaling, which is
-    # exactly what the matching sensor descriptions already apply via factor=0.01.
+    # exactly what the matching sensor descriptions already apply via factor=0.1.
     1136: Energy("HEAT_ENERGY_INPUT", False),
     1137: Energy("DHW_ENERGY_INPUT", False),
     1139: Energy("COOLING_ENERGY_INPUT", False),

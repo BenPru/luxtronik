@@ -25,6 +25,7 @@ from custom_components.luxtronik2.const import (
     SensorAttrKey as SA,
     SensorKey,
 )
+from custom_components.luxtronik2.lux_overrides import parameters_to_add_update
 from custom_components.luxtronik2.model import (
     LuxtronikBinarySensorEntityDescription,
     LuxtronikSensorDescription,
@@ -34,6 +35,7 @@ from custom_components.luxtronik2.sensor import (
     LuxtronikSensorEntity,
     LuxtronikStatusSensorEntity,
 )
+from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",
@@ -749,3 +751,45 @@ class TestBinarySensorComputeIsOn:
 
         entity._handle_coordinator_update(data)
         assert entity.is_on is True
+
+
+# ===========================================================================
+# Energy input sensors: Energy.from_heatpump() divides raw by 10; the
+# description's `factor` must supply the remaining /10 (raw is in "kWh/10"
+# units per Bouni/python-luxtronik), not another /100. Regression test for
+# the double-scaling bug introduced in 461875c, where factor=0.01 combined
+# with Energy's own /10 produced values 10x too low.
+# ===========================================================================
+
+
+def _energy_input_case(
+    sensor_key: SensorKey,
+) -> tuple[LuxtronikSensorDescription, object]:
+    description = next(d for d in SENSORS if d.key == sensor_key)
+    raw_name = description.luxtronik_key.rsplit(".", 1)[1]
+    datatype = next(
+        dt for dt in parameters_to_add_update.values() if dt.name == raw_name
+    )
+    return description, datatype
+
+
+class TestEnergyInputScaling:
+    def _assert_raw_converts_to(
+        self, sensor_key: SensorKey, raw_value: int, expected_kwh: float
+    ) -> None:
+        description, datatype = _energy_input_case(sensor_key)
+        converted = datatype.from_heatpump(raw_value)
+        group, sensor_id = description.luxtronik_key.split(".", 1)
+        data = make_coordinator_data(**{group: {sensor_id: converted}})
+        entity = _make_sensor(description, data)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == expected_kwh
+
+    def test_heat_energy_input_scaling(self):
+        self._assert_raw_converts_to(SensorKey.HEAT_ENERGY_INPUT, 269938, 2699.38)
+
+    def test_dhw_energy_input_scaling(self):
+        self._assert_raw_converts_to(SensorKey.DHW_ENERGY_INPUT, 66818, 668.18)
+
+    def test_cooling_energy_input_scaling(self):
+        self._assert_raw_converts_to(SensorKey.COOLING_ENERGY_INPUT, 12345, 123.45)
