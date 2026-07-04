@@ -1041,19 +1041,6 @@
                     "select_device_to_configure": "Selecteer de heatpomp die je wilt configureren"
                 }
             },
-            "options": {
-                "description": "Instellingen voor de Luxtronik warmtepomp {name}.\nDeze instellingen kunnen later worden gewijzigd onder Integraties.",
-                "data": {
-                    "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
-                    "control_mode_home_assistant": "Experimenteel!: Thermostaatstatus regelen via Home Assistant.",
-                    "ha_sensor_prefix": "Voorvoegsel voor entiteit-ID's"
-                },
-                "data_description": {
-                    "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
-                    "control_mode_home_assistant": "Wanneer de Home Assistant-thermostaat in de idle-status staat, wordt de uit-status aan Luxtronik gemeld en kan Luxtronik dit item niet starten.",
-                    "ha_sensor_prefix": "Belangrijk bij gebruik van meerdere warmtepompen. Bij \u00e9\u00e9n enkele kan gewoon 'luxtronik' worden gebruikt."
-                }
-            },
             "reconfigure": {
                 "title": "Luxtronik-verbinding opnieuw configureren",
                 "description": "Werk de verbindingsinstellingen bij voor de Luxtronik warmtepomp.",
@@ -1078,10 +1065,12 @@
                 "title": "Opties configureren voor {name}",
                 "description": "Instellingen voor de Luxtronik warmtepomp {name}.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur"
+                    "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
+                    "update_interval": "Update-interval"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg."
+                    "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
+                    "update_interval": "Hoe vaak de warmtepomp wordt bevraagd voor nieuwe gegevens."
                 }
             }
         }

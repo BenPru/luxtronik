@@ -46,11 +46,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
     VERSION = CONFIG_ENTRY_VERSION
-    _discovery_host = None
-    _discovery_port = None
-
-    _sensor_prefix = DOMAIN
-    _title = "Luxtronik"
     _all_devices: list[dict[str, Any]] = []
     _available_devices: list[dict[str, Any]] = []
 
@@ -378,6 +373,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             return self._create_entry(config, coordinator)
 
+        except AbortFlow:
+            raise
         except Exception as err:
             LOGGER.error("Unhandled DHCP discovery error", exc_info=err)
             return self.async_abort(reason="unknown")
@@ -481,15 +478,11 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Get default options flow."""
-        from .config_flow import LuxtronikOptionsFlowHandler
-
         return LuxtronikOptionsFlowHandler(config_entry)
 
 
 class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
     """Handle a Luxtronik options flow."""
-
-    _sensor_prefix = DOMAIN
 
     def _get_value(self, key: str, default=None):
         """Return a value from Luxtronik."""
