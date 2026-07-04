@@ -174,9 +174,11 @@ def _is_socket_closed(sock: socket.socket) -> bool:
     last_timeout: float | None = None
     try:
         last_timeout = sock.gettimeout()
-        # this will try to read bytes without blocking and also without removing them from buffer (peek only)
-        sock.settimeout(None)
-        data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
+        # settimeout(0) puts the socket in non-blocking mode (raises BlockingIOError
+        # instead of waiting), portably across platforms - socket.MSG_DONTWAIT is
+        # POSIX-only and unavailable on Windows. MSG_PEEK reads without consuming.
+        sock.settimeout(0)
+        data = sock.recv(16, socket.MSG_PEEK)
         if len(data) == 0:
             return True
     except BlockingIOError:
