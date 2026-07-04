@@ -32,6 +32,7 @@ from custom_components.luxtronik2.const import (
     DOMAIN,
     PLATFORMS,
     SERVICE_WRITE,
+    WRITABLE_PARAMETER_PREFIXES,
     SensorKey as SK,
 )
 
@@ -77,16 +78,6 @@ class TestWriteParameterValidation:
 
     def test_writable_prefix_accepted(self):
         """Verify whitelisted prefixes are accepted."""
-        writable_prefixes = (
-            "ID_Einst_",
-            "ID_Ba_",
-            "ID_Soll_",
-            "ID_Sollwert_",
-            "ID_SU_",
-            "ID_RBE_",
-            "Unknown_Parameter_",
-            "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
-        )
         test_params = [
             "ID_Einst_BWS_akt",
             "ID_Ba_Hz_akt",
@@ -94,24 +85,19 @@ class TestWriteParameterValidation:
             "ID_Sollwert_KuCft1_akt",
             "ID_SU_FrkdHz",
             "ID_RBE_Einflussfaktor_RT_akt",
-            "Unknown_Parameter_1159",
+            "Unknown_Parameter_1119",
             "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
+            "ELECTRICAL_POWER_LIMIT_VALUE",
+            "POWER_LIMIT_SWITCH",
+            "THERMAL_POWER_LIMIT_HEATING",
         ]
         for param in test_params:
-            assert param.startswith(writable_prefixes), f"{param} should be writable"
+            assert param.startswith(WRITABLE_PARAMETER_PREFIXES), (
+                f"{param} should be writable"
+            )
 
     def test_non_writable_prefix_rejected(self):
         """Verify non-whitelisted prefixes are rejected."""
-        writable_prefixes = (
-            "ID_Einst_",
-            "ID_Ba_",
-            "ID_Soll_",
-            "ID_Sollwert_",
-            "ID_SU_",
-            "ID_RBE_",
-            "Unknown_Parameter_",
-            "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
-        )
         forbidden_params = [
             "ID_WEB_Temperatur_TVL",
             "ID_Visi_Solar",
@@ -119,7 +105,7 @@ class TestWriteParameterValidation:
             "admin_access",
         ]
         for param in forbidden_params:
-            assert not param.startswith(writable_prefixes), (
+            assert not param.startswith(WRITABLE_PARAMETER_PREFIXES), (
                 f"{param} should NOT be writable"
             )
 
@@ -752,18 +738,7 @@ class TestWriteParameterService:
         assert exc_info.value.translation_domain == DOMAIN
         assert exc_info.value.translation_placeholders == {
             "parameter": "ID_Forbidden_param",
-            "prefixes": ", ".join(
-                (
-                    "ID_Einst_",
-                    "ID_Ba_",
-                    "ID_Soll_",
-                    "ID_Sollwert_",
-                    "ID_SU_",
-                    "ID_RBE_",
-                    "Unknown_Parameter_",
-                    "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
-                )
-            ),
+            "prefixes": ", ".join(WRITABLE_PARAMETER_PREFIXES),
         }
 
     @pytest.mark.asyncio
