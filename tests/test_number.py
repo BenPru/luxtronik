@@ -332,7 +332,7 @@ class TestDHWManualFrequency:
         assert entity.extra_state_attributes == {}
 
     @pytest.mark.asyncio
-    async def test_rejects_invalid_frequency_between_0_and_21(self):
+    async def test_rejects_invalid_frequency_between_0_and_20(self):
         entity = self._make_freq_entity()
         entity._debouncer = MagicMock()
         entity._debouncer.async_call = AsyncMock()
@@ -350,12 +350,12 @@ class TestDHWManualFrequency:
         entity._debouncer.async_call.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_accepts_twenty_one(self):
+    async def test_accepts_twenty(self):
         entity = self._make_freq_entity()
         entity._debouncer = MagicMock()
         entity._debouncer.async_call = AsyncMock()
-        await entity.async_set_native_value(21.0)
-        assert entity._pending_value == 21.0
+        await entity.async_set_native_value(20.0)
+        assert entity._pending_value == 20.0
         entity._debouncer.async_call.assert_awaited_once()
 
     @pytest.mark.asyncio
