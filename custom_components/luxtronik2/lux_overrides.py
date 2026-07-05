@@ -45,7 +45,7 @@ class SecondsToHours(Base):
 
 
 class FrequencyAutomatic(Base):
-    """Frequency with Automatic mode (0=Auto, 1-101=21-121 Hz)."""
+    """Frequency with Automatic mode (0=Auto, 1-101=20-120 Hz)."""
 
     measurement_type = "frequency"
 
@@ -53,13 +53,13 @@ class FrequencyAutomatic(Base):
         # 0 stays 0 (Automatic), 1-101 maps to 20-120 Hz
         if value == 0:
             return 0
-        return value + 20  # 1 → 21 Hz, 2 → 22 Hz, ..., 101 → 121 Hz
+        return value + 19  # 1 → 20 Hz, 2 → 21 Hz, ..., 101 → 120 Hz
 
     def to_heatpump(self, value):
-        # 0 stays 0 (Automatic), 21-121 Hz maps to 1-101
+        # 0 stays 0 (Automatic), 20-120 maps to 1-101
         if value == 0:
             return 0
-        return int(value - 20)  # 21 → 1, 22 → 2, ..., 121 → 101
+        return int(value - 19)  # 20 Hz → 1, 21 Hz → 2, ..., 120 Hz → 101
 
 
 class PoolPVMode(SelectionBase):

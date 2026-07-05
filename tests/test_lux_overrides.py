@@ -162,20 +162,20 @@ class TestFrequencyAutomatic:
     def test_from_heatpump_zero_is_automatic(self):
         assert self.converter.from_heatpump(0) == 0
 
-    def test_from_heatpump_maps_1_to_21hz(self):
-        assert self.converter.from_heatpump(1) == 21
+    def test_from_heatpump_maps_1_to_20hz(self):
+        assert self.converter.from_heatpump(1) == 20
 
-    def test_from_heatpump_maps_101_to_121hz(self):
-        assert self.converter.from_heatpump(101) == 121
+    def test_from_heatpump_maps_101_to_120hz(self):
+        assert self.converter.from_heatpump(101) == 120
 
     def test_to_heatpump_zero_stays_zero(self):
         assert self.converter.to_heatpump(0) == 0
 
-    def test_to_heatpump_maps_21hz_to_1(self):
-        assert self.converter.to_heatpump(21) == 1
+    def test_to_heatpump_maps_20hz_to_1(self):
+        assert self.converter.to_heatpump(20) == 1
 
-    def test_to_heatpump_maps_121hz_to_101(self):
-        assert self.converter.to_heatpump(121) == 101
+    def test_to_heatpump_maps_120hz_to_101(self):
+        assert self.converter.to_heatpump(120) == 101
 
     def test_roundtrip_45hz(self):
         raw = self.converter.to_heatpump(45)

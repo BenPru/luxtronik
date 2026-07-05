@@ -142,7 +142,7 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
     async def async_set_native_value(self, value: float) -> None:
         if (
             self.entity_description.key == SensorKey.DHW_MANUAL_FREQUENCY
-            and 0 < value < 21
+            and 0 < value < 20
         ):
             LOGGER.warning(
                 "DHW frequency control accepts only 0 (Automatic) or 20-120 Hz; rejecting %s",
