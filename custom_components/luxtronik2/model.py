@@ -18,6 +18,7 @@ from homeassistant.components.number import NumberEntityDescription, NumberMode
 from homeassistant.components.select import SelectEntityDescription
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
+from homeassistant.components.text import TextEntityDescription
 from homeassistant.components.update import UpdateDeviceClass, UpdateEntityDescription
 from homeassistant.components.water_heater import (
     WaterHeaterEntityDescription,
@@ -241,3 +242,21 @@ class LuxtronikSelectEntityDescription(
     """Class describing Luxtronik date entities."""
 
     platform = Platform.SELECT
+
+
+class LuxtronikTimerScheduleTextDescription(
+    LuxtronikEntityDescription,
+    TextEntityDescription,
+    frozen_or_thawed=True,
+):
+    """Class describing a single timer-program schedule block as an editable text entity.
+
+    Reads/writes multiple raw Luxtronik parameters (one pair per row) as a
+    delimited "start-end/start-end/..." string, so ``luxtronik_key`` is left
+    unused (stays at its ``LuxParameter.UNSET`` default).
+    """
+
+    platform = Platform.TEXT
+    mode_selector_name: str = ""
+    active_mode: str = ""
+    row_names: tuple[tuple[str, str], ...] = ()

@@ -32,6 +32,7 @@ PLATFORMS: list[str] = [
     Platform.CLIMATE,
     Platform.SELECT,
     Platform.DATE,
+    Platform.TEXT,
 ]
 CONF_UPDATE_INTERVAL: Final = "update_interval"
 
@@ -913,6 +914,17 @@ class SensorKey(StrEnum):
 
     EXTRA_DHW_TARGET_TEMPERATURE = "extra_dhw_target_temperature"
     EXTRA_DHW_DURATION = "extra_dhw_duration"
+
+    TIMER_DHW_SCHEDULE_WEEK = "timer_dhw_schedule_week"
+    TIMER_DHW_SCHEDULE_WEEKDAY = "timer_dhw_schedule_weekday"
+    TIMER_DHW_SCHEDULE_WEEKEND = "timer_dhw_schedule_weekend"
+    TIMER_DHW_SCHEDULE_MONDAY = "timer_dhw_schedule_monday"
+    TIMER_DHW_SCHEDULE_TUESDAY = "timer_dhw_schedule_tuesday"
+    TIMER_DHW_SCHEDULE_WEDNESDAY = "timer_dhw_schedule_wednesday"
+    TIMER_DHW_SCHEDULE_THURSDAY = "timer_dhw_schedule_thursday"
+    TIMER_DHW_SCHEDULE_FRIDAY = "timer_dhw_schedule_friday"
+    TIMER_DHW_SCHEDULE_SATURDAY = "timer_dhw_schedule_saturday"
+    TIMER_DHW_SCHEDULE_SUNDAY = "timer_dhw_schedule_sunday"
 
 
 # endregion Keys
