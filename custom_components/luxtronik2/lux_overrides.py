@@ -62,6 +62,46 @@ class FrequencyAutomatic(Base):
         return int(value - 20)  # 21 → 1, 22 → 2, ..., 121 → 101
 
 
+class TimeOfDay(Base):
+    """TimeOfDay datatype, converts from and to TimeOfDay."""
+
+    datatype_class = "timeofday"
+
+    @classmethod
+    def from_heatpump(cls, value):
+        if not isinstance(value, int):
+            return None
+        hours = value // 3600
+        minutes = (value // 60) % 60
+        seconds = value % 60
+
+        return f"{hours:02d}:{minutes:02d}" + (f":{seconds:02d}" if seconds > 0 else "")
+
+    @classmethod
+    def to_heatpump(cls, value):
+        if isinstance(value, int):
+            return value
+        if not isinstance(value, str):
+            return None
+        d = [int(v) for v in value.split(":")]
+
+        val = d[0] * 3600 + d[1] * 60
+        if len(d) == 3:
+            val += d[2]
+
+        return val
+
+
+class TimerProgram(SelectionBase):
+    """TimerProgram datatype, converts from and to list of TimerProgram codes"""
+
+    codes = {
+        0: "week",
+        1: "5+2",
+        2: "days",
+    }
+
+
 class PoolPVMode(SelectionBase):
     """PoolPVMode datatype, converts from and to a PoolPVMode"""
 
@@ -140,6 +180,13 @@ def update_Luxtronik_Parameters():
     # Kelvin temperature-difference parameters stored as tenths.
     delta_temperature_numbers = [88, 89]
     update_Luxtronik_Parameter_Classes(delta_temperature_numbers, Kelvin)
+
+    # Timer program schedule parameters: mostly TimeOfDay entries, with a
+    # handful of TimerProgram mode selectors interspersed in the range.
+    timer_program_numbers = {222, 283, 344, 405, 506, 607}
+    time_of_day_numbers = [n for n in range(162, 668) if n not in timer_program_numbers]
+    update_Luxtronik_Parameter_Classes(time_of_day_numbers, TimeOfDay)
+    update_Luxtronik_Parameter_Classes(list(timer_program_numbers), TimerProgram)
 
 
 def update_Luxtronik_Parameter_Classes(numbers, datatype_class):
