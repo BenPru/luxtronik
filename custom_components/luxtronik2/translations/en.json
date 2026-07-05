@@ -644,6 +644,38 @@
                 "name": "Away Mode Heating End Date"
             }
         },
+        "text": {
+            "timer_dhw_schedule_week": {
+                "name": "DHW Timer Schedule (Week)"
+            },
+            "timer_dhw_schedule_weekday": {
+                "name": "DHW Timer Schedule (Weekdays)"
+            },
+            "timer_dhw_schedule_weekend": {
+                "name": "DHW Timer Schedule (Weekend)"
+            },
+            "timer_dhw_schedule_monday": {
+                "name": "DHW Timer Schedule (Monday)"
+            },
+            "timer_dhw_schedule_tuesday": {
+                "name": "DHW Timer Schedule (Tuesday)"
+            },
+            "timer_dhw_schedule_wednesday": {
+                "name": "DHW Timer Schedule (Wednesday)"
+            },
+            "timer_dhw_schedule_thursday": {
+                "name": "DHW Timer Schedule (Thursday)"
+            },
+            "timer_dhw_schedule_friday": {
+                "name": "DHW Timer Schedule (Friday)"
+            },
+            "timer_dhw_schedule_saturday": {
+                "name": "DHW Timer Schedule (Saturday)"
+            },
+            "timer_dhw_schedule_sunday": {
+                "name": "DHW Timer Schedule (Sunday)"
+            }
+        },
         "select": {
             "thermal_desinfection_day": {
                 "name": "Thermal Desinfection Day",
@@ -826,6 +858,9 @@
         },
         "parameter_not_writable": {
             "message": "Parameter {parameter} rejected \u2014 only parameters with prefixes {prefixes} are writable"
+        },
+        "invalid_timer_schedule": {
+            "message": "Invalid timer schedule \"{value}\": expected \"HH:MM-HH:MM\" entries separated by \"/\", with at most {max_rows} entries"
         }
     },
     "issues": {
