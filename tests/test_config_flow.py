@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.data_entry_flow import AbortFlow
@@ -23,7 +23,10 @@ from custom_components.luxtronik2.const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
 )
-from custom_components.luxtronik2.coordinator import LuxtronikConnectionError
+from custom_components.luxtronik2.coordinator import (
+    LuxtronikConnectionError,
+    LuxtronikSerialNumberError,
+)
 
 
 def _mock_coordinator():
@@ -114,11 +117,11 @@ class TestSetUniqueIdOrAbort:
         flow._abort_if_unique_id_configured = MagicMock()
         coord = _mock_coordinator()
         result = await flow._set_unique_id_or_abort(coord, {CONF_HOST: "1.2.3.4"})
-        assert result is True
+        assert result is None
         flow.async_set_unique_id.assert_awaited_once_with(coord.unique_id)
 
     @pytest.mark.asyncio
-    async def test_returns_false_on_abort(self):
+    async def test_returns_abort_result_on_already_configured(self):
         flow = LuxtronikFlowHandler()
         flow.async_set_unique_id = AsyncMock()
         flow._abort_if_unique_id_configured = MagicMock(
@@ -126,7 +129,20 @@ class TestSetUniqueIdOrAbort:
         )
         coord = _mock_coordinator()
         result = await flow._set_unique_id_or_abort(coord, {CONF_HOST: "1.2.3.4"})
-        assert result is False
+        assert result is not None
+        assert result["reason"] == "already_configured"
+
+    @pytest.mark.asyncio
+    async def test_returns_abort_result_on_serial_number_error(self):
+        flow = LuxtronikFlowHandler()
+        flow.async_set_unique_id = AsyncMock()
+        coord = MagicMock()
+        type(coord).unique_id = PropertyMock(
+            side_effect=LuxtronikSerialNumberError("no serial number")
+        )
+        result = await flow._set_unique_id_or_abort(coord, {CONF_HOST: "1.2.3.4"})
+        assert result is not None
+        assert result["reason"] == "cannot_identify"
 
 
 # ===========================================================================
@@ -349,6 +365,41 @@ class TestAsyncStepDhcp:
         ):
             await flow.async_step_dhcp(self._make_dhcp_info())
         flow.async_create_entry.assert_called_once()
+        # Regression guard: our own update listener (__init__.py) already
+        # reloads the entry on data changes. If this ever goes back to the
+        # default (reload_on_update=True), core schedules a second reload and
+        # logs HA's "has an update listener and should use it for scheduling
+        # a reload" deprecation warning (removed in 2026.12.0).
+        assert (
+            flow._abort_if_unique_id_configured.call_args.kwargs["reload_on_update"]
+            is False
+        )
+
+    @pytest.mark.asyncio
+    async def test_dhcp_already_configured_after_connect_reraises_abort(self):
+        """AbortFlow raised by _abort_if_unique_id_configured after a successful
+        connect must propagate (via the `except AbortFlow: raise` guard added in
+        c8f0795) instead of being swallowed by the catch-all handler and
+        reported as an "unknown" error.
+        """
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        flow.hass.async_add_executor_job = AsyncMock(return_value=[("1.2.3.4", 8889)])
+        flow._async_current_entries = MagicMock(return_value=[])
+        flow.async_set_unique_id = AsyncMock()
+        flow._abort_if_unique_id_configured = MagicMock(
+            side_effect=AbortFlow("already_configured")
+        )
+        coord = _mock_coordinator()
+        with (
+            patch(
+                "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+                return_value=coord,
+            ),
+            pytest.raises(AbortFlow, match="already_configured"),
+        ):
+            await flow.async_step_dhcp(self._make_dhcp_info())
 
     @pytest.mark.asyncio
     async def test_dhcp_no_match_uses_default_port(self):
@@ -384,6 +435,31 @@ class TestAsyncStepDhcp:
         ):
             await flow.async_step_dhcp(self._make_dhcp_info())
         flow.async_abort.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_dhcp_cannot_identify_aborts(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        flow.hass.async_add_executor_job = AsyncMock(return_value=[("1.2.3.4", 8889)])
+        flow._async_current_entries = MagicMock(return_value=[])
+        flow.async_set_unique_id = AsyncMock(
+            side_effect=LuxtronikSerialNumberError("no serial number")
+        )
+        flow.async_abort = MagicMock(return_value={"type": "abort"})
+        coord = _mock_coordinator()
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coord,
+        ):
+            await flow.async_step_dhcp(self._make_dhcp_info())
+        flow.async_abort.assert_called_with(
+            reason="cannot_identify",
+            description_placeholders={
+                "host": "1.2.3.4",
+                "error": "no serial number",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_dhcp_unknown_error_aborts(self):
@@ -662,6 +738,34 @@ class TestAsyncStepReconfigure:
             await flow.async_step_reconfigure({CONF_HOST: "5.6.7.8", CONF_PORT: 8889})
         flow.async_show_form.assert_called_once()
         assert flow.async_show_form.call_args[1]["errors"] == {"base": "unknown"}
+
+    @pytest.mark.asyncio
+    async def test_serial_number_error_shows_cannot_identify_error(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        entry = MagicMock()
+        entry.data = {
+            CONF_HOST: "1.2.3.4",
+            CONF_PORT: 8889,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_MAX_DATA_LENGTH: DEFAULT_MAX_DATA_LENGTH,
+        }
+        flow._get_reconfigure_entry = MagicMock(return_value=entry)
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        flow.async_set_unique_id = AsyncMock(
+            side_effect=LuxtronikSerialNumberError("no serial number")
+        )
+        coord = _mock_coordinator()
+        with patch(
+            "custom_components.luxtronik2.config_flow.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coord,
+        ):
+            await flow.async_step_reconfigure({CONF_HOST: "5.6.7.8", CONF_PORT: 8889})
+        flow.async_show_form.assert_called_once()
+        assert flow.async_show_form.call_args[1]["errors"] == {
+            "base": "cannot_identify"
+        }
 
     @pytest.mark.asyncio
     async def test_successful_reconfigure(self):

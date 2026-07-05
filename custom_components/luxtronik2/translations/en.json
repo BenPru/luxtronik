@@ -774,6 +774,7 @@
     "config": {
         "abort": {
             "cannot_connect": "Failed to connect to Luxtronik at {host}.\\nError: {connect_error}",
+            "cannot_identify": "Connected to the device at {host}, but could not read its serial number to identify it.\\nError: {error}",
             "already_configured": "This device is already configured.",
             "reconfigure_successful": "Configuration updated successfully.",
             "unique_id_mismatch": "The device at the new address has a different identity than the currently configured device.",
@@ -788,6 +789,7 @@
             "address": "Invalid remote-address insert. The address has to be an IP address or a resolvable hostname.",
             "address_in_use": "The chosen listen port is already in use on this system.",
             "cannot_connect": "Failed to connect. Please check the host and port.",
+            "cannot_identify": "Connected to the device, but could not read its serial number to identify it.",
             "unknown": "Unexpected error"
         },
         "step": {

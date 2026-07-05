@@ -32,6 +32,7 @@ from .const import (
 from .coordinator import (
     LuxtronikConnectionError,
     LuxtronikCoordinator,
+    LuxtronikSerialNumberError,
     connect_and_get_coordinator,
 )
 from .lux_helper import discover
@@ -75,16 +76,27 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _set_unique_id_or_abort(
         self, coordinator: LuxtronikCoordinator, config: dict[str, Any]
-    ) -> bool:
-        """Set unique ID and abort if already configured."""
+    ) -> ConfigFlowResult | None:
+        """Set unique ID, returning an abort result if the flow should stop.
+
+        Returns None if the flow should proceed to create/update the entry.
+        """
         try:
             await self.async_set_unique_id(coordinator.unique_id)
             self._abort_if_unique_id_configured()
-
-            return True
+            return None
         except AbortFlow:
             LOGGER.debug("Device already configured: %s", config[CONF_HOST])
-            return False
+            return self.async_abort(reason="already_configured")
+        except LuxtronikSerialNumberError as err:
+            LOGGER.error("Could not identify device at %s: %s", config[CONF_HOST], err)
+            return self.async_abort(
+                reason="cannot_identify",
+                description_placeholders={
+                    "host": config[CONF_HOST],
+                    "error": str(err),
+                },
+            )
 
     def _create_entry(
         self, config: dict[str, Any], coordinator: LuxtronikCoordinator
@@ -206,8 +218,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 },
             )
 
-        if not await self._set_unique_id_or_abort(coordinator, config):
-            return self.async_abort(reason="already_configured")
+        if abort_result := await self._set_unique_id_or_abort(coordinator, config):
+            return abort_result
 
         return self._create_entry(config, coordinator)
 
@@ -239,10 +251,10 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 },
             )
 
-        if not await self._set_unique_id_or_abort(
+        if abort_result := await self._set_unique_id_or_abort(  # pragma: no cover
             coordinator, config
-        ):  # pragma: no cover
-            return self.async_abort(reason="already_configured")
+        ):
+            return abort_result
 
         return self._create_entry(config, coordinator)
 
@@ -360,7 +372,16 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     },
                 )
 
-            await self.async_set_unique_id(coordinator.unique_id)
+            try:
+                await self.async_set_unique_id(coordinator.unique_id)
+            except LuxtronikSerialNumberError as err:
+                LOGGER.error(
+                    "Could not identify DHCP-discovered device at %s: %s", host, err
+                )
+                return self.async_abort(
+                    reason="cannot_identify",
+                    description_placeholders={"host": host, "error": str(err)},
+                )
             self._abort_if_unique_id_configured(
                 updates={CONF_HOST: host, CONF_PORT: int(port or DEFAULT_PORT)},
                 # Our own update listener (see __init__.py) already reloads the
@@ -425,12 +446,12 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.exception("Unexpected exception during reconfigure connect")
                 errors["base"] = "unknown"
             else:
-                LOGGER.debug(
-                    "Reconfigure connected and refreshed successfully; entry unique_id=%s, coordinator unique_id=%s",
-                    reconfigure_entry.unique_id,
-                    coordinator.unique_id,
-                )
                 try:
+                    LOGGER.debug(
+                        "Reconfigure connected and refreshed successfully; entry unique_id=%s, coordinator unique_id=%s",
+                        reconfigure_entry.unique_id,
+                        coordinator.unique_id,
+                    )
                     await self.async_set_unique_id(coordinator.unique_id)
                     if reconfigure_entry.unique_id is None:
                         LOGGER.debug(
@@ -454,6 +475,13 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         err,
                     )
                     raise
+                except LuxtronikSerialNumberError as err:
+                    LOGGER.error(
+                        "Reconfigure could not identify device at %s: %s",
+                        config[CONF_HOST],
+                        err,
+                    )
+                    errors["base"] = "cannot_identify"
                 except Exception:  # pylint: disable=broad-except
                     LOGGER.exception("Unexpected exception during reconfigure update")
                     errors["base"] = "unknown"

@@ -1007,6 +1007,7 @@
     "config": {
         "abort": {
             "cannot_connect": "Verbindung zu Luxtronik unter {host} fehlgeschlagen.\\nFehler: {connect_error}",
+            "cannot_identify": "Verbindung zum Ger\u00e4t unter {host} hergestellt, aber die Seriennummer zur Identifizierung konnte nicht gelesen werden.\\nFehler: {error}",
             "already_configured": "Dieses Ger\u00e4t ist bereits konfiguriert.",
             "reconfigure_successful": "Konfiguration erfolgreich aktualisiert.",
             "unique_id_mismatch": "Das Ger\u00e4t an der neuen Adresse hat eine andere Identit\u00e4t als das aktuell konfigurierte Ger\u00e4t.",
@@ -1021,6 +1022,7 @@
             "address": "Ung\u00fcltige Remote-Adresse. Die Adresse muss eine IP-Adresse oder ein aufl\u00f6sbarer Hostname sein.",
             "address_in_use": "Der gew\u00e4hlte Port wird bereits auf diesem System verwendet.",
             "cannot_connect": "Verbindung fehlgeschlagen. Bitte Host und Port \u00fcberpr\u00fcfen.",
+            "cannot_identify": "Verbindung zum Ger\u00e4t hergestellt, aber die Seriennummer zur Identifizierung konnte nicht gelesen werden.",
             "unknown": "Unerwarteter Fehler"
         },
         "step": {

@@ -228,6 +228,10 @@ class Luxtronik:
         """Luxtronik helper descructor."""
         self._disconnect()
 
+    def disconnect(self) -> None:
+        """Explicitly close the connection to the heatpump."""
+        self._disconnect()
+
     def _disconnect(self):
         if self._socket is not None:
             if not _is_socket_closed(self._socket):
