@@ -154,6 +154,39 @@ class TestSecondsToHours:
         assert converter.to_heatpump(1.5) == 5400
 
 
+class TestTimeOfDay:
+    from custom_components.luxtronik2.lux_overrides import TimeOfDay
+
+    def test_from_heatpump_formats_hours_and_minutes(self):
+        assert self.TimeOfDay.from_heatpump(6 * 3600) == "06:00"
+        assert self.TimeOfDay.from_heatpump(22 * 3600 + 30 * 60) == "22:30"
+
+    def test_from_heatpump_includes_seconds_when_nonzero(self):
+        assert self.TimeOfDay.from_heatpump(6 * 3600 + 15) == "06:00:15"
+
+    def test_from_heatpump_non_int_returns_none(self):
+        assert self.TimeOfDay.from_heatpump("06:00") is None
+        assert self.TimeOfDay.from_heatpump(None) is None
+
+    def test_to_heatpump_parses_hours_and_minutes(self):
+        assert self.TimeOfDay.to_heatpump("06:00") == 6 * 3600
+        assert self.TimeOfDay.to_heatpump("22:30") == 22 * 3600 + 30 * 60
+
+    def test_to_heatpump_parses_seconds_when_present(self):
+        assert self.TimeOfDay.to_heatpump("06:00:15") == 6 * 3600 + 15
+
+    def test_to_heatpump_passes_through_int_for_backward_compatibility(self):
+        assert self.TimeOfDay.to_heatpump(21600) == 21600
+
+    def test_to_heatpump_non_str_non_int_returns_none(self):
+        assert self.TimeOfDay.to_heatpump(None) is None
+        assert self.TimeOfDay.to_heatpump(1.5) is None
+
+    def test_roundtrip(self):
+        raw = self.TimeOfDay.to_heatpump("07:30")
+        assert self.TimeOfDay.from_heatpump(raw) == "07:30"
+
+
 class TestFrequencyAutomatic:
     from custom_components.luxtronik2.lux_overrides import FrequencyAutomatic
 
