@@ -71,39 +71,112 @@ def get_entity_keys(filename: str) -> list[str]:
     return sorted(set(mapping.get(r, r) for r in refs))
 
 
-def check_translations() -> bool:
-    """Check all entity files against all language files. Returns True if OK."""
-    all_ok = True
+def load_all_languages() -> dict[str, dict]:
+    """Load every translations/<lang>.json, keyed by language code."""
+    data_by_lang: dict[str, dict] = {}
+    for lang_file in LANG_FILES:
+        with open(TRANS_DIR / lang_file, encoding="utf-8") as f:
+            data_by_lang[lang_file.removesuffix(".json")] = json.load(f)
+    return data_by_lang
 
+
+def find_missing_entity_keys() -> list[str]:
+    """Check that every SensorKey referenced in code exists as an entity in every
+    language file. Returns a list of human-readable problem descriptions."""
+    problems: list[str] = []
     for entity_file, section in ENTITY_CHECKS:
         keys = get_entity_keys(entity_file)
         if not keys:
             continue
-        LOG.info("\n%s", "=" * 60)
-        LOG.info("%s -> entity.%s (%d keys)", entity_file, section, len(keys))
         for lang_file in LANG_FILES:
-            lang = lang_file.replace(".json", "")
-            path = TRANS_DIR / lang_file
-            with open(path, encoding="utf-8") as f:
+            lang = lang_file.removesuffix(".json")
+            with open(TRANS_DIR / lang_file, encoding="utf-8") as f:
                 data = json.load(f)
             section_data = data.get("entity", {}).get(section, {})
             missing = [k for k in keys if k not in section_data]
-            if missing:
-                all_ok = False
-                LOG.info("  %s: MISSING %d", lang, len(missing))
-                for k in missing:
-                    LOG.info("    - %s", k)
-            else:
-                LOG.info("  %s: OK", lang)
+            for k in missing:
+                problems.append(
+                    f"[{lang}] entity.{section}.{k} missing (referenced in {entity_file})"
+                )
+    return problems
 
-    return all_ok
+
+def find_state_key_mismatches() -> list[str]:
+    """Check that every entity's `state` dict, and every `state_attributes.<attr>.state`
+    dict, has the exact same set of keys across all language files.
+
+    This catches the class of bug found in discussion #677: a locale (en.json) that
+    is missing an entire `state_attributes.cause`/`remedy` block while other locales
+    (de/nl/pl/cs) have it fully populated, or a locale simply missing individual
+    error codes that others have. Per-entity `state` presence alone (checked by
+    find_missing_entity_keys) does not catch either of these - only the nested keys
+    do.
+    """
+    problems: list[str] = []
+    data_by_lang = load_all_languages()
+
+    entity_paths: set[tuple[str, str]] = set()
+    for data in data_by_lang.values():
+        for platform, entities in data.get("entity", {}).items():
+            for entity_key, entity_data in entities.items():
+                if isinstance(entity_data, dict) and isinstance(
+                    entity_data.get("state"), dict
+                ):
+                    entity_paths.add((platform, entity_key))
+
+    for platform, entity_key in sorted(entity_paths):
+        per_lang_state: dict[str, set[str]] = {}
+        for lang, data in data_by_lang.items():
+            state = data["entity"].get(platform, {}).get(entity_key, {}).get("state", {})
+            per_lang_state[lang] = set(state.keys())
+        union = set().union(*per_lang_state.values())
+        for lang, keys in per_lang_state.items():
+            missing = sorted(union - keys)
+            if missing:
+                problems.append(
+                    f"[{lang}] entity.{platform}.{entity_key}.state missing keys: {missing}"
+                )
+
+        attr_names: set[str] = set()
+        for data in data_by_lang.values():
+            attrs = (
+                data["entity"].get(platform, {}).get(entity_key, {}).get(
+                    "state_attributes", {}
+                )
+            )
+            attr_names |= set(attrs.keys())
+
+        for attr in sorted(attr_names):
+            per_lang_attr_state: dict[str, set[str]] = {}
+            for lang, data in data_by_lang.items():
+                state = (
+                    data["entity"]
+                    .get(platform, {})
+                    .get(entity_key, {})
+                    .get("state_attributes", {})
+                    .get(attr, {})
+                    .get("state", {})
+                )
+                per_lang_attr_state[lang] = set(state.keys())
+            attr_union = set().union(*per_lang_attr_state.values())
+            if not attr_union:
+                continue
+            for lang, keys in per_lang_attr_state.items():
+                missing = sorted(attr_union - keys)
+                if missing:
+                    problems.append(
+                        f"[{lang}] entity.{platform}.{entity_key}.state_attributes."
+                        f"{attr}.state missing keys: {missing}"
+                    )
+    return problems
 
 
 if __name__ == "__main__":
-    ok = check_translations()
-    if ok:
-        LOG.info("\nAll translation files have complete coverage!")
+    all_problems = find_missing_entity_keys() + find_state_key_mismatches()
+    if not all_problems:
+        LOG.info("All translation files have complete coverage!")
         sys.exit(0)
-    else:
-        LOG.info("\nSome translations are missing!")
-        sys.exit(1)
+    LOG.info("Translation coverage problems found:")
+    for problem in all_problems:
+        LOG.info("  - %s", problem)
+    sys.exit(1)
