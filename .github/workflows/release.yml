@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_type:
-        description: 'Kies het type release dat je wilt maken'
+        description: 'Choose the type of release you want to create'
         required: true
         default: 'pre-release'
         type: choice
@@ -55,28 +55,28 @@ jobs:
           cd custom_components/luxtronik2
           zip -r ../../luxtronik2.zip .
 
-      # NIEUW: Haal de allerlaatste stabiele/full release op als dat nodig is
+      # Fetch the latest full release tag so pre-releases can also list every PR since then
       - name: Get Latest Full Release Tag
         id: stable_tag
-        if: ${{ github.event.inputs.release_type == 'full-release' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Vraagt de 'latest' release op (dit negeert automatisch pre-releases op GitHub)
+          # Fetches the 'latest' release (this automatically ignores pre-releases on GitHub)
           LATEST_TAG=$(gh api repos/${{ github.repository }}/releases/latest --jq '.tag_name')
           echo "PREVIOUS_STABLE=$LATEST_TAG" >> $GITHUB_ENV
 
-      # BIJGEWERKT: Maakt de release aan op basis van jouw keuze
+      # Creates the release based on your choice
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.VERSION }}
           name: ${{ env.VERSION }}
           generate_release_notes: true
-          # Als het een full-release is, dwingen we de vergelijking vanaf de vorige stabiele tag
-          previous_tag: ${{ github.event.inputs.release_type == 'full-release' && env.PREVIOUS_STABLE || null }}
-          # Prerelease staat aan (true) als je pre-release kiest, en uit (false) bij een full-release
+          # Always compare against the previous full release, so pre-release notes include
+          # every PR merged since the last full release too
+          previous_tag: ${{ env.PREVIOUS_STABLE }}
+          # Prerelease is enabled (true) when you choose pre-release, and disabled (false) for a full-release
           prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
-          # Zorgt dat een full-release ook echt als de officiële 'latest' gemarkeerd wordt op GitHub
+          # Ensures a full-release is actually marked as the official 'latest' on GitHub
           make_latest: ${{ github.event.inputs.release_type == 'full-release' && 'true' || 'false' }}
           files: luxtronik2.zip
