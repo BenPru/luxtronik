@@ -1,0 +1,899 @@
+# Primary source: 83055600.pdf, "83055600dUK - Translation of the original
+# instruction manual (HMD 2)", ait-deutschland GmbH, pages 34-38, table
+# "Error Diagnosis / Error messages" (columns: No. | Display | Description | Remedy).
+#
+# Cross-referenced against: Fehlerdiagnose_Codes_HMD2_de.pdf, "83055600bDE -
+# Originalbetriebsanleitung (HMD 2)". Despite being the German original the English
+# PDF is nominally a translation of, this copy is an OLDER revision ("b" in its
+# footer, vs "d" for the English PDF) - and a separately checked Dutch manual on
+# the same "d" revision confirms the English content. So the authority rule used
+# here is: English/Dutch (rev d) wins for anything that's a genuine content/
+# numbering difference between revisions (e.g. which code means what); German was
+# only used to catch self-evident errors in the English extraction itself (typos,
+# copy-paste duplicates) where the fix doesn't depend on which revision is newer.
+# See individual `note:` fields below for what changed and why. The German PDF
+# stops at 793 - codes 739 and 794-807 only exist in the English/newer revision,
+# which also matches the current translations/en.json coverage. A handful of other
+# codes (706, 717, 720, 727, 731, 757) are present in the English extraction but
+# didn't turn up in the German one either - plausibly more rev-d-only additions
+# following the same pattern, though this wasn't independently confirmed the way
+# 762/763 and 791 were, so treat those as lower-confidence.
+#
+# Extracted for BenPru/luxtronik discussion #677 ("Error reasons in automations"):
+# https://github.com/BenPru/luxtronik/discussions/677
+# Goal: populate `description`/`remedy` extra attributes on sensor.luxtronik_error_reason
+# from real manual text instead of duplicating the raw error code.
+#
+# Please review/correct directly in this file - it's the transcription staging area
+# before this data gets turned into a Python static table.
+#
+# Fields per code:
+#   display:     short name as shown on the heat pump display (No. + Display column)
+#   description: what the manual's "Description" column says
+#   remedy:      what the manual's "Remedy" column says ("" if manual gives none)
+#   reset_hint:  the badge text under Display in the manual, e.g. "Please call installer",
+#                "RESET autom.", "Reset in hh:mm" - not currently used anywhere, kept
+#                for reference / possible future severity classification.
+#   note:        my own flag - either a remaining ambiguity/uncertainty to check, or
+#                a note on how a discrepancy between the English and German PDFs was
+#                resolved. Not part of the manual text itself.
+#
+# Codes not listed here (e.g. 740-749, 753-754, 772-775, 801, 804-805) simply don't
+# appear in either manual's table - there are real gaps in the numbering.
+
+701:
+  display: "Error low pressure"
+  reset_hint: "Please call installer"
+  description: >-
+    Low pressure pressostat or low-pressure sensor in the cooling circle has responded
+    (L/W) or for longer than 20 seconds (S/W).
+  remedy: >-
+    Check HP for leakage, switching point pressure state, defrosting and T-outd.min.
+
+702:
+  display: "Low pressure stop"
+  reset_hint: "RESET autom."
+  description: >-
+    Only possible for L/W devices: Low pressure in the cooling circle has responded.
+    After some time, automated HP restart.
+  remedy: >-
+    Check HP for leakage, switching point pressure state, defrosting and T-outd.min.
+
+703:
+  display: "Antifreeze"
+  reset_hint: "Please call installer"
+  description: >-
+    Only possible for L/W devices: If the heat pump is running and the temperature in
+    flow is < 5 degC, antifreeze is detected.
+  remedy: >-
+    Check HP power, defrost valve and heating system.
+
+704:
+  display: "Error hot gas"
+  reset_hint: "Reset in hh:mm"
+  description: >-
+    Maximum temperature in the hot gas cooling circle exceeded. Automatic HP restart
+    after hh:mm.
+  remedy: >-
+    Check coolant quantity, evaporation, overheating flow, return and HS-min.
+
+705:
+  display: "Motor protection VEN"
+  reset_hint: "Please call installer"
+  description: >-
+    Only possible for L/W devices: Motor protection has responded.
+  remedy: >-
+    Check set value and ventilator / BCP.
+
+706:
+  display: "Motor protection BCP"
+  reset_hint: "Please call installer"
+  note: >-
+    Absent from the German (rev b) extraction (jumps 705 -> 707) - likely a rev-d-
+    only addition, same pattern as 739/794-807, though not independently confirmed.
+  description: >-
+    Option only possible for S/W- or W/W devices: Motor protection of the brine or
+    well water circulating pump or the compressor has responded.
+  remedy: >-
+    Check set values, compressor, BOS.
+
+707:
+  display: "Coding of HP"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit of the coding bridge in HP after the first switch-on.
+  remedy: >-
+    Coding resistance in HP, check plug and connection line.
+
+708:
+  display: "Return sensor"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the return sensor.
+  remedy: >-
+    Check return sensor, plug and connection line.
+
+709:
+  display: "Flow sensor"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the flow sensor. No fault shutdown for S/W- or W/W
+    devices.
+  remedy: >-
+    Check flow sensor, plug and connection line.
+
+710:
+  display: "Hot gas sensor"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the hot gas sensor of the cooling circle.
+  remedy: >-
+    Check hot gas sensor, plug and connection line.
+
+711:
+  display: "External temp. sensor"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the external temperature sensor. No fault shutdown.
+    Fixed value to -5 degC.
+  remedy: >-
+    Check external temperature sensor, plug and connection line.
+
+712:
+  display: "Domestic hot water sensor"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the domestic hot water sensor. No fault shutdown.
+  remedy: >-
+    Check domestic hot water sensor, plug and connection line.
+
+713:
+  display: "HS-on sensor"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the heat source sensor (inlet).
+  remedy: >-
+    Check heat source sensor, plug and connection line.
+
+714:
+  display: "Hot gas DHW"
+  reset_hint: "Reset in hh:mm"
+  description: >-
+    Check thermal application limit of the HP. Domestic hot water off for hh:mm.
+    Fault only triggers if the compressor is running.
+  remedy: >-
+    Check flow of domestic hot water, heat exchanger, domestic hot water temperature
+    and circulation pump.
+
+715:
+  display: "High-pressure switch-off"
+  reset_hint: "RESET autom."
+  description: >-
+    High pressure in the cooling circle has responded. After some time, automated HP
+    restart.
+  remedy: >-
+    Check flow of HW, overflows, temperature and condensation.
+
+716:
+  display: "High-pressure fault"
+  reset_hint: "Please call installer"
+  description: >-
+    High pressure pressostat in the cooling circle has responded several times.
+  remedy: >-
+    Check flow of HW, overflows, temperature and condensation.
+
+717:
+  display: "Flow HS"
+  reset_hint: "Please call installer"
+  note: >-
+    Absent from the German (rev b) extraction (jumps 716 -> 718) - see note on 706.
+  description: >-
+    Flow switch for W/W devices has responded during the pre-rinsing time or
+    operation.
+  remedy: >-
+    Check flow, switching point for DFS, filter, air clearance.
+
+718:
+  display: "Max. outside temp."
+  reset_hint: "RESET autom. in hh:mm"
+  description: >-
+    Only possible for L/W devices: Outside temperature has exceeded permissible
+    maximum value. Automatic HP restart after hh:mm.
+  remedy: >-
+    Check outside temperature and set value.
+
+719:
+  display: "Min. outside temp."
+  reset_hint: "RESET autom. in hh:mm"
+  description: >-
+    Only possible for L/W devices: Outside temperature has fallen below the
+    permissible minimum value. Automatic HP restart after hh:mm.
+  remedy: >-
+    Check outside temperature and set value.
+
+720:
+  display: "HS temperature"
+  reset_hint: "RESET autom. in hh:mm"
+  note: >-
+    Absent from the German (rev b) extraction (jumps 719 -> 721) - see note on 706.
+  description: >-
+    Option only possible for S/W- or W/W devices: Temperature at evaporation outlet
+    has fallen below the safety value on the HS side several times. Automatic HP
+    restart after hh:mm.
+  remedy: >-
+    Check flow, filter, air clearance, temperature.
+
+721:
+  display: "Low-pressure switch-off"
+  reset_hint: "RESET autom."
+  description: >-
+    Low pressure pressostat or low-pressure sensor in the cooling circle has
+    responded. After some time, automated HP restart (S/W and W/W).
+  remedy: >-
+    Check switching point of the pressostat, flow on HS side.
+
+722:
+  display: "Tempdiff HW"
+  reset_hint: "Please call installer"
+  description: >-
+    Temperature spread in the heating mode is negative (=erroneous).
+  remedy: >-
+    Check function and location of the flow and return sensor.
+
+723:
+  display: "Tempdiff DHW"
+  reset_hint: "Please call installer"
+  description: >-
+    Temperature spread in the domestic hot water mode is negative (=erroneous).
+  remedy: >-
+    Check function and location of the flow and return sensor.
+
+724:
+  display: "Tempdiff defrosting"
+  reset_hint: "Please call installer"
+  description: >-
+    Temperature spread in the heating circle is > 15 K during defrosting (=danger of
+    frost).
+  remedy: >-
+    Check function and location of the flow and return sensor, HCP capacity,
+    overflows and heating circles.
+
+725:
+  display: "System error DHW"
+  reset_hint: "Please call installer"
+  note: >-
+    Per instruction: use "DHW" (domestic hot water) rather than "SW"/"WW"
+    throughout, so this now matches the German original's "Anlagefehler WW"
+    literally instead of following existing translations/en.json's "System error
+    SW" naming. Also corrected the remedy text below using the German original -
+    the English PDF's "Ventilate hot water and SW" conflated heating water
+    (Heizwasser) with domestic hot water (WW); German says "Heizwasser und WW
+    entlüften" (vent heating water and DHW).
+  description: >-
+    Domestic hot water faulty, desired tank temperature is fallen below substantially.
+  remedy: >-
+    Check circulating pump DHW, tank filling, shutoff move and 3-way valve.
+    Ventilate heating water and DHW system.
+
+726:
+  display: "Sensor mixing circ 1"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the mixing circle sensor.
+  remedy: >-
+    Check mixing circle sensor, plug and connection line.
+
+727:
+  display: "Brine pressure"
+  reset_hint: "Please call installer"
+  note: >-
+    Absent from the German (rev b) extraction (jumps 726 -> 728) - see note on 706.
+  description: >-
+    Brine pressure pressostat has responded during the pre-rinsing time or during
+    operation.
+  remedy: >-
+    Check brine pressure and brine pressure pressostat.
+
+728:
+  display: "Sensor HS Off"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the heat source sensor at the HS outlet.
+  remedy: >-
+    Check heat source sensor, plug and connection line.
+
+729:
+  display: "Rotating field error"
+  reset_hint: "Please call installer"
+  description: >-
+    Compressor without power after switching on.
+  remedy: >-
+    Check rotating field and compressor.
+
+730:
+  display: "Screed heating error"
+  reset_hint: "Please call installer"
+  note: >-
+    RESOLVED via German original: the Remedy column was genuinely lost in the
+    English PDF extraction, not a real duplicate - German has distinct text
+    ("Leistungsbedarf während des Ausheizens überprüfen").
+  description: >-
+    The screed heating program could not reach an FL temperature level in the
+    specified time interval. Screed heating program continues running.
+  remedy: >-
+    Check power demand during screed heating.
+
+731:
+  display: "Timeout TDI"
+  reset_hint: ""
+  note: >-
+    UPDATED: this code doesn't appear at all in the German original manual (jumps
+    730 -> 732), which also stops at 793 entirely and doesn't have 739/794-807 -
+    consistent with it being an older revision. 731 is likely a newer-revision-only
+    addition rather than a missed remedy; still no remedy text found in the English
+    source either way.
+  description: >-
+    The temperature required for thermal disinfection could not be reached within the
+    set switching times.
+  remedy: ""
+
+732:
+  display: "Cooling fault"
+  reset_hint: "Please call installer"
+  note: >-
+    RESOLVED via German original ("Die Heizwassertemperatur von 16 °C wurde
+    mehrfach unterschritten"): this is the heating water temperature, not domestic
+    hot water - the English PDF's "hot water" here was a translation slip.
+  description: >-
+    The heating water temperature of 16 degC has been fallen short of several
+    times.
+  remedy: >-
+    Check mixer and heating circulation pump.
+
+733:
+  display: "Anode fault"
+  reset_hint: "Please call installer"
+  description: >-
+    Fault input of the impressed current anode has responded.
+  remedy: >-
+    Check connection line between anode and potentiostat. Fill DHW tank.
+
+734:
+  display: "Anode fault"
+  reset_hint: "Please call installer"
+  description: >-
+    Error 733 present for more than two weeks and domestic hot water is locked.
+  remedy: >-
+    Acknowledge error in order to release domestic hot water preparation again.
+    Rectify 733.
+
+735:
+  display: "Error Ext. En"
+  reset_hint: "Please call installer"
+  description: >-
+    Only possible with installed expansion board: Break or short-circuit in the
+    sensor "External energy source".
+  remedy: >-
+    Check sensor "External energy source", plug and connection line.
+
+736:
+  display: "Error solar collector"
+  reset_hint: "Please call installer"
+  note: >-
+    RESOLVED via German original: confirmed the English PDF's remedy ("solar tank")
+    was a manual typo - German has distinct, matching text ("Fühler
+    „Solarkollektor"... überprüfen").
+  description: >-
+    Only possible with installed expansion board: Break or short-circuit in the
+    "solar collector" sensor.
+  remedy: >-
+    Check "solar collector" sensor, plug and connection line.
+
+737:
+  display: "Error solar tank"
+  reset_hint: "Please call installer"
+  description: >-
+    Only possible with installed expansion board: Break or short-circuit in the
+    "solar tank" sensor.
+  remedy: >-
+    Check "solar tank" sensor, plug and connection line.
+
+738:
+  display: "Error mixing circle 2"
+  reset_hint: "Please call installer"
+  description: >-
+    Only possible with installed expansion board: Break or short-circuit in the
+    "mixing circle 2" sensor.
+  remedy: >-
+    Check "mixing circle 2" sensor, plug and connection line.
+
+739:
+  display: "Error mixing circle 3"
+  reset_hint: "Please call installer"
+  note: >-
+    Not present in the current translations/en.json error_reason table (which jumps
+    738 -> 750) - this would be a new code for the integration.
+  description: >-
+    Only possible with installed expansion board: Break or short-circuit in the
+    "mixing circle 3" sensor.
+  remedy: >-
+    Check "mixing circle 3" sensor, plug and connection line.
+
+750:
+  display: "Return sensor external"
+  reset_hint: "Please call installer"
+  description: >-
+    Break or short-circuit in the external return sensor.
+  remedy: >-
+    Check external return sensor, plug and connection line.
+
+751:
+  display: "Phase monitoring fault"
+  reset_hint: ""
+  description: >-
+    Phase-sequence relay has responded.
+  remedy: >-
+    Check rotary field and phase-sequence relay.
+
+752:
+  display: "Flow error"
+  reset_hint: ""
+  description: >-
+    Phase-sequence relay or flow switch has responded.
+  remedy: >-
+    See errors No. 751 and No. 717.
+
+755:
+  display: "Lost connection to slave"
+  reset_hint: "Please call installer"
+  description: >-
+    A slave has not responded for more than 5 minutes.
+  remedy: >-
+    Check network connection, switch, and IP addresses. Perform HP search if
+    necessary.
+
+756:
+  display: "Lost connection to master"
+  reset_hint: "Please call installer"
+  description: >-
+    A master has not responded for more than 5 minutes.
+  remedy: >-
+    Check network connection, switch, and IP addresses. Perform HP search if
+    necessary.
+
+757:
+  display: "Low-pressure fault in W/W-appliance"
+  reset_hint: ""
+  note: >-
+    Absent from the German (rev b) extraction (jumps 756 -> 758) - see note on 706.
+  description: >-
+    Low-pressure pressostat in the W/W-appliance has triggered either repeatedly or
+    for more than 20 seconds.
+  remedy: >-
+    If this malfunction occurs three times, the installation can only be cleared
+    again by authorised service personnel!
+
+758:
+  display: "Defrosting malfunction"
+  reset_hint: ""
+  description: >-
+    Five times in a row, defrosting has either lasted longer than 10 minutes or was
+    terminated with a feed temperature of < 10 degC.
+  remedy: >-
+    Check flow rate. Check flow sensor.
+
+759:
+  display: "TDI message"
+  reset_hint: ""
+  description: >-
+    Unable to correctly carry out thermal disinfection 5 times in succession.
+  remedy: >-
+    Check setting of second heat generator and safety temperature limiter.
+
+760:
+  display: "Defrosting fault"
+  reset_hint: ""
+  description: >-
+    Defrosting ended 5 times in succession by maximum time (strong wind impinges on
+    evaporator).
+  remedy: >-
+    Protect the fan and evaporator from strong wind.
+
+761:
+  display: "LIN timeout"
+  reset_hint: ""
+  description: >-
+    LIN timeout.
+  remedy: >-
+    Check cable/contact.
+
+762:
+  display: "Sensor evaporator intake"
+  reset_hint: ""
+  note: >-
+    RESOLVED: reverted to the English PDF's original mapping. The German PDF (rev
+    "b") has 762/763 the other way round, but the English PDF is a later revision
+    ("d" in its footer) and a separately checked Dutch manual on the same "d"
+    revision confirms the English ordering - so English/Dutch (rev d) wins over the
+    older German (rev b) for this numbering conflict.
+  description: >-
+    Tu sensor error (evaporator intake).
+  remedy: >-
+    Check sensor, replace if necessary.
+
+763:
+  display: "Sensor compressor intake"
+  reset_hint: ""
+  note: "RESOLVED: reverted to the English PDF's mapping - see note on 762."
+  description: >-
+    Tu1 sensor error (compressor intake).
+  remedy: >-
+    Check sensor, replace if necessary.
+
+764:
+  display: "Sensor compressor heater"
+  reset_hint: ""
+  description: >-
+    Sensor error compressor heater.
+  remedy: >-
+    Check sensor, replace if necessary.
+
+765:
+  display: "Overheating"
+  reset_hint: ""
+  description: >-
+    Overheating longer than 5 minutes below 2K.
+  remedy: >-
+    When switching on for the first time, check rotary field, otherwise phone
+    customer service.
+
+766:
+  display: "Compressor's functional range"
+  reset_hint: ""
+  description: >-
+    Operation for 5 minutes outside the compressor's functional range.
+  remedy: >-
+    Check rotary field.
+
+767:
+  display: "STB E-Rod"
+  reset_hint: ""
+  description: >-
+    STB of the heating element has been activated.
+  remedy: >-
+    Check the heating element and press the fuse back in.
+
+768:
+  display: "Flow monitoring"
+  reset_hint: ""
+  description: >-
+    Insufficient flow in defrost cycle.
+  remedy: >-
+    Check hydraulics, check pump, check flow.
+
+769:
+  display: "Pump control"
+  reset_hint: ""
+  description: >-
+    After 10 sec compressor runtime excessively low flow.
+  remedy: >-
+    Check PWM cable, check pump.
+
+770:
+  display: "Low superheat"
+  reset_hint: ""
+  description: >-
+    Overheating lies below the limit value for a lengthy period.
+  remedy: >-
+    Check the temperature sensor, pressure sensor and expansion valve.
+
+771:
+  display: "High superheat"
+  reset_hint: ""
+  note: >-
+    RESOLVED via German original: confirmed the English PDF's "lies below" was a
+    translation error - German clearly says "liegt ... über dem Grenzwert" (lies
+    above the limit value), as expected for a High-superheat fault.
+  description: >-
+    Overheating lies above the limit value for a lengthy period.
+  remedy: >-
+    Check the temperature sensor, pressure sensor, fill quantity and expansion valve.
+
+776:
+  display: "Limit of application-CP"
+  reset_hint: ""
+  description: >-
+    Compressor operates outside its use limits for a lengthy period.
+  remedy: >-
+    Check the thermodynamics.
+
+777:
+  display: "Expansion valve"
+  reset_hint: ""
+  description: >-
+    Expansion valve is defective.
+  remedy: >-
+    Check the expansion valve, connection cable and if applicable the SEC board.
+
+778:
+  display: "Low pressure sensor"
+  reset_hint: ""
+  description: >-
+    Low-pressure sensor is defective.
+  remedy: >-
+    Check the sensor, connector and connection cable.
+
+779:
+  display: "High pressure sensor"
+  reset_hint: ""
+  description: >-
+    High-pressure sensor is defective.
+  remedy: >-
+    Check the sensor, connector and connection cable.
+
+780:
+  display: "EVI sensor"
+  reset_hint: ""
+  description: >-
+    EVI sensor is defective.
+  remedy: >-
+    Check the sensor, connector and connection cable.
+
+781:
+  display: "Liquid temp. sensor before EXV"
+  reset_hint: ""
+  description: >-
+    Liquid temperature sensor upstream of the ex-valve is defective.
+  remedy: >-
+    Check the sensor, connector and connection cable.
+
+782:
+  display: "Suction gas EVI temp. sensor"
+  reset_hint: ""
+  description: >-
+    Suction gas EVI temperature sensor is defective.
+  remedy: >-
+    Check the sensor, connector and connection cable.
+
+783:
+  display: "Communication SEC board - Inverter"
+  reset_hint: ""
+  note: >-
+    CONFIRMED via German original: it also reuses the same display name
+    ("Kommunikation SEC - Inverter") for both 783 and 786 despite them describing
+    different connections (783: SEC<->Inverter, 786: SEC<->HZ/IO) - this is a
+    genuine manual inconsistency, not an extraction artifact.
+  description: >-
+    Connection between the SEC board and the inverter is disrupted.
+  remedy: >-
+    Check the connection cable, interference suppression capacitors and wiring.
+
+784:
+  display: "VSS lockdown"
+  reset_hint: ""
+  description: >-
+    Inverter is blocked.
+  remedy: >-
+    Disconnect the complete system from the power supply for 2 minutes. If it occurs
+    again, check the inverter and compressor.
+
+785:
+  display: "SEC-Board defective"
+  reset_hint: ""
+  description: >-
+    Error found in the SEC board.
+  remedy: >-
+    Replace the SEC board.
+
+786:
+  display: "Communication SEC board - HZ/IO"
+  reset_hint: ""
+  note: >-
+    See note on 783 (confirmed genuine duplicate display name in both manuals).
+    Renamed here for clarity/uniqueness in our data based on the Description text
+    ("Connection between SEC board and HZ/IO") - the manual itself doesn't
+    distinguish 783 and 786 by name.
+  description: >-
+    Connection between SEC board and HZ/IO is disrupted by the SEC board.
+  remedy: >-
+    Check the HZ/IO - SEC board wiring.
+
+787:
+  display: "VD alert"
+  reset_hint: ""
+  description: >-
+    Compressor signals faults.
+  remedy: >-
+    Acknowledge fault. If an error occurs repeatedly, phone the authorised service
+    personnel (customer service).
+
+788:
+  display: "Major VSS fault"
+  reset_hint: ""
+  note: >-
+    CONFIRMED via German original: it also reuses "Schwerw. Inverter Fehler" for
+    788, 790, AND 793 (three different underlying faults) - genuine manual
+    inconsistency, not an extraction artifact. English PDF gives 793 a more specific
+    name ("Inverter Temperature") that the German original doesn't distinguish.
+  description: >-
+    Fault in the inverter.
+  remedy: >-
+    Check the inverter.
+
+789:
+  display: "LIN/Encoding not found"
+  reset_hint: ""
+  description: >-
+    Control unit unable to find coding. Either the LIN connection is interrupted or
+    the coding resistor is not detected.
+  remedy: >-
+    Check the connection cable LIN / coding resistor.
+
+790:
+  display: "Major VSS fault"
+  reset_hint: ""
+  description: >-
+    Fault in the power supply of the inverter / compressor.
+  remedy: >-
+    Check the wiring, inverter and compressor.
+
+791:
+  display: "ModBus Inverter"
+  reset_hint: ""
+  note: >-
+    RESOLVED: kept the English text. The two manuals describe this code quite
+    differently (English: generic ModBus-timeout-with-the-inverter; German: a more
+    specific SEC-board/HZIO diagnostic procedure) - this looked like a real spec
+    change between manual revisions rather than a translation slip, and since
+    English (rev "d") is the newer revision, its content supersedes the older
+    German (rev "b") text here rather than being in genuine conflict with it.
+  description: >-
+    The control panel has no ModBus communication with the inverter for at least 10
+    seconds or 10 communication packets to the inverter were lost. Reset
+    automatically.
+  remedy: >-
+    Check the Modbus wiring of inverter.
+
+792:
+  display: "LIN-connection lost"
+  reset_hint: ""
+  description: >-
+    Unable to find a master board or any configuration.
+  remedy: >-
+    Check the coding connector on the LIN board(s).
+
+793:
+  display: "Inverter Temperature"
+  reset_hint: ""
+  description: >-
+    Temperature sensor fault in the inverter. Internal inverter temperature too high
+    at least 5x within 24 h.
+  remedy: >-
+    Fault acknowledges itself.
+
+794:
+  display: "Overvoltage"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    Overvoltage on inverter.
+  remedy: >-
+    Check the inverter voltage supply.
+
+795:
+  display: "Undervoltage"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    Undervoltage on inverter.
+  remedy: >-
+    Check the inverter voltage supply.
+
+796:
+  display: "Safety switch off"
+  reset_hint: ""
+  note: >-
+    Not present in current translations/en.json. This code has three distinct
+    sub-cases in the manual rather than one description/remedy pair - transcribed
+    as a combined multi-case text below; consider whether the final data model needs
+    to represent cases separately.
+  description: >-
+    Safety Input was triggered.
+    Case 1: Inverter malfunction. Reset automatically.
+    Case 2: High-pressure pressostats in refrigerating circuit have triggered. Reset
+    automatically.
+    Case 3: Only LWDV malfunction message caused by voltage fluctuations exceeding
+    the valid standard.
+  remedy: >-
+    Case 1: Check inverter. Remedy fault.
+    Case 2: Check HW throughflow, overflow, flow temperature sensor and high-pressure
+    sensor. Remedy fault.
+    Case 3: It must be turned off and resecured manually.
+
+797:
+  display: "MLRH is not supported"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    Heating rod regulating is not supported.
+  remedy: ""
+
+798:
+  display: "ModBus Fan"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    No ModBus communication with the fan for at least 10 seconds. Reset
+    automatically.
+  remedy: >-
+    Check ModBus - Fan wiring.
+
+799:
+  display: "ModBus ASB"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    No ModBus communication with the ASB board for at least 10 seconds. Reset
+    automatically.
+  remedy: >-
+    Check ModBus - ASB board wiring.
+
+800:
+  display: "Desuperheater-error"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    Shutdown is triggered when desuperheater temperature >= 80 degC. Device is
+    switched off and D0_Pause is written in shutdowns. Device is released again for
+    operation after 2 hours. If the shutdown occurs 5 times within 24 hours, error
+    800 is written to the fault memory.
+  remedy: >-
+    Remove energy from desuperheater memory. The machine can be restarted as soon as
+    the temperature falls < 80 degC.
+
+802:
+  display: "Switchbox fan"
+  reset_hint: ""
+  note: >-
+    Not present in current translations/en.json - new code for the integration.
+    Same display name as 803 (both "Switchbox fan").
+  description: >-
+    Shutdown will be triggered when temperature in the electrical control box >= 80
+    degC. If the temperature falls below 70 degC, then the heat pump will start up
+    again. Reset automatically.
+  remedy: >-
+    Check fan for correct function. Check connection cable. Check sensor. Check
+    electrical control box openings for blockages.
+
+803:
+  display: "Switchbox fan"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    Error 802 tripped 3 times within 24 hours. Manual reset required. If the
+    temperature in the electrical switch box is still >= 80 degC, the error will be
+    triggered again immediately.
+  remedy: >-
+    Check fan for correct function. Check connection cable. Check sensor. Check
+    electrical control box openings for blockages.
+
+806:
+  display: "ModBus SEC"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    The SEC-board has no ModBus communication for at least 10 seconds or query has
+    failed 10 times in a row. Reset automatically.
+  remedy: >-
+    Check ModBus - SEC board wiring.
+
+807:
+  display: "Lost ModBus communication"
+  reset_hint: ""
+  note: "Not present in current translations/en.json - new code for the integration."
+  description: >-
+    All possible ModBus communication faults with unit components for the respective
+    unit are present simultaneously for at least 10 seconds. Reset automatically.
+  remedy: >-
+    Check ModBus interface on the control unit, connection cable to ModBus
+    distributor and ModBus distributor itself. Check Modbus wiring.

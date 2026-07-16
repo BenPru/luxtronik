@@ -229,16 +229,16 @@
                 "name": "Sn\u00ed\u017een\u00ed teploty na noc"
             },
             "efficiency_pump_nominal_voltage": {
-                "name": "Nominální napětí účinného čerpadla"
+                "name": "Nomin\u00e1ln\u00ed nap\u011bt\u00ed \u00fa\u010dinn\u00e9ho \u010derpadla"
             },
             "efficiency_pump_nominal_percentage": {
-                "name": "Nominální procento účinného čerpadla"
+                "name": "Nomin\u00e1ln\u00ed procento \u00fa\u010dinn\u00e9ho \u010derpadla"
             },
             "efficiency_pump_minimal_voltage": {
-                "name": "Minimální napětí účinného čerpadla"
+                "name": "Minim\u00e1ln\u00ed nap\u011bt\u00ed \u00fa\u010dinn\u00e9ho \u010derpadla"
             },
             "efficiency_pump_minimal_percentage": {
-                "name": "Minimální procento účinného čerpadla"
+                "name": "Minim\u00e1ln\u00ed procento \u00fa\u010dinn\u00e9ho \u010derpadla"
             },
             "cooling_threshold_temperature": {
                 "name": "Minim\u00e1ln\u00ed teplota pro chlazen\u00ed"
@@ -387,6 +387,19 @@
                     "791": "Ztr\u00e1ta ModBus spojen\u00ed",
                     "792": "P\u0159eru\u0161en\u00e9 LIN spojen\u00ed",
                     "793": "Z\u00e1va\u017en\u00e1 chyba m\u011bni\u010de",
+                    "731": "\u010casov\u00fd limit TDI",
+                    "739": "\u010cidlo sm\u011b\u0161ovac\u00edho okruhu 3",
+                    "794": "P\u0159ep\u011bt\u00ed",
+                    "795": "Podp\u011bt\u00ed",
+                    "796": "Bezpe\u010dnostn\u00ed vypnut\u00ed",
+                    "797": "MLRH nen\u00ed podporov\u00e1no",
+                    "798": "ModBus ventil\u00e1tor",
+                    "799": "ModBus ASB",
+                    "800": "Chyba desuperheateru",
+                    "802": "Ventil\u00e1tor rozvad\u011b\u010de",
+                    "803": "Ventil\u00e1tor rozvad\u011b\u010de",
+                    "806": "ModBus SEC",
+                    "807": "Ztr\u00e1ta spojen\u00ed ModBus",
                     "minus_1": "Nezn\u00e1m\u00e1 chyba"
                 },
                 "state_attributes": {
@@ -469,7 +482,22 @@
                             "791": "Deska SEC nen\u00ed del\u0161\u00ed dobu dostupn\u00e1. 791 se spust\u00ed, pokud byla nalezena deska HZIO (bez samostatn\u00e9ho k\u00f3dov\u00e1n\u00ed), ale nen\u00ed na n\u00ed rozpozn\u00e1na \u017e\u00e1dn\u00e1 deska SEC.",
                             "792": "Nelze naj\u00edt \u017e\u00e1dn\u00fd z\u00e1kladn\u00ed panel a \u017e\u00e1dn\u00e1 konfigurace.",
                             "793": "Chyba teploty v Inverteru.",
-                            "minus_1": "Nezn\u00e1m\u00e1 chyba"
+                            "minus_1": "Nezn\u00e1m\u00e1 chyba",
+                            "731": "Teplota pot\u0159ebn\u00e1 pro term\u00e1ln\u00ed dezinfekci nebyla dosa\u017eena v nastaven\u00e9m \u010dasov\u00e9m intervalu.",
+                            "739": "Pouze p\u0159i instalovan\u00e9 roz\u0161i\u0159uj\u00edc\u00ed desce: p\u0159eru\u0161en\u00ed nebo zkrat \u010didla \u201esm\u011b\u0161ovac\u00ed okruh 3\u201c.",
+                            "794": "P\u0159ep\u011bt\u00ed na invertoru.",
+                            "795": "Podp\u011bt\u00ed na invertoru.",
+                            "796": "Byl aktivov\u00e1n bezpe\u010dnostn\u00ed vstup. P\u0159\u00edpad 1: porucha invertoru. Automatick\u00fd reset. P\u0159\u00edpad 2: aktivovaly se presostaty vysok\u00e9ho tlaku v chladic\u00edm okruhu. Automatick\u00fd reset. P\u0159\u00edpad 3: pouze hl\u00e1\u0161en\u00ed poruchy LWDV zp\u016fsoben\u00e9 kol\u00eds\u00e1n\u00edm nap\u011bt\u00ed mimo platnou normu.",
+                            "797": "Regulace topn\u00e9 ty\u010de nen\u00ed podporov\u00e1na.",
+                            "798": "Nejm\u00e9n\u011b 10 sekund \u017e\u00e1dn\u00e1 komunikace ModBus s ventil\u00e1torem. Automatick\u00fd reset.",
+                            "799": "Nejm\u00e9n\u011b 10 sekund \u017e\u00e1dn\u00e1 komunikace ModBus s deskou ASB. Automatick\u00fd reset.",
+                            "800": "Vypnut\u00ed je aktivov\u00e1no, kdy\u017e teplota desuperheateru dos\u00e1hne \u2265 80 \u00b0C. Za\u0159\u00edzen\u00ed se vypne a do historie vypnut\u00ed se zap\u00ed\u0161e D0_Pause. Za\u0159\u00edzen\u00ed je op\u011bt uvoln\u011bno pro provoz po 2 hodin\u00e1ch. Pokud k vypnut\u00ed dojde 5kr\u00e1t b\u011bhem 24 hodin, zap\u00ed\u0161e se chyba 800 do pam\u011bti poruch.",
+                            "802": "Vypnut\u00ed je aktivov\u00e1no, kdy\u017e teplota v elektrick\u00e9m rozvad\u011b\u010di dos\u00e1hne \u2265 80 \u00b0C. Pokud teplota klesne pod 70 \u00b0C, tepeln\u00e9 \u010derpadlo se znovu spust\u00ed. Automatick\u00fd reset.",
+                            "803": "Chyba 802 se aktivovala 3kr\u00e1t b\u011bhem 24 hodin. Je nutn\u00fd ru\u010dn\u00ed reset. Pokud je teplota v elektrick\u00e9m rozvad\u011b\u010di st\u00e1le \u2265 80 \u00b0C, chyba se okam\u017eit\u011b aktivuje znovu.",
+                            "806": "Deska SEC nem\u00e1 nejm\u00e9n\u011b 10 sekund \u017e\u00e1dnou komunikaci ModBus nebo dotaz selhal 10kr\u00e1t za sebou. Automatick\u00fd reset.",
+                            "807": "V\u0161echny mo\u017en\u00e9 poruchy komunikace ModBus s komponentami za\u0159\u00edzen\u00ed jsou p\u0159\u00edtomny sou\u010dasn\u011b po dobu nejm\u00e9n\u011b 10 sekund. Automatick\u00fd reset.",
+                            "768": "5kr\u00e1t za sebou nedostate\u010dn\u00fd pr\u016ftok p\u0159ed odt\u00e1v\u00e1n\u00edm.",
+                            "769": "Chyb\u00ed platn\u00fd sign\u00e1l pr\u016ftoku od ob\u011bhov\u00e9ho \u010derpadla. Automatick\u00fd reset."
                         }
                     },
                     "remedy": {
@@ -505,7 +533,6 @@
                             "728": "Kontrola \u010didla zdroje tepla, konektoru a p\u0159ipojovac\u00edm veden\u00ed.",
                             "729": "Kontrola ot\u00e1\u010dek a kompresoru.",
                             "730": "Kontrola spot\u0159eby v\u00fdkonu b\u011bhem oh\u0159evu.",
-                            "731": "Kontrola \u010didla zdroje tepla, v\u00fdparu a bodu rosy.",
                             "732": "Kontrola sm\u011b\u0161ova\u010de a ob\u011bhov\u00e9ho \u010derpadla pro vyt\u00e1p\u011bn\u00ed.",
                             "733": "Kontrola p\u0159ipojovac\u00edho veden\u00ed anody a potenciostatu. Napln\u011bn\u00ed z\u00e1sobn\u00edku tepl\u00e9 vody.",
                             "734": "Do\u010dasn\u00e9 potvrzen\u00ed chyby pro obnoven\u00ed p\u0159\u00edpravy tepl\u00e9 vody. Opravte chybu 733.",
@@ -548,7 +575,20 @@
                             "790": "Kontrola kabelov\u00e1n\u00ed, invertoru a kompresoru.",
                             "791": "Pokud jde o konfiguraci SEC, zkontrolujte ModBus kabel mezi HZ/IO a deskou SEC. Stejn\u011b tak zkontrolujte DESKU SEC, zda v\u0161e blik\u00e1, jak m\u00e1. Pokud to nen\u00ed konfigurace s deskou SEC (nap\u0159\u00edklad u za\u0159\u00edzen\u00ed P184), pak zkontrolujte kodovac\u00ed odpor HZ/IO.",
                             "792": "Kontrola k\u00f3dovac\u00edho konektoru na desce LIN.",
-                            "793": "Chyba se oprav\u00ed automaticky."
+                            "793": "Chyba se oprav\u00ed automaticky.",
+                            "739": "Kontrola \u010didla \u201esm\u011b\u0161ovac\u00ed okruh 3\u201c, konektoru a propojovac\u00edho veden\u00ed.",
+                            "794": "Kontrola nap\u00e1jen\u00ed invertoru.",
+                            "795": "Kontrola nap\u00e1jen\u00ed invertoru.",
+                            "796": "P\u0159\u00edpad 1: kontrola invertoru. Odstran\u011bn\u00ed poruchy. P\u0159\u00edpad 2: kontrola pr\u016ftoku topn\u00e9 vody, p\u0159epadu, \u010didla teploty na v\u00fdstupu a \u010didla vysok\u00e9ho tlaku. Odstran\u011bn\u00ed poruchy. P\u0159\u00edpad 3: nutn\u00e9 ru\u010dn\u00ed vypnut\u00ed a op\u011btovn\u00e9 zaji\u0161t\u011bn\u00ed.",
+                            "798": "Kontrola kabel\u00e1\u017ee ModBus ventil\u00e1toru.",
+                            "799": "Kontrola kabel\u00e1\u017ee ModBus desky ASB.",
+                            "800": "Odebr\u00e1n\u00ed energie ze z\u00e1sobn\u00edku desuperheateru. Jakmile teplota klesne pod 80 \u00b0C, lze za\u0159\u00edzen\u00ed znovu spustit.",
+                            "802": "Kontrola funkce ventil\u00e1toru. Kontrola p\u0159ipojovac\u00edho kabelu. Kontrola \u010didla. Kontrola otvor\u016f rozvad\u011b\u010de na ucp\u00e1n\u00ed.",
+                            "803": "Kontrola funkce ventil\u00e1toru. Kontrola p\u0159ipojovac\u00edho kabelu. Kontrola \u010didla. Kontrola otvor\u016f rozvad\u011b\u010de na ucp\u00e1n\u00ed.",
+                            "806": "Kontrola kabel\u00e1\u017ee ModBus desky SEC.",
+                            "807": "Kontrola rozhran\u00ed ModBus na ovl\u00e1dac\u00edm panelu, propojovac\u00edho kabelu k rozbo\u010dova\u010di ModBus a samotn\u00e9ho rozbo\u010dova\u010de ModBus. Kontrola kabel\u00e1\u017ee ModBus.",
+                            "768": "Kontrola pr\u016ftoku topn\u00e9 vody a p\u0159epadu. Odstran\u011bn\u00ed poruchy.",
+                            "769": "Kontrola kabel\u00e1\u017ee z\u00e1t\u011b\u017ee a \u0159\u00edzen\u00ed ob\u011bhov\u00e9ho \u010derpadla. Odstran\u011bn\u00ed poruchy."
                         }
                     }
                 }
@@ -570,8 +610,7 @@
                     "12": "Pauza n\u00edzk\u00e9ho tlaku",
                     "14": "Pauza invertoru",
                     "24": "LPC",
-                    "25": "Restart",
-                    "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+                    "25": "Restart"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -594,8 +633,7 @@
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
                             "14": "Pauza invertoru",
                             "24": "LPC",
-                            "25": "Restart",
-                            "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+                            "25": "Restart"
                         }
                     },
                     "timestamp_1": {
@@ -618,8 +656,7 @@
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
                             "14": "Pauza invertoru",
                             "24": "LPC",
-                            "25": "Restart",
-                            "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+                            "25": "Restart"
                         }
                     },
                     "timestamp_2": {
@@ -642,8 +679,7 @@
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
                             "14": "Pauza invertoru",
                             "24": "LPC",
-                            "25": "Restart",
-                            "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+                            "25": "Restart"
                         }
                     },
                     "timestamp_3": {
@@ -666,8 +702,7 @@
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
                             "14": "Pauza invertoru",
                             "24": "LPC",
-                            "25": "Restart",
-                            "-1": "Nezn\u00e1m\u00e9 vypnut\u00ed"
+                            "25": "Restart"
                         }
                     },
                     "timestamp_4": {

@@ -388,6 +388,21 @@
                     "791": "ModBus Verbindung verloren",
                     "792": "LIN-Verbindung unterbrochen",
                     "793": "Schwerw. Inverter Fehler",
+                    "731": "Zeit\u00fcberschreitung TDI",
+                    "739": "F\u00fchler Mischkreis 3",
+                    "768": "Durchfluss\u00fcberwachung",
+                    "769": "Pumpenansteuerung",
+                    "794": "\u00dcberspannung",
+                    "795": "Unterspannung",
+                    "796": "Sicherheitsabschaltung",
+                    "797": "MLRH wird nicht unterst\u00fctzt",
+                    "798": "ModBus Ventilator",
+                    "799": "ModBus ASB",
+                    "800": "Enthitzer-Fehler",
+                    "802": "Ventilator Schaltkasten",
+                    "803": "Ventilator Schaltkasten",
+                    "806": "ModBus SEC",
+                    "807": "ModBus Verbindung verloren",
                     "minus_1": "Unbekannter Fehler"
                 },
                 "state_attributes": {
@@ -470,7 +485,22 @@
                             "791": "SEC-Board seit einiger Zeit nicht mehr erreichbar. 791 wird ausgel\u00f6st, wenn zwar eine HZIO-Platine gefunden worden ist (ohne separate Kodierung), allerdings kein SEC-Board daran erkannt werden kann.",
                             "792": "Es konnte keine Grundplatine und auch sonst keine Konfiguration gefunden werden.",
                             "793": "Temperaturfehler im Inverter",
-                            "minus_1": "Unbekannter Fehler"
+                            "minus_1": "Unbekannter Fehler",
+                            "731": "Die f\u00fcr die thermische Desinfektion n\u00f6tige Temperatur konnte innerhalb der eingestellten Schaltzeiten nicht erreicht werden.",
+                            "739": "Bruch oder Kurzschlu\u00df des F\u00fchlers \u201eMischkreis3\u201c.",
+                            "768": "5mal in Folge zu geringer Durchfluss vor der Abtauung.",
+                            "769": "Kein g\u00fcltiges Durchflusssignal von der Umw\u00e4lzpumpe. Reset automatisch.",
+                            "794": "\u00dcberspannung am Inverter.",
+                            "795": "Unterspannung am Inverter.",
+                            "796": "Safety Input wurde ausgel\u00f6st. Fall 1: Inverterst\u00f6rung. Reset automatisch. Fall 2: Hochdruckpressostaten im K\u00e4ltekreis hat ausgel\u00f6st. Reset automatisch. Fall 3: Nur LADV St\u00f6rmeldung durch Spannungsschwankungen au\u00dferhalb der g\u00fcltigen Norm.",
+                            "797": "Heizstabregelung wird nicht unterst\u00fctzt.",
+                            "798": "Mindestens 10 Sekunden keine ModBus-Kommunikation zum Ventilator. Reset automatisch.",
+                            "799": "Mindestens 10 Sekunden keine ModBus-Kommunikation mit der ASB-Platine. Reset automatisch.",
+                            "800": "Abschaltung wird ausgel\u00f6st, wenn Enthitzer-Temperatur \u2265 80\u00b0C. Ger\u00e4t wird abgeschaltet und es wird D0_Pause in Abschaltungen geschrieben. Ger\u00e4t wird nach 2 Stunden wieder f\u00fcr den Betrieb freigegeben. Tritt die Abschaltung 5 mal innerhalb von 24 Stunden auf, wird Fehler 800 in den Fehlerspeicher geschrieben.",
+                            "802": "Abschaltung wird ausgel\u00f6st, wenn Temperatur im elektrischen Schaltkasten \u2265 80\u00b0C. F\u00e4llt die Temperatur unter 70\u00b0C, l\u00e4uft die W\u00e4rmepumpe wieder an. Reset automatisch.",
+                            "803": "Fehler 802 hat 3 mal innerhalb von 24h ausgel\u00f6st. Reset manuell erforderlich. Ist die Temperatur im elektrischen Schaltkasten noch \u2265 80\u00b0C, wird der Fehler sofort wieder ausgel\u00f6st.",
+                            "806": "SEC-Platine hat seit mindestens 10 Sekunden keine ModBus-Kommunikation oder Abfrage ist 10 mal hintereinander fehlgeschlagen. Reset automatisch.",
+                            "807": "Alle f\u00fcr das jeweilige Ger\u00e4t m\u00f6glichen ModBus-Kommunikationsst\u00f6rungen mit Ger\u00e4tekomponenten liegen f\u00fcr mindestens 10 Sekunden gleichzeitig an. Reset automatisch."
                         }
                     },
                     "remedy": {
@@ -548,7 +578,20 @@
                             "790": "Verkabelung, Inverter und Verdichter pr\u00fcfen",
                             "791": "Sofern es sich um die SECKonfiguration handelt, das ModBus-Kabel zwischen HZIO und SEC Board pr\u00fcfen. Ebenso das SEC-Board pr\u00fcfen, ob alles blinkt, wie es soll. Falls es KEINE Konfiguration mit SEC-Board ist (z.B., weil es sich um ein P184-Ger\u00e4t handelt), dann den Kodierungswiderstand der HZIO pr\u00fcfen.",
                             "792": "Kodierungsstecker auf LINPlatine(n) pr\u00fcfen",
-                            "793": "Fehler behebt sich selbst"
+                            "793": "Fehler behebt sich selbst",
+                            "739": "F\u00fchler \u201eMischkreis3\u201c, Stecker und Verbindungsleitung \u00fcberpr\u00fcfen.",
+                            "768": "Durchfluss HW und \u00dcberstr\u00f6mer \u00fcberpr\u00fcfen. Fehler beheben.",
+                            "769": "Verkabelung Last und Steuerung der Umw\u00e4lzpumpe \u00fcberpr\u00fcfen. Fehler beheben.",
+                            "794": "Spannungsversorgung Inverter pr\u00fcfen.",
+                            "795": "Spannungsversorgung Inverter pr\u00fcfen.",
+                            "796": "Fall 1: Inverter \u00fcberpr\u00fcfen. Fehler beheben. Fall 2: Durchfluss HW, \u00dcberstr\u00f6mer, Vorlauftemperaturf\u00fchler und Hochdrucksensor \u00fcberpr\u00fcfen. Fehler beheben. Fall 3: Es muss manuell aus- und wieder eingesichert werden.",
+                            "798": "Modbus Verkabelung Ventilator pr\u00fcfen.",
+                            "799": "Modbus Verkabelung ASB-Platine pr\u00fcfen.",
+                            "800": "Energie aus Enthitzer-Speicher abnehmen. Sobald die Temperatur < 80\u00b0C f\u00e4llt, kann die Maschine wieder gestartet werden.",
+                            "802": "Ventilator auf Funktion pr\u00fcfen. Anschlusskabel pr\u00fcfen. F\u00fchler pr\u00fcfen. Schaltraum\u00f6ffnungen auf Verstopfung pr\u00fcfen.",
+                            "803": "Ventilator auf Funktion pr\u00fcfen. Anschlusskabel pr\u00fcfen. F\u00fchler pr\u00fcfen. Schaltraum\u00f6ffnungen auf Verstopfung pr\u00fcfen.",
+                            "806": "Modbus Verkabelung SEC Platine pr\u00fcfen.",
+                            "807": "ModBus-Schnittstelle am Bedienteil, Verbindungskabel zum ModBus-Verteiler sowie ModBus-Verteiler pr\u00fcfen. Modbus Verkabelung pr\u00fcfen."
                         }
                     }
                 }
