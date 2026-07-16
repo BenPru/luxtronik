@@ -391,6 +391,21 @@
                     "791": "ModBus-verbinding verbroken",
                     "792": "LIN-verbinding onderbroken",
                     "793": "Fatale omvormerfout",
+                    "731": "Time-out TDI",
+                    "739": "Voeler menggroep3",
+                    "768": "Doorstromingsbewaking",
+                    "769": "Pompaansturing",
+                    "794": "Overspanning",
+                    "795": "Onderspanning",
+                    "796": "Veiligheidsuitschakeling",
+                    "797": "MLRH wordt niet ondersteund",
+                    "798": "ModBus Ventilator",
+                    "799": "ModBus ASB",
+                    "800": "Desuperheater-fout",
+                    "802": "Switchbox fan",
+                    "803": "Switchbox fan",
+                    "806": "ModBus SEC",
+                    "807": "ModBus-verbinding verloren",
                     "minus_1": "Onbekende fout"
                 },
                 "state_attributes": {
@@ -473,7 +488,22 @@
                             "791": "SEC-bord is al enige tijd niet toegankelijk. 791 wordt geactiveerd wanneer een HZIO-bord is gevonden (zonder aparte codering) maar er kan geen SEC-bord op worden herkend.",
                             "792": "Er kon geen moederbord of andere configuratie worden gevonden.",
                             "793": "Temperatuurfout in omvormer",
-                            "minus_1": "Onbekende fout"
+                            "minus_1": "Onbekende fout",
+                            "731": "De voor de thermische desinfectie nodige temperatuur kon binnen de ingestelde schakeltijden niet bereikt worden.",
+                            "739": "Alleen mogelijk bij ingebouwde uitbreidingsprintplaat: breuk of kortsluiting in de voeler \u201cmenggroep3\u201d.",
+                            "768": "Onvoldoende doorstroming bij LW160H(A)V tijdens de ontdooiing.",
+                            "769": "Na 10 s compressorlooptijd te geringe doorstroming.",
+                            "794": "Overspanning op de inverter.",
+                            "795": "Onderspanning op de inverter.",
+                            "796": "Safety Input is geactiveerd. Geval 1: Inverterstoring. Automatische reset. Geval 2: Hogedrukpressostaten in het koelcircuit is geactiveerd. Automatische reset. Geval 3: LWDV storingsmelding door spanningsschommelingen buiten de geldige norm.",
+                            "797": "Verwarmingselementregeling wordt niet ondersteund.",
+                            "798": "Geen ModBus-communicatie met de ventilator sinds ten minste 10 seconden. Automatische reset.",
+                            "799": "Geen ModBus-communicatie met de ASB-printplaat sinds ten minste 10 seconden. Automatische reset.",
+                            "800": "Uitschakeling wordt geactiveerd wanneer de temperatuur van de desuperheater \u2265 80\u00b0C is. Apparaat is uitgeschakeld en D0_Pause is in shutdowns geschreven. Het apparaat wordt weer vrijgegeven voor gebruik na 2 uur. Als het uitschakelen 5 keer binnen 24 uur plaatsvindt, wordt fout 800 naar het storingsgeheugen geschreven.",
+                            "802": "Uitschakeling wordt geactiveerd, wanneer de temperatuur in de elektrische schakelkast \u2265 80\u00b0C is. Als de temperatuur onder 70\u00b0C daalt, start de warmtepomp weer op. Automatische reset.",
+                            "803": "Fout 802 is driemaal binnen 24 uur geactiveerd. Reset handmatig noodzakelijk. Als de temperatuur in de elektrische schakelkast nog \u2265 80\u00b0C is, wordt de fout meteen weer geactiveerd.",
+                            "806": "SEC-printplaat heeft sinds minstens 10 seconden geen ModBus-communicatie of opvraging is 10 keer achter elkaar mislukt. Automatische reset.",
+                            "807": "Alle voor het desbetreffende apparaat mogelijke ModBus-communicatiestoringen met apparaatcomponenten zijn minstens 10 seconden lang tegelijk aanwezig. Automatische reset."
                         }
                     },
                     "remedy": {
@@ -551,7 +581,20 @@
                             "790": "Controleer bekabeling, omvormer en compressor",
                             "791": "Als het de SEC-configuratie is, controleer dan de ModBus-kabel tussen HZIO en SEC-bord. Controleer ook het SEC-bord om te zien of alles knippert zoals het zou moeten. Als er GEEN configuratie is met SEC-bord is (b.v. omdat het een P184-apparaat is), controleer dan de coderingsweerstand van de HZIO.",
                             "792": "Controleer codeerstekker op LIN-kaart",
-                            "793": "Fout corrigeert zichzelf"
+                            "793": "Fout corrigeert zichzelf",
+                            "739": "Voeler \u201cmenggroep3\u201d, stekker en verbindingskabel controleren.",
+                            "768": "Hydrauliek controleren, pomp controleren, doorstroming controleren.",
+                            "769": "PWM-kabel controleren, pomp controleren.",
+                            "794": "Stroomvoorziening inverter controleren.",
+                            "795": "Stroomvoorziening inverter controleren.",
+                            "796": "Geval 1: Inverter controleren. Storing verhelpen. Geval 2: Debiet HW, overstromer, aanvoertemperatuursensor en hogedruksensor controleren. Storing verhelpen. Geval 3: Er moet handmatig uit- en weer ingeschakeld worden.",
+                            "798": "Kabelverbinding tussen ModBus en ventilator controleren.",
+                            "799": "Kabelverbinding tussen ModBus en ASB-printplaat controleren.",
+                            "800": "Energie uit onthitter-buffer afnemen. Zodra de temperatuur < 80\u00b0C daalt, kan de machine weer gestart worden.",
+                            "802": "Ventilator op werking controleren. Aansluitkabel controleren. Sensor controleren. Elektrische schakelkastopeningen op verstopping controleren.",
+                            "803": "Ventilator op werking controleren. Aansluitkabel controleren. Sensor controleren. Elektrische schakelkastopeningen op verstopping controleren.",
+                            "806": "Kabelverbinding tussen ModBus en SEC-printplaat controleren.",
+                            "807": "ModBus-interface op het bedieningselement, verbindingskabel naar de ModBus-verdeler alsmede ModBus-verdeler controleren. Modbus bedrading controleren."
                         }
                     }
                 }
@@ -570,7 +613,10 @@
                     "8": "Onderste toepassingslimiet",
                     "9": "Geen vereiste",
                     "11": "Doorstroomwarmtebron",
-                    "12": "Lagedruk-pauze"
+                    "12": "Lagedruk-pauze",
+                    "14": "Inverterpauze",
+                    "24": "LPC",
+                    "25": "Herstart"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -591,7 +637,9 @@
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
                             "12": "Lagedruk-pauze",
-                            "-1": "Onbekende afsluiting"
+                            "14": "Inverterpauze",
+                            "24": "LPC",
+                            "25": "Herstart"
                         }
                     },
                     "timestamp_1": {
@@ -611,7 +659,10 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
-                            "12": "Lagedruk-pauze"
+                            "12": "Lagedruk-pauze",
+                            "14": "Inverterpauze",
+                            "24": "LPC",
+                            "25": "Herstart"
                         }
                     },
                     "timestamp_2": {
@@ -632,7 +683,9 @@
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
                             "12": "Lagedruk-pauze",
-                            "-1": "Onbekende afsluiting"
+                            "14": "Inverterpauze",
+                            "24": "LPC",
+                            "25": "Herstart"
                         }
                     },
                     "timestamp_3": {
@@ -652,7 +705,10 @@
                             "8": "Onderste toepassingslimiet",
                             "9": "Geen vereiste",
                             "11": "Doorstroomwarmtebron",
-                            "12": "Lagedruk-pauze"
+                            "12": "Lagedruk-pauze",
+                            "14": "Inverterpauze",
+                            "24": "LPC",
+                            "25": "Herstart"
                         }
                     },
                     "timestamp_4": {
