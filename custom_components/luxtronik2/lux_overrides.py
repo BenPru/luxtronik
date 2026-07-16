@@ -148,7 +148,12 @@ parameters_to_add_update = {
     1175: Bool("THERMAL_POWER_LIMIT_SWITCH", True),
     1176: Power("THERMAL_POWER_LIMIT_HEATING", True),
     1177: Power("THERMAL_POWER_LIMIT_WATER", True),
-    1178: Power("THERMAL_POWER_LIMIT_COOLING", True),
+    # 1178 was previously (wrongly) mapped here as THERMAL_POWER_LIMIT_COOLING;
+    # a hardware owner confirmed via the unit's own web interface that cooling
+    # is actually 1179, and upstream's naming for 1178 turned out to be a copy
+    # of this same guess rather than independent confirmation (see #680). Left
+    # unregistered until 1178's real purpose is confirmed.
+    1179: Power("THERMAL_POWER_LIMIT_COOLING", True),
     # Add more as needed
 }
 

@@ -168,7 +168,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     ),
     LuxtronikNumberDescription(
         key=SensorKey.THERMAL_POWER_LIMIT_COOLING,
-        luxtronik_key=LP.P1178_THERMAL_POWER_LIMIT_COOLING,
+        luxtronik_key=LP.P1179_THERMAL_POWER_LIMIT_COOLING,
         device_class=NumberDeviceClass.POWER,
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
