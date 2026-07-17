@@ -57,7 +57,6 @@
       "current_heat_output": { "default": "mdi:lightning-bolt-circle" },
       "cop_heating": { "default": "mdi:speedometer" },
       "cop_dhw": { "default": "mdi:speedometer" },
-      "cop_cooling": { "default": "mdi:speedometer" },
       "pump_frequency": { "default": "mdi:sine-wave" },
       "pump_flow_delta_target": { "default": "mdi:delta" },
       "pump_flow_delta": { "default": "mdi:delta" },

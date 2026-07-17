@@ -943,9 +943,6 @@
             "cooling_energy_input": {
                 "name": "Energia zu\u017cyta na ch\u0142odzenie"
             },
-            "cop_cooling": {
-                "name": "COP"
-            },
             "current_power_consumption": {
                 "name": "Pob\u00f3r mocy"
             },

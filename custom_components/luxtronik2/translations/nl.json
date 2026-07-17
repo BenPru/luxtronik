@@ -940,9 +940,6 @@
             "cooling_energy_input": {
                 "name": "Gebruikte energie koeling"
             },
-            "cop_cooling": {
-                "name": "COP"
-            },
             "current_power_consumption": {
                 "name": "Stroomverbruik"
             },

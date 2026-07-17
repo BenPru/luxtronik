@@ -740,14 +740,5 @@ SENSORS_COP: list[cop_descr] = [
         required_status=LuxOperationMode.domestic_water,
         icon="mdi:speedometer",
     ),
-    cop_descr(
-        key=SensorKey.COP_COOLING,
-        device_key=DeviceKey.cooling,
-        state_class=SensorStateClass.MEASUREMENT,
-        numerator_key=LC.C0257_CURRENT_HEAT_OUTPUT,
-        denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
-        required_status=LuxOperationMode.cooling,
-        icon="mdi:speedometer",
-    ),
 ]
 # endregion COP

@@ -922,9 +922,6 @@
             "cooling_energy_input": {
                 "name": "Spot\u0159ebovan\u00e1 energie pro chlazen\u00ed"
             },
-            "cop_cooling": {
-                "name": "COP"
-            },
             "room_thermostat_temperature": {
                 "name": "Teplota termostatu m\u00edstnosti"
             },

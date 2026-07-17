@@ -919,9 +919,6 @@
             "cooling_energy_input": {
                 "name": "Energy input"
             },
-            "cop_cooling": {
-                "name": "COP"
-            },
             "room_thermostat_temperature": {
                 "name": "Room thermostat"
             },
