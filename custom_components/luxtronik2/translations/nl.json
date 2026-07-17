@@ -931,6 +931,15 @@
             "circulation_pump_delta": {
                 "name": "Circulatiepomp Delta"
             },
+            "cop_cooling": {
+                "name": "COP Koeling"
+            },
+            "cop_dhw": {
+                "name": "COP Warm Water"
+            },
+            "cop_heating": {
+                "name": "COP Verwarming"
+            },
             "cooling_energy_input": {
                 "name": "Gebruikte energie koeling"
             },

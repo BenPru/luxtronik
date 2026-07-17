@@ -33,6 +33,7 @@ from .const import (
     UnitOfVolumeFlowRateExt,
 )
 from .model import (
+    LuxtronikCopSensorDescription as cop_descr,
     LuxtronikEntityAttributeDescription as attr,
     LuxtronikIndexSensorDescription as descr_index,
     LuxtronikSensorDescription as descr,
@@ -718,3 +719,35 @@ SENSORS: list[descr] = [
     ),
     # endregion Cooling
 ]
+
+# region COP (instantaneous, no external meter)
+SENSORS_COP: list[cop_descr] = [
+    cop_descr(
+        key=SensorKey.COP_HEATING,
+        device_key=DeviceKey.heating,
+        state_class=SensorStateClass.MEASUREMENT,
+        numerator_key=LC.C0257_CURRENT_HEAT_OUTPUT,
+        denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
+        required_status=LuxOperationMode.heating,
+        icon="mdi:speedometer",
+    ),
+    cop_descr(
+        key=SensorKey.COP_DHW,
+        device_key=DeviceKey.domestic_water,
+        state_class=SensorStateClass.MEASUREMENT,
+        numerator_key=LC.C0257_CURRENT_HEAT_OUTPUT,
+        denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
+        required_status=LuxOperationMode.domestic_water,
+        icon="mdi:speedometer",
+    ),
+    cop_descr(
+        key=SensorKey.COP_COOLING,
+        device_key=DeviceKey.cooling,
+        state_class=SensorStateClass.MEASUREMENT,
+        numerator_key=LC.C0257_CURRENT_HEAT_OUTPUT,
+        denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
+        required_status=LuxOperationMode.cooling,
+        icon="mdi:speedometer",
+    ),
+]
+# endregion COP

@@ -931,6 +931,15 @@
             "circulation_pump_delta": {
                 "name": "Umw\u00e4lzpumpe Delta"
             },
+            "cop_cooling": {
+                "name": "COP K\u00fchlung"
+            },
+            "cop_dhw": {
+                "name": "COP Warmwasser"
+            },
+            "cop_heating": {
+                "name": "COP Heizung"
+            },
             "cooling_energy_input": {
                 "name": "Eingesetzte Energie K\u00fchlung"
             },
