@@ -930,15 +930,6 @@
             },
             "circulation_pump_delta": {
                 "name": "Circulation pump delta"
-            },
-            "cop_cooling": {
-                "name": "COP Cooling"
-            },
-            "cop_dhw": {
-                "name": "COP DHW"
-            },
-            "cop_heating": {
-                "name": "COP Heating"
             }
         },
         "date": {

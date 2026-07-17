@@ -949,15 +949,6 @@
             "circulation_pump_delta_target": {
                 "name": "Cyrkulacyjna pompdelta docelowa"
             },
-            "cop_cooling": {
-                "name": "COP Ch\u0142odzenie"
-            },
-            "cop_dhw": {
-                "name": "COP Ciep\u0142a woda"
-            },
-            "cop_heating": {
-                "name": "COP Ogrzewanie"
-            },
             "pump_flow_delta": {
                 "name": "Delta przep\u0142ywu pompy"
             },

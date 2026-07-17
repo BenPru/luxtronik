@@ -933,15 +933,6 @@
             },
             "circulation_pump_delta": {
                 "name": "Rozd\u00edl pr\u016ftoku ob\u011bhov\u00e9ho \u010derpadla"
-            },
-            "cop_cooling": {
-                "name": "COP Chlazen\u00ed"
-            },
-            "cop_dhw": {
-                "name": "COP Tepl\u00e1 voda"
-            },
-            "cop_heating": {
-                "name": "COP Topen\u00ed"
             }
         },
         "date": {
