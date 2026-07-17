@@ -919,12 +919,6 @@
             "operation_hours_cooling": {
                 "name": "Betriebsstunden"
             },
-            "cooling_energy_input": {
-                "name": "Eingesetzte Energie Kühlung"
-            },
-            "cop_cooling": {
-                "name": "COP"
-            },
             "room_thermostat_temperature": {
                 "name": "Raum Thermostat"
             },
@@ -945,6 +939,9 @@
             },
             "cooling_energy_input": {
                 "name": "Eingesetzte Energie K\u00fchlung"
+            },
+            "cop_cooling": {
+                "name": "COP"
             },
             "second_heat_generator_amount_counter": {
                 "name": "Zweiter W\u00e4rmeerzeuger W\u00e4rmemenge"
