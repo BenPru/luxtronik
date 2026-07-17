@@ -853,6 +853,9 @@
             "dhw_energy_input": {
                 "name": "Energy input"
             },
+            "cop_dhw": {
+                "name": "COP"
+            },
             "flow_in_temperature": {
                 "name": "Flow in temperature"
             },
@@ -895,6 +898,9 @@
             "heat_energy_input": {
                 "name": "Energy input heating"
             },
+            "cop_heating": {
+                "name": "COP"
+            },
             "flow_out_temperature_external": {
                 "name": "Flow out temperature external"
             },
@@ -912,6 +918,9 @@
             },
             "cooling_energy_input": {
                 "name": "Energy input"
+            },
+            "cop_cooling": {
+                "name": "COP"
             },
             "room_thermostat_temperature": {
                 "name": "Room thermostat"

@@ -856,6 +856,9 @@
             "dhw_energy_input": {
                 "name": "Eingesetzte Energie"
             },
+            "cop_dhw": {
+                "name": "COP"
+            },
             "flow_in_temperature": {
                 "name": "Vorlauf Temperatur"
             },
@@ -898,6 +901,9 @@
             "heat_energy_input": {
                 "name": "Eingesetzte Energie Heizung"
             },
+            "cop_heating": {
+                "name": "COP"
+            },
             "flow_out_temperature_external": {
                 "name": "R\u00fccklauf Temperatur extern"
             },
@@ -912,6 +918,12 @@
             },
             "operation_hours_cooling": {
                 "name": "Betriebsstunden"
+            },
+            "cooling_energy_input": {
+                "name": "Eingesetzte Energie Kühlung"
+            },
+            "cop_cooling": {
+                "name": "COP"
             },
             "room_thermostat_temperature": {
                 "name": "Raum Thermostat"
