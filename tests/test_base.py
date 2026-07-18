@@ -10,6 +10,8 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
     CONF_TIMEOUT,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
     UnitOfTime,
 )
 import pytest
@@ -441,14 +443,67 @@ class TestAsyncAddedToHass:
         assert entity._attr_cache[SA.TIMER_HEATPUMP_ON] == "restored_value"
 
     @pytest.mark.asyncio
-    async def test_no_last_state_returns_early(self):
+    async def test_no_last_state_still_runs_tail_setup(self):
+        """First-ever add (no previous state) must still run the tail of the method:
+        dispatcher hookup and the initial _handle_coordinator_update call."""
         entity = _make_sensor_entity()
         entity.async_get_last_state = AsyncMock(return_value=None)
         entity.async_get_last_extra_data = AsyncMock(return_value=None)
+        entity.async_on_remove = MagicMock()
+        entity.entity_id = "sensor.test_entity"
         entity.platform = MagicMock()
 
-        await LuxtronikEntity.async_added_to_hass(entity)
-        # Should not crash
+        with patch(
+            "custom_components.luxtronik2.base.async_dispatcher_connect"
+        ) as mock_connect:
+            await LuxtronikEntity.async_added_to_hass(entity)
+
+        mock_connect.assert_called_once()
+        # coordinator.data is truthy (set in _mock_coordinator), so the initial
+        # _handle_coordinator_update call must have run and written HA state.
+        entity.async_write_ha_state.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_unavailable_state_not_restored(self):
+        """A previous state of STATE_UNAVAILABLE must not overwrite _attr_state."""
+        entity = _make_sensor_entity()
+        freshly_computed_state = entity._attr_state
+        last_state = MagicMock()
+        last_state.state = STATE_UNAVAILABLE
+        last_state.attributes = {}
+        entity.async_get_last_state = AsyncMock(return_value=last_state)
+        entity.async_get_last_extra_data = AsyncMock(return_value=None)
+        entity.async_on_remove = MagicMock()
+        entity.entity_id = "sensor.test_entity"
+        entity.platform = MagicMock()
+        entity.coordinator.data = None
+
+        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+            await LuxtronikEntity.async_added_to_hass(entity)
+
+        assert entity._attr_state == freshly_computed_state
+        assert entity._attr_state != STATE_UNAVAILABLE
+
+    @pytest.mark.asyncio
+    async def test_unknown_state_not_restored(self):
+        """A previous state of STATE_UNKNOWN must not overwrite _attr_state."""
+        entity = _make_sensor_entity()
+        freshly_computed_state = entity._attr_state
+        last_state = MagicMock()
+        last_state.state = STATE_UNKNOWN
+        last_state.attributes = {}
+        entity.async_get_last_state = AsyncMock(return_value=last_state)
+        entity.async_get_last_extra_data = AsyncMock(return_value=None)
+        entity.async_on_remove = MagicMock()
+        entity.entity_id = "sensor.test_entity"
+        entity.platform = MagicMock()
+        entity.coordinator.data = None
+
+        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+            await LuxtronikEntity.async_added_to_hass(entity)
+
+        assert entity._attr_state == freshly_computed_state
+        assert entity._attr_state != STATE_UNKNOWN
 
     @pytest.mark.asyncio
     async def test_restores_extra_data(self):
