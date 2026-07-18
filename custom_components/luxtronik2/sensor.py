@@ -31,8 +31,17 @@ from .const import (
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .evu_helper import LuxtronikEVUTracker
-from .model import LuxtronikIndexSensorDescription, LuxtronikSensorDescription
-from .sensor_entities_predefined import SENSORS, SENSORS_INDEX, SENSORS_STATUS
+from .model import (
+    LuxtronikCopSensorDescription,
+    LuxtronikIndexSensorDescription,
+    LuxtronikSensorDescription,
+)
+from .sensor_entities_predefined import (
+    SENSORS,
+    SENSORS_COP,
+    SENSORS_INDEX,
+    SENSORS_STATUS,
+)
 
 # endregion Imports
 
@@ -110,6 +119,21 @@ async def async_setup_entry(
             )
             for description in SENSORS_INDEX
             if coordinator.entity_active(description)
+        ],
+        True,
+    )
+
+    async_add_entities(
+        [
+            LuxtronikCopSensorEntity(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in SENSORS_COP
+            if (
+                coordinator.entity_active(description)
+                and key_exists(coordinator.data, description.numerator_key)
+                and key_exists(coordinator.data, description.denominator_key)
+            )
         ],
         True,
     )
@@ -381,3 +405,49 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity):
         if value_timestamp is None:
             return None
         return datetime.fromtimestamp(value_timestamp, UTC)
+
+
+class LuxtronikCopSensorEntity(LuxtronikSensorEntity):
+    """Instantaneous COP: current heat output divided by current power consumption.
+
+    Only meaningful while the heat pump is actively serving the circuit this
+    entity represents, so it goes unavailable outside that operating status
+    rather than showing a stale or misleading ratio from a different mode.
+
+    Reads C0080_STATUS through the normal (non-raw) get_sensor_data path,
+    same as base.py's SWITCH_GAP formatter - this applies
+    normalize_sensor_value()'s existing "heating but compressor not
+    actually running -> no_request" reclassification (common.py:223-228),
+    which is exactly the condition under which a COP reading would be
+    meaningless anyway, so it's a useful extra gate, not just incidental.
+    """
+
+    entity_description: LuxtronikCopSensorDescription  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """Handle updated data from the coordinator."""
+        data = self.coordinator.data if data is None else data
+        if data is None:
+            return
+
+        descr = self.entity_description
+        status = get_sensor_data(data, LC.C0080_STATUS)
+        numerator = get_sensor_data(data, descr.numerator_key)
+        denominator = get_sensor_data(data, descr.denominator_key)
+
+        if (descr.required_status is not None and status != descr.required_status) or (
+            not isinstance(numerator, (float, int))
+            or not isinstance(denominator, (float, int))
+            or denominator <= 0
+            or numerator < 0
+        ):
+            self._attr_available = False
+            self._attr_native_value = None
+        else:
+            self._attr_available = True
+            self._attr_native_value = round(numerator / denominator, 2)
+
+        self.async_write_ha_state()

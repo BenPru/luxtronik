@@ -790,6 +790,8 @@ class SensorKey(StrEnum):
     HEAT_ENERGY_INPUT = "heat_energy_input"
     DHW_ENERGY_INPUT = "dhw_energy_input"
     COOLING_ENERGY_INPUT = "cooling_energy_input"
+    COP_HEATING = "cop_heating"
+    COP_DHW = "cop_dhw"
     DHW_TEMPERATURE = "dhw_temperature"
     SOLAR_COLLECTOR_TEMPERATURE = "solar_collector_temperature"
     SOLAR_BUFFER_TEMPERATURE = "solar_buffer_temperature"

@@ -856,6 +856,9 @@
             "dhw_energy_input": {
                 "name": "Spot\u0159ebovan\u00e1 energie pro TUV"
             },
+            "cop_dhw": {
+                "name": "COP"
+            },
             "flow_in_temperature": {
                 "name": "Teplota vstupu"
             },
@@ -897,6 +900,9 @@
             },
             "heat_energy_input": {
                 "name": "Spot\u0159ebovan\u00e1 energie pro topen\u00ed"
+            },
+            "cop_heating": {
+                "name": "COP"
             },
             "flow_out_temperature_external": {
                 "name": "Teplota vn\u011bj\u0161\u00edho zp\u00e1te\u010dky"

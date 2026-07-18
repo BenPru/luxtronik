@@ -116,6 +116,25 @@ class LuxtronikIndexSensorDescription(  # type: ignore  # pyright: ignore[report
     luxtronik_key_timestamp: LuxParameter | LuxCalculation = LuxParameter.UNSET
 
 
+class LuxtronikCopSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikSensorDescription,
+    SensorEntityDescription,
+    frozen_or_thawed=True,
+):
+    """Class describing Luxtronik instantaneous COP sensor entities.
+
+    Unlike a plain sensor, the displayed value is a ratio of two other
+    coordinator values (numerator_key / denominator_key), only considered
+    valid while the heat pump's live operating status equals
+    required_status. luxtronik_key is intentionally left at its UNSET
+    default, same convention as LuxtronikTimerScheduleTextDescription.
+    """
+
+    numerator_key: LuxCalculation = LuxCalculation.UNSET
+    denominator_key: LuxCalculation = LuxCalculation.UNSET
+    required_status: LuxOperationMode | None = None
+
+
 class LuxtronikNumberDescription(
     LuxtronikEntityDescription,
     NumberEntityDescription,

@@ -55,6 +55,8 @@
       "analog_out1": { "default": "mdi:alpha-v-circle-outline" },
       "analog_out2": { "default": "mdi:alpha-v-circle-outline" },
       "current_heat_output": { "default": "mdi:lightning-bolt-circle" },
+      "cop_heating": { "default": "mdi:speedometer" },
+      "cop_dhw": { "default": "mdi:speedometer" },
       "pump_frequency": { "default": "mdi:sine-wave" },
       "pump_flow_delta_target": { "default": "mdi:delta" },
       "pump_flow_delta": { "default": "mdi:delta" },

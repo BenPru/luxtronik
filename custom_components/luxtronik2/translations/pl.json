@@ -868,6 +868,9 @@
             "dhw_energy_input": {
                 "name": "Pob\u00f3r energii ciep\u0142ej wody"
             },
+            "cop_dhw": {
+                "name": "COP"
+            },
             "flow_in_temperature": {
                 "name": "Temperatura na wej\u015bciu"
             },
@@ -909,6 +912,9 @@
             },
             "heat_energy_input": {
                 "name": "Ogrzewanie wej\u015bciowe energii"
+            },
+            "cop_heating": {
+                "name": "COP"
             },
             "flow_out_temperature_external": {
                 "name": "Zewn\u0119trzna temperatura na wyj\u015bciu"

@@ -856,6 +856,9 @@
             "dhw_energy_input": {
                 "name": "Energie gebruikt"
             },
+            "cop_dhw": {
+                "name": "COP"
+            },
             "flow_in_temperature": {
                 "name": "Aanvoertemperatuur"
             },
@@ -897,6 +900,9 @@
             },
             "heat_energy_input": {
                 "name": "Energieverbruikte verwarming"
+            },
+            "cop_heating": {
+                "name": "COP"
             },
             "flow_out_temperature_external": {
                 "name": "Retourtemperatuur extern"
