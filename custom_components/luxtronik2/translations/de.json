@@ -1142,6 +1142,9 @@
         },
         "invalid_write_target": {
             "message": "Es konnte keine geladene Luxtronik-W\u00e4rmepumpe f\u00fcr das Ziel {target} ermittelt werden"
+        },
+        "write_confirmation_mismatch": {
+            "message": "Die Luxtronik-W\u00e4rmepumpe hat die geschriebenen Werte nicht best\u00e4tigt: {details}"
         }
     },
     "issues": {

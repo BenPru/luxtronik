@@ -1171,6 +1171,9 @@
         },
         "invalid_timer_schedule": {
             "message": "Invalid timer schedule \"{value}\": expected \"HH:MM-HH:MM\" entries separated by \"/\", with at most {max_rows} entries"
+        },
+        "write_confirmation_mismatch": {
+            "message": "Luxtronik heat pump did not confirm the written value(s): {details}"
         }
     },
     "issues": {

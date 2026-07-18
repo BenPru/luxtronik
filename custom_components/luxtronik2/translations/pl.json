@@ -1160,6 +1160,9 @@
         },
         "invalid_write_target": {
             "message": "Nie uda\u0142o si\u0119 znale\u017a\u0107 za\u0142adowanej pompy ciep\u0142a Luxtronik dla celu {target}"
+        },
+        "write_confirmation_mismatch": {
+            "message": "Pompa ciep\u0142a Luxtronik nie potwierdzi\u0142a zapisanych warto\u015bci: {details}"
         }
     },
     "issues": {

@@ -1145,6 +1145,9 @@
         },
         "invalid_write_target": {
             "message": "Kon geen geladen Luxtronik-warmtepomp vinden voor doel {target}"
+        },
+        "write_confirmation_mismatch": {
+            "message": "De Luxtronik-warmtepomp heeft de geschreven waarde(n) niet bevestigd: {details}"
         }
     },
     "issues": {

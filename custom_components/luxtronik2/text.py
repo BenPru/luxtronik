@@ -146,19 +146,27 @@ class LuxtronikTimerScheduleText(
 
         Rows beyond the supplied entries are cleared to 00:00-00:00 so a
         shortened string actually removes the trailing rows on the device,
-        rather than leaving stale values in effect.
+        rather than leaving stale values in effect. Changed start/end values
+        (up to 10 for a 5-row block) are queued and written in a single
+        `async_write_many` batch, so the device sees one write cycle and the
+        coordinator refreshes once - instead of up to 10 sequential
+        `async_write` calls each triggering a full refresh.
         """
         row_names = self.entity_description.row_names
         pairs = _parse_schedule(value, len(row_names))
 
         data = self.coordinator.data
+        writes: list[tuple[str, str]] = []
         for index, (start_name, end_name) in enumerate(row_names):
             start, end = (
                 pairs[index] if index < len(pairs) else (_UNSET_TIME, _UNSET_TIME)
             )
             if get_sensor_data(data, f"parameters.{start_name}") != start:
-                data = await self.coordinator.async_write(start_name, start)
+                writes.append((start_name, start))
             if get_sensor_data(data, f"parameters.{end_name}") != end:
-                data = await self.coordinator.async_write(end_name, end)
+                writes.append((end_name, end))
+
+        if writes:
+            data = await self.coordinator.async_write_many(writes)
 
         self._handle_coordinator_update(data)
