@@ -16,7 +16,16 @@ from .common import async_get_mac_address
 
 # endregion Imports
 
-TO_REDACT = {CONF_USERNAME, CONF_PASSWORD}
+TO_REDACT = {
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    CONF_HOST,
+    "mac",
+    "unique_id",
+    "identifiers",
+    "via_device",
+    "configuration_url",
+}
 
 
 async def async_get_config_entry_diagnostics(
@@ -32,15 +41,15 @@ async def async_get_config_entry_diagnostics(
     async with timeout(10):
         mac = await async_get_mac_address(hass, entry.data[CONF_HOST])
 
-    entry_data = async_redact_data(entry.as_dict(), TO_REDACT)
-    if "data" not in entry_data:
-        entry_data["data"] = {}
+    entry_dict = dict(entry.as_dict())
+    entry_data = dict(entry_dict.get("data") or {})
     if mac is not None:
-        entry_data["data"]["mac"] = mac[:9] + "*"
+        entry_data["mac"] = mac
+    entry_dict["data"] = entry_data
 
     diag_data = {
-        "entry": entry_data,
-        "devices": coordinator.device_infos,
+        "entry": async_redact_data(entry_dict, TO_REDACT),
+        "devices": async_redact_data(coordinator.device_infos, TO_REDACT),
         "parameters": _dump_items(coordinator.data.parameters.parameters),
         "calculations": _dump_items(coordinator.data.calculations.calculations),
         "visibilities": _dump_items(coordinator.data.visibilities.visibilities),
