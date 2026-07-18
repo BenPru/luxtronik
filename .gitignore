@@ -137,3 +137,6 @@ dmypy.json
 #Mac
 .DS_Store
 check_coverage.py
+
+# Git worktrees (local scratch, not part of the repo)
+.worktrees/

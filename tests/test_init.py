@@ -21,6 +21,8 @@ from custom_components.luxtronik2 import (
     update_listener,
 )
 from custom_components.luxtronik2.const import (
+    ATTR_CONFIG_ENTRY_ID,
+    ATTR_DEVICE_ID,
     ATTR_PARAMETER,
     ATTR_VALUE,
     CONF_HA_SENSOR_PREFIX,
@@ -761,3 +763,323 @@ class TestWriteParameterService:
         assert exc_info.value.translation_key == "invalid_parameter_name"
         assert exc_info.value.translation_domain == DOMAIN
         assert exc_info.value.translation_placeholders == {"parameter": "None"}
+
+
+# ===========================================================================
+# write_parameter service handler - multi config entry target selection
+# ===========================================================================
+
+
+def _mock_loaded_config_entry(entry_id: str, hass) -> MagicMock:
+    """Build a MagicMock config entry that looks LOADED with runtime_data."""
+    from homeassistant.config_entries import ConfigEntryState
+
+    entry = MagicMock()
+    entry.entry_id = entry_id
+    entry.domain = DOMAIN
+    entry.state = ConfigEntryState.LOADED
+    entry.runtime_data = _mock_coordinator(hass)
+    return entry
+
+
+class TestWriteParameterServiceTargetSelection:
+    """The write service must target a specific config entry when several
+    heat pumps (config entries) are loaded, instead of silently picking the
+    first one returned by hass.config_entries.async_entries()."""
+
+    def _setup(self):
+        hass = MagicMock()
+        hass.services.has_service = MagicMock(return_value=False)
+        entry = _mock_entry()
+        setup_hass_services(hass, entry)
+        handler = hass.services.async_register.call_args[0][2]
+        return hass, handler
+
+    @pytest.mark.asyncio
+    async def test_write_multi_entry_with_config_entry_id_targets_correct_entry(self):
+        """A config_entry_id target must select that exact entry, even when
+        it is not first in hass.config_entries.async_entries()."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        entry_2 = _mock_loaded_config_entry("entry_2", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1, entry_2])
+        hass.config_entries.async_get_entry = MagicMock(
+            side_effect=lambda eid: {"entry_1": entry_1, "entry_2": entry_2}.get(eid)
+        )
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+            ATTR_CONFIG_ENTRY_ID: "entry_2",
+        }
+
+        await handler(service)
+
+        entry_2.runtime_data.async_write.assert_awaited_once_with(
+            "ID_Einst_BWS_akt", 42
+        )
+        entry_1.runtime_data.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_write_multi_entry_with_device_id_targets_correct_entry(self):
+        """A device_id target must be resolved via the device registry to the
+        config entry that owns that device, then write to that entry only."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        entry_2 = _mock_loaded_config_entry("entry_2", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1, entry_2])
+        hass.config_entries.async_get_entry = MagicMock(
+            side_effect=lambda eid: {"entry_1": entry_1, "entry_2": entry_2}.get(eid)
+        )
+
+        device = MagicMock()
+        device.config_entries = {"entry_2"}
+        device_registry = MagicMock()
+        device_registry.async_get = MagicMock(return_value=device)
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+            ATTR_DEVICE_ID: "device_xyz",
+        }
+
+        with patch(
+            "custom_components.luxtronik2.dr.async_get", return_value=device_registry
+        ):
+            await handler(service)
+
+        device_registry.async_get.assert_called_once_with("device_xyz")
+        entry_2.runtime_data.async_write.assert_awaited_once_with(
+            "ID_Einst_BWS_akt", 42
+        )
+        entry_1.runtime_data.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_write_multi_entry_no_target_raises_ambiguous(self):
+        """With no device_id/config_entry_id and more than one loaded entry,
+        the service must refuse to guess and raise instead of silently
+        writing to whichever entry happens to come first."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        entry_2 = _mock_loaded_config_entry("entry_2", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1, entry_2])
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+        }
+
+        with pytest.raises(ServiceValidationError) as exc_info:
+            await handler(service)
+
+        assert exc_info.value.translation_key == "ambiguous_write_target"
+        assert exc_info.value.translation_domain == DOMAIN
+        entry_1.runtime_data.async_write.assert_not_awaited()
+        entry_2.runtime_data.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_write_no_target_single_entry_still_works(self):
+        """Backward compatibility: a single-heat-pump setup with no explicit
+        target must keep working exactly as before."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1])
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+        }
+
+        await handler(service)
+
+        entry_1.runtime_data.async_write.assert_awaited_once_with(
+            "ID_Einst_BWS_akt", 42
+        )
+
+    @pytest.mark.asyncio
+    async def test_write_unknown_device_id_raises(self):
+        """A device_id that does not resolve to any known device must raise,
+        not silently fall through to writing the wrong entry."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1])
+        hass.config_entries.async_get_entry = MagicMock(
+            side_effect=lambda eid: {"entry_1": entry_1}.get(eid)
+        )
+
+        device_registry = MagicMock()
+        device_registry.async_get = MagicMock(return_value=None)
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+            ATTR_DEVICE_ID: "does_not_exist",
+        }
+
+        with (
+            patch(
+                "custom_components.luxtronik2.dr.async_get",
+                return_value=device_registry,
+            ),
+            pytest.raises(ServiceValidationError) as exc_info,
+        ):
+            await handler(service)
+
+        assert exc_info.value.translation_key == "invalid_write_target"
+        assert exc_info.value.translation_domain == DOMAIN
+        entry_1.runtime_data.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_write_device_id_from_other_integration_raises(self):
+        """A device_id belonging to a device from a different integration
+        (not a Luxtronik config entry) must raise, not fall back to picking
+        an arbitrary Luxtronik entry."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1])
+
+        other_entry = MagicMock()
+        other_entry.entry_id = "other_entry"
+        other_entry.domain = "some_other_integration"
+
+        hass.config_entries.async_get_entry = MagicMock(
+            side_effect=lambda eid: {
+                "entry_1": entry_1,
+                "other_entry": other_entry,
+            }.get(eid)
+        )
+
+        device = MagicMock()
+        device.config_entries = {"other_entry"}
+        device_registry = MagicMock()
+        device_registry.async_get = MagicMock(return_value=device)
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+            ATTR_DEVICE_ID: "device_of_other_integration",
+        }
+
+        with (
+            patch(
+                "custom_components.luxtronik2.dr.async_get",
+                return_value=device_registry,
+            ),
+            pytest.raises(ServiceValidationError) as exc_info,
+        ):
+            await handler(service)
+
+        assert exc_info.value.translation_key == "invalid_write_target"
+        assert exc_info.value.translation_domain == DOMAIN
+        entry_1.runtime_data.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_write_unknown_config_entry_id_raises(self):
+        """A config_entry_id that does not resolve to a loaded Luxtronik
+        entry must raise rather than silently targeting a different entry."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1])
+        hass.config_entries.async_get_entry = MagicMock(return_value=None)
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+            ATTR_CONFIG_ENTRY_ID: "does_not_exist",
+        }
+
+        with pytest.raises(ServiceValidationError) as exc_info:
+            await handler(service)
+
+        assert exc_info.value.translation_key == "invalid_write_target"
+        assert exc_info.value.translation_domain == DOMAIN
+        entry_1.runtime_data.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_write_config_entry_id_not_loaded_raises(self):
+        """A config_entry_id that belongs to this integration but whose entry
+        is not currently loaded (e.g. disabled, failed setup) must raise
+        rather than write through a coordinator that may not exist."""
+        hass, handler = self._setup()
+
+        from homeassistant.config_entries import ConfigEntryState
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1])
+
+        unloaded_entry = MagicMock()
+        unloaded_entry.entry_id = "entry_unloaded"
+        unloaded_entry.domain = DOMAIN
+        unloaded_entry.state = ConfigEntryState.NOT_LOADED
+        del unloaded_entry.runtime_data
+
+        hass.config_entries.async_get_entry = MagicMock(
+            side_effect=lambda eid: {
+                "entry_1": entry_1,
+                "entry_unloaded": unloaded_entry,
+            }.get(eid)
+        )
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+            ATTR_CONFIG_ENTRY_ID: "entry_unloaded",
+        }
+
+        with pytest.raises(ServiceValidationError) as exc_info:
+            await handler(service)
+
+        assert exc_info.value.translation_key == "invalid_write_target"
+        assert exc_info.value.translation_domain == DOMAIN
+        entry_1.runtime_data.async_write.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_write_device_id_takes_precedence_over_config_entry_id(self):
+        """When both device_id and config_entry_id are given, device_id wins
+        (documented precedence) rather than the two silently disagreeing."""
+        hass, handler = self._setup()
+
+        entry_1 = _mock_loaded_config_entry("entry_1", hass)
+        entry_2 = _mock_loaded_config_entry("entry_2", hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[entry_1, entry_2])
+        hass.config_entries.async_get_entry = MagicMock(
+            side_effect=lambda eid: {"entry_1": entry_1, "entry_2": entry_2}.get(eid)
+        )
+
+        device = MagicMock()
+        device.config_entries = {"entry_2"}
+        device_registry = MagicMock()
+        device_registry.async_get = MagicMock(return_value=device)
+
+        service = MagicMock()
+        service.data = {
+            ATTR_PARAMETER: "ID_Einst_BWS_akt",
+            ATTR_VALUE: "42",
+            ATTR_DEVICE_ID: "device_xyz",
+            ATTR_CONFIG_ENTRY_ID: "entry_1",
+        }
+
+        with patch(
+            "custom_components.luxtronik2.dr.async_get", return_value=device_registry
+        ):
+            await handler(service)
+
+        entry_2.runtime_data.async_write.assert_awaited_once_with(
+            "ID_Einst_BWS_akt", 42
+        )
+        entry_1.runtime_data.async_write.assert_not_awaited()

@@ -1133,6 +1133,12 @@
         },
         "parameter_not_writable": {
             "message": "Parametr {parameter} odm\u00edtnut \u2014 zapisovat lze pouze parametry s p\u0159edponami {prefixes}"
+        },
+        "ambiguous_write_target": {
+            "message": "Je nakonfigurov\u00e1no v\u00edce tepeln\u00fdch \u010derpadel Luxtronik ({count} na\u010dteno) \u2014 zadejte device_id nebo config_entry_id pro v\u00fdb\u011br c\u00edle z\u00e1pisu"
+        },
+        "invalid_write_target": {
+            "message": "Nepoda\u0159ilo se naj\u00edt na\u010dten\u00e9 tepeln\u00e9 \u010derpadlo Luxtronik pro c\u00edl {target}"
         }
     },
     "issues": {

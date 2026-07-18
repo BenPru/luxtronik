@@ -9,6 +9,7 @@ write:
       data:
         parameter: "ID_Ba_Bw_akt"
         value: "Automatic"
+        device_id: <device id of the Luxtronik heat pump>
 
   fields:
     parameter:
@@ -25,3 +26,23 @@ write:
       example: "Automatic"
       selector:
         text:
+    device_id:
+      name: Heat pump device
+      description: >-
+        Which Luxtronik heat pump to write to. Required if more than one
+        heat pump is configured; can be omitted when only a single heat
+        pump is set up.
+      required: false
+      selector:
+        device:
+          filter:
+            - integration: luxtronik2
+    config_entry_id:
+      name: Heat pump config entry
+      description: >-
+        Alternative to device_id: the config entry ID of the Luxtronik heat
+        pump to write to.
+      required: false
+      selector:
+        config_entry:
+          integration: luxtronik2

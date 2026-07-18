@@ -1139,6 +1139,12 @@
         },
         "parameter_not_writable": {
             "message": "Parameter {parameter} geweigerd \u2014 alleen parameters met prefixen {prefixes} zijn schrijfbaar"
+        },
+        "ambiguous_write_target": {
+            "message": "Er zijn meerdere Luxtronik-warmtepompen geconfigureerd ({count} geladen) \u2014 geef device_id of config_entry_id op om te bepalen welke moet worden beschreven"
+        },
+        "invalid_write_target": {
+            "message": "Kon geen geladen Luxtronik-warmtepomp vinden voor doel {target}"
         }
     },
     "issues": {

@@ -7,7 +7,7 @@ from enum import Enum, StrEnum
 import logging
 from typing import Final
 
-from homeassistant.const import Platform
+from homeassistant.const import ATTR_CONFIG_ENTRY_ID, ATTR_DEVICE_ID, Platform
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import StateType
 import voluptuous as vol
@@ -92,6 +92,8 @@ SERVICE_WRITE_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_PARAMETER): cv.string,
         vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),  # pyright: ignore[reportAttributeAccessIssue]
+        vol.Optional(ATTR_DEVICE_ID): cv.string,
+        vol.Optional(ATTR_CONFIG_ENTRY_ID): cv.string,
     }
 )
 

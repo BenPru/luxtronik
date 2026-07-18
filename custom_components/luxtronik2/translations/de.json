@@ -1136,6 +1136,12 @@
         },
         "parameter_not_writable": {
             "message": "Parameter {parameter} abgelehnt \u2014 nur Parameter mit Pr\u00e4fixen {prefixes} sind beschreibbar"
+        },
+        "ambiguous_write_target": {
+            "message": "Es sind mehrere Luxtronik-W\u00e4rmepumpen konfiguriert ({count} geladen) \u2014 bitte device_id oder config_entry_id angeben, um das Ziel auszuw\u00e4hlen"
+        },
+        "invalid_write_target": {
+            "message": "Es konnte keine geladene Luxtronik-W\u00e4rmepumpe f\u00fcr das Ziel {target} ermittelt werden"
         }
     },
     "issues": {
