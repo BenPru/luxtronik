@@ -4,14 +4,12 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
 
 from homeassistant.components.sensor import (
     ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
     SensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -26,6 +24,7 @@ from .const import (
     LuxCalculation as LC,
     LuxParameter as LP,
     LuxSmartGridStatus,
+    SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
 )
@@ -33,6 +32,7 @@ from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .evu_helper import LuxtronikEVUTracker
 from .model import (
     LuxtronikCopSensorDescription,
+    LuxtronikEntityAttributeDescription,
     LuxtronikIndexSensorDescription,
     LuxtronikSensorDescription,
 )
@@ -274,34 +274,19 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
         self._enrich_extra_attributes()
         self.async_write_ha_state()
 
-    def _get_sensor_value(self, sensor_name: str) -> Any:
-        sensor = self.hass.states.get(sensor_name)
-        if sensor is not None:
-            return sensor.state
-        return None
-
-    def _get_sensor_attr(self, sensor_name: str, attr: str) -> Any:
-        sensor = self.hass.states.get(sensor_name)
-        if sensor is not None and attr in sensor.attributes:
-            return sensor.attributes[attr]
-        return None
-
     def _build_status_text(self) -> str:
-        status_time = self._get_sensor_attr(
-            f"sensor.{self._sensor_prefix}_status_time", SA.STATUS_TEXT
-        )
-        line_1_state = self._get_sensor_value(
-            f"sensor.{self._sensor_prefix}_status_line_1"
-        )
-        line_2_state = self._get_sensor_value(
-            f"sensor.{self._sensor_prefix}_status_line_2"
-        )
-        if status_time is None or status_time == STATE_UNAVAILABLE:
+        status_time_raw = self._get_value(LC.C0120_STATUS_TIME)
+        line_1_state = self._get_value(LC.C0117_STATUS_LINE_1)
+        line_2_state = self._get_value(LC.C0118_STATUS_LINE_2)
+        if status_time_raw is None or line_1_state is None or line_2_state is None:
             return ""
-        if line_1_state is None or line_1_state == STATE_UNAVAILABLE:
-            return ""
-        if line_2_state is None or line_2_state == STATE_UNAVAILABLE:
-            return ""
+        status_time = self.formatted_data(
+            LuxtronikEntityAttributeDescription(
+                key=SA.STATUS_TEXT,
+                luxtronik_key=LC.C0120_STATUS_TIME,
+                format=SensorAttrFormat.HOUR_MINUTE,
+            )
+        )
         line_1 = self.platform.platform_data.platform_translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.{line_1_state}"
         )
