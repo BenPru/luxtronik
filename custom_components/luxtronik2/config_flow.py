@@ -41,14 +41,24 @@ from .schema_helper import build_options_schema, build_user_data_schema
 # endregion Imports
 
 SELECT_DEVICE_LABEL = "select_device_to_configure"
+MANUAL_ENTRY_VALUE = "__manual_entry__"
 
 
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Luxtronik heatpump controller config flow."""
 
     VERSION = CONFIG_ENTRY_VERSION
-    _all_devices: list[dict[str, Any]] = []
-    _available_devices: list[dict[str, Any]] = []
+
+    def __init__(self) -> None:
+        """Initialize the config flow with per-instance discovery state.
+
+        Must not be class-level: two flows running concurrently (e.g. two
+        users, or discovery + manual entry at the same time) would otherwise
+        share the same discovered-device lists.
+        """
+        super().__init__()
+        self._all_devices: list[dict[str, Any]] = []
+        self._available_devices: list[dict[str, Any]] = []
 
     def _build_config(
         self,
@@ -126,73 +136,87 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             LOGGER.info("Starting discovery of Luxtronik devices on network")
             device_list = await self._discover_devices()
+        except OSError as err:
+            LOGGER.warning("Device discovery failed due to a network error: %s", err)
+            return self.async_show_form(
+                step_id="manual_entry",
+                data_schema=build_user_data_schema(),
+                errors={"base": "cannot_connect"},
+            )
+        except Exception:  # pylint: disable=broad-except
+            LOGGER.exception("Could not handle config_flow.async_step_user")
+            return self.async_show_form(
+                step_id="manual_entry",
+                data_schema=build_user_data_schema(),
+                errors={"base": "unknown"},
+            )
 
-            configured_hosts_ports = {
-                (entry.data.get(CONF_HOST), entry.data.get(CONF_PORT))
-                for entry in self._async_current_entries()
+        configured_hosts_ports = {
+            (entry.data.get(CONF_HOST), entry.data.get(CONF_PORT))
+            for entry in self._async_current_entries()
+        }
+
+        self._all_devices = [
+            {
+                "host": host,
+                "port": port,
+                "configured": (host, port) in configured_hosts_ports,
             }
+            for host, port in device_list
+        ]
+        LOGGER.info("All discovered devices with config status: %s", self._all_devices)
 
-            self._all_devices = [
-                {
-                    "host": host,
-                    "port": port,
-                    "configured": (host, port) in configured_hosts_ports,
-                }
-                for host, port in device_list
+        self._available_devices = [d for d in self._all_devices if not d["configured"]]
+        LOGGER.info("Available (unconfigured) devices: %s", self._available_devices)
+
+        if self._available_devices:
+            device_options_list: list[selector.SelectOptionDict] = [
+                selector.SelectOptionDict(
+                    value=f"{d['host']}:{d['port']}",
+                    label=f"{d['host']}:{d['port']}",
+                )
+                for d in self._available_devices
             ]
-            LOGGER.info(
-                "All discovered devices with config status: %s", self._all_devices
+            # Manual entry must always be reachable, even while discovered
+            # devices are pending selection - a pump on another subnet
+            # can't be added otherwise.
+            device_options_list.append(
+                selector.SelectOptionDict(
+                    value=MANUAL_ENTRY_VALUE, label="Enter host manually"
+                )
             )
 
-            self._available_devices = [
-                d for d in self._all_devices if not d["configured"]
-            ]
-            LOGGER.info("Available (unconfigured) devices: %s", self._available_devices)
+            LOGGER.info("Presenting selection form for available devices")
+            LOGGER.info("device_options_list=%s", device_options_list)
 
-            if self._available_devices:
-                device_options_list = [
-                    f"{d['host']}:{d['port']}" for d in self._available_devices
-                ]
-
-                LOGGER.info("Presenting selection form for available devices")
-                LOGGER.info("device_options_list=%s", device_options_list)
-
-                return self.async_show_form(
-                    step_id="select_devices",
-                    data_schema=vol.Schema(
-                        {
-                            vol.Required(SELECT_DEVICE_LABEL): selector.SelectSelector(
-                                selector.SelectSelectorConfig(
-                                    options=device_options_list,
-                                    multiple=False,  # ✅ Only one device selectable
-                                    mode=selector.SelectSelectorMode.DROPDOWN,
-                                )
+            return self.async_show_form(
+                step_id="select_devices",
+                data_schema=vol.Schema(
+                    {
+                        vol.Required(SELECT_DEVICE_LABEL): selector.SelectSelector(
+                            selector.SelectSelectorConfig(
+                                options=device_options_list,
+                                multiple=False,  # ✅ Only one device selectable
+                                mode=selector.SelectSelectorMode.DROPDOWN,
                             )
-                        }
-                    ),
-                    description_placeholders={
-                        "configured": ", ".join(
-                            f"{d['host']}:{d['port']}"
-                            for d in self._all_devices
-                            if d["configured"]
                         )
-                    },
-                )
-
-            else:
-                LOGGER.info(
-                    "All discovered devices are already configured. Showing manual entry form."
-                )
-                return self.async_show_form(
-                    step_id="manual_entry", data_schema=build_user_data_schema()
-                )
-
-        except Exception as err:
-            LOGGER.error(
-                "Could not handle config_flow.async_step_user",
-                exc_info=err,
+                    }
+                ),
+                description_placeholders={
+                    "configured": ", ".join(
+                        f"{d['host']}:{d['port']}"
+                        for d in self._all_devices
+                        if d["configured"]
+                    )
+                },
             )
-            return self.async_abort(reason="unknown")
+
+        LOGGER.info(
+            "All discovered devices are already configured. Showing manual entry form."
+        )
+        return self.async_show_form(
+            step_id="manual_entry", data_schema=build_user_data_schema()
+        )
 
     async def async_step_select_devices(
         self, user_input: dict[str, Any] | None = None
@@ -204,6 +228,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         device_str = user_input.get(SELECT_DEVICE_LABEL)
         if device_str is None:
             return self.async_abort(reason="unknown")
+        if device_str == MANUAL_ENTRY_VALUE:
+            return await self.async_step_manual_entry()
         host, port = device_str.split(":")
         config = self._build_config(host, int(port))
 
