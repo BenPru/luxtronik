@@ -9,7 +9,6 @@
   ],
   "config_flow": true,
   "dependencies": [
-    "http",
     "network"
   ],
   "dhcp": [

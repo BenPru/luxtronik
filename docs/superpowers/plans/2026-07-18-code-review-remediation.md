@@ -304,6 +304,6 @@ Mark tasks here as they land (edit this file in the same PR as the fix):
 
 - [x] C1  - [x] C2  - [x] C3
 - [ ] I1  - [x] I2  - [x] I3  - [ ] I3b  - [ ] I4  - [x] I5  - [x] I6  - [x] I7  - [ ] I8  - [ ] I9  - [ ] I10  - [x] I11
-- [x] M1  - [ ] M2  - [x] M3  - [x] M4  - [ ] M5  - [x] M6  - [x] M7  - [ ] M8  - [ ] M9  - [ ] M10  - [ ] M11  - [ ] M12
+- [x] M1  - [ ] M2  - [x] M3  - [x] M4  - [ ] M5  - [x] M6  - [x] M7  - [ ] M8  - [ ] M9  - [ ] M10  - [x] M11  - [ ] M12
 
 Recovery note (2026-07-18): this file was found deleted mid-session with no git history (it was never committed) and was reconstructed from the content captured earlier in the same conversation. If you're reading this and something looks off versus the actual code state, re-verify line numbers/snippets against the current `main` rather than trusting this doc blindly — several tasks (I11, M3, M4) landed after the original review and their line refs above are stale by design (see the note at the top of this section).
