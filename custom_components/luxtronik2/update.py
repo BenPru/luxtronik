@@ -70,7 +70,7 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
 
     _attr_title = "Luxtronik Firmware Version"
     _attr_supported_features: UpdateEntityFeature = (  # pyright: ignore[reportIncompatibleVariableOverride]
-        UpdateEntityFeature.INSTALL | UpdateEntityFeature.RELEASE_NOTES
+        UpdateEntityFeature.RELEASE_NOTES
     )
     __firmware_version_available = None
     __firmware_version_changelog = None
@@ -163,7 +163,6 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
             f"{self.coordinator.manufacturer} {self.coordinator.model} (Download ID {download_id})</a> a firmware update to "
             f'<a href="{download_url}" target="_blank" rel="noreferrer noopener">Firmware Version {self.__firmware_version_available}</a> is available.<br><br>'
             f'<a href="{manual_url}" target="_blank" rel="noreferrer noopener">Firmware Update Instructions</a><br><br>'
-            "The Install button below has no function. It only exists to provide this notification in Home Assistant.<br><br>"
             "Please contact Alpha Innotec support for more information.<br><br>"
             f"Change Log:<br><br>{self.__firmware_version_changelog}<br><br>"
             "Please use Google Translate or similar, if necessary."
