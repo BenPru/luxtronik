@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 
@@ -174,8 +174,7 @@ def _make_status_sensor(data=None, description=None):
         hass, entry, coord, description, DeviceKey.heatpump
     )
     _patch_entity(entity)
-    entity.platform = MagicMock()
-    entity.platform.platform_data.platform_translations = {}
+    entity._get_entity_translations = MagicMock(return_value={})
     return entity
 
 
@@ -395,7 +394,7 @@ class TestBuildStatusText:
     def test_returns_full_text_when_all_present(self):
         entity = _make_status_sensor(_status_text_data())
         entity._attr_native_value = LuxOperationMode.heating
-        entity.platform.platform_data.platform_translations = {
+        entity._get_entity_translations.return_value = {
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.heatpump_running": "HP Running",
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.heating": "Heating",
         }
@@ -404,11 +403,28 @@ class TestBuildStatusText:
         assert "Heating" in result
         assert "1:23" in result
 
+    def test_get_entity_translations_uses_public_helper(self):
+        """_get_entity_translations must use the public translation helper, not
+        the private platform.platform_data.platform_translations attribute."""
+        entity = _make_status_sensor()
+        entity._get_entity_translations = (
+            LuxtronikStatusSensorEntity._get_entity_translations.__get__(entity)
+        )
+        entity.hass.config.language = "en"
+        with patch(
+            "custom_components.luxtronik2.sensor.async_get_cached_translations"
+        ) as mock_get_translations:
+            mock_get_translations.return_value = {"some.key": "value"}
+            result = entity._get_entity_translations()
+        mock_get_translations.assert_called_once_with(
+            entity.hass, "en", "entity", DOMAIN
+        )
+        assert result == {"some.key": "value"}
+
     def test_reflects_sibling_entity_renames(self):
         """Status text is unaffected by the sibling sensor entities being renamed."""
         entity = _make_status_sensor(_status_text_data())
-        entity.hass.states.get.return_value = None
-        entity.platform.platform_data.platform_translations = {
+        entity._get_entity_translations.return_value = {
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.heatpump_running": "HP Running",
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.heating": "Heating",
         }

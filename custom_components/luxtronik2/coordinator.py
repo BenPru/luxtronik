@@ -16,7 +16,6 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from packaging.version import InvalidVersion, Version
 
@@ -265,57 +264,43 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def get_device(
         self,
         key: DeviceKey = DeviceKey.heatpump,
-        platform: EntityPlatform | None = None,
     ) -> DeviceInfo:
         if key not in self.device_infos:
-            self._create_device_infos(self.hass, self._config, platform)
+            self._create_device_infos(self.hass, self._config)
         device_info = self.device_infos.get(key)
         if device_info is None:
             return DeviceInfo(
                 identifiers={(DOMAIN, f"{self.unique_id}_{key.value}".lower())}
             )
-        if device_info.get("name") == key:
-            device_info["name"] = self._build_device_name(key, platform)
         return device_info
 
     def _create_device_infos(
         self,
         hass: HomeAssistant,
         config: Mapping[str, Any],
-        platform: EntityPlatform | None = None,
     ):
         host = config[CONF_HOST]
         self.device_infos[DeviceKey.heatpump] = self._build_device_info(
-            DeviceKey.heatpump, host, platform
+            DeviceKey.heatpump, host
         )
         via = (
             DOMAIN,
             f"{self.unique_id}_{DeviceKey.heatpump}".lower(),
         )
         self.device_infos[DeviceKey.heating] = self._build_device_info(
-            DeviceKey.heating, host, platform, via
+            DeviceKey.heating, host, via
         )
         self.device_infos[DeviceKey.domestic_water] = self._build_device_info(
-            DeviceKey.domestic_water, host, platform, via
+            DeviceKey.domestic_water, host, via
         )
         self.device_infos[DeviceKey.cooling] = self._build_device_info(
-            DeviceKey.cooling, host, platform, via
+            DeviceKey.cooling, host, via
         )
-
-    def _build_device_name(
-        self, key: DeviceKey, platform: EntityPlatform | None = None
-    ) -> str:
-        if platform is None:
-            return str(key.value)
-        return platform.platform_data.platform_translations.get(
-            f"component.{DOMAIN}.entity.device.{key.value}.name"
-        ) or str(key.value)
 
     def _build_device_info(
         self,
         key: DeviceKey,
         host: str,
-        platform: EntityPlatform | None = None,
         via_device: tuple[str, str] | None = None,
     ) -> DeviceInfo:
         device_info = DeviceInfo(
@@ -326,7 +311,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 )
             },
             entry_type=None,
-            name=self._build_device_name(key, platform),
+            name=str(key.value),
+            translation_key=key.value,
             configuration_url=f"http://{host}/",
             connections={
                 (

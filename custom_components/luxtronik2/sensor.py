@@ -12,6 +12,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.translation import async_get_cached_translations
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -273,6 +274,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
         self._enrich_extra_attributes()
         self.async_write_ha_state()
 
+    def _get_entity_translations(self) -> dict[str, str]:
+        return async_get_cached_translations(
+            self.hass, self.hass.config.language, "entity", DOMAIN
+        )
+
     def _build_status_text(self) -> str:
         status_time_raw = self._get_value(LC.C0120_STATUS_TIME)
         line_1_state = self._get_value(LC.C0117_STATUS_LINE_1)
@@ -286,10 +292,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
                 format=SensorAttrFormat.HOUR_MINUTE,
             )
         )
-        line_1 = self.platform.platform_data.platform_translations.get(
+        translations = self._get_entity_translations()
+        line_1 = translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.{line_1_state}"
         )
-        line_2 = self.platform.platform_data.platform_translations.get(
+        line_2 = translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.{line_2_state}"
         )
         # Show evu end time if available

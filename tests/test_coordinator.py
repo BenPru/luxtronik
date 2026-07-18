@@ -1248,14 +1248,20 @@ class TestCoordinatorGetDeviceFallback:
         result = LuxtronikCoordinator.get_device(coord, DeviceKey.heatpump)
         assert "identifiers" in result
 
-    def test_build_device_name_with_platform(self):
-        coord = MagicMock()
-        platform = MagicMock()
-        platform.platform_data.platform_translations.get.return_value = "My Heatpump"
-        result = LuxtronikCoordinator._build_device_name(
-            coord, DeviceKey.heatpump, platform
+    def test_build_device_info_sets_translation_key(self):
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_SoftStand": "V3.90.1",
+                "ID_WEB_Code_WP_akt": "LWP 10",
+            },
+            parameters={
+                "ID_WP_SerienNummer_DATUM": 20230101,
+                "ID_WP_SerienNummer_HEX": 255,
+            },
         )
-        assert result == "My Heatpump"
+        device_info = coord._build_device_info(DeviceKey.heatpump, "192.168.1.1")
+        assert device_info["translation_key"] == DeviceKey.heatpump.value
+        assert device_info["name"] == DeviceKey.heatpump.value
 
 
 # ===========================================================================
