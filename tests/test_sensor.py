@@ -286,8 +286,27 @@ class TestSmartGridStatus:
     def test_smartgrid_disabled(self):
         entity = self._make_smartgrid_sensor(smartgrid_enabled=0)
         entity._handle_coordinator_update()
-        assert entity._attr_available is False
+        assert entity.available is False
         assert entity._attr_native_value is None
+
+    def test_smartgrid_enabled_is_available(self):
+        entity = self._make_smartgrid_sensor()
+        entity._handle_coordinator_update()
+        assert entity.available is True
+
+    def test_smartgrid_enabled_but_coordinator_update_failed(self):
+        entity = self._make_smartgrid_sensor()
+        entity._handle_coordinator_update()
+        entity.coordinator.last_update_success = False
+        assert entity.available is False
+
+    def test_other_status_sensor_available_tracks_coordinator_only(self):
+        entity = _make_status_sensor()
+        entity._handle_coordinator_update()
+        entity.coordinator.last_update_success = True
+        assert entity.available is True
+        entity.coordinator.last_update_success = False
+        assert entity.available is False
 
     def test_smartgrid_locked(self):
         entity = self._make_smartgrid_sensor(evu=1, evu2=0)

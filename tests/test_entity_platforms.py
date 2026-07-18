@@ -678,7 +678,7 @@ class TestSmartGridSensor:
     def test_smart_grid_disabled(self):
         entity, _ = self._make_smart_grid(sg_enabled=0)
         entity._handle_coordinator_update()
-        assert entity._attr_available is False
+        assert entity.available is False
         assert entity._attr_native_value is None
 
 
