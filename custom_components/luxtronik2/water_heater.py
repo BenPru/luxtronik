@@ -167,6 +167,7 @@ class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibl
             immediate=False,
             function=self._async_write_temperature,
         )
+        self.async_on_remove(self._debouncer_set_temp.async_shutdown)
         self._pending_temperature: float | None = None
 
     @property

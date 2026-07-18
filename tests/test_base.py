@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from conftest import make_coordinator_data
 from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
@@ -16,6 +15,7 @@ from homeassistant.const import (
 )
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.base import LuxtronikEntity
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,

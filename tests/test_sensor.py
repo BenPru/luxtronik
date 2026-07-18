@@ -5,9 +5,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
-from conftest import make_coordinator_data
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_UNAVAILABLE
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.binary_sensor import LuxtronikBinarySensorEntity
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,
