@@ -78,6 +78,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         hass: HomeAssistant,
         client: Luxtronik,
         config: Mapping[str, Any],
+        config_entry: ConfigEntry | None = None,
     ) -> None:
         """Initialize Luxtronik Client."""
 
@@ -96,6 +97,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             hass,
             LOGGER,
             name=DOMAIN,
+            config_entry=config_entry,
             update_method=self._async_update_data,
             update_interval=update_interval,
         )
@@ -214,9 +216,19 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     @staticmethod
     async def connect(  # pragma: no cover
-        hass: HomeAssistant, config_entry: ConfigEntry | dict[str, Any]
+        hass: HomeAssistant,
+        config_entry: ConfigEntry | dict[str, Any],
+        entry: ConfigEntry | None = None,
     ) -> LuxtronikCoordinator:
-        """Connect to heatpump."""
+        """Connect to heatpump.
+
+        `config_entry` supplies the connection settings (host/port/etc.) and
+        may be a plain dict (e.g. during config-flow validation, before an
+        entry exists). `entry` is the actual ConfigEntry to tie the resulting
+        coordinator to, when one exists - callers can't rely on `config_entry`
+        for that since it may already be a merged data dict rather than the
+        entry itself (see `connect_and_get_coordinator`).
+        """
         config: dict[Any, Any] | MappingProxyType[str, Any] | None = None
         if isinstance(config_entry, ConfigEntry):
             config = config_entry.data
@@ -247,6 +259,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             hass=hass,
             client=client,
             config=config,
+            config_entry=entry,
         )
 
     def get_device(
@@ -740,8 +753,10 @@ async def connect_and_get_coordinator(
     host: str = config_data.get(CONF_HOST, "")
     port = config_data.get(CONF_PORT, DEFAULT_PORT)
 
+    entry = config if isinstance(config, ConfigEntry) else None
+
     try:  # pragma: no cover
-        coordinator = await LuxtronikCoordinator.connect(hass, config_data)
+        coordinator = await LuxtronikCoordinator.connect(hass, config_data, entry)
         LOGGER.info("Luxtronik connect to device %s:%s successful!", host, port)
 
         if isinstance(config, ConfigEntry):

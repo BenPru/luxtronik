@@ -82,8 +82,7 @@ async def async_setup_entry(
                 coordinator.entity_active(description)
                 and key_exists(coordinator.data, description.luxtronik_key)
             )
-        ],
-        True,
+        ]
     )
 
     async_add_entities(
@@ -108,8 +107,7 @@ async def async_setup_entry(
                     )
                 )
             )
-        ],
-        True,
+        ]
     )
 
     async_add_entities(
@@ -119,8 +117,7 @@ async def async_setup_entry(
             )
             for description in SENSORS_INDEX
             if coordinator.entity_active(description)
-        ],
-        True,
+        ]
     )
 
     async_add_entities(
@@ -134,8 +131,7 @@ async def async_setup_entry(
                 and key_exists(coordinator.data, description.numerator_key)
                 and key_exists(coordinator.data, description.denominator_key)
             )
-        ],
-        True,
+        ]
     )
 
 

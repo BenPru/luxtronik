@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from conftest import make_coordinator_data
 from homeassistant.const import Platform
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
     DeviceKey,
     LuxParameter,

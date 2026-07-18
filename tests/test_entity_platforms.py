@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import date, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from conftest import make_coordinator_data
 from homeassistant.components.climate import (
     PRESET_AWAY,
     PRESET_BOOST,
@@ -18,6 +17,7 @@ from homeassistant.components.climate import (
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, UnitOfTemperature
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,

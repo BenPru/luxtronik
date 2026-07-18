@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
-from conftest import make_coordinator_data
 from homeassistant.components.number import NumberDeviceClass, NumberMode
 from homeassistant.const import (
     CONF_HOST,
@@ -17,6 +16,7 @@ from homeassistant.const import (
 )
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from conftest import make_coordinator_data
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
 from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2 import (
     _async_update_config_entry,
     _fix_select_entity_unique_ids,

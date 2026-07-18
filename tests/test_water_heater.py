@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from conftest import make_coordinator_data
 from homeassistant.components.water_heater import (
     STATE_ELECTRIC,
     STATE_HEAT_PUMP,
@@ -13,6 +12,7 @@ from homeassistant.components.water_heater import (
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_OFF
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
@@ -128,7 +128,7 @@ class TestWaterHeaterUnavailableKeys:
             patch("custom_components.luxtronik2.water_heater.LOGGER") as mock_logger,
         ):
             await async_setup_entry(
-                MagicMock(), entry, lambda entities, update: added.extend(entities)
+                MagicMock(), entry, lambda entities: added.extend(entities)
             )
             mock_logger.debug.assert_called()
 

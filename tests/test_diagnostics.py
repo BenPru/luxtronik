@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
-from conftest import FakeSensorItem
 from homeassistant.const import CONF_HOST
 import pytest
 
+from conftest import FakeSensorItem
 from custom_components.luxtronik2.const import DEFAULT_PORT
 from custom_components.luxtronik2.diagnostics import _dump_items
 

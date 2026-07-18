@@ -6,7 +6,6 @@ import asyncio
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from conftest import make_coordinator_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.exceptions import HomeAssistantError
@@ -14,6 +13,7 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 from packaging.version import Version
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
     CONF_UPDATE_INTERVAL,
     DEFAULT_PORT,

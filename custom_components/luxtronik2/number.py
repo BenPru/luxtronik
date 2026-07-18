@@ -67,8 +67,7 @@ async def async_setup_entry(
                 coordinator.entity_active(description)
                 and key_exists(coordinator.data, description.luxtronik_key)
             )
-        ],
-        True,
+        ]
     )
 
 
@@ -106,6 +105,7 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
             immediate=False,
             function=self._async_set_native_value,
         )
+        self.async_on_remove(self._debouncer.async_shutdown)
 
         # Store pending value for debounced write
         self._pending_value: float | None = None

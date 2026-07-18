@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
-from conftest import make_coordinator_data
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.common import (
     async_get_mac_address,
     convert_to_int_if_possible,
