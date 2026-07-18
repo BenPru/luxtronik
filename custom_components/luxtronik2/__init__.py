@@ -74,6 +74,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     # Clear any previous connection failure issue
     ir.async_delete_issue(hass, DOMAIN, f"connection_failed_{entry.entry_id}")
 
+    # Resolve unique_id lazily for entries that migrated from version 1
+    # without a live device (see I10) - runs once, on the first successful
+    # connection after migration.
+    if entry.unique_id is None:
+        hass.config_entries.async_update_entry(entry, unique_id=coordinator.unique_id)
+
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
     entry.runtime_data = coordinator
@@ -269,13 +275,14 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         LOGGER.debug("Starting migration from version %s", current_version)
         new_data = {**config_entry.data}
 
-        if current_version == 1:  # pragma: no cover
-            coordinator = await connect_and_get_coordinator(hass, config_entry)
+        if current_version == 1:
+            # Pure data transform - no live device required (see I10). The
+            # unique_id can't be derived from stored entry data alone; it is
+            # resolved lazily in async_setup_entry, where ConfigEntryNotReady
+            # gives automatic retries if the heat pump is offline.
             if CONF_HA_SENSOR_PREFIX not in new_data:
                 new_data[CONF_HA_SENSOR_PREFIX] = "luxtronik"
-            hass.config_entries.async_update_entry(
-                config_entry, data=new_data, version=2, unique_id=coordinator.unique_id
-            )
+            await _async_update_config_entry(hass, config_entry, new_data, 2)
             current_version = 2
 
         elif current_version == 2:  # pragma: no cover

@@ -270,6 +270,54 @@ class TestAsyncMigrateEntry:
         assert result is True
 
     @pytest.mark.asyncio
+    async def test_migration_v1_does_not_require_a_live_device(self):
+        """I10: v1->v2 must be a pure data transform, no device connection."""
+        hass = MagicMock()
+        hass.config_entries.async_entries.return_value = []
+        entry = _mock_entry(version=1)
+        entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+                side_effect=ConnectionError("device offline"),
+            ) as mock_connect,
+            patch(
+                "custom_components.luxtronik2._async_delete_legacy_devices",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._rename_entities",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._rename_cooling_entities",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._rename_curve_entities",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._fix_select_entity_unique_ids",
+                new_callable=AsyncMock,
+            ),
+        ):
+            result = await async_migrate_entry(hass, entry)
+
+        assert result is True
+        mock_connect.assert_not_called()
+
+        v2_call = next(
+            call
+            for call in hass.config_entries.async_update_entry.call_args_list
+            if call.kwargs.get("version") == 2
+        )
+        assert v2_call.kwargs["data"][CONF_HA_SENSOR_PREFIX] == "luxtronik"
+        assert "unique_id" not in v2_call.kwargs
+
+    @pytest.mark.asyncio
     async def test_migration_from_v3_to_v4(self):
         hass = MagicMock()
         hass.config_entries.async_entries.return_value = []
@@ -442,6 +490,64 @@ class TestAsyncSetupEntry:
         hass.config_entries.async_forward_entry_setups.assert_awaited_once_with(
             entry, PLATFORMS
         )
+
+    @pytest.mark.asyncio
+    async def test_resolves_unique_id_lazily_when_missing(self):
+        """I10: entries migrated from v1 without a live device get their
+        unique_id filled in on first successful connection."""
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.services.has_service.return_value = False
+        entry = _mock_entry()
+        entry.unique_id = None
+
+        coordinator = MagicMock()
+        coordinator.manufacturer = "Alpha Innotec"
+        coordinator.unique_id = "20230101_0xff"
+        coordinator.async_config_entry_first_refresh = AsyncMock()
+
+        with patch(
+            "custom_components.luxtronik2.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coordinator,
+        ):
+            result = await async_setup_entry(hass, entry)
+
+        assert result is True
+        unique_id_calls = [
+            call
+            for call in hass.config_entries.async_update_entry.call_args_list
+            if "unique_id" in call.kwargs
+        ]
+        assert len(unique_id_calls) == 1
+        assert unique_id_calls[0].kwargs["unique_id"] == "20230101_0xff"
+
+    @pytest.mark.asyncio
+    async def test_does_not_touch_unique_id_when_already_set(self):
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.services.has_service.return_value = False
+        entry = _mock_entry()
+        entry.unique_id = "already_set"
+
+        coordinator = MagicMock()
+        coordinator.manufacturer = "Alpha Innotec"
+        coordinator.unique_id = "20230101_0xff"
+        coordinator.async_config_entry_first_refresh = AsyncMock()
+
+        with patch(
+            "custom_components.luxtronik2.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coordinator,
+        ):
+            await async_setup_entry(hass, entry)
+
+        unique_id_calls = [
+            call
+            for call in hass.config_entries.async_update_entry.call_args_list
+            if "unique_id" in call.kwargs
+        ]
+        assert len(unique_id_calls) == 0
 
     @pytest.mark.asyncio
     async def test_connection_failure_raises_not_ready(self):
