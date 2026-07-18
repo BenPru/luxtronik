@@ -26,6 +26,7 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData
@@ -418,9 +419,24 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
         )
 
         if key_tar != LuxCalculation.C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET:
-            data: LuxtronikCoordinatorData | None = await self.coordinator.async_write(
-                key_tar.split(".")[1], self._pending_temperature
-            )
+            try:
+                data: (
+                    LuxtronikCoordinatorData | None
+                ) = await self.coordinator.async_write(
+                    key_tar.split(".")[1], self._pending_temperature
+                )
+            except HomeAssistantError as err:
+                # Debounced write, so no caller is left to surface this to;
+                # re-sync the entity to the device's actual value immediately
+                # instead of leaving the frontend showing the rejected value
+                # until the next poll (I3b).
+                LOGGER.error(
+                    "Debounced temperature write of %s failed, reverting to device value: %s",
+                    key_tar,
+                    err,
+                )
+                self._handle_coordinator_update(self.coordinator.data)
+                return
             self._handle_coordinator_update(data)
 
     async def async_turn_off(self) -> None:
