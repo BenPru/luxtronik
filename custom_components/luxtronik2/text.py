@@ -49,8 +49,7 @@ async def async_setup_entry(  # pragma: no cover
                     coordinator.data, f"parameters.{description.mode_selector_name}"
                 )
             )
-        ],
-        True,
+        ]
     )
 
 

@@ -220,7 +220,7 @@ class TestClimateUnavailableKeys:
             patch("custom_components.luxtronik2.climate.LOGGER") as mock_logger,
         ):
             await async_setup_entry(
-                MagicMock(), entry, lambda entities, update: added.extend(entities)
+                MagicMock(), entry, lambda entities: added.extend(entities)
             )
             mock_logger.debug.assert_called()
 
@@ -239,7 +239,7 @@ class TestClimateUnavailableKeys:
             "custom_components.luxtronik2.climate.key_exists", return_value=True
         ):
             await async_setup_entry(
-                MagicMock(), entry, lambda entities, update: added.extend(entities)
+                MagicMock(), entry, lambda entities: added.extend(entities)
             )
         assert len(added) == len(THERMOSTATS_SMART)
 

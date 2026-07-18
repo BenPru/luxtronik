@@ -128,7 +128,7 @@ class TestWaterHeaterUnavailableKeys:
             patch("custom_components.luxtronik2.water_heater.LOGGER") as mock_logger,
         ):
             await async_setup_entry(
-                MagicMock(), entry, lambda entities, update: added.extend(entities)
+                MagicMock(), entry, lambda entities: added.extend(entities)
             )
             mock_logger.debug.assert_called()
 

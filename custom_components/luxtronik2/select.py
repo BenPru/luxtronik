@@ -85,8 +85,7 @@ async def async_setup_entry(
                 coordinator.entity_active(desc)
                 and key_exists(coordinator.data, desc.luxtronik_key)
             )
-        ],
-        True,
+        ]
     )
 
 
