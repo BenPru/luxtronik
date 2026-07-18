@@ -21,7 +21,6 @@ from custom_components.luxtronik2.model import (
     LuxtronikSwitchDescription,
     LuxtronikUpdateEntityDescription,
     LuxtronikWaterHeaterDescription,
-    metaclass_resolver,
 )
 
 
@@ -44,7 +43,6 @@ class TestLuxtronikEntityDescription:
         assert desc.device_key == DeviceKey.heatpump
         assert desc.luxtronik_key == LuxParameter.UNSET
         assert desc.visibility == LuxVisibility.UNSET
-        assert desc.update_interval is None
         assert desc.icon_by_state is None
         assert desc.extra_attributes == ()
         assert desc.min_firmware_version is None
@@ -104,48 +102,6 @@ class TestLuxtronikBinarySensorDescription:
         )
         assert desc.on_state == "active"
         assert desc.on_states == ["active", "running"]
-
-
-# ===========================================================================
-# metaclass_resolver (model.py lines 182-188)
-# ===========================================================================
-
-
-class TestMetaclassResolver:
-    def test_single_metaclass(self):
-        class A:
-            pass
-
-        result = metaclass_resolver(A)
-        assert isinstance(result, type)
-        assert issubclass(type(result), type)
-
-    def test_multiple_same_metaclass(self):
-        class A:
-            pass
-
-        class B:
-            pass
-
-        result = metaclass_resolver(A, B)
-        assert isinstance(result, type)
-
-    def test_different_metaclasses(self):
-        class MetaA(type):
-            pass
-
-        class MetaB(type):
-            pass
-
-        class A(metaclass=MetaA):
-            pass
-
-        class B(metaclass=MetaB):
-            pass
-
-        result = metaclass_resolver(A, B)
-        assert isinstance(result, type)
-        assert issubclass(type(type(result)), type)
 
 
 class TestLuxtronikSwitchDescription:

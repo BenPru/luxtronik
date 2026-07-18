@@ -836,12 +836,6 @@ class TestThermalDesinfectionDaySelector:
         await entity.async_select_option("wednesday")
         assert entity._attr_current_option == "wednesday"
 
-    @pytest.mark.asyncio
-    async def test_async_update(self):
-        entity, _ = self._make_tdi_selector({"ID_Einst_BwTDI_akt_FR": 1})
-        await entity.async_update()
-        assert entity._attr_current_option == "friday"
-
 
 # ===========================================================================
 # LuxtronikModeSelector

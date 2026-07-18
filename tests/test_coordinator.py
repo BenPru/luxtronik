@@ -83,7 +83,6 @@ def _make_coordinator_direct(data=None):
     coord.client = MagicMock()
     coord._config = {"host": "1.2.3.4", "port": 8889}
     coord.device_infos = {}
-    coord.update_reason_write = False
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
     coord.update_interval = DEFAULT_UPDATE_INTERVAL
