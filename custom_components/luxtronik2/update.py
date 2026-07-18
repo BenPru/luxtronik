@@ -60,7 +60,7 @@ async def async_setup_entry(
     )
     entities = [update_entity]
 
-    async_add_entities(entities, True)
+    async_add_entities(entities)
 
 
 class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
