@@ -1169,8 +1169,20 @@
         "parameter_not_writable": {
             "message": "Parameter {parameter} rejected \u2014 only parameters with prefixes {prefixes} are writable"
         },
+        "ambiguous_write_target": {
+            "message": "Multiple Luxtronik heat pumps are configured ({count} loaded) \u2014 specify device_id or config_entry_id to select which one to write to"
+        },
+        "invalid_write_target": {
+            "message": "Could not resolve a loaded Luxtronik heat pump for target {target}"
+        },
         "invalid_timer_schedule": {
             "message": "Invalid timer schedule \"{value}\": expected \"HH:MM-HH:MM\" entries separated by \"/\", with at most {max_rows} entries"
+        },
+        "write_confirmation_mismatch": {
+            "message": "Luxtronik heat pump did not confirm the written value(s): {details}"
+        },
+        "write_confirmation_unavailable": {
+            "message": "Wrote {parameters} to the Luxtronik heat pump, but the confirming refresh failed — the result could not be confirmed"
         }
     },
     "issues": {

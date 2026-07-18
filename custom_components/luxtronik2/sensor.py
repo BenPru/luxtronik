@@ -244,6 +244,14 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
         """Init Luxtronik Status Sensor."""
         super().__init__(hass, entry, coordinator, description, device_info_ident)
         self._evu_tracker = LuxtronikEVUTracker()
+        self._smart_grid_available: bool = True
+
+    @property
+    def available(self) -> bool:
+        """SmartGrid status sensor is unavailable when SmartGrid is disabled."""
+        if self.entity_description.key == SensorKey.SMART_GRID_STATUS:
+            return super().available and self._smart_grid_available
+        return super().available
 
     @callback
     def _handle_coordinator_update(
@@ -325,10 +333,10 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
 
         # If SmartGrid is disabled, set sensor to unavailable
         if not smartgrid_enabled or smartgrid_enabled in [False, 0, "false", "False"]:
-            self._attr_available = False
+            self._smart_grid_available = False
             self._attr_native_value = None
         else:
-            self._attr_available = True
+            self._smart_grid_available = True
 
             evu = self._get_value(LC.C0031_EVU_UNLOCKED)
             evu2 = self._get_value(LC.C0185_EVU2)

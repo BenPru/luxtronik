@@ -480,6 +480,9 @@ class TestAsyncStepDhcp:
 class _TestableOptionsFlow(LuxtronikOptionsFlowHandler):
     """Subclass that makes config_entry directly accessible without hass."""
 
+    def __init__(self, config_entry):
+        self._config_entry = config_entry
+
     @property  # type: ignore[override]
     def config_entry(self):
         return self._config_entry
@@ -491,8 +494,7 @@ def _make_options_flow(entry=None):
         entry = MagicMock()
         entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
         entry.options = {}
-    with patch("homeassistant.config_entries.report_usage"):
-        flow = _TestableOptionsFlow(entry)
+    flow = _TestableOptionsFlow(entry)
     return flow
 
 

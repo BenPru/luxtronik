@@ -10,6 +10,8 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
     CONF_TIMEOUT,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
     UnitOfTime,
 )
 import pytest
@@ -27,6 +29,7 @@ from custom_components.luxtronik2.const import (
     LuxMode,
     LuxOperationMode,
     LuxParameter as LP,
+    LuxVisibility as LV,
     SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
@@ -440,14 +443,67 @@ class TestAsyncAddedToHass:
         assert entity._attr_cache[SA.TIMER_HEATPUMP_ON] == "restored_value"
 
     @pytest.mark.asyncio
-    async def test_no_last_state_returns_early(self):
+    async def test_no_last_state_still_runs_tail_setup(self):
+        """First-ever add (no previous state) must still run the tail of the method:
+        dispatcher hookup and the initial _handle_coordinator_update call."""
         entity = _make_sensor_entity()
         entity.async_get_last_state = AsyncMock(return_value=None)
         entity.async_get_last_extra_data = AsyncMock(return_value=None)
+        entity.async_on_remove = MagicMock()
+        entity.entity_id = "sensor.test_entity"
         entity.platform = MagicMock()
 
-        await LuxtronikEntity.async_added_to_hass(entity)
-        # Should not crash
+        with patch(
+            "custom_components.luxtronik2.base.async_dispatcher_connect"
+        ) as mock_connect:
+            await LuxtronikEntity.async_added_to_hass(entity)
+
+        mock_connect.assert_called_once()
+        # coordinator.data is truthy (set in _mock_coordinator), so the initial
+        # _handle_coordinator_update call must have run and written HA state.
+        entity.async_write_ha_state.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_unavailable_state_not_restored(self):
+        """A previous state of STATE_UNAVAILABLE must not overwrite _attr_state."""
+        entity = _make_sensor_entity()
+        freshly_computed_state = entity._attr_state
+        last_state = MagicMock()
+        last_state.state = STATE_UNAVAILABLE
+        last_state.attributes = {}
+        entity.async_get_last_state = AsyncMock(return_value=last_state)
+        entity.async_get_last_extra_data = AsyncMock(return_value=None)
+        entity.async_on_remove = MagicMock()
+        entity.entity_id = "sensor.test_entity"
+        entity.platform = MagicMock()
+        entity.coordinator.data = None
+
+        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+            await LuxtronikEntity.async_added_to_hass(entity)
+
+        assert entity._attr_state == freshly_computed_state
+        assert entity._attr_state != STATE_UNAVAILABLE
+
+    @pytest.mark.asyncio
+    async def test_unknown_state_not_restored(self):
+        """A previous state of STATE_UNKNOWN must not overwrite _attr_state."""
+        entity = _make_sensor_entity()
+        freshly_computed_state = entity._attr_state
+        last_state = MagicMock()
+        last_state.state = STATE_UNKNOWN
+        last_state.attributes = {}
+        entity.async_get_last_state = AsyncMock(return_value=last_state)
+        entity.async_get_last_extra_data = AsyncMock(return_value=None)
+        entity.async_on_remove = MagicMock()
+        entity.entity_id = "sensor.test_entity"
+        entity.platform = MagicMock()
+        entity.coordinator.data = None
+
+        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+            await LuxtronikEntity.async_added_to_hass(entity)
+
+        assert entity._attr_state == freshly_computed_state
+        assert entity._attr_state != STATE_UNKNOWN
 
     @pytest.mark.asyncio
     async def test_restores_extra_data(self):
@@ -562,6 +618,88 @@ class TestBaseEntityRegistryEnabledDefault:
         _patch_entity(entity)
         assert entity.entity_description.entity_registry_enabled_default is False
         coord.entity_visible.assert_called()
+
+    def test_default_omitted_falls_back_to_coordinator_visibility_when_not_visible(
+        self,
+    ):
+        """Regression test for C2: a description that does NOT explicitly set
+        entity_registry_enabled_default (i.e. relies on the dataclass default)
+        must still have its enabled-default driven by coordinator.entity_visible()
+        when the heat pump reports the entity's visibility flag as not visible.
+
+        Before the fix, LuxtronikEntityDescription.entity_registry_enabled_default
+        defaulted to `bool = True`, so the `is None` branch in
+        LuxtronikEntity.__init__ never fired for real (non-test-authored)
+        descriptions, and this assertion failed with True != False.
+        """
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = False
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            visibility=LV.V0005_COOLING,
+            # entity_registry_enabled_default intentionally omitted
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is False
+        coord.entity_visible.assert_called()
+
+    def test_default_omitted_stays_enabled_when_coordinator_reports_visible(self):
+        """Sanity check for the same fallback: when the coordinator reports the
+        entity IS visible, the omitted-default description ends up enabled."""
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = True
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            visibility=LV.V0005_COOLING,
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is True
+
+    def test_explicit_false_wins_over_visibility(self):
+        """Explicit False must keep winning even when the coordinator reports
+        the entity as visible (i.e. explicit values are never overridden)."""
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = True
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            entity_registry_enabled_default=False,
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is False
+        coord.entity_visible.assert_not_called()
+
+    def test_explicit_true_wins_over_visibility(self):
+        """Explicit True must keep winning even when the coordinator reports
+        the entity as not visible (i.e. explicit values are never overridden)."""
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = False
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            entity_registry_enabled_default=True,
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is True
+        coord.entity_visible.assert_not_called()
 
 
 # ===========================================================================

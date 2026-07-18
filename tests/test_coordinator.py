@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from conftest import make_coordinator_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from packaging.version import Version
 import pytest
@@ -86,6 +87,7 @@ def _make_coordinator_direct(data=None):
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
     coord.update_interval = DEFAULT_UPDATE_INTERVAL
+    coord.last_update_success = True
     if data is None:
         data = LuxtronikCoordinatorData(
             parameters={"ID_WEB_WP_BZ_akt": (0, 0)},
@@ -794,6 +796,222 @@ class TestAsyncWrite:
         )
         with pytest.raises(LuxtronikWriteError):
             await coord.async_write("param", 1)
+
+    @pytest.mark.asyncio
+    async def test_write_mismatch_raises(self):
+        """If the device rejects/clamps a write, the read-back after refresh
+        will differ from what was written - this must surface as an error,
+        not just a debug log, so the UI re-syncs instead of showing a stale
+        optimistic value."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            # Device clamped the write: asked for 42, device kept 40.
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"test_param": (0, 40)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        with pytest.raises(HomeAssistantError) as exc_info:
+            await coord.async_write("test_param", 42)
+        assert not isinstance(exc_info.value, LuxtronikWriteError)
+        assert exc_info.value.translation_key == "write_confirmation_mismatch"
+
+    @pytest.mark.asyncio
+    async def test_write_match_with_float_rounding_does_not_raise(self):
+        """Confirmation must tolerate float noise from 0.1-step datatypes
+        (e.g. Celsius: raw/10) instead of raising on a spurious mismatch."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"test_param": (0, 21.500000000000004)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        result = await coord.async_write("test_param", 21.5)
+        assert result is not None
+
+
+class TestAsyncWriteMany:
+    @pytest.mark.asyncio
+    async def test_queues_all_pairs_before_single_write_call(self):
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, "06:00"), "p2": (0, "22:00")},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        await coord.async_write_many([("p1", "06:00"), ("p2", "22:00")])
+
+        calls = coord.hass.async_add_executor_job.await_args_list
+        # Two parameters.set calls followed by exactly one client.write call.
+        assert calls[0].args[0] == coord.client.parameters.set
+        assert calls[0].args[1:] == ("p1", "06:00")
+        assert calls[1].args[0] == coord.client.parameters.set
+        assert calls[1].args[1:] == ("p2", "22:00")
+        assert calls[2].args == (coord.client.write,)
+        assert len(calls) == 3
+
+    @pytest.mark.asyncio
+    async def test_issues_single_refresh(self):
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+        coord.async_refresh = AsyncMock(
+            side_effect=lambda: setattr(
+                coord,
+                "data",
+                LuxtronikCoordinatorData(
+                    parameters={"p1": (0, "06:00"), "p2": (0, "22:00")},
+                    calculations={},
+                    visibilities={},
+                ),
+            )
+        )
+
+        await coord.async_write_many([("p1", "06:00"), ("p2", "22:00")])
+
+        coord.async_refresh.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_single_pair_matches_async_write_behavior(self):
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"test_param": (0, 42)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+        result = await coord.async_write_many([("test_param", 42)])
+        assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_mismatch_reports_offending_parameter(self):
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, "06:00"), "p2": (0, "00:00")},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        with pytest.raises(HomeAssistantError) as exc_info:
+            await coord.async_write_many([("p1", "06:00"), ("p2", "22:00")])
+        assert exc_info.value.translation_key == "write_confirmation_mismatch"
+        details = exc_info.value.translation_placeholders["details"]
+        assert "p2" in details
+        assert "p1" not in details
+
+    @pytest.mark.asyncio
+    async def test_refresh_failure_raises_distinct_error_not_mismatch(self):
+        """DataUpdateCoordinator.async_refresh() swallows failures internally
+        (logs, does not raise) rather than propagating them. If the post-write
+        refresh fails, self.data stays at its stale pre-write value, and
+        comparing the newly-written value against stale data would almost
+        always look like a mismatch - misleadingly claiming the device
+        rejected the write when only the confirming read failed. This must
+        surface as a distinct error, not write_confirmation_mismatch, and the
+        mismatch comparison must not run against stale data at all."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            # async_refresh() "succeeds" (returns normally, no exception) but
+            # leaves last_update_success False and self.data untouched/stale,
+            # exactly like a real transient socket hiccup during the read.
+            coord.last_update_success = False
+
+        coord.async_refresh = fake_refresh
+
+        with pytest.raises(HomeAssistantError) as exc_info:
+            await coord.async_write_many([("p1", "06:00")])
+
+        assert exc_info.value.translation_key == "write_confirmation_unavailable"
+        assert exc_info.value.translation_key != "write_confirmation_mismatch"
+
+    @pytest.mark.asyncio
+    async def test_refresh_success_with_flag_true_still_confirms_normally(self):
+        """Sanity check: when last_update_success is True (the normal case)
+        and the written value matches, async_write_many must still return
+        normally - no regression from the new check."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            coord.last_update_success = True
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, "06:00")},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        result = await coord.async_write_many([("p1", "06:00")])
+        assert result is not None
+
+
+class TestWriteConfirmed:
+    """Unit tests for the read-back comparison helper used by async_write /
+    async_write_many."""
+
+    def test_exact_match(self):
+        from custom_components.luxtronik2.coordinator import _write_confirmed
+
+        assert _write_confirmed("06:00", "06:00") is True
+
+    def test_exact_mismatch(self):
+        from custom_components.luxtronik2.coordinator import _write_confirmed
+
+        assert _write_confirmed("06:00", "07:00") is False
+
+    def test_int_vs_float_numeric_match(self):
+        from custom_components.luxtronik2.coordinator import _write_confirmed
+
+        assert _write_confirmed(42, 42.0) is True
+
+    def test_rounds_to_one_decimal_for_float_noise(self):
+        from custom_components.luxtronik2.coordinator import _write_confirmed
+
+        assert _write_confirmed(21.5, 21.500000000000004) is True
+
+    def test_numeric_mismatch_beyond_tolerance(self):
+        from custom_components.luxtronik2.coordinator import _write_confirmed
+
+        assert _write_confirmed(21.5, 21.7) is False
+
+    def test_bool_and_int_equivalence(self):
+        from custom_components.luxtronik2.coordinator import _write_confirmed
+
+        assert _write_confirmed(True, 1) is True
+        assert _write_confirmed(False, 0) is True
+
+    def test_type_mismatch_no_coercion(self):
+        from custom_components.luxtronik2.coordinator import _write_confirmed
+
+        assert _write_confirmed("42", 42) is False
 
 
 # ===========================================================================

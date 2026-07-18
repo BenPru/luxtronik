@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from conftest import make_coordinator_data
+from homeassistant.components.update import UpdateEntityFeature
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_UNAVAILABLE
 import pytest
 
@@ -116,6 +117,19 @@ def _make_latest_entity():
         entity
     )
     return entity
+
+
+# ===========================================================================
+# supported_features
+# ===========================================================================
+
+
+def test_supported_features_excludes_install():
+    """INSTALL is unsupported (no async_install implemented); pressing it would
+    raise NotImplementedError. Only RELEASE_NOTES should be advertised."""
+    entity = _make_update_entity()
+    assert entity._attr_supported_features == UpdateEntityFeature.RELEASE_NOTES
+    assert not (entity._attr_supported_features & UpdateEntityFeature.INSTALL)
 
 
 # ===========================================================================
@@ -451,6 +465,7 @@ class TestReleaseNotes:
         assert "V3.91.0" in result
         assert "Bug fixes" in result
         assert "Alpha Innotec" in result
+        assert "Install button" not in result
 
     def test_returns_none_for_unknown_prefix(self):
         entity = _make_update_entity()

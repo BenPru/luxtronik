@@ -1160,6 +1160,18 @@
         },
         "parameter_not_writable": {
             "message": "Parametr {parameter} odrzucony \u2014 tylko parametry z prefiksami {prefixes} s\u0105 zapisywalne"
+        },
+        "ambiguous_write_target": {
+            "message": "Skonfigurowano wi\u0119cej ni\u017c jedn\u0105 pomp\u0119 ciep\u0142a Luxtronik ({count} za\u0142adowanych) \u2014 podaj device_id lub config_entry_id, aby wybra\u0107 cel zapisu"
+        },
+        "invalid_write_target": {
+            "message": "Nie uda\u0142o si\u0119 znale\u017a\u0107 za\u0142adowanej pompy ciep\u0142a Luxtronik dla celu {target}"
+        },
+        "write_confirmation_mismatch": {
+            "message": "Pompa ciep\u0142a Luxtronik nie potwierdzi\u0142a zapisanych warto\u015bci: {details}"
+        },
+        "write_confirmation_unavailable": {
+            "message": "Zapisano {parameters} do pompy ciep\u0142a Luxtronik, ale od\u015bwie\u017cenie potwierdzaj\u0105ce nie powiod\u0142o si\u0119 \u2014 wyniku nie uda\u0142o si\u0119 potwierdzi\u0107"
         }
     },
     "issues": {

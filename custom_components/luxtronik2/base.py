@@ -8,7 +8,12 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.const import (
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -119,16 +124,21 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
 
         try:
             last_state = await self.async_get_last_state()
-            if last_state is None:
-                return
-            self._attr_state = last_state.state
+            if last_state is not None and last_state.state not in (
+                STATE_UNAVAILABLE,
+                STATE_UNKNOWN,
+            ):
+                self._attr_state = last_state.state
 
-            for attr in self.entity_description.extra_attributes:
-                if not attr.restore_on_startup or attr.key not in last_state.attributes:
-                    continue
-                self._attr_cache[attr.key] = self._restore_attr_value(
-                    last_state.attributes[attr.key]
-                )
+                for attr in self.entity_description.extra_attributes:
+                    if (
+                        not attr.restore_on_startup
+                        or attr.key not in last_state.attributes
+                    ):
+                        continue
+                    self._attr_cache[attr.key] = self._restore_attr_value(
+                        last_state.attributes[attr.key]
+                    )
 
             last_extra_data = await self.async_get_last_extra_data()
             if last_extra_data is not None:

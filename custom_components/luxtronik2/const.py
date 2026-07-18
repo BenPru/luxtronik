@@ -7,7 +7,7 @@ from enum import Enum, StrEnum
 import logging
 from typing import Final
 
-from homeassistant.const import Platform
+from homeassistant.const import ATTR_CONFIG_ENTRY_ID, ATTR_DEVICE_ID, Platform
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import StateType
 import voluptuous as vol
@@ -92,6 +92,8 @@ SERVICE_WRITE_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_PARAMETER): cv.string,
         vol.Required(ATTR_VALUE): vol.Any(cv.Number, cv.string),  # pyright: ignore[reportAttributeAccessIssue]
+        vol.Optional(ATTR_DEVICE_ID): cv.string,
+        vol.Optional(ATTR_CONFIG_ENTRY_ID): cv.string,
     }
 )
 
@@ -521,7 +523,8 @@ class LuxParameter(StrEnum):
     P1175_THERMAL_POWER_LIMIT_SWITCH = "parameters.THERMAL_POWER_LIMIT_SWITCH"
     P1176_THERMAL_POWER_LIMIT_HEATING = "parameters.THERMAL_POWER_LIMIT_HEATING"
     P1177_THERMAL_POWER_LIMIT_WATER = "parameters.THERMAL_POWER_LIMIT_WATER"
-    P1178_THERMAL_POWER_LIMIT_COOLING = "parameters.THERMAL_POWER_LIMIT_COOLING"
+    # ? P1178_UNKNOWN: Final = "parameters.Unknown_Parameter_1178" -->
+    P1179_THERMAL_POWER_LIMIT_COOLING = "parameters.THERMAL_POWER_LIMIT_COOLING"
 
     P0731_AWAY_HEATING_STARTDATE = "parameters.ID_SU_FstdHz"
     P0006_AWAY_HEATING_ENDDATE = "parameters.ID_SU_FrkdHz"

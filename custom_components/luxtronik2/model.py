@@ -88,7 +88,9 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     max_firmware_version: Version | None = None
 
     extra_attributes: tuple[LuxtronikEntityAttributeDescription, ...] = ()
-    entity_registry_enabled_default: bool = True
+    entity_registry_enabled_default: bool | None = (  # pyright: ignore[reportIncompatibleVariableOverride]
+        None
+    )
     state_class: str | None = None
 
 

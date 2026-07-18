@@ -3,10 +3,18 @@
 # region Imports
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
+from homeassistant.const import (
+    ATTR_CONFIG_ENTRY_ID,
+    ATTR_DEVICE_ID,
+    CONF_HOST,
+    CONF_PORT,
+    CONF_TIMEOUT,
+    Platform as P,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
@@ -138,21 +146,94 @@ def setup_hass_services(hass: HomeAssistant, entry: LuxtronikConfigEntry):
                 },
             )
 
-        # Find the first available coordinator
-        for config_entry in hass.config_entries.async_entries(DOMAIN):
-            if config_entry.state is ConfigEntryState.LOADED and hasattr(
-                config_entry, "runtime_data"
-            ):
-                coordinator = config_entry.runtime_data
-                await coordinator.async_write(parameter, value)
-                return
-        LOGGER.error(
-            "No active Luxtronik coordinator found for service call"
-        )  # pragma: no cover
+        target_entry = _resolve_write_target(hass, service.data)
+        if target_entry is None:  # pragma: no cover
+            LOGGER.error("No active Luxtronik coordinator found for service call")
+            return
+
+        coordinator = target_entry.runtime_data
+        await coordinator.async_write(parameter, value)
 
     hass.services.async_register(
         DOMAIN, SERVICE_WRITE, write_parameter, schema=SERVICE_WRITE_SCHEMA
     )
+
+
+def _resolve_write_target(
+    hass: HomeAssistant, service_data: Mapping[str, Any]
+) -> LuxtronikConfigEntry | None:
+    """Resolve which loaded Luxtronik config entry a `write` service call targets.
+
+    An explicit `device_id` or `config_entry_id` in the service call data pins
+    the write to that specific heat pump; `device_id` takes precedence if both
+    are given. With no explicit target, falls back to the single loaded config
+    entry (pre-existing single-pump behavior) - but raises rather than
+    guessing when more than one entry is loaded, since silently picking one
+    would risk writing a parameter to the wrong physical heat pump.
+
+    Returns None only when no target was given and no entry is loaded at all.
+    """
+    device_id = service_data.get(ATTR_DEVICE_ID)
+    config_entry_id = service_data.get(ATTR_CONFIG_ENTRY_ID)
+
+    if device_id:
+        device = dr.async_get(hass).async_get(device_id)
+        entry_id = next(
+            (
+                candidate_id
+                for candidate_id in (device.config_entries if device else ())
+                if (candidate := hass.config_entries.async_get_entry(candidate_id))
+                and candidate.domain == DOMAIN
+            ),
+            None,
+        )
+        if entry_id is None:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="invalid_write_target",
+                translation_placeholders={"target": f"device_id={device_id}"},
+            )
+        target_entry = hass.config_entries.async_get_entry(entry_id)
+    elif config_entry_id:
+        target_entry = hass.config_entries.async_get_entry(config_entry_id)
+        if target_entry is None or target_entry.domain != DOMAIN:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="invalid_write_target",
+                translation_placeholders={
+                    "target": f"config_entry_id={config_entry_id}"
+                },
+            )
+    else:
+        loaded_entries = [
+            entry
+            for entry in hass.config_entries.async_entries(DOMAIN)
+            if entry.state is ConfigEntryState.LOADED and hasattr(entry, "runtime_data")
+        ]
+        if len(loaded_entries) > 1:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="ambiguous_write_target",
+                translation_placeholders={"count": str(len(loaded_entries))},
+            )
+        return loaded_entries[0] if loaded_entries else None
+
+    if (
+        target_entry is None
+        or target_entry.state is not ConfigEntryState.LOADED
+        or not hasattr(target_entry, "runtime_data")
+    ):
+        target = (
+            f"device_id={device_id}"
+            if device_id
+            else f"config_entry_id={config_entry_id}"
+        )
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="invalid_write_target",
+            translation_placeholders={"target": target},
+        )
+    return target_entry
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) -> bool:
