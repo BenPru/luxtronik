@@ -391,7 +391,6 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
         if key_tar != LuxParameter.UNSET:
             self._attr_target_temperature = get_sensor_data(data, key_tar)
 
-        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def async_set_temperature(self, **kwargs: Any) -> None:

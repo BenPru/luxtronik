@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_UNAVAILABLE
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 
 from conftest import make_coordinator_data
 from custom_components.luxtronik2.binary_sensor import LuxtronikBinarySensorEntity
@@ -22,7 +22,6 @@ from custom_components.luxtronik2.const import (
     LuxSmartGridStatus,
     LuxStatus1Option,
     LuxStatus3Option,
-    SensorAttrKey as SA,
     SensorKey,
 )
 from custom_components.luxtronik2.lux_overrides import parameters_to_add_update
@@ -363,48 +362,38 @@ class TestSmartGridStatus:
 # ===========================================================================
 
 
+def _status_text_data(**calc_overrides):
+    calculations = {
+        "ID_WEB_HauptMenuStatus_Zeit": 4980,  # 1h 23m
+        "ID_WEB_HauptMenuStatus_Zeile1": "heatpump_running",
+        "ID_WEB_HauptMenuStatus_Zeile2": "heating",
+    }
+    calculations.update(calc_overrides)
+    return make_coordinator_data(calculations=calculations)
+
+
 class TestBuildStatusText:
     def test_returns_empty_when_status_time_none(self):
-        entity = _make_status_sensor()
-        entity.hass.states.get.return_value = None
+        data = _status_text_data(**{"ID_WEB_HauptMenuStatus_Zeit": None})
+        entity = _make_status_sensor(data)
         result = entity._build_status_text()
         assert result == ""
 
-    def test_returns_empty_when_status_time_unavailable(self):
-        entity = _make_status_sensor()
-        mock_state = MagicMock()
-        mock_state.state = STATE_UNAVAILABLE
-        mock_state.attributes = {SA.STATUS_TEXT: STATE_UNAVAILABLE}
+    def test_returns_empty_when_line1_none(self):
+        data = _status_text_data(**{"ID_WEB_HauptMenuStatus_Zeile1": None})
+        entity = _make_status_sensor(data)
+        result = entity._build_status_text()
+        assert result == ""
 
-        def get_side_effect(sensor_name):
-            if "status_time" in sensor_name:
-                return mock_state
-            return None
-
-        entity.hass.states.get.side_effect = get_side_effect
+    def test_returns_empty_when_line2_none(self):
+        data = _status_text_data(**{"ID_WEB_HauptMenuStatus_Zeile2": None})
+        entity = _make_status_sensor(data)
         result = entity._build_status_text()
         assert result == ""
 
     def test_returns_full_text_when_all_present(self):
-        entity = _make_status_sensor()
-        entity._sensor_prefix = DOMAIN
+        entity = _make_status_sensor(_status_text_data())
         entity._attr_native_value = LuxOperationMode.heating
-
-        def get_side_effect(sensor_name):
-            mock = MagicMock()
-            if "status_time" in sensor_name:
-                mock.state = "01:23"
-                mock.attributes = {SA.STATUS_TEXT: "01:23"}
-                return mock
-            if "status_line_1" in sensor_name:
-                mock.state = "heatpump_running"
-                return mock
-            if "status_line_2" in sensor_name:
-                mock.state = "heating"
-                return mock
-            return None
-
-        entity.hass.states.get.side_effect = get_side_effect
         entity._get_entity_translations.return_value = {
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.heatpump_running": "HP Running",
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.heating": "Heating",
@@ -412,6 +401,7 @@ class TestBuildStatusText:
         result = entity._build_status_text()
         assert "HP Running" in result
         assert "Heating" in result
+        assert "1:23" in result
 
     def test_get_entity_translations_uses_public_helper(self):
         """_get_entity_translations must use the public translation helper, not
@@ -431,84 +421,17 @@ class TestBuildStatusText:
         )
         assert result == {"some.key": "value"}
 
-    def test_returns_empty_when_line1_unavailable(self):
-        entity = _make_status_sensor()
-        entity._sensor_prefix = DOMAIN
-
-        def get_side_effect(sensor_name):
-            mock = MagicMock()
-            if "status_time" in sensor_name:
-                mock.state = "01:23"
-                mock.attributes = {SA.STATUS_TEXT: "01:23"}
-                return mock
-            if "status_line_1" in sensor_name:
-                mock.state = STATE_UNAVAILABLE
-                return mock
-            return MagicMock(state="ok")
-
-        entity.hass.states.get.side_effect = get_side_effect
+    def test_reflects_sibling_entity_renames(self):
+        """Status text is unaffected by the sibling sensor entities being renamed."""
+        entity = _make_status_sensor(_status_text_data())
+        entity._get_entity_translations.return_value = {
+            f"component.{DOMAIN}.entity.sensor.status_line_1.state.heatpump_running": "HP Running",
+            f"component.{DOMAIN}.entity.sensor.status_line_2.state.heating": "Heating",
+        }
         result = entity._build_status_text()
-        assert result == ""
-
-    def test_returns_empty_when_line2_unavailable(self):
-        entity = _make_status_sensor()
-        entity._sensor_prefix = DOMAIN
-
-        def get_side_effect(sensor_name):
-            mock = MagicMock()
-            if "status_time" in sensor_name:
-                mock.state = "01:23"
-                mock.attributes = {SA.STATUS_TEXT: "01:23"}
-                return mock
-            if "status_line_1" in sensor_name:
-                mock.state = "heatpump_running"
-                return mock
-            if "status_line_2" in sensor_name:
-                mock.state = STATE_UNAVAILABLE
-                return mock
-            return None
-
-        entity.hass.states.get.side_effect = get_side_effect
-        result = entity._build_status_text()
-        assert result == ""
-
-
-# ===========================================================================
-# StatusSensor._get_sensor_value / _get_sensor_attr
-# ===========================================================================
-
-
-class TestSensorHelpers:
-    def test_get_sensor_value_existing(self):
-        entity = _make_status_sensor()
-        mock_state = MagicMock()
-        mock_state.state = "42"
-        entity.hass.states.get.return_value = mock_state
-        assert entity._get_sensor_value("sensor.test") == "42"
-
-    def test_get_sensor_value_missing(self):
-        entity = _make_status_sensor()
-        entity.hass.states.get.return_value = None
-        assert entity._get_sensor_value("sensor.test") is None
-
-    def test_get_sensor_attr_existing(self):
-        entity = _make_status_sensor()
-        mock_state = MagicMock()
-        mock_state.attributes = {"foo": "bar"}
-        entity.hass.states.get.return_value = mock_state
-        assert entity._get_sensor_attr("sensor.test", "foo") == "bar"
-
-    def test_get_sensor_attr_missing_sensor(self):
-        entity = _make_status_sensor()
-        entity.hass.states.get.return_value = None
-        assert entity._get_sensor_attr("sensor.test", "foo") is None
-
-    def test_get_sensor_attr_missing_attr(self):
-        entity = _make_status_sensor()
-        mock_state = MagicMock()
-        mock_state.attributes = {}
-        entity.hass.states.get.return_value = mock_state
-        assert entity._get_sensor_attr("sensor.test", "foo") is None
+        assert "HP Running" in result
+        assert "Heating" in result
+        entity.hass.states.get.assert_not_called()
 
 
 # ===========================================================================
