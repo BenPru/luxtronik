@@ -39,3 +39,4 @@ ignore-words-list = "hass"
 testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
+addopts = ["-p", "no:homeassistant"]

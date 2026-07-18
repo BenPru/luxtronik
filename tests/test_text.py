@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from conftest import make_coordinator_data
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.exceptions import ServiceValidationError
 from luxtronik.parameters import Parameters
 import pytest
 
+from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
