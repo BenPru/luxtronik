@@ -68,20 +68,6 @@
                 "name": "Tweede warmtebron warmtemenge"
             }
         },
-        "device": {
-            "heatpump": {
-                "name": "WP"
-            },
-            "heating": {
-                "name": "Verw"
-            },
-            "domestic_water": {
-                "name": "Warmwater"
-            },
-            "cooling": {
-                "name": "Koel"
-            }
-        },
         "switch": {
             "remote_maintenance": {
                 "name": "Dienst op afstand"
@@ -1056,6 +1042,20 @@
             }
         }
     },
+    "device": {
+        "heatpump": {
+            "name": "WP"
+        },
+        "heating": {
+            "name": "Verw"
+        },
+        "domestic_water": {
+            "name": "Warmwater"
+        },
+        "cooling": {
+            "name": "Koel"
+        }
+    },
     "config": {
         "abort": {
             "cannot_connect": "De verbinding met Luxtronik op {host} is mislukt.\nFout: {connect_error}",
@@ -1156,7 +1156,7 @@
             "message": "De Luxtronik-warmtepomp heeft de geschreven waarde(n) niet bevestigd: {details}"
         },
         "write_confirmation_unavailable": {
-            "message": "{parameters} is/zijn naar de Luxtronik-warmtepomp geschreven, maar de bevestigende vernieuwing is mislukt — het resultaat kon niet worden bevestigd"
+            "message": "{parameters} is/zijn naar de Luxtronik-warmtepomp geschreven, maar de bevestigende vernieuwing is mislukt \u2014 het resultaat kon niet worden bevestigd"
         }
     },
     "issues": {
