@@ -3,6 +3,7 @@
 # region Imports
 from __future__ import annotations
 
+import contextlib
 import socket
 import struct
 import threading
@@ -23,7 +24,11 @@ from .const import (
 
 WAIT_TIME_WRITE_PARAMETER = 1.0
 
-# List of ports that are known to respond to discovery packets
+# List of ports that are known to respond to discovery packets.
+# Note: 47808 is also the IANA-reserved standard port for BACnet. discover()
+# only binds it for the brief duration of a broadcast+listen cycle and closes
+# it immediately after, but if another BACnet tool on the same host tries to
+# bind it at the same moment, one of the two will fail to bind.
 LUXTRONIK_DISCOVERY_PORTS = [4444, 47808]
 
 # Time (in seconds) to wait for response after sending discovery broadcast
@@ -225,8 +230,15 @@ class Luxtronik:
         self.visibilities = Visibilities()
 
     def __del__(self):
-        """Luxtronik helper descructor."""
-        self._disconnect()
+        """Luxtronik helper descructor.
+
+        Best-effort only: explicit cleanup happens via disconnect() (called
+        from coordinator shutdown). __del__ can run on any thread, including
+        during interpreter shutdown when modules/globals may already be
+        torn down, so any failure here is swallowed rather than raised.
+        """
+        with contextlib.suppress(Exception):
+            self._disconnect()
 
     def disconnect(self) -> None:
         """Explicitly close the connection to the heatpump."""

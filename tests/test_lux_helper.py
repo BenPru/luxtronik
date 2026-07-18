@@ -213,6 +213,13 @@ class TestLuxtronikClient:
         # Just ensure __del__ doesn't raise
         client.__del__()
 
+    def test_destructor_swallows_disconnect_errors(self):
+        """M10: __del__ can run during GC/interpreter shutdown on any thread;
+        a failure there must not raise, only best-effort cleanup."""
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        with patch.object(client, "_disconnect", side_effect=RuntimeError("boom")):
+            client.__del__()  # must not raise
+
 
 # ===========================================================================
 # discover
