@@ -17,6 +17,7 @@ from homeassistant.components.water_heater import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, STATE_OFF, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from packaging.version import Version
@@ -235,9 +236,22 @@ class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibl
         if self._pending_temperature is None:
             return
         lux_key = self.entity_description.luxtronik_key_target_temperature.value
-        data = await self.coordinator.async_write(
-            lux_key.split(".")[1], self._pending_temperature
-        )
+        try:
+            data = await self.coordinator.async_write(
+                lux_key.split(".")[1], self._pending_temperature
+            )
+        except HomeAssistantError as err:
+            # Debounced write, so no caller is left to surface this to;
+            # re-sync the entity to the device's actual value immediately
+            # instead of leaving the frontend showing the rejected value
+            # until the next poll (I3b).
+            LOGGER.error(
+                "Debounced temperature write of %s failed, reverting to device value: %s",
+                lux_key,
+                err,
+            )
+            self._handle_coordinator_update(self.coordinator.data)
+            return
         self._handle_coordinator_update(data)
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:

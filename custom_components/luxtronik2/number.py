@@ -11,6 +11,7 @@ from homeassistant.components.number import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
@@ -156,9 +157,22 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
 
         if self.entity_description.factor is not None:
             value = int(value / self.entity_description.factor)
-        data = await self.coordinator.async_write(
-            self.entity_description.luxtronik_key.value.split(".")[1], value
-        )
+        try:
+            data = await self.coordinator.async_write(
+                self.entity_description.luxtronik_key.value.split(".")[1], value
+            )
+        except HomeAssistantError as err:
+            # Debounced write, so no caller is left to surface this to;
+            # re-sync the entity to the device's actual value immediately
+            # instead of leaving the frontend showing the rejected value
+            # until the next poll (I3b).
+            LOGGER.error(
+                "Debounced write of %s failed, reverting to device value: %s",
+                self.entity_description.key,
+                err,
+            )
+            self._handle_coordinator_update(self.coordinator.data)
+            return
         self._handle_coordinator_update(data)
 
     @property

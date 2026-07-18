@@ -15,6 +15,7 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, UnitOfTemperature
+from homeassistant.exceptions import HomeAssistantError
 import pytest
 
 from conftest import make_coordinator_data
@@ -403,6 +404,19 @@ class TestLuxtronikNumberEntity:
         entity._pending_value = None
         await entity._async_set_native_value()
         coord.async_write.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_async_set_native_value_reverts_on_write_failure(self):
+        """I3b: a debounced write has no caller left to raise to, so on
+        failure the entity must re-sync itself to the device's actual
+        value immediately instead of leaving the rejected value showing."""
+        entity, coord = self._make_number(value=50.0)
+        coord.async_write = AsyncMock(side_effect=HomeAssistantError("rejected"))
+        entity._pending_value = 55.0
+        await entity._async_set_native_value()
+        coord.async_write.assert_called_once()
+        assert entity._attr_native_value == 50.0
+        entity.async_write_ha_state.assert_called()
 
 
 # ===========================================================================
@@ -1127,6 +1141,19 @@ class TestLuxtronikWaterHeater:
         coord.async_write.assert_not_called()
 
     @pytest.mark.asyncio
+    async def test_async_write_temperature_reverts_on_write_failure(self):
+        """I3b: a debounced write has no caller left to raise to, so on
+        failure the entity must re-sync itself to the device's actual
+        value immediately instead of leaving the rejected value showing."""
+        entity, coord = self._make_water_heater(target_temp=50.0)
+        coord.async_write = AsyncMock(side_effect=HomeAssistantError("rejected"))
+        entity._pending_temperature = 55.0
+        await entity._async_write_temperature()
+        coord.async_write.assert_called_once()
+        assert entity._attr_target_temperature == 50.0
+        entity.async_write_ha_state.assert_called()
+
+    @pytest.mark.asyncio
     async def test_turn_away_mode_on(self):
         entity, coord = self._make_water_heater()
         entity._attr_current_operation = "heat_pump"
@@ -1358,6 +1385,19 @@ class TestLuxtronikThermostat:
         entity._pending_temperature = None
         await entity._async_write_temperature()
         coord.async_write.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_async_write_temperature_reverts_on_write_failure(self):
+        """I3b: a debounced write has no caller left to raise to, so on
+        failure the entity must re-sync itself to the device's actual
+        value immediately instead of leaving the rejected value showing."""
+        entity, coord = self._make_thermostat(target=21.0)
+        coord.async_write = AsyncMock(side_effect=HomeAssistantError("rejected"))
+        entity._pending_temperature = 25.0
+        await entity._async_write_temperature()
+        coord.async_write.assert_called_once()
+        assert entity._attr_target_temperature == 21.0
+        entity.async_write_ha_state.assert_called()
 
     @pytest.mark.asyncio
     async def test_set_hvac_mode_off(self):
