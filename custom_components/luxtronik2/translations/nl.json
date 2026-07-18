@@ -1148,6 +1148,9 @@
         },
         "write_confirmation_mismatch": {
             "message": "De Luxtronik-warmtepomp heeft de geschreven waarde(n) niet bevestigd: {details}"
+        },
+        "write_confirmation_unavailable": {
+            "message": "{parameters} is/zijn naar de Luxtronik-warmtepomp geschreven, maar de bevestigende vernieuwing is mislukt — het resultaat kon niet worden bevestigd"
         }
     },
     "issues": {

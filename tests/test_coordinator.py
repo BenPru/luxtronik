@@ -87,6 +87,7 @@ def _make_coordinator_direct(data=None):
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
     coord.update_interval = DEFAULT_UPDATE_INTERVAL
+    coord.last_update_success = True
     if data is None:
         data = LuxtronikCoordinatorData(
             parameters={"ID_WEB_WP_BZ_akt": (0, 0)},
@@ -922,6 +923,54 @@ class TestAsyncWriteMany:
         details = exc_info.value.translation_placeholders["details"]
         assert "p2" in details
         assert "p1" not in details
+
+    @pytest.mark.asyncio
+    async def test_refresh_failure_raises_distinct_error_not_mismatch(self):
+        """DataUpdateCoordinator.async_refresh() swallows failures internally
+        (logs, does not raise) rather than propagating them. If the post-write
+        refresh fails, self.data stays at its stale pre-write value, and
+        comparing the newly-written value against stale data would almost
+        always look like a mismatch - misleadingly claiming the device
+        rejected the write when only the confirming read failed. This must
+        surface as a distinct error, not write_confirmation_mismatch, and the
+        mismatch comparison must not run against stale data at all."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            # async_refresh() "succeeds" (returns normally, no exception) but
+            # leaves last_update_success False and self.data untouched/stale,
+            # exactly like a real transient socket hiccup during the read.
+            coord.last_update_success = False
+
+        coord.async_refresh = fake_refresh
+
+        with pytest.raises(HomeAssistantError) as exc_info:
+            await coord.async_write_many([("p1", "06:00")])
+
+        assert exc_info.value.translation_key == "write_confirmation_unavailable"
+        assert exc_info.value.translation_key != "write_confirmation_mismatch"
+
+    @pytest.mark.asyncio
+    async def test_refresh_success_with_flag_true_still_confirms_normally(self):
+        """Sanity check: when last_update_success is True (the normal case)
+        and the written value matches, async_write_many must still return
+        normally - no regression from the new check."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            coord.last_update_success = True
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, "06:00")},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        result = await coord.async_write_many([("p1", "06:00")])
+        assert result is not None
 
 
 class TestWriteConfirmed:

@@ -1163,6 +1163,9 @@
         },
         "write_confirmation_mismatch": {
             "message": "Pompa ciep\u0142a Luxtronik nie potwierdzi\u0142a zapisanych warto\u015bci: {details}"
+        },
+        "write_confirmation_unavailable": {
+            "message": "Zapisano {parameters} do pompy ciep\u0142a Luxtronik, ale od\u015bwie\u017cenie potwierdzaj\u0105ce nie powiod\u0142o si\u0119 \u2014 wyniku nie uda\u0142o si\u0119 potwierdzi\u0107"
         }
     },
     "issues": {

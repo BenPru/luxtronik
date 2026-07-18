@@ -168,6 +168,22 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             await self.async_refresh()
             LOGGER.debug("Coordinator data refreshed!")
 
+            # async_refresh() swallows failures internally (logs, does not
+            # raise) rather than propagating them, so self.data may still be
+            # the stale pre-write snapshot here. Comparing newly-written
+            # values against stale data would almost always look like a
+            # mismatch, misleadingly implying the device rejected the write
+            # when only the confirming read failed. Surface that distinctly
+            # instead of running the confirm comparison against stale data.
+            if not self.last_update_success:
+                raise HomeAssistantError(
+                    translation_domain=DOMAIN,
+                    translation_key="write_confirmation_unavailable",
+                    translation_placeholders={
+                        "parameters": ", ".join(parameter for parameter, _ in pairs)
+                    },
+                )
+
             # Confirm each value after the read
             mismatches: list[str] = []
             for parameter, value in pairs:

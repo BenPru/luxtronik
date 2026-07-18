@@ -1142,6 +1142,9 @@
         },
         "write_confirmation_mismatch": {
             "message": "Tepeln\u00e9 \u010derpadlo Luxtronik nepotvrdilo zapsan\u00e9 hodnoty: {details}"
+        },
+        "write_confirmation_unavailable": {
+            "message": "Hodnoty {parameters} byly zaps\u00e1ny do tepeln\u00e9ho \u010derpadla Luxtronik, ale potvrzuj\u00edc\u00ed obnoven\u00ed selhalo \u2014 v\u00fdsledek nebylo mo\u017en\u00e9 potvrdit"
         }
     },
     "issues": {

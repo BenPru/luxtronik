@@ -1145,6 +1145,9 @@
         },
         "write_confirmation_mismatch": {
             "message": "Die Luxtronik-W\u00e4rmepumpe hat die geschriebenen Werte nicht best\u00e4tigt: {details}"
+        },
+        "write_confirmation_unavailable": {
+            "message": "{parameters} wurde(n) an die Luxtronik-W\u00e4rmepumpe geschrieben, aber die best\u00e4tigende Aktualisierung ist fehlgeschlagen \u2014 das Ergebnis konnte nicht best\u00e4tigt werden"
         }
     },
     "issues": {
