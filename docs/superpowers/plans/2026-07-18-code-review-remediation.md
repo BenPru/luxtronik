@@ -16,7 +16,7 @@ This document is written so that any AI model or contributor can pick up a singl
   "C:\Users\rhamm\anaconda3\envs\py314\python.exe" -m basedpyright --pythonpath "C:\Users\rhamm\anaconda3\envs\py314\python.exe" custom_components/luxtronik2
   ```
 - **Definition of done for every task**: basedpyright 0 errors, `ruff check` clean, `ruff format --check` clean, **full** test suite passes, coverage does not regress. Run coverage as `pytest --cov=custom_components.luxtronik2` — never scope `--cov` to a leaf submodule (it triggers a bcrypt/PyO3 re-init crash; see CLAUDE.md for the root cause).
-- **Git rules**: never commit on `main` — create a branch `fix/<description>` or `feat/<description>` first. **Never run `git commit` without explicit user approval.** Commit format: `<type>(<scope>): <gitmoji> <description>` (lowercase imperative), e.g. `fix(base): 🐛 restore visibility-driven enabled default`.
+- **Git rules**: never commit on `main` — create a branch `fix/<description>` or `feat/<description>` first, always starting from an up-to-date `origin/main` (`git fetch origin` then branch off `origin/main`) to prevent merge conflicts as much as possible. **Never run `git commit` without explicit user approval.** Commit format: `<type>(<scope>): <gitmoji> <description>` (lowercase imperative), e.g. `fix(base): 🐛 restore visibility-driven enabled default`.
 - **Line numbers in this document** were verified against commit `46b0c4b` and will drift as fixes land. Always re-locate the code by the quoted snippet or symbol name, not the line number alone.
 - **Tests-first**: for each behavioral fix, write a failing test that demonstrates the bug before changing the code (TDD). Existing tests live in `tests/`, one file per module (`tests/test_base.py`, `tests/test_sensor.py`, …).
 - **Architecture primer**: every platform follows a three-file pattern — `<platform>_entities_predefined.py` (static description lists), `model.py` (description dataclasses), `<platform>.py` (setup + entity classes subclassing `LuxtronikEntity` from `base.py`). `coordinator.py` holds `LuxtronikCoordinator` (a `DataUpdateCoordinator`) that owns the single socket connection to the heat pump. `lux_overrides.py` monkey-patches the upstream `luxtronik` PyPI library once per process. Config entries store the coordinator in `entry.runtime_data` (typed alias `LuxtronikConfigEntry` in `__init__.py`).
@@ -303,7 +303,7 @@ All four must be clean (0 lint findings, 0 format diffs, 0 type errors, all test
 Mark tasks here as they land (edit this file in the same PR as the fix):
 
 - [x] C1  - [x] C2  - [x] C3
-- [ ] I1  - [x] I2  - [x] I3  - [ ] I3b  - [ ] I4  - [x] I5  - [x] I6  - [x] I7  - [x] I8  - [ ] I9  - [ ] I10  - [x] I11
+- [ ] I1  - [x] I2  - [x] I3  - [ ] I3b  - [x] I4  - [x] I5  - [x] I6  - [x] I7  - [x] I8  - [ ] I9  - [ ] I10  - [x] I11
 - [x] M1  - [ ] M2  - [x] M3  - [x] M4  - [ ] M5  - [x] M6  - [x] M7  - [ ] M8  - [ ] M9  - [ ] M10  - [x] M11  - [ ] M12
 
 Recovery note (2026-07-18): this file was found deleted mid-session with no git history (it was never committed) and was reconstructed from the content captured earlier in the same conversation. If you're reading this and something looks off versus the actual code state, re-verify line numbers/snippets against the current `main` rather than trusting this doc blindly — several tasks (I11, M3, M4) landed after the original review and their line refs above are stale by design (see the note at the top of this section).

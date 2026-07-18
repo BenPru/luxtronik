@@ -188,10 +188,6 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
         return self.entity_description.native_max_value
 
     @property
-    def state(self) -> str | float | None:
-        return self._attr_native_value
-
-    @property
     def extra_state_attributes(self) -> dict[str, str]:
         """Return human-readable mode for DHW manual frequency entity."""
         if self.entity_description.key != SensorKey.DHW_MANUAL_FREQUENCY:
