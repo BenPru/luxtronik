@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.components.climate import (
@@ -456,6 +456,15 @@ class TestLuxtronikDateEntity:
     def test_handle_coordinator_update_timestamp(self):
         # Use a known timestamp
         ts = datetime(2025, 1, 15, 12, 0, 0).timestamp()
+        entity, _ = self._make_date_entity(value=ts)
+        data = make_coordinator_data(parameters={"ID_SU_FstdBw": ts})
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == date(2025, 1, 15)
+
+    def test_handle_coordinator_update_timestamp_is_utc_anchored(self):
+        """M8: date() must come from a UTC-interpreted timestamp, independent
+        of the host's local timezone (previously used naive fromtimestamp())."""
+        ts = datetime(2025, 1, 15, 0, 0, 0, tzinfo=UTC).timestamp()
         entity, _ = self._make_date_entity(value=ts)
         data = make_coordinator_data(parameters={"ID_SU_FstdBw": ts})
         entity._handle_coordinator_update(data)
