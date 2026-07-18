@@ -10,6 +10,8 @@ from homeassistant.data_entry_flow import AbortFlow
 import pytest
 
 from custom_components.luxtronik2.config_flow import (
+    MANUAL_ENTRY_VALUE,
+    SELECT_DEVICE_LABEL,
     LuxtronikFlowHandler,
     LuxtronikOptionsFlowHandler,
 )
@@ -146,6 +148,47 @@ class TestSetUniqueIdOrAbort:
 
 
 # ===========================================================================
+# Instance isolation (I8)
+# ===========================================================================
+
+
+class TestFlowInstanceIsolation:
+    def test_device_lists_are_not_shared_across_flow_instances(self):
+        """`_all_devices`/`_available_devices` must be per-instance, not class-level.
+
+        Two concurrent flows (e.g. two users, or discovery + manual entry
+        running simultaneously) must never see each other's discovered
+        device lists.
+        """
+        flow1 = LuxtronikFlowHandler()
+        flow2 = LuxtronikFlowHandler()
+        assert flow1._available_devices is not flow2._available_devices
+        assert flow1._all_devices is not flow2._all_devices
+
+    @pytest.mark.asyncio
+    async def test_concurrent_discovery_does_not_cross_contaminate(self):
+        """Two flows discovering different devices must not see each other's results."""
+
+        def _prepare(flow, devices):
+            flow.hass = MagicMock()
+            flow.hass.async_add_executor_job = AsyncMock(return_value=devices)
+            flow._async_current_entries = MagicMock(return_value=[])
+            flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
+            flow.async_show_form = MagicMock(return_value={"type": "form"})
+
+        flow1 = LuxtronikFlowHandler()
+        flow2 = LuxtronikFlowHandler()
+        _prepare(flow1, [("1.2.3.4", 8889)])
+        _prepare(flow2, [("5.6.7.8", 8888)])
+
+        await flow1.async_step_user()
+        await flow2.async_step_user()
+
+        assert [d["host"] for d in flow1._all_devices] == ["1.2.3.4"]
+        assert [d["host"] for d in flow2._all_devices] == ["5.6.7.8"]
+
+
+# ===========================================================================
 # async_step_user
 # ===========================================================================
 
@@ -193,14 +236,56 @@ class TestAsyncStepUser:
         flow.async_show_form.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_aborts_on_exception(self):
+    async def test_discovery_os_error_reshows_manual_form_with_cannot_connect(self):
+        """A transient network error during discovery must not kill the flow."""
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        flow.hass.async_add_executor_job = AsyncMock(
+            side_effect=OSError("network unreachable")
+        )
+        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        flow.async_abort = MagicMock(return_value={"type": "abort"})
+        await flow.async_step_user()
+        flow.async_abort.assert_not_called()
+        flow.async_show_form.assert_called_once()
+        call_kwargs = flow.async_show_form.call_args[1]
+        assert call_kwargs["step_id"] == "manual_entry"
+        assert call_kwargs["errors"] == {"base": "cannot_connect"}
+
+    @pytest.mark.asyncio
+    async def test_unexpected_error_reshows_manual_form_with_unknown_error(self):
+        """A last-resort catch-all must also re-show the form, not abort the flow."""
         flow = LuxtronikFlowHandler()
         flow.hass = MagicMock()
         flow.hass.async_add_executor_job = AsyncMock(side_effect=Exception("boom"))
         flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         await flow.async_step_user()
-        flow.async_abort.assert_called_once_with(reason="unknown")
+        flow.async_abort.assert_not_called()
+        flow.async_show_form.assert_called_once()
+        call_kwargs = flow.async_show_form.call_args[1]
+        assert call_kwargs["step_id"] == "manual_entry"
+        assert call_kwargs["errors"] == {"base": "unknown"}
+
+    @pytest.mark.asyncio
+    async def test_selection_form_includes_manual_entry_option(self):
+        """A pump on another subnet must stay reachable while devices are discovered."""
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        flow.hass.async_add_executor_job = AsyncMock(return_value=[("1.2.3.4", 8889)])
+        flow._async_current_entries = MagicMock(return_value=[])
+        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
+        flow.async_show_form = MagicMock(
+            return_value={"type": "form", "step_id": "select_devices"}
+        )
+        await flow.async_step_user()
+        schema = flow.async_show_form.call_args[1]["data_schema"]
+        select_selector = next(iter(schema.schema.values()))
+        options = select_selector.config["options"]
+        values = {opt["value"] if isinstance(opt, dict) else opt for opt in options}
+        assert MANUAL_ENTRY_VALUE in values
 
 
 # ===========================================================================
@@ -257,6 +342,19 @@ class TestAsyncStepSelectDevices:
                 {"select_device_to_configure": "1.2.3.4:8889"}
             )
         flow.async_create_entry.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_manual_entry_option_routes_to_manual_form(self):
+        """Selecting the manual-entry sentinel must reach the manual host form."""
+        flow = LuxtronikFlowHandler()
+        flow.async_step_manual_entry = AsyncMock(
+            return_value={"type": "form", "step_id": "manual_entry"}
+        )
+        result = await flow.async_step_select_devices(
+            {SELECT_DEVICE_LABEL: MANUAL_ENTRY_VALUE}
+        )
+        flow.async_step_manual_entry.assert_awaited_once_with()
+        assert result["step_id"] == "manual_entry"
 
     @pytest.mark.asyncio
     async def test_already_configured_aborts(self):
