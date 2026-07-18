@@ -16,7 +16,15 @@ from .common import async_get_mac_address
 
 # endregion Imports
 
-TO_REDACT = {CONF_USERNAME, CONF_PASSWORD}
+TO_REDACT = {
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    CONF_HOST,
+    "unique_id",
+    "identifiers",
+    "via_device",
+    "configuration_url",
+}
 
 
 async def async_get_config_entry_diagnostics(
@@ -36,11 +44,13 @@ async def async_get_config_entry_diagnostics(
     if "data" not in entry_data:
         entry_data["data"] = {}
     if mac is not None:
+        # Keep only the OUI (vendor prefix); the device-specific octets are
+        # the sensitive/unique part and are masked out.
         entry_data["data"]["mac"] = mac[:9] + "*"
 
     diag_data = {
         "entry": entry_data,
-        "devices": coordinator.device_infos,
+        "devices": async_redact_data(coordinator.device_infos, TO_REDACT),
         "parameters": _dump_items(coordinator.data.parameters.parameters),
         "calculations": _dump_items(coordinator.data.calculations.calculations),
         "visibilities": _dump_items(coordinator.data.visibilities.visibilities),

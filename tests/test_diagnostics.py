@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
+from homeassistant.components.diagnostics import REDACTED
 from homeassistant.const import CONF_HOST
 import pytest
 
@@ -63,7 +64,10 @@ class TestAsyncGetConfigEntryDiagnostics:
         entry = MagicMock()
         entry.runtime_data = coordinator
         entry.data = {"host": "192.168.1.100", "port": DEFAULT_PORT}
-        entry.as_dict.return_value = {"data": {"host": "192.168.1.100"}}
+        entry.as_dict.return_value = {
+            "unique_id": "20230101_0xff",
+            "data": {"host": "192.168.1.100"},
+        }
 
         result = await async_get_config_entry_diagnostics(hass, entry)
 
@@ -72,8 +76,12 @@ class TestAsyncGetConfigEntryDiagnostics:
         assert "parameters" in result
         assert "calculations" in result
         assert "visibilities" in result
-        # MAC should be redacted
-        assert result["entry"]["data"]["mac"].endswith("*")
+        # MAC keeps only the OUI (vendor prefix); the device-specific part
+        # is masked out - not routed through TO_REDACT (M9).
+        assert result["entry"]["data"]["mac"] == "aa:bb:cc:*"
+        # Host and serial-derived unique_id must be fully redacted (M9).
+        assert result["entry"]["data"]["host"] == REDACTED
+        assert result["entry"]["unique_id"] == REDACTED
 
     @pytest.mark.asyncio
     async def test_no_mac(self):
@@ -101,6 +109,52 @@ class TestAsyncGetConfigEntryDiagnostics:
 
         result = await async_get_config_entry_diagnostics(hass, entry)
         assert "mac" not in result["entry"]["data"]
+
+    @pytest.mark.asyncio
+    async def test_device_identifiers_are_redacted(self):
+        """M9: device identifiers/via_device/configuration_url embed the
+        serial number and host, and must be redacted like core integrations."""
+        from custom_components.luxtronik2.diagnostics import (
+            async_get_config_entry_diagnostics,
+        )
+
+        hass = MagicMock()
+        hass.async_add_executor_job = AsyncMock(return_value=None)
+
+        data = MagicMock()
+        data.parameters.parameters = {}
+        data.calculations.calculations = {}
+        data.visibilities.visibilities = {}
+
+        coordinator = MagicMock()
+        coordinator.async_request_refresh = AsyncMock()
+        coordinator.data = data
+        coordinator.device_infos = {
+            "heatpump": {
+                "identifiers": {("luxtronik2", "20230101_0xff_heatpump")},
+                "configuration_url": "http://192.168.1.100/",
+                "name": "heatpump",
+            },
+            "heating": {
+                "identifiers": {("luxtronik2", "20230101_0xff_heating")},
+                "via_device": ("luxtronik2", "20230101_0xff_heatpump"),
+                "name": "heating",
+            },
+        }
+
+        entry = MagicMock()
+        entry.runtime_data = coordinator
+        entry.data = {"host": "192.168.1.100"}
+        entry.as_dict.return_value = {"data": {}}
+
+        result = await async_get_config_entry_diagnostics(hass, entry)
+
+        assert result["devices"]["heatpump"]["identifiers"] == REDACTED
+        assert result["devices"]["heatpump"]["configuration_url"] == REDACTED
+        assert result["devices"]["heating"]["identifiers"] == REDACTED
+        assert result["devices"]["heating"]["via_device"] == REDACTED
+        # Non-sensitive fields must survive untouched
+        assert result["devices"]["heatpump"]["name"] == "heatpump"
 
 
 class TestDiagnosticsNoDataKey:
