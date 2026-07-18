@@ -219,6 +219,7 @@ Each task is independently mergeable unless a dependency is stated. Do NOT batch
 - **File**: `custom_components/luxtronik2/config_flow.py` (~lines 287–290)
 - **What's wrong**: assigns `legacy_entry.disabled_by = ...` directly. Works today but bypasses `hass.config_entries.async_set_disabled_by(entry_id, disabled_by)`, which persists the change and handles unload; core is progressively freezing ConfigEntry attributes.
 - **Fix**: replace the direct assignment with `await hass.config_entries.async_set_disabled_by(legacy_entry.entry_id, <ConfigEntryDisabler or None>)`. Check the surrounding code for what value is being set and preserve it.
+- **Resolution (2026-07-18)**: the flagged code was the whole body of `_async_migrate_data_from_custom_component_luxtronik2` — a migration from a predecessor `custom_components/luxtronik2` install, written 3+ years ago and never actually pointed at a different domain (`DOMAIN` is still `"luxtronik2"`, so the lookup was self-referential and effectively dead). Removed the method and its call site in `async_step_user` entirely instead of patching the API call, since the migration itself is obsolete, not just the mutation style.
 
 ### I10 — Migration v1 requires a live device
 
@@ -303,7 +304,7 @@ All four must be clean (0 lint findings, 0 format diffs, 0 type errors, all test
 Mark tasks here as they land (edit this file in the same PR as the fix):
 
 - [x] C1  - [x] C2  - [x] C3
-- [ ] I1  - [x] I2  - [x] I3  - [ ] I3b  - [x] I4  - [x] I5  - [x] I6  - [x] I7  - [x] I8  - [ ] I9  - [ ] I10  - [x] I11
+- [ ] I1  - [x] I2  - [x] I3  - [ ] I3b  - [x] I4  - [x] I5  - [x] I6  - [x] I7  - [x] I8  - [x] I9  - [ ] I10  - [x] I11
 - [x] M1  - [x] M2  - [x] M3  - [x] M4  - [ ] M5  - [x] M6  - [x] M7  - [ ] M8  - [ ] M9  - [ ] M10  - [x] M11  - [ ] M12
 
 Recovery note (2026-07-18): this file was found deleted mid-session with no git history (it was never committed) and was reconstructed from the content captured earlier in the same conversation. If you're reading this and something looks off versus the actual code state, re-verify line numbers/snippets against the current `main` rather than trusting this doc blindly — several tasks (I11, M3, M4) landed after the original review and their line refs above are stale by design (see the note at the top of this section).

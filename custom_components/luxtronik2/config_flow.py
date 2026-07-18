@@ -132,7 +132,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initiated by the user."""
         try:
             LOGGER.info("Starting async_step_user")
-            await self._async_migrate_data_from_custom_component_luxtronik2()
 
             LOGGER.info("Starting discovery of Luxtronik devices on network")
             device_list = await self._discover_devices()
@@ -283,57 +282,6 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             return abort_result
 
         return self._create_entry(config, coordinator)
-
-    async def _async_migrate_data_from_custom_component_luxtronik2(
-        self,
-    ):  # pragma: no cover
-        """
-        Migrate custom_components/luxtronik2 to components/luxtronik.
-
-            - If serial number matches
-            1. Set CONF_HA_SENSOR_PREFIX = "luxtronik2"
-            2. Disable custom_components/luxtronik2
-        """
-        # Check if custom_component_luxtronik2 exists:
-        try:
-            for legacy_entry in self.hass.config_entries.async_entries("luxtronik2"):
-                if (
-                    CONF_HOST not in legacy_entry.data
-                    or CONF_PORT not in legacy_entry.data
-                ):
-                    continue
-                try:
-                    # Try to connect and lookup serial number:
-                    coord_legacy = await connect_and_get_coordinator(
-                        self.hass, legacy_entry
-                    )
-                    if self.context.get("unique_id") == coord_legacy.unique_id:
-                        # Match Found! --> Migrate
-                        # How to use .INTEGRATION or other instead of .USER?
-                        legacy_entry.disabled_by = (
-                            config_entries.ConfigEntryDisabler.USER
-                        )
-                        self.hass.config_entries.async_update_entry(legacy_entry)
-                        await self.hass.config_entries.async_reload(
-                            legacy_entry.entry_id
-                        )
-                        ctx_data: dict[str, Any] = self.context.setdefault("data", {})  # pyright: ignore[reportCallIssue, reportArgumentType]
-                        ctx_data[CONF_HA_SENSOR_PREFIX] = "luxtronik2"
-                        if (
-                            hasattr(legacy_entry, "data")
-                            and CONF_HA_SENSOR_INDOOR_TEMPERATURE in legacy_entry.data
-                        ):
-                            ctx_data[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = (
-                                legacy_entry.data[CONF_HA_SENSOR_INDOOR_TEMPERATURE]
-                            )
-                        return
-                except Exception:  # pylint: disable=broad-except
-                    continue
-        except Exception as err:
-            LOGGER.error(
-                "Could not handle config_flow._async_migrate_data_from_custom_component_luxtronik2",
-                exc_info=err,
-            )
 
     async def async_step_dhcp(
         self, discovery_info: DhcpServiceInfo

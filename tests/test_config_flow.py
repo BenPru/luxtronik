@@ -173,7 +173,6 @@ class TestFlowInstanceIsolation:
             flow.hass = MagicMock()
             flow.hass.async_add_executor_job = AsyncMock(return_value=devices)
             flow._async_current_entries = MagicMock(return_value=[])
-            flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
             flow.async_show_form = MagicMock(return_value={"type": "form"})
 
         flow1 = LuxtronikFlowHandler()
@@ -200,7 +199,6 @@ class TestAsyncStepUser:
         flow.hass = MagicMock()
         flow.hass.async_add_executor_job = AsyncMock(return_value=[("1.2.3.4", 8889)])
         flow._async_current_entries = MagicMock(return_value=[])
-        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
         flow.async_show_form = MagicMock(
             return_value={"type": "form", "step_id": "select_devices"}
         )
@@ -216,7 +214,6 @@ class TestAsyncStepUser:
         existing = MagicMock()
         existing.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
         flow._async_current_entries = MagicMock(return_value=[existing])
-        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
         flow.async_show_form = MagicMock(
             return_value={"type": "form", "step_id": "manual_entry"}
         )
@@ -230,7 +227,6 @@ class TestAsyncStepUser:
         flow.hass = MagicMock()
         flow.hass.async_add_executor_job = AsyncMock(return_value=[])
         flow._async_current_entries = MagicMock(return_value=[])
-        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
         flow.async_show_form = MagicMock(return_value={"type": "form"})
         await flow.async_step_user()
         flow.async_show_form.assert_called_once()
@@ -243,7 +239,6 @@ class TestAsyncStepUser:
         flow.hass.async_add_executor_job = AsyncMock(
             side_effect=OSError("network unreachable")
         )
-        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
         flow.async_show_form = MagicMock(return_value={"type": "form"})
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         await flow.async_step_user()
@@ -259,7 +254,6 @@ class TestAsyncStepUser:
         flow = LuxtronikFlowHandler()
         flow.hass = MagicMock()
         flow.hass.async_add_executor_job = AsyncMock(side_effect=Exception("boom"))
-        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
         flow.async_show_form = MagicMock(return_value={"type": "form"})
         flow.async_abort = MagicMock(return_value={"type": "abort"})
         await flow.async_step_user()
@@ -276,7 +270,6 @@ class TestAsyncStepUser:
         flow.hass = MagicMock()
         flow.hass.async_add_executor_job = AsyncMock(return_value=[("1.2.3.4", 8889)])
         flow._async_current_entries = MagicMock(return_value=[])
-        flow._async_migrate_data_from_custom_component_luxtronik2 = AsyncMock()
         flow.async_show_form = MagicMock(
             return_value={"type": "form", "step_id": "select_devices"}
         )
