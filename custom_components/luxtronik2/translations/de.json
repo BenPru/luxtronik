@@ -65,20 +65,6 @@
                 "name": "Zweiter W\u00e4rmeerzeuger W\u00e4rmemenge"
             }
         },
-        "device": {
-            "heatpump": {
-                "name": "WP"
-            },
-            "heating": {
-                "name": "Heiz"
-            },
-            "domestic_water": {
-                "name": "BW"
-            },
-            "cooling": {
-                "name": "K\u00fchl"
-            }
-        },
         "switch": {
             "remote_maintenance": {
                 "name": "Fernwartung"
@@ -1051,6 +1037,20 @@
             "domestic_water": {
                 "name": "Brauchwasser"
             }
+        }
+    },
+    "device": {
+        "heatpump": {
+            "name": "WP"
+        },
+        "heating": {
+            "name": "Heiz"
+        },
+        "domestic_water": {
+            "name": "BW"
+        },
+        "cooling": {
+            "name": "K\u00fchl"
         }
     },
     "config": {

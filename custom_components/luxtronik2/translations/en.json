@@ -59,20 +59,6 @@
                 "name": "Motor protection"
             }
         },
-        "device": {
-            "heatpump": {
-                "name": "HP"
-            },
-            "heating": {
-                "name": "Heat"
-            },
-            "domestic_water": {
-                "name": "DHW"
-            },
-            "cooling": {
-                "name": "Cool"
-            }
-        },
         "switch": {
             "remote_maintenance": {
                 "name": "Remote maintenance"
@@ -1079,6 +1065,20 @@
             }
         }
     },
+    "device": {
+        "heatpump": {
+            "name": "HP"
+        },
+        "heating": {
+            "name": "Heat"
+        },
+        "domestic_water": {
+            "name": "DHW"
+        },
+        "cooling": {
+            "name": "Cool"
+        }
+    },
     "config": {
         "abort": {
             "cannot_connect": "Failed to connect to Luxtronik at {host}.\\nError: {connect_error}",
@@ -1182,7 +1182,7 @@
             "message": "Luxtronik heat pump did not confirm the written value(s): {details}"
         },
         "write_confirmation_unavailable": {
-            "message": "Wrote {parameters} to the Luxtronik heat pump, but the confirming refresh failed — the result could not be confirmed"
+            "message": "Wrote {parameters} to the Luxtronik heat pump, but the confirming refresh failed \u2014 the result could not be confirmed"
         }
     },
     "issues": {

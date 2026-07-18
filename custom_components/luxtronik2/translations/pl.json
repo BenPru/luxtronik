@@ -80,20 +80,6 @@
                 "name": "Delta docelowa przep\u0142ywu pompy"
             }
         },
-        "device": {
-            "heatpump": {
-                "name": "Pompa ciep\u0142a"
-            },
-            "heating": {
-                "name": "Ogrzewanie"
-            },
-            "domestic_water": {
-                "name": "Ciep\u0142a woda"
-            },
-            "cooling": {
-                "name": "Ch\u0142odzenie"
-            }
-        },
         "switch": {
             "remote_maintenance": {
                 "name": "Zdalna konserwacja"
@@ -1069,6 +1055,20 @@
             "domestic_water": {
                 "name": "Ciep\u0142a woda"
             }
+        }
+    },
+    "device": {
+        "heatpump": {
+            "name": "Pompa ciep\u0142a"
+        },
+        "heating": {
+            "name": "Ogrzewanie"
+        },
+        "domestic_water": {
+            "name": "Ciep\u0142a woda"
+        },
+        "cooling": {
+            "name": "Ch\u0142odzenie"
         }
     },
     "config": {

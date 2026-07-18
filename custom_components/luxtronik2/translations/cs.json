@@ -59,20 +59,6 @@
                 "name": "Ochrana motoru"
             }
         },
-        "device": {
-            "heatpump": {
-                "name": "T\u010c"
-            },
-            "heating": {
-                "name": "Topen\u00ed"
-            },
-            "domestic_water": {
-                "name": "TUV"
-            },
-            "cooling": {
-                "name": "Chlazen\u00ed"
-            }
-        },
         "switch": {
             "remote_maintenance": {
                 "name": "Vzd\u00e1len\u00e1 \u00fadr\u017eba"
@@ -1048,6 +1034,20 @@
             "domestic_water": {
                 "name": "TUV"
             }
+        }
+    },
+    "device": {
+        "heatpump": {
+            "name": "T\u010c"
+        },
+        "heating": {
+            "name": "Topen\u00ed"
+        },
+        "domestic_water": {
+            "name": "TUV"
+        },
+        "cooling": {
+            "name": "Chlazen\u00ed"
         }
     },
     "config": {

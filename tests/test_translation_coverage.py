@@ -32,6 +32,17 @@ sys.modules[_spec.name] = check_translation_coverage
 _spec.loader.exec_module(check_translation_coverage)
 
 
+def test_translation_files_are_valid_json() -> None:
+    """Every translations/<lang>.json file must parse as valid JSON.
+
+    Without this, a syntax error in one file surfaces as an unhandled
+    JSONDecodeError from whichever other check happens to load it first,
+    instead of a clean, isolated failure naming the file and location.
+    """
+    problems = check_translation_coverage.find_invalid_json_files()
+    assert not problems, "\n" + "\n".join(problems)
+
+
 def test_all_referenced_entity_keys_have_translations() -> None:
     """Every SensorKey referenced in a *_entities_predefined.py file must exist as
     an entity in every language file."""
@@ -44,4 +55,17 @@ def test_state_and_state_attribute_codes_match_across_locales() -> None:
     must have the same set of keys in every language file - no locale may be missing
     codes (or have stray/unreachable ones) that others don't."""
     problems = check_translation_coverage.find_state_key_mismatches()
+    assert not problems, "\n" + "\n".join(problems)
+
+
+def test_device_names_are_translated_at_top_level() -> None:
+    """Every DeviceKey must have a `device.<key>.name` translation at the top level
+    of every language file, not nested under `entity.device`.
+
+    Regression guard: HA's device_registry resolves DeviceInfo(translation_key=...)
+    from the top-level `component.{domain}.device.{key}.name` path. A `device` block
+    nested under `entity` loads without error but silently fails to resolve any
+    device name at runtime, falling back to the raw key (e.g. "domestic_water").
+    """
+    problems = check_translation_coverage.find_device_translation_problems()
     assert not problems, "\n" + "\n".join(problems)

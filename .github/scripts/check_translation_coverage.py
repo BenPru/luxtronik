@@ -46,6 +46,25 @@ def load_const_mapping() -> dict[str, str]:
     return mapping
 
 
+def load_device_keys() -> list[str]:
+    """Load DeviceKey enum values from const.py without importing homeassistant."""
+    with open(CONST_FILE, encoding="utf-8") as f:
+        source = f.read()
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name == "DeviceKey":
+            values: list[str] = []
+            for stmt in node.body:
+                if (
+                    isinstance(stmt, ast.Assign)
+                    and isinstance(stmt.value, ast.Constant)
+                    and isinstance(stmt.value.value, str)
+                ):
+                    values.append(stmt.value.value)
+            return values
+    raise RuntimeError("DeviceKey class not found in const.py")
+
+
 def get_entity_keys(filename: str) -> list[str]:
     """Extract SensorKey translation keys used in a predefined entities file."""
     filepath = ENTITY_DIR / filename
@@ -78,6 +97,24 @@ def load_all_languages() -> dict[str, dict]:
         with open(TRANS_DIR / lang_file, encoding="utf-8") as f:
             data_by_lang[lang_file.removesuffix(".json")] = json.load(f)
     return data_by_lang
+
+
+def find_invalid_json_files() -> list[str]:
+    """Check that every translations/<lang>.json file parses as valid JSON.
+
+    All other checks call load_all_languages()/json.load() and would raise
+    an unhandled JSONDecodeError on a syntax error rather than a clean,
+    isolated problem report - this gives a dedicated, easy-to-read failure
+    pointing at the exact file and line/column instead.
+    """
+    problems: list[str] = []
+    for lang_file in LANG_FILES:
+        with open(TRANS_DIR / lang_file, encoding="utf-8") as f:
+            try:
+                json.load(f)
+            except json.JSONDecodeError as e:
+                problems.append(f"[{lang_file}] invalid JSON: {e}")
+    return problems
 
 
 def find_missing_entity_keys() -> list[str]:
@@ -171,8 +208,52 @@ def find_state_key_mismatches() -> list[str]:
     return problems
 
 
+def find_device_translation_problems() -> list[str]:
+    """Check that every DeviceKey has a translated name at the top-level
+    `device.<key>.name` path in every language file, and that no locale has
+    regressed back to nesting the block under `entity.device` instead.
+
+    HA's device_registry resolves DeviceInfo(translation_key=...) from
+    `component.{domain}.device.{key}.name` - a top-level `device` section,
+    not `entity.device`. A file that nests it under `entity` builds and
+    loads fine but silently fails to resolve any device name at runtime,
+    which `find_missing_entity_keys` cannot catch since it only inspects
+    the `entity` section.
+    """
+    problems: list[str] = []
+    device_keys = load_device_keys()
+    data_by_lang = load_all_languages()
+
+    for lang, data in data_by_lang.items():
+        if "device" in data.get("entity", {}):
+            problems.append(
+                f"[{lang}] device block is nested under entity.device; "
+                "it must be a top-level `device` key so HA's "
+                "translation_key resolution can find it"
+            )
+
+        device_section = data.get("device", {})
+        for key in device_keys:
+            name = device_section.get(key, {}).get("name")
+            if not name:
+                problems.append(f"[{lang}] device.{key}.name missing")
+
+    return problems
+
+
 if __name__ == "__main__":
-    all_problems = find_missing_entity_keys() + find_state_key_mismatches()
+    json_problems = find_invalid_json_files()
+    if json_problems:
+        LOG.info("Translation coverage problems found:")
+        for problem in json_problems:
+            LOG.info("  - %s", problem)
+        sys.exit(1)
+
+    all_problems = (
+        find_missing_entity_keys()
+        + find_state_key_mismatches()
+        + find_device_translation_problems()
+    )
     if not all_problems:
         LOG.info("All translation files have complete coverage!")
         sys.exit(0)
