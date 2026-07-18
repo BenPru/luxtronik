@@ -27,6 +27,7 @@ from custom_components.luxtronik2.const import (
     LuxMode,
     LuxOperationMode,
     LuxParameter as LP,
+    LuxVisibility as LV,
     SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
@@ -562,6 +563,88 @@ class TestBaseEntityRegistryEnabledDefault:
         _patch_entity(entity)
         assert entity.entity_description.entity_registry_enabled_default is False
         coord.entity_visible.assert_called()
+
+    def test_default_omitted_falls_back_to_coordinator_visibility_when_not_visible(
+        self,
+    ):
+        """Regression test for C2: a description that does NOT explicitly set
+        entity_registry_enabled_default (i.e. relies on the dataclass default)
+        must still have its enabled-default driven by coordinator.entity_visible()
+        when the heat pump reports the entity's visibility flag as not visible.
+
+        Before the fix, LuxtronikEntityDescription.entity_registry_enabled_default
+        defaulted to `bool = True`, so the `is None` branch in
+        LuxtronikEntity.__init__ never fired for real (non-test-authored)
+        descriptions, and this assertion failed with True != False.
+        """
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = False
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            visibility=LV.V0005_COOLING,
+            # entity_registry_enabled_default intentionally omitted
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is False
+        coord.entity_visible.assert_called()
+
+    def test_default_omitted_stays_enabled_when_coordinator_reports_visible(self):
+        """Sanity check for the same fallback: when the coordinator reports the
+        entity IS visible, the omitted-default description ends up enabled."""
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = True
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            visibility=LV.V0005_COOLING,
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is True
+
+    def test_explicit_false_wins_over_visibility(self):
+        """Explicit False must keep winning even when the coordinator reports
+        the entity as visible (i.e. explicit values are never overridden)."""
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = True
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            entity_registry_enabled_default=False,
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is False
+        coord.entity_visible.assert_not_called()
+
+    def test_explicit_true_wins_over_visibility(self):
+        """Explicit True must keep winning even when the coordinator reports
+        the entity as not visible (i.e. explicit values are never overridden)."""
+        coord = _mock_coordinator()
+        coord.entity_visible.return_value = False
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            entity_registry_enabled_default=True,
+        )
+        entity = LuxtronikSensorEntity(
+            MagicMock(), _mock_entry(), coord, desc, DeviceKey.heatpump
+        )
+        _patch_entity(entity)
+        assert entity.entity_description.entity_registry_enabled_default is True
+        coord.entity_visible.assert_not_called()
 
 
 # ===========================================================================
