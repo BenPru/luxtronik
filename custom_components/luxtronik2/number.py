@@ -106,6 +106,7 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
             immediate=False,
             function=self._async_set_native_value,
         )
+        self.async_on_remove(self._debouncer.async_shutdown)
 
         # Store pending value for debounced write
         self._pending_value: float | None = None
