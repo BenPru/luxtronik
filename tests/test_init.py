@@ -10,6 +10,7 @@ import pytest
 
 from conftest import make_coordinator_data
 from custom_components.luxtronik2 import (
+    _async_delete_legacy_devices,
     _async_update_config_entry,
     _fix_select_entity_unique_ids,
     _identifiers_exists,
@@ -144,6 +145,80 @@ class TestIdentifiersExists:
 
 
 # ===========================================================================
+# _async_delete_legacy_devices
+# ===========================================================================
+
+
+class TestAsyncDeleteLegacyDevices:
+    @pytest.mark.asyncio
+    async def test_removes_devices_with_no_matching_identifiers(self):
+        """I10 follow-up: takes an already-connected coordinator, no device I/O."""
+        hass = MagicMock()
+        entry = _mock_entry()
+
+        current_device = MagicMock()
+        current_device.id = "device_current"
+        current_device.identifiers = {(DOMAIN, "current")}
+        stale_device = MagicMock()
+        stale_device.id = "device_stale"
+        stale_device.identifiers = {(DOMAIN, "stale")}
+
+        device_registry = MagicMock()
+        device_registry.async_remove_device = MagicMock()
+
+        coordinator = MagicMock()
+        coordinator.device_infos = {
+            "heatpump": {"identifiers": {(DOMAIN, "current")}},
+        }
+
+        with (
+            patch(
+                "custom_components.luxtronik2.dr.async_get",
+                return_value=device_registry,
+            ),
+            patch(
+                "custom_components.luxtronik2.dr.async_entries_for_config_entry",
+                return_value=[current_device, stale_device],
+            ),
+        ):
+            await _async_delete_legacy_devices(hass, entry, coordinator)
+
+        device_registry.async_remove_device.assert_called_once_with("device_stale")
+
+    @pytest.mark.asyncio
+    async def test_keeps_devices_matching_current_identifiers(self):
+        """A device matching a current coordinator identifier is never removed."""
+        hass = MagicMock()
+        entry = _mock_entry()
+
+        device = MagicMock()
+        device.id = "device_current"
+        device.identifiers = {(DOMAIN, "current")}
+
+        device_registry = MagicMock()
+        device_registry.async_remove_device = MagicMock()
+
+        coordinator = MagicMock()
+        coordinator.device_infos = {
+            "heatpump": {"identifiers": {(DOMAIN, "current")}},
+        }
+
+        with (
+            patch(
+                "custom_components.luxtronik2.dr.async_get",
+                return_value=device_registry,
+            ),
+            patch(
+                "custom_components.luxtronik2.dr.async_entries_for_config_entry",
+                return_value=[device],
+            ),
+        ):
+            await _async_delete_legacy_devices(hass, entry, coordinator)
+
+        device_registry.async_remove_device.assert_not_called()
+
+
+# ===========================================================================
 # _async_update_config_entry
 # ===========================================================================
 
@@ -268,6 +343,56 @@ class TestAsyncMigrateEntry:
         entry = _mock_entry(version=CONFIG_ENTRY_VERSION)
         result = await async_migrate_entry(hass, entry)
         assert result is True
+
+    @pytest.mark.asyncio
+    async def test_migration_v1_and_v2_do_not_require_a_live_device(self):
+        """I10: v1->v2->v3 must be pure data transforms, no device connection."""
+        hass = MagicMock()
+        hass.config_entries.async_entries.return_value = []
+        entry = _mock_entry(version=1)
+        entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+                side_effect=ConnectionError("device offline"),
+            ) as mock_connect,
+            patch(
+                "custom_components.luxtronik2._rename_entities",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._rename_cooling_entities",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._rename_curve_entities",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._fix_select_entity_unique_ids",
+                new_callable=AsyncMock,
+            ),
+        ):
+            result = await async_migrate_entry(hass, entry)
+
+        assert result is True
+        mock_connect.assert_not_called()
+
+        v2_call = next(
+            call
+            for call in hass.config_entries.async_update_entry.call_args_list
+            if call.kwargs.get("version") == 2
+        )
+        assert v2_call.kwargs["data"][CONF_HA_SENSOR_PREFIX] == "luxtronik"
+        assert "unique_id" not in v2_call.kwargs
+
+        # v2->v3 must also complete without ever touching the device.
+        assert any(
+            call.kwargs.get("version") == 3
+            for call in hass.config_entries.async_update_entry.call_args_list
+        )
 
     @pytest.mark.asyncio
     async def test_migration_from_v3_to_v4(self):
@@ -442,6 +567,95 @@ class TestAsyncSetupEntry:
         hass.config_entries.async_forward_entry_setups.assert_awaited_once_with(
             entry, PLATFORMS
         )
+
+    @pytest.mark.asyncio
+    async def test_resolves_unique_id_lazily_when_missing(self):
+        """I10: entries migrated from v1 without a live device get their
+        unique_id filled in on first successful connection."""
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.services.has_service.return_value = False
+        entry = _mock_entry()
+        entry.unique_id = None
+
+        coordinator = MagicMock()
+        coordinator.manufacturer = "Alpha Innotec"
+        coordinator.unique_id = "20230101_0xff"
+        coordinator.async_config_entry_first_refresh = AsyncMock()
+
+        with patch(
+            "custom_components.luxtronik2.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coordinator,
+        ):
+            result = await async_setup_entry(hass, entry)
+
+        assert result is True
+        unique_id_calls = [
+            call
+            for call in hass.config_entries.async_update_entry.call_args_list
+            if "unique_id" in call.kwargs
+        ]
+        assert len(unique_id_calls) == 1
+        assert unique_id_calls[0].kwargs["unique_id"] == "20230101_0xff"
+
+    @pytest.mark.asyncio
+    async def test_does_not_touch_unique_id_when_already_set(self):
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.services.has_service.return_value = False
+        entry = _mock_entry()
+        entry.unique_id = "already_set"
+
+        coordinator = MagicMock()
+        coordinator.manufacturer = "Alpha Innotec"
+        coordinator.unique_id = "20230101_0xff"
+        coordinator.async_config_entry_first_refresh = AsyncMock()
+
+        with patch(
+            "custom_components.luxtronik2.connect_and_get_coordinator",
+            new_callable=AsyncMock,
+            return_value=coordinator,
+        ):
+            await async_setup_entry(hass, entry)
+
+        unique_id_calls = [
+            call
+            for call in hass.config_entries.async_update_entry.call_args_list
+            if "unique_id" in call.kwargs
+        ]
+        assert len(unique_id_calls) == 0
+
+    @pytest.mark.asyncio
+    async def test_prunes_legacy_devices_after_connect(self):
+        """I10 follow-up: legacy device pruning runs from setup, with the
+        already-connected coordinator, not from the version migration."""
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.services.has_service.return_value = False
+        entry = _mock_entry()
+
+        coordinator = MagicMock()
+        coordinator.manufacturer = "Alpha Innotec"
+        coordinator.get_device = MagicMock()
+        coordinator.async_config_entry_first_refresh = AsyncMock()
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+                return_value=coordinator,
+            ),
+            patch(
+                "custom_components.luxtronik2._async_delete_legacy_devices",
+                new_callable=AsyncMock,
+            ) as mock_prune,
+        ):
+            result = await async_setup_entry(hass, entry)
+
+        assert result is True
+        coordinator.get_device.assert_called_once()
+        mock_prune.assert_awaited_once_with(hass, entry, coordinator)
 
     @pytest.mark.asyncio
     async def test_connection_failure_raises_not_ready(self):

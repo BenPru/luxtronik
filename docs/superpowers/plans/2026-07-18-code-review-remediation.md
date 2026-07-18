@@ -227,6 +227,8 @@ Each task is independently mergeable unless a dependency is stated. Do NOT batch
 - **What's wrong**: the v1→v2 step calls `connect_and_get_coordinator(...)` to resolve the unique_id. If the heat pump is offline during an HA upgrade, the migration fails and the config entry goes into a migration-error state (worse than setup-retry: HA does not retry failed migrations automatically).
 - **Fix**: make the migration a pure data transform. If the unique_id can't be derived from stored entry data alone, leave it unset/sentinel in the migration and resolve it lazily during `async_setup_entry` (where `ConfigEntryNotReady` gives automatic retries). Follow how later setup code already obtains `coordinator.unique_id`.
 - **Tests**: migration succeeds with no network available (mock `connect_and_get_coordinator` to raise; migration must still return `True`).
+- **Resolution (2026-07-18)**: v1 step no longer calls `connect_and_get_coordinator`; it only fills in `CONF_HA_SENSOR_PREFIX` and bumps to version 2, leaving `unique_id` untouched. `async_setup_entry` now sets `entry.unique_id` from `coordinator.unique_id` after a successful connection whenever it's still `None` (one-time, for entries that migrated without a live device).
+- **Follow-up (2026-07-18)**: the v2 step (`_async_delete_legacy_devices`) had the identical live-device dependency — same fix applied. It no longer connects itself; `async_migrate_entry`'s v2 branch is now a no-op version bump, and the actual device-registry pruning runs from `async_setup_entry` using the coordinator already connected there (calling `coordinator.get_device()` first to ensure `device_infos` is populated before pruning against it — pruning against an empty `device_infos` would otherwise delete every device, current ones included). Verified: no other migration step (3 through 8) touches `connect_and_get_coordinator` — they only rename entity-registry entries by string manipulation on the stored prefix, so v1/v2 were the only two affected.
 
 ### I11 — Add a thin harness-based integration-test layer
 
@@ -304,7 +306,7 @@ All four must be clean (0 lint findings, 0 format diffs, 0 type errors, all test
 Mark tasks here as they land (edit this file in the same PR as the fix):
 
 - [x] C1  - [x] C2  - [x] C3
-- [ ] I1  - [x] I2  - [x] I3  - [ ] I3b  - [x] I4  - [x] I5  - [x] I6  - [x] I7  - [x] I8  - [x] I9  - [ ] I10  - [x] I11
+- [ ] I1  - [x] I2  - [x] I3  - [ ] I3b  - [x] I4  - [x] I5  - [x] I6  - [x] I7  - [x] I8  - [x] I9  - [x] I10  - [x] I11
 - [x] M1  - [x] M2  - [x] M3  - [x] M4  - [ ] M5  - [x] M6  - [x] M7  - [ ] M8  - [ ] M9  - [ ] M10  - [x] M11  - [ ] M12
 
 Recovery note (2026-07-18): this file was found deleted mid-session with no git history (it was never committed) and was reconstructed from the content captured earlier in the same conversation. If you're reading this and something looks off versus the actual code state, re-verify line numbers/snippets against the current `main` rather than trusting this doc blindly — several tasks (I11, M3, M4) landed after the original review and their line refs above are stale by design (see the note at the top of this section).
