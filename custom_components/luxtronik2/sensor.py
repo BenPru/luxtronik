@@ -206,7 +206,6 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         else:
             self._attr_native_value = value
 
-        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
 

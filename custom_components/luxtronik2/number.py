@@ -136,7 +136,6 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
         else:
             self._attr_native_value = value
 
-        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def async_set_native_value(self, value: float) -> None:
