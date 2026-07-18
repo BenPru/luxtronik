@@ -102,7 +102,6 @@ class LuxtronikDateEntity(LuxtronikEntity[LuxtronikDateEntityDescription], DateE
         else:
             self._attr_native_value = None
 
-        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def async_set_value(self, value: date) -> None:

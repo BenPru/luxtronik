@@ -219,7 +219,6 @@ class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibl
             data, descr.luxtronik_key_target_temperature.value
         )
 
-        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def _async_set_lux_mode(self, lux_mode: str) -> None:

@@ -137,7 +137,6 @@ class LuxtronikTimerScheduleText(
             pairs.append(f"{start}-{end}")
         self._attr_native_value = "/".join(pairs)
 
-        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
     async def async_set_value(self, value: str) -> None:
