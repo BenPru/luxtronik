@@ -53,6 +53,23 @@ from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 # endregion Imports
 
 
+def _write_confirmed(written: Any, confirmed: Any) -> bool:
+    """Return True if a write's post-refresh read-back matches what was written.
+
+    Datatype conversion (raw int -> float/enum/etc., see `lux_helper.py`'s
+    vendored `to_heatpump`/`from_heatpump`) can change a value's type between
+    what an entity passes to `async_write`/`async_write_many` and what a
+    refresh reads back afterwards, so a plain `==` is too strict. Numeric
+    values are additionally compared after rounding to 1 decimal place to
+    absorb floating point noise from 0.1-step datatypes (e.g. Celsius: raw / 10).
+    """
+    if written == confirmed:
+        return True
+    if isinstance(written, (int, float)) and isinstance(confirmed, (int, float)):
+        return round(float(written), 1) == round(float(confirmed), 1)
+    return False
+
+
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
@@ -111,12 +128,39 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 raise UpdateFailed(f"Error fetching data: {err}") from err
 
     async def async_write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
+        """Write a single parameter to the heat pump and confirm it stuck.
+
+        Thin wrapper around `async_write_many` for the common single-parameter
+        write case; see that method for the write/refresh/confirm logic.
+        """
+        return await self.async_write_many([(parameter, value)])
+
+    async def async_write_many(
+        self, pairs: list[tuple[str, Any]]
+    ) -> LuxtronikCoordinatorData:
+        """Write multiple parameters in one queued batch, then refresh once.
+
+        All pairs are queued via `parameters.set` before a single
+        `client.write()` flushes them to the device, and the coordinator
+        refreshes exactly once afterwards - avoiding an up-to-N-serial-refresh
+        pattern a naive per-parameter write loop would cause (e.g. editing a
+        multi-row timer schedule).
+
+        After the refresh, each written value is compared against what the
+        device reports back; on any mismatch (rejected or clamped write) a
+        `HomeAssistantError` is raised so the UI surfaces the failure and the
+        entity re-syncs to the device's actual value instead of silently
+        keeping the optimistic one.
+        """
         try:
             async with self._lock:
-                await self.hass.async_add_executor_job(
-                    self.client.parameters.set, parameter, value
+                for parameter, value in pairs:
+                    await self.hass.async_add_executor_job(
+                        self.client.parameters.set, parameter, value
+                    )
+                LOGGER.debug(
+                    "Done: self.client.parameters.set (%d parameter(s))", len(pairs)
                 )
-                LOGGER.debug("Done: self.client.parameters.set")
                 await self.hass.async_add_executor_job(self.client.write)
                 LOGGER.debug("Done: self.client.write")
 
@@ -124,16 +168,47 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             await self.async_refresh()
             LOGGER.debug("Coordinator data refreshed!")
 
-            # Confirm the value after the read
-            confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
-            LOGGER.info(
-                'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
-                parameter,
-                value,
-                confirmed_value,
-            )
+            # async_refresh() swallows failures internally (logs, does not
+            # raise) rather than propagating them, so self.data may still be
+            # the stale pre-write snapshot here. Comparing newly-written
+            # values against stale data would almost always look like a
+            # mismatch, misleadingly implying the device rejected the write
+            # when only the confirming read failed. Surface that distinctly
+            # instead of running the confirm comparison against stale data.
+            if not self.last_update_success:
+                raise HomeAssistantError(
+                    translation_domain=DOMAIN,
+                    translation_key="write_confirmation_unavailable",
+                    translation_placeholders={
+                        "parameters": ", ".join(parameter for parameter, _ in pairs)
+                    },
+                )
+
+            # Confirm each value after the read
+            mismatches: list[str] = []
+            for parameter, value in pairs:
+                confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
+                LOGGER.info(
+                    'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
+                    parameter,
+                    value,
+                    confirmed_value,
+                )
+                if not _write_confirmed(value, confirmed_value):
+                    mismatches.append(
+                        f"{parameter} (wrote {value!r}, device reports {confirmed_value!r})"
+                    )
+
+            if mismatches:
+                raise HomeAssistantError(
+                    translation_domain=DOMAIN,
+                    translation_key="write_confirmation_mismatch",
+                    translation_placeholders={"details": "; ".join(mismatches)},
+                )
 
             return self.data
+        except HomeAssistantError:
+            raise
         except Exception as err:
             raise LuxtronikWriteError(f"Write error: {err}") from err
 

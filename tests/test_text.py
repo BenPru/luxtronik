@@ -48,6 +48,7 @@ def _mock_coordinator(data=None, *, last_update_success: bool = True):
     coord.entity_active.return_value = True
     coord.get_device.return_value = MagicMock()
     coord.async_write = AsyncMock(return_value=data)
+    coord.async_write_many = AsyncMock(return_value=data)
     return coord
 
 
@@ -225,17 +226,37 @@ class TestLuxtronikTimerScheduleText:
         assert entity.available is False
 
     @pytest.mark.asyncio
-    async def test_set_value_writes_only_changed_rows(self):
+    async def test_set_value_writes_only_changed_rows_in_one_batch(self):
         entity, coord, description = self._make_entity()
         start0, end0 = description.row_names[0]
         data = make_coordinator_data(parameters={start0: "06:00", end0: "22:00"})
         coord.data = data
-        coord.async_write = AsyncMock(return_value=data)
+        coord.async_write_many = AsyncMock(return_value=data)
 
         await entity.async_set_value("06:00-22:00")
 
-        # Row 0 already matches; remaining rows get cleared (2 writes each).
-        assert coord.async_write.await_count == (len(description.row_names) - 1) * 2
+        # Row 0 already matches; remaining rows get cleared (2 writes each) -
+        # but all queued into a single async_write_many call (one refresh),
+        # not one async_write call per changed value.
+        coord.async_write_many.assert_awaited_once()
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert len(pairs) == (len(description.row_names) - 1) * 2
+        coord.async_write.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_set_value_sends_expected_pairs(self):
+        entity, coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        start1, end1 = description.row_names[1]
+        data = make_coordinator_data(parameters={start0: "06:00", end0: "22:00"})
+        coord.data = data
+        coord.async_write_many = AsyncMock(return_value=data)
+
+        await entity.async_set_value("06:00-22:00/07:30-21:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (start1, "07:30") in pairs
+        assert (end1, "21:00") in pairs
 
     @pytest.mark.asyncio
     async def test_set_value_idempotent_when_unchanged(self):
@@ -249,11 +270,12 @@ class TestLuxtronikTimerScheduleText:
         row_values[end0] = "22:00"
         data = make_coordinator_data(parameters=row_values)
         coord.data = data
-        coord.async_write = AsyncMock(return_value=data)
+        coord.async_write_many = AsyncMock(return_value=data)
 
         entity._handle_coordinator_update(data)
         await entity.async_set_value(entity._attr_native_value)
 
+        coord.async_write_many.assert_not_called()
         coord.async_write.assert_not_called()
 
     @pytest.mark.asyncio
@@ -262,3 +284,4 @@ class TestLuxtronikTimerScheduleText:
         with pytest.raises(ServiceValidationError):
             await entity.async_set_value("not-a-schedule")
         coord.async_write.assert_not_called()
+        coord.async_write_many.assert_not_called()
