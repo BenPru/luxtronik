@@ -16,9 +16,10 @@ import asyncio
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.const import CONF_HOST, CONF_PORT, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -206,6 +207,36 @@ async def test_number_set_native_value_writes_converted_raw_value(
 
     assert client.parameters.get("ID_Soll_BWS_akt").value == 55.0
     assert float(hass.states.get(entity_id).state) == 55.0
+
+
+async def test_number_temperature_state_converts_to_imperial_unit(
+    hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A temperature number entity's state respects hass's display unit (I4 regression net).
+
+    `LuxtronikNumberEntity` used to override `state` to return
+    `self._attr_native_value` unconditionally, bypassing `NumberEntity`'s
+    built-in unit conversion - imperial users would see the raw Celsius
+    number mislabeled as Fahrenheit.
+    """
+    hass.config.units = US_CUSTOMARY_SYSTEM
+    client = FakeLuxtronikClient(
+        host="192.168.1.100", port=DEFAULT_PORT, socket_timeout=10, max_data_length=1024
+    )
+    _patch_client(monkeypatch, client)
+
+    entry = _make_entry()
+    entry.add_to_hass(hass)
+
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    entity_id = f"number.{DOMAIN}_{SensorKey.DHW_TARGET_TEMPERATURE}"
+    state = hass.states.get(entity_id)
+    assert state is not None
+    # Native value is 50.0 degC (see DEFAULT_PARAMETERS["ID_Soll_BWS_akt"]).
+    assert float(state.state) == pytest.approx(122.0)
+    assert state.attributes["unit_of_measurement"] == UnitOfTemperature.FAHRENHEIT
 
 
 async def test_unload_disconnects_client_and_unregisters_service(
