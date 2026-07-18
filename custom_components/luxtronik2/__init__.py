@@ -105,7 +105,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     else:
         new_title = f"Luxtronik @ {host}:{port}"
 
-    LOGGER.info("new_title: %s", new_title)
+    LOGGER.debug("new_title: %s", new_title)
 
     # Preserve any user-provided title. Only auto-update when the existing
     # title is empty. If the title already matches `new_title`, do nothing.
@@ -124,7 +124,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
 
     setup_hass_services(hass, entry)
 
-    LOGGER.info("Luxtronik integration setup completed for %s", entry.entry_id)
+    LOGGER.debug("Luxtronik integration setup completed for %s", entry.entry_id)
 
     return True
 
