@@ -326,3 +326,58 @@ class TestClimateTemperatureKeyBranches:
         thermostat._handle_coordinator_update(data)
         thermostat.hass.states.get.assert_called_with("sensor.living_room_temp")
         assert thermostat._attr_current_temperature == 21.5
+
+
+# ===========================================================================
+# climate.py — unmapped mode value (M7 regression)
+# ===========================================================================
+
+
+class TestClimateUnmappedMode:
+    def test_missing_mode_sets_hvac_and_preset_none(self):
+        """No mode reported (e.g. key absent) clears both hvac and preset mode."""
+        coord = _mock_coordinator()
+        entry = _mock_entry()
+        hass = MagicMock()
+
+        thermostat = LuxtronikThermostat(hass, entry, coord, THERMOSTATS[0])
+        _patch_entity(thermostat)
+        data = make_coordinator_data(
+            parameters={},
+            calculations={"ID_WEB_WP_BZ_akt": LuxOperationMode.heating},
+        )
+        thermostat._handle_coordinator_update(data)
+        assert thermostat._attr_hvac_mode is None
+        assert thermostat._attr_preset_mode is None
+
+    def test_unmapped_mode_does_not_raise(self):
+        """An unexpected mode value must not raise KeyError from the coordinator listener."""
+        coord = _mock_coordinator()
+        entry = _mock_entry()
+        hass = MagicMock()
+
+        thermostat = LuxtronikThermostat(hass, entry, coord, THERMOSTATS[0])
+        _patch_entity(thermostat)
+        data = make_coordinator_data(
+            parameters={"ID_Ba_Hz_akt": "unexpected_mode"},
+            calculations={"ID_WEB_WP_BZ_akt": LuxOperationMode.heating},
+        )
+        thermostat._handle_coordinator_update(data)
+        assert thermostat._attr_hvac_mode is None
+        assert thermostat._attr_preset_mode is None
+
+    def test_mapped_mode_still_works(self):
+        """Known modes keep resolving to their mapped hvac/preset mode."""
+        coord = _mock_coordinator()
+        entry = _mock_entry()
+        hass = MagicMock()
+
+        thermostat = LuxtronikThermostat(hass, entry, coord, THERMOSTATS[0])
+        _patch_entity(thermostat)
+        data = make_coordinator_data(
+            parameters={"ID_Ba_Hz_akt": LuxMode.party},
+            calculations={"ID_WEB_WP_BZ_akt": LuxOperationMode.heating},
+        )
+        thermostat._handle_coordinator_update(data)
+        assert thermostat._attr_hvac_mode == HVAC_MODE_MAPPING_HEAT[LuxMode.party]
+        assert thermostat._attr_preset_mode == HVAC_PRESET_MAPPING[LuxMode.party]

@@ -217,11 +217,11 @@ async def async_setup_entry(
         is_smart_thermostat,
     )
 
-    THERMOSTATS = THERMOSTATS_SMART if is_smart_thermostat else THERMOSTATS_OTHER
+    thermostats = THERMOSTATS_SMART if is_smart_thermostat else THERMOSTATS_OTHER
 
     unavailable_keys = [
         i.luxtronik_key
-        for i in THERMOSTATS
+        for i in thermostats
         if not key_exists(coordinator.data, i.luxtronik_key)
     ]
     if unavailable_keys:
@@ -232,7 +232,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             LuxtronikThermostat(hass, entry, coordinator, description)
-            for description in THERMOSTATS
+            for description in thermostats
             if (
                 coordinator.entity_active(description)
                 and key_exists(coordinator.data, description.luxtronik_key)
@@ -360,10 +360,19 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
             return
 
         mode = get_sensor_data(data, self.entity_description.luxtronik_key.value)
-        self._attr_hvac_mode = (
-            None if mode is None else self.entity_description.hvac_mode_mapping[mode]
-        )
-        self._attr_preset_mode = None if mode is None else HVAC_PRESET_MAPPING[mode]
+        if mode is None:
+            self._attr_hvac_mode = None
+            self._attr_preset_mode = None
+        else:
+            hvac_mode = self.entity_description.hvac_mode_mapping.get(mode)
+            if hvac_mode is None:
+                LOGGER.warning("Unknown hvac mode %s, unable to map", mode)
+            self._attr_hvac_mode = hvac_mode
+
+            preset_mode = HVAC_PRESET_MAPPING.get(mode)
+            if preset_mode is None:
+                LOGGER.warning("Unknown preset mode %s, unable to map", mode)
+            self._attr_preset_mode = preset_mode
         self._attr_current_lux_operation = lux_action = get_sensor_data(
             data, self.entity_description.luxtronik_key_current_action.value
         )
