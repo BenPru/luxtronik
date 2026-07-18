@@ -191,7 +191,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=5.0,
         native_step=0.5,
         mode=NumberMode.BOX,
-        update_interval=None,
     ),
     LuxtronikNumberDescription(
         key=SensorKey.PUMP_OPTIMIZATION_TIME,
@@ -495,7 +494,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=65.0,
         native_step=0.5,
         max_firmware_version=Version("3.90.0"),
-        update_interval=None,
     ),
     # Bug #280 since firmware 3.90.1 different set point
     LuxtronikNumberDescription(
@@ -509,7 +507,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=65.0,
         native_step=0.5,
         min_firmware_version=Version("3.90.1"),
-        update_interval=None,
     ),
     LuxtronikNumberDescription(
         key=SensorKey.DHW_HYSTERESIS,

@@ -19,7 +19,6 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
-from homeassistant.util.dt import utcnow
 
 from .common import get_sensor_data
 from .const import (
@@ -49,7 +48,6 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
     """Luxtronik base device."""
 
     entity_description: DescriptionT
-    next_update: datetime | None = None
     _attr_state: Any = None  # Any: values come from luxtronik library (untyped)
 
     _entity_component_unrecorded_attributes = frozenset(
@@ -160,12 +158,6 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
 
     def _restore_attr_value(self, value: Any | None) -> Any:
         return value
-
-    def should_update(self) -> bool:
-        """Determine if the entity should update based on next_update."""
-        if self.entity_description.update_interval is None:
-            return True
-        return self.next_update is None or self.next_update <= utcnow()
 
     async def _data_update(self, event):
         self._handle_coordinator_update()

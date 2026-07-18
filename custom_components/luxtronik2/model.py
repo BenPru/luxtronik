@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from decimal import Decimal
 
 from homeassistant.components.binary_sensor import BinarySensorEntityDescription
@@ -31,7 +31,6 @@ from luxtronik import Calculations, Parameters, Visibilities
 from packaging.version import Version
 
 from .const import (
-    UPDATE_INTERVAL_VERY_SLOW,
     DeviceKey,
     # FirmwareVersionMinor,
     LuxCalculation,
@@ -70,10 +69,6 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
 
     has_entity_name: bool = True
 
-    # Bug in python: Have to assign a value:
-    platform = Platform.AIR_QUALITY
-
-    update_interval: timedelta | None = None
     icon_by_state: dict[StateType | date | datetime | Decimal, str] | None = None
     device_key: DeviceKey = DeviceKey.heatpump
     luxtronik_key: LuxParameter | LuxCalculation = LuxParameter.UNSET
@@ -143,7 +138,6 @@ class LuxtronikNumberDescription(
     """Class describing Luxtronik number sensor entities."""
 
     platform = Platform.NUMBER
-    update_interval: timedelta | None = UPDATE_INTERVAL_VERY_SLOW
     factor: float | None = None
     native_precision: int | None = None
     mode: NumberMode = NumberMode.AUTO
@@ -174,7 +168,6 @@ class LuxtronikSwitchDescription(
     """Class describing Luxtronik switch entities."""
 
     platform = Platform.SWITCH
-    update_interval: timedelta = UPDATE_INTERVAL_VERY_SLOW
     on_state: str | bool = True
     on_states: list[str] | None = None
     off_state: str | bool = False
@@ -203,16 +196,6 @@ class LuxtronikClimateDescription(
     min_temp: float | None = None
     max_temp: float | None = None
     temperature_unit: str = UnitOfTemperature.CELSIUS
-
-
-def metaclass_resolver(*classes):
-    metaclass = tuple(set(type(cls) for cls in classes))
-    metaclass = (
-        metaclass[0]
-        if len(metaclass) == 1
-        else type("_".join(mcls.__name__ for mcls in metaclass), metaclass, {})
-    )  # class M_C
-    return metaclass("_".join(cls.__name__ for cls in classes), classes, {})
 
 
 class LuxtronikWaterHeaterDescription(
