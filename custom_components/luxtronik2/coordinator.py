@@ -313,15 +313,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             name=str(key.value),
             translation_key=key.value,
             configuration_url=f"http://{host}/",
-            connections={
-                (
-                    DOMAIN,
-                    f"{self.unique_id}_{key.value}".lower(),
-                )
-            },
             sw_version=self.firmware_version,
             model=self.model,
-            suggested_area="",  # was "Utility room",
             hw_version=None,
             manufacturer=self.manufacturer,
             # default_name=f"{text}",
