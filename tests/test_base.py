@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import (
@@ -132,51 +132,6 @@ class TestBaseHandleCoordinatorUpdate:
         entity = _make_sensor_entity(data, desc)
         LuxtronikEntity._handle_coordinator_update(entity, data)
         assert entity._attr_icon == "mdi:default"
-
-
-# ===========================================================================
-# should_update
-# ===========================================================================
-
-
-class TestShouldUpdate:
-    def test_no_interval_always_true(self):
-        entity = _make_sensor_entity()
-        assert entity.should_update() is True
-
-    def test_with_interval_and_no_next_update(self):
-        desc = LuxtronikSensorDescription(
-            key=SensorKey.FLOW_OUT_TEMPERATURE,
-            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
-            device_key=DeviceKey.heatpump,
-            update_interval=timedelta(seconds=60),
-        )
-        entity = _make_sensor_entity(description=desc)
-        entity.next_update = None
-        assert entity.should_update() is True
-
-    def test_with_interval_and_future_next_update(self):
-        desc = LuxtronikSensorDescription(
-            key=SensorKey.FLOW_OUT_TEMPERATURE,
-            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
-            device_key=DeviceKey.heatpump,
-            update_interval=timedelta(seconds=60),
-        )
-        entity = _make_sensor_entity(description=desc)
-        # Set next_update far in the future (UTC) so should_update returns False
-        entity.next_update = datetime.now(UTC) + timedelta(hours=1)
-        assert entity.should_update() is False
-
-    def test_with_interval_and_past_next_update(self):
-        desc = LuxtronikSensorDescription(
-            key=SensorKey.FLOW_OUT_TEMPERATURE,
-            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
-            device_key=DeviceKey.heatpump,
-            update_interval=timedelta(seconds=60),
-        )
-        entity = _make_sensor_entity(description=desc)
-        entity.next_update = datetime.now(UTC) - timedelta(hours=1)
-        assert entity.should_update() is True
 
 
 # ===========================================================================

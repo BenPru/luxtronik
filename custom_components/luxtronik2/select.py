@@ -203,21 +203,6 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
                 )
                 self._handle_coordinator_update(updated_data)
 
-    async def async_update(self) -> None:
-        """Read current day from heat pump and update selected option."""
-        data = self.coordinator.data
-        if data is None:
-            return
-
-        selected_day = "none"
-        for day, param_enum in DAY_NAME_TO_PARAM.items():
-            param = param_enum.value
-            if str(get_sensor_data(data, param)) == "1":
-                selected_day = day
-                break
-
-        self._attr_current_option = selected_day
-
 
 class LuxtronikModeSelector(
     LuxtronikEntity[LuxtronikSelectEntityDescription], SelectEntity

@@ -85,7 +85,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.client = client
         self._config = config
         self.device_infos = dict[str, DeviceInfo]()
-        self.update_reason_write = False
 
         update_interval: timedelta = DEFAULT_UPDATE_INTERVAL
         raw = config.get(CONF_UPDATE_INTERVAL)
