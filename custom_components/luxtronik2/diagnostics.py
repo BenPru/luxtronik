@@ -20,7 +20,6 @@ TO_REDACT = {
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_HOST,
-    "mac",
     "unique_id",
     "identifiers",
     "via_device",
@@ -41,14 +40,16 @@ async def async_get_config_entry_diagnostics(
     async with timeout(10):
         mac = await async_get_mac_address(hass, entry.data[CONF_HOST])
 
-    entry_dict = dict(entry.as_dict())
-    entry_data = dict(entry_dict.get("data") or {})
+    entry_data = async_redact_data(entry.as_dict(), TO_REDACT)
+    if "data" not in entry_data:
+        entry_data["data"] = {}
     if mac is not None:
-        entry_data["mac"] = mac
-    entry_dict["data"] = entry_data
+        # Keep only the OUI (vendor prefix); the device-specific octets are
+        # the sensitive/unique part and are masked out.
+        entry_data["data"]["mac"] = mac[:9] + "*"
 
     diag_data = {
-        "entry": async_redact_data(entry_dict, TO_REDACT),
+        "entry": entry_data,
         "devices": async_redact_data(coordinator.device_infos, TO_REDACT),
         "parameters": _dump_items(coordinator.data.parameters.parameters),
         "calculations": _dump_items(coordinator.data.calculations.calculations),

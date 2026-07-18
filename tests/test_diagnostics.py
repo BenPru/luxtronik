@@ -76,8 +76,10 @@ class TestAsyncGetConfigEntryDiagnostics:
         assert "parameters" in result
         assert "calculations" in result
         assert "visibilities" in result
-        # MAC, host and serial-derived unique_id must be redacted (M9)
-        assert result["entry"]["data"]["mac"] == REDACTED
+        # MAC keeps only the OUI (vendor prefix); the device-specific part
+        # is masked out - not routed through TO_REDACT (M9).
+        assert result["entry"]["data"]["mac"] == "aa:bb:cc:*"
+        # Host and serial-derived unique_id must be fully redacted (M9).
         assert result["entry"]["data"]["host"] == REDACTED
         assert result["entry"]["unique_id"] == REDACTED
 
