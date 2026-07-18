@@ -506,15 +506,17 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Get default options flow."""
-        return LuxtronikOptionsFlowHandler(config_entry)
+        return LuxtronikOptionsFlowHandler()
 
 
-class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
+class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle a Luxtronik options flow."""
 
     def _get_value(self, key: str, default=None):
         """Return a value from Luxtronik."""
-        return self.options.get(key, self.config_entry.data.get(key, default))
+        return self.config_entry.options.get(
+            key, self.config_entry.data.get(key, default)
+        )
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -528,7 +530,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
         """Handle the user options step."""
         try:
             if user_input is not None:
-                new_options = dict(self.options)
+                new_options = dict(self.config_entry.options)
                 value = user_input.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
                 if value:
                     new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = value
