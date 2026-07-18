@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from homeassistant.components.date import (
     ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
@@ -93,7 +93,7 @@ class LuxtronikDateEntity(LuxtronikEntity[LuxtronikDateEntityDescription], DateE
 
         if isinstance(value, int | float):
             try:
-                dt_value = datetime.fromtimestamp(value)
+                dt_value = datetime.fromtimestamp(value, UTC)
                 self._attr_native_value = dt_value.date()
             except (ValueError, OSError):
                 self._attr_native_value = None
