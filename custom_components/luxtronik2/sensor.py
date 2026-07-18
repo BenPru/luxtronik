@@ -14,6 +14,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.translation import async_get_cached_translations
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -286,6 +287,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
             return sensor.attributes[attr]
         return None
 
+    def _get_entity_translations(self) -> dict[str, str]:
+        return async_get_cached_translations(
+            self.hass, self.hass.config.language, "entity", DOMAIN
+        )
+
     def _build_status_text(self) -> str:
         status_time = self._get_sensor_attr(
             f"sensor.{self._sensor_prefix}_status_time", SA.STATUS_TEXT
@@ -302,10 +308,11 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
             return ""
         if line_2_state is None or line_2_state == STATE_UNAVAILABLE:
             return ""
-        line_1 = self.platform.platform_data.platform_translations.get(
+        translations = self._get_entity_translations()
+        line_1 = translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.{line_1_state}"
         )
-        line_2 = self.platform.platform_data.platform_translations.get(
+        line_2 = translations.get(
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.{line_2_state}"
         )
         # Show evu end time if available

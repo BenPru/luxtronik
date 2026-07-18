@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, STATE_UNAVAILABLE
 
@@ -175,8 +175,7 @@ def _make_status_sensor(data=None, description=None):
         hass, entry, coord, description, DeviceKey.heatpump
     )
     _patch_entity(entity)
-    entity.platform = MagicMock()
-    entity.platform.platform_data.platform_translations = {}
+    entity._get_entity_translations = MagicMock(return_value={})
     return entity
 
 
@@ -406,13 +405,31 @@ class TestBuildStatusText:
             return None
 
         entity.hass.states.get.side_effect = get_side_effect
-        entity.platform.platform_data.platform_translations = {
+        entity._get_entity_translations.return_value = {
             f"component.{DOMAIN}.entity.sensor.status_line_1.state.heatpump_running": "HP Running",
             f"component.{DOMAIN}.entity.sensor.status_line_2.state.heating": "Heating",
         }
         result = entity._build_status_text()
         assert "HP Running" in result
         assert "Heating" in result
+
+    def test_get_entity_translations_uses_public_helper(self):
+        """_get_entity_translations must use the public translation helper, not
+        the private platform.platform_data.platform_translations attribute."""
+        entity = _make_status_sensor()
+        entity._get_entity_translations = (
+            LuxtronikStatusSensorEntity._get_entity_translations.__get__(entity)
+        )
+        entity.hass.config.language = "en"
+        with patch(
+            "custom_components.luxtronik2.sensor.async_get_cached_translations"
+        ) as mock_get_translations:
+            mock_get_translations.return_value = {"some.key": "value"}
+            result = entity._get_entity_translations()
+        mock_get_translations.assert_called_once_with(
+            entity.hass, "en", "entity", DOMAIN
+        )
+        assert result == {"some.key": "value"}
 
     def test_returns_empty_when_line1_unavailable(self):
         entity = _make_status_sensor()

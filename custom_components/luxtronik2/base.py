@@ -90,7 +90,6 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
         # --- everything below uses the FINAL description ---
         self._attr_translation_key = description.translation_key
         self._attr_cache = {}
-        self._device_info_ident = device_info_ident
         self._attr_device_info = coordinator.get_device(device_info_ident)
 
         self._attr_extra_state_attributes = {
@@ -117,10 +116,6 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
         await super().async_added_to_hass()
-        # Force device name:
-        self._attr_device_info = self.coordinator.get_device(
-            self._device_info_ident, self.platform
-        )
 
         try:
             last_state = await self.async_get_last_state()
