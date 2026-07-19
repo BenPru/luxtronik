@@ -232,15 +232,15 @@ def normalize_sensor_value(
 
 
 def state_as_number_or_none(state: State, default: float | None = None) -> float | None:
-    """Try to coerce our state to a number.
-
-    Raises ValueError if this is not possible.
-    """
+    """Try to coerce our state to a number, returning default if not possible."""
     if state is None:
         return default
     if state.state == STATE_UNAVAILABLE:
         return default  # state.state
-    result = state_as_number(state)
+    try:
+        result = state_as_number(state)
+    except ValueError:
+        return default
     return default if not isinstance(result, float) or result is None else result
 
 
