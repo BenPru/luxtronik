@@ -338,6 +338,16 @@ class TestStateAsNumberOrNone:
         result = state_as_number_or_none(state)
         assert result == 42.5
 
+    def test_non_numeric_garbage_state(self):
+        state = MagicMock()
+        state.state = "N/A"
+        assert state_as_number_or_none(state) is None
+
+    def test_non_numeric_garbage_state_with_default(self):
+        state = MagicMock()
+        state.state = "N/A"
+        assert state_as_number_or_none(state, default=10.0) == 10.0
+
 
 # ===========================================================================
 # convert_to_int_if_possible
