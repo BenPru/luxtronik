@@ -100,7 +100,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             update_interval=update_interval,
         )
 
-        LOGGER.info(
+        LOGGER.debug(
             "Coordinator update interval=%s s",
             self.update_interval.total_seconds()
             if self.update_interval is not None
@@ -188,7 +188,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             mismatches: list[str] = []
             for parameter, value in pairs:
                 confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
-                LOGGER.info(
+                LOGGER.debug(
                     'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
                     parameter,
                     value,

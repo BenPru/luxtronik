@@ -131,9 +131,9 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
         try:
-            LOGGER.info("Starting async_step_user")
+            LOGGER.debug("Starting async_step_user")
 
-            LOGGER.info("Starting discovery of Luxtronik devices on network")
+            LOGGER.debug("Starting discovery of Luxtronik devices on network")
             device_list = await self._discover_devices()
         except OSError as err:
             LOGGER.warning("Device discovery failed due to a network error: %s", err)
@@ -163,10 +163,10 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             }
             for host, port in device_list
         ]
-        LOGGER.info("All discovered devices with config status: %s", self._all_devices)
+        LOGGER.debug("All discovered devices with config status: %s", self._all_devices)
 
         self._available_devices = [d for d in self._all_devices if not d["configured"]]
-        LOGGER.info("Available (unconfigured) devices: %s", self._available_devices)
+        LOGGER.debug("Available (unconfigured) devices: %s", self._available_devices)
 
         if self._available_devices:
             device_options_list: list[selector.SelectOptionDict] = [
@@ -185,8 +185,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             )
 
-            LOGGER.info("Presenting selection form for available devices")
-            LOGGER.info("device_options_list=%s", device_options_list)
+            LOGGER.debug("Presenting selection form for available devices")
+            LOGGER.debug("device_options_list=%s", device_options_list)
 
             return self.async_show_form(
                 step_id="select_devices",
@@ -210,7 +210,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 },
             )
 
-        LOGGER.info(
+        LOGGER.debug(
             "All discovered devices are already configured. Showing manual entry form."
         )
         return self.async_show_form(
@@ -253,7 +253,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle manual entry of host and port."""
         if user_input is None:
-            LOGGER.info("Showing manual entry form")
+            LOGGER.debug("Showing manual entry form")
             return self.async_show_form(
                 step_id="manual_entry", data_schema=build_user_data_schema()
             )
@@ -288,7 +288,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Prepare configuration for a DHCP discovered Luxtronik heatpump."""
         try:
-            LOGGER.info(
+            LOGGER.debug(
                 "DHCP discovered a possible Luxtronik device '%s' @ '%s'",
                 discovery_info.hostname,
                 discovery_info.ip,
@@ -300,7 +300,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             # Check if IP is already configured
             if discovery_info.ip in configured_hosts:
-                LOGGER.info(
+                LOGGER.debug(
                     "DHCP IP '%s' is already configured as Luxtronik device, aborting.",
                     discovery_info.ip,
                 )
@@ -321,7 +321,7 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             host, port = matched if matched else (discovery_info.ip, DEFAULT_PORT)
 
             if matched:
-                LOGGER.info(
+                LOGGER.debug(
                     "DHCP device '%s:%s' not yet configured, and recognized as Luxtronik device!",
                     host,
                     port,
