@@ -3,6 +3,7 @@ from homeassistant.helpers import selector
 import voluptuous as vol
 
 from .const import (
+    CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_MAX_DATA_LENGTH,
     CONF_UPDATE_INTERVAL,
@@ -35,6 +36,7 @@ def build_user_data_schema(
 
 def build_options_schema(
     current_indoor_temp: str | None = None,
+    current_power_consumption_sensor: str | None = None,
     current_interval: str | None = None,
 ) -> vol.Schema:
     interval_options = [
@@ -50,6 +52,13 @@ def build_options_schema(
                 selector.EntitySelectorConfig(
                     domain="sensor", device_class="temperature"
                 )
+            ),
+            vol.Optional(
+                CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
+                default=current_power_consumption_sensor,
+                description={"suggested_value": current_power_consumption_sensor},
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor", device_class="power")
             ),
             vol.Optional(
                 CONF_UPDATE_INTERVAL,

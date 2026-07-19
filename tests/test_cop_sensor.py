@@ -8,6 +8,7 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 
 from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
+    CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -34,6 +35,7 @@ _ENTRY_DATA = {
 def _mock_entry():
     entry = MagicMock()
     entry.data = _ENTRY_DATA.copy()
+    entry.options = {}
     return entry
 
 
@@ -126,6 +128,87 @@ class TestCopSensorHandleCoordinatorUpdate:
         entity._handle_coordinator_update(data)
         assert entity._attr_native_value is None
         assert entity._attr_available is False
+
+    def test_uses_external_power_sensor_when_configured(self):
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_WP_BZ_akt": LuxOperationMode.heating,
+                "ID_WEB_VD1out": True,
+                "Heat_Output": 6000,
+                # Deliberately different from the external value below, to
+                # prove the external sensor takes priority, not just that
+                # it's "also read".
+                "Unknown_Calculation_268": 999999,
+            }
+        )
+        entry = _mock_entry()
+        entry.options = {
+            CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: "sensor.shelly_power"
+        }
+        hass = MagicMock()
+        external_state = MagicMock()
+        external_state.state = "1500"
+        hass.states.get.return_value = external_state
+        coord = _mock_coordinator(data)
+        description = _heating_cop_description()
+        entity = LuxtronikCopSensorEntity(
+            hass, entry, coord, description, DeviceKey.heating
+        )
+        entity.hass = hass
+        entity.hass.config.time_zone = "UTC"
+        entity.async_write_ha_state = MagicMock()
+
+        entity._handle_coordinator_update(data)
+
+        hass.states.get.assert_called_with("sensor.shelly_power")
+        assert entity._attr_native_value == 4.0
+        assert entity._attr_available is True
+
+    def test_external_power_sensor_unavailable_makes_entity_unavailable(self):
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_WP_BZ_akt": LuxOperationMode.heating,
+                "ID_WEB_VD1out": True,
+                "Heat_Output": 6000,
+                "Unknown_Calculation_268": 1500,
+            }
+        )
+        entry = _mock_entry()
+        entry.options = {
+            CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: "sensor.shelly_power"
+        }
+        hass = MagicMock()
+        hass.states.get.return_value = None
+        coord = _mock_coordinator(data)
+        description = _heating_cop_description()
+        entity = LuxtronikCopSensorEntity(
+            hass, entry, coord, description, DeviceKey.heating
+        )
+        entity.hass = hass
+        entity.hass.config.time_zone = "UTC"
+        entity.async_write_ha_state = MagicMock()
+
+        entity._handle_coordinator_update(data)
+
+        assert entity._attr_native_value is None
+        assert entity._attr_available is False
+
+    def test_no_external_sensor_configured_uses_internal_value(self):
+        # Regression guard: entry.options == {} (the _mock_entry() default)
+        # must still take the internal C0268 path, unchanged from before
+        # this feature existed.
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_WP_BZ_akt": LuxOperationMode.heating,
+                "ID_WEB_VD1out": True,
+                "Heat_Output": 6000,
+                "Unknown_Calculation_268": 1500,
+            }
+        )
+        entity = _make_entity(data)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == 4.0
+        assert entity._attr_available is True
 
     def test_none_data_returns_early(self):
         data = make_coordinator_data(

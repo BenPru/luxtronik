@@ -1124,10 +1124,12 @@
                 "description": "Nastaven\u00ed pro tepeln\u00e9 \u010derpadlo Luxtronik {name}.",
                 "data": {
                     "ha_sensor_indoor_temperature": "ID senzoru vnit\u0159n\u00ed teploty",
+                    "ha_sensor_current_power_consumption": "ID senzoru aktu\u00e1ln\u00ed spot\u0159eby energie",
                     "update_interval": "Interval aktualizace"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Termostat pro \u0159\u00edzen\u00ed vyt\u00e1p\u011bn\u00ed je vytvo\u0159en v Home Assistant. Skute\u010dn\u00e1 teplota je nastavena senzorem Home Assistant.\nPokud je Luxtronik p\u0159ipojen k hardwarov\u00e9mu pokojov\u00e9mu termostatu, ponechte toto pole pr\u00e1zdn\u00e9.",
+                    "ha_sensor_current_power_consumption": "Pokud je vestav\u011bn\u00e9 m\u011b\u0159en\u00ed aktu\u00e1ln\u00ed spot\u0159eby energie tepeln\u00e9ho \u010derpadla nep\u0159esn\u00e9, lze pro v\u00fdpo\u010dty COP (vyt\u00e1p\u011bn\u00ed/TUV) m\u00edsto toho pou\u017e\u00edt extern\u00ed senzor v\u00fdkonu Home Assistant (nap\u0159. chytrou z\u00e1suvku). Toto nezm\u011bn\u00ed hodnotu zobrazovanou samotn\u00fdm senzorem aktu\u00e1ln\u00ed spot\u0159eby energie.\nPonechte pr\u00e1zdn\u00e9 pro pou\u017eit\u00ed vestav\u011bn\u00e9ho m\u011b\u0159en\u00ed tepeln\u00e9ho \u010derpadla.",
                     "update_interval": "Jak \u010dasto se m\u00e1 tepeln\u00e9 \u010derpadlo dotazovat na nov\u00e1 data."
                 }
             }

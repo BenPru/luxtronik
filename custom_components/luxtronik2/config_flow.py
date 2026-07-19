@@ -16,6 +16,7 @@ from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 import voluptuous as vol
 
 from .const import (
+    CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
@@ -514,6 +515,16 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                 ):
                     new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = None
 
+                power_value = user_input.get(CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION)
+                if power_value:
+                    new_options[CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION] = power_value
+                elif (
+                    CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION in new_options
+                    or CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION
+                    in self.config_entry.data
+                ):
+                    new_options[CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION] = None
+
                 update_interval = user_input.get(
                     CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_OPTION
                 )
@@ -522,6 +533,9 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                 return self.async_create_entry(title="", data=new_options)
 
             current_indoor_temp = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
+            current_power_consumption_sensor = self._get_value(
+                CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION
+            )
             current_interval = self._get_value(
                 CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_OPTION
             )
@@ -530,6 +544,7 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                 step_id="user",
                 data_schema=build_options_schema(
                     current_indoor_temp=current_indoor_temp,
+                    current_power_consumption_sensor=current_power_consumption_sensor,
                     current_interval=current_interval,
                 ),
                 description_placeholders={"name": self.config_entry.title},

@@ -73,6 +73,7 @@ CONF_VISIBILITIES: Final = "visibilities"
 
 CONF_HA_SENSOR_PREFIX: Final = "ha_sensor_prefix"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
+CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: Final = "ha_sensor_current_power_consumption"
 
 CONF_LOCK_TIMEOUT: Final = "lock_timeout"
 CONF_SAFE: Final = "safe"
