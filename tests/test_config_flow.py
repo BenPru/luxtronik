@@ -16,6 +16,7 @@ from custom_components.luxtronik2.config_flow import (
     LuxtronikOptionsFlowHandler,
 )
 from custom_components.luxtronik2.const import (
+    CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
@@ -658,6 +659,39 @@ class TestOptionsFlow:
         flow.async_create_entry.assert_called_once()
         call_kwargs = flow.async_create_entry.call_args[1]
         assert call_kwargs["data"].get(CONF_HA_SENSOR_INDOOR_TEMPERATURE) is None
+
+    @pytest.mark.asyncio
+    async def test_step_user_saves_power_consumption_sensor(self):
+        entry = MagicMock()
+        entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+        entry.options = {}
+        entry.title = "Test HP"
+        flow = _make_options_flow(entry)
+        flow.hass = MagicMock()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+        await flow.async_step_user(
+            {CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: "sensor.shelly_power"}
+        )
+        flow.async_create_entry.assert_called_once()
+        call_kwargs = flow.async_create_entry.call_args[1]
+        assert (
+            call_kwargs["data"][CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION]
+            == "sensor.shelly_power"
+        )
+
+    @pytest.mark.asyncio
+    async def test_step_user_clears_power_consumption_sensor(self):
+        entry = MagicMock()
+        entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+        entry.options = {CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: "sensor.old_power"}
+        entry.title = "Test HP"
+        flow = _make_options_flow(entry)
+        flow.hass = MagicMock()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+        await flow.async_step_user({})
+        flow.async_create_entry.assert_called_once()
+        call_kwargs = flow.async_create_entry.call_args[1]
+        assert call_kwargs["data"].get(CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION) is None
 
     @pytest.mark.asyncio
     async def test_step_user_saves_update_interval(self):
