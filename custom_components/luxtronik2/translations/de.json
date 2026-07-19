@@ -1127,10 +1127,12 @@
                 "description": "Einstellungen f\u00fcr die Luxtronik-W\u00e4rmepumpe {name}.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor-ID f\u00fcr die Raumtemperatur",
+                    "ha_sensor_current_power_consumption": "Sensor-ID f\u00fcr den aktuellen Stromverbrauch",
                     "update_interval": "Aktualisierungsintervall"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Ein Thermostat zur Heizungssteuerung wird in Home Assistant erstellt. Die tats\u00e4chliche Temperatur wird von einem Home Assistant-Sensor gesetzt.\nWenn Luxtronik mit einem Hardware-Raumthermostat verbunden ist, sollte dieses Feld leer bleiben.",
+                    "ha_sensor_current_power_consumption": "Wenn die eingebaute Messung des aktuellen Stromverbrauchs der W\u00e4rmepumpe ungenau ist, kann stattdessen ein externer Home Assistant-Stromsensor (z. B. eine Smart-Steckdose) f\u00fcr die COP-Berechnungen (Heizung/Warmwasser) verwendet werden. Dies \u00e4ndert nicht, was der Sensor f\u00fcr den aktuellen Stromverbrauch selbst anzeigt.\nLeer lassen, um die eingebaute Messung der W\u00e4rmepumpe zu verwenden.",
                     "update_interval": "Wie oft die W\u00e4rmepumpe nach neuen Daten abgefragt wird."
                 }
             }

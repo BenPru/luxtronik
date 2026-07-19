@@ -1153,10 +1153,12 @@
                 "description": "Settings for the Luxtronik heat pump {name}.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature",
+                    "ha_sensor_current_power_consumption": "Sensor ID for the current power consumption",
                     "update_interval": "Update interval"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
+                    "ha_sensor_current_power_consumption": "If the heat pump's built-in current power consumption reading is inaccurate, an external Home Assistant power sensor (e.g. a smart plug) can be used instead for the Heating/DHW COP calculations. This does not change what the Current power consumption sensor itself displays.\nLeave empty to use the heat pump's built-in reading.",
                     "update_interval": "How often to poll the heat pump for new data."
                 }
             }

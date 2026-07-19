@@ -1130,10 +1130,12 @@
                 "description": "Instellingen voor de Luxtronik warmtepomp {name}.",
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
+                    "ha_sensor_current_power_consumption": "Sensor-ID voor het huidige stroomverbruik",
                     "update_interval": "Update-interval"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
+                    "ha_sensor_current_power_consumption": "Als de ingebouwde meting van het huidige stroomverbruik van de warmtepomp onnauwkeurig is, kan in plaats daarvan een externe Home Assistant-stroomsensor (bijvoorbeeld een slimme stekker) worden gebruikt voor de COP-berekeningen (verwarming/warm water). Dit verandert niet wat de sensor voor het huidige stroomverbruik zelf weergeeft.\nLaat leeg om de ingebouwde meting van de warmtepomp te gebruiken.",
                     "update_interval": "Hoe vaak de warmtepomp wordt bevraagd voor nieuwe gegevens."
                 }
             }

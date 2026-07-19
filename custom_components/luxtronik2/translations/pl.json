@@ -1145,10 +1145,12 @@
                 "description": "Ustawienia dla pompy ciep\u0142a Luxtronik {name}.",
                 "data": {
                     "ha_sensor_indoor_temperature": "ID czujnika temperatury wewn\u0119trznej",
+                    "ha_sensor_current_power_consumption": "ID czujnika bie\u017c\u0105cego poboru mocy",
                     "update_interval": "Interwa\u0142 aktualizacji"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, pozostaw to pole puste.",
+                    "ha_sensor_current_power_consumption": "Je\u015bli wbudowany pomiar bie\u017c\u0105cego poboru mocy pompy ciep\u0142a jest niedok\u0142adny, do oblicze\u0144 COP (ogrzewanie/CWU) mo\u017cna zamiast tego u\u017cy\u0107 zewn\u0119trznego czujnika mocy Home Assistant (np. inteligentnego gniazdka). Nie zmienia to warto\u015bci wy\u015bwietlanej przez sam czujnik bie\u017c\u0105cego poboru mocy.\nPozostaw puste, aby u\u017cywa\u0107 wbudowanego pomiaru pompy ciep\u0142a.",
                     "update_interval": "Jak cz\u0119sto odpytywa\u0107 pomp\u0119 ciep\u0142a o nowe dane."
                 }
             }
