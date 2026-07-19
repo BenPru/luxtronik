@@ -16,8 +16,9 @@ from homeassistant.helpers.translation import async_get_cached_translations
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
-from .common import get_sensor_data, key_exists
+from .common import get_sensor_data, key_exists, state_as_number_or_none
 from .const import (
+    CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     LOGGER,
@@ -407,9 +408,32 @@ class LuxtronikCopSensorEntity(LuxtronikSensorEntity):
     actually running -> no_request" reclassification (common.py:223-228),
     which is exactly the condition under which a COP reading would be
     meaningless anyway, so it's a useful extra gate, not just incidental.
+
+    The denominator (power consumption) can be sourced from an external HA
+    sensor instead of the heat pump's own (sometimes inaccurate)
+    current_power_consumption reading, if the user configured one via
+    CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION in the options flow - same
+    pattern climate.py already uses for the indoor-temperature override.
+    Only the denominator is overridable this way; the numerator
+    (current_heat_output) always comes from the heat pump.
     """
 
     entity_description: LuxtronikCopSensorDescription  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        coordinator: LuxtronikCoordinator,
+        description: LuxtronikCopSensorDescription,
+        device_info_ident: DeviceKey,
+    ) -> None:
+        """Init Luxtronik COP Sensor."""
+        super().__init__(hass, entry, coordinator, description, device_info_ident)
+        self._external_power_sensor_entity_id: str | None = entry.options.get(
+            CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
+            entry.data.get(CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION),
+        )
 
     @callback
     def _handle_coordinator_update(
@@ -423,7 +447,16 @@ class LuxtronikCopSensorEntity(LuxtronikSensorEntity):
         descr = self.entity_description
         status = get_sensor_data(data, LC.C0080_STATUS)
         numerator = get_sensor_data(data, descr.numerator_key)
-        denominator = get_sensor_data(data, descr.denominator_key)
+
+        if self._external_power_sensor_entity_id:
+            external_state = self.hass.states.get(self._external_power_sensor_entity_id)
+            denominator = (
+                state_as_number_or_none(external_state)
+                if external_state is not None
+                else None
+            )
+        else:
+            denominator = get_sensor_data(data, descr.denominator_key)
 
         if (descr.required_status is not None and status != descr.required_status) or (
             not isinstance(numerator, (float, int))
