@@ -221,17 +221,22 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
         return attributes
 
     def formatted_data(self, attr: LuxtronikEntityAttributeDescription) -> str:
-        """Calculate the attribute value."""
+        """Calculate the attribute value.
+
+        Compares the raw attribute reading (e.g. DHW temperature) against
+        this entity's own already-scaled `_attr_native_value` (e.g. the DHW
+        thermal desinfection target) - not `_attr_state * factor`, which is
+        never populated for entities (the only real one,
+        DHW_THERMAL_DESINFECTION_TARGET) that don't declare a `factor`.
+        """
         if attr.format != SensorAttrFormat.TIMESTAMP_LAST_OVER:
             return super().formatted_data(attr)
         value = self._get_value(attr.luxtronik_key)
         if value is None:
             return ""
         if (
-            self._attr_state is not None
-            and self.entity_description.factor is not None
-            and float(value)
-            >= float(self._attr_state) * float(self.entity_description.factor)
+            self._attr_native_value is not None
+            and float(value) >= float(self._attr_native_value)
             and (
                 attr.key not in self._attr_cache
                 or self._is_past(self._attr_cache[attr.key])

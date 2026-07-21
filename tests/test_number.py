@@ -215,7 +215,6 @@ class TestNumberFormattedData:
             key=SensorKey.HEATING_TARGET_CORRECTION,
             luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
             device_key=DeviceKey.heating,
-            factor=0.1,
         )
         entity = _make_number_entity(data, desc)
         attr = LuxtronikEntityAttributeDescription(
@@ -227,15 +226,18 @@ class TestNumberFormattedData:
         assert result == ""
 
     def test_timestamp_last_over_with_value_above_threshold(self):
+        """Regression: DHW_THERMAL_DESINFECTION_TARGET (the only real entity
+        using TIMESTAMP_LAST_OVER) declares no `factor` - the comparison
+        must work against `_attr_native_value` directly, not silently no-op
+        because `entity_description.factor` is None."""
         data = make_coordinator_data(parameters={"ID_Einst_WK_akt": 100})
         desc = LuxtronikNumberDescription(
             key=SensorKey.HEATING_TARGET_CORRECTION,
             luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
             device_key=DeviceKey.heating,
-            factor=0.1,
         )
         entity = _make_number_entity(data, desc)
-        entity._attr_state = 5.0  # 5.0 * 0.1 = 0.5, value=100 >= 0.5
+        entity._attr_native_value = 50.0  # value=100 >= 50.0
         attr = LuxtronikEntityAttributeDescription(
             key=SA.TIMER_HEATPUMP_ON,
             luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
@@ -245,16 +247,32 @@ class TestNumberFormattedData:
         # Should set cache and return today's date
         assert result != ""
 
+    def test_timestamp_last_over_below_threshold_stays_empty(self):
+        data = make_coordinator_data(parameters={"ID_Einst_WK_akt": 40})
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.HEATING_TARGET_CORRECTION,
+            luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
+            device_key=DeviceKey.heating,
+        )
+        entity = _make_number_entity(data, desc)
+        entity._attr_native_value = 50.0  # value=40 < 50.0
+        attr = LuxtronikEntityAttributeDescription(
+            key=SA.TIMER_HEATPUMP_ON,
+            luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
+            format=SensorAttrFormat.TIMESTAMP_LAST_OVER,
+        )
+        result = entity.formatted_data(attr)
+        assert result == ""
+
     def test_timestamp_last_over_cached_result(self):
         data = make_coordinator_data(parameters={"ID_Einst_WK_akt": 100})
         desc = LuxtronikNumberDescription(
             key=SensorKey.HEATING_TARGET_CORRECTION,
             luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
             device_key=DeviceKey.heating,
-            factor=0.1,
         )
         entity = _make_number_entity(data, desc)
-        entity._attr_state = 5.0
+        entity._attr_native_value = 50.0
         entity._attr_cache[SA.TIMER_HEATPUMP_ON] = date(2099, 12, 31)
         attr = LuxtronikEntityAttributeDescription(
             key=SA.TIMER_HEATPUMP_ON,
