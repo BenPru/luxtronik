@@ -300,14 +300,31 @@ class TestDHWManualFrequency:
         entity._attr_native_value = 45
         assert entity.state == 45
 
+    # Every entity's `_attr_extra_state_attributes` always carries a
+    # diagnostic Luxtronik_Key entry, set unconditionally in base.py's
+    # __init__ - the merged `extra_state_attributes` property must preserve
+    # it rather than replacing the dict outright (that was the regression).
+    _FREQ_LUXTRONIK_KEY_ATTR = {
+        SA.LUXTRONIK_KEY.value: "1045 parameters.ID_Einst_P155_DHW_Freq"
+    }
+    _CORRECTION_LUXTRONIK_KEY_ATTR = {
+        SA.LUXTRONIK_KEY.value: "0001 parameters.ID_Einst_WK_akt"
+    }
+
     def test_extra_state_attributes_automatic(self):
         entity = self._make_freq_entity(raw_value=0)
-        assert entity.extra_state_attributes == {"mode": "Automatic"}
+        assert entity.extra_state_attributes == {
+            **self._FREQ_LUXTRONIK_KEY_ATTR,
+            "mode": "Automatic",
+        }
 
     def test_extra_state_attributes_manual(self):
         entity = self._make_freq_entity(raw_value=25)
         entity._attr_native_value = 45
-        assert entity.extra_state_attributes == {"mode": "Manual at 45 Hz"}
+        assert entity.extra_state_attributes == {
+            **self._FREQ_LUXTRONIK_KEY_ATTR,
+            "mode": "Manual at 45 Hz",
+        }
 
     def test_extra_state_attributes_none_value(self):
         data = make_coordinator_data(parameters={"ID_Einst_P155_DHW_Freq": None})
@@ -318,9 +335,9 @@ class TestDHWManualFrequency:
         )
         entity = _make_number_entity(data, desc)
         entity._handle_coordinator_update(data)
-        assert entity.extra_state_attributes == {}
+        assert entity.extra_state_attributes == self._FREQ_LUXTRONIK_KEY_ATTR
 
-    def test_extra_state_attributes_other_keys_returns_empty(self):
+    def test_extra_state_attributes_other_keys_omit_mode(self):
         data = make_coordinator_data(parameters={"ID_Einst_WK_akt": 50})
         desc = LuxtronikNumberDescription(
             key=SensorKey.HEATING_TARGET_CORRECTION,
@@ -328,7 +345,31 @@ class TestDHWManualFrequency:
             device_key=DeviceKey.heating,
         )
         entity = _make_number_entity(data, desc)
-        assert entity.extra_state_attributes == {}
+        assert entity.extra_state_attributes == self._CORRECTION_LUXTRONIK_KEY_ATTR
+
+    def test_extra_state_attributes_preserves_base_attributes_for_other_keys(self):
+        """Regression: the DHW-frequency 'mode' special case must merge with,
+        not discard, extra_attributes the base entity computed for other
+        Number entities (e.g. the DHW thermal desinfection target's
+        last_thermal_desinfection)."""
+        data = make_coordinator_data(parameters={"ID_Einst_WK_akt": 50})
+        desc = LuxtronikNumberDescription(
+            key=SensorKey.HEATING_TARGET_CORRECTION,
+            luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
+            device_key=DeviceKey.heating,
+            extra_attributes=(
+                LuxtronikEntityAttributeDescription(
+                    key=SA.LAST_THERMAL_DESINFECTION,
+                    luxtronik_key=LP.P0001_HEATING_TARGET_CORRECTION,
+                ),
+            ),
+        )
+        entity = _make_number_entity(data, desc)
+        entity._handle_coordinator_update(data)
+        assert entity.extra_state_attributes == {
+            **self._CORRECTION_LUXTRONIK_KEY_ATTR,
+            SA.LAST_THERMAL_DESINFECTION.value: "50",
+        }
 
     @pytest.mark.asyncio
     async def test_rejects_invalid_frequency_between_0_and_20(self):

@@ -203,15 +203,22 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
 
     @property
     def extra_state_attributes(self) -> dict[str, str]:
-        """Return human-readable mode for DHW manual frequency entity."""
-        if self.entity_description.key != SensorKey.DHW_MANUAL_FREQUENCY:
-            return {}
-        val = self._attr_native_value
-        if val == 0:
-            return {"mode": "Automatic"}
-        if val is not None:
-            return {"mode": f"Manual at {int(val)} Hz"}
-        return {}
+        """Extra attributes, plus a human-readable mode for DHW manual frequency.
+
+        Must merge with (not replace) the base-computed attributes - other
+        Number entities may declare their own `extra_attributes` (e.g. the
+        DHW thermal desinfection target's `last_thermal_desinfection`), which
+        `_enrich_extra_attributes()` already populated into
+        `self._attr_extra_state_attributes`.
+        """
+        attributes = dict(self._attr_extra_state_attributes)
+        if self.entity_description.key == SensorKey.DHW_MANUAL_FREQUENCY:
+            val = self._attr_native_value
+            if val == 0:
+                attributes["mode"] = "Automatic"
+            elif val is not None:
+                attributes["mode"] = f"Manual at {int(val)} Hz"
+        return attributes
 
     def formatted_data(self, attr: LuxtronikEntityAttributeDescription) -> str:
         """Calculate the attribute value."""
