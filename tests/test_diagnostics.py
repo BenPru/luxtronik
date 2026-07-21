@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.components.diagnostics import REDACTED
 from homeassistant.const import CONF_HOST
@@ -10,7 +10,7 @@ import pytest
 
 from conftest import FakeSensorItem
 from custom_components.luxtronik2.const import DEFAULT_PORT
-from custom_components.luxtronik2.diagnostics import _dump_items
+from custom_components.luxtronik2.diagnostics import _dump_items, _redact_log_records
 
 
 class TestDumpItems:
@@ -76,12 +76,69 @@ class TestAsyncGetConfigEntryDiagnostics:
         assert "parameters" in result
         assert "calculations" in result
         assert "visibilities" in result
+        assert "log_records" in result
         # MAC keeps only the OUI (vendor prefix); the device-specific part
         # is masked out - not routed through TO_REDACT (M9).
         assert result["entry"]["data"]["mac"] == "aa:bb:cc:*"
         # Host and serial-derived unique_id must be fully redacted (M9).
         assert result["entry"]["data"]["host"] == REDACTED
         assert result["entry"]["unique_id"] == REDACTED
+
+    @pytest.mark.asyncio
+    async def test_includes_and_redacts_captured_log_records(self):
+        """Log records are embedded so a single diagnostics download covers
+        both state and recent log activity; the configured host is scrubbed
+        out of them since log lines aren't structured data and can't go
+        through TO_REDACT like the rest of the payload."""
+        from custom_components.luxtronik2.diagnostics import (
+            async_get_config_entry_diagnostics,
+        )
+
+        hass = MagicMock()
+        hass.async_add_executor_job = AsyncMock(return_value=None)
+
+        data = MagicMock()
+        data.parameters.parameters = {}
+        data.calculations.calculations = {}
+        data.visibilities.visibilities = {}
+
+        coordinator = MagicMock()
+        coordinator.async_request_refresh = AsyncMock()
+        coordinator.data = data
+        coordinator.device_infos = {}
+
+        entry = MagicMock()
+        entry.runtime_data = coordinator
+        entry.data = {CONF_HOST: "192.168.1.100"}
+        entry.as_dict.return_value = {"data": {}}
+
+        fake_records = [
+            "2026-07-21 10:00:00 DEBUG some.logger: connecting to 192.168.1.100:8889",
+            "2026-07-21 10:00:01 ERROR some.logger: unrelated failure",
+        ]
+        with patch(
+            "custom_components.luxtronik2.diagnostics.get_captured_log_records",
+            return_value=fake_records,
+        ):
+            result = await async_get_config_entry_diagnostics(hass, entry)
+
+        assert "192.168.1.100" not in result["log_records"][0]
+        assert "**REDACTED_HOST**" in result["log_records"][0]
+        assert result["log_records"][1] == fake_records[1]
+
+
+class TestRedactLogRecords:
+    def test_replaces_host_occurrences(self):
+        records = ["connecting to 10.0.0.5:8889", "no host here"]
+        result = _redact_log_records(records, "10.0.0.5")
+        assert result == ["connecting to **REDACTED_HOST**:8889", "no host here"]
+
+    def test_empty_host_returns_records_unchanged(self):
+        records = ["some log line"]
+        assert _redact_log_records(records, "") == records
+
+    def test_empty_records_list(self):
+        assert _redact_log_records([], "10.0.0.5") == []
 
     @pytest.mark.asyncio
     async def test_no_mac(self):
