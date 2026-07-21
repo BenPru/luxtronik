@@ -22,6 +22,7 @@ from homeassistant.helpers.entity_registry import (
     async_get,
 )
 
+from . import log_capture  # noqa: F401 - attaches the diagnostics log-capture handler
 from .common import convert_to_int_if_possible
 from .const import (
     ATTR_PARAMETER,

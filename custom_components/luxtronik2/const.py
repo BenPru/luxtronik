@@ -62,6 +62,8 @@ UPDATE_INTERVAL_VERY_SLOW: Final = timedelta(minutes=5)
 SECOND_TO_HOUR_FACTOR: Final = 1 / 3600
 
 DEFAULT_DHW_MIN_TEMPERATURE: Final = 30.0
+
+MAX_CAPTURED_LOG_RECORDS: Final = 1000
 # endregion Constants Main
 
 # region Conf
