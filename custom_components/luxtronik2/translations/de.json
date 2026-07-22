@@ -57,12 +57,6 @@
             },
             "motor_protection": {
                 "name": "Motorschutz"
-            },
-            "cooling_energy_input": {
-                "name": "Eingesetzte Energie K\u00fchlung"
-            },
-            "second_heat_generator_amount_counter": {
-                "name": "Zweiter W\u00e4rmeerzeuger W\u00e4rmemenge"
             }
         },
         "switch": {
@@ -944,6 +938,38 @@
                 "name": "Abwesenheitsmodus Heizung Enddatum"
             }
         },
+        "text": {
+            "timer_dhw_schedule_week": {
+                "name": "Warmwasser-Zeitschaltplan (Woche)"
+            },
+            "timer_dhw_schedule_weekday": {
+                "name": "Warmwasser-Zeitschaltplan (Werktage)"
+            },
+            "timer_dhw_schedule_weekend": {
+                "name": "Warmwasser-Zeitschaltplan (Wochenende)"
+            },
+            "timer_dhw_schedule_monday": {
+                "name": "Warmwasser-Zeitschaltplan (Montag)"
+            },
+            "timer_dhw_schedule_tuesday": {
+                "name": "Warmwasser-Zeitschaltplan (Dienstag)"
+            },
+            "timer_dhw_schedule_wednesday": {
+                "name": "Warmwasser-Zeitschaltplan (Mittwoch)"
+            },
+            "timer_dhw_schedule_thursday": {
+                "name": "Warmwasser-Zeitschaltplan (Donnerstag)"
+            },
+            "timer_dhw_schedule_friday": {
+                "name": "Warmwasser-Zeitschaltplan (Freitag)"
+            },
+            "timer_dhw_schedule_saturday": {
+                "name": "Warmwasser-Zeitschaltplan (Samstag)"
+            },
+            "timer_dhw_schedule_sunday": {
+                "name": "Warmwasser-Zeitschaltplan (Sonntag)"
+            }
+        },
         "select": {
             "thermal_desinfection_day": {
                 "name": "Tag der thermischen Desinfektion",
@@ -1150,6 +1176,9 @@
         },
         "invalid_write_target": {
             "message": "Es konnte keine geladene Luxtronik-W\u00e4rmepumpe f\u00fcr das Ziel {target} ermittelt werden"
+        },
+        "invalid_timer_schedule": {
+            "message": "Ung\u00fcltiger Zeitschaltplan \"{value}\": erwartet werden \"HH:MM-HH:MM\"-Eintr\u00e4ge, getrennt durch \"/\", mit maximal {max_rows} Eintr\u00e4gen"
         },
         "write_confirmation_mismatch": {
             "message": "Die Luxtronik-W\u00e4rmepumpe hat die geschriebenen Werte nicht best\u00e4tigt: {details}"

@@ -21,6 +21,7 @@ ENTITY_CHECKS = [
     ("date_entities_predefined.py", "date"),
     ("select_entities_predefined.py", "select"),
     ("switch_entities_predefined.py", "switch"),
+    ("timer_schedule_entities_predefined.py", "text"),
 ]
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -164,7 +165,9 @@ def find_state_key_mismatches() -> list[str]:
     for platform, entity_key in sorted(entity_paths):
         per_lang_state: dict[str, set[str]] = {}
         for lang, data in data_by_lang.items():
-            state = data["entity"].get(platform, {}).get(entity_key, {}).get("state", {})
+            state = (
+                data["entity"].get(platform, {}).get(entity_key, {}).get("state", {})
+            )
             per_lang_state[lang] = set(state.keys())
         union = set().union(*per_lang_state.values())
         for lang, keys in per_lang_state.items():
@@ -177,9 +180,10 @@ def find_state_key_mismatches() -> list[str]:
         attr_names: set[str] = set()
         for data in data_by_lang.values():
             attrs = (
-                data["entity"].get(platform, {}).get(entity_key, {}).get(
-                    "state_attributes", {}
-                )
+                data["entity"]
+                .get(platform, {})
+                .get(entity_key, {})
+                .get("state_attributes", {})
             )
             attr_names |= set(attrs.keys())
 
@@ -241,6 +245,31 @@ def find_device_translation_problems() -> list[str]:
     return problems
 
 
+def find_exceptions_translation_problems() -> list[str]:
+    """Check that every top-level `exceptions.<key>.message` in en.json also
+    exists (non-empty) in every other language file.
+
+    `find_missing_entity_keys` only inspects the `entity` section, so a
+    ServiceValidationError/HomeAssistantError translation_key added under the
+    top-level `exceptions` block (see text.py's invalid_timer_schedule) can go
+    untranslated in de/nl/cs/pl without CI ever catching it.
+    """
+    problems: list[str] = []
+    data_by_lang = load_all_languages()
+    en_keys = set(data_by_lang["en"].get("exceptions", {}).keys())
+
+    for lang, data in data_by_lang.items():
+        if lang == "en":
+            continue
+        exceptions_section = data.get("exceptions", {})
+        for key in sorted(en_keys):
+            message = exceptions_section.get(key, {}).get("message")
+            if not message:
+                problems.append(f"[{lang}] exceptions.{key}.message missing")
+
+    return problems
+
+
 if __name__ == "__main__":
     json_problems = find_invalid_json_files()
     if json_problems:
@@ -253,6 +282,7 @@ if __name__ == "__main__":
         find_missing_entity_keys()
         + find_state_key_mismatches()
         + find_device_translation_problems()
+        + find_exceptions_translation_problems()
     )
     if not all_problems:
         LOG.info("All translation files have complete coverage!")

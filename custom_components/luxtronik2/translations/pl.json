@@ -57,27 +57,6 @@
             },
             "compressor2": {
                 "name": "Spr\u0119\u017carka 2"
-            },
-            "cooling_energy_input": {
-                "name": "Energia zu\u017cyta na ch\u0142odzenie"
-            },
-            "current_power_consumption": {
-                "name": "Pob\u00f3r mocy"
-            },
-            "second_heat_generator_amount_counter": {
-                "name": "Ilo\u015b\u0107 ciep\u0142a drugiego generatora"
-            },
-            "circulation_pump_delta": {
-                "name": "Cyrkulacyjna pompdelta"
-            },
-            "circulation_pump_delta_target": {
-                "name": "Cyrkulacyjna pompdelta docelowa"
-            },
-            "pump_flow_delta": {
-                "name": "Delta przep\u0142ywu pompy"
-            },
-            "pump_flow_delta_target": {
-                "name": "Delta docelowa przep\u0142ywu pompy"
             }
         },
         "switch": {
@@ -923,9 +902,6 @@
             "room_thermostat_temperature_target": {
                 "name": "Temperatura docelowa termostatu pokojowego"
             },
-            "compressor2": {
-                "name": "Spr\u0119\u017carka 2"
-            },
             "cooling_energy_input": {
                 "name": "Energia zu\u017cyta na ch\u0142odzenie"
             },
@@ -960,6 +936,38 @@
             },
             "away_heating_enddate": {
                 "name": "Data zako\u0144czenia trybu nieobecno\u015bci - ogrzewanie"
+            }
+        },
+        "text": {
+            "timer_dhw_schedule_week": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (tydzie\u0144)"
+            },
+            "timer_dhw_schedule_weekday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (dni robocze)"
+            },
+            "timer_dhw_schedule_weekend": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (weekend)"
+            },
+            "timer_dhw_schedule_monday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (poniedzia\u0142ek)"
+            },
+            "timer_dhw_schedule_tuesday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (wtorek)"
+            },
+            "timer_dhw_schedule_wednesday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (\u015broda)"
+            },
+            "timer_dhw_schedule_thursday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (czwartek)"
+            },
+            "timer_dhw_schedule_friday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (pi\u0105tek)"
+            },
+            "timer_dhw_schedule_saturday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (sobota)"
+            },
+            "timer_dhw_schedule_sunday": {
+                "name": "Harmonogram czasowy ciep\u0142ej wody (niedziela)"
             }
         },
         "select": {
@@ -1168,6 +1176,9 @@
         },
         "invalid_write_target": {
             "message": "Nie uda\u0142o si\u0119 znale\u017a\u0107 za\u0142adowanej pompy ciep\u0142a Luxtronik dla celu {target}"
+        },
+        "invalid_timer_schedule": {
+            "message": "Nieprawid\u0142owy harmonogram czasowy \"{value}\": oczekiwane s\u0105 wpisy \"HH:MM-HH:MM\" oddzielone znakiem \"/\", maksymalnie {max_rows} wpis\u00f3w"
         },
         "write_confirmation_mismatch": {
             "message": "Pompa ciep\u0142a Luxtronik nie potwierdzi\u0142a zapisanych warto\u015bci: {details}"

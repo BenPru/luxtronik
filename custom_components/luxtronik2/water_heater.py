@@ -69,6 +69,7 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         # luxtronik_key_target_temperature_low=LuxParameter,
         temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LV.V0029_DHW_TEMPERATURE,
+        device_key=DeviceKey.domestic_water,
         max_firmware_version_minor=Version("88.2"),
     ),
     LuxtronikWaterHeaterDescription(
@@ -86,6 +87,7 @@ WATER_HEATERS: list[LuxtronikWaterHeaterDescription] = [
         # luxtronik_key_target_temperature_low=LuxParameter,
         temperature_unit=UnitOfTemperature.CELSIUS,
         visibility=LV.V0029_DHW_TEMPERATURE,
+        device_key=DeviceKey.domestic_water,
         min_firmware_version_minor=Version("88.3"),
     ),
 ]

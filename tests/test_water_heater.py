@@ -53,7 +53,7 @@ class TestWaterHeaterDescriptions:
 
     def test_all_domestic_water(self):
         for wh in WATER_HEATERS:
-            assert wh.device_key == DeviceKey.heatpump  # default
+            assert wh.device_key == DeviceKey.domestic_water
             assert wh.luxtronik_action_heating == LuxOperationMode.domestic_water
 
     def test_firmware_version_split(self):
