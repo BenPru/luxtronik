@@ -196,9 +196,6 @@
             "dhw_hysteresis": {
                 "name": "Hystereze TUV"
             },
-            "dhw_frequency_control": {
-                "name": "Inverter Frekvence TUV (Hz, 0 = Automaticky)"
-            },
             "heating_room_temperature_impact_factor": {
                 "name": "Faktor vlivu teploty m\u00edstnosti na vyt\u00e1p\u011bn\u00ed"
             },
@@ -941,6 +938,38 @@
                 "name": "Datum konce re\u017eimu mimo domov - vyt\u00e1p\u011bn\u00ed"
             }
         },
+        "text": {
+            "timer_dhw_schedule_week": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (t\u00fdden)"
+            },
+            "timer_dhw_schedule_weekday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (pracovn\u00ed dny)"
+            },
+            "timer_dhw_schedule_weekend": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (v\u00edkend)"
+            },
+            "timer_dhw_schedule_monday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (pond\u011bl\u00ed)"
+            },
+            "timer_dhw_schedule_tuesday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (\u00fater\u00fd)"
+            },
+            "timer_dhw_schedule_wednesday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (st\u0159eda)"
+            },
+            "timer_dhw_schedule_thursday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (\u010dtvrtek)"
+            },
+            "timer_dhw_schedule_friday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (p\u00e1tek)"
+            },
+            "timer_dhw_schedule_saturday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (sobota)"
+            },
+            "timer_dhw_schedule_sunday": {
+                "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (ned\u011ble)"
+            }
+        },
         "select": {
             "thermal_desinfection_day": {
                 "name": "Den termick\u00e9 dezinfekce",
@@ -1147,6 +1176,9 @@
         },
         "invalid_write_target": {
             "message": "Nepoda\u0159ilo se naj\u00edt na\u010dten\u00e9 tepeln\u00e9 \u010derpadlo Luxtronik pro c\u00edl {target}"
+        },
+        "invalid_timer_schedule": {
+            "message": "Neplatn\u00fd \u010dasov\u00fd pl\u00e1n \"{value}\": o\u010dek\u00e1vaj\u00ed se polo\u017eky \"HH:MM-HH:MM\" odd\u011blen\u00e9 znakem \"/\", maxim\u00e1ln\u011b {max_rows} polo\u017eek"
         },
         "write_confirmation_mismatch": {
             "message": "Tepeln\u00e9 \u010derpadlo Luxtronik nepotvrdilo zapsan\u00e9 hodnoty: {details}"

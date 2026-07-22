@@ -57,15 +57,6 @@
             },
             "motor_protection": {
                 "name": "Motorbeveiliging"
-            },
-            "cooling_energy_input": {
-                "name": "Gebruikte energie koeling"
-            },
-            "current_power_consumption": {
-                "name": "Stroomverbruik"
-            },
-            "second_heat_generator_amount_counter": {
-                "name": "Tweede warmtebron warmtemenge"
             }
         },
         "switch": {
@@ -947,6 +938,38 @@
                 "name": "Einddatum Verwarming vakantie modus"
             }
         },
+        "text": {
+            "timer_dhw_schedule_week": {
+                "name": "Warmwater tijdschema (week)"
+            },
+            "timer_dhw_schedule_weekday": {
+                "name": "Warmwater tijdschema (werkdagen)"
+            },
+            "timer_dhw_schedule_weekend": {
+                "name": "Warmwater tijdschema (weekend)"
+            },
+            "timer_dhw_schedule_monday": {
+                "name": "Warmwater tijdschema (maandag)"
+            },
+            "timer_dhw_schedule_tuesday": {
+                "name": "Warmwater tijdschema (dinsdag)"
+            },
+            "timer_dhw_schedule_wednesday": {
+                "name": "Warmwater tijdschema (woensdag)"
+            },
+            "timer_dhw_schedule_thursday": {
+                "name": "Warmwater tijdschema (donderdag)"
+            },
+            "timer_dhw_schedule_friday": {
+                "name": "Warmwater tijdschema (vrijdag)"
+            },
+            "timer_dhw_schedule_saturday": {
+                "name": "Warmwater tijdschema (zaterdag)"
+            },
+            "timer_dhw_schedule_sunday": {
+                "name": "Warmwater tijdschema (zondag)"
+            }
+        },
         "select": {
             "thermal_desinfection_day": {
                 "name": "Dag waarop de thermische desinfection wordt uitgevoerd",
@@ -1153,6 +1176,9 @@
         },
         "invalid_write_target": {
             "message": "Kon geen geladen Luxtronik-warmtepomp vinden voor doel {target}"
+        },
+        "invalid_timer_schedule": {
+            "message": "Ongeldig tijdschema \"{value}\": verwacht worden \"HH:MM-HH:MM\"-items gescheiden door \"/\", met maximaal {max_rows} items"
         },
         "write_confirmation_mismatch": {
             "message": "De Luxtronik-warmtepomp heeft de geschreven waarde(n) niet bevestigd: {details}"
