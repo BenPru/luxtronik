@@ -1,4 +1,4 @@
-name: HACS
+name: HACS / Hassfest
 
 on:
   push:
