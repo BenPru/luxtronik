@@ -44,11 +44,11 @@ It is used by manufacturers such as:
 
 ### Step 1: Add the repository to HACS
 
-Click the button below to automatically add the custom repository to HACS:
+Click the button below to open the integration directly in HACS:
 
-[![Open your Home Assistant instance and show the add HACS repository dialog with a specific repository pre-filled.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BenPru&repository=Luxtronik&category=integration)
+[![Open your Home Assistant instance and show the HACS repository.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BenPru&repository=Luxtronik&category=integration)
 
-*(Alternatively: Open HACS, go to Integrations, click the three dots in the top right, select "Custom repositories", enter `https://github.com/BenPru/luxtronik`, and select "Integration" as the category).*
+*(Alternatively: Open **HACS** > **Integrations**, search for **Luxtronik**, select it, and click **Download**).*
 
 ### Step 2: Install the Integration
 
