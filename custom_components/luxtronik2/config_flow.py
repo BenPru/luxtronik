@@ -92,22 +92,79 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         Returns None if the flow should proceed to create/update the entry.
         """
+        host = config[CONF_HOST]
+        port = config[CONF_PORT]
         try:
-            await self.async_set_unique_id(coordinator.unique_id)
-            self._abort_if_unique_id_configured()
-            return None
-        except AbortFlow:
-            LOGGER.debug("Device already configured: %s", config[CONF_HOST])
-            return self.async_abort(reason="already_configured")
+            serial_unique_id = coordinator.unique_id
         except LuxtronikSerialNumberError as err:
-            LOGGER.error("Could not identify device at %s: %s", config[CONF_HOST], err)
+            LOGGER.error("Could not identify device at %s: %s", host, err)
             return self.async_abort(
                 reason="cannot_identify",
                 description_placeholders={
-                    "host": config[CONF_HOST],
+                    "host": host,
                     "error": str(err),
                 },
             )
+
+        try:
+            await self.async_set_unique_id(serial_unique_id)
+            self._abort_if_unique_id_configured()
+            return None
+        except AbortFlow:
+            return self._abort_already_configured(serial_unique_id, host, port)
+
+    def _abort_already_configured(
+        self, serial_unique_id: str, host: str, port: int
+    ) -> ConfigFlowResult:
+        """Abort with the *reason* the device counts as already configured.
+
+        The unique ID is the heat pump's serial number, so a second endpoint
+        aborting here means it reported a serial that an existing entry
+        already uses - i.e. it is the same physical controller reached a
+        second way (a duplicate port forward is the usual cause, see issue
+        #724), not a second pump. Naming the conflicting entry turns an
+        otherwise unexplained "This device is already configured." into
+        something the user can act on.
+        """
+        conflict = next(
+            (
+                entry
+                for entry in self._async_current_entries()
+                if entry.unique_id == serial_unique_id
+            ),
+            None,
+        )
+        if conflict is None:
+            LOGGER.debug(
+                "Device at %s:%s (serial '%s') is already configured",
+                host,
+                port,
+                serial_unique_id,
+            )
+            return self.async_abort(reason="already_configured")
+
+        conflict_host = conflict.data.get(CONF_HOST)
+        conflict_port = conflict.data.get(CONF_PORT)
+        LOGGER.warning(
+            "Device at %s:%s reports serial '%s', which is already configured as "
+            "'%s' (%s:%s). Both addresses reach the same heat pump - check for a "
+            "duplicate port forward if you expected two separate units",
+            host,
+            port,
+            serial_unique_id,
+            conflict.title,
+            conflict_host,
+            conflict_port,
+        )
+        return self.async_abort(
+            reason="already_configured_serial",
+            description_placeholders={
+                "host": f"{host}:{port}",
+                "serial": serial_unique_id,
+                "existing_host": f"{conflict_host}:{conflict_port}",
+                "existing_title": conflict.title,
+            },
+        )
 
     def _create_entry(
         self, config: dict[str, Any], coordinator: LuxtronikCoordinator

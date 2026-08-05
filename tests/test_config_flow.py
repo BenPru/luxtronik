@@ -112,14 +112,25 @@ class TestFlowHelpers:
 # ===========================================================================
 
 
+def _mock_entry(unique_id: str, host: str, port: int, title: str = "entry"):
+    entry = MagicMock()
+    entry.unique_id = unique_id
+    entry.title = title
+    entry.data = {CONF_HOST: host, CONF_PORT: port}
+    return entry
+
+
 class TestSetUniqueIdOrAbort:
     @pytest.mark.asyncio
     async def test_sets_unique_id(self):
         flow = LuxtronikFlowHandler()
         flow.async_set_unique_id = AsyncMock()
         flow._abort_if_unique_id_configured = MagicMock()
+        flow._async_current_entries = MagicMock(return_value=[])
         coord = _mock_coordinator()
-        result = await flow._set_unique_id_or_abort(coord, {CONF_HOST: "1.2.3.4"})
+        result = await flow._set_unique_id_or_abort(
+            coord, {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+        )
         assert result is None
         flow.async_set_unique_id.assert_awaited_once_with(coord.unique_id)
 
@@ -130,8 +141,11 @@ class TestSetUniqueIdOrAbort:
         flow._abort_if_unique_id_configured = MagicMock(
             side_effect=AbortFlow("already_configured")
         )
+        flow._async_current_entries = MagicMock(return_value=[])
         coord = _mock_coordinator()
-        result = await flow._set_unique_id_or_abort(coord, {CONF_HOST: "1.2.3.4"})
+        result = await flow._set_unique_id_or_abort(
+            coord, {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+        )
         assert result is not None
         assert result["reason"] == "already_configured"
 
@@ -143,9 +157,66 @@ class TestSetUniqueIdOrAbort:
         type(coord).unique_id = PropertyMock(
             side_effect=LuxtronikSerialNumberError("no serial number")
         )
-        result = await flow._set_unique_id_or_abort(coord, {CONF_HOST: "1.2.3.4"})
+        result = await flow._set_unique_id_or_abort(
+            coord, {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+        )
         assert result is not None
         assert result["reason"] == "cannot_identify"
+
+    @pytest.mark.asyncio
+    async def test_serial_conflict_abort_names_the_existing_entry(self):
+        """Issue #724: a second endpoint whose serial is already configured is
+        the same pump reached twice, so the abort must say which entry it
+        collided with instead of the bare 'already configured'."""
+        flow = LuxtronikFlowHandler()
+        flow.async_set_unique_id = AsyncMock()
+        flow._abort_if_unique_id_configured = MagicMock(
+            side_effect=AbortFlow("already_configured")
+        )
+        coord = _mock_coordinator()
+        flow._async_current_entries = MagicMock(
+            return_value=[
+                _mock_entry(
+                    coord.unique_id,
+                    "name1.mooo.com",
+                    8452,
+                    title="Luxtronik @ name1.mooo.com:8452",
+                )
+            ]
+        )
+
+        result = await flow._set_unique_id_or_abort(
+            coord, {CONF_HOST: "name1.mooo.com", CONF_PORT: 8450}
+        )
+
+        assert result is not None
+        assert result["reason"] == "already_configured_serial"
+        placeholders = result["description_placeholders"]
+        assert placeholders["host"] == "name1.mooo.com:8450"
+        assert placeholders["serial"] == coord.unique_id
+        assert placeholders["existing_host"] == "name1.mooo.com:8452"
+        assert placeholders["existing_title"] == "Luxtronik @ name1.mooo.com:8452"
+
+    @pytest.mark.asyncio
+    async def test_abort_falls_back_when_no_entry_matches_the_serial(self):
+        """The conflict can come from an in-progress flow rather than an entry;
+        without a matching entry there is nothing specific to report."""
+        flow = LuxtronikFlowHandler()
+        flow.async_set_unique_id = AsyncMock()
+        flow._abort_if_unique_id_configured = MagicMock(
+            side_effect=AbortFlow("already_configured")
+        )
+        flow._async_current_entries = MagicMock(
+            return_value=[_mock_entry("some_other_serial", "1.2.3.4", 8889)]
+        )
+        coord = _mock_coordinator()
+
+        result = await flow._set_unique_id_or_abort(
+            coord, {CONF_HOST: "5.6.7.8", CONF_PORT: 8889}
+        )
+
+        assert result is not None
+        assert result["reason"] == "already_configured"
 
 
 # ===========================================================================

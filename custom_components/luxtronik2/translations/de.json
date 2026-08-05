@@ -1084,6 +1084,7 @@
             "cannot_connect": "Verbindung zu Luxtronik unter {host} fehlgeschlagen.\\nFehler: {connect_error}",
             "cannot_identify": "Verbindung zum Ger\u00e4t unter {host} hergestellt, aber die Seriennummer zur Identifizierung konnte nicht gelesen werden.\\nFehler: {error}",
             "already_configured": "Dieses Ger\u00e4t ist bereits konfiguriert.",
+            "already_configured_serial": "Die W\u00e4rmepumpe unter {host} meldet die Seriennummer {serial}, die bereits als {existing_title} ({existing_host}) konfiguriert ist. Beide Adressen erreichen dieselbe W\u00e4rmepumpe - pr\u00fcfe bei zwei erwarteten Ger\u00e4ten die Portweiterleitungen auf Duplikate.",
             "reconfigure_successful": "Konfiguration erfolgreich aktualisiert.",
             "unique_id_mismatch": "Das Ger\u00e4t an der neuen Adresse hat eine andere Identit\u00e4t als das aktuell konfigurierte Ger\u00e4t.",
             "already_in_progress": "Der Konfigurationsvorgang ist bereits aktiv.",
