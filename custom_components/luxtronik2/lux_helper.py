@@ -172,7 +172,10 @@ def _is_socket_closed(sock: socket.socket) -> bool:
         if sock.fileno() < 0:
             return True
     except Exception as err:  # pylint: disable=broad-except
-        LOGGER.exception(
+        # Debug, not error: this probe runs before every read attempt and the
+        # caller recovers by reconnecting, so a failure here is not itself a
+        # problem worth reporting at default log level.
+        LOGGER.debug(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
         return True
@@ -193,12 +196,18 @@ def _is_socket_closed(sock: socket.socket) -> bool:
     except OSError as err:
         if err.errno == 107:  # Socket not connected
             return True
-        LOGGER.exception(
+        # Debug, not error: this probe runs before every read attempt and the
+        # caller recovers by reconnecting, so a failure here is not itself a
+        # problem worth reporting at default log level.
+        LOGGER.debug(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
         return False
     except Exception as err:  # pylint: disable=broad-except
-        LOGGER.exception(
+        # Debug, not error: this probe runs before every read attempt and the
+        # caller recovers by reconnecting, so a failure here is not itself a
+        # problem worth reporting at default log level.
+        LOGGER.debug(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
         return False
@@ -225,6 +234,7 @@ class Luxtronik:
         self._port = port
         self._socket_timeout = socket_timeout
         self._max_data_length = max_data_length
+        self._short_reads = 0
         self.calculations = Calculations()
         self.parameters = Parameters(safe=safe)
         self.visibilities = Visibilities()
@@ -249,7 +259,7 @@ class Luxtronik:
             if not _is_socket_closed(self._socket):
                 self._socket.close()
             self._socket = None
-            LOGGER.info(
+            LOGGER.debug(
                 "Disconnected from Luxtronik heatpump %s:%s", self._host, self._port
             )
 
@@ -262,7 +272,7 @@ class Luxtronik:
                 self._socket.settimeout(self._socket_timeout)
                 try:
                     self._socket.connect((self._host, self._port))
-                    LOGGER.info(
+                    LOGGER.debug(
                         "Connected to Luxtronik heatpump %s:%s with timeout %.1fs",
                         self._host,
                         self._port,
@@ -288,12 +298,11 @@ class Luxtronik:
             if write:
                 self._write()
             self._read()
-        except OSError:
-            LOGGER.error("Socket error during read/write", exc_info=True)
-            self._disconnect()
-            raise
-        except struct.error:
-            LOGGER.error("Protocol/parse error during read/write", exc_info=True)
+        except (OSError, struct.error):
+            # Deliberately not logged here: the exception propagates to the
+            # coordinator, which re-raises it as UpdateFailed and lets
+            # DataUpdateCoordinator report it. Logging it as well produced two
+            # entries - one with a full traceback - for every transient blip.
             self._disconnect()
             raise
 
@@ -327,27 +336,73 @@ class Luxtronik:
             if not isinstance(index, int) or not isinstance(value, int):
                 LOGGER.warning("Parameter id '%s' or value '%s' invalid!", index, value)
                 continue
-            LOGGER.info("Parameter '%d' set to '%s'", index, value)
             data = struct.pack(">iii", LUXTRONIK_PARAMETERS_WRITE, index, value)
-            LOGGER.debug("Data %s", data)
             self._socket.sendall(data)
-            cmd = struct.unpack(">i", self._socket.recv(4))[0]
-            LOGGER.debug("Command %s", cmd)
-            val = struct.unpack(">i", self._socket.recv(4))[0]
-            LOGGER.debug("Value %s", val)
+            cmd = self._read_int()
+            val = self._read_int()
+            LOGGER.debug(
+                "Parameter '%d' set to '%s' (ack cmd=%s value=%s)",
+                index,
+                value,
+                cmd,
+                val,
+            )
         # Flush queue after writing all values
         self.parameters.queue = {}
         # Give the heatpump a short time to handle the value changes/calculations:
         # Todo: Change methods to async
         # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
+    def _read_exact(self, count: int) -> bytes:
+        """Receive exactly ``count`` bytes from the socket.
+
+        TCP gives no framing guarantee: ``recv(n)`` may return fewer than ``n``
+        bytes whenever a segment boundary falls inside the value being read.
+        Treating such a short read as a failed item (as the upstream library
+        does) both drops that item and leaves its remaining bytes in the
+        stream, so every following value is decoded from misaligned bytes and
+        lands on the wrong sensor. Loop until the full value has arrived
+        instead, and let a dead connection raise rather than spin.
+        """
+        if self._socket is None:
+            raise OSError("Cannot read: socket is not connected")
+        chunks: list[bytes] = []
+        remaining = count
+        while remaining > 0:
+            chunk = self._socket.recv(remaining)
+            if not chunk:
+                raise ConnectionError(
+                    f"Connection to {self._host}:{self._port} closed by peer"
+                )
+            chunks.append(chunk)
+            remaining -= len(chunk)
+            if remaining:
+                # Counted rather than logged: a chatty controller can fragment
+                # every single value, and there are ~1700 of them per poll.
+                # `_read_data` reports the total for the block instead.
+                self._short_reads += 1
+        return b"".join(chunks)
+
+    def _read_int(self) -> int:
+        """Read one big-endian 32 bit integer."""
+        return struct.unpack(
+            ">i", self._read_exact(LUXTRONIK_SOCKET_READ_SIZE_INTEGER)
+        )[0]
+
+    def _read_char(self) -> int:
+        """Read one signed byte."""
+        return struct.unpack(">b", self._read_exact(LUXTRONIK_SOCKET_READ_SIZE_CHAR))[0]
+
     def _read_data(  # pragma: no cover
         self, command: int, item_size: int, parser, label: str, retries: int = 4
     ) -> None:
         """Generic method to read data from the socket with timeout and retry handling."""
-        data = []
-
         for attempt in range(retries + 1):
+            # Must be reset per attempt: items read before a failed attempt
+            # would otherwise be prepended to the retry's data and shift every
+            # index of the reparsed block.
+            data = []
+            self._short_reads = 0
             try:
                 # check if connection still exists before reading
                 if self._socket is None or _is_socket_closed(self._socket):
@@ -360,15 +415,15 @@ class Luxtronik:
                     raise OSError("Socket not connected after connect()")
 
                 self._socket.sendall(struct.pack(">ii", command, 0))
-                cmd = struct.unpack(">i", self._socket.recv(4))[0]
+                cmd = self._read_int()
                 LOGGER.debug("Command %s (%s)", cmd, label)
 
                 # Optional status field for calculations
                 if command == LUXTRONIK_CALCULATIONS_READ:
-                    stat = struct.unpack(">i", self._socket.recv(4))[0]
+                    stat = self._read_int()
                     LOGGER.debug("Stat %s", stat)
 
-                length = struct.unpack(">i", self._socket.recv(4))[0]
+                length = self._read_int()
                 if length > self._max_data_length:
                     LOGGER.warning(
                         "Skip reading %s! Length oversized! %s > %s",
@@ -386,35 +441,58 @@ class Luxtronik:
 
                 LOGGER.debug("Length %s (%s)", length, label)
 
-                fmt = ">i" if item_size == LUXTRONIK_SOCKET_READ_SIZE_INTEGER else ">b"
+                read_item = (
+                    self._read_int
+                    if item_size == LUXTRONIK_SOCKET_READ_SIZE_INTEGER
+                    else self._read_char
+                )
 
+                # Any failure here aborts the whole block: the parsers assign
+                # values by list position, so a single skipped item would
+                # silently relabel every sensor after it (issue #723). The
+                # retry handler below disconnects, which also discards the
+                # desynchronised remainder of the response.
                 for _ in range(length):
-                    try:
-                        raw = self._socket.recv(item_size)
-                        data.append(struct.unpack(fmt, raw)[0])
-                    except (TimeoutError, struct.error) as err:
-                        LOGGER.debug("Error reading %s item: %s", label, err)
+                    data.append(read_item())
 
-                LOGGER.debug("Read %d %s items", length, label)
+                if len(data) != length:
+                    raise OSError(
+                        f"Incomplete {label} block: got {len(data)} of {length} items"
+                    )
+
+                LOGGER.debug(
+                    "Read %d %s items (%d fragmented)",
+                    length,
+                    label,
+                    self._short_reads,
+                )
                 parser.parse(data)
                 return  # Success, exit after first successful attempt
 
             except (TimeoutError, ConnectionResetError, OSError) as err:
-                LOGGER.warning(
-                    "Error while reading %s (attempt %d/%d): %s",
-                    label,
-                    attempt + 1,
-                    retries + 1,
-                    err,
-                )
                 self._disconnect()
 
                 if attempt < retries:
                     delay = 1  # min(30, 10 * attempt)  # cap delay to avoid long waits
-                    LOGGER.warning("Waiting %s seconds before retrying...", delay)
+                    # Debug, not warning: an attempt that is about to be retried
+                    # is not yet a problem. Only exhausting them all is, and
+                    # that is reported below.
+                    LOGGER.debug(
+                        "Error while reading %s (attempt %d/%d): %s - retrying in %ss",
+                        label,
+                        attempt + 1,
+                        retries + 1,
+                        err,
+                        delay,
+                    )
                     time.sleep(delay)
                 else:
-                    LOGGER.error("All attempts to read %s failed.", label)
+                    LOGGER.error(
+                        "All %d attempts to read %s failed. Last error: %s",
+                        retries + 1,
+                        label,
+                        err,
+                    )
                     return
 
             except Exception as err:
