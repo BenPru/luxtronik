@@ -551,6 +551,25 @@ class TestLuxtronikReadWrite:
         mock_sock.sendall.assert_called_once()
 
 
+def _fragmented_recv(payload: bytes, chunk_sizes: list[int]):
+    """Build a recv() side effect that serves ``payload`` in short reads.
+
+    Mimics a real stream socket: never returns more than the requested number
+    of bytes, but may return fewer - which is exactly what happens when a TCP
+    segment boundary falls inside a value.
+    """
+    stream = bytearray(payload)
+    sizes = list(chunk_sizes)
+
+    def recv(size):
+        take = min(size, sizes.pop(0) if sizes else size, len(stream))
+        chunk = bytes(stream[:take])
+        del stream[:take]
+        return chunk
+
+    return recv
+
+
 class TestLuxtronikReadData:
     @patch("custom_components.luxtronik2.lux_helper.socket.socket")
     def test_read_data_oversized_length(self, mock_socket_class):
@@ -752,6 +771,226 @@ class TestLuxtronikReadData:
         )
 
         parser.parse.assert_not_called()
+
+    def test_read_exact_without_socket_raises(self):
+        """Reading without a connection is an error, not a silent empty read."""
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = None
+
+        with pytest.raises(OSError, match="not connected"):
+            client._read_exact(4)
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_read_data_short_reads_are_reassembled(self, mock_socket_class):
+        """A TCP short read must not drop or misalign items (issue #723)."""
+        from custom_components.luxtronik2.lux_helper import (
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+        )
+
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        # The heatpump answers cmd, length=3 and three ints, but the stream is
+        # fragmented mid-integer the way a real TCP segment boundary does it.
+        payload = struct.pack(">i", LUXTRONIK_PARAMETERS_READ)
+        payload += struct.pack(">i", 3)
+        payload += struct.pack(">iii", 100, 200, 300)
+        # Every value gets split across two recv() returns.
+        mock_sock.recv.side_effect = _fragmented_recv(payload, [3, 1] * 10)
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        parser = MagicMock()
+
+        client._read_data(
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+            parser,
+            "params",
+            retries=0,
+        )
+
+        parser.parse.assert_called_once_with([100, 200, 300])
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_read_data_reports_fragmentation_once_per_block(
+        self, mock_socket_class, caplog
+    ):
+        """Fragmentation is summarised per block, not logged per item."""
+        from custom_components.luxtronik2.lux_helper import (
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+        )
+
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        payload = struct.pack(">i", LUXTRONIK_PARAMETERS_READ)
+        payload += struct.pack(">i", 2)
+        payload += struct.pack(">ii", 100, 200)
+        # cmd and length arrive whole; both items are split in two.
+        mock_sock.recv.side_effect = _fragmented_recv(payload, [4, 4, 3, 1, 3, 1])
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        parser = MagicMock()
+
+        with caplog.at_level("DEBUG"):
+            client._read_data(
+                LUXTRONIK_PARAMETERS_READ,
+                LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+                parser,
+                "params",
+                retries=0,
+            )
+
+        parser.parse.assert_called_once_with([100, 200])
+        assert client._short_reads == 2
+        assert len([r for r in caplog.records if "fragmented" in r.message]) == 1
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_read_data_item_timeout_does_not_parse_shifted_data(
+        self, mock_socket_class
+    ):
+        """A timeout mid-block must abort, never parse a short/shifted list."""
+        from custom_components.luxtronik2.lux_helper import (
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+        )
+
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", LUXTRONIK_PARAMETERS_READ),  # cmd
+            struct.pack(">i", 3),  # length
+            struct.pack(">i", 100),  # item 1
+            TimeoutError("timeout"),  # item 2 never arrives
+            struct.pack(">i", 300),  # item 3
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        parser = MagicMock()
+
+        client._read_data(
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+            parser,
+            "params",
+            retries=0,
+        )
+
+        parser.parse.assert_not_called()
+
+    @patch("custom_components.luxtronik2.lux_helper.time.sleep")
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_read_data_retry_discards_partial_data(self, mock_socket_class, mock_sleep):
+        """Items read before a failed attempt must not leak into the retry."""
+        from custom_components.luxtronik2.lux_helper import (
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+        )
+
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        mock_sock.recv.side_effect = [
+            # Attempt 1: dies after the first item
+            struct.pack(">i", LUXTRONIK_PARAMETERS_READ),
+            struct.pack(">i", 2),
+            struct.pack(">i", 111),
+            TimeoutError("timeout"),
+            # Attempt 2: full, correct answer
+            struct.pack(">i", LUXTRONIK_PARAMETERS_READ),
+            struct.pack(">i", 2),
+            struct.pack(">i", 100),
+            struct.pack(">i", 200),
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        parser = MagicMock()
+
+        client._read_data(
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+            parser,
+            "params",
+            retries=1,
+        )
+
+        parser.parse.assert_called_once_with([100, 200])
+        mock_sleep.assert_called_once_with(1)
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_read_data_peer_close_aborts(self, mock_socket_class):
+        """An empty recv() means the peer closed - abort instead of spinning."""
+        from custom_components.luxtronik2.lux_helper import (
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+        )
+
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", LUXTRONIK_PARAMETERS_READ),
+            struct.pack(">i", 2),
+            struct.pack(">i", 100),
+            b"",  # connection died
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        parser = MagicMock()
+
+        client._read_data(
+            LUXTRONIK_PARAMETERS_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_INTEGER,
+            parser,
+            "params",
+            retries=0,
+        )
+
+        parser.parse.assert_not_called()
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_read_data_visibilities_short_read(self, mock_socket_class):
+        """Single-byte visibility items also survive a fragmented header."""
+        from custom_components.luxtronik2.lux_helper import (
+            LUXTRONIK_SOCKET_READ_SIZE_CHAR,
+            LUXTRONIK_VISIBILITIES_READ,
+        )
+
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        payload = struct.pack(">i", LUXTRONIK_VISIBILITIES_READ)
+        payload += struct.pack(">i", 3)
+        payload += struct.pack(">bbb", 1, 0, 1)
+        mock_sock.recv.side_effect = _fragmented_recv(payload, [3, 1, 2] * 5)
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        parser = MagicMock()
+
+        client._read_data(
+            LUXTRONIK_VISIBILITIES_READ,
+            LUXTRONIK_SOCKET_READ_SIZE_CHAR,
+            parser,
+            "vis",
+            retries=0,
+        )
+
+        parser.parse.assert_called_once_with([1, 0, 1])
 
     @patch("custom_components.luxtronik2.lux_helper.socket.socket")
     def test_read_calls_all_three_groups(self, mock_socket_class):

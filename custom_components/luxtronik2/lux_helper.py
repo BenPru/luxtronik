@@ -225,6 +225,7 @@ class Luxtronik:
         self._port = port
         self._socket_timeout = socket_timeout
         self._max_data_length = max_data_length
+        self._short_reads = 0
         self.calculations = Calculations()
         self.parameters = Parameters(safe=safe)
         self.visibilities = Visibilities()
@@ -331,9 +332,9 @@ class Luxtronik:
             data = struct.pack(">iii", LUXTRONIK_PARAMETERS_WRITE, index, value)
             LOGGER.debug("Data %s", data)
             self._socket.sendall(data)
-            cmd = struct.unpack(">i", self._socket.recv(4))[0]
+            cmd = self._read_int()
             LOGGER.debug("Command %s", cmd)
-            val = struct.unpack(">i", self._socket.recv(4))[0]
+            val = self._read_int()
             LOGGER.debug("Value %s", val)
         # Flush queue after writing all values
         self.parameters.queue = {}
@@ -341,13 +342,56 @@ class Luxtronik:
         # Todo: Change methods to async
         # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
+    def _read_exact(self, count: int) -> bytes:
+        """Receive exactly ``count`` bytes from the socket.
+
+        TCP gives no framing guarantee: ``recv(n)`` may return fewer than ``n``
+        bytes whenever a segment boundary falls inside the value being read.
+        Treating such a short read as a failed item (as the upstream library
+        does) both drops that item and leaves its remaining bytes in the
+        stream, so every following value is decoded from misaligned bytes and
+        lands on the wrong sensor. Loop until the full value has arrived
+        instead, and let a dead connection raise rather than spin.
+        """
+        if self._socket is None:
+            raise OSError("Cannot read: socket is not connected")
+        chunks: list[bytes] = []
+        remaining = count
+        while remaining > 0:
+            chunk = self._socket.recv(remaining)
+            if not chunk:
+                raise ConnectionError(
+                    f"Connection to {self._host}:{self._port} closed by peer"
+                )
+            chunks.append(chunk)
+            remaining -= len(chunk)
+            if remaining:
+                # Counted rather than logged: a chatty controller can fragment
+                # every single value, and there are ~1700 of them per poll.
+                # `_read_data` reports the total for the block instead.
+                self._short_reads += 1
+        return b"".join(chunks)
+
+    def _read_int(self) -> int:
+        """Read one big-endian 32 bit integer."""
+        return struct.unpack(
+            ">i", self._read_exact(LUXTRONIK_SOCKET_READ_SIZE_INTEGER)
+        )[0]
+
+    def _read_char(self) -> int:
+        """Read one signed byte."""
+        return struct.unpack(">b", self._read_exact(LUXTRONIK_SOCKET_READ_SIZE_CHAR))[0]
+
     def _read_data(  # pragma: no cover
         self, command: int, item_size: int, parser, label: str, retries: int = 4
     ) -> None:
         """Generic method to read data from the socket with timeout and retry handling."""
-        data = []
-
         for attempt in range(retries + 1):
+            # Must be reset per attempt: items read before a failed attempt
+            # would otherwise be prepended to the retry's data and shift every
+            # index of the reparsed block.
+            data = []
+            self._short_reads = 0
             try:
                 # check if connection still exists before reading
                 if self._socket is None or _is_socket_closed(self._socket):
@@ -360,15 +404,15 @@ class Luxtronik:
                     raise OSError("Socket not connected after connect()")
 
                 self._socket.sendall(struct.pack(">ii", command, 0))
-                cmd = struct.unpack(">i", self._socket.recv(4))[0]
+                cmd = self._read_int()
                 LOGGER.debug("Command %s (%s)", cmd, label)
 
                 # Optional status field for calculations
                 if command == LUXTRONIK_CALCULATIONS_READ:
-                    stat = struct.unpack(">i", self._socket.recv(4))[0]
+                    stat = self._read_int()
                     LOGGER.debug("Stat %s", stat)
 
-                length = struct.unpack(">i", self._socket.recv(4))[0]
+                length = self._read_int()
                 if length > self._max_data_length:
                     LOGGER.warning(
                         "Skip reading %s! Length oversized! %s > %s",
@@ -386,16 +430,31 @@ class Luxtronik:
 
                 LOGGER.debug("Length %s (%s)", length, label)
 
-                fmt = ">i" if item_size == LUXTRONIK_SOCKET_READ_SIZE_INTEGER else ">b"
+                read_item = (
+                    self._read_int
+                    if item_size == LUXTRONIK_SOCKET_READ_SIZE_INTEGER
+                    else self._read_char
+                )
 
+                # Any failure here aborts the whole block: the parsers assign
+                # values by list position, so a single skipped item would
+                # silently relabel every sensor after it (issue #723). The
+                # retry handler below disconnects, which also discards the
+                # desynchronised remainder of the response.
                 for _ in range(length):
-                    try:
-                        raw = self._socket.recv(item_size)
-                        data.append(struct.unpack(fmt, raw)[0])
-                    except (TimeoutError, struct.error) as err:
-                        LOGGER.debug("Error reading %s item: %s", label, err)
+                    data.append(read_item())
 
-                LOGGER.debug("Read %d %s items", length, label)
+                if len(data) != length:
+                    raise OSError(
+                        f"Incomplete {label} block: got {len(data)} of {length} items"
+                    )
+
+                LOGGER.debug(
+                    "Read %d %s items (%d fragmented)",
+                    length,
+                    label,
+                    self._short_reads,
+                )
                 parser.parse(data)
                 return  # Success, exit after first successful attempt
 
