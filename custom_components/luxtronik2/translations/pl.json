@@ -1084,6 +1084,7 @@
             "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 z Luxtronik pod adresem {host}.\\nB\u0142\u0105d: {connect_error}",
             "cannot_identify": "Po\u0142\u0105czono z urz\u0105dzeniem pod adresem {host}, ale nie uda\u0142o si\u0119 odczyta\u0107 jego numeru seryjnego w celu identyfikacji.\\nB\u0142\u0105d: {error}",
             "already_configured": "To urz\u0105dzenie jest ju\u017c skonfigurowane.",
+            "already_configured_serial": "Pompa ciep\u0142a pod adresem {host} zg\u0142asza numer seryjny {serial}, kt\u00f3ry jest ju\u017c skonfigurowany jako '{existing_title}' ({existing_host}). Oba adresy prowadz\u0105 do tej samej pompy ciep\u0142a - je\u015bli spodziewano si\u0119 dw\u00f3ch osobnych urz\u0105dze\u0144, sprawd\u017a przekierowanie port\u00f3w pod k\u0105tem duplikat\u00f3w.",
             "reconfigure_successful": "Konfiguracja zosta\u0142a pomy\u015blnie zaktualizowana.",
             "unique_id_mismatch": "Urz\u0105dzenie pod nowym adresem ma inn\u0105 to\u017csamo\u015b\u0107 ni\u017c aktualnie skonfigurowane urz\u0105dzenie.",
             "already_in_progress": "Proces konfiguracji jest ju\u017c w toku.",

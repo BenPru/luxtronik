@@ -1084,6 +1084,7 @@
             "cannot_connect": "De verbinding met Luxtronik op {host} is mislukt.\nFout: {connect_error}",
             "cannot_identify": "Verbonden met het apparaat op {host}, maar het serienummer kon niet worden gelezen om het te identificeren.\nFout: {error}",
             "already_configured": "Dit apparaat is al geconfigureerd.",
+            "already_configured_serial": "De warmtepomp op {host} meldt serienummer {serial}, dat al is geconfigureerd als '{existing_title}' ({existing_host}). Beide adressen bereiken dezelfde warmtepomp - controleer de port forwarding op duplicaten als je twee afzonderlijke units verwachtte.",
             "reconfigure_successful": "Configuratie succesvol bijgewerkt.",
             "unique_id_mismatch": "Het apparaat op het nieuwe adres heeft een andere identiteit dan het momenteel geconfigureerde apparaat.",
             "already_in_progress": "De configuratiestroom is al actief.",
