@@ -172,7 +172,10 @@ def _is_socket_closed(sock: socket.socket) -> bool:
         if sock.fileno() < 0:
             return True
     except Exception as err:  # pylint: disable=broad-except
-        LOGGER.exception(
+        # Debug, not error: this probe runs before every read attempt and the
+        # caller recovers by reconnecting, so a failure here is not itself a
+        # problem worth reporting at default log level.
+        LOGGER.debug(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
         return True
@@ -193,12 +196,18 @@ def _is_socket_closed(sock: socket.socket) -> bool:
     except OSError as err:
         if err.errno == 107:  # Socket not connected
             return True
-        LOGGER.exception(
+        # Debug, not error: this probe runs before every read attempt and the
+        # caller recovers by reconnecting, so a failure here is not itself a
+        # problem worth reporting at default log level.
+        LOGGER.debug(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
         return False
     except Exception as err:  # pylint: disable=broad-except
-        LOGGER.exception(
+        # Debug, not error: this probe runs before every read attempt and the
+        # caller recovers by reconnecting, so a failure here is not itself a
+        # problem worth reporting at default log level.
+        LOGGER.debug(
             "Unexpected exception when checking if a socket is closed", exc_info=err
         )
         return False
@@ -250,7 +259,7 @@ class Luxtronik:
             if not _is_socket_closed(self._socket):
                 self._socket.close()
             self._socket = None
-            LOGGER.info(
+            LOGGER.debug(
                 "Disconnected from Luxtronik heatpump %s:%s", self._host, self._port
             )
 
@@ -263,7 +272,7 @@ class Luxtronik:
                 self._socket.settimeout(self._socket_timeout)
                 try:
                     self._socket.connect((self._host, self._port))
-                    LOGGER.info(
+                    LOGGER.debug(
                         "Connected to Luxtronik heatpump %s:%s with timeout %.1fs",
                         self._host,
                         self._port,
@@ -289,12 +298,11 @@ class Luxtronik:
             if write:
                 self._write()
             self._read()
-        except OSError:
-            LOGGER.error("Socket error during read/write", exc_info=True)
-            self._disconnect()
-            raise
-        except struct.error:
-            LOGGER.error("Protocol/parse error during read/write", exc_info=True)
+        except (OSError, struct.error):
+            # Deliberately not logged here: the exception propagates to the
+            # coordinator, which re-raises it as UpdateFailed and lets
+            # DataUpdateCoordinator report it. Logging it as well produced two
+            # entries - one with a full traceback - for every transient blip.
             self._disconnect()
             raise
 
@@ -328,14 +336,17 @@ class Luxtronik:
             if not isinstance(index, int) or not isinstance(value, int):
                 LOGGER.warning("Parameter id '%s' or value '%s' invalid!", index, value)
                 continue
-            LOGGER.info("Parameter '%d' set to '%s'", index, value)
             data = struct.pack(">iii", LUXTRONIK_PARAMETERS_WRITE, index, value)
-            LOGGER.debug("Data %s", data)
             self._socket.sendall(data)
             cmd = self._read_int()
-            LOGGER.debug("Command %s", cmd)
             val = self._read_int()
-            LOGGER.debug("Value %s", val)
+            LOGGER.debug(
+                "Parameter '%d' set to '%s' (ack cmd=%s value=%s)",
+                index,
+                value,
+                cmd,
+                val,
+            )
         # Flush queue after writing all values
         self.parameters.queue = {}
         # Give the heatpump a short time to handle the value changes/calculations:
@@ -459,21 +470,29 @@ class Luxtronik:
                 return  # Success, exit after first successful attempt
 
             except (TimeoutError, ConnectionResetError, OSError) as err:
-                LOGGER.warning(
-                    "Error while reading %s (attempt %d/%d): %s",
-                    label,
-                    attempt + 1,
-                    retries + 1,
-                    err,
-                )
                 self._disconnect()
 
                 if attempt < retries:
                     delay = 1  # min(30, 10 * attempt)  # cap delay to avoid long waits
-                    LOGGER.warning("Waiting %s seconds before retrying...", delay)
+                    # Debug, not warning: an attempt that is about to be retried
+                    # is not yet a problem. Only exhausting them all is, and
+                    # that is reported below.
+                    LOGGER.debug(
+                        "Error while reading %s (attempt %d/%d): %s - retrying in %ss",
+                        label,
+                        attempt + 1,
+                        retries + 1,
+                        err,
+                        delay,
+                    )
                     time.sleep(delay)
                 else:
-                    LOGGER.error("All attempts to read %s failed.", label)
+                    LOGGER.error(
+                        "All %d attempts to read %s failed. Last error: %s",
+                        retries + 1,
+                        label,
+                        err,
+                    )
                     return
 
             except Exception as err:
