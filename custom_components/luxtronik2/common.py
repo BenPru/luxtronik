@@ -103,6 +103,90 @@ def get_sensor_data(
     )
 
 
+def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) -> Any:
+    """Derive the effective operation mode for C0080_STATUS.
+
+    The Luxtronik controller's raw status word is unreliable in several
+    documented cases (passive/active cooling reported as no_request, thermal
+    disinfection reported as heating, heating reported while the compressor is
+    off). Each ``if`` below is one such workaround. Returns ``value`` unchanged
+    when no workaround applies.
+    """
+    status_line3_raw = get_sensor_data(
+        coordinator, LC.C0119_STATUS_LINE_3, raw_value=True
+    )
+
+    if status_line3_raw == LuxStatus3Option.thermal_desinfection:
+        return LuxOperationMode.domestic_water
+
+    status_line1 = get_sensor_data(coordinator, LC.C0117_STATUS_LINE_1)
+    status_line3 = get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
+    add_circ_pump = get_sensor_data(coordinator, LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
+    s1_workaround: list[str] = [
+        LuxStatus1Option.heatpump_idle,
+        LuxStatus1Option.pump_forerun,
+        LuxStatus1Option.heatpump_coming,
+    ]
+    s3_workaround: list[str | None] = [
+        LuxStatus3Option.no_request,
+        LuxStatus3Option.unknown,
+        LuxStatus3Option.none,
+        LuxStatus3Option.grid_switch_on_delay,
+        None,
+    ]
+    if (
+        status_line1 in s1_workaround
+        and status_line3 in s3_workaround
+        and not add_circ_pump
+    ):
+        return LuxOperationMode.no_request
+
+    if (
+        status_line3
+        in [
+            LuxStatus3Option.no_request,
+            LuxStatus3Option.cycle_lock,
+            LuxStatus3Option.heating,
+        ]
+        and get_sensor_data(coordinator, LC.C0038_DHW_RECIRCULATION_PUMP)
+        and get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
+    ):
+        return LuxOperationMode.domestic_water
+
+    if value == LuxOperationMode.no_request:
+        if (
+            status_line3_raw is not None
+            and status_line3_raw == LuxStatus3Option.cooling
+        ):
+            return LuxOperationMode.cooling
+
+        if (
+            status_line3_raw is not None
+            and status_line3_raw == LuxStatus3Option.heating
+        ):
+            T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
+            T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
+            T_heat_in = get_sensor_data(
+                coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE
+            )
+            T_heat_out = get_sensor_data(
+                coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
+            )
+            Flow_WQ = get_sensor_data(coordinator, LC.C0173_HEAT_SOURCE_FLOW_RATE)
+            Pump = get_sensor_data(coordinator, LC.C0043_PUMP_FLOW)
+            if (T_out > T_in) and (T_heat_out > T_heat_in) and (Flow_WQ > 0) and Pump:
+                return LuxOperationMode.cooling
+
+    if (
+        value == LuxOperationMode.heating
+        and not get_sensor_data(coordinator, LC.C0044_COMPRESSOR)
+        and not get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
+    ):
+        return LuxOperationMode.no_request
+
+    return value
+
+
 def normalize_sensor_value(
     value: Any,
     coordinator: LuxtronikCoordinatorData | None,
@@ -148,84 +232,7 @@ def normalize_sensor_value(
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
 
     if sensor_id == LC.C0080_STATUS:
-        status_line3_raw = get_sensor_data(
-            coordinator, LC.C0119_STATUS_LINE_3, raw_value=True
-        )
-
-        if status_line3_raw == LuxStatus3Option.thermal_desinfection:
-            return LuxOperationMode.domestic_water
-
-        status_line1 = get_sensor_data(coordinator, LC.C0117_STATUS_LINE_1)
-        status_line3 = get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
-        add_circ_pump = get_sensor_data(
-            coordinator, LC.C0047_ADDITIONAL_CIRCULATION_PUMP
-        )
-        s1_workaround: list[str] = [
-            LuxStatus1Option.heatpump_idle,
-            LuxStatus1Option.pump_forerun,
-            LuxStatus1Option.heatpump_coming,
-        ]
-        s3_workaround: list[str | None] = [
-            LuxStatus3Option.no_request,
-            LuxStatus3Option.unknown,
-            LuxStatus3Option.none,
-            LuxStatus3Option.grid_switch_on_delay,
-            None,
-        ]
-        if (
-            status_line1 in s1_workaround
-            and status_line3 in s3_workaround
-            and not add_circ_pump
-        ):
-            return LuxOperationMode.no_request
-
-        if (
-            status_line3
-            in [
-                LuxStatus3Option.no_request,
-                LuxStatus3Option.cycle_lock,
-                LuxStatus3Option.heating,
-            ]
-            and get_sensor_data(coordinator, LC.C0038_DHW_RECIRCULATION_PUMP)
-            and get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
-        ):
-            return LuxOperationMode.domestic_water
-
-        if value == LuxOperationMode.no_request:
-            if (
-                status_line3_raw is not None
-                and status_line3_raw == LuxStatus3Option.cooling
-            ):
-                return LuxOperationMode.cooling
-
-            if (
-                status_line3_raw is not None
-                and status_line3_raw == LuxStatus3Option.heating
-            ):
-                T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
-                T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
-                T_heat_in = get_sensor_data(
-                    coordinator, LC.C0204_HEAT_SOURCE_INPUT_TEMPERATURE
-                )
-                T_heat_out = get_sensor_data(
-                    coordinator, LC.C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE
-                )
-                Flow_WQ = get_sensor_data(coordinator, LC.C0173_HEAT_SOURCE_FLOW_RATE)
-                Pump = get_sensor_data(coordinator, LC.C0043_PUMP_FLOW)
-                if (
-                    (T_out > T_in)
-                    and (T_heat_out > T_heat_in)
-                    and (Flow_WQ > 0)
-                    and Pump
-                ):
-                    return LuxOperationMode.cooling
-
-        if (
-            value == LuxOperationMode.heating
-            and not get_sensor_data(coordinator, LC.C0044_COMPRESSOR)
-            and not get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
-        ):
-            return LuxOperationMode.no_request
+        return _derive_operation_mode(value, coordinator)
 
     # no changes needed, return sensor value
     return value
