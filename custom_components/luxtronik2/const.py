@@ -58,6 +58,14 @@ UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)
 UPDATE_INTERVAL_SLOW: Final = timedelta(minutes=3)
 UPDATE_INTERVAL_VERY_SLOW: Final = timedelta(minutes=5)
 
+# How long the status sensor keeps reporting domestic_water after a genuine DHW
+# state ends, provided the DHW recirculation pump is still running. Covers the
+# gap where the controller reports no_request while transitioning from normal
+# DHW heating into thermal disinfection (issue #519) - observed at ~2 minutes on
+# real hardware. Bounded so a permanently running recirculation pump can never
+# latch the status indefinitely.
+DHW_TRANSITION_HOLD: Final = timedelta(minutes=5)
+
 
 SECOND_TO_HOUR_FACTOR: Final = 1 / 3600
 

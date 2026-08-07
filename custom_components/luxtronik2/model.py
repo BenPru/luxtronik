@@ -52,6 +52,10 @@ class LuxtronikCoordinatorData:
     calculations: Calculations
     visibilities: Visibilities
 
+    # Derived once per poll by LuxtronikCoordinator._update_dhw_transition_hold().
+    # Defaulted so every other construction site (tests, diagnostics) is unaffected.
+    dhw_transition_hold: bool = False
+
 
 @dataclass
 class LuxtronikEntityAttributeDescription:
