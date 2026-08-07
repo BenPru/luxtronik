@@ -232,7 +232,16 @@ def normalize_sensor_value(
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
 
     if sensor_id == LC.C0080_STATUS:
-        return _derive_operation_mode(value, coordinator)
+        mode = _derive_operation_mode(value, coordinator)
+        # Transition hold: the controller briefly reports no_request while
+        # moving from normal DHW heating into thermal disinfection, even though
+        # the DHW recirculation pump keeps running (issue #519). The coordinator
+        # decides once per poll whether we are inside such a window; here we
+        # only honour that decision. Scoped to no_request so a genuine switch to
+        # cooling or heating is never masked.
+        if mode == LuxOperationMode.no_request and coordinator.dhw_transition_hold:
+            return LuxOperationMode.domestic_water
+        return mode
 
     # no changes needed, return sensor value
     return value
