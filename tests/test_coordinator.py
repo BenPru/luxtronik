@@ -18,6 +18,7 @@ from custom_components.luxtronik2.const import (
     CONF_UPDATE_INTERVAL,
     DEFAULT_PORT,
     DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
@@ -1261,6 +1262,63 @@ class TestCoordinatorGetDeviceFallback:
         device_info = coord._build_device_info(DeviceKey.heatpump, "192.168.1.1")
         assert device_info["translation_key"] == DeviceKey.heatpump.value
         assert device_info["name"] == DeviceKey.heatpump.value
+
+
+class TestDeviceInfoSerialNumber:
+    """The serial number decides device identity, so it must be discoverable."""
+
+    @staticmethod
+    def _coordinator():
+        return _make_coordinator(
+            calculations={
+                "ID_WEB_SoftStand": "V3.90.1",
+                "ID_WEB_Code_WP_akt": "LWP 10",
+            },
+            parameters={
+                "ID_WP_SerienNummer_DATUM": 230924,
+                "ID_WP_SerienNummer_HEX": 625,
+            },
+        )
+
+    def test_heatpump_device_exposes_serial_number(self):
+        """The physical unit carries the serial in its device info."""
+        coord = self._coordinator()
+
+        device_info = coord._build_device_info(DeviceKey.heatpump, "192.168.1.1")
+
+        assert device_info["serial_number"] == "230924_0271"
+
+    def test_serial_number_matches_unique_id_rendering(self):
+        """Device page and the duplicate-serial abort message must agree.
+
+        `config_flow` reports collisions using the `unique_id` form, so a user
+        comparing that message against the device page has to see the same
+        string.
+        """
+        coord = self._coordinator()
+
+        device_info = coord._build_device_info(DeviceKey.heatpump, "192.168.1.1")
+
+        assert device_info["serial_number"] == coord.unique_id
+
+    @pytest.mark.parametrize(
+        "key",
+        [DeviceKey.heating, DeviceKey.domestic_water, DeviceKey.cooling],
+    )
+    def test_logical_subdevices_omit_serial_number(self, key: DeviceKey):
+        """Only the physical unit owns the serial.
+
+        Heating/DHW/cooling are logical sub-devices of the same heat pump;
+        repeating the serial on each would read as several distinct units
+        sharing one serial - the exact confusion reported in #724.
+        """
+        coord = self._coordinator()
+
+        device_info = coord._build_device_info(
+            key, "192.168.1.1", (DOMAIN, "some_heatpump")
+        )
+
+        assert "serial_number" not in device_info
 
 
 # ===========================================================================
