@@ -323,6 +323,16 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         )
         if via_device is not None:
             device_info["via_device"] = via_device
+        else:
+            # Only the physical unit carries the serial: heating, domestic
+            # water and cooling are logical sub-devices of the same heat pump
+            # (they are the ones passing `via_device`), and repeating the
+            # serial on each would read as several units sharing one serial.
+            #
+            # Rendered as `unique_id` rather than `serial_number` so it matches
+            # the string `config_flow` prints when a second config entry
+            # collides on this serial.
+            device_info["serial_number"] = self.unique_id
         return device_info
 
     def _is_version_not_compatible(
