@@ -35,6 +35,17 @@ class TestLuxtronikCoordinatorData:
         assert data.calculations.get("key2") is not None
         assert data.visibilities.get("key3") is not None
 
+    def test_dhw_transition_hold_defaults_to_false(self):
+        """A freshly built bundle must not hold - callers may omit the field."""
+        data = make_coordinator_data()
+        assert data.dhw_transition_hold is False
+
+    def test_dhw_transition_hold_is_settable(self):
+        """The coordinator sets this once per poll after building the bundle."""
+        data = make_coordinator_data()
+        data.dhw_transition_hold = True
+        assert data.dhw_transition_hold is True
+
 
 class TestLuxtronikEntityDescription:
     def test_defaults(self):

@@ -309,6 +309,57 @@ class TestNormalizeSensorValue:
         result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
         assert result == LuxOperationMode.no_request
 
+    def test_dhw_hold_converts_no_request_to_domestic_water(self):
+        """During the DHW->TDI transition the status must stay domestic_water."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_BUPout": True,
+                "ID_WEB_ZW1out": False,
+            }
+        )
+        data.dhw_transition_hold = True
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.domestic_water
+
+    def test_no_dhw_hold_leaves_no_request_alone(self):
+        """Without an active hold the existing no_request behaviour is unchanged."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_BUPout": True,
+                "ID_WEB_ZW1out": False,
+            }
+        )
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.no_request
+
+    def test_dhw_hold_does_not_mask_cooling(self):
+        """A hold must never override a mode the heat pump genuinely moved into."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.cooling,
+            }
+        )
+        data.dhw_transition_hold = True
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.cooling
+
+    def test_dhw_hold_does_not_affect_other_sensors(self):
+        """The hold is scoped to C0080_STATUS only."""
+        data = make_coordinator_data(
+            calculations={"ID_WEB_HauptMenuStatus_Zeile1": "Heatpump Idle"}
+        )
+        data.dhw_transition_hold = True
+        result = normalize_sensor_value("Heatpump Idle", data, LC.C0117_STATUS_LINE_1)
+        assert result == LuxStatus1Option.heatpump_idle
+
 
 # ===========================================================================
 # state_as_number_or_none
