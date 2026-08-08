@@ -22,8 +22,10 @@ from custom_components.luxtronik2.const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
+    LuxOperationMode,
     LuxParameter as LP,
     LuxRoomThermostatType,
+    LuxStatus3Option,
     LuxVisibility as LV,
 )
 from custom_components.luxtronik2.coordinator import (
@@ -84,6 +86,7 @@ def _make_coordinator_direct(data=None):
     coord.client = MagicMock()
     coord._config = {"host": "1.2.3.4", "port": 8889}
     coord.device_infos = {}
+    coord._dhw_hold_until = None
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
     coord.update_interval = DEFAULT_UPDATE_INTERVAL
@@ -1476,3 +1479,92 @@ class TestConnectAndGetCoordinator:
             pytest.raises(LuxtronikConnectionError),
         ):
             await connect_and_get_coordinator(MagicMock(), config_entry)
+
+
+# ===========================================================================
+# DHW transition hold (issue #519)
+# ===========================================================================
+
+
+class TestDhwTransitionHold:
+    """Cross-poll lifecycle of the DHW transition hold (issue #519)."""
+
+    def _coord(self) -> LuxtronikCoordinator:
+        return _make_coordinator()
+
+    def _data(self, status: str, recirculation: bool) -> LuxtronikCoordinatorData:
+        return make_coordinator_data(
+            calculations={
+                "ID_WEB_WP_BZ_akt": status,
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_BUPout": recirculation,
+                "ID_WEB_ZW1out": False,
+            }
+        )
+
+    def test_dhw_poll_arms_the_hold_but_does_not_flag_it(self):
+        """While DHW is genuinely reported there is nothing to hold."""
+        coord = self._coord()
+        data = self._data(LuxOperationMode.domestic_water, recirculation=True)
+        coord._update_dhw_transition_hold(data)
+        assert data.dhw_transition_hold is False
+        assert coord._dhw_hold_until is not None
+
+    def test_next_poll_holds_when_pump_still_running(self, freezer):
+        """The transition poll right after DHW must be flagged as held."""
+        coord = self._coord()
+        freezer.move_to("2026-08-08 12:00:00+00:00")
+        coord._update_dhw_transition_hold(
+            self._data(LuxOperationMode.domestic_water, recirculation=True)
+        )
+        freezer.move_to("2026-08-08 12:01:00+00:00")
+        data = self._data(LuxOperationMode.no_request, recirculation=True)
+        coord._update_dhw_transition_hold(data)
+        assert data.dhw_transition_hold is True
+
+    def test_no_hold_when_pump_stopped(self, freezer):
+        """Pump off means the DHW cycle really ended - report no_request."""
+        coord = self._coord()
+        freezer.move_to("2026-08-08 12:00:00+00:00")
+        coord._update_dhw_transition_hold(
+            self._data(LuxOperationMode.domestic_water, recirculation=True)
+        )
+        freezer.move_to("2026-08-08 12:01:00+00:00")
+        data = self._data(LuxOperationMode.no_request, recirculation=False)
+        coord._update_dhw_transition_hold(data)
+        assert data.dhw_transition_hold is False
+        assert coord._dhw_hold_until is None
+
+    def test_hold_expires_after_the_configured_window(self, freezer):
+        """A permanently running recirculation pump must not latch DHW forever."""
+        coord = self._coord()
+        freezer.move_to("2026-08-08 12:00:00+00:00")
+        coord._update_dhw_transition_hold(
+            self._data(LuxOperationMode.domestic_water, recirculation=True)
+        )
+        freezer.move_to("2026-08-08 12:06:00+00:00")  # > DHW_TRANSITION_HOLD
+        data = self._data(LuxOperationMode.no_request, recirculation=True)
+        coord._update_dhw_transition_hold(data)
+        assert data.dhw_transition_hold is False
+        assert coord._dhw_hold_until is None
+
+    def test_hold_does_not_start_from_pump_alone(self):
+        """Without a preceding genuine DHW state the pump alone proves nothing."""
+        coord = self._coord()
+        data = self._data(LuxOperationMode.no_request, recirculation=True)
+        coord._update_dhw_transition_hold(data)
+        assert data.dhw_transition_hold is False
+
+    def test_hold_does_not_extend_itself(self, freezer):
+        """The deadline is anchored to the last genuine DHW poll, not refreshed."""
+        coord = self._coord()
+        freezer.move_to("2026-08-08 12:00:00+00:00")
+        coord._update_dhw_transition_hold(
+            self._data(LuxOperationMode.domestic_water, recirculation=True)
+        )
+        deadline = coord._dhw_hold_until
+        freezer.move_to("2026-08-08 12:02:00+00:00")
+        coord._update_dhw_transition_hold(
+            self._data(LuxOperationMode.no_request, recirculation=True)
+        )
+        assert coord._dhw_hold_until == deadline

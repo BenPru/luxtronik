@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Mapping
-from datetime import timedelta
+from datetime import datetime, timedelta
 import operator
 import re
 from types import MappingProxyType
@@ -17,9 +17,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 from packaging.version import InvalidVersion, Version
 
-from .common import normalize_sensor_value
+from .common import get_sensor_data, normalize_sensor_value
 from .const import (
     CONF_CALCULATIONS,
     CONF_MAX_DATA_LENGTH,
@@ -30,6 +31,7 @@ from .const import (
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
     DEFAULT_UPDATE_INTERVAL,
+    DHW_TRANSITION_HOLD,
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
@@ -37,6 +39,7 @@ from .const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
+    LuxOperationMode,
     LuxParameter as LP,
     LuxRoomThermostatType,
     LuxVisibility as LV,
@@ -85,6 +88,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.client = client
         self._config = config
         self.device_infos = dict[str, DeviceInfo]()
+        # Deadline for the DHW transition hold; see _update_dhw_transition_hold().
+        self._dhw_hold_until: datetime | None = None
 
         update_interval: timedelta = DEFAULT_UPDATE_INTERVAL
         raw = config.get(CONF_UPDATE_INTERVAL)
@@ -117,15 +122,51 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     if self.update_interval is not None
                     else None,
                 )
-                self.data = LuxtronikCoordinatorData(
+                data = LuxtronikCoordinatorData(
                     parameters=self.client.parameters,
                     calculations=self.client.calculations,
                     visibilities=self.client.visibilities,
                 )
+                self._update_dhw_transition_hold(data)
+                self.data = data
 
                 return self.data
             except Exception as err:
                 raise UpdateFailed(f"Error fetching data: {err}") from err
+
+    def _update_dhw_transition_hold(self, data: LuxtronikCoordinatorData) -> None:
+        """Decide whether this poll falls inside a DHW transition hold.
+
+        The controller drops to no_request for a minute or two while moving from
+        normal domestic-water heating into thermal disinfection, even though the
+        DHW recirculation pump keeps running (issue #519). Reporting the heat
+        pump as idle there breaks utility meters that split energy by operating
+        mode, so we keep reporting domestic_water for a bounded window.
+
+        Reading the status through get_sensor_data() here is safe and
+        deliberate: `data.dhw_transition_hold` is still False at this point, so
+        the value returned is the un-held mode - exactly the input this decision
+        needs, with no second derivation path to keep in sync.
+
+        The hold can only ever extend a domestic_water state that actually
+        happened. It never starts one from the pump alone, and it is capped at
+        DHW_TRANSITION_HOLD so a permanently running pump cannot latch it.
+        """
+        now = dt_util.utcnow()
+
+        if get_sensor_data(data, LC.C0080_STATUS) == LuxOperationMode.domestic_water:
+            self._dhw_hold_until = now + DHW_TRANSITION_HOLD
+            return
+
+        if (
+            self._dhw_hold_until is not None
+            and now < self._dhw_hold_until
+            and get_sensor_data(data, LC.C0038_DHW_RECIRCULATION_PUMP)
+        ):
+            data.dhw_transition_hold = True
+            return
+
+        self._dhw_hold_until = None
 
     async def async_write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
         """Write a single parameter to the heat pump and confirm it stuck.
