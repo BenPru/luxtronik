@@ -65,6 +65,14 @@ The integration learns these lockout windows by observing the heat pump's own op
 
 **Smart Grid Status** is a related but separate sensor: it only reports a value while the *Smart Grid* switch (see [Smart Grid & Power Limitation](#smart-grid--power-limitation) below) is enabled, and shows one of four SG-ready states (`EVU locked` / `Reduced operation` / `Normal operation` / `Increased operation`) derived from the heat pump's two EVU input signals.
 
+## Domestic Water Status During Thermal Disinfection
+
+The heat pump controller briefly reports `no_request` while switching from normal domestic-water heating into a thermal disinfection run, even though the DHW recirculation pump keeps running. To keep energy accounting (for example a utility meter split by operating mode) from attributing that gap to idle time, the **Status** sensor keeps reporting `domestic_water` for up to 5 minutes after a genuine domestic-water state, for as long as the DHW recirculation pump is still running.
+
+Two limits are deliberate: the hold never *starts* a `domestic_water` state on its own — the pump running by itself is not enough, a real domestic-water state must have preceded it — and it never overrides a genuine switch to heating or cooling. It also ends as soon as the pump stops, so in practice it lasts only the couple of minutes the transition actually takes; the 5-minute cap is a backstop against an installation whose recirculation pump runs continuously.
+
+A visible side effect: for up to 5 minutes after *any* domestic-water cycle ends, not just before a disinfection run, the Status sensor lingers on `domestic_water` while the pump is still circulating.
+
 ## Firmware Update Entity
 
 The **Firmware** update entity checks Alpha Innotec's public download portal (once per hour) for a newer firmware build than the one currently installed, comparing versions semantically. If a newer version exists, its release notes panel shows: a link to the manufacturer's firmware page for your specific model, a direct download link, localized (German/English) update instructions, and the raw change log fetched from the portal.
