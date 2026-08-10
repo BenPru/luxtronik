@@ -314,7 +314,11 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
         visibility=LV.V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
-        factor=0.01,
+        # Raw register unit is 0.1 kWh. #490 changed this to 0.01 based on a
+        # single unverified display comparison; measured against the rated
+        # element power (parameter 1025) on five units, 0.1 is the correct
+        # scale and 0.01 reports a tenth of the real energy. See #625.
+        factor=0.1,
         native_precision=1,
     ),
     descr(
