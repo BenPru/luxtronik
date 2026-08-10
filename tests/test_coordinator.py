@@ -29,6 +29,9 @@ from custom_components.luxtronik2.const import (
     LuxVisibility as LV,
 )
 from custom_components.luxtronik2.coordinator import (
+    WRITE_CONFIRM_INITIAL_DELAY,
+    WRITE_CONFIRM_MAX_ATTEMPTS,
+    WRITE_CONFIRM_MAX_DELAY,
     LuxtronikConnectionError,
     LuxtronikCoordinator,
     LuxtronikSerialNumberError,
@@ -974,6 +977,164 @@ class TestAsyncWriteMany:
 
         result = await coord.async_write_many([("p1", "06:00")])
         assert result is not None
+
+
+class TestWriteConfirmRetry:
+    """Some controllers (e.g. LWC407 / firmware V1.88.3, issue #729) do not
+    reflect a freshly written parameter in their readable register block for
+    a few hundred ms, so the first confirming read still returns the old
+    value. The write itself succeeded, so confirmation must be retried before
+    the mismatch is reported as a failure."""
+
+    @pytest.mark.asyncio
+    async def test_stale_first_readback_confirms_on_retry(self):
+        """A controller that needs a moment to apply the write must not be
+        reported as having rejected it."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+        refreshes = 0
+
+        async def fake_refresh():
+            nonlocal refreshes
+            refreshes += 1
+            # First read-back is still the pre-write value; second has applied.
+            value = "Holidays" if refreshes == 1 else "Automatic"
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"ID_Einst_BA_Lueftung_akt": (0, value)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        with patch(
+            "custom_components.luxtronik2.coordinator.asyncio.sleep", new=AsyncMock()
+        ):
+            result = await coord.async_write("ID_Einst_BA_Lueftung_akt", "Automatic")
+
+        assert result is not None
+        assert refreshes == 2
+
+    @pytest.mark.asyncio
+    async def test_retry_delay_is_awaited_not_blocking(self):
+        """The retry wait must yield to the event loop (await asyncio.sleep),
+        never block it - this runs inside Home Assistant's loop."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+        refreshes = 0
+
+        async def fake_refresh():
+            nonlocal refreshes
+            refreshes += 1
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, 40 if refreshes == 1 else 42)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+        sleep_mock = AsyncMock()
+
+        with patch(
+            "custom_components.luxtronik2.coordinator.asyncio.sleep", new=sleep_mock
+        ):
+            await coord.async_write("p1", 42)
+
+        sleep_mock.assert_awaited_once_with(WRITE_CONFIRM_INITIAL_DELAY)
+
+    @pytest.mark.asyncio
+    async def test_immediate_confirmation_never_sleeps(self):
+        """Controllers that apply the write instantly (~3ms measured) must pay
+        no delay penalty: exactly one refresh, no wait."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+        refreshes = 0
+
+        async def fake_refresh():
+            nonlocal refreshes
+            refreshes += 1
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, 42)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+        sleep_mock = AsyncMock()
+
+        with patch(
+            "custom_components.luxtronik2.coordinator.asyncio.sleep", new=sleep_mock
+        ):
+            await coord.async_write("p1", 42)
+
+        assert refreshes == 1
+        sleep_mock.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_retry_delays_back_off_and_stay_capped(self):
+        """Each retry is a full read (~1900 values), so repeated probing is
+        expensive: the delay doubles to stop hammering a value that is not
+        converging, but stays capped so the final wait cannot overshoot the
+        retry budget."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            # Never converges, so every retry is used.
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, 40)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+        sleep_mock = AsyncMock()
+
+        with (
+            patch(
+                "custom_components.luxtronik2.coordinator.asyncio.sleep",
+                new=sleep_mock,
+            ),
+            pytest.raises(HomeAssistantError),
+        ):
+            await coord.async_write("p1", 42)
+
+        delays = [call.args[0] for call in sleep_mock.await_args_list]
+        assert delays == [0.1, 0.2, 0.4, 0.8, 1.0]
+        assert max(delays) == WRITE_CONFIRM_MAX_DELAY
+        assert delays[0] == WRITE_CONFIRM_INITIAL_DELAY
+
+    @pytest.mark.asyncio
+    async def test_genuinely_rejected_write_still_raises_after_retries(self):
+        """A clamped/rejected write never converges, so it must still surface
+        as write_confirmation_mismatch once the retry budget is spent."""
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+        refreshes = 0
+
+        async def fake_refresh():
+            nonlocal refreshes
+            refreshes += 1
+            # Device clamped the write and will never report 42.
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, 40)},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        with (
+            patch(
+                "custom_components.luxtronik2.coordinator.asyncio.sleep",
+                new=AsyncMock(),
+            ),
+            pytest.raises(HomeAssistantError) as exc_info,
+        ):
+            await coord.async_write("p1", 42)
+
+        assert exc_info.value.translation_key == "write_confirmation_mismatch"
+        assert refreshes == WRITE_CONFIRM_MAX_ATTEMPTS
 
 
 class TestWriteConfirmed:
