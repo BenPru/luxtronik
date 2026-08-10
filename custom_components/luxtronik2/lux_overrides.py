@@ -23,6 +23,7 @@ from .const import (
     CONF_CALCULATIONS,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
+    LOGGER,
     PARSED_COUNT_ATTR,
 )
 
@@ -311,6 +312,8 @@ def isolate_instance_data():
 
 
 _PARSE_COUNTS_RECORDED = False
+_UNKNOWN_CODE_WARNING_INSTALLED = False
+_REPORTED_UNKNOWN_CODES: set[tuple[str, str, object]] = set()
 
 
 def record_parsed_block_lengths():
@@ -343,6 +346,52 @@ def record_parsed_block_lengths():
         cls.parse = _parse
 
     _PARSE_COUNTS_RECORDED = True
+
+
+def warn_on_unknown_selection_codes():
+    """Log once when the controller reports a code this integration cannot decode.
+
+    ``SelectionBase.from_heatpump`` returns ``None`` for any raw value missing
+    from its ``codes`` table, which otherwise fails silently - the entity just
+    shows an empty state. New heat pump models and new status/switchoff codes
+    reintroduce this every time the firmware moves ahead of our tables, so ask
+    the user to report it rather than letting it sit undetected.
+
+    Raw ``0`` is skipped for tables that have no entry for ``0``
+    (``SwitchoffFile``, ``BivalenceLevel``): there it means "slot empty", not
+    "unknown code", and it is what most controllers report for most of their
+    switchoff history slots.
+    """
+    # No lock needed: called only from synchronous code path (no await),
+    # so the event loop cannot preempt between the guard check and flag set.
+    global _UNKNOWN_CODE_WARNING_INSTALLED
+    if _UNKNOWN_CODE_WARNING_INSTALLED:
+        return
+
+    _orig_from_heatpump = SelectionBase.from_heatpump
+
+    def _from_heatpump(self, value):
+        result = _orig_from_heatpump(self, value)
+        if result is None and not (value == 0 and 0 not in self.codes):
+            marker = (type(self).__name__, self.name, value)
+            if marker not in _REPORTED_UNKNOWN_CODES:
+                _REPORTED_UNKNOWN_CODES.add(marker)
+                LOGGER.warning(
+                    "Heat pump reported code %s for register '%s' (%s), which "
+                    "this integration cannot decode - the matching entity will "
+                    "have no state. Please report it at "
+                    "https://github.com/BenPru/luxtronik/issues so the code "
+                    "table can be extended, attaching the integration "
+                    "diagnostics download",
+                    value,
+                    self.name,
+                    type(self).__name__,
+                )
+        return result
+
+    SelectionBase.from_heatpump = _from_heatpump
+
+    _UNKNOWN_CODE_WARNING_INSTALLED = True
 
 
 def update_Luxtronik_HeatpumpCodes():
