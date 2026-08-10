@@ -16,6 +16,7 @@ from .const import (
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     LOGGER,
+    PARSED_COUNT_ATTR,
     LuxCalculation as LC,
     LuxOperationMode,
     LuxParameter as LP,
@@ -23,9 +24,50 @@ from .const import (
     LuxStatus3Option,
     LuxVisibility as LV,
 )
+from .lux_overrides import UPSTREAM_MAX_DEFINED_INDEX
 from .model import LuxtronikCoordinatorData
 
 # endregion Imports
+
+
+def _register_returned(group_data: Any, group: str, index: int) -> bool:
+    """Did the controller actually return this register in its last read?
+
+    The library's definition dict is static, so a definition existing proves
+    nothing about the connected unit.  The recorded block length does: the
+    controller returned indices 0..count-1 and nothing else, the block being
+    positional and always dense.
+
+    The conclusion is drawn only above upstream's own definition range, which
+    is where every register this can affect lives.  Inside that range the
+    pre-existing behaviour is kept, so a controller returning a shorter block
+    than any we have seen - an old 1.x unit, or a read truncated mid-transfer,
+    which the library swallows silently - cannot make entities disappear
+    wholesale.
+
+    Absence is deliberately not inferred from ``.value is None`` - a register
+    that IS present reads ``None`` too when its datatype cannot decode the raw
+    value (``SelectionBase`` returns ``None`` for an unrecognised code).
+    """
+    upstream_max = UPSTREAM_MAX_DEFINED_INDEX.get(group)
+    if upstream_max is None or index <= upstream_max:
+        return True
+    parsed_count = getattr(group_data, PARSED_COUNT_ATTR, None)
+    if not isinstance(parsed_count, int):
+        # No count recorded: the object was built directly rather than through
+        # a patched parse() (tests, diagnostics). Definition presence is all
+        # we have, which is the behaviour this function replaced.
+        return True
+    if index >= parsed_count:
+        LOGGER.debug(
+            "Register %s index %d is beyond the %d values this controller "
+            "returned - not creating its entity",
+            group,
+            index,
+            parsed_count,
+        )
+        return False
+    return True
 
 
 def key_exists(
@@ -47,16 +89,22 @@ def key_exists(
             sensor_id,
         )
 
-        if group == "parameters":
-            items = coordinator.parameters.parameters.items()
-        elif group == "calculations":
-            items = coordinator.calculations.calculations.items()
-        elif group == "visibilities":
-            items = coordinator.visibilities.visibilities.items()
+        if group == CONF_PARAMETERS:
+            group_data = coordinator.parameters
+            items = group_data.parameters.items()
+        elif group == CONF_CALCULATIONS:
+            group_data = coordinator.calculations
+            items = group_data.calculations.items()
+        elif group == CONF_VISIBILITIES:
+            group_data = coordinator.visibilities
+            items = group_data.visibilities.items()
         else:
             return False
 
-        return any(item.name == sensor_id for _, item in items)
+        index = next((i for i, item in items if item.name == sensor_id), None)
+        if index is None:
+            return False
+        return _register_returned(group_data, group, index)
     except Exception as e:
         LOGGER.error("Error checking key existence: %s", e)
         return False

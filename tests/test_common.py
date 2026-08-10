@@ -75,6 +75,68 @@ class TestKeyExists:
         assert key_exists(data, "parameters.some_key") is False
 
 
+@pytest.fixture
+def tiny_upstream_range(monkeypatch):
+    """Pretend upstream defines only index 0, so indices 1+ are 'override-added'.
+
+    FakeSensorGroup indexes items by insertion order, so without this every test
+    index would sit inside the real upstream range (0..1125) and never be
+    eligible for the absence rule.
+    """
+    monkeypatch.setattr(
+        "custom_components.luxtronik2.common.UPSTREAM_MAX_DEFINED_INDEX",
+        {"parameters": 0, "calculations": 0, "visibilities": 0},
+    )
+
+
+class TestRegisterPresence:
+    def test_absent_register_returns_false(self, tiny_upstream_range):
+        """A definition exists, but the controller returned a shorter block."""
+        data = make_coordinator_data(
+            parameters={"upstream_a": 1, "added_b": 2, "added_c": None},
+            parameters_parsed_count=2,
+        )
+        assert key_exists(data, "parameters.upstream_a") is True  # index 0
+        assert key_exists(data, "parameters.added_b") is True  # index 1 < 2
+        assert key_exists(data, "parameters.added_c") is False  # index 2 >= 2
+
+    def test_present_register_reading_none_is_still_present(self, tiny_upstream_range):
+        """A SelectionBase register with an unknown code reads None but exists."""
+        data = make_coordinator_data(
+            parameters={"upstream_a": 1, "unknown_code": None},
+            parameters_parsed_count=2,
+        )
+        assert key_exists(data, "parameters.unknown_code") is True
+
+    def test_upstream_range_is_never_suppressed(self):
+        """Even a wildly short block cannot hide a register upstream defines.
+
+        This is what keeps 1.x controllers, which may return fewer values than
+        anything in the diagnostics corpus, on the pre-change behaviour.
+        """
+        data = make_coordinator_data(
+            parameters={"a": 1, "b": 2, "c": 3},
+            parameters_parsed_count=0,
+        )
+        assert key_exists(data, "parameters.c") is True
+
+    def test_without_recorded_count_falls_back_to_definition(self, tiny_upstream_range):
+        """Objects built without a parse() (tests, diagnostics) keep old behaviour."""
+        data = make_coordinator_data(parameters={"a": 1, "b": 2})
+        assert key_exists(data, "parameters.b") is True
+
+    def test_rule_is_generic_across_groups(self, tiny_upstream_range):
+        """The check is not parameters-only, even though only parameters can
+        currently trigger it (lux_overrides adds nothing above the calculations
+        or visibilities range)."""
+        data = make_coordinator_data(
+            calculations={"upstream_a": 1, "added_b": 2},
+            calculations_parsed_count=1,
+        )
+        assert key_exists(data, "calculations.upstream_a") is True
+        assert key_exists(data, "calculations.added_b") is False
+
+
 # ===========================================================================
 # get_sensor_data
 # ===========================================================================
