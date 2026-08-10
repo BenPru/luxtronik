@@ -8,6 +8,14 @@ from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
 import pytest
 
+from custom_components.luxtronik2 import lux_overrides
+from custom_components.luxtronik2.const import (
+    CONF_CALCULATIONS,
+    CONF_PARAMETERS,
+    CONF_VISIBILITIES,
+    PARSED_COUNT_ATTR,
+)
+
 
 class TestUpdateLuxtronikHeatpumpCodes:
     def test_codes_updated(self):
@@ -234,3 +242,86 @@ class TestFrequencyAutomatic:
     def test_roundtrip_45hz(self):
         raw = self.converter.to_heatpump(45)
         assert self.converter.from_heatpump(raw) == 45
+
+
+@pytest.fixture
+def restore_parse():
+    """record_parsed_block_lengths patches library classes process-wide."""
+    originals = {cls: cls.parse for cls in (Parameters, Calculations, Visibilities)}
+    flag = lux_overrides._PARSE_COUNTS_RECORDED
+    lux_overrides._PARSE_COUNTS_RECORDED = False
+    yield
+    for cls, parse in originals.items():
+        cls.parse = parse
+    lux_overrides._PARSE_COUNTS_RECORDED = flag
+
+
+class TestRecordParsedBlockLengths:
+    def test_records_block_length_for_each_group(self, restore_parse):
+        lux_overrides.record_parsed_block_lengths()
+
+        params = Parameters()
+        params.parse([0] * 1126)
+        assert getattr(params, PARSED_COUNT_ATTR) == 1126
+
+        calcs = Calculations()
+        calcs.parse([0] * 260)
+        assert getattr(calcs, PARSED_COUNT_ATTR) == 260
+
+        vis = Visibilities()
+        vis.parse([0] * 355)
+        assert getattr(vis, PARSED_COUNT_ATTR) == 355
+
+    def test_values_still_parse(self, restore_parse):
+        """The wrapper must not swallow the original parse behaviour."""
+        lux_overrides.record_parsed_block_lengths()
+        params = Parameters()
+        params.parse([7] * 1126)
+        assert params.parameters[0].value is not None
+
+    def test_is_idempotent(self, restore_parse):
+        """Calling twice must not double-wrap or change the recorded count."""
+        lux_overrides.record_parsed_block_lengths()
+        lux_overrides.record_parsed_block_lengths()
+        params = Parameters()
+        params.parse([0] * 42)
+        assert getattr(params, PARSED_COUNT_ATTR) == 42
+
+    def test_attribute_absent_before_parse(self, restore_parse):
+        """A freshly built instance has no count until it has parsed."""
+        lux_overrides.record_parsed_block_lengths()
+        assert getattr(Parameters(), PARSED_COUNT_ATTR, None) is None
+
+
+class TestUpstreamMaxDefinedIndex:
+    def test_pins_the_installed_library_range(self):
+        """The absence rule only fires above this index, so an upstream bump must
+        be a deliberate, reviewed change - not a silent behaviour shift."""
+        assert lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_PARAMETERS] == 1125
+        assert lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_CALCULATIONS] == 259
+        assert lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_VISIBILITIES] == 354
+
+    def test_every_override_only_parameter_sits_above_the_range(self):
+        """The 13 indices that exist only because of lux_overrides are exactly the
+        ones the absence rule must be able to reach."""
+        upstream_max = lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_PARAMETERS]
+        override_only = {
+            index
+            for index in lux_overrides.parameters_to_add_update
+            if index > upstream_max
+        }
+        assert override_only == {
+            1136,
+            1137,
+            1139,
+            1140,
+            1146,
+            1147,
+            1148,
+            1158,
+            1159,
+            1175,
+            1176,
+            1177,
+            1179,
+        }

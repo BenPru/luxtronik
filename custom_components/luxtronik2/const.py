@@ -81,6 +81,10 @@ CONF_PARAMETERS: Final = "parameters"
 CONF_CALCULATIONS: Final = "calculations"
 CONF_VISIBILITIES: Final = "visibilities"
 
+# Instance attribute set by lux_overrides.record_parsed_block_lengths() on each
+# parse(): how many values the controller returned for that block.
+PARSED_COUNT_ATTR: Final = "luxtronik_parsed_count"
+
 CONF_HA_SENSOR_PREFIX: Final = "ha_sensor_prefix"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
 CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: Final = "ha_sensor_current_power_consumption"

@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Final
 
 from luxtronik.calculations import Calculations
 from luxtronik.datatypes import (
@@ -17,6 +18,13 @@ from luxtronik.datatypes import (
 )
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
+
+from .const import (
+    CONF_CALCULATIONS,
+    CONF_PARAMETERS,
+    CONF_VISIBILITIES,
+    PARSED_COUNT_ATTR,
+)
 
 
 class MajorMinorVersion(Base):
@@ -130,6 +138,19 @@ class PoolPVMode(SelectionBase):
         3: "Pool_Holidays",
         4: "Pool_Off",
     }
+
+
+# Highest index the installed luxtronik library defines per block, captured
+# before the overrides below extend those dicts.  Everything at or below this
+# index is part of upstream's own definition set and is returned by every
+# controller observed, so absence is only ever concluded above it - which is
+# exactly where the indices this module adds live.  Measured, not guessed:
+# parameters 0..1125 (dense), calculations max 259, visibilities 0..354.
+UPSTREAM_MAX_DEFINED_INDEX: Final[dict[str, int]] = {
+    CONF_PARAMETERS: max(Parameters.parameters),
+    CONF_CALCULATIONS: max(Calculations.calculations),
+    CONF_VISIBILITIES: max(Visibilities.visibilities),
+}
 
 
 # Define your new/updated custom parameters in a dictionary
@@ -287,6 +308,41 @@ def isolate_instance_data():
     Visibilities.__init__ = _vis_init
 
     _INSTANCE_DATA_ISOLATED = True
+
+
+_PARSE_COUNTS_RECORDED = False
+
+
+def record_parsed_block_lengths():
+    """Patch ``parse()`` to record how many values the controller returned.
+
+    ``parse()`` assigns ``.value`` only for the indices present in the raw
+    block; every other definition keeps whatever it had, which for a register
+    the unit does not have means ``None`` forever.  The definition dict is
+    static, so it cannot answer "does this controller have register N?" - but
+    the block length can: register N is present exactly when ``N < length``.
+
+    This is deliberately not inferred from ``.value is None``, because a
+    register that IS present also reads ``None`` when its datatype cannot
+    decode the raw value (``SelectionBase`` returns ``None`` for a code
+    missing from its table, e.g. an unrecognised heat pump model).
+    """
+    # No lock needed: called only from synchronous code path (no await),
+    # so the event loop cannot preempt between the guard check and flag set.
+    global _PARSE_COUNTS_RECORDED
+    if _PARSE_COUNTS_RECORDED:
+        return
+
+    for cls in (Parameters, Calculations, Visibilities):
+        _orig_parse = cls.parse
+
+        def _parse(self, raw_data, _orig_parse=_orig_parse):
+            setattr(self, PARSED_COUNT_ATTR, len(raw_data))
+            return _orig_parse(self, raw_data)
+
+        cls.parse = _parse
+
+    _PARSE_COUNTS_RECORDED = True
 
 
 def update_Luxtronik_HeatpumpCodes():

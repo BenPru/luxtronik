@@ -47,6 +47,7 @@ from .const import (
 from .lux_helper import Luxtronik, get_manufacturer_by_model
 from .lux_overrides import (
     isolate_instance_data,
+    record_parsed_block_lengths,
     update_Luxtronik_HeatpumpCodes,
     update_Luxtronik_Parameters,
 )
@@ -847,6 +848,7 @@ async def connect_and_get_coordinator(
         update_Luxtronik_HeatpumpCodes()
         update_Luxtronik_Parameters()
         isolate_instance_data()
+        record_parsed_block_lengths()
         _OVERRIDES_APPLIED = True
         LOGGER.info(
             "Library overrides applied (HeatpumpCodes, Parameters, instance data isolation)."
