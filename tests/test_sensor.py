@@ -784,44 +784,44 @@ class TestEnergyInputScaling:
 
 class TestAuxHeaterAmountScaling:
     """Parameters 1059 and 1140 both count auxiliary-heater heat in 0.1 kWh
-    units. They stay `Unknown` in the library, so the description's `factor`
-    is the whole conversion and the raw register reaches the entity untouched.
+    units, so the Energy datatype they are registered with is the whole
+    conversion and neither description carries a `factor`.
 
-    The scale is pinned by physics rather than by a datatype: energy divided
-    by the aux heater's run time must equal its rated power (parameter 1025).
-    The values below are real readings taken from user diagnostics in #625 -
-    37539 counts over 420.03 hours of ZWE1 run time on a unit whose rated
-    element is 9.0 kW, giving 8.94 kW at factor 0.1 and 0.89 kW at 0.01.
+    The scale is pinned by physics rather than by upstream's unit note:
+    energy divided by the aux heater's run time must equal its rated power
+    (parameter 1025). The values below are real readings from user
+    diagnostics in #625 - 37539 counts over 420.03 hours of ZWE1 run time on
+    a unit whose rated element is 9.0 kW, giving 8.94 kW at 0.1 kWh per count
+    and 0.89 kW if a further /10 is applied on top, as #490 did.
     """
 
-    def _assert_raw_converts_to(
-        self, sensor_key: SensorKey, raw_value: int, expected_kwh: float
-    ) -> None:
-        description = next(d for d in SENSORS if d.key == sensor_key)
+    def _converted_value(self, sensor_key: SensorKey, raw_value: int) -> float:
+        description, datatype = _energy_input_case(sensor_key)
+        converted = datatype.from_heatpump(raw_value)
         group, sensor_id = description.luxtronik_key.split(".", 1)
-        data = make_coordinator_data(**{group: {sensor_id: raw_value}})
+        data = make_coordinator_data(**{group: {sensor_id: converted}})
         entity = _make_sensor(description, data)
         entity._handle_coordinator_update(data)
-        assert entity._attr_native_value == expected_kwh
+        return entity._attr_native_value
 
     def test_additional_heat_generator_amount_counter_scaling(self):
-        self._assert_raw_converts_to(
-            SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER, 37539, 3753.9
+        value = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER, 37539
         )
+        assert value == 3753.9
 
     def test_second_heat_generator_amount_counter_scaling(self):
-        self._assert_raw_converts_to(
-            SensorKey.SECOND_HEAT_GENERATOR_AMOUNT_COUNTER, 841, 84.1
+        value = self._converted_value(
+            SensorKey.SECOND_HEAT_GENERATOR_AMOUNT_COUNTER, 841
         )
+        assert value == 84.1
 
     def test_implied_power_matches_rated_element(self):
-        """Guards the scale itself: 37539 counts over 420.03 ZWE1 hours must
-        come out near the unit's rated 9.0 kW, which only holds at 0.1."""
-        description = next(
-            d
-            for d in SENSORS
-            if d.key == SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER
+        """Guards the whole chain - datatype plus description - rather than a
+        magic number: 37539 counts over 420.03 ZWE1 hours must come out near
+        the unit's rated 9.0 kW, which fails if either scaling step changes.
+        """
+        kwh = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER, 37539
         )
-        assert description.factor is not None
-        implied_kw = 37539 * description.factor / 420.03
-        assert 8.0 <= implied_kw <= 9.5
+        assert 8.0 <= kwh / 420.03 <= 9.5
