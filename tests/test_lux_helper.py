@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import struct
 from unittest.mock import MagicMock, patch
 
@@ -498,6 +499,37 @@ class TestLuxtronikReadWrite:
         ):
             client._read_write(write=False)
 
+    def test_write_does_not_read_back(self):
+        """A write must not drag a full read (~1900 values) along with it: the
+        coordinator refreshes straight afterwards to confirm the write, so the
+        client-side read is discarded work and doubles the socket traffic of
+        every write. Upstream's write() reads nothing either."""
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+
+        with (
+            patch.object(client, "connect"),
+            patch.object(client, "_write") as mock_write,
+            patch.object(client, "_read") as mock_read,
+        ):
+            client._read_write(write=True)
+
+        mock_write.assert_called_once()
+        mock_read.assert_not_called()
+
+    def test_read_still_reads(self):
+        """The read path must be unaffected: it reads and never writes."""
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+
+        with (
+            patch.object(client, "connect"),
+            patch.object(client, "_write") as mock_write,
+            patch.object(client, "_read") as mock_read,
+        ):
+            client._read_write(write=False)
+
+        mock_read.assert_called_once()
+        mock_write.assert_not_called()
+
     def test_write_no_socket_raises(self):
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
         client._socket = None
@@ -509,8 +541,11 @@ class TestLuxtronikReadWrite:
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
         mock_socket_class.return_value = mock_sock
-        # recv returns packed ints for cmd and val responses
-        mock_sock.recv.return_value = struct.pack(">i", 0)
+        # The ack is the echoed command followed by the echoed parameter index.
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            struct.pack(">i", 1),
+        ]
 
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
         client._socket = mock_sock
@@ -536,11 +571,65 @@ class TestLuxtronikReadWrite:
         mock_sock.sendall.assert_not_called()
 
     @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_warns_when_ack_echoes_unexpected_index(
+        self, mock_socket_class, caplog
+    ):
+        """The controller acks a 3002 write by echoing the parameter index. An
+        echo for a different index means the socket stream has desynced, so
+        every following read is misaligned garbage - that must not pass
+        silently."""
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            struct.pack(">i", 999),  # echo for a parameter we did not write
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42}
+
+        with caplog.at_level(logging.WARNING):
+            client._write()
+
+        assert any(
+            record.levelno == logging.WARNING and "999" in record.getMessage()
+            for record in caplog.records
+        )
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_does_not_warn_when_ack_echoes_written_index(
+        self, mock_socket_class, caplog
+    ):
+        """A correct ack echoes back the index just written - the normal case,
+        which must stay quiet."""
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            struct.pack(">i", 1),  # echo matches the written index
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42}
+
+        with caplog.at_level(logging.WARNING):
+            client._write()
+
+        assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
     def test_write_converts_float_to_int(self, mock_socket_class):
         mock_sock = MagicMock()
         mock_sock.fileno.return_value = -1
         mock_socket_class.return_value = mock_sock
-        mock_sock.recv.return_value = struct.pack(">i", 0)
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            struct.pack(">i", 5),
+        ]
 
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
         client._socket = mock_sock

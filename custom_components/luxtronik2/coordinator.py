@@ -55,6 +55,24 @@ from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 # endregion Imports
 
 
+# Some controllers do not reflect a freshly written parameter in their
+# readable register block immediately, so the confirming read-back still
+# returns the pre-write value (issue #729: LWC407 / firmware V1.88.3). The
+# write itself succeeded, so confirmation is retried for a bounded window
+# before a mismatch is reported as a failed write. Controllers that apply
+# writes instantly (~3 ms measured) confirm on the first read and never wait.
+#
+# The delay doubles per retry, capped: every attempt costs a *full* read of
+# ~1900 values, so probing cheaply at first (0.1 s catches a quick settler
+# without making it wait a fixed quarter second) then backing off keeps a
+# write that will never converge from burning reads. The cap stops the last
+# delay from overshooting the budget. Worst case: 6 reads over ~2.5 s of
+# waiting before a genuine rejection is reported.
+WRITE_CONFIRM_MAX_ATTEMPTS = 6
+WRITE_CONFIRM_INITIAL_DELAY = 0.1
+WRITE_CONFIRM_MAX_DELAY = 1.0
+
+
 def _write_confirmed(written: Any, confirmed: Any) -> bool:
     """Return True if a write's post-refresh read-back matches what was written.
 
@@ -205,40 +223,63 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 await self.hass.async_add_executor_job(self.client.write)
                 LOGGER.debug("Done: self.client.write")
 
-            # Refresh after write
-            await self.async_refresh()
-            LOGGER.debug("Coordinator data refreshed!")
-
-            # async_refresh() swallows failures internally (logs, does not
-            # raise) rather than propagating them, so self.data may still be
-            # the stale pre-write snapshot here. Comparing newly-written
-            # values against stale data would almost always look like a
-            # mismatch, misleadingly implying the device rejected the write
-            # when only the confirming read failed. Surface that distinctly
-            # instead of running the confirm comparison against stale data.
-            if not self.last_update_success:
-                raise HomeAssistantError(
-                    translation_domain=DOMAIN,
-                    translation_key="write_confirmation_unavailable",
-                    translation_placeholders={
-                        "parameters": ", ".join(parameter for parameter, _ in pairs)
-                    },
-                )
-
-            # Confirm each value after the read
+            # Refresh after write, retrying the confirming read while the
+            # device still reports pre-write values (see the
+            # WRITE_CONFIRM_* constants). The wait is awaited rather than
+            # slept through: this runs on Home Assistant's event loop, and
+            # the socket lock above is already released here.
             mismatches: list[str] = []
-            for parameter, value in pairs:
-                confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
-                LOGGER.debug(
-                    'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
-                    parameter,
-                    value,
-                    confirmed_value,
-                )
-                if not _write_confirmed(value, confirmed_value):
-                    mismatches.append(
-                        f"{parameter} (wrote {value!r}, device reports {confirmed_value!r})"
+            delay = WRITE_CONFIRM_INITIAL_DELAY
+            for attempt in range(WRITE_CONFIRM_MAX_ATTEMPTS):
+                if attempt:
+                    await asyncio.sleep(delay)
+                    delay = min(delay * 2, WRITE_CONFIRM_MAX_DELAY)
+
+                await self.async_refresh()
+                LOGGER.debug("Coordinator data refreshed!")
+
+                # async_refresh() swallows failures internally (logs, does not
+                # raise) rather than propagating them, so self.data may still
+                # be the stale pre-write snapshot here. Comparing
+                # newly-written values against stale data would almost always
+                # look like a mismatch, misleadingly implying the device
+                # rejected the write when only the confirming read failed.
+                # Surface that distinctly instead of running the confirm
+                # comparison against stale data - and do not retry, since a
+                # failed read tells us nothing about the write.
+                if not self.last_update_success:
+                    raise HomeAssistantError(
+                        translation_domain=DOMAIN,
+                        translation_key="write_confirmation_unavailable",
+                        translation_placeholders={
+                            "parameters": ", ".join(parameter for parameter, _ in pairs)
+                        },
                     )
+
+                # Confirm each value after the read
+                mismatches = []
+                for parameter, value in pairs:
+                    confirmed_value = self.get_value(f"{CONF_PARAMETERS}.{parameter}")
+                    LOGGER.debug(
+                        'LuxtronikDevice.write finished %s value: "%s" (confirmed: "%s")',
+                        parameter,
+                        value,
+                        confirmed_value,
+                    )
+                    if not _write_confirmed(value, confirmed_value):
+                        mismatches.append(
+                            f"{parameter} (wrote {value!r}, device reports {confirmed_value!r})"
+                        )
+
+                if not mismatches:
+                    break
+
+                LOGGER.debug(
+                    "Write not confirmed yet (attempt %d/%d): %s",
+                    attempt + 1,
+                    WRITE_CONFIRM_MAX_ATTEMPTS,
+                    "; ".join(mismatches),
+                )
 
             if mismatches:
                 raise HomeAssistantError(

@@ -22,8 +22,6 @@ from .const import (
 
 # endregion Imports
 
-WAIT_TIME_WRITE_PARAMETER = 1.0
-
 # List of ports that are known to respond to discovery packets.
 # Note: 47808 is also the IANA-reserved standard port for BACnet. discover()
 # only binds it for the brief duration of a broadcast+listen cycle and closes
@@ -295,9 +293,16 @@ class Luxtronik:
         self.connect()
 
         try:
+            # Write and read are exclusive: the coordinator refreshes right
+            # after a write to confirm it, so reading here too would fetch
+            # ~1900 values that are immediately discarded and overwritten -
+            # doubling the socket traffic of every write against a controller
+            # that is happier with less of it. Upstream splits these the same
+            # way (write() writes, write_and_read() is a separate method).
             if write:
                 self._write()
-            self._read()
+            else:
+                self._read()
         except (OSError, struct.error):
             # Deliberately not logged here: the exception propagates to the
             # coordinator, which re-raises it as UpdateFailed and lets
@@ -338,20 +343,37 @@ class Luxtronik:
                 continue
             data = struct.pack(">iii", LUXTRONIK_PARAMETERS_WRITE, index, value)
             self._socket.sendall(data)
+            # The controller acknowledges a 3002 write with two ints: the
+            # echoed command (3002) and the echoed *parameter index* - NOT the
+            # value it stored. Verified on an Alpha Innotec MSW4-16: writing
+            # index 894 (ID_Einst_BA_Lueftung_akt) the value 0 acks with 894,
+            # which cannot be any of that parameter's codes (0-3). So the ack
+            # says only "I received a write for this parameter", never whether
+            # the value was accepted, clamped or rejected - confirming a write
+            # requires reading the parameter back (see the WRITE_CONFIRM_*
+            # retry loop in coordinator.async_write_many).
             cmd = self._read_int()
-            val = self._read_int()
+            echoed_index = self._read_int()
             LOGGER.debug(
-                "Parameter '%d' set to '%s' (ack cmd=%s value=%s)",
+                "Parameter '%d' set to '%s' (ack cmd=%s echoed_index=%s)",
                 index,
                 value,
                 cmd,
-                val,
+                echoed_index,
             )
+            if echoed_index != index:
+                # An ack for a different parameter means the socket stream is
+                # no longer aligned to message boundaries, so every subsequent
+                # read is misaligned garbage rather than heat pump data.
+                LOGGER.warning(
+                    "Write ack mismatch: wrote parameter '%d' but the heat pump "
+                    "echoed '%s' (cmd=%s). The connection may be out of sync.",
+                    index,
+                    echoed_index,
+                    cmd,
+                )
         # Flush queue after writing all values
         self.parameters.queue = {}
-        # Give the heatpump a short time to handle the value changes/calculations:
-        # Todo: Change methods to async
-        # await asyncio.sleep(WAIT_TIME_WRITE_PARAMETER)
 
     def _read_exact(self, count: int) -> bytes:
         """Receive exactly ``count`` bytes from the socket.
