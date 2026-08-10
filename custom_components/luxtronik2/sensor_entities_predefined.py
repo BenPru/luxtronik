@@ -314,11 +314,11 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
         visibility=LV.V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
-        # Raw register unit is 0.1 kWh. #490 changed this to 0.01 based on a
-        # single unverified display comparison; measured against the rated
-        # element power (parameter 1025) on five units, 0.1 is the correct
-        # scale and 0.01 reports a tenth of the real energy. See #625.
-        factor=0.1,
+        # Raw register unit is 0.1 kWh, applied by the Energy datatype this
+        # parameter is registered with in lux_overrides - hence no factor.
+        # #490 scaled it by a further /10 based on a single unverified display
+        # comparison; measured against the rated element power (parameter
+        # 1025) on five units, that reported a tenth of the real energy. #625.
         native_precision=1,
     ),
     descr(
@@ -329,7 +329,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
-        factor=0.1,
+        # 0.1 kWh raw unit, applied by the Energy datatype (see 1059 above).
         native_precision=1,
         # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),

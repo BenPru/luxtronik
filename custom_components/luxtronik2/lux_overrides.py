@@ -14,7 +14,6 @@ from luxtronik.datatypes import (
     Power,
     SelectionBase,
     Timestamp,
-    Unknown,
 )
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
@@ -134,14 +133,21 @@ parameters_to_add_update = {
     1147: SecondsToHours("Extra_DHW_duration", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
     1159: Percent("ELECTRICAL_POWER_LIMIT_VALUE", True),
-    # Read-only sensors confirmed against Bouni/python-luxtronik's in-progress
-    # parameter definitions (not yet released). Their "kWh/10" unit note means
-    # an additional /10 is needed on top of Energy's own /10 scaling, which is
-    # exactly what the matching sensor descriptions already apply via factor=0.1.
+    # Read-only energy counters. These three still carry an additional /10 on
+    # top of Energy's own /10, applied via factor=0.1 on their descriptions -
+    # established from plausibility only (see 6df44aa), not from measurement.
+    # Upstream's "kWh/10" unit note is NOT what distinguishes them: 1059 and
+    # calculations 151/152/154 carry the same note and need Energy alone.
+    # Re-measuring these three is tracked in #734.
     1136: Energy("HEAT_ENERGY_INPUT", False),
     1137: Energy("DHW_ENERGY_INPUT", False),
     1139: Energy("COOLING_ENERGY_INPUT", False),
-    1140: Unknown("SECOND_HEAT_GENERATOR_AMOUNT_COUNTER", False),
+    # Auxiliary-heater heat counters, both in 0.1 kWh units, so Energy's own
+    # /10 is the whole conversion and their descriptions carry no factor. The
+    # scale was measured against the rated element power in #625; the name of
+    # 1059 must stay ID_Waermemenge_ZWE, which is how const.py resolves it.
+    1059: Energy("ID_Waermemenge_ZWE", False),
+    1140: Energy("SECOND_HEAT_GENERATOR_AMOUNT_COUNTER", False),
     # Bouni/python-luxtronik's in-progress definitions mark these read-only,
     # but our switch/number entities treat them as user-writable by design.
     1158: Bool("POWER_LIMIT_SWITCH", True),
