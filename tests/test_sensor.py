@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
+from luxtronik.calculations import Calculations
 
 from conftest import make_coordinator_data
 from custom_components.luxtronik2.binary_sensor import LuxtronikBinarySensorEntity
@@ -730,6 +731,33 @@ def _energy_input_case(
         dt for dt in parameters_to_add_update.values() if dt.name == raw_name
     )
     return description, datatype
+
+
+class TestAnalogOutScaling:
+    """The library's Voltage datatype already applies its own scaling_factor
+    of 0.1, and the coordinator surfaces that decoded value. An additional
+    `factor` in the description would scale a second time and report a tenth
+    of the real voltage. Unlike the energy inputs below, the raw analog-out
+    registers carry no extra /10, so no factor belongs here."""
+
+    def _assert_raw_converts_to(
+        self, sensor_key: SensorKey, raw_value: int, expected_volt: float
+    ) -> None:
+        description = next(d for d in SENSORS if d.key == sensor_key)
+        raw_name = description.luxtronik_key.rsplit(".", 1)[1]
+        datatype = Calculations().get(raw_name)
+        converted = datatype.from_heatpump(raw_value)
+        group, sensor_id = description.luxtronik_key.split(".", 1)
+        data = make_coordinator_data(**{group: {sensor_id: converted}})
+        entity = _make_sensor(description, data)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == expected_volt
+
+    def test_analog_out1_scaling(self):
+        self._assert_raw_converts_to(SensorKey.ANALOG_OUT1, 105, 10.5)
+
+    def test_analog_out2_scaling(self):
+        self._assert_raw_converts_to(SensorKey.ANALOG_OUT2, 55, 5.5)
 
 
 class TestEnergyInputScaling:
