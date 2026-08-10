@@ -699,6 +699,45 @@ class TestEntityActive:
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
         assert coord.entity_active(desc) is False
 
+    def test_entity_active_formula_absent_register(self):
+        """A register the controller does not expose must not get an entity."""
+        coord = _make_coordinator_direct()
+        coord._is_version_not_compatible = MagicMock(return_value=False)
+        coord.device_key_active = MagicMock(return_value=True)
+        coord.get_value = MagicMock(return_value=None)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.device_key = DeviceKey.heatpump
+        desc.entity_active_formula = "!= 0.0"
+        desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        assert coord.entity_active(desc) is False
+
+    def test_entity_active_formula_zero_is_not_absent(self):
+        """A register reading 0.0 is present - the formula decides, not the None check."""
+        coord = _make_coordinator_direct()
+        coord._is_version_not_compatible = MagicMock(return_value=False)
+        coord.device_key_active = MagicMock(return_value=True)
+        coord.get_value = MagicMock(return_value=0.0)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.device_key = DeviceKey.heatpump
+        desc.entity_active_formula = "!= 0.0"
+        desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        assert coord.entity_active(desc) is False
+
+    def test_entity_active_formula_nonzero_creates_entity(self):
+        """A register with a real reading passes the formula and gets an entity."""
+        coord = _make_coordinator_direct()
+        coord._is_version_not_compatible = MagicMock(return_value=False)
+        coord.device_key_active = MagicMock(return_value=True)
+        coord.get_value = MagicMock(return_value=12.3)
+        desc = MagicMock(spec=LuxtronikEntityDescription)
+        desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
+        desc.device_key = DeviceKey.heatpump
+        desc.entity_active_formula = "!= 0.0"
+        desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        assert coord.entity_active(desc) is True
+
 
 # ===========================================================================
 # get_value / get_sensor

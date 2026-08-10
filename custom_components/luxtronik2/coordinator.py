@@ -654,12 +654,16 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return False
         if description.entity_active_formula is not None:
             active_value = self.get_value(description.luxtronik_key)
-            if active_value is not None:
-                formula_result = self._evaluate_visibility_formula(
-                    active_value, description.entity_active_formula
-                )
-                if formula_result is not None:
-                    return formula_result
+            if active_value is None:
+                # The controller did not return this register, so the formula
+                # has nothing to decide on. Creating the entity anyway leaves
+                # it permanently unavailable (#738).
+                return False
+            formula_result = self._evaluate_visibility_formula(
+                active_value, description.entity_active_formula
+            )
+            if formula_result is not None:
+                return formula_result
         return True
 
     def device_key_active(self, device_key: DeviceKey) -> bool:
