@@ -593,9 +593,9 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        # Energy.from_heatpump() already divides by 10; this factor supplies
-        # the remaining /10 noted for this parameter ("kWh/10" raw unit).
-        factor=0.1,
+        # 0.01 kWh raw unit, applied by the Energy2 datatype this parameter is
+        # registered with in lux_overrides - hence no factor. Scale measured
+        # against the heat-quantity calculations in #734.
         # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
     ),
     descr(
@@ -667,9 +667,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        # Energy.from_heatpump() already divides by 10; this factor supplies
-        # the remaining /10 noted for this parameter ("kWh/10" raw unit).
-        factor=0.1,
+        # 0.01 kWh raw unit, applied by the Energy2 datatype (see 1136 above).
         # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
     ),
     descr(
@@ -722,9 +720,9 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        # Energy.from_heatpump() already divides by 10; this factor supplies
-        # the remaining /10 noted for this parameter ("kWh/10" raw unit).
-        factor=0.1,
+        # 0.01 kWh raw unit, applied by the Energy2 datatype (see 1136 above).
+        # This one reads 0.0 on every unit examined in #734, so its scale
+        # follows its two siblings by analogy and is not itself measured.
         # min_firmware_version_minor=FirmwareVersionMinor.minor_88,
     ),
     # endregion Cooling
