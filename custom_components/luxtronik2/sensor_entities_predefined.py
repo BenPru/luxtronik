@@ -337,7 +337,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         visibility=LV.V0248_ANALOG_OUT1,
         entity_registry_enabled_default=False,
-        factor=0.1,
     ),
     descr(
         key=SensorKey.ANALOG_OUT2,
@@ -347,7 +346,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         visibility=LV.V0249_ANALOG_OUT2,
         entity_registry_enabled_default=False,
-        factor=0.1,
     ),
     descr(
         key=SensorKey.VENTILATION_SUPPLY_AIR_TEMPERATURE,
