@@ -154,6 +154,27 @@ class TestSecondsToHours:
         assert converter.to_heatpump(1.5) == 5400
 
 
+class TestEnergy2:
+    """0.01 kWh per count, a hundredth of a kilowatt-hour, against the
+    library's own Energy which is a tenth. Which registers belong on which is
+    measured, not documented - see TestEnergyInputScaling in test_sensor.py.
+    """
+
+    def test_from_heatpump_divides_by_hundred(self):
+        from custom_components.luxtronik2.lux_overrides import Energy2
+
+        converter = Energy2("HEAT_ENERGY_INPUT", False)
+        assert converter.from_heatpump(0) == 0.0
+        assert converter.from_heatpump(269938) == 2699.38
+
+    def test_to_heatpump_round_trips(self):
+        from custom_components.luxtronik2.lux_overrides import Energy2
+
+        converter = Energy2("HEAT_ENERGY_INPUT", False)
+        assert converter.to_heatpump(2699.38) == 269938
+        assert converter.to_heatpump(0.0) == 0
+
+
 class TestTimeOfDay:
     from custom_components.luxtronik2.lux_overrides import TimeOfDay
 

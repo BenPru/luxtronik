@@ -737,8 +737,8 @@ class TestAnalogOutScaling:
     """The library's Voltage datatype already applies its own scaling_factor
     of 0.1, and the coordinator surfaces that decoded value. An additional
     `factor` in the description would scale a second time and report a tenth
-    of the real voltage. Unlike the energy inputs below, the raw analog-out
-    registers carry no extra /10, so no factor belongs here."""
+    of the real voltage, so no factor belongs here - as with the energy
+    counters below, the datatype is the whole conversion."""
 
     def _assert_raw_converts_to(
         self, sensor_key: SensorKey, raw_value: int, expected_volt: float
@@ -761,6 +761,19 @@ class TestAnalogOutScaling:
 
 
 class TestEnergyInputScaling:
+    """Parameters 1136/1137/1139 count energy input in 0.01 kWh units, so the
+    Energy2 datatype they are registered with is the whole conversion and none
+    of the three descriptions carries a `factor`.
+
+    The scale was measured in #734, not read off upstream's "kWh/10" note
+    (which claims /10 for these registers and is wrong): regressing the
+    heat-quantity calculations on these counters across 19 diagnostics
+    snapshots of one MSW4-16 gives a marginal COP of 6.4 for heating and 3.8
+    for DHW at 0.01 kWh per count - and 0.64 / 0.38 at 0.1 kWh per count,
+    which no compressor can achieve. The raw values below are from that same
+    series.
+    """
+
     def _assert_raw_converts_to(
         self, sensor_key: SensorKey, raw_value: int, expected_kwh: float
     ) -> None:
@@ -780,6 +793,29 @@ class TestEnergyInputScaling:
 
     def test_cooling_energy_input_scaling(self):
         self._assert_raw_converts_to(SensorKey.COOLING_ENERGY_INPUT, 12345, 123.45)
+
+    def _converted_value(self, sensor_key: SensorKey, raw_value: int) -> float:
+        description, datatype = _energy_input_case(sensor_key)
+        converted = datatype.from_heatpump(raw_value)
+        group, sensor_id = description.luxtronik_key.split(".", 1)
+        data = make_coordinator_data(**{group: {sensor_id: converted}})
+        entity = _make_sensor(description, data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_implied_cop_is_physical(self):
+        """Guards the whole chain - datatype plus description - against a
+        factor-of-ten change: over the window covered by the #734 series the
+        unit put out 17345.0 kWh of heating heat for 269232 counts of input
+        and 2680.7 kWh of DHW heat for 69627 counts, which has to come out as
+        a COP above 1 and below the ~8 no air-source unit exceeds seasonally.
+        """
+        for sensor_key, counts, heat_kwh in (
+            (SensorKey.HEAT_ENERGY_INPUT, 269232, 17345.0),
+            (SensorKey.DHW_ENERGY_INPUT, 69627, 2680.7),
+        ):
+            cop = heat_kwh / self._converted_value(sensor_key, counts)
+            assert 1.0 < cop < 8.0
 
 
 class TestAuxHeaterAmountScaling:

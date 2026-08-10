@@ -30,6 +30,23 @@ class MajorMinorVersion(Base):
         return f"{major}.{minor:02d}"
 
 
+class Energy2(Base):
+    """Energy counter stored in 0.01 kWh units, unlike the library's `Energy`.
+
+    Both scales occur on the same controller - see the energy-input parameters
+    in `parameters_to_add_update` for which registers were measured onto this
+    one, and why upstream's unit annotation cannot be used to tell them apart.
+    """
+
+    measurement_type = "energy"
+
+    def from_heatpump(self, value):
+        return value / 100
+
+    def to_heatpump(self, value):
+        return int(value * 100)
+
+
 class SecondsToHours(Base):
     """Seconds to hours datatype, converts from and to hours."""
 
@@ -133,15 +150,19 @@ parameters_to_add_update = {
     1147: SecondsToHours("Extra_DHW_duration", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
     1159: Percent("ELECTRICAL_POWER_LIMIT_VALUE", True),
-    # Read-only energy counters. These three still carry an additional /10 on
-    # top of Energy's own /10, applied via factor=0.1 on their descriptions -
-    # established from plausibility only (see 6df44aa), not from measurement.
-    # Upstream's "kWh/10" unit note is NOT what distinguishes them: 1059 and
-    # calculations 151/152/154 carry the same note and need Energy alone.
-    # Re-measuring these three is tracked in #734.
-    1136: Energy("HEAT_ENERGY_INPUT", False),
-    1137: Energy("DHW_ENERGY_INPUT", False),
-    1139: Energy("COOLING_ENERGY_INPUT", False),
+    # Read-only energy counters in 0.01 kWh units, hence Energy2 and no factor
+    # on their descriptions. Measured in #734 against the heat-quantity
+    # calculations: regressing calc 151/152 on these over 19 snapshots of one
+    # unit gives a marginal COP of 6.4 (heating) and 3.8 (DHW) at /100, but
+    # 0.64 and 0.38 at /10 - below 1, so impossible for a compressor. Lifetime
+    # totals put the same upper bound under 2 at /10 on six further units.
+    # Upstream's "kWh/10" note claims /10 for these and is simply wrong here;
+    # it also sits on 1059 and calculations 151/152/154, which need /10.
+    # 1139 has read 0.0 on every unit seen so far, so it follows its two
+    # siblings by analogy rather than by measurement.
+    1136: Energy2("HEAT_ENERGY_INPUT", False),
+    1137: Energy2("DHW_ENERGY_INPUT", False),
+    1139: Energy2("COOLING_ENERGY_INPUT", False),
     # Auxiliary-heater heat counters, both in 0.1 kWh units, so Energy's own
     # /10 is the whole conversion and their descriptions carry no factor. The
     # scale was measured against the rated element power in #625; the name of
