@@ -922,6 +922,18 @@
             },
             "second_heat_generator_amount_counter": {
                 "name": "Tweede warmtebron warmtemenge"
+            },
+            "ventilation_supply_air_temperature": {
+                "name": "Toevoerluchttemperatuur"
+            },
+            "ventilation_exhaust_air_temperature": {
+                "name": "Afvoerluchttemperatuur"
+            },
+            "ventilation_supply_fan": {
+                "name": "Toevoerventilator"
+            },
+            "ventilation_exhaust_fan": {
+                "name": "Afvoerventilator"
             }
         },
         "date": {
@@ -1049,6 +1061,15 @@
                     "party": "Party",
                     "holidays": "Vakantie"
                 }
+            },
+            "ventilation_mode": {
+                "name": "Ventilatiemodus",
+                "state": {
+                    "off": "Uit",
+                    "automatic": "Automatisch",
+                    "party": "Party",
+                    "holidays": "Vakantie"
+                }
             }
         },
         "climate": {
@@ -1077,6 +1098,9 @@
         },
         "cooling": {
             "name": "Koel"
+        },
+        "ventilation": {
+            "name": "Vent"
         }
     },
     "config": {

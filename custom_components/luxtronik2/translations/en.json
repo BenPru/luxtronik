@@ -922,6 +922,18 @@
             },
             "circulation_pump_delta": {
                 "name": "Circulation pump delta"
+            },
+            "ventilation_supply_air_temperature": {
+                "name": "Supply air temperature"
+            },
+            "ventilation_exhaust_air_temperature": {
+                "name": "Exhaust air temperature"
+            },
+            "ventilation_supply_fan": {
+                "name": "Supply fan"
+            },
+            "ventilation_exhaust_fan": {
+                "name": "Exhaust fan"
             }
         },
         "date": {
@@ -1049,6 +1061,15 @@
                     "party": "Party",
                     "holidays": "Holidays"
                 }
+            },
+            "ventilation_mode": {
+                "name": "Ventilation mode",
+                "state": {
+                    "off": "Off",
+                    "automatic": "Automatic",
+                    "party": "Party",
+                    "holidays": "Holidays"
+                }
             }
         },
         "climate": {
@@ -1077,6 +1098,9 @@
         },
         "cooling": {
             "name": "Cool"
+        },
+        "ventilation": {
+            "name": "Vent"
         }
     },
     "config": {

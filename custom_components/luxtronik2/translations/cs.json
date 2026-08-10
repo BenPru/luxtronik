@@ -922,6 +922,18 @@
             },
             "circulation_pump_delta": {
                 "name": "Rozd\u00edl pr\u016ftoku ob\u011bhov\u00e9ho \u010derpadla"
+            },
+            "ventilation_supply_air_temperature": {
+                "name": "Teplota přiváděného vzduchu"
+            },
+            "ventilation_exhaust_air_temperature": {
+                "name": "Teplota odváděného vzduchu"
+            },
+            "ventilation_supply_fan": {
+                "name": "Ventilátor přívodu"
+            },
+            "ventilation_exhaust_fan": {
+                "name": "Ventilátor odvodu"
             }
         },
         "date": {
@@ -1049,6 +1061,15 @@
                     "party": "P\u00e1rty",
                     "holidays": "Dovolen\u00e1"
                 }
+            },
+            "ventilation_mode": {
+                "name": "Režim větrání",
+                "state": {
+                    "off": "Vypnuto",
+                    "automatic": "Automaticky",
+                    "party": "Párty",
+                    "holidays": "Dovolená"
+                }
             }
         },
         "climate": {
@@ -1077,6 +1098,9 @@
         },
         "cooling": {
             "name": "Chlazen\u00ed"
+        },
+        "ventilation": {
+            "name": "Větrání"
         }
     },
     "config": {

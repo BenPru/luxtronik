@@ -922,6 +922,18 @@
             },
             "second_heat_generator_amount_counter": {
                 "name": "Zweiter W\u00e4rmeerzeuger W\u00e4rmemenge"
+            },
+            "ventilation_supply_air_temperature": {
+                "name": "Zulufttemperatur"
+            },
+            "ventilation_exhaust_air_temperature": {
+                "name": "Ablufttemperatur"
+            },
+            "ventilation_supply_fan": {
+                "name": "Zuluftventilator"
+            },
+            "ventilation_exhaust_fan": {
+                "name": "Abluftventilator"
             }
         },
         "date": {
@@ -1049,6 +1061,15 @@
                     "party": "Hochleistung",
                     "holidays": "Ferien"
                 }
+            },
+            "ventilation_mode": {
+                "name": "Lüftungsmodus",
+                "state": {
+                    "off": "Aus",
+                    "automatic": "Automatisch",
+                    "party": "Hochleistung",
+                    "holidays": "Ferien"
+                }
             }
         },
         "climate": {
@@ -1077,6 +1098,9 @@
         },
         "cooling": {
             "name": "K\u00fchl"
+        },
+        "ventilation": {
+            "name": "Lüft"
         }
     },
     "config": {

@@ -350,6 +350,41 @@ SENSORS: list[descr] = [
         factor=0.1,
     ),
     descr(
+        key=SensorKey.VENTILATION_SUPPLY_AIR_TEMPERATURE,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LC.C0159_VENTILATION_SUPPLY_AIR_TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+    ),
+    descr(
+        key=SensorKey.VENTILATION_EXHAUST_AIR_TEMPERATURE,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LC.C0160_VENTILATION_EXHAUST_AIR_TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+    ),
+    # VZU/VAB are analog 0-10 V fan-speed outputs, so they carry the
+    # modulation level a binary sensor would discard. The library's Voltage
+    # datatype already scales raw/10, hence no factor here.
+    descr(
+        key=SensorKey.VENTILATION_SUPPLY_FAN,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LC.C0164_VENTILATION_SUPPLY_FAN,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+    ),
+    descr(
+        key=SensorKey.VENTILATION_EXHAUST_FAN,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LC.C0165_VENTILATION_EXHAUST_FAN,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+    ),
+    descr(
         key=SensorKey.CURRENT_HEAT_OUTPUT,
         luxtronik_key=LC.C0257_CURRENT_HEAT_OUTPUT,
         state_class=SensorStateClass.MEASUREMENT,

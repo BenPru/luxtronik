@@ -103,6 +103,17 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         options=heating_control_mode_options,
     ),
     LuxtronikSelectEntityDescription(
+        key=SK.VENTILATION_MODE,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LuxParameter.P0894_VENTILATION_MODE,
+        # VentilationMode has the same four states as the mixing-circuit modes
+        # (no second_heatsource), so the existing option list fits as-is.
+        # No visibility gate: there is no per-parameter flag for the
+        # ventilation mode, and the ventilation device itself is already
+        # gated on has_ventilation.
+        options=mode_mk_options,
+    ),
+    LuxtronikSelectEntityDescription(
         key=SK.PV_MODE_SELECTOR,
         device_key=DeviceKey.heatpump,
         luxtronik_key=LuxParameter.P0119_MODE_PV,
