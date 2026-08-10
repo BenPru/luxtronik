@@ -336,6 +336,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.device_infos[DeviceKey.cooling] = self._build_device_info(
             DeviceKey.cooling, host, via
         )
+        self.device_infos[DeviceKey.ventilation] = self._build_device_info(
+            DeviceKey.ventilation, host, via
+        )
 
     def _build_device_info(
         self,
@@ -626,6 +629,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self.has_domestic_water
         if device_key == DeviceKey.cooling:
             return self.has_cooling
+        if device_key == DeviceKey.ventilation:
+            return self.has_ventilation
         raise NotImplementedError
 
     @property
@@ -641,6 +646,35 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if val is not None and val > 0:
             return True
         return self.detect_cooling_present()
+
+    @property
+    def has_ventilation(self) -> bool:
+        """Is an integrated ventilation module present.
+
+        Detected from the air temperatures, not from the ventilation
+        visibility flags, which are unreliable: issue #729's reporter runs a
+        working ventilation module while ID_Visi_Lueftung reads 0, so those
+        flags cannot be trusted in either direction and are deliberately not
+        consulted anywhere for ventilation. A unit without the module reports
+        a flat 0.0 on both channels instead (measured on an Alpha Innotec
+        MSW4-16), while a real module reports room-temperature exhaust air
+        and tempered supply air.
+
+        Both channels are required, so a single stuck or unwired channel
+        cannot conjure a phantom ventilation device. This is the only gate
+        the ventilation entities have - they carry no visibility of their
+        own - so it has to be the conservative one.
+
+        Same shape as _detect_solar_present()'s sentinel checks (5.0 / 150.0).
+        """
+        supply = self.get_value(LC.C0159_VENTILATION_SUPPLY_AIR_TEMPERATURE)
+        exhaust = self.get_value(LC.C0160_VENTILATION_EXHAUST_AIR_TEMPERATURE)
+        if supply is None or exhaust is None:
+            return False
+        try:
+            return float(supply) != 0.0 and float(exhaust) != 0.0
+        except (TypeError, ValueError):
+            return False
 
     def get_value(self, group_sensor_id: str | LP | LC | LV):
         """Get a sensor value from Luxtronik."""

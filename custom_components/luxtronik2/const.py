@@ -150,6 +150,7 @@ class DeviceKey(StrEnum):
     heating = "heating"
     domestic_water = "domestic_water"
     cooling = "cooling"
+    ventilation = "ventilation"
 
 
 class FirmwareVersionMinor(Enum):
@@ -493,7 +494,10 @@ class LuxParameter(StrEnum):
     P0881_MODE_SOLAR = "parameters.ID_Einst_Solar_akt"
     P0882_SOLAR_OPERATION_HOURS = "parameters.ID_BSTD_Solar"
     P0883_SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR = "parameters.ID_Einst_TDC_Koll_Max_akt"
-    # P0894_VENTILATION_MODE: Final = "parameters.ID_Einst_BA_Lueftung_akt" # "Automatic", "Party", "Holidays", "Off"
+    # Codes are 0=Automatic, 1=Party, 2=Holidays, 3=Off - note this differs
+    # from the heating/DHW mode numbering, which also has second_heatsource.
+    # Irrelevant to the select, which works on the library's decoded strings.
+    P0894_VENTILATION_MODE = "parameters.ID_Einst_BA_Lueftung_akt"
     P0966_COOLING_TARGET_TEMPERATURE_MK3 = "parameters.ID_Sollwert_KuCft3_akt"
     P0973_MAX_DHW_TEMPERATURE = "parameters.ID_Einst_BW_max"
     P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE = (
@@ -640,6 +644,15 @@ class LuxCalculation(StrEnum):
     C0157_ANALOG_OUT2 = "calculations.ID_WEB_AnalogOut2"
     C0158_TIMER_HOT_GAS = "calculations.ID_WEB_Time_Heissgas"
     C0173_HEAT_SOURCE_FLOW_RATE = "calculations.ID_WEB_Durchfluss_WQ"
+    C0159_VENTILATION_SUPPLY_AIR_TEMPERATURE = (
+        "calculations.ID_WEB_Temp_Lueftung_Zuluft"
+    )
+    C0160_VENTILATION_EXHAUST_AIR_TEMPERATURE = (
+        "calculations.ID_WEB_Temp_Lueftung_Abluft"
+    )
+    # Analog 0-10 V fan-speed outputs, not on/off signals.
+    C0164_VENTILATION_SUPPLY_FAN = "calculations.ID_WEB_Out_VZU"
+    C0165_VENTILATION_EXHAUST_FAN = "calculations.ID_WEB_Out_VAB"
     C0175_SUCTION_EVAPORATOR_TEMPERATURE = "calculations.ID_WEB_LIN_ANSAUG_VERDAMPFER"
     C0176_SUCTION_COMPRESSOR_TEMPERATURE = "calculations.ID_WEB_LIN_ANSAUG_VERDICHTER"
     C0177_COMPRESSOR_HEATING_TEMPERATURE = "calculations.ID_WEB_LIN_VDH"
@@ -773,6 +786,11 @@ class SensorKey(StrEnum):
     SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = "second_heat_generator_amount_counter"
     ANALOG_OUT1 = "analog_out1"
     ANALOG_OUT2 = "analog_out2"
+    VENTILATION_MODE = "ventilation_mode"
+    VENTILATION_SUPPLY_AIR_TEMPERATURE = "ventilation_supply_air_temperature"
+    VENTILATION_EXHAUST_AIR_TEMPERATURE = "ventilation_exhaust_air_temperature"
+    VENTILATION_SUPPLY_FAN = "ventilation_supply_fan"
+    VENTILATION_EXHAUST_FAN = "ventilation_exhaust_fan"
     CURRENT_HEAT_OUTPUT = "current_heat_output"
     CURRENT_POWER_CONSUMPTION = "current_power_consumption"
     PUMP_FREQUENCY = "pump_frequency"

@@ -922,6 +922,18 @@
             },
             "pump_flow_delta_target": {
                 "name": "Delta docelowa przep\u0142ywu pompy"
+            },
+            "ventilation_supply_air_temperature": {
+                "name": "Temperatura powietrza nawiewanego"
+            },
+            "ventilation_exhaust_air_temperature": {
+                "name": "Temperatura powietrza wywiewanego"
+            },
+            "ventilation_supply_fan": {
+                "name": "Wentylator nawiewu"
+            },
+            "ventilation_exhaust_fan": {
+                "name": "Wentylator wywiewu"
             }
         },
         "date": {
@@ -1049,6 +1061,15 @@
                     "party": "Tryb imprezowy",
                     "holidays": "Tryb wakacyjny"
                 }
+            },
+            "ventilation_mode": {
+                "name": "Tryb wentylacji",
+                "state": {
+                    "off": "Wyłączony",
+                    "automatic": "Automatyczny",
+                    "party": "Tryb imprezowy",
+                    "holidays": "Tryb wakacyjny"
+                }
             }
         },
         "climate": {
@@ -1077,6 +1098,9 @@
         },
         "cooling": {
             "name": "Ch\u0142odzenie"
+        },
+        "ventilation": {
+            "name": "Wentylacja"
         }
     },
     "config": {

@@ -311,6 +311,56 @@ class TestDeviceKeyActive:
         )
         assert coord.device_key_active(DeviceKey.cooling) is True
 
+    def test_ventilation_active_when_both_air_temperatures_report(self):
+        """A ventilation module reports real supply and exhaust air
+        temperatures; units without one report 0.0 for both (issue #729)."""
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 17.4,
+                "ID_WEB_Temp_Lueftung_Abluft": 21.2,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is True
+
+    def test_ventilation_inactive_when_both_air_temperatures_are_zero(self):
+        """The no-module signal: both channels flat at 0.0 (measured on an
+        Alpha Innotec MSW4-16, which has no ventilation module)."""
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 0.0,
+                "ID_WEB_Temp_Lueftung_Abluft": 0.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is False
+
+    def test_ventilation_inactive_when_only_one_air_temperature_reports(self):
+        """Both channels are required. Gating fails open elsewhere in
+        entity_visible, so a half-signal must not create the device."""
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 0.0,
+                "ID_WEB_Temp_Lueftung_Abluft": 21.2,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is False
+
+    def test_ventilation_inactive_when_air_temperatures_are_not_numeric(self):
+        """A non-numeric reading is not evidence of a ventilation module, and
+        must not raise out of a device-gating check either."""
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": "n/a",
+                "ID_WEB_Temp_Lueftung_Abluft": "n/a",
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is False
+
+    def test_ventilation_inactive_when_air_temperatures_missing(self):
+        """Firmware that does not expose these calculations at all must not
+        produce a ventilation device."""
+        coord = _make_coordinator(calculations={})
+        assert coord.device_key_active(DeviceKey.ventilation) is False
+
     def test_unknown_device_key_raises(self):
         coord = _make_coordinator()
         with pytest.raises(NotImplementedError):
