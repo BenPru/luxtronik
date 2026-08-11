@@ -1005,6 +1005,14 @@
                     "2": "Analogov\u00fd vstup"
                 }
             },
+            "timer_dhw_program": {
+                "name": "\u010casov\u00fd program TUV",
+                "state": {
+                    "week": "Cel\u00fd t\u00fdden",
+                    "weekday_weekend": "Pracovn\u00ed dny + v\u00edkend",
+                    "daily": "Jednotliv\u00e9 dny"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV re\u017eim",
                 "state": {

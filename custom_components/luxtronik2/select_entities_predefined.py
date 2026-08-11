@@ -51,6 +51,15 @@ mode_pv_pool_options: list[str] = [
 
 heating_control_mode_options: list[str] = [m.value for m in LuxHeatingControlModeTypes]
 
+# The device's raw values ("5+2") are not usable as HA option names, so the
+# HA-facing names are mapped explicitly onto them.
+TIMER_PROGRAM_RAW_OPTIONS: dict[str, str] = {
+    "week": "week",
+    "weekday_weekend": "5+2",
+    "daily": "days",
+}
+timer_program_options: list[str] = list(TIMER_PROGRAM_RAW_OPTIONS)
+
 
 # ---- Descriptions directly in SELECT_ENTITIES ---------------------
 SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
@@ -66,6 +75,14 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         device_key=DeviceKey.domestic_water,
         luxtronik_key=LuxParameter.P0004_MODE_DHW,
         options=mode_options,
+    ),
+    LuxtronikSelectEntityDescription(
+        key=SK.TIMER_DHW_PROGRAM,
+        device_key=DeviceKey.domestic_water,
+        luxtronik_key=LuxParameter.P0405_TIMER_PROGRAM_DHW,
+        entity_category=EntityCategory.CONFIG,
+        options=timer_program_options,
+        raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
     ),
     LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_SELECTOR,

@@ -17,6 +17,7 @@ from custom_components.luxtronik2.const import (
     DOMAIN,
     DeviceKey,
     LuxDaySelectorParameter,
+    LuxParameter,
     LuxPoolPVMode,
     SensorKey,
 )
@@ -204,3 +205,61 @@ class TestBuildSelectDescriptions:
         for d in descriptions:
             if d.key != SensorKey.PV_MODE_SELECTOR:
                 assert d.options is not None
+
+
+# ===========================================================================
+# raw_option_map (timer program selector)
+# ===========================================================================
+
+
+class TestRawOptionMap:
+    def _make_selector(self, raw_value: str):
+        from custom_components.luxtronik2.select import LuxtronikModeSelector
+
+        desc = LuxtronikSelectEntityDescription(
+            key=SensorKey.TIMER_DHW_PROGRAM,
+            device_key=DeviceKey.domestic_water,
+            luxtronik_key=LuxParameter.P0405_TIMER_PROGRAM_DHW,
+            options=["week", "weekday_weekend", "daily"],
+            raw_option_map={"week": "week", "weekday_weekend": "5+2", "daily": "days"},
+        )
+        data = make_coordinator_data(parameters={"ID_Einst_SUBW_akt2": raw_value})
+        coord = _mock_coordinator(data)
+        entity = LuxtronikModeSelector(
+            _mock_entry(), coord, desc, DeviceKey.domestic_water
+        )
+        _patch_entity(entity)
+        return entity, coord
+
+    def test_options_are_the_ha_names(self):
+        entity, _coord = self._make_selector("week")
+        assert entity._attr_options == ["week", "weekday_weekend", "daily"]
+
+    def test_raw_value_maps_to_ha_option(self):
+        entity, _coord = self._make_selector("5+2")
+        entity._handle_coordinator_update()
+        assert entity._attr_current_option == "weekday_weekend"
+
+    @pytest.mark.asyncio
+    async def test_selecting_option_writes_raw_value(self):
+        entity, coord = self._make_selector("week")
+        await entity.async_select_option("weekday_weekend")
+        coord.async_write.assert_awaited_once_with("ID_Einst_SUBW_akt2", "5+2")
+
+    def test_existing_selectors_keep_working_without_a_map(self):
+        from custom_components.luxtronik2.select import LuxtronikModeSelector
+
+        desc = LuxtronikSelectEntityDescription(
+            key=SensorKey.DOMESTIC_WATER_MODE_SELECTOR,
+            device_key=DeviceKey.domestic_water,
+            luxtronik_key=LuxParameter.P0004_MODE_DHW,
+            options=["Automatic", "Off"],
+        )
+        data = make_coordinator_data(parameters={"ID_Ba_Bw_akt": "Automatic"})
+        entity = LuxtronikModeSelector(
+            _mock_entry(), _mock_coordinator(data), desc, DeviceKey.domestic_water
+        )
+        _patch_entity(entity)
+        entity._handle_coordinator_update()
+        assert entity._attr_options == ["automatic", "off"]
+        assert entity._attr_current_option == "automatic"

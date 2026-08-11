@@ -1005,6 +1005,14 @@
                     "2": "AIn"
                 }
             },
+            "timer_dhw_program": {
+                "name": "Warmwasser Zeitprogramm",
+                "state": {
+                    "week": "Ganze Woche",
+                    "weekday_weekend": "Werktage + Wochenende",
+                    "daily": "Einzelne Tage"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV Modus",
                 "state": {

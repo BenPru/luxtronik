@@ -1005,6 +1005,14 @@
                     "2": "Analog in"
                 }
             },
+            "timer_dhw_program": {
+                "name": "Hot water timer program",
+                "state": {
+                    "week": "Whole week",
+                    "weekday_weekend": "Weekdays + weekend",
+                    "daily": "Per day"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV Mode",
                 "state": {
