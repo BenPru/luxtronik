@@ -303,3 +303,46 @@ class TestTimerScheduleUniqueId:
             _timer_schedule_unique_id(_mock_entry(), description)
             == f"text.{DOMAIN}_{description.key}"
         )
+
+
+# ===========================================================================
+# _active_schedule_descriptions
+# ===========================================================================
+
+
+class TestActiveScheduleDescriptions:
+    _SELECTOR = "ID_Einst_SUBW_akt2"
+
+    def _call(self, parameters, *, entity_active=True):
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        data = make_coordinator_data(parameters=parameters)
+        coord = _mock_coordinator(data)
+        coord.entity_active.return_value = entity_active
+        return [d.key for d in _active_schedule_descriptions(coord, data)]
+
+    def test_week_mode_yields_only_the_week_block(self):
+        assert self._call({self._SELECTOR: "week"}) == [SK.TIMER_DHW_SCHEDULE_WEEK]
+
+    def test_weekday_weekend_mode_yields_both_blocks(self):
+        assert self._call({self._SELECTOR: "5+2"}) == [
+            SK.TIMER_DHW_SCHEDULE_WEEKDAY,
+            SK.TIMER_DHW_SCHEDULE_WEEKEND,
+        ]
+
+    def test_days_mode_yields_seven_day_blocks(self):
+        keys = self._call({self._SELECTOR: "days"})
+        assert len(keys) == 7
+        assert SK.TIMER_DHW_SCHEDULE_MONDAY in keys
+        assert SK.TIMER_DHW_SCHEDULE_SUNDAY in keys
+
+    def test_missing_selector_parameter_yields_nothing(self):
+        assert self._call({}) == []
+
+    def test_data_none_yields_nothing(self):
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        assert _active_schedule_descriptions(_mock_coordinator(), None) == []
+
+    def test_inactive_entity_yields_nothing(self):
+        assert self._call({self._SELECTOR: "week"}, entity_active=False) == []

@@ -41,6 +41,32 @@ def _timer_schedule_unique_id(
     return ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
 
 
+def _active_schedule_descriptions(
+    coordinator: LuxtronikCoordinator,
+    data: LuxtronikCoordinatorData | None,
+) -> list[LuxtronikTimerScheduleTextDescription]:
+    """Return the schedule blocks belonging to the circuit's active program.
+
+    A block qualifies when the circuit's mode selector is present on this
+    controller and its value equals the block's `active_mode`. Every other
+    block is meaningless on the device, so no entity is created for it.
+    """
+    if data is None:
+        return []
+
+    descriptions: list[LuxtronikTimerScheduleTextDescription] = []
+    for description in TIMER_SCHEDULE_ENTITIES:
+        if not coordinator.entity_active(description):
+            continue
+        selector_key = f"parameters.{description.mode_selector_name}"
+        if not key_exists(data, selector_key):
+            continue
+        if get_sensor_data(data, selector_key) != description.active_mode:
+            continue
+        descriptions.append(description)
+    return descriptions
+
+
 async def async_setup_entry(  # pragma: no cover
     hass: HomeAssistant,
     entry: LuxtronikConfigEntry,
