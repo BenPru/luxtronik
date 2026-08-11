@@ -65,9 +65,22 @@ registry entry, its customizations, and the recorder history intact; only
 `hidden_by` flips. Cost: the device page shows "+N hidden entities" behind a
 click, and inactive entities remain in the registry.
 
-Accepted edge case: if a user manually unhides an inactive-mode entity, the next
-sync re-hides it. That matches the feature's intent (only the running program's
-blocks are meaningful) and keeps the logic simple.
+Accepted edge case: if a user manually unhides an inactive-mode entity, it stays
+unhidden (with no state) until the next actual program change, which re-hides
+it. The sync only runs its unhide/add/remove/hide pass when the desired entity
+set differs from the live one, so an unchanged poll deliberately writes nothing
+to the registry — no per-poll re-hide loop.
+
+Reading the selector is treated as three-valued: "program X", "this controller
+has no such selector" (no blocks — nothing to create), and "unreadable this
+poll". The last one is not the same as "no program active":
+`get_sensor_data` returns `None` both for an absent register and for a present
+register whose datatype could not decode the raw value (`SelectionBase` returns
+`None` for an unrecognised code), and `key_exists` cannot separate them for
+parameter 405, which lies inside upstream's defined index range. So an
+unreadable selector makes the sync a complete no-op for that poll — otherwise a
+single glitched read would remove all live schedule entities and hide all ten
+registry entries, to be undone again by the next good poll.
 
 ### Coupling to the entity_id convention
 

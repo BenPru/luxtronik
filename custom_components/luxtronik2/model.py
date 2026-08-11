@@ -247,7 +247,7 @@ class LuxtronikSelectEntityDescription(
     SelectEntityDescription,
     frozen_or_thawed=True,
 ):
-    """Class describing Luxtronik date entities."""
+    """Class describing Luxtronik select entities."""
 
     platform = Platform.SELECT
     #: Maps the HA-facing option name to the raw value the device expects,
