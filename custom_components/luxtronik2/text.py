@@ -27,6 +27,20 @@ _UNSET_TIME = "00:00"
 _PAIR_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d-([01]\d|2[0-3]):[0-5]\d$")
 
 
+def _timer_schedule_unique_id(
+    entry: LuxtronikConfigEntry,
+    description: LuxtronikTimerScheduleTextDescription,
+) -> str:
+    """Return the unique_id of a schedule entity.
+
+    Today this is also its default entity_id. The format lives here only, so
+    decoupling unique_id from entity_id later (HA best practice) is a
+    single-site change plus a registry migration.
+    """
+    prefix = entry.data[CONF_HA_SENSOR_PREFIX]
+    return ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
+
+
 async def async_setup_entry(  # pragma: no cover
     hass: HomeAssistant,
     entry: LuxtronikConfigEntry,
@@ -98,8 +112,7 @@ class LuxtronikTimerScheduleText(
             description=description,
             device_info_ident=device_info_ident,
         )
-        prefix = entry.data[CONF_HA_SENSOR_PREFIX]
-        self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
+        self.entity_id = _timer_schedule_unique_id(entry, description)
         self._attr_unique_id = self.entity_id
         self._attr_mode = TextMode.TEXT
         self._attr_native_min = 0

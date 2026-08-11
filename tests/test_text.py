@@ -285,3 +285,21 @@ class TestLuxtronikTimerScheduleText:
             await entity.async_set_value("not-a-schedule")
         coord.async_write.assert_not_called()
         coord.async_write_many.assert_not_called()
+
+
+# ===========================================================================
+# _timer_schedule_unique_id
+# ===========================================================================
+
+
+class TestTimerScheduleUniqueId:
+    def test_matches_the_entity_id_the_entity_assigns_itself(self):
+        from custom_components.luxtronik2.text import _timer_schedule_unique_id
+
+        description = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_WEEK
+        )
+        assert (
+            _timer_schedule_unique_id(_mock_entry(), description)
+            == f"text.{DOMAIN}_{description.key}"
+        )
