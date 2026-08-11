@@ -177,6 +177,7 @@ Advanced entities:
 | **Thermal Desinfection Day** | Select | Day | The day on which the thermal disinfection cycle is performed, or `continuous` to make every DHW heating cycle eligible (see the on-demand trick below). The heat pump runs the cycle at its own fixed nightly time on that day — this integration cannot change *when* it runs, only *which day(s)*. |
 | **DHW Manual Frequency** | Number | Hz | Forces the compressor to a fixed frequency during DHW heating instead of the heat pump's own automatic choice (`0` = Automatic). Useful for solar self-consumption — see [Advanced Features: DHW Manual Frequency](ADVANCED_FEATURES.md#dhw-manual-frequency-matching-compressor-power-to-solar-surplus). |
 | **Away/Holiday Start & End Date** | Date | - | Pre-schedule a future DHW Holiday period (auto start and return), independent of the Heating device's own dates — see [Advanced Features: Away / Holiday Scheduling](ADVANCED_FEATURES.md#away--holiday-scheduling). |
+| **DHW Timer Program** | Select | - | Which blocking-time schedule shape the controller uses: *Whole week*, *Weekdays + weekend*, or *Per day*. Switching it swaps which schedule entities are present — see [TIMER_SCHEDULES.md](TIMER_SCHEDULES.md). |
 
 > **ℹ️ Note:** It is not possible to trigger a thermal disinfection cycle on demand, or move it off its fixed nightly time, using the *Thermal Desinfection Day* select alone. It can be emulated at a time of your choosing by temporarily setting *Thermal Desinfection Day* to `continuous` and raising the *DHW Target Temperature* to the *Thermal Desinfection Target Temperature* value — this makes the heat pump's normal (immediate) heating logic reach disinfection temperature right away, instead of waiting for its own nightly schedule. See the *Legionella prevention using solar power* example below. The **Thermal Desinfection Target Temperature** entity also exposes a `last_thermal_desinfection` timestamp attribute (last time the DHW temperature rose above that target), handy for gating an automation like the example to "at most once a week".
 
@@ -184,7 +185,7 @@ If your system has an integrated **solar thermal collector** feeding the DHW tan
 
 #### DHW Timer Schedule (Blocking Times)
 
-DHW also supports an editable weekly schedule of **blocking times** — windows during which automatic DHW heating is switched off, exposed as a set of Text entities. See **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** for the entity list, the `HH:MM-HH:MM/...` format, and an important note on how DHW's blocking-time semantics differ from the heating schedule.
+DHW also supports an editable weekly schedule of **blocking times** — windows during which automatic DHW heating is switched off, exposed as a set of Text entities. The controller offers three schedule shapes (whole week, weekdays + weekend, per day) selected by the *DHW Timer Program* entity; only the selected shape's schedule entities are present, the others are disabled. See **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** for the entity list, the `HH:MM-HH:MM/...` format, and an important note on how DHW's blocking-time semantics differ from the heating schedule.
 
 #### 3.1.2 Automating DHW
 Automations for DHW typically use the water heater entity or the Party/Boost mode. Common scenarios include pre-heating before showers, using excess solar energy to heat the tank.

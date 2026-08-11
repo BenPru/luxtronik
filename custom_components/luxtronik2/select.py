@@ -227,12 +227,19 @@ class LuxtronikModeSelector(
         self._lux_parameter = (
             description.luxtronik_key if lux_parameter is None else lux_parameter
         )
-        raw_options = list(options or description.options or [])
-        self._option_to_raw = {
-            _normalize_select_option(raw_option): raw_option
-            for raw_option in raw_options
-        }
+        if description.raw_option_map:
+            self._option_to_raw = dict(description.raw_option_map)
+        else:
+            raw_options = list(options or description.options or [])
+            self._option_to_raw = {
+                _normalize_select_option(raw_option): raw_option
+                for raw_option in raw_options
+            }
         self._attr_options = list(self._option_to_raw)
+        self._raw_to_option = {
+            _normalize_select_option(raw): option
+            for option, raw in self._option_to_raw.items()
+        }
         self._attr_current_option = None
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
@@ -250,7 +257,8 @@ class LuxtronikModeSelector(
             return
 
         current_raw = str(get_sensor_data(data, self._lux_parameter))
-        current = _normalize_select_option(current_raw)
+        normalized = _normalize_select_option(current_raw)
+        current = self._raw_to_option.get(normalized, normalized)
 
         LOGGER.debug(
             "%s raw value from coordinator: %r, normalized value: %r",

@@ -403,6 +403,7 @@ class LuxParameter(StrEnum):
     P0002_DHW_TARGET_TEMPERATURE = "parameters.ID_Einst_BWS_akt"
     P0003_MODE_HEATING = "parameters.ID_Ba_Hz_akt"
     P0004_MODE_DHW = "parameters.ID_Ba_Bw_akt"
+    P0405_TIMER_PROGRAM_DHW = "parameters.ID_Einst_SUBW_akt2"
     # luxtronik*_heating_curve*
     P0011_HEATING_CURVE_END_TEMPERATURE = "parameters.ID_Einst_HzHwHKE_akt"
     P0012_HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE = "parameters.ID_Einst_HzHKRANH_akt"
@@ -953,6 +954,7 @@ class SensorKey(StrEnum):
     EXTRA_DHW_TARGET_TEMPERATURE = "extra_dhw_target_temperature"
     EXTRA_DHW_DURATION = "extra_dhw_duration"
 
+    TIMER_DHW_PROGRAM = "timer_dhw_program"
     TIMER_DHW_SCHEDULE_WEEK = "timer_dhw_schedule_week"
     TIMER_DHW_SCHEDULE_WEEKDAY = "timer_dhw_schedule_weekday"
     TIMER_DHW_SCHEDULE_WEEKEND = "timer_dhw_schedule_weekend"

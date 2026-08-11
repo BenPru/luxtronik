@@ -247,9 +247,14 @@ class LuxtronikSelectEntityDescription(
     SelectEntityDescription,
     frozen_or_thawed=True,
 ):
-    """Class describing Luxtronik date entities."""
+    """Class describing Luxtronik select entities."""
 
     platform = Platform.SELECT
+    #: Maps the HA-facing option name to the raw value the device expects,
+    #: for parameters whose raw values are not usable as HA options (e.g.
+    #: the timer program's "5+2"). When unset, options are derived from the
+    #: raw values as before.
+    raw_option_map: dict[str, str] | None = None
 
 
 class LuxtronikTimerScheduleTextDescription(

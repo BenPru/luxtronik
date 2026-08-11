@@ -1005,6 +1005,14 @@
                     "2": "Analoge ingang"
                 }
             },
+            "timer_dhw_program": {
+                "name": "Warmwater tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV Mode",
                 "state": {

@@ -1005,6 +1005,14 @@
                     "2": "Wej\u015bcie analogowe"
                 }
             },
+            "timer_dhw_program": {
+                "name": "Program czasowy CWU",
+                "state": {
+                    "week": "Cały tydzień",
+                    "weekday_weekend": "Dni robocze + weekend",
+                    "daily": "Poszczególne dni"
+                }
+            },
             "pv_mode_selector": {
                 "name": "Tryb PV",
                 "state": {
