@@ -3,6 +3,7 @@
 # region Imports
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import (
+    PERCENTAGE,
     EntityCategory,
     UnitOfElectricPotential,
     UnitOfEnergy,
@@ -332,6 +333,20 @@ SENSORS: list[descr] = [
         # 0.1 kWh raw unit, applied by the Energy datatype (see 1059 above).
         native_precision=1,
     ),
+    # The analog outputs are per mille of a 10 V full scale, so the library's
+    # Voltage datatype (raw / 10) lands on 0-100 and `factor` supplies the
+    # remaining tenth: raw 1000 -> 100.0 -> 10.0 V. Removing the factor (as
+    # 2026.08.11 briefly did) reports an impossible 100 V; across 45
+    # diagnostics dumps AnalogOut1-4 never exceed 100.0 and pile up on
+    # 0.0 / 50.0 / 100.0. The analog *inputs* differ - AnalogIn3 reads 3.3 for
+    # 3.3 V - which is what made this look like a scaling bug from either
+    # side (#729).
+    #
+    # 0/50/100 is equally round read as percent, so the dumps cannot tell
+    # volts from percent here; volts is kept because the controller
+    # configures and displays these outputs as a 0-10 V signal. The
+    # ventilation fan outputs below share the encoding but not that
+    # reasoning, and are percent.
     descr(
         key=SensorKey.ANALOG_OUT1,
         luxtronik_key=LC.C0156_ANALOG_OUT1,
@@ -340,6 +355,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         visibility=LV.V0248_ANALOG_OUT1,
         entity_registry_enabled_default=False,
+        factor=0.1,
     ),
     descr(
         key=SensorKey.ANALOG_OUT2,
@@ -349,6 +365,7 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         visibility=LV.V0249_ANALOG_OUT2,
         entity_registry_enabled_default=False,
+        factor=0.1,
     ),
     descr(
         key=SensorKey.VENTILATION_SUPPLY_AIR_TEMPERATURE,
@@ -366,24 +383,29 @@ SENSORS: list[descr] = [
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
     ),
-    # VZU/VAB are analog 0-10 V fan-speed outputs, so they carry the
-    # modulation level a binary sensor would discard. The library's Voltage
-    # datatype already scales raw/10, hence no factor here.
+    # VZU/VAB are analog fan outputs, so they carry the modulation level a
+    # binary sensor would discard. Same per-mille encoding as the analog
+    # outputs above, but reported as percent rather than volts: the quantity
+    # is a fan modulation level, which is what the controller's ventilation
+    # stages are configured in, and percent needs no factor. #729's LWC407
+    # reports 34.0 in the reduced stage and 68.7 in the nominal one - two
+    # clean stages either way (34 % / 69 %, or 3.4 V / 6.9 V of a 10 V scale).
+    # They are setpoints, not measured speeds - they never reach 0 and do not
+    # follow the unit being switched off by other means - which is why they
+    # are named "... fan setpoint".
     descr(
         key=SensorKey.VENTILATION_SUPPLY_FAN,
         device_key=DeviceKey.ventilation,
         luxtronik_key=LC.C0164_VENTILATION_SUPPLY_FAN,
         state_class=SensorStateClass.MEASUREMENT,
-        device_class=SensorDeviceClass.VOLTAGE,
-        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        native_unit_of_measurement=PERCENTAGE,
     ),
     descr(
         key=SensorKey.VENTILATION_EXHAUST_FAN,
         device_key=DeviceKey.ventilation,
         luxtronik_key=LC.C0165_VENTILATION_EXHAUST_FAN,
         state_class=SensorStateClass.MEASUREMENT,
-        device_class=SensorDeviceClass.VOLTAGE,
-        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        native_unit_of_measurement=PERCENTAGE,
     ),
     descr(
         key=SensorKey.CURRENT_HEAT_OUTPUT,

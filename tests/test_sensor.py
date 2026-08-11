@@ -5,7 +5,14 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
+from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PORT,
+    CONF_TIMEOUT,
+    PERCENTAGE,
+    UnitOfElectricPotential,
+)
 from luxtronik.calculations import Calculations
 
 from conftest import make_coordinator_data
@@ -733,31 +740,71 @@ def _energy_input_case(
     return description, datatype
 
 
-class TestAnalogOutScaling:
-    """The library's Voltage datatype already applies its own scaling_factor
-    of 0.1, and the coordinator surfaces that decoded value. An additional
-    `factor` in the description would scale a second time and report a tenth
-    of the real voltage, so no factor belongs here - as with the energy
-    counters below, the datatype is the whole conversion."""
+def _assert_raw_converts_to(
+    sensor_key: SensorKey, raw_value: int, expected: float
+) -> None:
+    """Push a raw register value through the real datatype and description."""
+    description = next(d for d in SENSORS if d.key == sensor_key)
+    raw_name = description.luxtronik_key.rsplit(".", 1)[1]
+    datatype = Calculations().get(raw_name)
+    converted = datatype.from_heatpump(raw_value)
+    group, sensor_id = description.luxtronik_key.split(".", 1)
+    data = make_coordinator_data(**{group: {sensor_id: converted}})
+    entity = _make_sensor(description, data)
+    entity._handle_coordinator_update(data)
+    assert entity._attr_native_value == expected
 
-    def _assert_raw_converts_to(
-        self, sensor_key: SensorKey, raw_value: int, expected_volt: float
-    ) -> None:
-        description = next(d for d in SENSORS if d.key == sensor_key)
-        raw_name = description.luxtronik_key.rsplit(".", 1)[1]
-        datatype = Calculations().get(raw_name)
-        converted = datatype.from_heatpump(raw_value)
-        group, sensor_id = description.luxtronik_key.split(".", 1)
-        data = make_coordinator_data(**{group: {sensor_id: converted}})
-        entity = _make_sensor(description, data)
-        entity._handle_coordinator_update(data)
-        assert entity._attr_native_value == expected_volt
+
+class TestAnalogOutScaling:
+    """The analog outputs are per mille of a 10 V full scale: the library's
+    Voltage datatype (raw / 10) lands on 0-100 and the description's `factor`
+    supplies the remaining tenth. Dropping the factor reports raw 1000 as
+    100 V on a 10 V output - across 45 diagnostics dumps AnalogOut1-4 never
+    exceed 100.0 and cluster on 0.0 / 50.0 / 100.0 (#729)."""
 
     def test_analog_out1_scaling(self):
-        self._assert_raw_converts_to(SensorKey.ANALOG_OUT1, 105, 10.5)
+        _assert_raw_converts_to(SensorKey.ANALOG_OUT1, 1000, 10.0)
 
     def test_analog_out2_scaling(self):
-        self._assert_raw_converts_to(SensorKey.ANALOG_OUT2, 55, 5.5)
+        _assert_raw_converts_to(SensorKey.ANALOG_OUT2, 550, 5.5)
+
+    def test_analog_outs_are_volts(self):
+        """0/50/100 is equally round read as percent, so the dumps cannot
+        settle volts vs percent here. Volts is a deliberate choice - the
+        controller configures these as a 0-10 V signal - and the factor only
+        makes sense alongside it, so the two are asserted together."""
+        for key in (SensorKey.ANALOG_OUT1, SensorKey.ANALOG_OUT2):
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.device_class == SensorDeviceClass.VOLTAGE
+            assert (
+                description.native_unit_of_measurement == UnitOfElectricPotential.VOLT
+            )
+            assert description.factor == 0.1
+
+
+class TestVentilationFanScaling:
+    """The fan outputs share the analog outputs' per-mille encoding but are
+    reported as a modulation percentage, which is what the controller's
+    ventilation stages are set in - so the datatype is the whole conversion
+    and no `factor` belongs here. Raw values from #729's LWC407."""
+
+    def test_supply_fan_scaling(self):
+        """340 in the reduced ventilation stage."""
+        _assert_raw_converts_to(SensorKey.VENTILATION_SUPPLY_FAN, 340, 34.0)
+
+    def test_exhaust_fan_scaling(self):
+        """625 on the exhaust channel in the nominal stage."""
+        _assert_raw_converts_to(SensorKey.VENTILATION_EXHAUST_FAN, 625, 62.5)
+
+    def test_fans_are_percent_without_factor(self):
+        for key in (
+            SensorKey.VENTILATION_SUPPLY_FAN,
+            SensorKey.VENTILATION_EXHAUST_FAN,
+        ):
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.native_unit_of_measurement == PERCENTAGE
+            assert description.device_class is None
+            assert description.factor is None
 
 
 class TestEnergyInputScaling:

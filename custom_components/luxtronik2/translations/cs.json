@@ -930,10 +930,10 @@
                 "name": "Teplota odváděného vzduchu"
             },
             "ventilation_supply_fan": {
-                "name": "Ventilátor přívodu"
+                "name": "Žádaná hodnota ventilátoru přívodu"
             },
             "ventilation_exhaust_fan": {
-                "name": "Ventilátor odvodu"
+                "name": "Žádaná hodnota ventilátoru odvodu"
             }
         },
         "date": {

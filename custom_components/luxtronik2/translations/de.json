@@ -930,10 +930,10 @@
                 "name": "Ablufttemperatur"
             },
             "ventilation_supply_fan": {
-                "name": "Zuluftventilator"
+                "name": "Zuluftventilator Sollwert"
             },
             "ventilation_exhaust_fan": {
-                "name": "Abluftventilator"
+                "name": "Abluftventilator Sollwert"
             }
         },
         "date": {
