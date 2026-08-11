@@ -46,7 +46,6 @@ def build_options_schema(
         {
             vol.Optional(
                 CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-                default=current_indoor_temp,
                 description={"suggested_value": current_indoor_temp},
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
@@ -55,7 +54,6 @@ def build_options_schema(
             ),
             vol.Optional(
                 CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
-                default=current_power_consumption_sensor,
                 description={"suggested_value": current_power_consumption_sensor},
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="sensor", device_class="power")
