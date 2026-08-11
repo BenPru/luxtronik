@@ -5,13 +5,16 @@ from __future__ import annotations
 import re
 
 from homeassistant.components.text import (
+    DOMAIN as TEXT_DOMAIN,
     ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
     TextEntity,
     TextMode,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_registry import RegistryEntryHider
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -67,6 +70,119 @@ def _active_schedule_descriptions(
     return descriptions
 
 
+class _TimerScheduleSync:
+    """Keeps the live schedule entities in step with the active timer program.
+
+    Only the blocks of the running program exist as entities. The registry
+    entries of the other blocks are kept but hidden, so a user's rename,
+    area, icon and recorder history survive a program switch -- removing the
+    registry entry would discard all of it.
+    """
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: LuxtronikConfigEntry,
+        coordinator: LuxtronikCoordinator,
+        async_add_entities: AddEntitiesCallback,
+    ) -> None:
+        self.hass = hass
+        self.entry = entry
+        self.coordinator = coordinator
+        self.async_add_entities = async_add_entities
+        self._entities: dict[str, LuxtronikTimerScheduleText] = {}
+
+    async def async_setup(self) -> None:
+        """Add the active program's entities and hide the rest."""
+        await self.async_apply()
+
+    @callback
+    def async_sync(self) -> None:
+        """Coordinator listener: schedule an add/remove pass."""
+        self.entry.async_create_task(self.hass, self.async_apply(), eager_start=False)
+
+    async def async_apply(self) -> None:
+        """Bring the live entity set in line with the active program."""
+        desired = {
+            description.key: description
+            for description in _active_schedule_descriptions(
+                self.coordinator, self.coordinator.data
+            )
+        }
+        to_add = [
+            description
+            for key, description in desired.items()
+            if key not in self._entities
+        ]
+        to_remove = [
+            (key, entity)
+            for key, entity in self._entities.items()
+            if key not in desired
+        ]
+        if not to_add and not to_remove:
+            return
+
+        registry = er.async_get(self.hass)
+        # Unhide before adding: an entity added while its registry entry is
+        # hidden would stay hidden.
+        self._unhide_active(registry, set(desired))
+
+        if to_add:
+            entities = [
+                LuxtronikTimerScheduleText(
+                    self.entry, self.coordinator, description, description.device_key
+                )
+                for description in to_add
+            ]
+            for description, entity in zip(to_add, entities, strict=True):
+                self._entities[description.key] = entity
+            self.async_add_entities(entities)
+
+        for key, entity in to_remove:
+            del self._entities[key]
+            # No force_remove: the registry entry must survive so the user's
+            # customisations and history are still there next time.
+            await entity.async_remove()
+
+        self._hide_inactive(registry, set(desired))
+
+    def _unhide_active(
+        self, registry: er.EntityRegistry, desired_keys: set[str]
+    ) -> None:
+        for description in TIMER_SCHEDULE_ENTITIES:
+            if description.key not in desired_keys:
+                continue
+            entity_id = registry.async_get_entity_id(
+                TEXT_DOMAIN, DOMAIN, _timer_schedule_unique_id(self.entry, description)
+            )
+            if entity_id is None:
+                continue
+            registry_entry = registry.async_get(entity_id)
+            if (
+                registry_entry is not None
+                and registry_entry.hidden_by is RegistryEntryHider.INTEGRATION
+            ):
+                registry.async_update_entity(entity_id, hidden_by=None)
+
+    def _hide_inactive(
+        self, registry: er.EntityRegistry, desired_keys: set[str]
+    ) -> None:
+        for description in TIMER_SCHEDULE_ENTITIES:
+            if description.key in desired_keys:
+                continue
+            entity_id = registry.async_get_entity_id(
+                TEXT_DOMAIN, DOMAIN, _timer_schedule_unique_id(self.entry, description)
+            )
+            if entity_id is None:
+                continue
+            registry_entry = registry.async_get(entity_id)
+            # hidden_by USER is the user's own decision and is left alone.
+            if registry_entry is not None and registry_entry.hidden_by is None:
+                registry.async_update_entity(
+                    entity_id, hidden_by=RegistryEntryHider.INTEGRATION
+                )
+
+
 async def async_setup_entry(  # pragma: no cover
     hass: HomeAssistant,
     entry: LuxtronikConfigEntry,
@@ -77,20 +193,9 @@ async def async_setup_entry(  # pragma: no cover
     if not coordinator.last_update_success:
         return
 
-    async_add_entities(
-        [
-            LuxtronikTimerScheduleText(
-                entry, coordinator, description, description.device_key
-            )
-            for description in TIMER_SCHEDULE_ENTITIES
-            if (
-                coordinator.entity_active(description)
-                and key_exists(
-                    coordinator.data, f"parameters.{description.mode_selector_name}"
-                )
-            )
-        ]
-    )
+    sync = _TimerScheduleSync(hass, entry, coordinator, async_add_entities)
+    await sync.async_setup()
+    entry.async_on_unload(coordinator.async_add_listener(sync.async_sync))
 
 
 def _parse_schedule(value: str, max_rows: int) -> list[tuple[str, str]]:

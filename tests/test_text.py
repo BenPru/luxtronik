@@ -346,3 +346,173 @@ class TestActiveScheduleDescriptions:
 
     def test_inactive_entity_yields_nothing(self):
         assert self._call({self._SELECTOR: "week"}, entity_active=False) == []
+
+
+# ===========================================================================
+# _TimerScheduleSync
+# ===========================================================================
+
+
+class TestTimerScheduleSync:
+    _SELECTOR = "ID_Einst_SUBW_akt2"
+
+    def _make_sync(self, mode: str):
+        from custom_components.luxtronik2.text import _TimerScheduleSync
+
+        data = make_coordinator_data(parameters={self._SELECTOR: mode})
+        coord = _mock_coordinator(data)
+        entry = _mock_entry()
+        added: list = []
+
+        def _add_entities(entities):
+            added.extend(entities)
+
+        sync = _TimerScheduleSync(MagicMock(), entry, coord, _add_entities)
+        return sync, coord, added
+
+    def _registry(self, known: dict[str, MagicMock]):
+        """Fake entity registry: unique_id -> registry entry."""
+        registry = MagicMock()
+        registry.async_get_entity_id.side_effect = (
+            lambda _domain, _platform, unique_id: (
+                unique_id if unique_id in known else None
+            )
+        )
+        registry.async_get.side_effect = lambda entity_id: known.get(entity_id)
+        return registry
+
+    def _entry(self, hidden_by=None):
+        registry_entry = MagicMock()
+        registry_entry.hidden_by = hidden_by
+        return registry_entry
+
+    @pytest.mark.asyncio
+    async def test_setup_adds_only_the_active_blocks(self):
+        sync, _coord, added = self._make_sync("week")
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get",
+                return_value=self._registry({}),
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+        assert [e.entity_description.key for e in added] == [SK.TIMER_DHW_SCHEDULE_WEEK]
+
+    @pytest.mark.asyncio
+    async def test_setup_hides_existing_entries_of_inactive_blocks(self):
+        from homeassistant.helpers.entity_registry import RegistryEntryHider
+
+        from custom_components.luxtronik2.text import _timer_schedule_unique_id
+
+        sync, _coord, _added = self._make_sync("week")
+        entry = _mock_entry()
+        stale = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_MONDAY
+        )
+        stale_id = _timer_schedule_unique_id(entry, stale)
+        registry = self._registry({stale_id: self._entry()})
+
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+
+        registry.async_update_entity.assert_any_call(
+            stale_id, hidden_by=RegistryEntryHider.INTEGRATION
+        )
+
+    @pytest.mark.asyncio
+    async def test_setup_does_not_touch_a_user_hidden_entry(self):
+        from homeassistant.helpers.entity_registry import RegistryEntryHider
+
+        from custom_components.luxtronik2.text import _timer_schedule_unique_id
+
+        sync, _coord, _added = self._make_sync("week")
+        entry = _mock_entry()
+        week = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_WEEK
+        )
+        week_id = _timer_schedule_unique_id(entry, week)
+        registry = self._registry({week_id: self._entry(RegistryEntryHider.USER)})
+
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+
+        registry.async_update_entity.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_setup_unhides_an_integration_hidden_active_entry(self):
+        from homeassistant.helpers.entity_registry import RegistryEntryHider
+
+        from custom_components.luxtronik2.text import _timer_schedule_unique_id
+
+        sync, _coord, _added = self._make_sync("week")
+        entry = _mock_entry()
+        week = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_WEEK
+        )
+        week_id = _timer_schedule_unique_id(entry, week)
+        registry = self._registry(
+            {week_id: self._entry(RegistryEntryHider.INTEGRATION)}
+        )
+
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+
+        registry.async_update_entity.assert_any_call(week_id, hidden_by=None)
+
+    @pytest.mark.asyncio
+    async def test_mode_change_swaps_the_entities(self):
+        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
+
+        sync, coord, added = self._make_sync("week")
+        registry = self._registry({})
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+            coord.data = make_coordinator_data(parameters={self._SELECTOR: "5+2"})
+            with patch.object(
+                LuxtronikTimerScheduleText, "async_remove", new=AsyncMock()
+            ) as remove:
+                await sync.async_apply()
+
+        assert remove.await_count == 1
+        assert [e.entity_description.key for e in added[1:]] == [
+            SK.TIMER_DHW_SCHEDULE_WEEKDAY,
+            SK.TIMER_DHW_SCHEDULE_WEEKEND,
+        ]
+
+    @pytest.mark.asyncio
+    async def test_unchanged_mode_does_not_touch_anything(self):
+        sync, _coord, added = self._make_sync("week")
+        registry = self._registry({})
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+            registry.async_update_entity.reset_mock()
+            await sync.async_apply()
+
+        assert len(added) == 1
+        registry.async_update_entity.assert_not_called()
