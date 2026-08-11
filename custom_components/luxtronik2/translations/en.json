@@ -930,10 +930,10 @@
                 "name": "Exhaust air temperature"
             },
             "ventilation_supply_fan": {
-                "name": "Supply fan"
+                "name": "Supply fan setpoint"
             },
             "ventilation_exhaust_fan": {
-                "name": "Exhaust fan"
+                "name": "Exhaust fan setpoint"
             }
         },
         "date": {

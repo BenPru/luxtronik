@@ -930,10 +930,10 @@
                 "name": "Afvoerluchttemperatuur"
             },
             "ventilation_supply_fan": {
-                "name": "Toevoerventilator"
+                "name": "Toevoerventilator instelwaarde"
             },
             "ventilation_exhaust_fan": {
-                "name": "Afvoerventilator"
+                "name": "Afvoerventilator instelwaarde"
             }
         },
         "date": {

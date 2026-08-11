@@ -930,10 +930,10 @@
                 "name": "Temperatura powietrza wywiewanego"
             },
             "ventilation_supply_fan": {
-                "name": "Wentylator nawiewu"
+                "name": "Wentylator nawiewu - wartość zadana"
             },
             "ventilation_exhaust_fan": {
-                "name": "Wentylator wywiewu"
+                "name": "Wentylator wywiewu - wartość zadana"
             }
         },
         "date": {
