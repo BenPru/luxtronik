@@ -934,6 +934,18 @@
             },
             "ventilation_exhaust_fan": {
                 "name": "Wentylator wywiewu - wartość zadana"
+            },
+            "ventilation_stage_humidity_protection": {
+                "name": "Stopień ochrony przed wilgocią"
+            },
+            "ventilation_stage_reduced": {
+                "name": "Stopień zredukowany"
+            },
+            "ventilation_stage_nominal": {
+                "name": "Stopień nominalny"
+            },
+            "ventilation_stage_intensive": {
+                "name": "Stopień intensywny"
             }
         },
         "date": {
