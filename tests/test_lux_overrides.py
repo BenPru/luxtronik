@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 from luxtronik.calculations import Calculations
-from luxtronik.datatypes import Celsius, HeatpumpCode, Unknown
+from luxtronik.datatypes import (
+    BivalenceLevel,
+    Celsius,
+    HeatpumpCode,
+    SwitchoffFile,
+    Unknown,
+)
 from luxtronik.parameters import Parameters
 from luxtronik.visibilities import Visibilities
 import pytest
@@ -348,3 +354,66 @@ class TestUpstreamMaxDefinedIndex:
             1177,
             1179,
         }
+
+
+@pytest.fixture
+def restore_selection_base():
+    """warn_on_unknown_selection_codes patches the library class process-wide."""
+    from luxtronik.datatypes import SelectionBase
+
+    original = SelectionBase.from_heatpump
+    flag = lux_overrides._UNKNOWN_CODE_WARNING_INSTALLED
+    reported = set(lux_overrides._REPORTED_UNKNOWN_CODES)
+    lux_overrides._UNKNOWN_CODE_WARNING_INSTALLED = False
+    lux_overrides._REPORTED_UNKNOWN_CODES.clear()
+    yield
+    SelectionBase.from_heatpump = original
+    lux_overrides._UNKNOWN_CODE_WARNING_INSTALLED = flag
+    lux_overrides._REPORTED_UNKNOWN_CODES.clear()
+    lux_overrides._REPORTED_UNKNOWN_CODES.update(reported)
+
+
+class TestUnknownSelectionCodeWarning:
+    def test_warns_with_register_name_and_raw_code(
+        self, restore_selection_base, caplog
+    ):
+        lux_overrides.warn_on_unknown_selection_codes()
+        item = HeatpumpCode("ID_WEB_Code_WP_akt")
+        assert item.from_heatpump(9999) is None
+        assert "ID_WEB_Code_WP_akt" in caplog.text
+        assert "9999" in caplog.text
+        assert "HeatpumpCode" in caplog.text
+        assert "github.com/BenPru/luxtronik/issues" in caplog.text
+
+    def test_warns_only_once_per_code(self, restore_selection_base, caplog):
+        lux_overrides.warn_on_unknown_selection_codes()
+        item = HeatpumpCode("ID_WEB_Code_WP_akt")
+        item.from_heatpump(9999)
+        item.from_heatpump(9999)
+        assert caplog.text.count("9999") == 1
+
+    def test_known_code_does_not_warn(self, restore_selection_base, caplog):
+        lux_overrides.warn_on_unknown_selection_codes()
+        item = HeatpumpCode("ID_WEB_Code_WP_akt")
+        assert item.from_heatpump(0) is not None
+        assert caplog.text == ""
+
+    def test_empty_slot_sentinel_does_not_warn(self, restore_selection_base, caplog):
+        """SwitchoffFile's table starts at 1, so raw 0 means 'no entry' - not unknown."""
+        lux_overrides.warn_on_unknown_selection_codes()
+        assert SwitchoffFile("ID_WEB_Switchoff2_file_Nr0").from_heatpump(0) is None
+        assert BivalenceLevel("ID_WEB_BIV_Stufe_akt").from_heatpump(0) is None
+        assert caplog.text == ""
+
+    def test_nonzero_unknown_on_sentinel_class_still_warns(
+        self, restore_selection_base, caplog
+    ):
+        lux_overrides.warn_on_unknown_selection_codes()
+        assert SwitchoffFile("ID_WEB_Switchoff_file_Nr0").from_heatpump(42) is None
+        assert "42" in caplog.text
+
+    def test_is_idempotent(self, restore_selection_base, caplog):
+        lux_overrides.warn_on_unknown_selection_codes()
+        lux_overrides.warn_on_unknown_selection_codes()
+        HeatpumpCode("ID_WEB_Code_WP_akt").from_heatpump(9999)
+        assert caplog.text.count("9999") == 1
