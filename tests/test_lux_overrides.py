@@ -9,12 +9,14 @@ from luxtronik.visibilities import Visibilities
 import pytest
 
 from custom_components.luxtronik2 import lux_overrides
+from custom_components.luxtronik2.common import key_exists
 from custom_components.luxtronik2.const import (
     CONF_CALCULATIONS,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     PARSED_COUNT_ATTR,
 )
+from custom_components.luxtronik2.model import LuxtronikCoordinatorData
 
 
 class TestUpdateLuxtronikHeatpumpCodes:
@@ -300,6 +302,27 @@ class TestUpstreamMaxDefinedIndex:
         assert lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_PARAMETERS] == 1125
         assert lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_CALCULATIONS] == 259
         assert lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_VISIBILITIES] == 354
+
+    def test_short_block_suppresses_only_override_added_indices(self, restore_parse):
+        """The presence rule against real library objects, not positional fakes.
+
+        Every other presence test runs on conftest's FakeSensorGroup, whose index
+        is positional. A real Parameters carries the sparse override-added keys
+        (1136..1179) and the real 1125 threshold, which is the only place the
+        confinement clause can actually be exercised.
+        """
+        lux_overrides.update_Luxtronik_Parameters()
+        lux_overrides.isolate_instance_data()
+        lux_overrides.record_parsed_block_lengths()
+        short = Parameters()
+        short.parse([0] * 1126)
+        data = LuxtronikCoordinatorData(short, Parameters(), Parameters())
+        assert (
+            key_exists(data, "parameters.SECOND_HEAT_GENERATOR_AMOUNT_COUNTER") is False
+        )
+        assert key_exists(data, "parameters.ELECTRICAL_POWER_LIMIT_VALUE") is False
+        assert key_exists(data, "parameters.ID_Waermemenge_ZWE") is True
+        assert key_exists(data, f"parameters.{short.parameters[1125].name}") is True
 
     def test_every_override_only_parameter_sits_above_the_range(self):
         """The 13 indices that exist only because of lux_overrides are exactly the

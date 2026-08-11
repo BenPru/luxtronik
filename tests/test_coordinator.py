@@ -713,7 +713,12 @@ class TestEntityActive:
         assert coord.entity_active(desc) is False
 
     def test_entity_active_formula_zero_is_not_absent(self):
-        """A register reading 0.0 is present - the formula decides, not the None check."""
+        """A register reading 0.0 is present - the formula decides, not the None check.
+
+        A formula that 0.0 satisfies is the only way to tell the two apart: an
+        active entity here is reachable only if 0.0 reached the evaluator rather
+        than short-circuiting on the absent-register check.
+        """
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)
         coord.device_key_active = MagicMock(return_value=True)
@@ -721,9 +726,9 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.entity_active_formula = "!= 0.0"
+        desc.entity_active_formula = "== 0.0"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
-        assert coord.entity_active(desc) is False
+        assert coord.entity_active(desc) is True
 
     def test_entity_active_formula_nonzero_creates_entity(self):
         """A register with a real reading passes the formula and gets an entity."""

@@ -851,7 +851,8 @@ async def connect_and_get_coordinator(
         record_parsed_block_lengths()
         _OVERRIDES_APPLIED = True
         LOGGER.info(
-            "Library overrides applied (HeatpumpCodes, Parameters, instance data isolation)."
+            "Library overrides applied (HeatpumpCodes, Parameters, instance data "
+            "isolation, parsed block length recording)."
         )
 
     config_data: dict[str, Any] = dict(

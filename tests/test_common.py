@@ -120,6 +120,24 @@ class TestRegisterPresence:
         )
         assert key_exists(data, "parameters.c") is True
 
+    def test_upstream_max_index_itself_is_inside_the_range(self, monkeypatch):
+        """The confinement is ``index <= upstream_max``, not ``<``.
+
+        The highest index upstream defines is upstream's own, so it must stay on
+        the pre-change behaviour even when the block stops right before it. This
+        is the only case that separates the two operators: everywhere else an
+        index at the boundary also satisfies ``index < parsed_count``.
+        """
+        monkeypatch.setattr(
+            "custom_components.luxtronik2.common.UPSTREAM_MAX_DEFINED_INDEX",
+            {"parameters": 1, "calculations": 1, "visibilities": 1},
+        )
+        data = make_coordinator_data(
+            parameters={"upstream_a": 1, "upstream_b": 2},
+            parameters_parsed_count=1,
+        )
+        assert key_exists(data, "parameters.upstream_b") is True  # index 1 == max
+
     def test_without_recorded_count_falls_back_to_definition(self, tiny_upstream_range):
         """Objects built without a parse() (tests, diagnostics) keep old behaviour."""
         data = make_coordinator_data(parameters={"a": 1, "b": 2})
