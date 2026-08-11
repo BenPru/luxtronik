@@ -74,6 +74,13 @@ WRITE_CONFIRM_MAX_ATTEMPTS = 6
 WRITE_CONFIRM_INITIAL_DELAY = 0.1
 WRITE_CONFIRM_MAX_DELAY = 1.0
 
+# Values a temperature register reports when nothing is wired to it. 0.0 is
+# the absent-hardware reading; 5.0 and 75.0 are the controller's placeholders,
+# observed on unconnected TRL_ext / TEE / TFB1-3 channels (issue #729) and
+# already relied on by _detect_solar_present() for the collector (5.0) and
+# buffer (150.0, buffer-specific and deliberately not in this set) sensors.
+LUX_TEMPERATURE_SENTINELS: Final[frozenset[float]] = frozenset({0.0, 5.0, 75.0})
+
 
 def _write_confirmed(written: Any, confirmed: Any) -> bool:
     """Return True if a write's post-refresh read-back matches what was written.
@@ -702,24 +709,44 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         visibility flags, which are unreliable: issue #729's reporter runs a
         working ventilation module while ID_Visi_Lueftung reads 0, so those
         flags cannot be trusted in either direction and are deliberately not
-        consulted anywhere for ventilation. A unit without the module reports
-        a flat 0.0 on both channels instead (measured on an Alpha Innotec
-        MSW4-16), while a real module reports room-temperature exhaust air
-        and tempered supply air.
+        consulted anywhere for ventilation.
 
-        Both channels are required, so a single stuck or unwired channel
-        cannot conjure a phantom ventilation device. This is the only gate
-        the ventilation entities have - they carry no visibility of their
-        own - so it has to be the conservative one.
+        Only one channel has to read plausibly. Requiring both was wrong:
+        #729's reporter has a module with no exhaust sensor, whose channel
+        sits on the controller's unwired-sensor sentinel (5.0, unchanged
+        across 18 h of recorder history while supply drifted realistically
+        through 229 states). A unit without a module reports a flat 0.0 on
+        both channels (measured on an Alpha Innotec MSW4-16), so demanding
+        two live channels would hide the device from exactly the
+        installations that asked for it.
 
-        Same shape as _detect_solar_present()'s sentinel checks (5.0 / 150.0).
+        Sentinels are therefore treated as absent readings rather than as
+        values, the same shape as _detect_solar_present()'s 5.0 / 150.0
+        checks.
         """
-        supply = self.get_value(LC.C0159_VENTILATION_SUPPLY_AIR_TEMPERATURE)
-        exhaust = self.get_value(LC.C0160_VENTILATION_EXHAUST_AIR_TEMPERATURE)
-        if supply is None or exhaust is None:
+        return any(
+            self._is_plausible_reading(self.get_value(key))
+            for key in (
+                LC.C0159_VENTILATION_SUPPLY_AIR_TEMPERATURE,
+                LC.C0160_VENTILATION_EXHAUST_AIR_TEMPERATURE,
+            )
+        )
+
+    @staticmethod
+    def _is_plausible_reading(value: Any) -> bool:
+        """Is this air temperature a measurement rather than a sentinel.
+
+        0.0 is the missing-module reading, 5.0 and 75.0 are the controller's
+        unwired-sensor placeholders - the same values unconnected TRL_ext,
+        TEE and TFB1-3 channels report on the #729 reporter's LWC407.
+        Whether 5.0 / 75.0 hold across controller generations is unverified,
+        but treating them as readings is the worse failure: it fabricates a
+        room temperature that never moves.
+        """
+        if value is None:
             return False
         try:
-            return float(supply) != 0.0 and float(exhaust) != 0.0
+            return float(value) not in LUX_TEMPERATURE_SENTINELS
         except (TypeError, ValueError):
             return False
 

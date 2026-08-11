@@ -336,13 +336,37 @@ class TestDeviceKeyActive:
         )
         assert coord.device_key_active(DeviceKey.ventilation) is False
 
-    def test_ventilation_inactive_when_only_one_air_temperature_reports(self):
-        """Both channels are required. Gating fails open elsewhere in
-        entity_visible, so a half-signal must not create the device."""
+    def test_ventilation_active_when_only_one_air_temperature_reports(self):
+        """One live channel is enough. #729's reporter runs a working module
+        whose exhaust channel has no sensor, so requiring both would hide the
+        device from the installation that asked for it."""
         coord = _make_coordinator(
             calculations={
                 "ID_WEB_Temp_Lueftung_Zuluft": 0.0,
                 "ID_WEB_Temp_Lueftung_Abluft": 21.2,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is True
+
+    def test_ventilation_active_when_other_channel_is_a_sentinel(self):
+        """5.0 is the unwired-sensor placeholder, not a reading: #729's
+        exhaust channel held it for 18 h without a single state change while
+        supply drifted through 229. The live supply channel decides."""
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 24.1,
+                "ID_WEB_Temp_Lueftung_Abluft": 5.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is True
+
+    def test_ventilation_inactive_when_both_channels_are_sentinels(self):
+        """5.0 / 75.0 are the same placeholders unconnected TRL_ext, TEE and
+        TFB1-3 channels report, so two of them are no evidence of a module."""
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 75.0,
+                "ID_WEB_Temp_Lueftung_Abluft": 5.0,
             }
         )
         assert coord.device_key_active(DeviceKey.ventilation) is False
