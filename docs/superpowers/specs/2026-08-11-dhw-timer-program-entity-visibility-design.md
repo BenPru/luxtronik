@@ -89,10 +89,11 @@ unique_id. The format is written down **once**, in a shared
 `_timer_schedule_unique_id(entry, description)` helper used by both, so that
 decoupling unique_id from entity_id later is a single-site change plus a
 registry migration — not a hunt for duplicated string formatting.
-- **`available` stays.** After this change it is no longer the primary
-  mechanism, but it remains a cheap safety net covering the window between a
-  coordinator update carrying a new mode and the scheduled add/remove task
-  running.
+
+`LuxtronikTimerScheduleText.available` keeps its mode check. After this change
+it is no longer the primary mechanism, but it remains a cheap safety net
+covering the window between a coordinator update carrying a new mode and the
+scheduled add/remove task running.
 
 Because the registry entry survives, switching a program away and back restores
 the same entity_id (including a user-chosen one) with its customizations and
