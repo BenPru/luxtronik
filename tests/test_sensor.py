@@ -30,6 +30,7 @@ from custom_components.luxtronik2.const import (
     LuxSmartGridStatus,
     LuxStatus1Option,
     LuxStatus3Option,
+    LuxVisibility,
     SensorKey,
 )
 from custom_components.luxtronik2.lux_overrides import parameters_to_add_update
@@ -753,6 +754,46 @@ def _assert_raw_converts_to(
     entity = _make_sensor(description, data)
     entity._handle_coordinator_update(data)
     assert entity._attr_native_value == expected
+
+
+class TestVentilationStageSetpoints:
+    """The four ventilation stages are exposed read-only and unitless while
+    their scale is unconfirmed: the library types them Unknown/UINT32 and
+    non-writeable, so no conversion runs and the raw register is the value.
+    Claiming a unit (or promoting them to a `number`) would commit to a scale
+    that the diagnostics evidence does not yet settle (#729)."""
+
+    STAGE_KEYS = (
+        SensorKey.VENTILATION_STAGE_HUMIDITY_PROTECTION,
+        SensorKey.VENTILATION_STAGE_REDUCED,
+        SensorKey.VENTILATION_STAGE_NOMINAL,
+        SensorKey.VENTILATION_STAGE_INTENSIVE,
+    )
+
+    def test_stages_are_unitless_and_unscaled(self):
+        for key in self.STAGE_KEYS:
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.native_unit_of_measurement is None
+            assert description.device_class is None
+            assert description.factor is None
+            assert description.device_key == DeviceKey.ventilation
+
+    def test_stage_value_is_the_raw_register(self):
+        """100/150/230/300 on #729's controller, passed through untouched."""
+        for key, raw in zip(self.STAGE_KEYS, (100, 150, 230, 300), strict=True):
+            description = next(d for d in SENSORS if d.key == key)
+            group, sensor_id = description.luxtronik_key.split(".", 1)
+            data = make_coordinator_data(**{group: {sensor_id: raw}})
+            entity = _make_sensor(description, data)
+            entity._handle_coordinator_update(data)
+            assert entity._attr_native_value == raw
+
+    def test_stages_are_not_gated_on_the_ventilation_visibility_flags(self):
+        """Same flag family that reads 0 on a working module, which is why
+        has_ventilation ignores it - the ventilation device is the gate."""
+        for key in self.STAGE_KEYS:
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.visibility == LuxVisibility.UNSET
 
 
 class TestAnalogOutScaling:

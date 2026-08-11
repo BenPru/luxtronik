@@ -934,6 +934,18 @@
             },
             "ventilation_exhaust_fan": {
                 "name": "Afvoerventilator instelwaarde"
+            },
+            "ventilation_stage_humidity_protection": {
+                "name": "Stand vochtbescherming"
+            },
+            "ventilation_stage_reduced": {
+                "name": "Stand gereduceerd"
+            },
+            "ventilation_stage_nominal": {
+                "name": "Stand nominaal"
+            },
+            "ventilation_stage_intensive": {
+                "name": "Stand intensief"
             }
         },
         "date": {

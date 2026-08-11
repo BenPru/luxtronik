@@ -503,6 +503,17 @@ class LuxParameter(StrEnum):
     # from the heating/DHW mode numbering, which also has second_heatsource.
     # Irrelevant to the select, which works on the library's decoded strings.
     P0894_VENTILATION_MODE = "parameters.ID_Einst_BA_Lueftung_akt"
+    # The four DIN 1946-6 ventilation stages. Both the pinned library and
+    # upstream's rewrite type these as Unknown/UINT32 and non-writeable, so
+    # the value is the raw register with no conversion and the unit is
+    # unconfirmed - see the sensor descriptions for why they are exposed
+    # read-only and unitless for now (#729).
+    P0960_VENTILATION_STAGE_HUMIDITY_PROTECTION = (
+        "parameters.ID_Einst_Luf_Feuchteschutz_akt"
+    )
+    P0961_VENTILATION_STAGE_REDUCED = "parameters.ID_Einst_Luf_Reduziert_akt"
+    P0962_VENTILATION_STAGE_NOMINAL = "parameters.ID_Einst_Luf_Nennlueftung_akt"
+    P0963_VENTILATION_STAGE_INTENSIVE = "parameters.ID_Einst_Luf_Intensivlueftung_akt"
     P0966_COOLING_TARGET_TEMPERATURE_MK3 = "parameters.ID_Sollwert_KuCft3_akt"
     P0973_MAX_DHW_TEMPERATURE = "parameters.ID_Einst_BW_max"
     P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE = (
@@ -796,6 +807,10 @@ class SensorKey(StrEnum):
     VENTILATION_EXHAUST_AIR_TEMPERATURE = "ventilation_exhaust_air_temperature"
     VENTILATION_SUPPLY_FAN = "ventilation_supply_fan"
     VENTILATION_EXHAUST_FAN = "ventilation_exhaust_fan"
+    VENTILATION_STAGE_HUMIDITY_PROTECTION = "ventilation_stage_humidity_protection"
+    VENTILATION_STAGE_REDUCED = "ventilation_stage_reduced"
+    VENTILATION_STAGE_NOMINAL = "ventilation_stage_nominal"
+    VENTILATION_STAGE_INTENSIVE = "ventilation_stage_intensive"
     CURRENT_HEAT_OUTPUT = "current_heat_output"
     CURRENT_POWER_CONSUMPTION = "current_power_consumption"
     PUMP_FREQUENCY = "pump_frequency"

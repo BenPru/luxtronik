@@ -934,6 +934,18 @@
             },
             "ventilation_exhaust_fan": {
                 "name": "Abluftventilator Sollwert"
+            },
+            "ventilation_stage_humidity_protection": {
+                "name": "Stufe Feuchteschutz"
+            },
+            "ventilation_stage_reduced": {
+                "name": "Stufe Reduziert"
+            },
+            "ventilation_stage_nominal": {
+                "name": "Stufe Nennlüftung"
+            },
+            "ventilation_stage_intensive": {
+                "name": "Stufe Intensivlüftung"
             }
         },
         "date": {

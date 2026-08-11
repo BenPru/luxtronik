@@ -407,6 +407,43 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
     ),
+    # The four configured ventilation stages (DIN 1946-6: humidity
+    # protection, reduced, nominal, intensive). Read-only and unitless on
+    # purpose: both the pinned library and upstream's rewrite type these as
+    # Unknown/UINT32 and non-writeable, so no conversion runs and the value
+    # is the raw register. The names and a typical 100/150/230/300 reading
+    # point at m3/h, but per mille of a fan setpoint would look identical,
+    # and a `number` entity would have to commit to a scale before writing
+    # real airflow into someone's house. Exposing them read-only first turns
+    # the diagnostics corpus into the evidence needed to promote them (#729).
+    #
+    # Gated on the ventilation device rather than the ID_Visi_Einst_Luf_*
+    # flags: those are the same flag family that reads 0 on a working module,
+    # which is why has_ventilation ignores them (see coordinator).
+    descr(
+        key=SensorKey.VENTILATION_STAGE_HUMIDITY_PROTECTION,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LP.P0960_VENTILATION_STAGE_HUMIDITY_PROTECTION,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    descr(
+        key=SensorKey.VENTILATION_STAGE_REDUCED,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LP.P0961_VENTILATION_STAGE_REDUCED,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    descr(
+        key=SensorKey.VENTILATION_STAGE_NOMINAL,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LP.P0962_VENTILATION_STAGE_NOMINAL,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    descr(
+        key=SensorKey.VENTILATION_STAGE_INTENSIVE,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LP.P0963_VENTILATION_STAGE_INTENSIVE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
     descr(
         key=SensorKey.CURRENT_HEAT_OUTPUT,
         luxtronik_key=LC.C0257_CURRENT_HEAT_OUTPUT,

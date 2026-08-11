@@ -934,6 +934,18 @@
             },
             "ventilation_exhaust_fan": {
                 "name": "Exhaust fan setpoint"
+            },
+            "ventilation_stage_humidity_protection": {
+                "name": "Humidity protection stage"
+            },
+            "ventilation_stage_reduced": {
+                "name": "Reduced stage"
+            },
+            "ventilation_stage_nominal": {
+                "name": "Nominal stage"
+            },
+            "ventilation_stage_intensive": {
+                "name": "Intensive stage"
             }
         },
         "date": {

@@ -934,6 +934,18 @@
             },
             "ventilation_exhaust_fan": {
                 "name": "Žádaná hodnota ventilátoru odvodu"
+            },
+            "ventilation_stage_humidity_protection": {
+                "name": "Stupeň ochrany proti vlhkosti"
+            },
+            "ventilation_stage_reduced": {
+                "name": "Redukovaný stupeň"
+            },
+            "ventilation_stage_nominal": {
+                "name": "Nominální stupeň"
+            },
+            "ventilation_stage_intensive": {
+                "name": "Intenzivní stupeň"
             }
         },
         "date": {
