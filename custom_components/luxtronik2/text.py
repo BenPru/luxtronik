@@ -20,7 +20,7 @@ from homeassistant.helpers.entity_registry import RegistryEntryHider
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists
-from .const import CONF_HA_SENSOR_PREFIX, DOMAIN, DeviceKey
+from .const import CONF_HA_SENSOR_PREFIX, DOMAIN, LOGGER, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikTimerScheduleTextDescription
 from .timer_schedule_entities_predefined import TIMER_SCHEDULE_ENTITIES
@@ -48,15 +48,26 @@ def _timer_schedule_unique_id(
 def _active_schedule_descriptions(
     coordinator: LuxtronikCoordinator,
     data: LuxtronikCoordinatorData | None,
-) -> list[LuxtronikTimerScheduleTextDescription]:
+) -> list[LuxtronikTimerScheduleTextDescription] | None:
     """Return the schedule blocks belonging to the circuit's active program.
 
     A block qualifies when the circuit's mode selector is present on this
     controller and its value equals the block's `active_mode`. Every other
     block is meaningless on the device, so no entity is created for it.
+
+    Returns ``None`` -- "no information this poll", as opposed to an empty
+    list meaning "no block is active" -- when there is no coordinator data,
+    or when a selector that *is* present on this controller could not be
+    read. `get_sensor_data` returns ``None`` both for an absent register and
+    for a present one whose datatype could not decode the raw value
+    (``SelectionBase`` returns ``None`` for an unrecognised code), and
+    `key_exists` cannot tell the two apart for parameter 405, which sits
+    inside upstream's defined index range. Reading a transient decode
+    failure as "no program is active" would tear down every schedule entity
+    and hide all ten registry entries until the next good poll.
     """
     if data is None:
-        return []
+        return None
 
     descriptions: list[LuxtronikTimerScheduleTextDescription] = []
     for description in TIMER_SCHEDULE_ENTITIES:
@@ -65,7 +76,15 @@ def _active_schedule_descriptions(
         selector_key = f"parameters.{description.mode_selector_name}"
         if not key_exists(data, selector_key):
             continue
-        if get_sensor_data(data, selector_key) != description.active_mode:
+        mode = get_sensor_data(data, selector_key)
+        if mode is None:
+            LOGGER.debug(
+                "Timer program selector %s could not be read this poll - "
+                "leaving the schedule entities untouched",
+                selector_key,
+            )
+            return None
+        if mode != description.active_mode:
             continue
         descriptions.append(description)
     return descriptions
@@ -98,10 +117,22 @@ class _TimerScheduleSync:
         # compute `desired` against a dict the first call is still mutating,
         # risking a duplicate registration for the same key.
         self._lock = asyncio.Lock()
+        self._closing = False
 
     async def async_setup(self) -> None:
         """Add the active program's entities and hide the rest."""
         await self.async_apply()
+
+    @callback
+    def async_close(self) -> None:
+        """Stop applying: the config entry is unloading.
+
+        HA resets the platforms *before* running the entry's on-unload
+        callbacks and then awaits (rather than cancels) the entry's pending
+        tasks, so an `async_apply` queued just before the unload could
+        otherwise add entities to an already-reset platform.
+        """
+        self._closing = True
 
     @callback
     def async_sync(self) -> None:
@@ -119,13 +150,19 @@ class _TimerScheduleSync:
         and mutate `self._entities` concurrently with the in-flight call,
         risking a duplicate registration for the same key.
         """
+        if self._closing:
+            return
         async with self._lock:
-            desired = {
-                description.key: description
-                for description in _active_schedule_descriptions(
-                    self.coordinator, self.coordinator.data
-                )
-            }
+            if self._closing:
+                return
+            active = _active_schedule_descriptions(
+                self.coordinator, self.coordinator.data
+            )
+            if active is None:
+                # Nothing could be concluded this poll: do not add, remove or
+                # write anything.
+                return
+            desired = {description.key: description for description in active}
             to_add = [
                 description
                 for key, description in desired.items()
@@ -160,12 +197,39 @@ class _TimerScheduleSync:
 
             for key, entity in to_remove:
                 del self._entities[key]
-                # No force_remove: the registry entry must survive so the
-                # user's customisations and history are still there next
-                # time.
-                await entity.async_remove()
+                await self._async_remove_entity(key, entity)
 
             self._hide_inactive(registry, set(desired))
+
+    async def _async_remove_entity(
+        self, key: str, entity: LuxtronikTimerScheduleText
+    ) -> None:
+        """Take one schedule entity out of the state machine.
+
+        `async_add_entities` is a synchronous callback: it only *schedules*
+        the add, so an entry in `self._entities` is not necessarily a live
+        entity. `EntityPlatform._async_add_entity` calls
+        `add_to_platform_abort()` for a disabled registry entry (setting
+        `entity.hass = None`), and a fast enough second program switch can
+        reach here before the platform's add task has run at all. Removing
+        such an entity would raise on `self.hass.loop`, and - since this runs
+        inside one `entry.async_create_task` - would abort the remaining
+        removals and the hide pass with it, so every failure is contained
+        and logged instead.
+        """
+        if entity.hass is None:  # pyright: ignore[reportUnnecessaryComparison]
+            LOGGER.debug(
+                "Timer schedule entity %s was never added to the platform - "
+                "nothing to remove",
+                key,
+            )
+            return
+        try:
+            # No force_remove: the registry entry must survive so the user's
+            # customisations and history are still there next time.
+            await entity.async_remove()
+        except Exception:  # pylint: disable=broad-except
+            LOGGER.exception("Error removing timer schedule entity %s", key)
 
     def _unhide_active(
         self, registry: er.EntityRegistry, desired_keys: set[str]
@@ -215,6 +279,9 @@ async def async_setup_entry(  # pragma: no cover
         return
 
     sync = _TimerScheduleSync(hass, entry, coordinator, async_add_entities)
+    # Registered before the listener so the closing flag is in place for
+    # every pass the listener can ever schedule.
+    entry.async_on_unload(sync.async_close)
     await sync.async_setup()
     entry.async_on_unload(coordinator.async_add_listener(sync.async_sync))
 

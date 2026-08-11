@@ -3,17 +3,23 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity_registry import RegistryEntryHider
 from luxtronik.parameters import Parameters
 import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from conftest import make_coordinator_data
+from conftest import DEFAULT_PARAMETERS, make_coordinator_data
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
+    CONFIG_ENTRY_VERSION,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
@@ -338,12 +344,29 @@ class TestActiveScheduleDescriptions:
         assert SK.TIMER_DHW_SCHEDULE_SUNDAY in keys
 
     def test_missing_selector_parameter_yields_nothing(self):
+        """A selector that this controller does not have is a real answer: no blocks."""
         assert self._call({}) == []
 
-    def test_data_none_yields_nothing(self):
+    def test_data_none_yields_no_information(self):
+        """No coordinator data at all is "unknown", not "no program active"."""
         from custom_components.luxtronik2.text import _active_schedule_descriptions
 
-        assert _active_schedule_descriptions(_mock_coordinator(), None) == []
+        assert _active_schedule_descriptions(_mock_coordinator(), None) is None
+
+    def test_undecodable_selector_yields_no_information(self):
+        """A present-but-unreadable selector must not read as "no program active".
+
+        `get_sensor_data` returns None both for an absent register and for a
+        register whose datatype could not decode the raw value this poll
+        (`SelectionBase` returns None for an unrecognised code). Treating the
+        latter as "nothing is active" would drop all 10 entities and hide all
+        10 registry entries on a single glitched read.
+        """
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        data = make_coordinator_data(parameters={self._SELECTOR: None})
+        coord = _mock_coordinator(data)
+        assert _active_schedule_descriptions(coord, data) is None
 
     def test_inactive_entity_yields_nothing(self):
         assert self._call({self._SELECTOR: "week"}, entity_active=False) == []
@@ -364,11 +387,18 @@ class TestTimerScheduleSync:
         coord = _mock_coordinator(data)
         entry = _mock_entry()
         added: list = []
+        hass = MagicMock()
 
         def _add_entities(entities):
+            for entity in entities:
+                # Stand in for what the platform's `add_to_platform_start`
+                # does once it actually runs the scheduled add. The sync
+                # keys its removal guard off this, because an add that was
+                # aborted (or has not run yet) leaves `hass` unset.
+                entity.hass = hass
             added.extend(entities)
 
-        sync = _TimerScheduleSync(MagicMock(), entry, coord, _add_entities)
+        sync = _TimerScheduleSync(hass, entry, coord, _add_entities)
         return sync, coord, added
 
     def _registry(self, known: dict[str, MagicMock]):
@@ -559,6 +589,148 @@ class TestTimerScheduleSync:
         assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
 
     @pytest.mark.asyncio
+    async def test_unreadable_selector_does_not_remove_or_hide_anything(self):
+        """A glitched selector read must be a no-op, not a full teardown.
+
+        Regression test: treating an undecodable selector value as "no
+        program active" removed every live schedule entity and wrote
+        `hidden_by = INTEGRATION` on all 10 registry entries, with the next
+        good poll re-adding and unhiding them - entity churn, registry writes
+        and a recorder gap caused by one transient read.
+        """
+        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
+
+        sync, coord, _added = self._make_sync("week")
+        registry = self._registry({})
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+            registry.async_update_entity.reset_mock()
+            coord.data = make_coordinator_data(parameters={self._SELECTOR: None})
+            with patch.object(
+                LuxtronikTimerScheduleText, "async_remove", new=AsyncMock()
+            ) as remove:
+                await sync.async_apply()
+
+        remove.assert_not_awaited()
+        registry.async_update_entity.assert_not_called()
+        assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
+
+    @pytest.mark.asyncio
+    async def test_removal_of_an_entity_that_never_reached_the_platform(self):
+        """An entity whose add was aborted must be dropped without crashing.
+
+        `async_add_entities` only schedules the add. If the registry entry is
+        disabled, `EntityPlatform._async_add_entity` calls
+        `add_to_platform_abort()`, which sets `entity.hass = None`; a later
+        `entity.async_remove()` would then blow up on
+        `self.hass.loop.create_future()` inside the sync task, skipping the
+        rest of the removal loop and the hide pass.
+        """
+        from homeassistant.helpers.entity_registry import RegistryEntryHider
+
+        from custom_components.luxtronik2.text import _timer_schedule_unique_id
+
+        sync, coord, _added = self._make_sync("week")
+        entry = _mock_entry()
+        week = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_WEEK
+        )
+        week_id = _timer_schedule_unique_id(entry, week)
+        registry = self._registry({week_id: self._entry()})
+
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+            # The platform aborted the add (disabled registry entry).
+            sync._entities[SK.TIMER_DHW_SCHEDULE_WEEK].hass = None  # type: ignore[assignment]
+            registry.async_update_entity.reset_mock()
+            coord.data = make_coordinator_data(parameters={self._SELECTOR: "5+2"})
+            await sync.async_apply()
+
+        assert SK.TIMER_DHW_SCHEDULE_WEEK not in sync._entities
+        # The rest of the pass still ran: the now-inactive week block is hidden.
+        registry.async_update_entity.assert_any_call(
+            week_id, hidden_by=RegistryEntryHider.INTEGRATION
+        )
+
+    @pytest.mark.asyncio
+    async def test_a_failing_removal_does_not_abort_the_pass(self):
+        """One entity failing to remove must not skip the others or the hide pass."""
+        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
+
+        sync, coord, _added = self._make_sync("days")
+        registry = self._registry({})
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+            assert len(sync._entities) == 7
+            coord.data = make_coordinator_data(parameters={self._SELECTOR: "week"})
+            calls: list = []
+
+            async def _boom(self_entity):
+                calls.append(self_entity)
+                raise RuntimeError("removal exploded")
+
+            with patch.object(LuxtronikTimerScheduleText, "async_remove", new=_boom):
+                await sync.async_apply()
+
+        assert len(calls) == 7
+        assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
+
+    @pytest.mark.asyncio
+    async def test_apply_after_close_is_a_no_op(self):
+        """A task queued before unload must not add entities to a reset platform."""
+        sync, _coord, added = self._make_sync("week")
+        registry = self._registry({})
+        sync.async_close()
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_apply()
+
+        assert added == []
+        registry.async_update_entity.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_close_while_waiting_for_the_lock_stops_the_queued_pass(self):
+        """The unload can land while a pass is already queued behind the lock."""
+        sync, _coord, added = self._make_sync("week")
+        registry = self._registry({})
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync._lock.acquire()
+            queued = asyncio.create_task(sync.async_apply())
+            await asyncio.sleep(0)
+            assert not queued.done()
+
+            sync.async_close()
+            sync._lock.release()
+            await queued
+
+        assert added == []
+        registry.async_update_entity.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_unchanged_mode_does_not_touch_anything(self):
         sync, _coord, added = self._make_sync("week")
         registry = self._registry({})
@@ -574,3 +746,156 @@ class TestTimerScheduleSync:
 
         assert len(added) == 1
         registry.async_update_entity.assert_not_called()
+
+
+# ===========================================================================
+# Real-hass integration tests
+# ===========================================================================
+
+
+@pytest.mark.usefixtures("enable_custom_integrations")
+class TestTimerScheduleSyncAgainstRealHass:
+    """The swap mechanism against a real `hass` and a real entity registry.
+
+    The unit tests above drive `_TimerScheduleSync` with a MagicMock registry
+    and a stubbed `async_remove`, so they cannot pin the HA contracts this
+    design actually rests on: that `async_remove()` without `force_remove`
+    keeps the registry entry (and leaves a `restored` state behind), that
+    re-adding the same unique_id after a swap-back succeeds instead of
+    tripping "Entity id already exists", and that an entity whose add was
+    aborted (disabled registry entry) does not break the next pass.
+    """
+
+    _SELECTOR = "ID_Einst_SUBW_akt2"
+    _WEEK_ID = f"text.{DOMAIN}_{SK.TIMER_DHW_SCHEDULE_WEEK}"
+    _WEEKDAY_ID = f"text.{DOMAIN}_{SK.TIMER_DHW_SCHEDULE_WEEKDAY}"
+    _WEEKEND_ID = f"text.{DOMAIN}_{SK.TIMER_DHW_SCHEDULE_WEEKEND}"
+
+    def _client(self, mode: str):
+        from test_setup_integration import FakeLuxtronikClient
+
+        parameters: dict[str, Any] = DEFAULT_PARAMETERS.copy()
+        parameters[self._SELECTOR] = mode
+        return FakeLuxtronikClient(
+            host="192.168.1.100",
+            port=DEFAULT_PORT,
+            socket_timeout=10,
+            max_data_length=1024,
+            parameters=parameters,
+        )
+
+    async def _setup(self, hass: HomeAssistant, monkeypatch, client) -> MockConfigEntry:
+        monkeypatch.setattr(
+            "custom_components.luxtronik2.coordinator.Luxtronik",
+            lambda **kwargs: client,
+        )
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            version=CONFIG_ENTRY_VERSION,
+            data={
+                CONF_HOST: "192.168.1.100",
+                CONF_PORT: DEFAULT_PORT,
+                CONF_HA_SENSOR_PREFIX: DOMAIN,
+            },
+        )
+        entry.add_to_hass(hass)
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+        return entry
+
+    async def _switch_to(self, hass: HomeAssistant, entry, client, mode: str) -> None:
+        client.parameters.set(self._SELECTOR, mode)
+        await entry.runtime_data.async_refresh()
+        await hass.async_block_till_done()
+
+    async def test_program_round_trip_keeps_the_registry_entry(
+        self, hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        client = self._client("week")
+        entry = await self._setup(hass, monkeypatch, client)
+        registry = er.async_get(hass)
+
+        # Active program: entity live, registry entry visible.
+        assert hass.states.get(self._WEEK_ID) is not None
+        assert hass.states.get(self._WEEKDAY_ID) is None
+        week_entry = registry.async_get(self._WEEK_ID)
+        assert week_entry is not None
+        assert week_entry.hidden_by is None
+
+        await self._switch_to(hass, entry, client, "5+2")
+
+        # The week block is gone from the state machine (async_remove without
+        # force_remove leaves a `restored` placeholder because the registry
+        # entry survives), and its registry entry is hidden, not removed.
+        week_state = hass.states.get(self._WEEK_ID)
+        assert week_state is None or week_state.attributes.get("restored") is True
+        week_entry = registry.async_get(self._WEEK_ID)
+        assert week_entry is not None
+        assert week_entry.hidden_by is RegistryEntryHider.INTEGRATION
+        assert hass.states.get(self._WEEKDAY_ID) is not None
+        assert hass.states.get(self._WEEKEND_ID) is not None
+
+        await self._switch_to(hass, entry, client, "week")
+
+        # Swapping back re-adds under the same entity_id and unhides it.
+        week_state = hass.states.get(self._WEEK_ID)
+        assert week_state is not None
+        assert week_state.attributes.get("restored") is not True
+        week_entry = registry.async_get(self._WEEK_ID)
+        assert week_entry is not None
+        assert week_entry.hidden_by is None
+
+    async def test_a_user_rename_survives_the_round_trip(
+        self, hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The whole point of hiding instead of removing the registry entry."""
+        client = self._client("week")
+        entry = await self._setup(hass, monkeypatch, client)
+        registry = er.async_get(hass)
+        renamed_id = "text.my_dhw_week_schedule"
+        registry.async_update_entity(
+            self._WEEK_ID, new_entity_id=renamed_id, name="My week schedule"
+        )
+        await hass.async_block_till_done()
+
+        await self._switch_to(hass, entry, client, "5+2")
+        await self._switch_to(hass, entry, client, "week")
+
+        renamed_entry = registry.async_get(renamed_id)
+        assert renamed_entry is not None
+        assert renamed_entry.name == "My week schedule"
+        assert renamed_entry.hidden_by is None
+        assert hass.states.get(renamed_id) is not None
+
+    async def test_a_disabled_schedule_entity_does_not_break_the_swap(
+        self, hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A user-disabled block is never added, so it must not be removed either.
+
+        Regression test: `async_add_entities` only schedules the add, and
+        `EntityPlatform._async_add_entity` aborts it for a disabled registry
+        entry (setting `entity.hass = None`). The next program switch then
+        raised inside the sync task, skipping the remaining removals and the
+        hide pass entirely.
+        """
+        client = self._client("week")
+        registry = er.async_get(hass)
+        registry.async_get_or_create(
+            "text",
+            DOMAIN,
+            self._WEEK_ID,
+            suggested_object_id=f"{DOMAIN}_{SK.TIMER_DHW_SCHEDULE_WEEK}",
+            disabled_by=er.RegistryEntryDisabler.USER,
+        )
+        entry = await self._setup(hass, monkeypatch, client)
+        assert hass.states.get(self._WEEK_ID) is None
+
+        await self._switch_to(hass, entry, client, "5+2")
+
+        # The pass completed: the new program's entities exist and the
+        # inactive week entry was hidden.
+        assert hass.states.get(self._WEEKDAY_ID) is not None
+        assert hass.states.get(self._WEEKEND_ID) is not None
+        week_entry = registry.async_get(self._WEEK_ID)
+        assert week_entry is not None
+        assert week_entry.hidden_by is RegistryEntryHider.INTEGRATION
