@@ -36,40 +36,76 @@ inherit it when they are added.
   `LuxtronikCoordinatorData`, so it is directly unit-testable.
 - **At setup:** add only the desired entities. For every non-desired key that
   *already has* a registry entry (existing installs, or a mode that was active
-  earlier), set `hidden_by = RegistryEntryHider.INTEGRATION`. On a fresh install
-  the inactive modes were never registered, so nothing exists to hide and the
-  device page shows only the active program's blocks. Registry entries are
-  looked up with `er.async_get_entity_id(TEXT_DOMAIN, DOMAIN, unique_id)`.
+  earlier), set `disabled_by = RegistryEntryDisabler.INTEGRATION`. On a fresh
+  install the inactive modes were never registered, so nothing exists to disable
+  and the device page shows only the active program's blocks. Registry entries
+  are looked up with `er.async_get_entity_id(TEXT_DOMAIN, DOMAIN, unique_id)`.
 - **On change:** the helper is registered as a coordinator listener via
   `entry.async_on_unload(coordinator.async_add_listener(...))`. Each poll it
   recomputes the desired set; when it differs from the live set it
-  1. clears `hidden_by` on the newly active keys (only when it is
-     `INTEGRATION` — a user's own hide is never overridden) and adds their
+  1. clears `disabled_by` on the newly active keys (only when it is
+     `INTEGRATION` — a user's own disable is never overridden) and adds their
      entities through the retained `async_add_entities` callback, and
   2. removes the stale entities from the state machine with
      `entity.async_remove()` (**not** `force_remove=True`: the registry entry
-     must survive) and sets `hidden_by = INTEGRATION` on them.
+     must survive) and sets `disabled_by = INTEGRATION` on them.
 
   Coordinator listener callbacks are synchronous, so the add/remove work is
   scheduled with `entry.async_create_task`.
 
-### Why hide instead of removing the registry entry
+  A one-time migration runs alongside this: any schedule entity still carrying
+  `hidden_by = RegistryEntryHider.INTEGRATION` from the earlier hide-based build
+  (see below) gets it cleared, for both active and inactive keys, on the first
+  sync pass that touches it.
 
-Removing a registry entry discards everything the user attached to it: a
+### Why disable instead of hide, and why not remove the registry entry
+
+The first implementation of this design hid inactive entries
+(`hidden_by = RegistryEntryHider.INTEGRATION`) instead of disabling them. Live
+verification on a real HA instance (2026.7.2) showed that this does not achieve
+the goal: on the **device page**, HA renders hidden entities inline, labelled
+"(Hidden)" and showing `unavailable`:
+
+```
+Tijdschema (dinsdag) (Verborgen)     unavailable
+Tijdschema (week)    (Verborgen)     unavailable
+Tijdschema (weekend)                 00:00-11:00/12:00-14:00/17:00-00:00
+```
+
+*Disabled* entities, by contrast, are collapsed behind a `+N disabled entities`
+button. Hiding only cleans dashboards, entity pickers and auto-generated
+views — not the device page, which is where the clutter was reported. So the
+mechanism is `disabled_by = RegistryEntryDisabler.INTEGRATION`, not `hidden_by`.
+
+Purging the registry entry outright (instead of hiding or disabling it) was
+considered and rejected: it discards everything the user attached to it — a
 renamed entity_id, friendly name, icon, area, labels. Today the entity_id is
 integration-assigned (`unique_id == entity_id == "text.<prefix>_<key>"`), so the
 loss is mostly invisible — but that convention is expected to change toward
-HA best practice, where entity_ids are user-owned. Once it does, a program
-switch silently reverting user renames would be a genuine bug. Hiding keeps the
-registry entry, its customizations, and the recorder history intact; only
-`hidden_by` flips. Cost: the device page shows "+N hidden entities" behind a
-click, and inactive entities remain in the registry.
+HA best practice, where entity_ids are user-owned, and that loss gets worse
+once `unique_id` is decoupled from `entity_id`. A program switch silently
+reverting user renames would be a genuine bug. Disabling keeps the registry
+entry, its customizations, and the recorder history intact; only `disabled_by`
+flips.
 
-Accepted edge case: if a user manually unhides an inactive-mode entity, it stays
-unhidden (with no state) until the next actual program change, which re-hides
-it. The sync only runs its unhide/add/remove/hide pass when the desired entity
-set differs from the live one, so an unchanged poll deliberately writes nothing
-to the registry — no per-poll re-hide loop.
+Cost, accepted because switching timer program is a rare action: clearing
+`disabled_by` makes HA's `EntityRegistryDisabledHandler` schedule a config-entry
+reload 30 seconds later (`config_entries.RELOAD_AFTER_UPDATE_DELAY`) — enabling
+a registry entry is, in HA's model, indistinguishable from a user re-enabling it
+by hand, and both are followed by a reload. There is no way to clear
+`disabled_by` on an entity without triggering this, short of not using
+`disabled_by` at all (which the device-page evidence above rules out). No
+suppression hack is used to work around it.
+
+Accepted edge case: if a user manually re-enables an inactive-mode entity via
+the registry, HA schedules its own 30s reload for that (same mechanism as
+above); on the reload, `_disable_inactive` runs again, finds `disabled_by` is
+`None` for a still-inactive key, and sets it back to `INTEGRATION` — so the
+manual re-enable does not stick past the reload it itself triggers. Outside of
+a reload, the sync only runs its enable/add/remove/disable pass when the
+desired entity set differs from the live one, so an unchanged poll
+deliberately writes nothing to the registry — no per-poll re-disable loop, and
+no per-poll reload either.
 
 Reading the selector is treated as three-valued: "program X", "this controller
 has no such selector" (no blocks — nothing to create), and "unreadable this
@@ -132,14 +168,22 @@ entities swap immediately after the user changes the program in HA.
 - desired-set computation returns the right descriptions for each of `week`,
   `5+2`, `days`, and an empty set when the selector parameter is absent
 - setup adds only the active mode's entities
-- setup hides pre-existing registry entries of the non-active keys, and does
+- setup disables pre-existing registry entries of the non-active keys, and does
   nothing for non-active keys that have no registry entry
-- a mode change on a later coordinator update adds + unhides the new mode's
-  entities and removes + hides the previous ones, with the registry entries of
-  the previous mode still present afterwards
-- a user-set `hidden_by = USER` is not cleared when that mode becomes active
+- a mode change on a later coordinator update adds + enables the new mode's
+  entities and removes + disables the previous ones, with the registry entries
+  of the previous mode still present afterwards
+- a user-set `disabled_by = USER` is not cleared when that mode becomes active
 - no churn (no add, remove, or registry write) when the mode is unchanged
   between polls
+- a `hidden_by = RegistryEntryHider.INTEGRATION` left over from the earlier
+  hide-based build is cleared on the next sync pass, for both an active and an
+  inactive key (the inactive one is then disabled as usual)
+- against a real `hass`/entity registry: entity_id survives a program
+  round-trip, the registry entry survives removal, a user rename survives, and
+  `disabled_by` flips `INTEGRATION` ↔ `None` across the switch — including
+  letting the resulting config-entry reload actually run in-test (the delay is
+  collapsed to 0 via monkeypatch rather than skipped or waited out for real)
 
 `tests/test_select.py` and the predefined-entity/translation-coverage tests
 cover the new selector: description shape, display→raw option mapping, write of

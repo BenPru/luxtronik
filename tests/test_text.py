@@ -10,7 +10,10 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.entity_registry import RegistryEntryHider
+from homeassistant.helpers.entity_registry import (
+    RegistryEntryDisabler,
+    RegistryEntryHider,
+)
 from luxtronik.parameters import Parameters
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -359,8 +362,8 @@ class TestActiveScheduleDescriptions:
         `get_sensor_data` returns None both for an absent register and for a
         register whose datatype could not decode the raw value this poll
         (`SelectionBase` returns None for an unrecognised code). Treating the
-        latter as "nothing is active" would drop all 10 entities and hide all
-        10 registry entries on a single glitched read.
+        latter as "nothing is active" would drop all 10 entities and disable
+        all 10 registry entries on a single glitched read.
         """
         from custom_components.luxtronik2.text import _active_schedule_descriptions
 
@@ -412,8 +415,9 @@ class TestTimerScheduleSync:
         registry.async_get.side_effect = lambda entity_id: known.get(entity_id)
         return registry
 
-    def _entry(self, hidden_by=None):
+    def _entry(self, disabled_by=None, hidden_by=None):
         registry_entry = MagicMock()
+        registry_entry.disabled_by = disabled_by
         registry_entry.hidden_by = hidden_by
         return registry_entry
 
@@ -431,9 +435,7 @@ class TestTimerScheduleSync:
         assert [e.entity_description.key for e in added] == [SK.TIMER_DHW_SCHEDULE_WEEK]
 
     @pytest.mark.asyncio
-    async def test_setup_hides_existing_entries_of_inactive_blocks(self):
-        from homeassistant.helpers.entity_registry import RegistryEntryHider
-
+    async def test_setup_disables_existing_entries_of_inactive_blocks(self):
         from custom_components.luxtronik2.text import _timer_schedule_unique_id
 
         sync, _coord, _added = self._make_sync("week")
@@ -453,13 +455,11 @@ class TestTimerScheduleSync:
             await sync.async_setup()
 
         registry.async_update_entity.assert_any_call(
-            stale_id, hidden_by=RegistryEntryHider.INTEGRATION
+            stale_id, disabled_by=RegistryEntryDisabler.INTEGRATION
         )
 
     @pytest.mark.asyncio
-    async def test_setup_does_not_touch_a_user_hidden_entry(self):
-        from homeassistant.helpers.entity_registry import RegistryEntryHider
-
+    async def test_setup_does_not_touch_a_user_disabled_entry(self):
         from custom_components.luxtronik2.text import _timer_schedule_unique_id
 
         sync, _coord, _added = self._make_sync("week")
@@ -468,7 +468,7 @@ class TestTimerScheduleSync:
             d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_WEEK
         )
         week_id = _timer_schedule_unique_id(entry, week)
-        registry = self._registry({week_id: self._entry(RegistryEntryHider.USER)})
+        registry = self._registry({week_id: self._entry(RegistryEntryDisabler.USER)})
 
         with (
             patch(
@@ -481,9 +481,7 @@ class TestTimerScheduleSync:
         registry.async_update_entity.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_setup_unhides_an_integration_hidden_active_entry(self):
-        from homeassistant.helpers.entity_registry import RegistryEntryHider
-
+    async def test_setup_enables_an_integration_disabled_active_entry(self):
         from custom_components.luxtronik2.text import _timer_schedule_unique_id
 
         sync, _coord, _added = self._make_sync("week")
@@ -493,7 +491,32 @@ class TestTimerScheduleSync:
         )
         week_id = _timer_schedule_unique_id(entry, week)
         registry = self._registry(
-            {week_id: self._entry(RegistryEntryHider.INTEGRATION)}
+            {week_id: self._entry(RegistryEntryDisabler.INTEGRATION)}
+        )
+
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+
+        registry.async_update_entity.assert_any_call(week_id, disabled_by=None)
+
+    @pytest.mark.asyncio
+    async def test_setup_migrates_a_hidden_active_entry_without_disabling_it(self):
+        """An earlier build hid the active entry too; the migration just clears it."""
+        from custom_components.luxtronik2.text import _timer_schedule_unique_id
+
+        sync, _coord, _added = self._make_sync("week")
+        entry = _mock_entry()
+        week = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_WEEK
+        )
+        week_id = _timer_schedule_unique_id(entry, week)
+        registry = self._registry(
+            {week_id: self._entry(hidden_by=RegistryEntryHider.INTEGRATION)}
         )
 
         with (
@@ -505,6 +528,37 @@ class TestTimerScheduleSync:
             await sync.async_setup()
 
         registry.async_update_entity.assert_any_call(week_id, hidden_by=None)
+        for call in registry.async_update_entity.call_args_list:
+            assert "disabled_by" not in call.kwargs
+
+    @pytest.mark.asyncio
+    async def test_setup_migrates_a_hidden_inactive_entry_and_disables_it(self):
+        """An inactive entry left over from the hidden-based build gets both:
+        the stale hidden_by is scrubbed and disabled_by is now set."""
+        from custom_components.luxtronik2.text import _timer_schedule_unique_id
+
+        sync, _coord, _added = self._make_sync("week")
+        entry = _mock_entry()
+        stale = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_MONDAY
+        )
+        stale_id = _timer_schedule_unique_id(entry, stale)
+        registry = self._registry(
+            {stale_id: self._entry(hidden_by=RegistryEntryHider.INTEGRATION)}
+        )
+
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+
+        registry.async_update_entity.assert_any_call(stale_id, hidden_by=None)
+        registry.async_update_entity.assert_any_call(
+            stale_id, disabled_by=RegistryEntryDisabler.INTEGRATION
+        )
 
     @pytest.mark.asyncio
     async def test_mode_change_swaps_the_entities(self):
@@ -589,14 +643,14 @@ class TestTimerScheduleSync:
         assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
 
     @pytest.mark.asyncio
-    async def test_unreadable_selector_does_not_remove_or_hide_anything(self):
+    async def test_unreadable_selector_does_not_remove_or_disable_anything(self):
         """A glitched selector read must be a no-op, not a full teardown.
 
         Regression test: treating an undecodable selector value as "no
         program active" removed every live schedule entity and wrote
-        `hidden_by = INTEGRATION` on all 10 registry entries, with the next
-        good poll re-adding and unhiding them - entity churn, registry writes
-        and a recorder gap caused by one transient read.
+        `disabled_by = INTEGRATION` on all 10 registry entries, with the next
+        good poll re-adding and re-enabling them - entity churn, registry
+        writes and a recorder gap caused by one transient read.
         """
         from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
 
@@ -629,10 +683,8 @@ class TestTimerScheduleSync:
         `add_to_platform_abort()`, which sets `entity.hass = None`; a later
         `entity.async_remove()` would then blow up on
         `self.hass.loop.create_future()` inside the sync task, skipping the
-        rest of the removal loop and the hide pass.
+        rest of the removal loop and the disable pass.
         """
-        from homeassistant.helpers.entity_registry import RegistryEntryHider
-
         from custom_components.luxtronik2.text import _timer_schedule_unique_id
 
         sync, coord, _added = self._make_sync("week")
@@ -657,14 +709,14 @@ class TestTimerScheduleSync:
             await sync.async_apply()
 
         assert SK.TIMER_DHW_SCHEDULE_WEEK not in sync._entities
-        # The rest of the pass still ran: the now-inactive week block is hidden.
+        # The rest of the pass still ran: the now-inactive week block is disabled.
         registry.async_update_entity.assert_any_call(
-            week_id, hidden_by=RegistryEntryHider.INTEGRATION
+            week_id, disabled_by=RegistryEntryDisabler.INTEGRATION
         )
 
     @pytest.mark.asyncio
     async def test_a_failing_removal_does_not_abort_the_pass(self):
-        """One entity failing to remove must not skip the others or the hide pass."""
+        """One entity failing to remove must not skip the others or the disable pass."""
         from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
 
         sync, coord, _added = self._make_sync("days")
@@ -815,40 +867,52 @@ class TestTimerScheduleSyncAgainstRealHass:
         entry = await self._setup(hass, monkeypatch, client)
         registry = er.async_get(hass)
 
-        # Active program: entity live, registry entry visible.
+        # Active program: entity live, registry entry enabled.
         assert hass.states.get(self._WEEK_ID) is not None
         assert hass.states.get(self._WEEKDAY_ID) is None
         week_entry = registry.async_get(self._WEEK_ID)
         assert week_entry is not None
-        assert week_entry.hidden_by is None
+        assert week_entry.disabled_by is None
 
         await self._switch_to(hass, entry, client, "5+2")
 
         # The week block is gone from the state machine (async_remove without
         # force_remove leaves a `restored` placeholder because the registry
-        # entry survives), and its registry entry is hidden, not removed.
+        # entry survives), and its registry entry is disabled, not removed.
         week_state = hass.states.get(self._WEEK_ID)
         assert week_state is None or week_state.attributes.get("restored") is True
         week_entry = registry.async_get(self._WEEK_ID)
         assert week_entry is not None
-        assert week_entry.hidden_by is RegistryEntryHider.INTEGRATION
+        assert week_entry.disabled_by is RegistryEntryDisabler.INTEGRATION
         assert hass.states.get(self._WEEKDAY_ID) is not None
         assert hass.states.get(self._WEEKEND_ID) is not None
 
-        await self._switch_to(hass, entry, client, "week")
+        # Clearing disabled_by makes HA schedule a config-entry reload 30s
+        # from now (config_entries.RELOAD_AFTER_UPDATE_DELAY) via
+        # EntityRegistryDisabledHandler. Collapse that delay to 0 so the
+        # reload actually runs inside this test instead of leaving a 30s
+        # timer pending - both to exercise the real end-to-end behaviour and
+        # to avoid a lingering-timer teardown warning.
+        monkeypatch.setattr("homeassistant.config_entries.RELOAD_AFTER_UPDATE_DELAY", 0)
 
-        # Swapping back re-adds under the same entity_id and unhides it.
+        await self._switch_to(hass, entry, client, "week")
+        # Let the (now near-instant) reload timer fire and the resulting
+        # config-entry reload task finish.
+        await hass.async_block_till_done()
+
+        # Swapping back re-adds under the same entity_id and re-enables it -
+        # surviving the config-entry reload that clearing disabled_by causes.
         week_state = hass.states.get(self._WEEK_ID)
         assert week_state is not None
         assert week_state.attributes.get("restored") is not True
         week_entry = registry.async_get(self._WEEK_ID)
         assert week_entry is not None
-        assert week_entry.hidden_by is None
+        assert week_entry.disabled_by is None
 
     async def test_a_user_rename_survives_the_round_trip(
         self, hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """The whole point of hiding instead of removing the registry entry."""
+        """The whole point of disabling instead of removing the registry entry."""
         client = self._client("week")
         entry = await self._setup(hass, monkeypatch, client)
         registry = er.async_get(hass)
@@ -858,13 +922,19 @@ class TestTimerScheduleSyncAgainstRealHass:
         )
         await hass.async_block_till_done()
 
+        # See test_program_round_trip_keeps_the_registry_entry: re-enabling
+        # the week block on the way back schedules HA's 30s config-entry
+        # reload; collapse it so it actually runs in this test.
+        monkeypatch.setattr("homeassistant.config_entries.RELOAD_AFTER_UPDATE_DELAY", 0)
+
         await self._switch_to(hass, entry, client, "5+2")
         await self._switch_to(hass, entry, client, "week")
+        await hass.async_block_till_done()
 
         renamed_entry = registry.async_get(renamed_id)
         assert renamed_entry is not None
         assert renamed_entry.name == "My week schedule"
-        assert renamed_entry.hidden_by is None
+        assert renamed_entry.disabled_by is None
         assert hass.states.get(renamed_id) is not None
 
     async def test_a_disabled_schedule_entity_does_not_break_the_swap(
@@ -876,7 +946,7 @@ class TestTimerScheduleSyncAgainstRealHass:
         `EntityPlatform._async_add_entity` aborts it for a disabled registry
         entry (setting `entity.hass = None`). The next program switch then
         raised inside the sync task, skipping the remaining removals and the
-        hide pass entirely.
+        disable pass entirely.
         """
         client = self._client("week")
         registry = er.async_get(hass)
@@ -893,9 +963,50 @@ class TestTimerScheduleSyncAgainstRealHass:
         await self._switch_to(hass, entry, client, "5+2")
 
         # The pass completed: the new program's entities exist and the
-        # inactive week entry was hidden.
+        # user-disabled, now-inactive week entry is left exactly as the user
+        # set it.
         assert hass.states.get(self._WEEKDAY_ID) is not None
         assert hass.states.get(self._WEEKEND_ID) is not None
         week_entry = registry.async_get(self._WEEK_ID)
         assert week_entry is not None
-        assert week_entry.hidden_by is RegistryEntryHider.INTEGRATION
+        assert week_entry.disabled_by is er.RegistryEntryDisabler.USER
+
+    async def test_hidden_by_from_the_previous_hide_based_build_is_cleared(
+        self, hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Installs that ran the interim hidden-based build must not keep it.
+
+        Both an active and an inactive schedule entity carrying the old
+        `hidden_by = INTEGRATION` from that build get it cleared on the next
+        sync pass - the inactive one is disabled instead, the active one is
+        left enabled.
+        """
+        client = self._client("week")
+        registry = er.async_get(hass)
+        registry.async_get_or_create(
+            "text",
+            DOMAIN,
+            self._WEEK_ID,
+            suggested_object_id=f"{DOMAIN}_{SK.TIMER_DHW_SCHEDULE_WEEK}",
+            hidden_by=RegistryEntryHider.INTEGRATION,
+        )
+        registry.async_get_or_create(
+            "text",
+            DOMAIN,
+            self._WEEKDAY_ID,
+            suggested_object_id=f"{DOMAIN}_{SK.TIMER_DHW_SCHEDULE_WEEKDAY}",
+            hidden_by=RegistryEntryHider.INTEGRATION,
+        )
+
+        entry = await self._setup(hass, monkeypatch, client)
+        assert entry.state.value == "loaded"
+
+        week_entry = registry.async_get(self._WEEK_ID)
+        assert week_entry is not None
+        assert week_entry.hidden_by is None
+        assert week_entry.disabled_by is None
+
+        weekday_entry = registry.async_get(self._WEEKDAY_ID)
+        assert weekday_entry is not None
+        assert weekday_entry.hidden_by is None
+        assert weekday_entry.disabled_by is RegistryEntryDisabler.INTEGRATION

@@ -15,7 +15,10 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity_registry import RegistryEntryHider
+from homeassistant.helpers.entity_registry import (
+    RegistryEntryDisabler,
+    RegistryEntryHider,
+)
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -64,7 +67,7 @@ def _active_schedule_descriptions(
     `key_exists` cannot tell the two apart for parameter 405, which sits
     inside upstream's defined index range. Reading a transient decode
     failure as "no program is active" would tear down every schedule entity
-    and hide all ten registry entries until the next good poll.
+    and disable all ten registry entries until the next good poll.
     """
     if data is None:
         return None
@@ -94,9 +97,11 @@ class _TimerScheduleSync:
     """Keeps the live schedule entities in step with the active timer program.
 
     Only the blocks of the running program exist as entities. The registry
-    entries of the other blocks are kept but hidden, so a user's rename,
+    entries of the other blocks are kept but disabled, so a user's rename,
     area, icon and recorder history survive a program switch -- removing the
-    registry entry would discard all of it.
+    registry entry would discard all of it. (An earlier build hid the
+    inactive entries instead; see `_enable_active`/`_disable_inactive` for
+    the one-time migration off that mechanism.)
     """
 
     def __init__(
@@ -120,7 +125,7 @@ class _TimerScheduleSync:
         self._closing = False
 
     async def async_setup(self) -> None:
-        """Add the active program's entities and hide the rest."""
+        """Add the active program's entities and disable the rest."""
         await self.async_apply()
 
     @callback
@@ -177,9 +182,11 @@ class _TimerScheduleSync:
                 return
 
             registry = er.async_get(self.hass)
-            # Unhide before adding: an entity added while its registry entry
-            # is hidden would stay hidden.
-            self._unhide_active(registry, set(desired))
+            # Enable before adding: EntityPlatform._async_add_entity calls
+            # add_to_platform_abort() for a disabled registry entry, so an
+            # entity added while its registry entry is still disabled would
+            # never come up.
+            self._enable_active(registry, set(desired))
 
             if to_add:
                 entities = [
@@ -199,7 +206,7 @@ class _TimerScheduleSync:
                 del self._entities[key]
                 await self._async_remove_entity(key, entity)
 
-            self._hide_inactive(registry, set(desired))
+            self._disable_inactive(registry, set(desired))
 
     async def _async_remove_entity(
         self, key: str, entity: LuxtronikTimerScheduleText
@@ -214,7 +221,7 @@ class _TimerScheduleSync:
         reach here before the platform's add task has run at all. Removing
         such an entity would raise on `self.hass.loop`, and - since this runs
         inside one `entry.async_create_task` - would abort the remaining
-        removals and the hide pass with it, so every failure is contained
+        removals and the disable pass with it, so every failure is contained
         and logged instead.
         """
         if entity.hass is None:  # pyright: ignore[reportUnnecessaryComparison]
@@ -231,7 +238,7 @@ class _TimerScheduleSync:
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Error removing timer schedule entity %s", key)
 
-    def _unhide_active(
+    def _enable_active(
         self, registry: er.EntityRegistry, desired_keys: set[str]
     ) -> None:
         for description in TIMER_SCHEDULE_ENTITIES:
@@ -247,9 +254,23 @@ class _TimerScheduleSync:
                 registry_entry is not None
                 and registry_entry.hidden_by is RegistryEntryHider.INTEGRATION
             ):
+                # Migration: an earlier build hid inactive blocks instead of
+                # disabling them. Scrub the stale hidden_by so it doesn't
+                # linger on installs that ran that build.
                 registry.async_update_entity(entity_id, hidden_by=None)
+            if (
+                registry_entry is not None
+                and registry_entry.disabled_by is RegistryEntryDisabler.INTEGRATION
+            ):
+                # Clearing here, before the entity is added, is required:
+                # EntityPlatform._async_add_entity calls
+                # add_to_platform_abort() for a disabled registry entry.
+                # This clear makes HA schedule a config-entry reload 30s from
+                # now (config_entries.RELOAD_AFTER_UPDATE_DELAY) - accepted,
+                # since switching timer program is rare.
+                registry.async_update_entity(entity_id, disabled_by=None)
 
-    def _hide_inactive(
+    def _disable_inactive(
         self, registry: er.EntityRegistry, desired_keys: set[str]
     ) -> None:
         for description in TIMER_SCHEDULE_ENTITIES:
@@ -261,10 +282,16 @@ class _TimerScheduleSync:
             if entity_id is None:
                 continue
             registry_entry = registry.async_get(entity_id)
-            # hidden_by USER is the user's own decision and is left alone.
-            if registry_entry is not None and registry_entry.hidden_by is None:
+            if (
+                registry_entry is not None
+                and registry_entry.hidden_by is RegistryEntryHider.INTEGRATION
+            ):
+                # Migration: see _enable_active.
+                registry.async_update_entity(entity_id, hidden_by=None)
+            # disabled_by USER is the user's own decision and is left alone.
+            if registry_entry is not None and registry_entry.disabled_by is None:
                 registry.async_update_entity(
-                    entity_id, hidden_by=RegistryEntryHider.INTEGRATION
+                    entity_id, disabled_by=RegistryEntryDisabler.INTEGRATION
                 )
 
 
