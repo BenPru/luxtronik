@@ -14,6 +14,7 @@ from custom_components.luxtronik2.const import (
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
     DOMAIN,
+    PARSED_COUNT_ATTR,
 )
 from custom_components.luxtronik2.model import LuxtronikCoordinatorData
 
@@ -36,11 +37,15 @@ class FakeSensorItem:
 class FakeSensorGroup:
     """Fake Parameters / Calculations / Visibilities container."""
 
-    def __init__(self, data: dict[str, Any] | None = None):
+    def __init__(
+        self, data: dict[str, Any] | None = None, parsed_count: int | None = None
+    ):
         self._data: dict[str, FakeSensorItem] = {}
         if data:
             for key, value in data.items():
                 self._data[key] = FakeSensorItem(key, value)
+        if parsed_count is not None:
+            setattr(self, PARSED_COUNT_ATTR, parsed_count)
 
     def get(self, sensor_id: str) -> FakeSensorItem | None:
         return self._data.get(sensor_id)
@@ -76,12 +81,15 @@ def make_coordinator_data(
     parameters: dict[str, Any] | None = None,
     calculations: dict[str, Any] | None = None,
     visibilities: dict[str, Any] | None = None,
+    parameters_parsed_count: int | None = None,
+    calculations_parsed_count: int | None = None,
+    visibilities_parsed_count: int | None = None,
 ) -> LuxtronikCoordinatorData:
     """Build a LuxtronikCoordinatorData with fake sensor groups."""
     return LuxtronikCoordinatorData(
-        parameters=FakeSensorGroup(parameters or {}),
-        calculations=FakeSensorGroup(calculations or {}),
-        visibilities=FakeSensorGroup(visibilities or {}),
+        parameters=FakeSensorGroup(parameters or {}, parameters_parsed_count),
+        calculations=FakeSensorGroup(calculations or {}, calculations_parsed_count),
+        visibilities=FakeSensorGroup(visibilities or {}, visibilities_parsed_count),
     )
 
 

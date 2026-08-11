@@ -331,7 +331,6 @@ SENSORS: list[descr] = [
         entity_active_formula="!= 0.0",
         # 0.1 kWh raw unit, applied by the Energy datatype (see 1059 above).
         native_precision=1,
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     descr(
         key=SensorKey.ANALOG_OUT1,
