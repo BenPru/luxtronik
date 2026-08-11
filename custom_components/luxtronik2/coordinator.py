@@ -50,6 +50,7 @@ from .lux_overrides import (
     record_parsed_block_lengths,
     update_Luxtronik_HeatpumpCodes,
     update_Luxtronik_Parameters,
+    warn_on_unknown_selection_codes,
 )
 from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 
@@ -849,10 +850,12 @@ async def connect_and_get_coordinator(
         update_Luxtronik_Parameters()
         isolate_instance_data()
         record_parsed_block_lengths()
+        warn_on_unknown_selection_codes()
         _OVERRIDES_APPLIED = True
         LOGGER.info(
             "Library overrides applied (HeatpumpCodes, Parameters, instance data "
-            "isolation, parsed block length recording)."
+            "isolation, parsed block length recording, unknown selection code "
+            "warning)."
         )
 
     config_data: dict[str, Any] = dict(
