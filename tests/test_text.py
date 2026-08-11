@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
@@ -499,6 +500,63 @@ class TestTimerScheduleSync:
             SK.TIMER_DHW_SCHEDULE_WEEKDAY,
             SK.TIMER_DHW_SCHEDULE_WEEKEND,
         ]
+
+    @pytest.mark.asyncio
+    async def test_overlapping_apply_calls_are_serialized(self):
+        """Two overlapping `async_apply()` calls must not interleave.
+
+        Regression test: without a lock, a second coordinator update landing
+        while a first `async_apply()` is suspended mid-removal would compute
+        `desired` and mutate `self._entities` concurrently with the first
+        call, risking a duplicate registration for the same key.
+        """
+        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
+
+        sync, coord, _added = self._make_sync("week")
+        registry = self._registry({})
+
+        remove_started = asyncio.Event()
+        release_remove = asyncio.Event()
+
+        async def _slow_remove(self_entity):
+            remove_started.set()
+            await release_remove.wait()
+
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            await sync.async_setup()
+            coord.data = make_coordinator_data(parameters={self._SELECTOR: "5+2"})
+
+            with patch.object(
+                LuxtronikTimerScheduleText, "async_remove", new=_slow_remove
+            ):
+                first = asyncio.create_task(sync.async_apply())
+                await remove_started.wait()
+
+                # A second coordinator update lands (mode flips back to
+                # "week") while the first apply is still suspended awaiting
+                # the removal it started.
+                coord.data = make_coordinator_data(parameters={self._SELECTOR: "week"})
+                second = asyncio.create_task(sync.async_apply())
+                await asyncio.sleep(0)
+                await asyncio.sleep(0)
+
+                # The lock must keep the second call from starting its own
+                # add/remove pass until the first call has fully finished.
+                assert not second.done()
+                assert sync._lock.locked()
+
+                release_remove.set()
+                await first
+                await second
+
+        # The entity set ends up matching the final ("week") mode, with no
+        # duplicate registration for the week key.
+        assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
 
     @pytest.mark.asyncio
     async def test_unchanged_mode_does_not_touch_anything(self):

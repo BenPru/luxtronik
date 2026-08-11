@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 
 from homeassistant.components.text import (
@@ -91,6 +92,12 @@ class _TimerScheduleSync:
         self.coordinator = coordinator
         self.async_add_entities = async_add_entities
         self._entities: dict[str, LuxtronikTimerScheduleText] = {}
+        # Coordinator updates arrive independently of any in-flight apply, and
+        # `async_apply` awaits mid-mutation (each entity removal). Without
+        # serializing here, a second update landing during that await would
+        # compute `desired` against a dict the first call is still mutating,
+        # risking a duplicate registration for the same key.
+        self._lock = asyncio.Lock()
 
     async def async_setup(self) -> None:
         """Add the active program's entities and hide the rest."""
@@ -102,49 +109,63 @@ class _TimerScheduleSync:
         self.entry.async_create_task(self.hass, self.async_apply(), eager_start=False)
 
     async def async_apply(self) -> None:
-        """Bring the live entity set in line with the active program."""
-        desired = {
-            description.key: description
-            for description in _active_schedule_descriptions(
-                self.coordinator, self.coordinator.data
-            )
-        }
-        to_add = [
-            description
-            for key, description in desired.items()
-            if key not in self._entities
-        ]
-        to_remove = [
-            (key, entity)
-            for key, entity in self._entities.items()
-            if key not in desired
-        ]
-        if not to_add and not to_remove:
-            return
+        """Bring the live entity set in line with the active program.
 
-        registry = er.async_get(self.hass)
-        # Unhide before adding: an entity added while its registry entry is
-        # hidden would stay hidden.
-        self._unhide_active(registry, set(desired))
-
-        if to_add:
-            entities = [
-                LuxtronikTimerScheduleText(
-                    self.entry, self.coordinator, description, description.device_key
+        Serialized by `self._lock`: a second call queued behind an in-flight
+        one (e.g. two coordinator updates arriving while the first call is
+        still awaiting an entity removal) waits for it to finish, then
+        re-derives `desired` from the then-current coordinator data instead
+        of acting on a stale snapshot -- otherwise it could compute `desired`
+        and mutate `self._entities` concurrently with the in-flight call,
+        risking a duplicate registration for the same key.
+        """
+        async with self._lock:
+            desired = {
+                description.key: description
+                for description in _active_schedule_descriptions(
+                    self.coordinator, self.coordinator.data
                 )
-                for description in to_add
+            }
+            to_add = [
+                description
+                for key, description in desired.items()
+                if key not in self._entities
             ]
-            for description, entity in zip(to_add, entities, strict=True):
-                self._entities[description.key] = entity
-            self.async_add_entities(entities)
+            to_remove = [
+                (key, entity)
+                for key, entity in self._entities.items()
+                if key not in desired
+            ]
+            if not to_add and not to_remove:
+                return
 
-        for key, entity in to_remove:
-            del self._entities[key]
-            # No force_remove: the registry entry must survive so the user's
-            # customisations and history are still there next time.
-            await entity.async_remove()
+            registry = er.async_get(self.hass)
+            # Unhide before adding: an entity added while its registry entry
+            # is hidden would stay hidden.
+            self._unhide_active(registry, set(desired))
 
-        self._hide_inactive(registry, set(desired))
+            if to_add:
+                entities = [
+                    LuxtronikTimerScheduleText(
+                        self.entry,
+                        self.coordinator,
+                        description,
+                        description.device_key,
+                    )
+                    for description in to_add
+                ]
+                for description, entity in zip(to_add, entities, strict=True):
+                    self._entities[description.key] = entity
+                self.async_add_entities(entities)
+
+            for key, entity in to_remove:
+                del self._entities[key]
+                # No force_remove: the registry entry must survive so the
+                # user's customisations and history are still there next
+                # time.
+                await entity.async_remove()
+
+            self._hide_inactive(registry, set(desired))
 
     def _unhide_active(
         self, registry: er.EntityRegistry, desired_keys: set[str]
