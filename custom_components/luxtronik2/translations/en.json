@@ -1022,6 +1022,36 @@
             },
             "timer_heating_schedule_sunday": {
                 "name": "Heating Timer Schedule (Sunday)"
+            },
+            "timer_ventilation_schedule_week": {
+                "name": "Ventilation Timer Schedule (Week)"
+            },
+            "timer_ventilation_schedule_weekday": {
+                "name": "Ventilation Timer Schedule (Weekdays)"
+            },
+            "timer_ventilation_schedule_weekend": {
+                "name": "Ventilation Timer Schedule (Weekend)"
+            },
+            "timer_ventilation_schedule_monday": {
+                "name": "Ventilation Timer Schedule (Monday)"
+            },
+            "timer_ventilation_schedule_tuesday": {
+                "name": "Ventilation Timer Schedule (Tuesday)"
+            },
+            "timer_ventilation_schedule_wednesday": {
+                "name": "Ventilation Timer Schedule (Wednesday)"
+            },
+            "timer_ventilation_schedule_thursday": {
+                "name": "Ventilation Timer Schedule (Thursday)"
+            },
+            "timer_ventilation_schedule_friday": {
+                "name": "Ventilation Timer Schedule (Friday)"
+            },
+            "timer_ventilation_schedule_saturday": {
+                "name": "Ventilation Timer Schedule (Saturday)"
+            },
+            "timer_ventilation_schedule_sunday": {
+                "name": "Ventilation Timer Schedule (Sunday)"
             }
         },
         "select": {

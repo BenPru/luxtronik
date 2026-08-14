@@ -95,7 +95,7 @@ class TestTimerScheduleTable:
         assert not problems, "\n".join(problems)
 
     def test_entity_count(self):
-        assert len(TIMER_SCHEDULE_ENTITIES) == 20
+        assert len(TIMER_SCHEDULE_ENTITIES) == 30
 
     def test_row_counts_per_circuit(self):
         """DHW has 5 slots per day, the heating circuit only 3."""
@@ -150,6 +150,43 @@ class TestTimerScheduleTable:
         assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEKDAY] == "5+2"
         assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEKEND] == "5+2"
         assert by_key[SK.TIMER_HEATING_SCHEDULE_MONDAY] == "days"
+
+    def test_ventilation_selector_and_device(self):
+        from custom_components.luxtronik2.const import DeviceKey
+
+        description = next(
+            d
+            for d in TIMER_SCHEDULE_ENTITIES
+            if d.key == SK.TIMER_VENTILATION_SCHEDULE_WEEK
+        )
+        assert description.mode_selector_name == "ID_Einst_SuLuf_akt"
+        assert description.device_key is DeviceKey.ventilation
+        assert len(description.row_names) == 3
+
+    def test_ventilation_row_names_use_the_leading_start_end_index(self):
+        """Ventilation names are `<prefix>_zeit_<0|1>_<row>_<2*col>`.
+
+        The start and end blocks are interleaved in the parameter numbering
+        (starts 896-925, ends 926-955), unlike every other circuit where the
+        end sits immediately after its start.
+        """
+        by_key = {d.key: d.row_names for d in TIMER_SCHEDULE_ENTITIES}
+        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_WEEK][0] == (
+            "ID_Einst_SuLufWo_zeit_0_0_0",
+            "ID_Einst_SuLufWo_zeit_1_0_0",
+        )
+        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_WEEKEND][2] == (
+            "ID_Einst_SuLuf25_zeit_0_2_2",
+            "ID_Einst_SuLuf25_zeit_1_2_2",
+        )
+        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_WEDNESDAY][1] == (
+            "ID_Einst_SuLufTg_zeit_0_1_4",
+            "ID_Einst_SuLufTg_zeit_1_1_4",
+        )
+        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_SUNDAY][2] == (
+            "ID_Einst_SuLufTg_zeit_0_2_12",
+            "ID_Einst_SuLufTg_zeit_1_2_12",
+        )
 
 
 # ===========================================================================
@@ -427,6 +464,24 @@ class TestActiveScheduleDescriptions:
         active, unreadable = _active_schedule_descriptions(coord, data)
         assert [d.key for d in active] == [SK.TIMER_HEATING_SCHEDULE_WEEK]
         assert unreadable == {self._SELECTOR}
+
+    def test_ventilation_blocks_are_skipped_without_a_ventilation_module(self):
+        """`entity_active` is False for the ventilation device on such a unit."""
+        from custom_components.luxtronik2.const import DeviceKey
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        data = make_coordinator_data(
+            parameters={self._SELECTOR: "week", "ID_Einst_SuLuf_akt": "week"}
+        )
+        coord = _mock_coordinator(data)
+        coord.entity_active.side_effect = lambda description: (
+            description.device_key is not DeviceKey.ventilation
+        )
+        active, unreadable = _active_schedule_descriptions(coord, data)
+        keys = [d.key for d in active]
+        assert SK.TIMER_DHW_SCHEDULE_WEEK in keys
+        assert SK.TIMER_VENTILATION_SCHEDULE_WEEK not in keys
+        assert unreadable == set()
 
     def test_data_none_still_yields_no_information(self):
         """No coordinator data at all is "unknown" for every circuit."""

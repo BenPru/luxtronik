@@ -1,8 +1,8 @@
 """Predefined timer-program schedule text entities.
 
-Covers the DHW (Bw) and heating (Hkr) circuits. The remaining timer-program
-circuits (Mk1/Mk2/ZIP/Swb) follow the same pattern and need one
-`_TimerCircuit` instance plus translations each; see the
+Covers the DHW (Bw), heating (Hkr) and ventilation (Luf) circuits. The
+remaining timer-program circuits (Mk1/Mk2/ZIP/Swb) follow the same pattern
+and need one `_TimerCircuit` instance plus translations each; see the
 "lux-timer-program-parameter-layout" memory for their selector/prefix values.
 """
 
@@ -74,6 +74,25 @@ def _row_names_row_slot(
     )
 
 
+def _row_names_block_row_col(
+    prefix: str, rows: int, col: int
+) -> tuple[tuple[str, str], ...]:
+    """Build the (start_name, end_name) pairs for a `<0|1>_<row>_<col>` block.
+
+    The ventilation circuit names its slots ``<prefix>_zeit_<0|1>_<row>_<2*col>``
+    with the start/end index *first*, so its start times (896-925) and end
+    times (926-955) form two interleaved blocks rather than adjacent pairs.
+
+    Inferred from the parameter naming, not from a diagnostics dump: no unit
+    with a ventilation module has been sampled yet. If a dump ever shows the
+    leading index is not start/end, this function is the only thing to change.
+    """
+    return tuple(
+        (f"{prefix}_zeit_0_{row}_{2 * col}", f"{prefix}_zeit_1_{row}_{2 * col}")
+        for row in range(rows)
+    )
+
+
 # Numbers verified against a real diagnostics dump for parameters 162-667.
 _DHW_CIRCUIT = _TimerCircuit(
     mode_selector_name="ID_Einst_SUBW_akt2",
@@ -115,6 +134,28 @@ _HEATING_WEEKDAYS: tuple[tuple[SK, int], ...] = (
     (SK.TIMER_HEATING_SCHEDULE_FRIDAY, 4),
     (SK.TIMER_HEATING_SCHEDULE_SATURDAY, 5),
     (SK.TIMER_HEATING_SCHEDULE_SUNDAY, 6),
+)
+
+_VENTILATION_CIRCUIT = _TimerCircuit(
+    mode_selector_name="ID_Einst_SuLuf_akt",
+    rows=3,
+    same_schedule_prefix="ID_Einst_SuLufWo",
+    weekday_weekend_prefix="ID_Einst_SuLuf25",
+    per_day_prefix="ID_Einst_SuLufTg",
+    name_builder=_row_names_block_row_col,
+    device_key=DeviceKey.ventilation,
+)
+# The selector's week/5+2/days codes are assumed to match the other circuits;
+# see lux_overrides.update_Luxtronik_Parameters. Also inferred, not sampled.
+
+_VENTILATION_WEEKDAYS: tuple[tuple[SK, int], ...] = (
+    (SK.TIMER_VENTILATION_SCHEDULE_MONDAY, 0),
+    (SK.TIMER_VENTILATION_SCHEDULE_TUESDAY, 1),
+    (SK.TIMER_VENTILATION_SCHEDULE_WEDNESDAY, 2),
+    (SK.TIMER_VENTILATION_SCHEDULE_THURSDAY, 3),
+    (SK.TIMER_VENTILATION_SCHEDULE_FRIDAY, 4),
+    (SK.TIMER_VENTILATION_SCHEDULE_SATURDAY, 5),
+    (SK.TIMER_VENTILATION_SCHEDULE_SUNDAY, 6),
 )
 
 
@@ -188,5 +229,12 @@ TIMER_SCHEDULE_ENTITIES: list[LuxtronikTimerScheduleTextDescription] = (
         weekday_key=SK.TIMER_HEATING_SCHEDULE_WEEKDAY,
         weekend_key=SK.TIMER_HEATING_SCHEDULE_WEEKEND,
         day_keys=_HEATING_WEEKDAYS,
+    )
+    + _build_circuit_entities(
+        _VENTILATION_CIRCUIT,
+        week_key=SK.TIMER_VENTILATION_SCHEDULE_WEEK,
+        weekday_key=SK.TIMER_VENTILATION_SCHEDULE_WEEKDAY,
+        weekend_key=SK.TIMER_VENTILATION_SCHEDULE_WEEKEND,
+        day_keys=_VENTILATION_WEEKDAYS,
     )
 )

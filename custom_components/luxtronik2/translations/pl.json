@@ -1022,6 +1022,36 @@
             },
             "timer_heating_schedule_sunday": {
                 "name": "Harmonogram czasowy ogrzewania (niedziela)"
+            },
+            "timer_ventilation_schedule_week": {
+                "name": "Harmonogram czasowy wentylacji (tydzie\u0144)"
+            },
+            "timer_ventilation_schedule_weekday": {
+                "name": "Harmonogram czasowy wentylacji (dni robocze)"
+            },
+            "timer_ventilation_schedule_weekend": {
+                "name": "Harmonogram czasowy wentylacji (weekend)"
+            },
+            "timer_ventilation_schedule_monday": {
+                "name": "Harmonogram czasowy wentylacji (poniedzia\u0142ek)"
+            },
+            "timer_ventilation_schedule_tuesday": {
+                "name": "Harmonogram czasowy wentylacji (wtorek)"
+            },
+            "timer_ventilation_schedule_wednesday": {
+                "name": "Harmonogram czasowy wentylacji (\u015broda)"
+            },
+            "timer_ventilation_schedule_thursday": {
+                "name": "Harmonogram czasowy wentylacji (czwartek)"
+            },
+            "timer_ventilation_schedule_friday": {
+                "name": "Harmonogram czasowy wentylacji (pi\u0105tek)"
+            },
+            "timer_ventilation_schedule_saturday": {
+                "name": "Harmonogram czasowy wentylacji (sobota)"
+            },
+            "timer_ventilation_schedule_sunday": {
+                "name": "Harmonogram czasowy wentylacji (niedziela)"
             }
         },
         "select": {

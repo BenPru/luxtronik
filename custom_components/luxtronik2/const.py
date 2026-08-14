@@ -992,6 +992,17 @@ class SensorKey(StrEnum):
     TIMER_HEATING_SCHEDULE_SATURDAY = "timer_heating_schedule_saturday"
     TIMER_HEATING_SCHEDULE_SUNDAY = "timer_heating_schedule_sunday"
 
+    TIMER_VENTILATION_SCHEDULE_WEEK = "timer_ventilation_schedule_week"
+    TIMER_VENTILATION_SCHEDULE_WEEKDAY = "timer_ventilation_schedule_weekday"
+    TIMER_VENTILATION_SCHEDULE_WEEKEND = "timer_ventilation_schedule_weekend"
+    TIMER_VENTILATION_SCHEDULE_MONDAY = "timer_ventilation_schedule_monday"
+    TIMER_VENTILATION_SCHEDULE_TUESDAY = "timer_ventilation_schedule_tuesday"
+    TIMER_VENTILATION_SCHEDULE_WEDNESDAY = "timer_ventilation_schedule_wednesday"
+    TIMER_VENTILATION_SCHEDULE_THURSDAY = "timer_ventilation_schedule_thursday"
+    TIMER_VENTILATION_SCHEDULE_FRIDAY = "timer_ventilation_schedule_friday"
+    TIMER_VENTILATION_SCHEDULE_SATURDAY = "timer_ventilation_schedule_saturday"
+    TIMER_VENTILATION_SCHEDULE_SUNDAY = "timer_ventilation_schedule_sunday"
+
 
 # endregion Keys
 

@@ -1022,6 +1022,36 @@
             },
             "timer_heating_schedule_sunday": {
                 "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (ned\u011ble)"
+            },
+            "timer_ventilation_schedule_week": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (t\u00fdden)"
+            },
+            "timer_ventilation_schedule_weekday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (pracovn\u00ed dny)"
+            },
+            "timer_ventilation_schedule_weekend": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (v\u00edkend)"
+            },
+            "timer_ventilation_schedule_monday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (pond\u011bl\u00ed)"
+            },
+            "timer_ventilation_schedule_tuesday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (\u00fater\u00fd)"
+            },
+            "timer_ventilation_schedule_wednesday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (st\u0159eda)"
+            },
+            "timer_ventilation_schedule_thursday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (\u010dtvrtek)"
+            },
+            "timer_ventilation_schedule_friday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (p\u00e1tek)"
+            },
+            "timer_ventilation_schedule_saturday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (sobota)"
+            },
+            "timer_ventilation_schedule_sunday": {
+                "name": "\u010casov\u00fd pl\u00e1n v\u011btr\u00e1n\u00ed (ned\u011ble)"
             }
         },
         "select": {
