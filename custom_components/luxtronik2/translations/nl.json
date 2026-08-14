@@ -992,6 +992,36 @@
             },
             "timer_dhw_schedule_sunday": {
                 "name": "Warmwater tijdschema (zondag)"
+            },
+            "timer_heating_schedule_week": {
+                "name": "Verwarming tijdschema (week)"
+            },
+            "timer_heating_schedule_weekday": {
+                "name": "Verwarming tijdschema (werkdagen)"
+            },
+            "timer_heating_schedule_weekend": {
+                "name": "Verwarming tijdschema (weekend)"
+            },
+            "timer_heating_schedule_monday": {
+                "name": "Verwarming tijdschema (maandag)"
+            },
+            "timer_heating_schedule_tuesday": {
+                "name": "Verwarming tijdschema (dinsdag)"
+            },
+            "timer_heating_schedule_wednesday": {
+                "name": "Verwarming tijdschema (woensdag)"
+            },
+            "timer_heating_schedule_thursday": {
+                "name": "Verwarming tijdschema (donderdag)"
+            },
+            "timer_heating_schedule_friday": {
+                "name": "Verwarming tijdschema (vrijdag)"
+            },
+            "timer_heating_schedule_saturday": {
+                "name": "Verwarming tijdschema (zaterdag)"
+            },
+            "timer_heating_schedule_sunday": {
+                "name": "Verwarming tijdschema (zondag)"
             }
         },
         "select": {

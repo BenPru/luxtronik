@@ -1,11 +1,12 @@
 """Predefined timer-program schedule text entities.
 
-Only the DHW (Bw) circuit is wired up so far, to validate the approach
-before rolling out to the other 5 timer-program circuits (Hkr/Mk1/Mk2/ZIP/
-Swb). See the "lux-timer-program-parameter-layout" memory for their
-selector/prefix values once this is extended.
+Covers the DHW (Bw) and heating (Hkr) circuits. The remaining timer-program
+circuits (Mk1/Mk2/ZIP/Swb) follow the same pattern and need one
+`_TimerCircuit` instance plus translations each; see the
+"lux-timer-program-parameter-layout" memory for their selector/prefix values.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.const import EntityCategory
@@ -36,7 +37,7 @@ class _TimerCircuit:
     for its matching end time. For the weekday/weekend and per-day blocks,
     ``slot`` also encodes which day-group the row belongs to
     (``slot = 2 * column``, where ``column`` is 0/1 for weekday/weekend, or
-    0-6 for Monday-Sunday) -- see `_row_names` below.
+    0-6 for Monday-Sunday) -- see `_row_names_row_slot` below.
     """
 
     #: Raw parameter name of the mode selector that picks which of the three
@@ -50,7 +51,27 @@ class _TimerCircuit:
     same_schedule_prefix: str
     weekday_weekend_prefix: str
     per_day_prefix: str
+    #: Builds the (start_name, end_name) pairs for one block. Circuits do not
+    #: share a single naming scheme, so the layout is per circuit -- see the
+    #: two `_row_names_*` functions. Deliberately has no default: a default
+    #: here would make it a class attribute and bind as a method on access.
+    name_builder: Callable[[str, int, int], tuple[tuple[str, str], ...]]
     device_key: DeviceKey
+
+
+def _row_names_row_slot(
+    prefix: str, rows: int, col: int
+) -> tuple[tuple[str, str], ...]:
+    """Build the (start_name, end_name) pairs for a `<row>_<slot>` block.
+
+    Matches the firmware's ``<prefix>_zeit_<row>_<slot>`` numbering, where
+    slot is ``2*col`` (start) / ``2*col + 1`` (end). Used by the DHW and
+    heating circuits.
+    """
+    return tuple(
+        (f"{prefix}_zeit_{row}_{2 * col}", f"{prefix}_zeit_{row}_{2 * col + 1}")
+        for row in range(rows)
+    )
 
 
 # Numbers verified against a real diagnostics dump for parameters 162-667.
@@ -60,6 +81,7 @@ _DHW_CIRCUIT = _TimerCircuit(
     same_schedule_prefix="ID_Einst_SuBwWO",
     weekday_weekend_prefix="ID_Einst_SuBw25",
     per_day_prefix="ID_Einst_SuBwTG",
+    name_builder=_row_names_row_slot,
     device_key=DeviceKey.domestic_water,
 )
 
@@ -73,17 +95,27 @@ _DHW_WEEKDAYS: tuple[tuple[SK, int], ...] = (
     (SK.TIMER_DHW_SCHEDULE_SUNDAY, 6),
 )
 
+_HEATING_CIRCUIT = _TimerCircuit(
+    mode_selector_name="ID_Einst_SuHkr_akt",
+    rows=3,
+    # `W0` ends in a digit zero and `TG` is uppercase: these are the upstream
+    # library's literal names and differ from the DHW spellings.
+    same_schedule_prefix="ID_Einst_SuHkrW0",
+    weekday_weekend_prefix="ID_Einst_SuHkr25",
+    per_day_prefix="ID_Einst_SuHkrTG",
+    name_builder=_row_names_row_slot,
+    device_key=DeviceKey.heating,
+)
 
-def _row_names(prefix: str, rows: int, col: int) -> tuple[tuple[str, str], ...]:
-    """Build the ordered (start_name, end_name) pairs for one schedule block.
-
-    Matches the firmware's ``<prefix>_zeit_<row>_<slot>`` numbering, where
-    slot is ``2*col`` (start) / ``2*col + 1`` (end).
-    """
-    return tuple(
-        (f"{prefix}_zeit_{row}_{2 * col}", f"{prefix}_zeit_{row}_{2 * col + 1}")
-        for row in range(rows)
-    )
+_HEATING_WEEKDAYS: tuple[tuple[SK, int], ...] = (
+    (SK.TIMER_HEATING_SCHEDULE_MONDAY, 0),
+    (SK.TIMER_HEATING_SCHEDULE_TUESDAY, 1),
+    (SK.TIMER_HEATING_SCHEDULE_WEDNESDAY, 2),
+    (SK.TIMER_HEATING_SCHEDULE_THURSDAY, 3),
+    (SK.TIMER_HEATING_SCHEDULE_FRIDAY, 4),
+    (SK.TIMER_HEATING_SCHEDULE_SATURDAY, 5),
+    (SK.TIMER_HEATING_SCHEDULE_SUNDAY, 6),
+)
 
 
 def _build_circuit_entities(
@@ -101,7 +133,9 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             active_mode="week",
-            row_names=_row_names(circuit.same_schedule_prefix, circuit.rows, 0),
+            row_names=circuit.name_builder(
+                circuit.same_schedule_prefix, circuit.rows, 0
+            ),
         ),
         LuxtronikTimerScheduleTextDescription(
             key=weekday_key,
@@ -109,7 +143,9 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             active_mode="5+2",
-            row_names=_row_names(circuit.weekday_weekend_prefix, circuit.rows, 0),
+            row_names=circuit.name_builder(
+                circuit.weekday_weekend_prefix, circuit.rows, 0
+            ),
         ),
         LuxtronikTimerScheduleTextDescription(
             key=weekend_key,
@@ -117,7 +153,9 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             active_mode="5+2",
-            row_names=_row_names(circuit.weekday_weekend_prefix, circuit.rows, 1),
+            row_names=circuit.name_builder(
+                circuit.weekday_weekend_prefix, circuit.rows, 1
+            ),
         ),
     ]
     entities.extend(
@@ -127,7 +165,9 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             active_mode="days",
-            row_names=_row_names(circuit.per_day_prefix, circuit.rows, day_index),
+            row_names=circuit.name_builder(
+                circuit.per_day_prefix, circuit.rows, day_index
+            ),
         )
         for day_key, day_index in day_keys
     )
@@ -141,5 +181,12 @@ TIMER_SCHEDULE_ENTITIES: list[LuxtronikTimerScheduleTextDescription] = (
         weekday_key=SK.TIMER_DHW_SCHEDULE_WEEKDAY,
         weekend_key=SK.TIMER_DHW_SCHEDULE_WEEKEND,
         day_keys=_DHW_WEEKDAYS,
+    )
+    + _build_circuit_entities(
+        _HEATING_CIRCUIT,
+        week_key=SK.TIMER_HEATING_SCHEDULE_WEEK,
+        weekday_key=SK.TIMER_HEATING_SCHEDULE_WEEKDAY,
+        weekend_key=SK.TIMER_HEATING_SCHEDULE_WEEKEND,
+        day_keys=_HEATING_WEEKDAYS,
     )
 )

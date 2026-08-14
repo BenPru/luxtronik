@@ -992,6 +992,36 @@
             },
             "timer_dhw_schedule_sunday": {
                 "name": "\u010casov\u00fd pl\u00e1n tepl\u00e9 vody (ned\u011ble)"
+            },
+            "timer_heating_schedule_week": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (t\u00fdden)"
+            },
+            "timer_heating_schedule_weekday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (pracovn\u00ed dny)"
+            },
+            "timer_heating_schedule_weekend": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (v\u00edkend)"
+            },
+            "timer_heating_schedule_monday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (pond\u011bl\u00ed)"
+            },
+            "timer_heating_schedule_tuesday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (\u00fater\u00fd)"
+            },
+            "timer_heating_schedule_wednesday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (st\u0159eda)"
+            },
+            "timer_heating_schedule_thursday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (\u010dtvrtek)"
+            },
+            "timer_heating_schedule_friday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (p\u00e1tek)"
+            },
+            "timer_heating_schedule_saturday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (sobota)"
+            },
+            "timer_heating_schedule_sunday": {
+                "name": "\u010casov\u00fd pl\u00e1n vyt\u00e1p\u011bn\u00ed (ned\u011ble)"
             }
         },
         "select": {

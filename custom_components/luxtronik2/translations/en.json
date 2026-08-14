@@ -992,6 +992,36 @@
             },
             "timer_dhw_schedule_sunday": {
                 "name": "DHW Timer Schedule (Sunday)"
+            },
+            "timer_heating_schedule_week": {
+                "name": "Heating Timer Schedule (Week)"
+            },
+            "timer_heating_schedule_weekday": {
+                "name": "Heating Timer Schedule (Weekdays)"
+            },
+            "timer_heating_schedule_weekend": {
+                "name": "Heating Timer Schedule (Weekend)"
+            },
+            "timer_heating_schedule_monday": {
+                "name": "Heating Timer Schedule (Monday)"
+            },
+            "timer_heating_schedule_tuesday": {
+                "name": "Heating Timer Schedule (Tuesday)"
+            },
+            "timer_heating_schedule_wednesday": {
+                "name": "Heating Timer Schedule (Wednesday)"
+            },
+            "timer_heating_schedule_thursday": {
+                "name": "Heating Timer Schedule (Thursday)"
+            },
+            "timer_heating_schedule_friday": {
+                "name": "Heating Timer Schedule (Friday)"
+            },
+            "timer_heating_schedule_saturday": {
+                "name": "Heating Timer Schedule (Saturday)"
+            },
+            "timer_heating_schedule_sunday": {
+                "name": "Heating Timer Schedule (Sunday)"
             }
         },
         "select": {

@@ -992,6 +992,36 @@
             },
             "timer_dhw_schedule_sunday": {
                 "name": "Harmonogram czasowy ciep\u0142ej wody (niedziela)"
+            },
+            "timer_heating_schedule_week": {
+                "name": "Harmonogram czasowy ogrzewania (tydzie\u0144)"
+            },
+            "timer_heating_schedule_weekday": {
+                "name": "Harmonogram czasowy ogrzewania (dni robocze)"
+            },
+            "timer_heating_schedule_weekend": {
+                "name": "Harmonogram czasowy ogrzewania (weekend)"
+            },
+            "timer_heating_schedule_monday": {
+                "name": "Harmonogram czasowy ogrzewania (poniedzia\u0142ek)"
+            },
+            "timer_heating_schedule_tuesday": {
+                "name": "Harmonogram czasowy ogrzewania (wtorek)"
+            },
+            "timer_heating_schedule_wednesday": {
+                "name": "Harmonogram czasowy ogrzewania (\u015broda)"
+            },
+            "timer_heating_schedule_thursday": {
+                "name": "Harmonogram czasowy ogrzewania (czwartek)"
+            },
+            "timer_heating_schedule_friday": {
+                "name": "Harmonogram czasowy ogrzewania (pi\u0105tek)"
+            },
+            "timer_heating_schedule_saturday": {
+                "name": "Harmonogram czasowy ogrzewania (sobota)"
+            },
+            "timer_heating_schedule_sunday": {
+                "name": "Harmonogram czasowy ogrzewania (niedziela)"
             }
         },
         "select": {

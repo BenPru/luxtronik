@@ -94,12 +94,15 @@ class TestTimerScheduleTable:
 
         assert not problems, "\n".join(problems)
 
-    def test_ten_dhw_entities_generated(self):
-        assert len(TIMER_SCHEDULE_ENTITIES) == 10
+    def test_entity_count(self):
+        assert len(TIMER_SCHEDULE_ENTITIES) == 20
 
-    def test_row_counts_are_five_for_dhw(self):
-        for description in TIMER_SCHEDULE_ENTITIES:
-            assert len(description.row_names) == 5
+    def test_row_counts_per_circuit(self):
+        """DHW has 5 slots per day, the heating circuit only 3."""
+        by_key = {d.key: len(d.row_names) for d in TIMER_SCHEDULE_ENTITIES}
+        assert by_key[SK.TIMER_DHW_SCHEDULE_WEEK] == 5
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEK] == 3
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_SUNDAY] == 3
 
     def test_active_modes(self):
         by_key = {d.key: d.active_mode for d in TIMER_SCHEDULE_ENTITIES}
@@ -108,6 +111,45 @@ class TestTimerScheduleTable:
         assert by_key[SK.TIMER_DHW_SCHEDULE_WEEKEND] == "5+2"
         assert by_key[SK.TIMER_DHW_SCHEDULE_MONDAY] == "days"
         assert by_key[SK.TIMER_DHW_SCHEDULE_SUNDAY] == "days"
+
+    def test_heating_selector_and_device(self):
+        from custom_components.luxtronik2.const import DeviceKey
+
+        description = next(
+            d
+            for d in TIMER_SCHEDULE_ENTITIES
+            if d.key == SK.TIMER_HEATING_SCHEDULE_WEEK
+        )
+        assert description.mode_selector_name == "ID_Einst_SuHkr_akt"
+        assert description.device_key is DeviceKey.heating
+
+    def test_heating_row_names(self):
+        """Spot-checks against the real upstream names (222-282).
+
+        The heating prefixes are spelled `SuHkrW0` (digit zero) and `SuHkrTG`,
+        which differ from DHW's `SuBwWO`/`SuBwTG` - a copy-paste of the DHW
+        prefix would still generate plausible-looking names.
+        """
+        by_key = {d.key: d.row_names for d in TIMER_SCHEDULE_ENTITIES}
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEK][0] == (
+            "ID_Einst_SuHkrW0_zeit_0_0",
+            "ID_Einst_SuHkrW0_zeit_0_1",
+        )
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEKEND][0] == (
+            "ID_Einst_SuHkr25_zeit_0_2",
+            "ID_Einst_SuHkr25_zeit_0_3",
+        )
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_SUNDAY][2] == (
+            "ID_Einst_SuHkrTG_zeit_2_12",
+            "ID_Einst_SuHkrTG_zeit_2_13",
+        )
+
+    def test_heating_active_modes(self):
+        by_key = {d.key: d.active_mode for d in TIMER_SCHEDULE_ENTITIES}
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEK] == "week"
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEKDAY] == "5+2"
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEKEND] == "5+2"
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_MONDAY] == "days"
 
 
 # ===========================================================================

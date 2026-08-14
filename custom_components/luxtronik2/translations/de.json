@@ -992,6 +992,36 @@
             },
             "timer_dhw_schedule_sunday": {
                 "name": "Warmwasser-Zeitschaltplan (Sonntag)"
+            },
+            "timer_heating_schedule_week": {
+                "name": "Heizung-Zeitschaltplan (Woche)"
+            },
+            "timer_heating_schedule_weekday": {
+                "name": "Heizung-Zeitschaltplan (Werktage)"
+            },
+            "timer_heating_schedule_weekend": {
+                "name": "Heizung-Zeitschaltplan (Wochenende)"
+            },
+            "timer_heating_schedule_monday": {
+                "name": "Heizung-Zeitschaltplan (Montag)"
+            },
+            "timer_heating_schedule_tuesday": {
+                "name": "Heizung-Zeitschaltplan (Dienstag)"
+            },
+            "timer_heating_schedule_wednesday": {
+                "name": "Heizung-Zeitschaltplan (Mittwoch)"
+            },
+            "timer_heating_schedule_thursday": {
+                "name": "Heizung-Zeitschaltplan (Donnerstag)"
+            },
+            "timer_heating_schedule_friday": {
+                "name": "Heizung-Zeitschaltplan (Freitag)"
+            },
+            "timer_heating_schedule_saturday": {
+                "name": "Heizung-Zeitschaltplan (Samstag)"
+            },
+            "timer_heating_schedule_sunday": {
+                "name": "Heizung-Zeitschaltplan (Sonntag)"
             }
         },
         "select": {
