@@ -371,7 +371,8 @@ class TestActiveScheduleDescriptions:
         data = make_coordinator_data(parameters=parameters)
         coord = _mock_coordinator(data)
         coord.entity_active.return_value = entity_active
-        return [d.key for d in _active_schedule_descriptions(coord, data)]
+        active, _unreadable = _active_schedule_descriptions(coord, data)
+        return [d.key for d in active]
 
     def test_week_mode_yields_only_the_week_block(self):
         assert self._call({self._SELECTOR: "week"}) == [SK.TIMER_DHW_SCHEDULE_WEEK]
@@ -392,29 +393,46 @@ class TestActiveScheduleDescriptions:
         """A selector that this controller does not have is a real answer: no blocks."""
         assert self._call({}) == []
 
-    def test_data_none_yields_no_information(self):
-        """No coordinator data at all is "unknown", not "no program active"."""
-        from custom_components.luxtronik2.text import _active_schedule_descriptions
+    def test_inactive_entity_yields_nothing(self):
+        assert self._call({self._SELECTOR: "week"}, entity_active=False) == []
 
-        assert _active_schedule_descriptions(_mock_coordinator(), None) is None
-
-    def test_undecodable_selector_yields_no_information(self):
+    def test_undecodable_selector_freezes_only_its_own_circuit(self):
         """A present-but-unreadable selector must not read as "no program active".
 
         `get_sensor_data` returns None both for an absent register and for a
-        register whose datatype could not decode the raw value this poll
-        (`SelectionBase` returns None for an unrecognised code). Treating the
-        latter as "nothing is active" would drop all 10 entities and disable
-        all 10 registry entries on a single glitched read.
+        register whose datatype could not decode the raw value
+        (`SelectionBase` returns None for an unrecognised code). The selector
+        is reported as unreadable so the sync leaves that circuit alone.
         """
         from custom_components.luxtronik2.text import _active_schedule_descriptions
 
         data = make_coordinator_data(parameters={self._SELECTOR: None})
         coord = _mock_coordinator(data)
-        assert _active_schedule_descriptions(coord, data) is None
+        active, unreadable = _active_schedule_descriptions(coord, data)
+        assert active == []
+        assert unreadable == {self._SELECTOR}
 
-    def test_inactive_entity_yields_nothing(self):
-        assert self._call({self._SELECTOR: "week"}, entity_active=False) == []
+    def test_one_unreadable_circuit_does_not_hide_another(self):
+        """The regression the second circuit makes possible.
+
+        Before this, any single unreadable selector returned "no information"
+        for the whole pass, freezing every circuit's entities.
+        """
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        data = make_coordinator_data(
+            parameters={self._SELECTOR: None, "ID_Einst_SuHkr_akt": "week"}
+        )
+        coord = _mock_coordinator(data)
+        active, unreadable = _active_schedule_descriptions(coord, data)
+        assert [d.key for d in active] == [SK.TIMER_HEATING_SCHEDULE_WEEK]
+        assert unreadable == {self._SELECTOR}
+
+    def test_data_none_still_yields_no_information(self):
+        """No coordinator data at all is "unknown" for every circuit."""
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        assert _active_schedule_descriptions(_mock_coordinator(), None) is None
 
 
 # ===========================================================================
@@ -715,6 +733,52 @@ class TestTimerScheduleSync:
         remove.assert_not_awaited()
         registry.async_update_entity.assert_not_called()
         assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
+
+    @pytest.mark.asyncio
+    async def test_an_unreadable_circuit_is_frozen_while_others_still_sync(self):
+        """A frozen circuit keeps its live entities and registry entries.
+
+        The per-circuit skip is only safe if the sync also refuses to remove
+        and disable that circuit's blocks - otherwise it causes exactly the
+        teardown the whole-pass bail existed to prevent.
+        """
+        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
+
+        sync, coord, added = self._make_sync("week")
+        registry = self._registry({})
+        with (
+            patch(
+                "custom_components.luxtronik2.text.er.async_get", return_value=registry
+            ),
+            patch("homeassistant.helpers.frame.report_usage"),
+        ):
+            # Both circuits start in "week" mode.
+            coord.data = make_coordinator_data(
+                parameters={self._SELECTOR: "week", "ID_Einst_SuHkr_akt": "week"}
+            )
+            await sync.async_setup()
+            assert set(sync._entities) == {
+                SK.TIMER_DHW_SCHEDULE_WEEK,
+                SK.TIMER_HEATING_SCHEDULE_WEEK,
+            }
+
+            # DHW's selector glitches while heating switches program.
+            coord.data = make_coordinator_data(
+                parameters={self._SELECTOR: None, "ID_Einst_SuHkr_akt": "5+2"}
+            )
+            with patch.object(
+                LuxtronikTimerScheduleText, "async_remove", new=AsyncMock()
+            ) as remove:
+                await sync.async_apply()
+
+        # Only the heating week block was removed; the DHW one is untouched.
+        assert remove.await_count == 1
+        assert SK.TIMER_DHW_SCHEDULE_WEEK in sync._entities
+        assert SK.TIMER_HEATING_SCHEDULE_WEEK not in sync._entities
+        assert [e.entity_description.key for e in added[2:]] == [
+            SK.TIMER_HEATING_SCHEDULE_WEEKDAY,
+            SK.TIMER_HEATING_SCHEDULE_WEEKEND,
+        ]
 
     @pytest.mark.asyncio
     async def test_removal_of_an_entity_that_never_reached_the_platform(self):
