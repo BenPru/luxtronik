@@ -39,8 +39,28 @@ Device gating is already generic: `coordinator.device_key_active` returns
 for `DeviceKey.ventilation`, and `_active_schedule_descriptions` already calls
 `entity_active`. No coordinator change is needed.
 
-Each circuit yields 10 entities: week, weekday, weekend, and one per weekday
-Monday-Sunday. 20 new entities in total.
+Each circuit yields 10 text entities: week, weekday, weekend, and one per
+weekday Monday-Sunday. 20 new text entities in total.
+
+## Program mode selects
+
+DHW also exposes its mode selector as a select entity (`SK.TIMER_DHW_PROGRAM`
+-> `LuxParameter.P0405_TIMER_PROGRAM_DHW` in `select_entities_predefined.py`).
+Without the equivalents, a user can see the new schedules but cannot switch
+which program is active from Home Assistant - and which schedule entities
+exist at all is driven by exactly that selector. So both circuits get one too:
+
+| | Heating | Ventilation |
+|---|---|---|
+| Sensor key | `SK.TIMER_HEATING_PROGRAM` | `SK.TIMER_VENTILATION_PROGRAM` |
+| Lux parameter | `P0222_TIMER_PROGRAM_HEATING` | `P0895_TIMER_PROGRAM_VENTILATION` |
+| Device | `DeviceKey.heating` | `DeviceKey.ventilation` |
+
+Both reuse the existing `timer_program_options` /
+`TIMER_PROGRAM_RAW_OPTIONS` mapping (`week` / `weekday_weekend` -> `"5+2"` /
+`daily` -> `"days"`) and `EntityCategory.CONFIG`, exactly like the DHW one.
+They need the same `name` + `state` translation shape as
+`entity.select.timer_dhw_program` in all five languages.
 
 ## Parameter-name layouts
 
@@ -118,13 +138,26 @@ unrolled is the mixing/ZIP/pool set.
 20 new `SensorKey` members following the existing DHW naming:
 `TIMER_HEATING_SCHEDULE_{WEEK,WEEKDAY,WEEKEND,MONDAY..SUNDAY}` and
 `TIMER_VENTILATION_SCHEDULE_{...}`, with string values matching the member
-name in lowercase.
+name in lowercase, plus `TIMER_HEATING_PROGRAM` and
+`TIMER_VENTILATION_PROGRAM`.
+
+Two new `LuxParameter` members alongside `P0405_TIMER_PROGRAM_DHW`:
+`P0222_TIMER_PROGRAM_HEATING = "parameters.ID_Einst_SuHkr_akt"` and
+`P0895_TIMER_PROGRAM_VENTILATION = "parameters.ID_Einst_SuLuf_akt"`.
+
+### `select_entities_predefined.py`
+
+Two `LuxtronikSelectEntityDescription` entries appended to `SELECT_ENTITIES`,
+copying the `SK.TIMER_DHW_PROGRAM` entry's shape with the keys, parameters and
+devices from the table above.
 
 ### `translations/{en,de,nl,cs,pl}.json`
 
 20 keys each under `entity.text`, mirroring the DHW wording, e.g.
 `"Heating Timer Schedule (Monday)"` / `"Heizung-Zeitschaltplan (Montag)"` /
-`"Verwarming tijdschema (maandag)"`. All five files stay in lockstep.
+`"Verwarming tijdschema (maandag)"`, and 2 keys each under `entity.select`
+with the same `name` + `state` shape as `timer_dhw_program`. All five files
+stay in lockstep.
 
 ### `text.py` — per-circuit bail
 
@@ -135,18 +168,34 @@ circuit is unreadable". With three circuits it is not: an undecodable
 ventilation selector — precisely the assumption shipped unverified above —
 would freeze the heating and DHW entities too.
 
-Make the bail per-circuit: collect the `mode_selector_name`s that failed to
-read this poll and skip only the descriptions belonging to them, computing the
-other circuits' active blocks normally. The whole-pass `None` return stays for
-`data is None`, which genuinely carries no information about any circuit.
+Make the bail per-circuit. `_active_schedule_descriptions` returns
+`tuple[list[description], set[str]] | None`: the active blocks, plus the
+`mode_selector_name`s that could not be read this poll. `None` stays reserved
+for `data is None`, which genuinely carries no information about any circuit.
 
-Nothing else in `text.py` changes: the registry enable/disable sync, the write
-batching in `async_set_value`, and the `available` property are all already
-keyed per description via `mode_selector_name`.
+"Skipping" an unreadable circuit means more than leaving it out of the active
+list — its live entities must also survive. `async_apply` derives the frozen
+keys (every description whose selector is unreadable) and excludes them from
+both `to_remove` and the `_disable_inactive` pass, so an unreadable circuit is
+left exactly as it is while the others are synced normally. Without that, the
+per-circuit skip would cause the very teardown the whole-pass bail exists to
+prevent.
+
+Nothing else in `text.py` changes: `_enable_active`, the write batching in
+`async_set_value`, and the `available` property already work per description.
+An entity of an unreadable circuit reports unavailable (its selector reads
+`None`, which never equals `active_mode`) while keeping its registry entry and
+history — which is the intended behaviour.
+
+This changes the helper's return type, so the private `_call` helper in
+`TestActiveScheduleDescriptions` unwraps the tuple; its assertions and every
+other existing DHW test stay as they are.
 
 ## Testing
 
-Extends `tests/test_text.py`. All existing DHW tests must pass unchanged.
+Extends `tests/test_text.py`. All existing DHW tests keep their assertions;
+the only edit permitted to them is unwrapping the new tuple return in the
+`TestActiveScheduleDescriptions._call` helper.
 
 - **Name generation, heating**: `_row_names_row_slot` output spot-checked
   against real upstream names, e.g. week row 0 -> `ID_Einst_SuHkrW0_zeit_0_0`
@@ -160,11 +209,18 @@ Extends `tests/test_text.py`. All existing DHW tests must pass unchanged.
 - **Device gating**: with `has_ventilation` False, no ventilation description
   is returned by `_active_schedule_descriptions`; with it True and the
   selector reading `week`, exactly the ventilation week block appears.
-- **Per-circuit bail**: with the ventilation selector unreadable and the DHW
-  and heating selectors reading `week`, the pass still returns both of their
-  week blocks and no ventilation block — the regression this rollout forces.
+- **Per-circuit bail**: with one circuit's selector unreadable and the others
+  reading `week`, the pass still returns the readable circuits' week blocks
+  and reports the unreadable selector in the second element of the tuple.
+- **Frozen circuit is left alone**: a live entity of a circuit whose selector
+  turns unreadable is neither removed from the state machine nor written to
+  the registry, while a second, readable circuit still swaps its blocks in the
+  same pass.
 - **Datatype overrides**: after `update_Luxtronik_Parameters()`, parameter 895
   is `TimerProgram` and 896/955 are `TimeOfDay`.
+- **Program selects** (`tests/test_select.py`): the two new descriptions are
+  present in `SELECT_ENTITIES` with the expected `luxtronik_key`, device and
+  `raw_option_map`, so a wrong parameter string is caught at CI time.
 
 Coverage must not regress; run the full suite with `--cov` scoped at the
 package root.
