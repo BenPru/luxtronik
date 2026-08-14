@@ -1085,6 +1085,22 @@
                     "daily": "Jednotliv\u00e9 dny"
                 }
             },
+            "timer_heating_program": {
+                "name": "\u010casov\u00fd program vyt\u00e1p\u011bn\u00ed",
+                "state": {
+                    "week": "Cel\u00fd t\u00fdden",
+                    "weekday_weekend": "Pracovn\u00ed dny + v\u00edkend",
+                    "daily": "Jednotliv\u00e9 dny"
+                }
+            },
+            "timer_ventilation_program": {
+                "name": "\u010casov\u00fd program v\u011btr\u00e1n\u00ed",
+                "state": {
+                    "week": "Cel\u00fd t\u00fdden",
+                    "weekday_weekend": "Pracovn\u00ed dny + v\u00edkend",
+                    "daily": "Jednotliv\u00e9 dny"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV re\u017eim",
                 "state": {

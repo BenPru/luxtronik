@@ -85,6 +85,22 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
     ),
     LuxtronikSelectEntityDescription(
+        key=SK.TIMER_HEATING_PROGRAM,
+        device_key=DeviceKey.heating,
+        luxtronik_key=LuxParameter.P0222_TIMER_PROGRAM_HEATING,
+        entity_category=EntityCategory.CONFIG,
+        options=timer_program_options,
+        raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
+    ),
+    LuxtronikSelectEntityDescription(
+        key=SK.TIMER_VENTILATION_PROGRAM,
+        device_key=DeviceKey.ventilation,
+        luxtronik_key=LuxParameter.P0895_TIMER_PROGRAM_VENTILATION,
+        entity_category=EntityCategory.CONFIG,
+        options=timer_program_options,
+        raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
+    ),
+    LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_SELECTOR,
         device_key=DeviceKey.heating,
         luxtronik_key=LuxParameter.P0003_MODE_HEATING,

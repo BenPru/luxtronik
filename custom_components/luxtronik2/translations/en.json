@@ -1085,6 +1085,22 @@
                     "daily": "Per day"
                 }
             },
+            "timer_heating_program": {
+                "name": "Heating timer program",
+                "state": {
+                    "week": "Whole week",
+                    "weekday_weekend": "Weekdays + weekend",
+                    "daily": "Per day"
+                }
+            },
+            "timer_ventilation_program": {
+                "name": "Ventilation timer program",
+                "state": {
+                    "week": "Whole week",
+                    "weekday_weekend": "Weekdays + weekend",
+                    "daily": "Per day"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV Mode",
                 "state": {

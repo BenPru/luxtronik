@@ -263,3 +263,60 @@ class TestRawOptionMap:
         entity._handle_coordinator_update()
         assert entity._attr_options == ["automatic", "off"]
         assert entity._attr_current_option == "automatic"
+
+
+# ===========================================================================
+# Heating and ventilation timer program selects
+# ===========================================================================
+
+
+class TestTimerProgramSelects:
+    """The program selector of every schedule-carrying circuit is settable."""
+
+    def _description(self, key):
+        from custom_components.luxtronik2.select_entities_predefined import (
+            SELECT_ENTITIES,
+        )
+
+        return next(d for d in SELECT_ENTITIES if d.key == key)
+
+    def test_heating_program_select(self):
+        description = self._description(SensorKey.TIMER_HEATING_PROGRAM)
+        assert description.luxtronik_key == LuxParameter.P0222_TIMER_PROGRAM_HEATING
+        assert description.device_key is DeviceKey.heating
+        assert description.raw_option_map == {
+            "week": "week",
+            "weekday_weekend": "5+2",
+            "daily": "days",
+        }
+
+    def test_ventilation_program_select(self):
+        description = self._description(SensorKey.TIMER_VENTILATION_PROGRAM)
+        assert description.luxtronik_key == LuxParameter.P0895_TIMER_PROGRAM_VENTILATION
+        assert description.device_key is DeviceKey.ventilation
+        assert description.options == ["week", "weekday_weekend", "daily"]
+
+    def test_parameter_strings_match_the_schedule_selectors(self):
+        """The select and the schedule entities must drive the same register.
+
+        A typo in either parameter string would silently give the user a
+        selector that writes somewhere else while the schedules keep reading
+        the real one.
+        """
+        from custom_components.luxtronik2.timer_schedule_entities_predefined import (
+            TIMER_SCHEDULE_ENTITIES,
+        )
+
+        selectors = {
+            SensorKey.TIMER_HEATING_SCHEDULE_WEEK: (
+                LuxParameter.P0222_TIMER_PROGRAM_HEATING
+            ),
+            SensorKey.TIMER_VENTILATION_SCHEDULE_WEEK: (
+                LuxParameter.P0895_TIMER_PROGRAM_VENTILATION
+            ),
+        }
+        for schedule_key, parameter in selectors.items():
+            description = next(
+                d for d in TIMER_SCHEDULE_ENTITIES if d.key == schedule_key
+            )
+            assert parameter.value == f"parameters.{description.mode_selector_name}"

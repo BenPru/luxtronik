@@ -1085,6 +1085,22 @@
                     "daily": "Per dag"
                 }
             },
+            "timer_heating_program": {
+                "name": "Verwarming tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
+            "timer_ventilation_program": {
+                "name": "Ventilatie tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV Mode",
                 "state": {

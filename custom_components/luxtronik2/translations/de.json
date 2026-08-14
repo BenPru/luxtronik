@@ -1085,6 +1085,22 @@
                     "daily": "Einzelne Tage"
                 }
             },
+            "timer_heating_program": {
+                "name": "Heizung Zeitprogramm",
+                "state": {
+                    "week": "Ganze Woche",
+                    "weekday_weekend": "Werktage + Wochenende",
+                    "daily": "Einzelne Tage"
+                }
+            },
+            "timer_ventilation_program": {
+                "name": "L\u00fcftung Zeitprogramm",
+                "state": {
+                    "week": "Ganze Woche",
+                    "weekday_weekend": "Werktage + Wochenende",
+                    "daily": "Einzelne Tage"
+                }
+            },
             "pv_mode_selector": {
                 "name": "PV Modus",
                 "state": {

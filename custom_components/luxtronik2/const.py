@@ -403,6 +403,7 @@ class LuxParameter(StrEnum):
     P0002_DHW_TARGET_TEMPERATURE = "parameters.ID_Einst_BWS_akt"
     P0003_MODE_HEATING = "parameters.ID_Ba_Hz_akt"
     P0004_MODE_DHW = "parameters.ID_Ba_Bw_akt"
+    P0222_TIMER_PROGRAM_HEATING = "parameters.ID_Einst_SuHkr_akt"
     P0405_TIMER_PROGRAM_DHW = "parameters.ID_Einst_SUBW_akt2"
     # luxtronik*_heating_curve*
     P0011_HEATING_CURVE_END_TEMPERATURE = "parameters.ID_Einst_HzHwHKE_akt"
@@ -503,6 +504,7 @@ class LuxParameter(StrEnum):
     # from the heating/DHW mode numbering, which also has second_heatsource.
     # Irrelevant to the select, which works on the library's decoded strings.
     P0894_VENTILATION_MODE = "parameters.ID_Einst_BA_Lueftung_akt"
+    P0895_TIMER_PROGRAM_VENTILATION = "parameters.ID_Einst_SuLuf_akt"
     # The four DIN 1946-6 ventilation stages. Both the pinned library and
     # upstream's rewrite type these as Unknown/UINT32 and non-writeable, so
     # the value is the raw register with no conversion and the unit is
@@ -970,6 +972,8 @@ class SensorKey(StrEnum):
     EXTRA_DHW_DURATION = "extra_dhw_duration"
 
     TIMER_DHW_PROGRAM = "timer_dhw_program"
+    TIMER_HEATING_PROGRAM = "timer_heating_program"
+    TIMER_VENTILATION_PROGRAM = "timer_ventilation_program"
     TIMER_DHW_SCHEDULE_WEEK = "timer_dhw_schedule_week"
     TIMER_DHW_SCHEDULE_WEEKDAY = "timer_dhw_schedule_weekday"
     TIMER_DHW_SCHEDULE_WEEKEND = "timer_dhw_schedule_weekend"

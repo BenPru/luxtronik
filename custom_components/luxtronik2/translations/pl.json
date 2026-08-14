@@ -1085,6 +1085,22 @@
                     "daily": "Poszczególne dni"
                 }
             },
+            "timer_heating_program": {
+                "name": "Program czasowy ogrzewania",
+                "state": {
+                    "week": "Cały tydzień",
+                    "weekday_weekend": "Dni robocze + weekend",
+                    "daily": "Poszczególne dni"
+                }
+            },
+            "timer_ventilation_program": {
+                "name": "Program czasowy wentylacji",
+                "state": {
+                    "week": "Cały tydzień",
+                    "weekday_weekend": "Dni robocze + weekend",
+                    "daily": "Poszczególne dni"
+                }
+            },
             "pv_mode_selector": {
                 "name": "Tryb PV",
                 "state": {
