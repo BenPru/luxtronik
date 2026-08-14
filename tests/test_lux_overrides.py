@@ -417,3 +417,47 @@ class TestUnknownSelectionCodeWarning:
         lux_overrides.warn_on_unknown_selection_codes()
         HeatpumpCode("ID_WEB_Code_WP_akt").from_heatpump(9999)
         assert caplog.text.count("9999") == 1
+
+
+class TestTimerScheduleDatatypeCoverage:
+    """Both timer-program parameter blocks must get their datatypes.
+
+    The heating/DHW/pool block is contiguous at 162-667, but the ventilation
+    block sits apart at 895-955 and was not covered at all, so every
+    ventilation time decoded as a raw seconds integer.
+    """
+
+    def _applied(self):
+        from luxtronik.parameters import Parameters
+
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        return Parameters.parameters
+
+    def test_ventilation_selector_is_a_timer_program(self):
+        from custom_components.luxtronik2.lux_overrides import TimerProgram
+
+        assert isinstance(self._applied()[895], TimerProgram)
+
+    def test_ventilation_times_are_time_of_day(self):
+        from custom_components.luxtronik2.lux_overrides import TimeOfDay
+
+        parameters = self._applied()
+        # First and last of both the start block (896-925) and the
+        # interleaved end block (926-955).
+        for number in (896, 925, 926, 955):
+            assert isinstance(parameters[number], TimeOfDay), number
+
+    def test_heating_block_is_still_covered(self):
+        from custom_components.luxtronik2.lux_overrides import (
+            TimeOfDay,
+            TimerProgram,
+        )
+
+        parameters = self._applied()
+        assert isinstance(parameters[222], TimerProgram)
+        for number in (223, 282):
+            assert isinstance(parameters[number], TimeOfDay), number

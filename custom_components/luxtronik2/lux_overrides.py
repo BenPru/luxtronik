@@ -236,9 +236,14 @@ def update_Luxtronik_Parameters():
     update_Luxtronik_Parameter_Classes(delta_temperature_numbers, Kelvin)
 
     # Timer program schedule parameters: mostly TimeOfDay entries, with a
-    # handful of TimerProgram mode selectors interspersed in the range.
-    timer_program_numbers = {222, 283, 344, 405, 506, 607}
-    time_of_day_numbers = [n for n in range(162, 668) if n not in timer_program_numbers]
+    # handful of TimerProgram mode selectors interspersed. 162-667 holds the
+    # heating, mixing, DHW, circulation-pump and pool circuits; the
+    # ventilation circuit sits apart at 895 (selector) and 896-955 (times).
+    timer_program_numbers = {222, 283, 344, 405, 506, 607, 895}
+    schedule_numbers = list(range(162, 668)) + list(range(895, 956))
+    time_of_day_numbers = [
+        n for n in schedule_numbers if n not in timer_program_numbers
+    ]
     update_Luxtronik_Parameter_Classes(time_of_day_numbers, TimeOfDay)
     update_Luxtronik_Parameter_Classes(list(timer_program_numbers), TimerProgram)
 
