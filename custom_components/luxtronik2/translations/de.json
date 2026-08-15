@@ -1117,7 +1117,7 @@
                     "off": "Aus",
                     "automatic": "Automatisch",
                     "second_heatsource": "Zweiter W\u00e4rmeerzeuger",
-                    "party": "Hochleistung",
+                    "party": "Party",
                     "holidays": "Ferien"
                 }
             },
@@ -1127,7 +1127,7 @@
                     "off": "Aus",
                     "automatic": "Automatisch",
                     "second_heatsource": "Zweiter W\u00e4rmeerzeuger",
-                    "party": "Hochleistung",
+                    "party": "Party",
                     "holidays": "Ferien"
                 }
             },
@@ -1136,7 +1136,7 @@
                 "state": {
                     "off": "Aus",
                     "automatic": "Automatisch",
-                    "party": "Hochleistung",
+                    "party": "Party",
                     "holidays": "Ferien"
                 }
             },
@@ -1145,7 +1145,7 @@
                 "state": {
                     "off": "Aus",
                     "automatic": "Automatisch",
-                    "party": "Hochleistung",
+                    "party": "Party",
                     "holidays": "Ferien"
                 }
             },
@@ -1154,7 +1154,7 @@
                 "state": {
                     "off": "Aus",
                     "automatic": "Automatisch",
-                    "party": "Hochleistung",
+                    "party": "Party",
                     "holidays": "Ferien"
                 }
             },
@@ -1163,7 +1163,7 @@
                 "state": {
                     "off": "Aus",
                     "automatic": "Automatisch",
-                    "party": "Hochleistung",
+                    "party": "Party",
                     "holidays": "Ferien"
                 }
             }

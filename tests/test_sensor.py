@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_TIMEOUT,
     PERCENTAGE,
     UnitOfElectricPotential,
+    UnitOfVolumeFlowRate,
 )
 from luxtronik.calculations import Calculations
 
@@ -757,11 +758,12 @@ def _assert_raw_converts_to(
 
 
 class TestVentilationStageSetpoints:
-    """The four ventilation stages are exposed read-only and unitless while
-    their scale is unconfirmed: the library types them Unknown/UINT32 and
-    non-writeable, so no conversion runs and the raw register is the value.
-    Claiming a unit (or promoting them to a `number`) would commit to a scale
-    that the diagnostics evidence does not yet settle (#729)."""
+    """The four ventilation stages hold the configured airflow in m3/h: the
+    library types them Unknown/UINT32, so no conversion runs and the raw
+    register is the value. #729's LWC407 (400 m3/h unit) read 130 / 200 / 250
+    against fan outputs of 32.5 % / 50.0 % / 62.5 % at the same moments.
+    They stay read-only - that is one system, and a `number` would commit to
+    the scale before writing real airflow."""
 
     STAGE_KEYS = (
         SensorKey.VENTILATION_STAGE_HUMIDITY_PROTECTION,
@@ -770,17 +772,22 @@ class TestVentilationStageSetpoints:
         SensorKey.VENTILATION_STAGE_INTENSIVE,
     )
 
-    def test_stages_are_unitless_and_unscaled(self):
+    def test_stages_are_airflow_and_unscaled(self):
         for key in self.STAGE_KEYS:
             description = next(d for d in SENSORS if d.key == key)
-            assert description.native_unit_of_measurement is None
-            assert description.device_class is None
+            assert (
+                description.native_unit_of_measurement
+                == UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
+            )
+            assert description.device_class == SensorDeviceClass.VOLUME_FLOW_RATE
             assert description.factor is None
             assert description.device_key == DeviceKey.ventilation
 
     def test_stage_value_is_the_raw_register(self):
-        """100/150/230/300 on #729's controller, passed through untouched."""
-        for key, raw in zip(self.STAGE_KEYS, (100, 150, 230, 300), strict=True):
+        """130/200/250 on #729's controller, passed through untouched. The
+        intensive value is synthetic - that stage is not reachable through the
+        mode parameter there, so it was never observed."""
+        for key, raw in zip(self.STAGE_KEYS, (130, 200, 250, 400), strict=True):
             description = next(d for d in SENSORS if d.key == key)
             group, sensor_id = description.luxtronik_key.split(".", 1)
             data = make_coordinator_data(**{group: {sensor_id: raw}})
@@ -810,10 +817,11 @@ class TestAnalogOutScaling:
         _assert_raw_converts_to(SensorKey.ANALOG_OUT2, 550, 5.5)
 
     def test_analog_outs_are_volts(self):
-        """0/50/100 is equally round read as percent, so the dumps cannot
-        settle volts vs percent here. Volts is a deliberate choice - the
-        controller configures these as a 0-10 V signal - and the factor only
-        makes sense alongside it, so the two are asserted together."""
+        """0/50/100 is equally round read as percent, so the dumps alone
+        cannot settle volts vs percent. #729's controller web UI does:
+        AnalogOut2 85.0 displays as 8.50 V, AnalogOut3 50.0 as 5.00 V. The
+        factor only makes sense alongside volts, so the two are asserted
+        together."""
         for key in (SensorKey.ANALOG_OUT1, SensorKey.ANALOG_OUT2):
             description = next(d for d in SENSORS if d.key == key)
             assert description.device_class == SensorDeviceClass.VOLTAGE
@@ -825,9 +833,10 @@ class TestAnalogOutScaling:
 
 class TestVentilationFanScaling:
     """The fan outputs share the analog outputs' per-mille encoding but are
-    reported as a modulation percentage, which is what the controller's
-    ventilation stages are set in - so the datatype is the whole conversion
-    and no `factor` belongs here. Raw values from #729's LWC407."""
+    reported as a modulation percentage without a `factor`: the value handed
+    out is the undivided register, and #729's controller displays 3.25 V where
+    this integration shows 32.5 - correct as percent of the 10 V scale, ten
+    times too large as volts. Raw values from that LWC407."""
 
     def test_supply_fan_scaling(self):
         """340 in the reduced ventilation stage."""

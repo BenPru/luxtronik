@@ -12,6 +12,7 @@ from homeassistant.const import (
     UnitOfPressure,
     UnitOfTemperature,
     UnitOfTime,
+    UnitOfVolumeFlowRate,
 )
 
 from .const import (
@@ -385,14 +386,15 @@ SENSORS: list[descr] = [
     ),
     # VZU/VAB are analog fan outputs, so they carry the modulation level a
     # binary sensor would discard. Same per-mille encoding as the analog
-    # outputs above, but reported as percent rather than volts: the quantity
-    # is a fan modulation level, which is what the controller's ventilation
-    # stages are configured in, and percent needs no factor. #729's LWC407
-    # reports 34.0 in the reduced stage and 68.7 in the nominal one - two
-    # clean stages either way (34 % / 69 %, or 3.4 V / 6.9 V of a 10 V scale).
-    # They are setpoints, not measured speeds - they never reach 0 and do not
-    # follow the unit being switched off by other means - which is why they
-    # are named "... fan setpoint".
+    # outputs above, but reported as percent rather than volts, and without
+    # the factor: the value handed out is the undivided register, and #729's
+    # controller displays 3.25 V for the 32.5 this integration shows. Labelled
+    # V that would read as 32.5 volts - ten times the real output - while as
+    # percent it is right, since the same point is 32.5 % of the 10 V scale.
+    # Confirmed against that controller's web UI at three operating points
+    # (32.5 / 50.0 / 62.5), each matching a configured stage below divided by
+    # the unit size. Percent also keeps the number free of an assumed full
+    # scale, which volts would not.
     descr(
         key=SensorKey.VENTILATION_SUPPLY_FAN,
         device_key=DeviceKey.ventilation,
@@ -408,14 +410,19 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=PERCENTAGE,
     ),
     # The four configured ventilation stages (DIN 1946-6: humidity
-    # protection, reduced, nominal, intensive). Read-only and unitless on
-    # purpose: both the pinned library and upstream's rewrite type these as
-    # Unknown/UINT32 and non-writeable, so no conversion runs and the value
-    # is the raw register. The names and a typical 100/150/230/300 reading
-    # point at m3/h, but per mille of a fan setpoint would look identical,
-    # and a `number` entity would have to commit to a scale before writing
-    # real airflow into someone's house. Exposing them read-only first turns
-    # the diagnostics corpus into the evidence needed to promote them (#729).
+    # protection, reduced, nominal, intensive). The register is the airflow
+    # in m3/h with no conversion - both the pinned library and upstream's
+    # rewrite type these as Unknown/UINT32, so the raw value is what arrives.
+    # #729's LWC407, configured for a 400 m3/h unit, reported 130 / 200 / 250
+    # against fan outputs of 32.5 % / 50.0 % / 62.5 % at the same moments:
+    # three operating points where stage / unit size lands exactly on the fan
+    # output, which per mille of the fan setpoint would not do. Intensive was
+    # never observed - that stage is not reachable through the mode parameter
+    # on that controller - so it rides on the other three.
+    #
+    # Still read-only. That is one system, and a `number` entity would have to
+    # commit to the scale before writing real airflow into someone's house;
+    # a wrong unit on a sensor is a label, a wrong unit on a write is not.
     #
     # Gated on the ventilation device rather than the ID_Visi_Einst_Luf_*
     # flags: those are the same flag family that reads 0 on a working module,
@@ -425,24 +432,32 @@ SENSORS: list[descr] = [
         device_key=DeviceKey.ventilation,
         luxtronik_key=LP.P0960_VENTILATION_STAGE_HUMIDITY_PROTECTION,
         entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
+        native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
     ),
     descr(
         key=SensorKey.VENTILATION_STAGE_REDUCED,
         device_key=DeviceKey.ventilation,
         luxtronik_key=LP.P0961_VENTILATION_STAGE_REDUCED,
         entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
+        native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
     ),
     descr(
         key=SensorKey.VENTILATION_STAGE_NOMINAL,
         device_key=DeviceKey.ventilation,
         luxtronik_key=LP.P0962_VENTILATION_STAGE_NOMINAL,
         entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
+        native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
     ),
     descr(
         key=SensorKey.VENTILATION_STAGE_INTENSIVE,
         device_key=DeviceKey.ventilation,
         luxtronik_key=LP.P0963_VENTILATION_STAGE_INTENSIVE,
         entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
+        native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
     ),
     descr(
         key=SensorKey.CURRENT_HEAT_OUTPUT,
