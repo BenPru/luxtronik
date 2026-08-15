@@ -546,7 +546,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfPower.WATT,
         entity_registry_enabled_default=False,
         native_precision=0,
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # endregion Main heatpump
     # region Heating
@@ -677,7 +676,6 @@ SENSORS: list[descr] = [
         # 0.01 kWh raw unit, applied by the Energy2 datatype this parameter is
         # registered with in lux_overrides - hence no factor. Scale measured
         # against the heat-quantity calculations in #734.
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
     ),
     descr(
         key=SensorKey.FLOW_OUT_TEMPERATURE_EXTERNAL,
@@ -749,7 +747,6 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         # 0.01 kWh raw unit, applied by the Energy2 datatype (see 1136 above).
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_89,
     ),
     descr(
         key=SensorKey.SOLAR_COLLECTOR_TEMPERATURE,
@@ -804,7 +801,6 @@ SENSORS: list[descr] = [
         # 0.01 kWh raw unit, applied by the Energy2 datatype (see 1136 above).
         # This one reads 0.0 on every unit examined in #734, so its scale
         # follows its two siblings by analogy and is not itself measured.
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_88,
     ),
     # endregion Cooling
 ]

@@ -32,7 +32,6 @@ from packaging.version import Version
 
 from .const import (
     DeviceKey,
-    # FirmwareVersionMinor,
     LuxCalculation,
     LuxOperationMode,
     LuxParameter,
@@ -81,6 +80,17 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     visibility: LuxVisibility | LuxParameter = LuxVisibility.UNSET
     visibility_formula: str | None = None
     entity_active_formula: str | None = None
+    # All four are compared against a Version with `<` / `>`, so they must be
+    # Version instances - a bare int or an Enum member raises TypeError at
+    # entity setup, because Version.__lt__ returns NotImplemented and neither
+    # int nor Enum defines the reflected operator against it.
+    #
+    # The `_minor` pair carries <minor>.<patch> (V3.90.1 -> Version("90.1")),
+    # which is why a whole-number type cannot express the thresholds actually
+    # in use - see water_heater.py, where 88.2 and 88.3 split the DHW target
+    # parameter pair. Prefer testing whether the register is present at all
+    # (`.value is None`) over any version gate; reserve these for registers
+    # present on both sides of a change whose *meaning* moves.
     min_firmware_version_minor: Version | None = None
     max_firmware_version_minor: Version | None = None
     min_firmware_version: Version | None = None
