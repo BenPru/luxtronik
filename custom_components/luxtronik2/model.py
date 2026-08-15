@@ -134,6 +134,28 @@ class LuxtronikCopSensorDescription(  # type: ignore  # pyright: ignore[reportIn
     required_status: LuxOperationMode | None = None
 
 
+class LuxtronikSumSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikSensorDescription,
+    SensorEntityDescription,
+    frozen_or_thawed=True,
+):
+    """Class describing Luxtronik sensor entities that total several registers.
+
+    The displayed value is the sum of the coordinator values behind
+    summand_keys. It exists for quantities the controller splits across
+    more than one register over its firmware history, where no single
+    register holds the whole total on every unit - see the additional heat
+    generator energy counters (1059 / 1140, #733).
+
+    Summands absent from this controller contribute nothing rather than
+    invalidating the total, so a unit exposing only one of them still gets
+    a correct figure. luxtronik_key is intentionally left at its UNSET
+    default, same convention as LuxtronikCopSensorDescription.
+    """
+
+    summand_keys: tuple[LuxParameter | LuxCalculation, ...] = ()
+
+
 class LuxtronikNumberDescription(
     LuxtronikEntityDescription,
     NumberEntityDescription,

@@ -812,11 +812,14 @@
             "current_power_consumption": {
                 "name": "Aktu\u00e1ln\u00ed spot\u0159eba energie"
             },
-            "additional_heat_generator_amount_counter": {
-                "name": "Mno\u017estv\u00ed tepla dodate\u010dn\u00e9ho zdroje"
+            "additional_heat_generator_energy_p1059": {
+                "name": "Mno\u017estv\u00ed tepla dodate\u010dn\u00e9ho zdroje (firmware p\u0159ed x.88)"
             },
-            "second_heat_generator_amount_counter": {
-                "name": "Mno\u017estv\u00ed tepla druh\u00e9ho gener\u00e1toru"
+            "additional_heat_generator_energy_p1140": {
+                "name": "Mno\u017estv\u00ed tepla dodate\u010dn\u00e9ho zdroje (firmware x.88 a nov\u011bj\u0161\u00ed)"
+            },
+            "additional_heat_generator_energy": {
+                "name": "Mno\u017estv\u00ed tepla dodate\u010dn\u00e9ho zdroje"
             },
             "heat_source_output_temperature": {
                 "name": "Teplota v\u00fdstupu tepla"

@@ -809,7 +809,10 @@
             "current_heat_output": {
                 "name": "Actuele warmteconsumptie"
             },
-            "additional_heat_generator_amount_counter": {
+            "additional_heat_generator_energy_p1059": {
+                "name": "Warmtehoeveelheid extra warmtegenerator (firmware vóór x.88)"
+            },
+            "additional_heat_generator_energy": {
                 "name": "Warmtehoeveelheid extra warmtegenerator"
             },
             "heat_source_output_temperature": {
@@ -920,8 +923,8 @@
             "current_power_consumption": {
                 "name": "Stroomverbruik"
             },
-            "second_heat_generator_amount_counter": {
-                "name": "Tweede warmtebron warmtemenge"
+            "additional_heat_generator_energy_p1140": {
+                "name": "Warmtehoeveelheid extra warmtegenerator (firmware x.88 en later)"
             },
             "ventilation_supply_air_temperature": {
                 "name": "Toevoerluchttemperatuur"

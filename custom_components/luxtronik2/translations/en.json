@@ -812,11 +812,14 @@
             "current_power_consumption": {
                 "name": "Current power consumption"
             },
-            "additional_heat_generator_amount_counter": {
-                "name": "Additional heat generator amount counter"
+            "additional_heat_generator_energy_p1059": {
+                "name": "Additional heat generator energy (firmware before x.88)"
             },
-            "second_heat_generator_amount_counter": {
-                "name": "Second heat generator amount counter"
+            "additional_heat_generator_energy_p1140": {
+                "name": "Additional heat generator energy (firmware x.88 and later)"
+            },
+            "additional_heat_generator_energy": {
+                "name": "Additional heat generator energy"
             },
             "heat_source_output_temperature": {
                 "name": "Heat source output"

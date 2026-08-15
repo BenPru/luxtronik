@@ -16,7 +16,7 @@ import voluptuous as vol
 
 # region Constants Main
 DOMAIN: Final = "luxtronik2"
-CONFIG_ENTRY_VERSION: Final = 9
+CONFIG_ENTRY_VERSION: Final = 10
 NICKNAME_PREFIX: Final = "Home Assistant"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
@@ -798,10 +798,20 @@ class SensorKey(StrEnum):
     ADDITIONAL_HEAT_GENERATOR2_OPERATION_HOURS = (
         "additional_heat_generator2_operation_hours"
     )
-    ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = (
-        "additional_heat_generator_amount_counter"
-    )
-    SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = "second_heat_generator_amount_counter"
+    # The aux heater's energy, which the controller splits across two
+    # registers: it stops advancing 1059 and starts 1140 at a firmware
+    # change, so only their sum is the lifetime figure on a unit spanning
+    # the handover. Despite its old name 1140 is not the second heat
+    # generator (ZWE2) - it counts the same element as 1059.
+    #
+    # The keys name the register rather than the firmware era on purpose.
+    # unique_id derives from these values, so a key can only be changed via
+    # an entity-registry migration; the register index is an immutable fact
+    # while the exact firmware boundary is still inferred, and lives in the
+    # translated names where revising it costs nothing. #733
+    ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059 = "additional_heat_generator_energy_p1059"
+    ADDITIONAL_HEAT_GENERATOR_ENERGY_P1140 = "additional_heat_generator_energy_p1140"
+    ADDITIONAL_HEAT_GENERATOR_ENERGY = "additional_heat_generator_energy"
     ANALOG_OUT1 = "analog_out1"
     ANALOG_OUT2 = "analog_out2"
     VENTILATION_MODE = "ventilation_mode"

@@ -812,7 +812,10 @@
             "current_power_consumption": {
                 "name": "Leistungsaufnahme"
             },
-            "additional_heat_generator_amount_counter": {
+            "additional_heat_generator_energy_p1059": {
+                "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge (Firmware vor x.88)"
+            },
+            "additional_heat_generator_energy": {
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge"
             },
             "heat_source_output_temperature": {
@@ -920,8 +923,8 @@
             "cooling_energy_input": {
                 "name": "Eingesetzte Energie K\u00fchlung"
             },
-            "second_heat_generator_amount_counter": {
-                "name": "Zweiter W\u00e4rmeerzeuger W\u00e4rmemenge"
+            "additional_heat_generator_energy_p1140": {
+                "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge (Firmware ab x.88)"
             },
             "ventilation_supply_air_temperature": {
                 "name": "Zulufttemperatur"
