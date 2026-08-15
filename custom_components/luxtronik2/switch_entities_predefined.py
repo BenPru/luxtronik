@@ -45,14 +45,12 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         visibility=LV.V0357_ELECTRICAL_POWER_LIMITATION_SWITCH,
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     LuxtronikSwitchDescription(
         key=SensorKey.THERMAL_POWER_LIMITATION_SWITCH,
         luxtronik_key=LP.P1175_THERMAL_POWER_LIMIT_SWITCH,
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
-        # min_firmware_version_minor=FirmwareVersionMinor.minor_90,
     ),
     # LuxtronikSwitchDescription(
     #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,

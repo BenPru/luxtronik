@@ -157,15 +157,6 @@ class DeviceKey(StrEnum):
     ventilation = "ventilation"
 
 
-class FirmwareVersionMinor(Enum):
-    """Firmware minor versions."""
-
-    minor_80 = 80
-    minor_88 = 88
-    minor_89 = 89
-    minor_90 = 90
-
-
 LUXTRONIK_HA_SIGNAL_UPDATE_ENTITY = "luxtronik_entry_update"
 
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(seconds=10)
