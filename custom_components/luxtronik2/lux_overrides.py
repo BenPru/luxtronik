@@ -88,7 +88,17 @@ class FrequencyAutomatic(Base):
 
 
 class TimeOfDay(Base):
-    """TimeOfDay datatype, converts from and to TimeOfDay."""
+    """TimeOfDay datatype, converts from and to TimeOfDay.
+
+    Always renders "HH:MM". The registers this covers are timer-program
+    schedule times, and the heat pump's own controller can only set those to
+    a whole minute, so a raw value carrying seconds is a register artefact
+    rather than a setting anyone made. Rendering it as "HH:MM:SS" would only
+    widen the string past what the consuming text entities allow. The seconds
+    are dropped on display only: `to_heatpump` still accepts them, and an
+    untouched row is never written back, so the raw value on the device is
+    left as it is.
+    """
 
     datatype_class = "timeofday"
 
@@ -98,9 +108,8 @@ class TimeOfDay(Base):
             return None
         hours = value // 3600
         minutes = (value // 60) % 60
-        seconds = value % 60
 
-        return f"{hours:02d}:{minutes:02d}" + (f":{seconds:02d}" if seconds > 0 else "")
+        return f"{hours:02d}:{minutes:02d}"
 
     @classmethod
     def to_heatpump(cls, value):
@@ -236,9 +245,14 @@ def update_Luxtronik_Parameters():
     update_Luxtronik_Parameter_Classes(delta_temperature_numbers, Kelvin)
 
     # Timer program schedule parameters: mostly TimeOfDay entries, with a
-    # handful of TimerProgram mode selectors interspersed in the range.
-    timer_program_numbers = {222, 283, 344, 405, 506, 607}
-    time_of_day_numbers = [n for n in range(162, 668) if n not in timer_program_numbers]
+    # handful of TimerProgram mode selectors interspersed. 162-667 holds the
+    # heating, mixing, DHW, circulation-pump and pool circuits; the
+    # ventilation circuit sits apart at 895 (selector) and 896-955 (times).
+    timer_program_numbers = {222, 283, 344, 405, 506, 607, 895}
+    schedule_numbers = list(range(162, 668)) + list(range(895, 956))
+    time_of_day_numbers = [
+        n for n in schedule_numbers if n not in timer_program_numbers
+    ]
     update_Luxtronik_Parameter_Classes(time_of_day_numbers, TimeOfDay)
     update_Luxtronik_Parameter_Classes(list(timer_program_numbers), TimerProgram)
 

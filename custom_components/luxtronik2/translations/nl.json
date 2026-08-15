@@ -992,6 +992,66 @@
             },
             "timer_dhw_schedule_sunday": {
                 "name": "Warmwater tijdschema (zondag)"
+            },
+            "timer_heating_schedule_week": {
+                "name": "Verwarming tijdschema (week)"
+            },
+            "timer_heating_schedule_weekday": {
+                "name": "Verwarming tijdschema (werkdagen)"
+            },
+            "timer_heating_schedule_weekend": {
+                "name": "Verwarming tijdschema (weekend)"
+            },
+            "timer_heating_schedule_monday": {
+                "name": "Verwarming tijdschema (maandag)"
+            },
+            "timer_heating_schedule_tuesday": {
+                "name": "Verwarming tijdschema (dinsdag)"
+            },
+            "timer_heating_schedule_wednesday": {
+                "name": "Verwarming tijdschema (woensdag)"
+            },
+            "timer_heating_schedule_thursday": {
+                "name": "Verwarming tijdschema (donderdag)"
+            },
+            "timer_heating_schedule_friday": {
+                "name": "Verwarming tijdschema (vrijdag)"
+            },
+            "timer_heating_schedule_saturday": {
+                "name": "Verwarming tijdschema (zaterdag)"
+            },
+            "timer_heating_schedule_sunday": {
+                "name": "Verwarming tijdschema (zondag)"
+            },
+            "timer_ventilation_schedule_week": {
+                "name": "Ventilatie tijdschema (week)"
+            },
+            "timer_ventilation_schedule_weekday": {
+                "name": "Ventilatie tijdschema (werkdagen)"
+            },
+            "timer_ventilation_schedule_weekend": {
+                "name": "Ventilatie tijdschema (weekend)"
+            },
+            "timer_ventilation_schedule_monday": {
+                "name": "Ventilatie tijdschema (maandag)"
+            },
+            "timer_ventilation_schedule_tuesday": {
+                "name": "Ventilatie tijdschema (dinsdag)"
+            },
+            "timer_ventilation_schedule_wednesday": {
+                "name": "Ventilatie tijdschema (woensdag)"
+            },
+            "timer_ventilation_schedule_thursday": {
+                "name": "Ventilatie tijdschema (donderdag)"
+            },
+            "timer_ventilation_schedule_friday": {
+                "name": "Ventilatie tijdschema (vrijdag)"
+            },
+            "timer_ventilation_schedule_saturday": {
+                "name": "Ventilatie tijdschema (zaterdag)"
+            },
+            "timer_ventilation_schedule_sunday": {
+                "name": "Ventilatie tijdschema (zondag)"
             }
         },
         "select": {
@@ -1019,6 +1079,22 @@
             },
             "timer_dhw_program": {
                 "name": "Warmwater tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
+            "timer_heating_program": {
+                "name": "Verwarming tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
+            "timer_ventilation_program": {
+                "name": "Ventilatie tijdprogramma",
                 "state": {
                     "week": "Hele week",
                     "weekday_weekend": "Werkdagen + weekend",

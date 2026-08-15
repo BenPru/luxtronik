@@ -51,46 +51,54 @@ def _timer_schedule_unique_id(
 def _active_schedule_descriptions(
     coordinator: LuxtronikCoordinator,
     data: LuxtronikCoordinatorData | None,
-) -> list[LuxtronikTimerScheduleTextDescription] | None:
-    """Return the schedule blocks belonging to the circuit's active program.
+) -> tuple[list[LuxtronikTimerScheduleTextDescription], set[str]] | None:
+    """Return the active schedule blocks and the unreadable selectors.
 
-    A block qualifies when the circuit's mode selector is present on this
+    A block qualifies when its circuit's mode selector is present on this
     controller and its value equals the block's `active_mode`. Every other
     block is meaningless on the device, so no entity is created for it.
 
-    Returns ``None`` -- "no information this poll", as opposed to an empty
-    list meaning "no block is active" -- when there is no coordinator data,
-    or when a selector that *is* present on this controller could not be
-    read. `get_sensor_data` returns ``None`` both for an absent register and
-    for a present one whose datatype could not decode the raw value
+    The second element holds the `mode_selector_name`s that could not be read
+    this poll. `get_sensor_data` returns ``None`` both for an absent register
+    and for a present one whose datatype could not decode the raw value
     (``SelectionBase`` returns ``None`` for an unrecognised code), and
-    `key_exists` cannot tell the two apart for parameter 405, which sits
-    inside upstream's defined index range. Reading a transient decode
-    failure as "no program is active" would tear down every schedule entity
-    and disable all ten registry entries until the next good poll.
+    `key_exists` cannot tell the two apart for a parameter inside upstream's
+    defined index range. Reading a transient decode failure as "no program is
+    active" would tear down that circuit's schedule entities and disable their
+    registry entries until the next good poll, so the caller leaves those
+    circuits untouched instead. The failure is per circuit: an unreadable
+    selector on one circuit must not freeze the others.
+
+    Returns ``None`` -- "no information about anything this poll" -- only when
+    there is no coordinator data at all.
     """
     if data is None:
         return None
 
     descriptions: list[LuxtronikTimerScheduleTextDescription] = []
+    unreadable: set[str] = set()
     for description in TIMER_SCHEDULE_ENTITIES:
         if not coordinator.entity_active(description):
             continue
-        selector_key = f"parameters.{description.mode_selector_name}"
+        selector_name = description.mode_selector_name
+        if selector_name in unreadable:
+            continue
+        selector_key = f"parameters.{selector_name}"
         if not key_exists(data, selector_key):
             continue
         mode = get_sensor_data(data, selector_key)
         if mode is None:
             LOGGER.debug(
                 "Timer program selector %s could not be read this poll - "
-                "leaving the schedule entities untouched",
+                "leaving its schedule entities untouched",
                 selector_key,
             )
-            return None
+            unreadable.add(selector_name)
+            continue
         if mode != description.active_mode:
             continue
         descriptions.append(description)
-    return descriptions
+    return descriptions, unreadable
 
 
 class _TimerScheduleSync:
@@ -101,7 +109,10 @@ class _TimerScheduleSync:
     area, icon and recorder history survive a program switch -- removing the
     registry entry would discard all of it. (An earlier build hid the
     inactive entries instead; see `_enable_active`/`_disable_inactive` for
-    the one-time migration off that mechanism.)
+    the one-time migration off that mechanism.) The exception is a circuit
+    whose mode selector could not be read this poll: its blocks are left
+    exactly as they were, neither removed nor disabled, since a transient
+    decode failure is not evidence that the circuit's program changed.
     """
 
     def __init__(
@@ -154,20 +165,34 @@ class _TimerScheduleSync:
         of acting on a stale snapshot -- otherwise it could compute `desired`
         and mutate `self._entities` concurrently with the in-flight call,
         risking a duplicate registration for the same key.
+
+        A circuit whose mode selector could not be read this poll is frozen:
+        its blocks are excluded from both `to_remove` and the disable pass,
+        so they survive untouched until a poll can actually read that
+        selector again.
         """
         if self._closing:
             return
         async with self._lock:
             if self._closing:
                 return
-            active = _active_schedule_descriptions(
+            result = _active_schedule_descriptions(
                 self.coordinator, self.coordinator.data
             )
-            if active is None:
+            if result is None:
                 # Nothing could be concluded this poll: do not add, remove or
                 # write anything.
                 return
+            active, unreadable = result
             desired = {description.key: description for description in active}
+            # A circuit whose selector could not be read keeps whatever it
+            # has: its blocks are neither removed nor disabled, because we
+            # cannot tell which of them the device is actually running.
+            frozen = {
+                description.key
+                for description in TIMER_SCHEDULE_ENTITIES
+                if description.mode_selector_name in unreadable
+            }
             to_add = [
                 description
                 for key, description in desired.items()
@@ -176,7 +201,7 @@ class _TimerScheduleSync:
             to_remove = [
                 (key, entity)
                 for key, entity in self._entities.items()
-                if key not in desired
+                if key not in desired and key not in frozen
             ]
             if not to_add and not to_remove:
                 return
@@ -206,7 +231,7 @@ class _TimerScheduleSync:
                 del self._entities[key]
                 await self._async_remove_entity(key, entity)
 
-            self._disable_inactive(registry, set(desired))
+            self._disable_inactive(registry, set(desired) | frozen)
 
     async def _async_remove_entity(
         self, key: str, entity: LuxtronikTimerScheduleText
@@ -362,7 +387,9 @@ class LuxtronikTimerScheduleText(
         self._attr_unique_id = self.entity_id
         self._attr_mode = TextMode.TEXT
         self._attr_native_min = 0
-        # Each "HH:MM-HH:MM" pair is 11 chars, joined by a single "/".
+        # Each "HH:MM-HH:MM" pair is 11 chars, joined by a single "/". The
+        # width is guaranteed by the `TimeOfDay` datatype, which always
+        # renders "HH:MM" - see its docstring in `lux_overrides`.
         self._attr_native_max = len(description.row_names) * 12 - 1
         self._attr_native_value = None
 

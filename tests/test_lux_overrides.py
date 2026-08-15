@@ -198,8 +198,21 @@ class TestTimeOfDay:
         assert self.TimeOfDay.from_heatpump(6 * 3600) == "06:00"
         assert self.TimeOfDay.from_heatpump(22 * 3600 + 30 * 60) == "22:30"
 
-    def test_from_heatpump_includes_seconds_when_nonzero(self):
-        assert self.TimeOfDay.from_heatpump(6 * 3600 + 15) == "06:00:15"
+    def test_from_heatpump_drops_seconds(self):
+        """The controller can only set whole minutes, so seconds are noise.
+
+        Rendering them would also widen the value past what the schedule
+        text entities allow: `_attr_native_max` there budgets 11 characters
+        per "HH:MM-HH:MM" pair.
+        """
+        assert self.TimeOfDay.from_heatpump(6 * 3600 + 15) == "06:00"
+        assert self.TimeOfDay.from_heatpump(6 * 3600 + 59) == "06:00"
+        assert self.TimeOfDay.from_heatpump(59) == "00:00"
+
+    def test_from_heatpump_is_always_five_characters(self):
+        """The invariant `_attr_native_max` in text.py is sized against."""
+        for raw in range(0, 24 * 3600, 617):
+            assert len(self.TimeOfDay.from_heatpump(raw)) == 5
 
     def test_from_heatpump_non_int_returns_none(self):
         assert self.TimeOfDay.from_heatpump("06:00") is None
@@ -417,3 +430,47 @@ class TestUnknownSelectionCodeWarning:
         lux_overrides.warn_on_unknown_selection_codes()
         HeatpumpCode("ID_WEB_Code_WP_akt").from_heatpump(9999)
         assert caplog.text.count("9999") == 1
+
+
+class TestTimerScheduleDatatypeCoverage:
+    """Both timer-program parameter blocks must get their datatypes.
+
+    The heating/DHW/pool block is contiguous at 162-667, but the ventilation
+    block sits apart at 895-955 and was not covered at all, so every
+    ventilation time decoded as a raw seconds integer.
+    """
+
+    def _applied(self):
+        from luxtronik.parameters import Parameters
+
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        return Parameters.parameters
+
+    def test_ventilation_selector_is_a_timer_program(self):
+        from custom_components.luxtronik2.lux_overrides import TimerProgram
+
+        assert isinstance(self._applied()[895], TimerProgram)
+
+    def test_ventilation_times_are_time_of_day(self):
+        from custom_components.luxtronik2.lux_overrides import TimeOfDay
+
+        parameters = self._applied()
+        # First and last of both the start block (896-925) and the
+        # interleaved end block (926-955).
+        for number in (896, 925, 926, 955):
+            assert isinstance(parameters[number], TimeOfDay), number
+
+    def test_heating_block_is_still_covered(self):
+        from custom_components.luxtronik2.lux_overrides import (
+            TimeOfDay,
+            TimerProgram,
+        )
+
+        parameters = self._applied()
+        assert isinstance(parameters[222], TimerProgram)
+        for number in (223, 282):
+            assert isinstance(parameters[number], TimeOfDay), number

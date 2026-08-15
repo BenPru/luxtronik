@@ -992,6 +992,66 @@
             },
             "timer_dhw_schedule_sunday": {
                 "name": "Warmwasser-Zeitschaltplan (Sonntag)"
+            },
+            "timer_heating_schedule_week": {
+                "name": "Heizungs-Zeitschaltplan (Woche)"
+            },
+            "timer_heating_schedule_weekday": {
+                "name": "Heizungs-Zeitschaltplan (Werktage)"
+            },
+            "timer_heating_schedule_weekend": {
+                "name": "Heizungs-Zeitschaltplan (Wochenende)"
+            },
+            "timer_heating_schedule_monday": {
+                "name": "Heizungs-Zeitschaltplan (Montag)"
+            },
+            "timer_heating_schedule_tuesday": {
+                "name": "Heizungs-Zeitschaltplan (Dienstag)"
+            },
+            "timer_heating_schedule_wednesday": {
+                "name": "Heizungs-Zeitschaltplan (Mittwoch)"
+            },
+            "timer_heating_schedule_thursday": {
+                "name": "Heizungs-Zeitschaltplan (Donnerstag)"
+            },
+            "timer_heating_schedule_friday": {
+                "name": "Heizungs-Zeitschaltplan (Freitag)"
+            },
+            "timer_heating_schedule_saturday": {
+                "name": "Heizungs-Zeitschaltplan (Samstag)"
+            },
+            "timer_heating_schedule_sunday": {
+                "name": "Heizungs-Zeitschaltplan (Sonntag)"
+            },
+            "timer_ventilation_schedule_week": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Woche)"
+            },
+            "timer_ventilation_schedule_weekday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Werktage)"
+            },
+            "timer_ventilation_schedule_weekend": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Wochenende)"
+            },
+            "timer_ventilation_schedule_monday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Montag)"
+            },
+            "timer_ventilation_schedule_tuesday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Dienstag)"
+            },
+            "timer_ventilation_schedule_wednesday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Mittwoch)"
+            },
+            "timer_ventilation_schedule_thursday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Donnerstag)"
+            },
+            "timer_ventilation_schedule_friday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Freitag)"
+            },
+            "timer_ventilation_schedule_saturday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Samstag)"
+            },
+            "timer_ventilation_schedule_sunday": {
+                "name": "L\u00fcftungs-Zeitschaltplan (Sonntag)"
             }
         },
         "select": {
@@ -1019,6 +1079,22 @@
             },
             "timer_dhw_program": {
                 "name": "Warmwasser Zeitprogramm",
+                "state": {
+                    "week": "Ganze Woche",
+                    "weekday_weekend": "Werktage + Wochenende",
+                    "daily": "Einzelne Tage"
+                }
+            },
+            "timer_heating_program": {
+                "name": "Heizung Zeitprogramm",
+                "state": {
+                    "week": "Ganze Woche",
+                    "weekday_weekend": "Werktage + Wochenende",
+                    "daily": "Einzelne Tage"
+                }
+            },
+            "timer_ventilation_program": {
+                "name": "L\u00fcftung Zeitprogramm",
                 "state": {
                     "week": "Ganze Woche",
                     "weekday_weekend": "Werktage + Wochenende",

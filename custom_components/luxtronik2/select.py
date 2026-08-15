@@ -241,6 +241,11 @@ class LuxtronikModeSelector(
             for option, raw in self._option_to_raw.items()
         }
         self._attr_current_option = None
+        # Raw values already reported as unrecognised. The coordinator polls
+        # every few seconds, so a register whose code mapping is simply wrong
+        # for this controller would otherwise log the same warning forever;
+        # each distinct value is worth exactly one.
+        self._reported_unknown_raw: set[str] = set()
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
@@ -268,12 +273,14 @@ class LuxtronikModeSelector(
         )
 
         if current not in self._attr_options:
-            LOGGER.warning(
-                "%s value %r not in options %r",
-                self.entity_id,
-                current_raw,
-                self._attr_options,
-            )
+            if current_raw not in self._reported_unknown_raw:
+                self._reported_unknown_raw.add(current_raw)
+                LOGGER.warning(
+                    "%s value %r not in options %r",
+                    self.entity_id,
+                    current_raw,
+                    self._attr_options,
+                )
             return
 
         if self._attr_current_option != current:

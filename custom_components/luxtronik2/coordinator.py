@@ -117,6 +117,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.device_infos = dict[str, DeviceInfo]()
         # Deadline for the DHW transition hold; see _update_dhw_transition_hold().
         self._dhw_hold_until: datetime | None = None
+        # Latch for the ventilation module; see has_ventilation.
+        self._ventilation_detected = False
 
         update_interval: timedelta = DEFAULT_UPDATE_INTERVAL
         raw = config.get(CONF_UPDATE_INTERVAL)
@@ -723,14 +725,32 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         Sentinels are therefore treated as absent readings rather than as
         values, the same shape as _detect_solar_present()'s 5.0 / 150.0
         checks.
+
+        Latched on: once a plausible reading has been seen, this stays True
+        for the lifetime of the config entry. The evidence is a live
+        temperature, so it can legitimately land on a sentinel later -- a
+        supply-air channel genuinely passing through 0.0 or 5.0 C while the
+        exhaust channel is an unwired 5.0 makes both look absent for that
+        poll. Without the latch the device would come and go across polls,
+        and `text.py` (the only per-poll caller of `entity_active`) would
+        tear its schedule entities down and rebuild them each time. The
+        other capability gates do not need this: `has_domestic_water` and
+        `has_cooling` read cumulative operating-hour counters, which cannot
+        decrease.
+
+        Not persisted, so a restart re-detects from scratch. That also
+        clears the latch if the module is genuinely removed.
         """
-        return any(
+        if self._ventilation_detected:
+            return True
+        self._ventilation_detected = any(
             self._is_plausible_reading(self.get_value(key))
             for key in (
                 LC.C0159_VENTILATION_SUPPLY_AIR_TEMPERATURE,
                 LC.C0160_VENTILATION_EXHAUST_AIR_TEMPERATURE,
             )
         )
+        return self._ventilation_detected
 
     @staticmethod
     def _is_plausible_reading(value: Any) -> bool:
