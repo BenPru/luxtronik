@@ -334,6 +334,11 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             await _async_update_config_entry(hass, config_entry, new_data, 9)
             current_version = 9
 
+        elif current_version == 9:
+            await _rename_aux_heater_energy_entities(hass, config_entry)
+            await _async_update_config_entry(hass, config_entry, new_data, 10)
+            current_version = 10
+
     LOGGER.info("Migration to version %s successful", current_version)
     return True
 
@@ -446,6 +451,35 @@ async def _rename_cooling_entities(
                 ("cooling_start_delay_hours", SK.COOLING_START_DELAY_HOURS),
                 ("cooling_stop_delay_hours", SK.COOLING_STOP_DELAY_HOURS),
             ]
+        },
+    )
+
+
+async def _rename_aux_heater_energy_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry
+):
+    """Rename the two aux heater energy counters for version 10 migration.
+
+    Their old names were near-synonymous and gave no hint which register
+    each read, and "second heat generator" was outright wrong for 1140 -
+    it counts the same element as 1059, not ZWE2. The new keys name the
+    register, which never changes, while the firmware era each belongs to
+    is carried by the translated name. #733
+    """
+    await _up_many(
+        hass,
+        config_entry,
+        {
+            P.SENSOR: [
+                (
+                    "additional_heat_generator_amount_counter",
+                    SK.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+                ),
+                (
+                    "second_heat_generator_amount_counter",
+                    SK.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1140,
+                ),
+            ],
         },
     )
 

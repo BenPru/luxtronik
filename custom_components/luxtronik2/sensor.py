@@ -37,12 +37,14 @@ from .model import (
     LuxtronikEntityAttributeDescription,
     LuxtronikIndexSensorDescription,
     LuxtronikSensorDescription,
+    LuxtronikSumSensorDescription,
 )
 from .sensor_entities_predefined import (
     SENSORS,
     SENSORS_COP,
     SENSORS_INDEX,
     SENSORS_STATUS,
+    SENSORS_SUM,
 )
 
 # endregion Imports
@@ -132,6 +134,24 @@ async def async_setup_entry(
                 coordinator.entity_active(description)
                 and key_exists(coordinator.data, description.numerator_key)
                 and key_exists(coordinator.data, description.denominator_key)
+            )
+        ]
+    )
+
+    async_add_entities(
+        [
+            LuxtronikSumSensorEntity(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in SENSORS_SUM
+            if (
+                coordinator.entity_active(description)
+                # One summand is enough: a controller predating the second
+                # register still has a valid total from the first alone.
+                and any(
+                    key_exists(coordinator.data, key)
+                    for key in description.summand_keys
+                )
             )
         ]
     )
@@ -469,5 +489,55 @@ class LuxtronikCopSensorEntity(LuxtronikSensorEntity):
         else:
             self._attr_available = True
             self._attr_native_value = round(numerator / denominator, 2)
+
+        self.async_write_ha_state()
+
+
+class LuxtronikSumSensorEntity(LuxtronikSensorEntity):
+    """A total across several registers holding one split quantity.
+
+    Its only current use is the additional heat generator's lifetime energy,
+    which the controller splits across parameters 1059 and 1140: 1059 stops
+    advancing at a firmware change and 1140 resumes counting from there, so
+    neither register alone is the lifetime figure on a unit that spans the
+    handover. Summing them reproduces the constant kWh-per-ZWE-hour rate the
+    unit held before the change, which is the evidence the split is a clean
+    handover with no gap or overlap (#733).
+
+    Registers this controller does not expose read None and are skipped, so
+    firmware predating 1140 still gets a correct total from 1059 alone. That
+    differs from LuxtronikCopSensorEntity, where a missing input makes the
+    ratio meaningless and the entity goes unavailable. Only an entirely
+    absent set - which async_setup_entry already refuses to create an entity
+    for - yields no value.
+    """
+
+    entity_description: LuxtronikSumSensorDescription  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """Handle updated data from the coordinator."""
+        data = self.coordinator.data if data is None else data
+        if data is None:
+            return
+
+        descr = self.entity_description
+        summands: list[float] = []
+        for key in descr.summand_keys:
+            value = get_sensor_data(data, key)
+            if isinstance(value, float | int):
+                summands.append(float(value))
+
+        if not summands:
+            self._attr_available = False
+            self._attr_native_value = None
+        else:
+            self._attr_available = True
+            total = sum(summands) * (descr.factor or 1)
+            if descr.native_precision is not None:
+                total = round(total, descr.native_precision)
+            self._attr_native_value = total
 
         self.async_write_ha_state()

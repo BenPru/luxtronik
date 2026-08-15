@@ -937,15 +937,15 @@ class TestAuxHeaterAmountScaling:
         entity._handle_coordinator_update(data)
         return entity._attr_native_value
 
-    def test_additional_heat_generator_amount_counter_scaling(self):
+    def test_p1059_energy_scaling(self):
         value = self._converted_value(
-            SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER, 37539
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059, 37539
         )
         assert value == 3753.9
 
-    def test_second_heat_generator_amount_counter_scaling(self):
+    def test_p1140_energy_scaling(self):
         value = self._converted_value(
-            SensorKey.SECOND_HEAT_GENERATOR_AMOUNT_COUNTER, 841
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1140, 841
         )
         assert value == 84.1
 
@@ -955,6 +955,6 @@ class TestAuxHeaterAmountScaling:
         the unit's rated 9.0 kW, which fails if either scaling step changes.
         """
         kwh = self._converted_value(
-            SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER, 37539
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059, 37539
         )
         assert 8.0 <= kwh / 420.03 <= 9.5

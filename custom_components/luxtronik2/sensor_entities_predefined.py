@@ -36,6 +36,7 @@ from .model import (
     LuxtronikEntityAttributeDescription as attr,
     LuxtronikIndexSensorDescription as descr_index,
     LuxtronikSensorDescription as descr,
+    LuxtronikSumSensorDescription as sum_descr,
 )
 
 # endregion Imports
@@ -308,7 +309,7 @@ SENSORS: list[descr] = [
         native_precision=2,
     ),
     descr(
-        key=SensorKey.ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
+        key=SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
         luxtronik_key=LP.P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -324,7 +325,7 @@ SENSORS: list[descr] = [
         native_precision=1,
     ),
     descr(
-        key=SensorKey.SECOND_HEAT_GENERATOR_AMOUNT_COUNTER,
+        key=SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1140,
         luxtronik_key=LP.P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -333,6 +334,13 @@ SENSORS: list[descr] = [
         entity_active_formula="!= 0.0",
         # 0.1 kWh raw unit, applied by the Energy datatype (see 1059 above).
         native_precision=1,
+        # Despite the name this is not the second heat generator (ZWE2) - it
+        # counts the same element as 1059, which stops advancing once this
+        # one starts. Neither raw register is the figure a user wants, so
+        # both defer to the total below rather than being enabled by
+        # default. The key itself must not change: unique_id derives from it,
+        # and renaming would orphan existing history. #733
+        entity_registry_enabled_default=False,
     ),
     # The analog outputs are per mille of a 10 V full scale, so the library's
     # Voltage datatype (raw / 10) lands on 0-100 and `factor` supplies the
@@ -823,3 +831,22 @@ SENSORS_COP: list[cop_descr] = [
     ),
 ]
 # endregion COP
+
+# region Totals
+SENSORS_SUM: list[sum_descr] = [
+    sum_descr(
+        key=SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY,
+        summand_keys=(
+            LP.P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
+            LP.P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER,
+        ),
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        # Deliberately not EntityCategory.DIAGNOSTIC: diagnostic entities
+        # cannot be selected in the energy dashboard, which is the main thing
+        # a lifetime kWh counter is for.
+        native_precision=1,
+    ),
+]
+# endregion Totals

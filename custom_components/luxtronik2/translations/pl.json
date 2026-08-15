@@ -809,8 +809,11 @@
             "current_heat_output": {
                 "name": "Aktualna moc cieplna"
             },
-            "additional_heat_generator_amount_counter": {
-                "name": "Licznik ilo\u015bci dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a"
+            "additional_heat_generator_energy_p1059": {
+                "name": "Ilo\u015b\u0107 ciep\u0142a dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a (firmware przed x.88)"
+            },
+            "additional_heat_generator_energy": {
+                "name": "Ilo\u015b\u0107 ciep\u0142a dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a"
             },
             "heat_source_output_temperature": {
                 "name": "Moc \u017ar\u00f3d\u0142a ciep\u0142a"
@@ -908,8 +911,8 @@
             "current_power_consumption": {
                 "name": "Pob\u00f3r mocy"
             },
-            "second_heat_generator_amount_counter": {
-                "name": "Ilo\u015b\u0107 ciep\u0142a drugiego generatora"
+            "additional_heat_generator_energy_p1140": {
+                "name": "Ilo\u015b\u0107 ciep\u0142a dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a (firmware x.88 i nowszy)"
             },
             "circulation_pump_delta": {
                 "name": "Cyrkulacyjna pompdelta"

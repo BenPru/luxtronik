@@ -14,6 +14,7 @@ from custom_components.luxtronik2 import (
     _async_update_config_entry,
     _fix_select_entity_unique_ids,
     _identifiers_exists,
+    _rename_aux_heater_energy_entities,
     _up_many,
     async_migrate_entry,
     async_setup_entry,
@@ -332,6 +333,66 @@ class TestFixSelectEntityUniqueIds:
 
 
 # ===========================================================================
+# _rename_aux_heater_energy_entities
+# ===========================================================================
+
+
+class TestRenameAuxHeaterEnergyEntities:
+    """The v9->v10 rename of the two aux heater energy counters (#733).
+
+    The old key strings are the load-bearing half: a typo there matches no
+    existing entity, so the rename silently no-ops and the user is left with
+    an orphaned entity plus a fresh empty one. They are literals here on
+    purpose - deriving them from SensorKey would defeat the check, since
+    that is exactly what the migration moved away from.
+    """
+
+    @pytest.mark.asyncio
+    async def test_renames_both_counters_to_register_named_keys(self):
+        hass = MagicMock()
+        entry = _mock_entry()
+        ent_reg = MagicMock()
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _rename_aux_heater_energy_entities(hass, entry)
+
+        renames = {
+            call.args[0]: call.kwargs["new_entity_id"]
+            for call in ent_reg.async_update_entity.call_args_list
+        }
+        prefix = entry.data[CONF_HA_SENSOR_PREFIX]
+        assert renames == {
+            f"sensor.{prefix}_additional_heat_generator_amount_counter": (
+                f"sensor.{prefix}_additional_heat_generator_energy_p1059"
+            ),
+            f"sensor.{prefix}_second_heat_generator_amount_counter": (
+                f"sensor.{prefix}_additional_heat_generator_energy_p1140"
+            ),
+        }
+
+    @pytest.mark.asyncio
+    async def test_keeps_unique_id_and_entity_id_in_step(self):
+        """base.py derives unique_id from entity_id, so they must not diverge."""
+        hass = MagicMock()
+        entry = _mock_entry()
+        ent_reg = MagicMock()
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _rename_aux_heater_energy_entities(hass, entry)
+
+        for call in ent_reg.async_update_entity.call_args_list:
+            assert call.kwargs["new_entity_id"] == call.kwargs["new_unique_id"]
+
+    @pytest.mark.asyncio
+    async def test_survives_an_installation_without_these_entities(self):
+        """Most units never had either counter enabled; KeyError is normal."""
+        hass = MagicMock()
+        entry = _mock_entry()
+        ent_reg = MagicMock()
+        ent_reg.async_update_entity.side_effect = KeyError("unknown entity")
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _rename_aux_heater_energy_entities(hass, entry)
+
+
+# ===========================================================================
 # async_migrate_entry
 # ===========================================================================
 
@@ -372,6 +433,10 @@ class TestAsyncMigrateEntry:
             ),
             patch(
                 "custom_components.luxtronik2._fix_select_entity_unique_ids",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._rename_aux_heater_energy_entities",
                 new_callable=AsyncMock,
             ),
         ):
@@ -424,12 +489,16 @@ class TestAsyncMigrateEntry:
                 "custom_components.luxtronik2._fix_select_entity_unique_ids",
                 new_callable=AsyncMock,
             ),
+            patch(
+                "custom_components.luxtronik2._rename_aux_heater_energy_entities",
+                new_callable=AsyncMock,
+            ),
         ):
             result = await async_migrate_entry(hass, entry)
 
         assert result is True
         # Should have been called for versions 4, 5, 6, 7, 8, 9
-        assert mock_update.call_count == 6
+        assert mock_update.call_count == 7
 
     @pytest.mark.asyncio
     async def test_migration_v3_adds_prefix(self):
@@ -457,6 +526,10 @@ class TestAsyncMigrateEntry:
             ),
             patch(
                 "custom_components.luxtronik2._fix_select_entity_unique_ids",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "custom_components.luxtronik2._rename_aux_heater_energy_entities",
                 new_callable=AsyncMock,
             ),
         ):

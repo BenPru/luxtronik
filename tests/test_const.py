@@ -38,7 +38,7 @@ class TestConstants:
         assert DOMAIN == "luxtronik2"
 
     def test_config_version(self):
-        assert CONFIG_ENTRY_VERSION == 9
+        assert CONFIG_ENTRY_VERSION == 10
 
     def test_default_port(self):
         assert DEFAULT_PORT == 8889
