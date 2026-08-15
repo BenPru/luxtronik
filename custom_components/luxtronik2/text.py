@@ -387,7 +387,9 @@ class LuxtronikTimerScheduleText(
         self._attr_unique_id = self.entity_id
         self._attr_mode = TextMode.TEXT
         self._attr_native_min = 0
-        # Each "HH:MM-HH:MM" pair is 11 chars, joined by a single "/".
+        # Each "HH:MM-HH:MM" pair is 11 chars, joined by a single "/". The
+        # width is guaranteed by the `TimeOfDay` datatype, which always
+        # renders "HH:MM" - see its docstring in `lux_overrides`.
         self._attr_native_max = len(description.row_names) * 12 - 1
         self._attr_native_value = None
 

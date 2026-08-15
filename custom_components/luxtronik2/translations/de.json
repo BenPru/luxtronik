@@ -994,64 +994,64 @@
                 "name": "Warmwasser-Zeitschaltplan (Sonntag)"
             },
             "timer_heating_schedule_week": {
-                "name": "Heizung-Zeitschaltplan (Woche)"
+                "name": "Heizungs-Zeitschaltplan (Woche)"
             },
             "timer_heating_schedule_weekday": {
-                "name": "Heizung-Zeitschaltplan (Werktage)"
+                "name": "Heizungs-Zeitschaltplan (Werktage)"
             },
             "timer_heating_schedule_weekend": {
-                "name": "Heizung-Zeitschaltplan (Wochenende)"
+                "name": "Heizungs-Zeitschaltplan (Wochenende)"
             },
             "timer_heating_schedule_monday": {
-                "name": "Heizung-Zeitschaltplan (Montag)"
+                "name": "Heizungs-Zeitschaltplan (Montag)"
             },
             "timer_heating_schedule_tuesday": {
-                "name": "Heizung-Zeitschaltplan (Dienstag)"
+                "name": "Heizungs-Zeitschaltplan (Dienstag)"
             },
             "timer_heating_schedule_wednesday": {
-                "name": "Heizung-Zeitschaltplan (Mittwoch)"
+                "name": "Heizungs-Zeitschaltplan (Mittwoch)"
             },
             "timer_heating_schedule_thursday": {
-                "name": "Heizung-Zeitschaltplan (Donnerstag)"
+                "name": "Heizungs-Zeitschaltplan (Donnerstag)"
             },
             "timer_heating_schedule_friday": {
-                "name": "Heizung-Zeitschaltplan (Freitag)"
+                "name": "Heizungs-Zeitschaltplan (Freitag)"
             },
             "timer_heating_schedule_saturday": {
-                "name": "Heizung-Zeitschaltplan (Samstag)"
+                "name": "Heizungs-Zeitschaltplan (Samstag)"
             },
             "timer_heating_schedule_sunday": {
-                "name": "Heizung-Zeitschaltplan (Sonntag)"
+                "name": "Heizungs-Zeitschaltplan (Sonntag)"
             },
             "timer_ventilation_schedule_week": {
-                "name": "Lüftung-Zeitschaltplan (Woche)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Woche)"
             },
             "timer_ventilation_schedule_weekday": {
-                "name": "Lüftung-Zeitschaltplan (Werktage)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Werktage)"
             },
             "timer_ventilation_schedule_weekend": {
-                "name": "Lüftung-Zeitschaltplan (Wochenende)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Wochenende)"
             },
             "timer_ventilation_schedule_monday": {
-                "name": "Lüftung-Zeitschaltplan (Montag)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Montag)"
             },
             "timer_ventilation_schedule_tuesday": {
-                "name": "Lüftung-Zeitschaltplan (Dienstag)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Dienstag)"
             },
             "timer_ventilation_schedule_wednesday": {
-                "name": "Lüftung-Zeitschaltplan (Mittwoch)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Mittwoch)"
             },
             "timer_ventilation_schedule_thursday": {
-                "name": "Lüftung-Zeitschaltplan (Donnerstag)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Donnerstag)"
             },
             "timer_ventilation_schedule_friday": {
-                "name": "Lüftung-Zeitschaltplan (Freitag)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Freitag)"
             },
             "timer_ventilation_schedule_saturday": {
-                "name": "Lüftung-Zeitschaltplan (Samstag)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Samstag)"
             },
             "timer_ventilation_schedule_sunday": {
-                "name": "Lüftung-Zeitschaltplan (Sonntag)"
+                "name": "L\u00fcftungs-Zeitschaltplan (Sonntag)"
             }
         },
         "select": {

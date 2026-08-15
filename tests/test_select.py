@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 import pytest
@@ -245,6 +245,32 @@ class TestRawOptionMap:
         entity, coord = self._make_selector("week")
         await entity.async_select_option("weekday_weekend")
         coord.async_write.assert_awaited_once_with("ID_Einst_SUBW_akt2", "5+2")
+
+    def test_an_unrecognised_raw_value_is_warned_about_once(self):
+        """The coordinator polls constantly; one bad code must not spam the log.
+
+        The ventilation timer program's code mapping (parameter 895) is an
+        inference, so a controller whose codes differ would otherwise emit
+        one WARNING per poll forever. The first occurrence still warns, and
+        a second, different bad value warns again.
+        """
+        entity, coord = self._make_selector("week")
+        with patch("custom_components.luxtronik2.select.LOGGER") as logger:
+            coord.data = make_coordinator_data(
+                parameters={"ID_Einst_SUBW_akt2": "nonsense"}
+            )
+            entity._handle_coordinator_update()
+            entity._handle_coordinator_update()
+            entity._handle_coordinator_update()
+            assert logger.warning.call_count == 1
+
+            coord.data = make_coordinator_data(
+                parameters={"ID_Einst_SUBW_akt2": "other-nonsense"}
+            )
+            entity._handle_coordinator_update()
+            assert logger.warning.call_count == 2
+        # State is untouched by an unrecognised value, as before.
+        assert entity._attr_current_option is None
 
     def test_existing_selectors_keep_working_without_a_map(self):
         from custom_components.luxtronik2.select import LuxtronikModeSelector

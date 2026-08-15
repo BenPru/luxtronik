@@ -198,8 +198,21 @@ class TestTimeOfDay:
         assert self.TimeOfDay.from_heatpump(6 * 3600) == "06:00"
         assert self.TimeOfDay.from_heatpump(22 * 3600 + 30 * 60) == "22:30"
 
-    def test_from_heatpump_includes_seconds_when_nonzero(self):
-        assert self.TimeOfDay.from_heatpump(6 * 3600 + 15) == "06:00:15"
+    def test_from_heatpump_drops_seconds(self):
+        """The controller can only set whole minutes, so seconds are noise.
+
+        Rendering them would also widen the value past what the schedule
+        text entities allow: `_attr_native_max` there budgets 11 characters
+        per "HH:MM-HH:MM" pair.
+        """
+        assert self.TimeOfDay.from_heatpump(6 * 3600 + 15) == "06:00"
+        assert self.TimeOfDay.from_heatpump(6 * 3600 + 59) == "06:00"
+        assert self.TimeOfDay.from_heatpump(59) == "00:00"
+
+    def test_from_heatpump_is_always_five_characters(self):
+        """The invariant `_attr_native_max` in text.py is sized against."""
+        for raw in range(0, 24 * 3600, 617):
+            assert len(self.TimeOfDay.from_heatpump(raw)) == 5
 
     def test_from_heatpump_non_int_returns_none(self):
         assert self.TimeOfDay.from_heatpump("06:00") is None

@@ -30,14 +30,16 @@ class _TimerCircuit:
     - ``per_day_prefix`` ("TG"/"Tg", German "täglich"): a separate,
       independently editable schedule for each individual day of the week.
 
-    Each prefix is also the parameter-name prefix: the firmware exposes the
-    actual start/end times as ``<prefix>_zeit_<row>_<slot>``, where ``row``
-    is the schedule slot within a day (0-based, up to `rows` per day) and
-    ``slot`` is an even number for the start time and that same number + 1
-    for its matching end time. For the weekday/weekend and per-day blocks,
-    ``slot`` also encodes which day-group the row belongs to
-    (``slot = 2 * column``, where ``column`` is 0/1 for weekday/weekend, or
-    0-6 for Monday-Sunday) -- see `_row_names_row_slot` below.
+    Each prefix is also the parameter-name prefix under which the firmware
+    exposes the actual start/end times, but the circuits do not agree on the
+    name shape that follows it: DHW and heating use
+    ``<prefix>_zeit_<row>_<slot>`` while ventilation uses
+    ``<prefix>_zeit_<0|1>_<row>_<2*col>``. Which one applies is decided per
+    circuit by `name_builder` below -- see the two `_row_names_*` functions
+    for each layout. Common to both: ``row`` is the schedule slot within a
+    day (0-based, up to `rows` per day) and ``column`` is 0 for the
+    same-schedule block, 0/1 for weekday/weekend, and 0-6 for
+    Monday-Sunday.
     """
 
     #: Raw parameter name of the mode selector that picks which of the three

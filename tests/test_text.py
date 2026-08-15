@@ -1,4 +1,4 @@
-"""Tests for the DHW timer-program schedule text entities."""
+"""Tests for the DHW, heating and ventilation timer-program schedule text entities."""
 
 from __future__ import annotations
 
@@ -281,6 +281,22 @@ class TestLuxtronikTimerScheduleText:
         data = make_coordinator_data(parameters={start0: "00:00", end0: "00:00"})
         entity._handle_coordinator_update(data)
         assert entity._attr_native_value == ""
+
+    def test_a_fully_populated_block_lands_exactly_on_native_max(self):
+        """`_attr_native_max` must fit the widest value the block can render.
+
+        Every pair is 11 characters because `TimeOfDay` always renders
+        "HH:MM" (it drops the seconds a non-minute-aligned register would
+        otherwise carry) - this is the consumer side of that invariant.
+        """
+        longest = max(TIMER_SCHEDULE_ENTITIES, key=lambda d: len(d.row_names))
+        entity, _, description = self._make_entity(key=longest.key)
+        parameters = {}
+        for start_name, end_name in description.row_names:
+            parameters[start_name] = "06:00"
+            parameters[end_name] = "22:00"
+        entity._handle_coordinator_update(make_coordinator_data(parameters=parameters))
+        assert len(entity._attr_native_value) == entity._attr_native_max
 
     def test_handle_coordinator_update_none_data(self):
         entity, coord, _ = self._make_entity()
@@ -758,49 +774,45 @@ class TestTimerScheduleSync:
         assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
 
     @pytest.mark.asyncio
-    async def test_unreadable_selector_does_not_remove_or_disable_anything(self):
-        """A glitched selector read must be a no-op, not a full teardown.
-
-        Regression test: treating an undecodable selector value as "no
-        program active" removed every live schedule entity and wrote
-        `disabled_by = INTEGRATION` on all 10 registry entries, with the next
-        good poll re-adding and re-enabling them - entity churn, registry
-        writes and a recorder gap caused by one transient read.
-        """
-        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
-
-        sync, coord, _added = self._make_sync("week")
-        registry = self._registry({})
-        with (
-            patch(
-                "custom_components.luxtronik2.text.er.async_get", return_value=registry
-            ),
-            patch("homeassistant.helpers.frame.report_usage"),
-        ):
-            await sync.async_setup()
-            registry.async_update_entity.reset_mock()
-            coord.data = make_coordinator_data(parameters={self._SELECTOR: None})
-            with patch.object(
-                LuxtronikTimerScheduleText, "async_remove", new=AsyncMock()
-            ) as remove:
-                await sync.async_apply()
-
-        remove.assert_not_awaited()
-        registry.async_update_entity.assert_not_called()
-        assert list(sync._entities) == [SK.TIMER_DHW_SCHEDULE_WEEK]
-
-    @pytest.mark.asyncio
     async def test_an_unreadable_circuit_is_frozen_while_others_still_sync(self):
         """A frozen circuit keeps its live entities and registry entries.
 
+        Regression test: treating an undecodable selector value as "no
+        program active" removed every live schedule entity of that circuit
+        and wrote `disabled_by = INTEGRATION` on its registry entries, with
+        the next good poll re-adding and re-enabling them - entity churn,
+        registry writes and a recorder gap caused by one transient read.
+
         The per-circuit skip is only safe if the sync also refuses to remove
         and disable that circuit's blocks - otherwise it causes exactly the
-        teardown the whole-pass bail existed to prevent.
+        teardown the whole-pass bail existed to prevent. Real registry ids
+        are seeded for both circuits (not an empty registry) so that a
+        regression which drops the freeze from the `_disable_inactive` call
+        has an actual row to wrongly write `disabled_by` to - an empty
+        registry would make `async_get_entity_id` return `None` for the
+        frozen circuit and the assertions below would pass for the wrong
+        reason.
         """
-        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
+        from custom_components.luxtronik2.text import (
+            LuxtronikTimerScheduleText,
+            _timer_schedule_unique_id,
+        )
 
         sync, coord, added = self._make_sync("week")
-        registry = self._registry({})
+        entry = _mock_entry()
+        dhw_week = next(
+            d for d in TIMER_SCHEDULE_ENTITIES if d.key == SK.TIMER_DHW_SCHEDULE_WEEK
+        )
+        dhw_week_id = _timer_schedule_unique_id(entry, dhw_week)
+        heating_week = next(
+            d
+            for d in TIMER_SCHEDULE_ENTITIES
+            if d.key == SK.TIMER_HEATING_SCHEDULE_WEEK
+        )
+        heating_week_id = _timer_schedule_unique_id(entry, heating_week)
+        registry = self._registry(
+            {dhw_week_id: self._entry(), heating_week_id: self._entry()}
+        )
         with (
             patch(
                 "custom_components.luxtronik2.text.er.async_get", return_value=registry
@@ -816,6 +828,7 @@ class TestTimerScheduleSync:
                 SK.TIMER_DHW_SCHEDULE_WEEK,
                 SK.TIMER_HEATING_SCHEDULE_WEEK,
             }
+            registry.async_update_entity.reset_mock()
 
             # DHW's selector glitches while heating switches program.
             coord.data = make_coordinator_data(
@@ -834,6 +847,14 @@ class TestTimerScheduleSync:
             SK.TIMER_HEATING_SCHEDULE_WEEKDAY,
             SK.TIMER_HEATING_SCHEDULE_WEEKEND,
         ]
+        # The heating circuit's now-inactive week entry got disabled...
+        registry.async_update_entity.assert_any_call(
+            heating_week_id, disabled_by=RegistryEntryDisabler.INTEGRATION
+        )
+        # ...but the frozen DHW circuit's registry entry was never touched by
+        # any call, in either position.
+        for call in registry.async_update_entity.call_args_list:
+            assert call.args[0] != dhw_week_id
 
     @pytest.mark.asyncio
     async def test_removal_of_an_entity_that_never_reached_the_platform(self):

@@ -388,6 +388,75 @@ class TestDeviceKeyActive:
         coord = _make_coordinator(calculations={})
         assert coord.device_key_active(DeviceKey.ventilation) is False
 
+    def test_ventilation_stays_active_once_detected(self):
+        """The detection latches on, because the evidence is a live reading.
+
+        A supply-air channel genuinely passing through 0.0 or 5.0 C - while
+        the exhaust channel sits on the unwired 5.0 sentinel - makes both
+        channels look absent for that poll. Without the latch the device
+        would disappear and come back, and `text.py` (the only per-poll
+        caller of `entity_active`) would tear its schedule entities down and
+        rebuild them each time.
+        """
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 17.4,
+                "ID_WEB_Temp_Lueftung_Abluft": 5.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is True
+
+        # The supply air drifts down onto a sentinel: both channels now look
+        # absent, but the module has not gone anywhere.
+        coord.data = make_coordinator_data(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 5.0,
+                "ID_WEB_Temp_Lueftung_Abluft": 5.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is True
+
+    def test_ventilation_detected_on_a_later_poll(self):
+        """A first poll landing on a sentinel must not be final.
+
+        This is why the gate latches on rather than being evaluated once at
+        setup: a restart during a cold spell would otherwise hide the module
+        for the whole session.
+        """
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 0.0,
+                "ID_WEB_Temp_Lueftung_Abluft": 0.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is False
+
+        coord.data = make_coordinator_data(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 17.4,
+                "ID_WEB_Temp_Lueftung_Abluft": 0.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.ventilation) is True
+
+    def test_ventilation_latch_is_per_coordinator(self):
+        """The latch lives in memory, so a fresh entry re-detects."""
+        detected = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 17.4,
+                "ID_WEB_Temp_Lueftung_Abluft": 21.2,
+            }
+        )
+        assert detected.device_key_active(DeviceKey.ventilation) is True
+
+        fresh = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 0.0,
+                "ID_WEB_Temp_Lueftung_Abluft": 0.0,
+            }
+        )
+        assert fresh.device_key_active(DeviceKey.ventilation) is False
+
     def test_unknown_device_key_raises(self):
         coord = _make_coordinator()
         with pytest.raises(NotImplementedError):
