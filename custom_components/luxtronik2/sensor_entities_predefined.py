@@ -107,7 +107,6 @@ SENSORS: list[descr] = [
         entity_registry_visible_default=False,
         device_class=SensorDeviceClass.ENUM,
         options=[e.value for e in LuxStatus1Option],
-        #        translation_key="status_line_1",
     ),
     descr(
         key=SensorKey.STATUS_LINE_2,
@@ -116,7 +115,6 @@ SENSORS: list[descr] = [
         entity_registry_visible_default=False,
         device_class=SensorDeviceClass.ENUM,
         options=["since", "in"],
-        #        translation_key="status_line_2",
     ),
     descr(
         key=SensorKey.STATUS_LINE_3,
@@ -125,7 +123,6 @@ SENSORS: list[descr] = [
         entity_registry_visible_default=False,
         device_class=SensorDeviceClass.ENUM,
         options=[e.value for e in LuxStatus3Option],
-        #       translation_key="status_line_3",
     ),
     descr(
         key=SensorKey.HEAT_SOURCE_INPUT_TEMPERATURE,

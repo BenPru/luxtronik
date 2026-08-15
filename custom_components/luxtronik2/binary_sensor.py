@@ -95,10 +95,6 @@ class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportInco
         state = get_sensor_data(data, descr.luxtronik_key.value)
         self._attr_is_on = self.compute_is_on(state)
 
-        # if descr.luxtronik_key == LC.C0146_APPROVAL_COOLING:
-        #    LOGGER.info('Cooling Approval=%s',self._attr_state)
-        #    LOGGER.info('on_state=%s',descr.on_state)
-
         super()._handle_coordinator_update()
 
     def compute_is_on(self, state: Any) -> bool:  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]

@@ -17,10 +17,8 @@ import voluptuous as vol
 # region Constants Main
 DOMAIN: Final = "luxtronik2"
 CONFIG_ENTRY_VERSION: Final = 10
-NICKNAME_PREFIX: Final = "Home Assistant"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
-# LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [
     Platform.SENSOR,
@@ -53,11 +51,6 @@ DEFAULT_UPDATE_INTERVAL_OPTION: Final = next(
     if value == DEFAULT_UPDATE_INTERVAL
 )
 
-UPDATE_INTERVAL_FAST: Final = timedelta(seconds=10)
-UPDATE_INTERVAL_NORMAL: Final = timedelta(minutes=1)
-UPDATE_INTERVAL_SLOW: Final = timedelta(minutes=3)
-UPDATE_INTERVAL_VERY_SLOW: Final = timedelta(minutes=5)
-
 # How long the status sensor keeps reporting domestic_water after a genuine DHW
 # state ends, provided the DHW recirculation pump is still running. Covers the
 # gap where the controller reports no_request while transitioning from normal
@@ -75,8 +68,6 @@ MAX_CAPTURED_LOG_RECORDS: Final = 1000
 # endregion Constants Main
 
 # region Conf
-CONF_COORDINATOR: Final = "coordinator"
-
 CONF_PARAMETERS: Final = "parameters"
 CONF_CALCULATIONS: Final = "calculations"
 CONF_VISIBILITIES: Final = "visibilities"
@@ -89,8 +80,6 @@ CONF_HA_SENSOR_PREFIX: Final = "ha_sensor_prefix"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
 CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: Final = "ha_sensor_current_power_consumption"
 
-CONF_LOCK_TIMEOUT: Final = "lock_timeout"
-CONF_SAFE: Final = "safe"
 CONF_MAX_DATA_LENGTH: Final = "max_data_length"
 
 DEFAULT_HOST: Final = ""
@@ -157,10 +146,7 @@ class DeviceKey(StrEnum):
     ventilation = "ventilation"
 
 
-LUXTRONIK_HA_SIGNAL_UPDATE_ENTITY = "luxtronik_entry_update"
-
 MIN_TIME_BETWEEN_UPDATES: Final = timedelta(seconds=10)
-MIN_TIME_BETWEEN_UPDATES_DOWNLOAD_PORTAL: Final = timedelta(hours=1)
 DOWNLOAD_PORTAL_URL: Final = (
     "https://www.heatpump24.com/software/fetchSoftware.php?softwareID="
 )
@@ -176,7 +162,6 @@ FIRMWARE_UPDATE_MANUAL_DE = (
 # endregion Constants Main
 
 # region Conf
-LANG_EN: Final = "en"
 LANG_DE: Final = "de"
 
 
@@ -526,7 +511,6 @@ class LuxParameter(StrEnum):
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = "parameters.ID_Waermemenge_ZWE"
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
-    P1087_SILENT_MODE = "parameters.Unknown_Parameter_1087"  # Silent mode On/Off
     P1119_LAST_DEFROST_TIMESTAMP = (
         "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
     )
@@ -947,7 +931,6 @@ class SensorKey(StrEnum):
     APPROVAL_COOLING = "approval_cooling"
     ROOM_THERMOSTAT_TEMPERATURE = "room_thermostat_temperature"
     ROOM_THERMOSTAT_TEMPERATURE_TARGET = "room_thermostat_temperature_target"
-    ROOM_THERMOSTAT_TYPE = "room_thermostat_type"
     COOLING_START_DELAY_HOURS = "cooling_start_delay_hours"
     COOLING_STOP_DELAY_HOURS = "cooling_stop_delay_hours"
     COOLING_OUTDOOR_TEMP_THRESHOLD = "cooling_threshold_temperature"
@@ -957,7 +940,6 @@ class SensorKey(StrEnum):
     COOLING_MIN_FLOW_OUT_TEMPERATURE = "cooling_min_flow_out_temperature"
     SMART_GRID_SWITCH = "smartgrid"
     SWITCHOFF_REASON = "switchoff_reason"
-    SILENT_MODE = "silent_mode"
     PUMP_VENT_HUP = "pump_vent_hup"
     PUMP_VENT_TIMER_H = "pump_vent_timer_h"
     PUMP_VENT_ACTIVE = "pump_vent_active"

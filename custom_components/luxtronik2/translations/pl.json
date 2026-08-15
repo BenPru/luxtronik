@@ -90,9 +90,6 @@
             "cooling": {
                 "name": "Ch\u0142odzenie"
             },
-            "silent_mode": {
-                "name": "Tryb cichy"
-            },
             "pump_vent_hup": {
                 "name": "Wentylacja HUP"
             },

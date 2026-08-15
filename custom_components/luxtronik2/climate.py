@@ -120,7 +120,6 @@ THERMOSTATS_SMART: list[LuxtronikClimateDescription] = [
         icon_by_state=LUX_STATE_ICON_MAP,
         temperature_unit=UnitOfTemperature.CELSIUS,
         translation_key_name="heating_controller",
-        # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
     ),
     LuxtronikClimateDescription(
@@ -139,7 +138,6 @@ THERMOSTATS_SMART: list[LuxtronikClimateDescription] = [
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
         translation_key_name="cooling_controller",
-        # visibility=LuxVisibility.V0005_COOLING,
         device_key=DeviceKey.cooling,
     ),
 ]
@@ -166,7 +164,6 @@ THERMOSTATS_OTHER: list[LuxtronikClimateDescription] = [
         min_temp=-5.0,
         max_temp=5.0,
         translation_key_name="heating_controller",
-        # visibility=LuxVisibility.V0023_FLOW_IN_TEMPERATURE,
         device_key=DeviceKey.heating,
     ),
     LuxtronikClimateDescription(
@@ -185,7 +182,6 @@ THERMOSTATS_OTHER: list[LuxtronikClimateDescription] = [
         icon_by_state=LUX_STATE_ICON_MAP_COOL,
         temperature_unit=UnitOfTemperature.CELSIUS,
         translation_key_name="cooling_controller",
-        # visibility=LuxVisibility.V0005_COOLING,
         device_key=DeviceKey.cooling,
     ),
 ]
@@ -249,7 +245,6 @@ class LuxtronikClimateExtraStoredData(ExtraStoredData):
     _attr_target_temperature: float | None = None
     _attr_hvac_mode: HVACMode | str | None = None
     _attr_preset_mode: str | None = None
-    # _attr_is_aux_heat: bool | None = None
     last_hvac_mode_before_preset: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
@@ -270,7 +265,6 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
     _attr_target_temperature_low = 18.0
     _attr_target_temperature_step = 0.5
 
-    # _attr_is_aux_heat: bool | None = None
     _attr_hvac_mode: HVACMode | str | None = None
     _attr_preset_mode: str | None = None
 
