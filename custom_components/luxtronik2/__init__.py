@@ -94,9 +94,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # Trigger a refresh again now that all platforms have registered
-    # await coordinator.async_refresh()
-
     # 🛠️ Update title on initial setup only
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT)

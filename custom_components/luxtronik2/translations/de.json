@@ -90,9 +90,6 @@
             "cooling": {
                 "name": "K\u00fchlung"
             },
-            "silent_mode": {
-                "name": "Fl\u00fcsterbetrieb"
-            },
             "pump_vent_hup": {
                 "name": "Entl\u00fcften HUP"
             },

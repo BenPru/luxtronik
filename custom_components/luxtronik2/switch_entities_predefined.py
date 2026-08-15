@@ -25,7 +25,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         key=SensorKey.EFFICIENCY_PUMP,
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
-        # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
         key=SensorKey.SMART_GRID_SWITCH,
@@ -37,7 +36,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         key=SensorKey.PUMP_HEAT_CONTROL,
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
-        # device_class=SensorDeviceClass.HEAT
     ),
     LuxtronikSwitchDescription(
         key=SensorKey.ELECTRICAL_POWER_LIMITATION_SWITCH,
@@ -52,12 +50,6 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
     ),
-    # LuxtronikSwitchDescription(
-    #     luxtronik_key=LP.P0870_AMOUNT_COUNTER_ACTIVE,
-    #     key="amount_counter_active",
-    #     icon="mdi:counter",
-    #     entity_category=EntityCategory.CONFIG,
-    # ),
     # endregion Main heatpump
     # region Heating
     LuxtronikSwitchDescription(

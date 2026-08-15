@@ -413,9 +413,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             model=self.model,
             hw_version=None,
             manufacturer=self.manufacturer,
-            # default_name=f"{text}",
-            # default_manufacturer=self.manufacturer,
-            # default_model=self.model,
         )
         if via_device is not None:
             device_info["via_device"] = via_device
