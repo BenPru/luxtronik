@@ -586,11 +586,23 @@
                     "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
                     "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                     "9": "nieaktywny",
+                    "10": "Zewnętrzne źródło energii",
                     "11": "Przep\u0142yw",
                     "12": "Pauza niskiego ci\u015bnienia",
+                    "13": "Pauza przegrzania",
                     "14": "Pauza falownika",
+                    "15": "Pauza desuperheatera",
+                    "16": "Tryb pracy przełączania",
+                    "17": "Inne wyłączenie",
+                    "18": "Minimalny przepływ chłodzenia",
+                    "19": "PV max",
+                    "20": "Pauza gorącego gazu",
+                    "21": "Pauza przegrzania gorącego gazu",
+                    "22": "nieaktywny",
+                    "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                     "24": "LPC",
-                    "25": "Restart"
+                    "25": "Restart",
+                    "27": "Maksymalna temperatura zasilania"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -609,11 +621,23 @@
                             "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
                             "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                             "9": "nieaktywny",
+                            "10": "Zewnętrzne źródło energii",
                             "11": "Przep\u0142yw",
                             "12": "Pauza niskiego ci\u015bnienia",
+                            "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
+                            "15": "Pauza desuperheatera",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
+                            "19": "PV max",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
+                            "22": "nieaktywny",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maksymalna temperatura zasilania"
                         }
                     },
                     "timestamp_1": {
@@ -632,11 +656,23 @@
                             "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
                             "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                             "9": "nieaktywny",
+                            "10": "Zewnętrzne źródło energii",
                             "11": "Przep\u0142yw",
                             "12": "Pauza niskiego ci\u015bnienia",
+                            "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
+                            "15": "Pauza desuperheatera",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
+                            "19": "PV max",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
+                            "22": "nieaktywny",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maksymalna temperatura zasilania"
                         }
                     },
                     "timestamp_2": {
@@ -655,11 +691,23 @@
                             "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
                             "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                             "9": "nieaktywny",
+                            "10": "Zewnętrzne źródło energii",
                             "11": "Przep\u0142yw",
                             "12": "Pauza niskiego ci\u015bnienia",
+                            "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
+                            "15": "Pauza desuperheatera",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
+                            "19": "PV max",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
+                            "22": "nieaktywny",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maksymalna temperatura zasilania"
                         }
                     },
                     "timestamp_3": {
@@ -678,11 +726,23 @@
                             "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
                             "8": "Ni\u017csze ograniczenie u\u017cytkowania",
                             "9": "nieaktywny",
+                            "10": "Zewnętrzne źródło energii",
                             "11": "Przep\u0142yw",
                             "12": "Pauza niskiego ci\u015bnienia",
+                            "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
+                            "15": "Pauza desuperheatera",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
+                            "19": "PV max",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
+                            "22": "nieaktywny",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maksymalna temperatura zasilania"
                         }
                     },
                     "timestamp_4": {

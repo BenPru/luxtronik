@@ -586,11 +586,23 @@
                     "7": "Teplota dos\u00e1hla minim\u00e1ln\u00ed povolen\u00e9 \u00farovn\u011b",
                     "8": "N\u00edzk\u00e1 \u00farove\u0148 povolen\u00e9 teploty",
                     "9": "\u017d\u00e1dn\u00fd po\u017eadavek",
+                    "10": "Extern\u00ed zdroj energie",
                     "11": "Pr\u016ftok v tepeln\u00e9m zdroji",
                     "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                    "13": "Pauza p\u0159eh\u0159\u00e1t\u00ed",
                     "14": "Pauza invertoru",
+                    "15": "Pauza desuperheateru",
+                    "16": "Re\u017eim p\u0159ep\u00edn\u00e1n\u00ed",
+                    "17": "Jin\u00e9 vypnut\u00ed",
+                    "18": "Minim\u00e1ln\u00ed pr\u016ftok chlazen\u00ed",
+                    "19": "PV max",
+                    "20": "Pauza hork\u00e9ho plynu",
+                    "21": "Pauza p\u0159eh\u0159\u00e1t\u00ed hork\u00e9ho plynu",
+                    "22": "\u017d\u00e1dn\u00fd po\u017eadavek",
+                    "23": "Minim\u00e1ln\u00ed v\u00fdstupn\u00ed teplota zdroje tepla p\u0159i chlazen\u00ed",
                     "24": "LPC",
-                    "25": "Restart"
+                    "25": "Restart",
+                    "27": "Maxim\u00e1ln\u00ed teplota v\u00fdstupu"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -609,11 +621,23 @@
                             "7": "Teplota dos\u00e1hla minim\u00e1ln\u00ed povolen\u00e9 \u00farovn\u011b",
                             "8": "N\u00edzk\u00e1 \u00farove\u0148 povolen\u00e9 teploty",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek",
+                            "10": "Extern\u00ed zdroj energie",
                             "11": "Pr\u016ftok v tepeln\u00e9m zdroji",
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "13": "Pauza p\u0159eh\u0159\u00e1t\u00ed",
                             "14": "Pauza invertoru",
+                            "15": "Pauza desuperheateru",
+                            "16": "Re\u017eim p\u0159ep\u00edn\u00e1n\u00ed",
+                            "17": "Jin\u00e9 vypnut\u00ed",
+                            "18": "Minim\u00e1ln\u00ed pr\u016ftok chlazen\u00ed",
+                            "19": "PV max",
+                            "20": "Pauza hork\u00e9ho plynu",
+                            "21": "Pauza p\u0159eh\u0159\u00e1t\u00ed hork\u00e9ho plynu",
+                            "22": "\u017d\u00e1dn\u00fd po\u017eadavek",
+                            "23": "Minim\u00e1ln\u00ed v\u00fdstupn\u00ed teplota zdroje tepla p\u0159i chlazen\u00ed",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maxim\u00e1ln\u00ed teplota v\u00fdstupu"
                         }
                     },
                     "timestamp_1": {
@@ -632,11 +656,23 @@
                             "7": "Minim\u00e1ln\u00ed teplotn\u00ed limit provozu",
                             "8": "Ni\u017e\u0161\u00ed limit provozu",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
+                            "10": "Extern\u00ed zdroj energie",
                             "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "13": "Pauza p\u0159eh\u0159\u00e1t\u00ed",
                             "14": "Pauza invertoru",
+                            "15": "Pauza desuperheateru",
+                            "16": "Re\u017eim p\u0159ep\u00edn\u00e1n\u00ed",
+                            "17": "Jin\u00e9 vypnut\u00ed",
+                            "18": "Minim\u00e1ln\u00ed pr\u016ftok chlazen\u00ed",
+                            "19": "PV max",
+                            "20": "Pauza hork\u00e9ho plynu",
+                            "21": "Pauza p\u0159eh\u0159\u00e1t\u00ed hork\u00e9ho plynu",
+                            "22": "\u017d\u00e1dn\u00fd po\u017eadavek",
+                            "23": "Minim\u00e1ln\u00ed v\u00fdstupn\u00ed teplota zdroje tepla p\u0159i chlazen\u00ed",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maxim\u00e1ln\u00ed teplota v\u00fdstupu"
                         }
                     },
                     "timestamp_2": {
@@ -655,11 +691,23 @@
                             "7": "Minim\u00e1ln\u00ed teplotn\u00ed limit provozu",
                             "8": "Ni\u017e\u0161\u00ed limit provozu",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
+                            "10": "Extern\u00ed zdroj energie",
                             "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "13": "Pauza p\u0159eh\u0159\u00e1t\u00ed",
                             "14": "Pauza invertoru",
+                            "15": "Pauza desuperheateru",
+                            "16": "Re\u017eim p\u0159ep\u00edn\u00e1n\u00ed",
+                            "17": "Jin\u00e9 vypnut\u00ed",
+                            "18": "Minim\u00e1ln\u00ed pr\u016ftok chlazen\u00ed",
+                            "19": "PV max",
+                            "20": "Pauza hork\u00e9ho plynu",
+                            "21": "Pauza p\u0159eh\u0159\u00e1t\u00ed hork\u00e9ho plynu",
+                            "22": "\u017d\u00e1dn\u00fd po\u017eadavek",
+                            "23": "Minim\u00e1ln\u00ed v\u00fdstupn\u00ed teplota zdroje tepla p\u0159i chlazen\u00ed",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maxim\u00e1ln\u00ed teplota v\u00fdstupu"
                         }
                     },
                     "timestamp_3": {
@@ -678,11 +726,23 @@
                             "7": "Minim\u00e1ln\u00ed teplotn\u00ed limit provozu",
                             "8": "Ni\u017e\u0161\u00ed limit provozu",
                             "9": "\u017d\u00e1dn\u00fd po\u017eadavek na vyt\u00e1p\u011bn\u00ed",
+                            "10": "Extern\u00ed zdroj energie",
                             "11": "Pr\u016ftok tepl\u00e9ho m\u00e9dia tepelnou \u010derpadlem",
                             "12": "Pauza n\u00edzk\u00e9ho tlaku",
+                            "13": "Pauza p\u0159eh\u0159\u00e1t\u00ed",
                             "14": "Pauza invertoru",
+                            "15": "Pauza desuperheateru",
+                            "16": "Re\u017eim p\u0159ep\u00edn\u00e1n\u00ed",
+                            "17": "Jin\u00e9 vypnut\u00ed",
+                            "18": "Minim\u00e1ln\u00ed pr\u016ftok chlazen\u00ed",
+                            "19": "PV max",
+                            "20": "Pauza hork\u00e9ho plynu",
+                            "21": "Pauza p\u0159eh\u0159\u00e1t\u00ed hork\u00e9ho plynu",
+                            "22": "\u017d\u00e1dn\u00fd po\u017eadavek",
+                            "23": "Minim\u00e1ln\u00ed v\u00fdstupn\u00ed teplota zdroje tepla p\u0159i chlazen\u00ed",
                             "24": "LPC",
-                            "25": "Restart"
+                            "25": "Restart",
+                            "27": "Maxim\u00e1ln\u00ed teplota v\u00fdstupu"
                         }
                     },
                     "timestamp_4": {

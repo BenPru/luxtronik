@@ -21,6 +21,7 @@ from custom_components.luxtronik2.const import (
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     PARSED_COUNT_ATTR,
+    LuxSwitchoffReason,
 )
 from custom_components.luxtronik2.model import LuxtronikCoordinatorData
 
@@ -412,11 +413,52 @@ class TestUnknownSelectionCodeWarning:
         assert caplog.text == ""
 
     def test_empty_slot_sentinel_does_not_warn(self, restore_selection_base, caplog):
-        """SwitchoffFile's table starts at 1, so raw 0 means 'no entry' - not unknown."""
+        """BivalenceLevel's table starts at 1, so raw 0 means 'no entry' - not unknown."""
         lux_overrides.warn_on_unknown_selection_codes()
-        assert SwitchoffFile("ID_WEB_Switchoff2_file_Nr0").from_heatpump(0) is None
         assert BivalenceLevel("ID_WEB_BIV_Stufe_akt").from_heatpump(0) is None
         assert caplog.text == ""
+
+
+class TestSwitchoffCodes:
+    def test_table_matches_switchoff_reason_translations(self):
+        """The library table and the sensor's own translations must agree."""
+        lux_overrides.update_Luxtronik_SwitchoffCodes()
+        item = SwitchoffFile("ID_WEB_Switchoff_file_Nr0")
+        assert item.from_heatpump(0) == "heatpump error"
+        assert item.from_heatpump(3) == "evu lock"
+        assert item.from_heatpump(11) == "flow rate"
+        assert item.from_heatpump(25) == "restart"
+        assert item.from_heatpump(27) == "maximum flow temperature"
+
+    def test_every_code_is_named_and_translated(self):
+        """The library table, the enum and en.json must describe the same codes."""
+        import json
+        from pathlib import Path
+
+        lux_overrides.update_Luxtronik_SwitchoffCodes()
+        translations = json.loads(
+            (
+                Path(__file__).resolve().parent.parent
+                / "custom_components"
+                / "luxtronik2"
+                / "translations"
+                / "en.json"
+            ).read_text(encoding="utf-8")
+        )
+        states = translations["entity"]["sensor"]["switchoff_reason"]["state"]
+
+        for code in SwitchoffFile("").codes:
+            assert code in {e.value for e in LuxSwitchoffReason}, code
+            assert str(code) in states, code
+
+    def test_still_reports_codes_outside_the_known_table(
+        self, restore_selection_base, caplog
+    ):
+        """Codes past the observed ones stay undocumented - keep asking for reports."""
+        lux_overrides.update_Luxtronik_SwitchoffCodes()
+        lux_overrides.warn_on_unknown_selection_codes()
+        assert SwitchoffFile("ID_WEB_Switchoff_file_Nr1").from_heatpump(26) is None
+        assert "26" in caplog.text
 
     def test_nonzero_unknown_on_sentinel_class_still_warns(
         self, restore_selection_base, caplog
