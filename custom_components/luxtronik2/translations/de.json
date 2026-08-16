@@ -586,11 +586,23 @@
                     "7": "Temperatur Einsatzgrenze minimal",
                     "8": "Untere Einsatzgrenze",
                     "9": "Keine Anforderung",
+                    "10": "Externe Energiequelle",
                     "11": "Durchfluss-W\u00e4rmequelle",
                     "12": "Niederdruck-Pause",
+                    "13": "\u00dcberhitzungs-Pause",
                     "14": "Inverter-Pause",
+                    "15": "Enthitzer-Pause",
+                    "16": "Betriebsart Umschaltung",
+                    "17": "Sonstige Abschaltung",
+                    "18": "Mindestdurchfluss K\u00fchlung",
+                    "19": "PV max",
+                    "20": "Hei\u00dfgas-Pause",
+                    "21": "\u00dcberhitzung Hei\u00dfgas-Pause",
+                    "22": "Keine Anforderung",
+                    "23": "Minimale W\u00e4rmequellen-Austrittstemperatur K\u00fchlung",
                     "24": "LPC",
-                    "25": "Neustart"
+                    "25": "Neustart",
+                    "27": "Vorlauf max."
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -609,11 +621,23 @@
                             "7": "Temperatur Einsatzgrenze minimal",
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
+                            "10": "Externe Energiequelle",
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
+                            "13": "\u00dcberhitzungs-Pause",
                             "14": "Inverter-Pause",
+                            "15": "Enthitzer-Pause",
+                            "16": "Betriebsart Umschaltung",
+                            "17": "Sonstige Abschaltung",
+                            "18": "Mindestdurchfluss K\u00fchlung",
+                            "19": "PV max",
+                            "20": "Hei\u00dfgas-Pause",
+                            "21": "\u00dcberhitzung Hei\u00dfgas-Pause",
+                            "22": "Keine Anforderung",
+                            "23": "Minimale W\u00e4rmequellen-Austrittstemperatur K\u00fchlung",
                             "24": "LPC",
-                            "25": "Neustart"
+                            "25": "Neustart",
+                            "27": "Vorlauf max."
                         }
                     },
                     "timestamp_1": {
@@ -632,11 +656,23 @@
                             "7": "Temperatur Einsatzgrenze minimal",
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
+                            "10": "Externe Energiequelle",
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
+                            "13": "\u00dcberhitzungs-Pause",
                             "14": "Inverter-Pause",
+                            "15": "Enthitzer-Pause",
+                            "16": "Betriebsart Umschaltung",
+                            "17": "Sonstige Abschaltung",
+                            "18": "Mindestdurchfluss K\u00fchlung",
+                            "19": "PV max",
+                            "20": "Hei\u00dfgas-Pause",
+                            "21": "\u00dcberhitzung Hei\u00dfgas-Pause",
+                            "22": "Keine Anforderung",
+                            "23": "Minimale W\u00e4rmequellen-Austrittstemperatur K\u00fchlung",
                             "24": "LPC",
-                            "25": "Neustart"
+                            "25": "Neustart",
+                            "27": "Vorlauf max."
                         }
                     },
                     "timestamp_2": {
@@ -655,11 +691,23 @@
                             "7": "Temperatur Einsatzgrenze minimal",
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
+                            "10": "Externe Energiequelle",
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
+                            "13": "\u00dcberhitzungs-Pause",
                             "14": "Inverter-Pause",
+                            "15": "Enthitzer-Pause",
+                            "16": "Betriebsart Umschaltung",
+                            "17": "Sonstige Abschaltung",
+                            "18": "Mindestdurchfluss K\u00fchlung",
+                            "19": "PV max",
+                            "20": "Hei\u00dfgas-Pause",
+                            "21": "\u00dcberhitzung Hei\u00dfgas-Pause",
+                            "22": "Keine Anforderung",
+                            "23": "Minimale W\u00e4rmequellen-Austrittstemperatur K\u00fchlung",
                             "24": "LPC",
-                            "25": "Neustart"
+                            "25": "Neustart",
+                            "27": "Vorlauf max."
                         }
                     },
                     "timestamp_3": {
@@ -678,11 +726,23 @@
                             "7": "Temperatur Einsatzgrenze minimal",
                             "8": "Untere Einsatzgrenze",
                             "9": "Keine Anforderung",
+                            "10": "Externe Energiequelle",
                             "11": "Durchfluss-W\u00e4rmequelle",
                             "12": "Niederdruck-Pause",
+                            "13": "\u00dcberhitzungs-Pause",
                             "14": "Inverter-Pause",
+                            "15": "Enthitzer-Pause",
+                            "16": "Betriebsart Umschaltung",
+                            "17": "Sonstige Abschaltung",
+                            "18": "Mindestdurchfluss K\u00fchlung",
+                            "19": "PV max",
+                            "20": "Hei\u00dfgas-Pause",
+                            "21": "\u00dcberhitzung Hei\u00dfgas-Pause",
+                            "22": "Keine Anforderung",
+                            "23": "Minimale W\u00e4rmequellen-Austrittstemperatur K\u00fchlung",
                             "24": "LPC",
-                            "25": "Neustart"
+                            "25": "Neustart",
+                            "27": "Vorlauf max."
                         }
                     },
                     "timestamp_4": {

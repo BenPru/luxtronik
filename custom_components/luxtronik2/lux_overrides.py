@@ -14,6 +14,7 @@ from luxtronik.datatypes import (
     Percent2,
     Power,
     SelectionBase,
+    SwitchoffFile,
     Timestamp,
 )
 from luxtronik.parameters import Parameters
@@ -372,9 +373,8 @@ def warn_on_unknown_selection_codes():
     the user to report it rather than letting it sit undetected.
 
     Raw ``0`` is skipped for tables that have no entry for ``0``
-    (``SwitchoffFile``, ``BivalenceLevel``): there it means "slot empty", not
-    "unknown code", and it is what most controllers report for most of their
-    switchoff history slots.
+    (e.g. ``BivalenceLevel``): there it means "slot empty", not "unknown code",
+    and it is what a controller reports for anything it has not filled in yet.
     """
     # No lock needed: called only from synchronous code path (no await),
     # so the event loop cannot preempt between the guard check and flag set.
@@ -406,6 +406,63 @@ def warn_on_unknown_selection_codes():
     SelectionBase.from_heatpump = _from_heatpump
 
     _UNKNOWN_CODE_WARNING_INSTALLED = True
+
+
+def update_Luxtronik_SwitchoffCodes():
+    """Replace the pinned library's incomplete/shifted switchoff code table.
+
+    luxtronik 0.3.14 knows only codes 1-9, and misnumbers three of them. It was
+    released in June 2022 and is still the newest release on PyPI, so two merged
+    upstream fixes never reached any user: `19: PV max` (issue #89, March 2023)
+    and Bouni/python-luxtronik#186 (November 2024), which added 10-25 and
+    renumbered 1/2/4 to 0/1/2. Without this override, every controller reporting
+    one of the perfectly ordinary codes 10-25 (flow rate, low pressure pause,
+    LPC, restart, ...) decodes to `None` and triggers the "please report it"
+    warning from `warn_on_unknown_selection_codes()`.
+
+    PR #186 derived the corrected numbering by reading the strings the heat pump
+    itself displays and cross-checking them against the manual; issue #185 that
+    prompted it confirmed `22` the same way, by lining the five register slots up
+    with the five timestamps in the controller's own log. That is also where the
+    numbering used by the `switchoff_reason` sensor's translations comes from, so
+    both readings of the same history now agree.
+
+    `24: LPC` is upstream's own uncertain guess (possibly "limit power
+    consumption") and is deliberately left as the bare abbreviation.
+    """
+    SwitchoffFile.codes = {
+        0: "heatpump error",
+        1: "system error",
+        2: "operation mode second heat generator",
+        3: "evu lock",
+        # 4 is left unassigned upstream: the old table's entry for it moved to 2.
+        5: "air defrost",
+        6: "maximal usage temperature",
+        7: "minimal usage temperature",
+        8: "lower usage limit",
+        9: "no request",
+        10: "external energy source",
+        11: "flow rate",
+        12: "low pressure pause",
+        13: "superheating pause",
+        14: "inverter pause",
+        15: "desuperheater pause",
+        16: "operation mode for switching over",
+        17: "other shutdown",
+        18: "min. flow cooling",
+        19: "PV max",
+        20: "hot gas pause",
+        21: "overheating hot gas pause",
+        22: "no request",
+        23: "min. heat source out cooling",
+        24: "LPC",
+        25: "restart",
+        # 27 is not in upstream's table: read off an HMD2 display, whose
+        # "Abschaltungen" log showed "Aanvoer max." for the same timestamps the
+        # switchoff history reported 27 (confirmed against a run that stopped
+        # at 66.0 degrees flow and resumed two minutes later).
+        27: "maximum flow temperature",
+    }
 
 
 def update_Luxtronik_HeatpumpCodes():

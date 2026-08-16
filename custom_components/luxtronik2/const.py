@@ -278,36 +278,42 @@ class LuxRoomThermostatType(Enum):
 
 
 class LuxSwitchoffReason(Enum):
-    """LuxSwitchoff reason etc."""
+    """Reasons the heat pump logs when it stops running.
 
-    cycle_lock = 0  # cycle_lock
-    heatpump_error = 1
-    system_error = 2
+    Only the values are used (to build the `switchoff_reason` sensor's
+    `options`); the display strings come from the translation files. Keep the
+    names in step with `lux_overrides.update_Luxtronik_SwitchoffCodes()` and
+    those translations - see that function for where the numbering comes from.
+    """
+
+    heatpump_error = 0
+    system_error = 1
+    operation_mode_second_heat_generator = 2
     evu_lock = 3
-    operation_mode_second_heat_generator = 4
+    undefined_4 = 4  # left unassigned upstream
     air_defrost = 5
     maximal_usage_temperature = 6
     minimal_usage_temperature = 7
     lower_usage_limit = 8
     no_request = 9
-    undefined_10 = 10  # ???
+    external_energy_source = 10
     flow_rate = 11  # Durchfluss
-    p0_pause = 12
-    undefined_13 = 13  # ???
-    IO_pause = 14
-    undefined_15 = 15  # ???
-    undefined_16 = 16  # ???
-    undefined_17 = 17  # ???
-    undefined_18 = 18  # ???
+    low_pressure_pause = 12
+    superheating_pause = 13
+    inverter_pause = 14
+    desuperheater_pause = 15
+    operation_mode_for_switching_over = 16
+    other_shutdown = 17
+    min_flow_cooling = 18
     PV_max = 19
-    undefined_20 = 20  # ???
-    undefined_21 = 21  # ???
-    undefined_22 = 22  # ???
-    undefined_23 = 23  # ???
-    LPC = 24
+    hot_gas_pause = 20
+    overheating_hot_gas_pause = 21
+    no_request_alt = 22  # same meaning as 9; both occur in the wild
+    min_heat_source_out_cooling = 23
+    LPC = 24  # upstream's guess: possibly "limit power consumption"
     restart = 25
     undefined_26 = 26  # ???
-    undefined_27 = 27  # ???
+    maximum_flow_temperature = 27
     undefined_28 = 28  # ???
     undefined_29 = 29  # ???
     undefined_30 = 30  # ???
