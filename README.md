@@ -336,6 +336,10 @@ If you want to accurately measure the SCOP (Seasonal Coefficient of Performance)
 
 The **Heating COP** and **DHW COP** sensors report an instantaneous efficiency ratio, and can use such an external meter directly as their power-consumption input instead of the heat pump's own reading — see [Advanced Features: COP Calculation and the External Power Sensor](ADVANCED_FEATURES.md#cop-calculation-and-the-external-power-sensor).
 
+> **⚠️ Series-2 controllers (firmware V2.x): the Additional heat generator energy sensors now read ten times lower.**
+> On a series-2 controller these counters step in 0.01 kWh, not the 0.1 kWh the integration previously assumed, so a unit that reported 14714 kWh now correctly reports 1471.4 kWh. Because they are total-increasing energy sensors, Home Assistant reads that one-off drop as a meter reset and books the first reading after the update as fresh consumption — a spurious spike of roughly the sensor's whole lifetime total in the energy dashboard.
+> To remove it, open **Developer Tools → Statistics**, find each *Additional heat generator energy* sensor, and use the **Fix issue / adjust sum** action on the day the update landed. Series-3 controllers (V3.x) are unaffected; their scale was verified in #625 and has not changed.
+
 ---
 
 ## 4. Troubleshooting

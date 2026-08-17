@@ -60,6 +60,12 @@ from .model import (
 #   parameters 852/854/878/879, the other ID_Waermemenge_* counters, are
 #   0.01 kWh on both generations (checked against calculations 151/152, which
 #   are 0.1 kWh, on 21 diagnostics dumps). Series 3 is where 1059 leaves it.
+#   Both series-2 readings came from V2.88.3 units, so the sample fixes the
+#   series but not the minor: a change at x.88 rather than between generations
+#   would fit it equally well and would leave older series-2 firmware reading
+#   ten times low. Keyed on the series because a counter's scale is a property
+#   of the controller line, not of a register set; a pre-x.88 series-2 dump is
+#   the second thing to check for after a V1.x one (#752).
 # Series 1 - assumed to match series 2, never measured: there is no V1.x
 #   diagnostics dump in the corpus at all. A controller line that used 0.01 kWh
 #   on series 1, kept it on series 2 and changed to 0.1 on series 3 is a

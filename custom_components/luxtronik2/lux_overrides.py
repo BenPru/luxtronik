@@ -203,10 +203,15 @@ parameters_to_add_update = {
     1137: Energy2("DHW_ENERGY_INPUT", False),
     1138: Energy2("POOL_ENERGY_INPUT", False),
     1139: Energy2("COOLING_ENERGY_INPUT", False),
-    # Auxiliary-heater heat counters, both in 0.1 kWh units, so Energy's own
-    # /10 is the whole conversion and their descriptions carry no factor. The
-    # scale was measured against the rated element power in #625; the name of
-    # 1059 must stay ID_Waermemenge_ZWE, which is how const.py resolves it.
+    # Auxiliary-heater heat counters. 0.1 kWh per count on a series-3
+    # controller, so Energy's own /10 is the whole conversion there (measured
+    # against the rated element power in #625), but 0.01 kWh on series 2, where
+    # their descriptions take a further /10 - see
+    # AUX_HEATER_ENERGY_FACTOR_BY_SERIES in sensor_entities_predefined.py for
+    # the per-generation evidence. The split cannot live here: these overrides
+    # are applied once per process, while one process can serve two config
+    # entries whose heat pumps are different generations. The name of 1059 must
+    # stay ID_Waermemenge_ZWE, which is how const.py resolves it.
     1059: Energy("ID_Waermemenge_ZWE", False),
     1140: Energy("SECOND_HEAT_GENERATOR_AMOUNT_COUNTER", False),
     # Bouni/python-luxtronik's in-progress definitions mark these read-only,
