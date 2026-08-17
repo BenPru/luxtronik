@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
 from .binary_sensor_entities_predefined import BINARY_SENSORS
-from .common import get_sensor_data, key_exists
+from .common import get_sensor_data, key_exists, read_smart_grid_inputs
 from .const import CONF_HA_SENSOR_PREFIX, LOGGER, DeviceKey, SensorKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikBinarySensorEntityDescription
@@ -92,7 +92,13 @@ class LuxtronikBinarySensorEntity(  # type: ignore  # pyright: ignore[reportInco
             return
 
         descr = self.entity_description
-        state = get_sensor_data(data, descr.luxtronik_key.value)
+        if descr.key == SensorKey.EVU2:
+            # SG2 is not wired to the HZIO input on every controller
+            # generation, so derive it the same way the SmartGrid status
+            # sensor does - the two must never disagree (#669).
+            _, state = read_smart_grid_inputs(data)
+        else:
+            state = get_sensor_data(data, descr.luxtronik_key.value)
         self._attr_is_on = self.compute_is_on(state)
 
         super()._handle_coordinator_update()

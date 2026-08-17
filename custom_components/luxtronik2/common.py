@@ -29,6 +29,11 @@ from .model import LuxtronikCoordinatorData
 
 # endregion Imports
 
+# Rail of the room station's +/-5 K adjuster. Mains voltage on that terminal
+# pins the reading to one end or the other, which is how an SG2 contact shows
+# up there on a Luxtronik 2.0 controller (#669).
+SMART_GRID_RFV_RAIL = 5.0
+
 
 def _register_returned(group_data: Any, group: str, index: int) -> bool:
     """Did the controller actually return this register in its last read?
@@ -149,6 +154,75 @@ def get_sensor_data(
         if raw_value
         else normalize_sensor_value(value, coordinator, luxtronik_key)
     )
+
+
+def _as_bool(value: Any) -> bool:
+    """Coerce a Luxtronik input register to a bool (True/1/"true"/"True")."""
+    return value in [True, 1, "1", "true", "True"]
+
+
+def smart_grid_enabled(coordinator: LuxtronikCoordinatorData) -> bool:
+    """Is SmartGrid switched on at the controller?
+
+    P1030 holds a mode rather than a flag: 0 is off, but the variant selected
+    when it is on is not always 1 - the Luxtronik 2.0 unit in #669 reports 3.
+    So this must not be coerced through a boolean-ish comparison.
+    """
+    value = get_sensor_data(coordinator, LP.P1030_SMART_GRID_SWITCH)
+    return bool(value) and value not in [False, 0, "0", "false", "False"]
+
+
+def read_smart_grid_inputs(
+    coordinator: LuxtronikCoordinatorData,
+) -> tuple[bool, bool]:
+    """Read the EVU1/EVU2 inputs of the SmartGrid state table.
+
+    The SG contacts are wired to different terminals per controller
+    generation (see the "Klemmenplan Smart Grid" in the part-2 manuals):
+    Luxtronik 2.1 and HMD2 put SG2 on a dedicated input reported through the
+    HZIO board, but Luxtronik 2.0 puts it on the RFV room station terminal,
+    where the HZIO register stays 0 forever and the status sensor sticks on
+    evu_locked / reduced_operation (#669).
+
+    That wiring identifies itself in the data, so no firmware gate is needed.
+    It requires SmartGrid to be switched on at all - with it off the terminal
+    is not an SG contact by definition - no room station to be configured,
+    since otherwise the terminal is taken, and an RFV reading at one of the
+    adjuster's rails, which a real station never parks at. Every unit in the
+    diagnostics corpus without a station reads exactly 0.0; the only exception
+    was the SG2-wired 2.0 unit in #669, whose reading flipped +5.0 / -5.0 with
+    the contact.
+
+    The rail test is a band rather than an exact match: the register may not be
+    clamped at the rail on every unit, so reading slightly past it must still
+    count. It is bounded above because a signed Celsius register can also
+    report something implausible, and treating that as SG2 would move a 2.1
+    unit onto this branch and invert its EVU1 as well.
+
+    On 2.0 the EVU terminal carries SG1 itself, and there "released" means the
+    SG1 row of the table is 0, so EVU1 is inverted along with it.
+    """
+    evu1 = _as_bool(get_sensor_data(coordinator, LC.C0031_EVU_UNLOCKED))
+    rfv = get_sensor_data(coordinator, LC.C0023_ROOM_STATION_RFV)
+    room_station = get_sensor_data(coordinator, LP.P0033_ROOM_THERMOSTAT_TYPE)
+
+    rfv_value: float | None = None
+    if rfv is not None and room_station is not None and smart_grid_enabled(coordinator):
+        try:
+            if int(room_station) == 0:
+                rfv_value = float(rfv)
+        except (TypeError, ValueError):
+            # Both registers are Unknown/Celsius datatypes, so a firmware that
+            # reports something unparsable must fall back, not raise.
+            rfv_value = None
+
+    if rfv_value is not None and SMART_GRID_RFV_RAIL <= abs(rfv_value) <= (
+        SMART_GRID_RFV_RAIL * 2
+    ):
+        LOGGER.debug("SmartGrid SG2 read from the RFV terminal (%s)", rfv_value)
+        return not evu1, rfv_value < 0
+
+    return evu1, _as_bool(get_sensor_data(coordinator, LC.C0185_EVU2))
 
 
 def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) -> Any:
