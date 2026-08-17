@@ -575,6 +575,10 @@ class LuxCalculation(StrEnum):
     C0021_FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE = "calculations.ID_WEB_Sollwert_TVL_MK1"
     C0022_FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE = "calculations.ID_WEB_Sollwert_TVL_MK2"
     C0023_FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE = "calculations.ID_WEB_Sollwert_TVL_MK3"
+    # Room station (Raumfernversteller) adjuster, +/-5 K. Doubles as the
+    # SmartGrid SG2 input on Luxtronik 2.0 controllers, where the reading
+    # flips between the two rails with the contact, see #669.
+    C0023_ROOM_STATION_RFV = "calculations.ID_WEB_Temperatur_RFV"
     C0024_HEAT_SOURCE_OUTPUT_TEMPERATURE = "calculations.ID_WEB_Temperatur_TWA"
     C0026_SOLAR_COLLECTOR_TEMPERATURE = "calculations.ID_WEB_Temperatur_TSK"
     C0027_SOLAR_BUFFER_TEMPERATURE = "calculations.ID_WEB_Temperatur_TSS"

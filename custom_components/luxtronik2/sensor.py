@@ -16,7 +16,13 @@ from homeassistant.helpers.translation import async_get_cached_translations
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
-from .common import get_sensor_data, key_exists, state_as_number_or_none
+from .common import (
+    get_sensor_data,
+    key_exists,
+    read_smart_grid_inputs,
+    smart_grid_enabled,
+    state_as_number_or_none,
+)
 from .const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_PREFIX,
@@ -101,7 +107,10 @@ async def async_setup_entry(
                     # Check if firmware supports the Luxtronik Parameter/Calculation key
                     key_exists(coordinator.data, description.luxtronik_key)
                     or (
-                        # For SmartGrid status sensor, check if required parameters exist
+                        # For SmartGrid status sensor, check if required parameters exist.
+                        # EVU2 may be read from another register than C0185 at
+                        # runtime (#669), but every controller defines C0185,
+                        # so this stays a valid presence check.
                         description.key == SensorKey.SMART_GRID_STATUS
                         and (
                             key_exists(coordinator.data, LP.P1030_SMART_GRID_SWITCH)
@@ -350,24 +359,16 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
 
     def _update_smart_grid_status(self) -> None:
         """Calculate and update SmartGrid status based on EVU and EVU2 inputs."""
-        from .const import LuxParameter as LP
-
-        # Check if SmartGrid is enabled (P1030)
-        smartgrid_enabled = self._get_value(LP.P1030_SMART_GRID_SWITCH)
-
-        # If SmartGrid is disabled, set sensor to unavailable
-        if not smartgrid_enabled or smartgrid_enabled in [False, 0, "false", "False"]:
+        # If SmartGrid is disabled (P1030), set sensor to unavailable
+        if not smart_grid_enabled(self.coordinator.data):
             self._smart_grid_available = False
             self._attr_native_value = None
         else:
             self._smart_grid_available = True
 
-            evu = self._get_value(LC.C0031_EVU_UNLOCKED)
-            evu2 = self._get_value(LC.C0185_EVU2)
-
-            # Convert to boolean (handle True/False/1/0/"true"/"false")
-            evu_on = evu in [True, 1, "true", "True"]
-            evu2_on = evu2 in [True, 1, "true", "True"]
+            # Which terminal carries SG1/SG2 depends on the controller
+            # generation, so the inputs are derived rather than read (#669).
+            evu_on, evu2_on = read_smart_grid_inputs(self.coordinator.data)
 
             # Determine SmartGrid status based on EVU and EVU2 inputs
             # EVU=0, EVU2=0 → Status 2 (reduced operation)

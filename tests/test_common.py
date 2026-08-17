@@ -13,6 +13,7 @@ from custom_components.luxtronik2.common import (
     get_sensor_data,
     key_exists,
     normalize_sensor_value,
+    read_smart_grid_inputs,
     state_as_number_or_none,
 )
 from custom_components.luxtronik2.const import (
@@ -153,6 +154,120 @@ class TestRegisterPresence:
         )
         assert key_exists(data, "calculations.upstream_a") is True
         assert key_exists(data, "calculations.added_b") is False
+
+
+# ===========================================================================
+# read_smart_grid_inputs
+# ===========================================================================
+
+
+def _sg_data(evu_in=True, hzio_evu2=0, rfv=0.0, rfv_type=0, smart_grid=1):
+    return make_coordinator_data(
+        calculations={
+            "ID_WEB_EVUin": evu_in,
+            "ID_WEB_HZIO_EVU2": hzio_evu2,
+            "ID_WEB_Temperatur_RFV": rfv,
+        },
+        parameters={
+            "ID_Einst_RFVEinb_akt": rfv_type,
+            "ID_Einst_SmartGrid": smart_grid,
+        },
+    )
+
+
+class TestReadSmartGridInputs:
+    """SG1/SG2 land on different terminals per controller generation (#669)."""
+
+    def test_hzio_wiring_reads_the_registers_verbatim(self):
+        """The 2.1 / HMD2 case: EVU2 from calc 185, EVU1 from calc 31."""
+        assert read_smart_grid_inputs(_sg_data(evu_in=True, hzio_evu2=1)) == (
+            True,
+            True,
+        )
+        assert read_smart_grid_inputs(_sg_data(evu_in=False, hzio_evu2=1)) == (
+            False,
+            True,
+        )
+        assert read_smart_grid_inputs(_sg_data(evu_in=True, hzio_evu2=0)) == (
+            True,
+            False,
+        )
+        assert read_smart_grid_inputs(_sg_data(evu_in=False, hzio_evu2=0)) == (
+            False,
+            False,
+        )
+
+    def test_rfv_wiring_reads_evu2_from_the_rfv_sign(self):
+        """Luxtronik 2.0: SG2 sits on the room station terminal, EVU1 inverted.
+
+        Both rows are taken from the two diagnostics dumps in #669, together
+        with the state the controller display showed for each.
+        """
+        # SG2 on -> display state 3 -> EVU1=0, EVU2=1
+        assert read_smart_grid_inputs(_sg_data(evu_in=True, rfv=-5.0)) == (False, True)
+        # SG2 off -> display state 2 -> EVU1=0, EVU2=0
+        assert read_smart_grid_inputs(_sg_data(evu_in=True, rfv=5.0)) == (False, False)
+
+    def test_rfv_wiring_inverts_evu1(self):
+        """On 2.0 the EVU terminal is SG1 itself, so released == EVU1 off."""
+        assert read_smart_grid_inputs(_sg_data(evu_in=False, rfv=-5.0)) == (True, True)
+
+    def test_room_station_configured_keeps_hzio(self):
+        """A real room station owns the terminal, so it can never be SG2.
+
+        Every unit in the diagnostics corpus with a station reads -2.0..0.0.
+        """
+        assert read_smart_grid_inputs(
+            _sg_data(evu_in=True, hzio_evu2=1, rfv=-2.0, rfv_type=4)
+        ) == (True, True)
+
+    def test_idle_rfv_input_keeps_hzio(self):
+        """The common case: no station, nothing wired, RFV reads exactly 0.0."""
+        assert read_smart_grid_inputs(
+            _sg_data(evu_in=True, hzio_evu2=1, rfv=0.0, rfv_type=0)
+        ) == (True, True)
+
+    def test_missing_registers_fall_back_to_hzio(self):
+        """Firmware without RFV registers must keep the pre-#669 behaviour."""
+        data = make_coordinator_data(
+            calculations={"ID_WEB_EVUin": True, "ID_WEB_HZIO_EVU2": 1},
+            parameters={"ID_Einst_SmartGrid": 1},
+        )
+        assert read_smart_grid_inputs(data) == (True, True)
+
+    def test_smart_grid_off_keeps_hzio(self):
+        """With SG disabled the terminal is not an SG contact by definition.
+
+        Without this the heuristic would run on every install in the fleet,
+        including the majority that never enabled SmartGrid.
+        """
+        assert read_smart_grid_inputs(
+            _sg_data(evu_in=True, hzio_evu2=1, rfv=-5.0, smart_grid=0)
+        ) == (True, True)
+
+    def test_smart_grid_mode_value_is_enabled(self):
+        """P1030 holds a mode, not a flag - the #669 unit reports 3, not 1."""
+        assert read_smart_grid_inputs(
+            _sg_data(evu_in=True, rfv=-5.0, smart_grid=3)
+        ) == (False, True)
+
+    def test_implausible_rfv_reading_keeps_hzio(self):
+        """A signed Celsius register can report garbage; only the rails count.
+
+        Without a ceiling such a reading would move a 2.1 unit onto the 2.0
+        branch, which also inverts its EVU1.
+        """
+        for rfv in (3276.7, -100.0):
+            assert read_smart_grid_inputs(
+                _sg_data(evu_in=True, hzio_evu2=1, rfv=rfv)
+            ) == (True, True)
+
+    def test_unreadable_room_station_setting_keeps_hzio(self):
+        """P33 is an Unknown-datatype register, so do not trust its type."""
+        for rfv_type in (None, "unknown"):
+            assert read_smart_grid_inputs(
+                _sg_data(evu_in=True, hzio_evu2=1, rfv=-5.0, rfv_type=rfv_type)
+            ) == (True, True)
 
 
 # ===========================================================================

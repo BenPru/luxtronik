@@ -275,6 +275,69 @@ class TestLuxtronikBinarySensorEntity:
         coord.data = None
         entity._handle_coordinator_update(None)
 
+    def _make_evu2_sensor(self):
+        from custom_components.luxtronik2.binary_sensor import (
+            LuxtronikBinarySensorEntity,
+        )
+
+        desc = LuxtronikBinarySensorEntityDescription(
+            key=SK.EVU2,
+            luxtronik_key=LC.C0185_EVU2,
+            device_key=DeviceKey.heatpump,
+        )
+        coord = _mock_coordinator(make_coordinator_data())
+        entry = _mock_entry()
+
+        with patch("homeassistant.helpers.frame.report_usage"):
+            entity = LuxtronikBinarySensorEntity(
+                MagicMock(), entry, coord, desc, DeviceKey.heatpump
+            )
+        _patch_entity_hass(entity)
+        return entity
+
+    def _evu2_data(self, hzio_evu2=0, rfv=0.0, rfv_type=0, smart_grid=1):
+        return make_coordinator_data(
+            calculations={
+                "ID_WEB_EVUin": True,
+                "ID_WEB_HZIO_EVU2": hzio_evu2,
+                "ID_WEB_Temperatur_RFV": rfv,
+            },
+            parameters={
+                "ID_Einst_RFVEinb_akt": rfv_type,
+                "ID_Einst_SmartGrid": smart_grid,
+            },
+        )
+
+    def test_evu2_follows_hzio_register(self):
+        entity = self._make_evu2_sensor()
+        entity._handle_coordinator_update(self._evu2_data(hzio_evu2=1))
+        assert entity._attr_is_on is True
+        entity._handle_coordinator_update(self._evu2_data(hzio_evu2=0))
+        assert entity._attr_is_on is False
+
+    def test_evu2_follows_rfv_sign_on_2_0_wiring(self):
+        """Must agree with the SmartGrid status sensor on a 2.0 unit (#669)."""
+        entity = self._make_evu2_sensor()
+        entity._handle_coordinator_update(self._evu2_data(rfv=-5.0))
+        assert entity._attr_is_on is True
+        entity._handle_coordinator_update(self._evu2_data(rfv=5.0))
+        assert entity._attr_is_on is False
+
+    def test_evu2_ignores_a_configured_room_station(self):
+        entity = self._make_evu2_sensor()
+        entity._handle_coordinator_update(
+            self._evu2_data(hzio_evu2=1, rfv=-5.0, rfv_type=4)
+        )
+        assert entity._attr_is_on is True
+
+    def test_evu2_ignores_rfv_when_smart_grid_is_off(self):
+        """The heuristic must not run on installs that never enabled SG."""
+        entity = self._make_evu2_sensor()
+        entity._handle_coordinator_update(
+            self._evu2_data(hzio_evu2=0, rfv=-5.0, smart_grid=0)
+        )
+        assert entity._attr_is_on is False
+
 
 # ===========================================================================
 # async_setup_entry — number
@@ -640,19 +703,21 @@ class TestLuxtronikSensorEntity:
 
 
 class TestSmartGridSensor:
-    def _make_smart_grid(self, evu=0, evu2=0, sg_enabled=1):
+    def _make_smart_grid(self, evu=0, evu2=0, sg_enabled=1, rfv=0.0, rfv_type=0):
         from custom_components.luxtronik2.sensor import LuxtronikStatusSensorEntity
 
         data = make_coordinator_data(
             calculations={
                 "ID_WEB_EVUin": evu,
                 "ID_WEB_HZIO_EVU2": evu2,
+                "ID_WEB_Temperatur_RFV": rfv,
                 "ID_WEB_WP_BZ_akt": "heating",
                 "ID_WEB_VD1out": 1,
                 "ID_WEB_ZW1out": 0,
             },
             parameters={
                 "ID_Einst_SmartGrid": sg_enabled,
+                "ID_Einst_RFVEinb_akt": rfv_type,
             },
         )
         coord = _mock_coordinator(data)
@@ -703,6 +768,30 @@ class TestSmartGridSensor:
         entity._handle_coordinator_update()
         assert entity.available is False
         assert entity._attr_native_value is None
+
+    def test_smart_grid_rfv_wiring_normal(self):
+        """Luxtronik 2.0 with SG2 on the RFV terminal, display state 3 (#669)."""
+        from custom_components.luxtronik2.const import LuxSmartGridStatus
+
+        entity, _ = self._make_smart_grid(evu=1, evu2=0, rfv=-5.0)
+        entity._handle_coordinator_update()
+        assert entity._attr_native_value == LuxSmartGridStatus.normal
+
+    def test_smart_grid_rfv_wiring_reduced(self):
+        """Same unit with SG2 open, display state 2 (#669)."""
+        from custom_components.luxtronik2.const import LuxSmartGridStatus
+
+        entity, _ = self._make_smart_grid(evu=1, evu2=0, rfv=5.0)
+        entity._handle_coordinator_update()
+        assert entity._attr_native_value == LuxSmartGridStatus.reduced
+
+    def test_smart_grid_room_station_still_uses_hzio(self):
+        """A configured room station never doubles as SG2."""
+        from custom_components.luxtronik2.const import LuxSmartGridStatus
+
+        entity, _ = self._make_smart_grid(evu=1, evu2=0, rfv=-5.0, rfv_type=4)
+        entity._handle_coordinator_update()
+        assert entity._attr_native_value == LuxSmartGridStatus.locked
 
 
 # ===========================================================================
