@@ -875,6 +875,9 @@
             "heat_amount_heating": {
                 "name": "Mno\u017estv\u00ed tepla pro topen\u00ed"
             },
+            "pool_heat_amount": {
+                "name": "Množství tepla pro bazén"
+            },
             "heat_amount_flow_rate": {
                 "name": "Mno\u017estv\u00ed tepla"
             },
@@ -904,6 +907,9 @@
             },
             "cooling_energy_input": {
                 "name": "Spot\u0159ebovan\u00e1 energie pro chlazen\u00ed"
+            },
+            "pool_energy_input": {
+                "name": "Spotřebovaná energie pro bazén"
             },
             "room_thermostat_temperature": {
                 "name": "Teplota termostatu m\u00edstnosti"

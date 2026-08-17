@@ -875,6 +875,9 @@
             "heat_amount_heating": {
                 "name": "Heating heat amount"
             },
+            "pool_heat_amount": {
+                "name": "Pool heat amount"
+            },
             "heat_amount_flow_rate": {
                 "name": "Heating heat amount flow rate"
             },
@@ -904,6 +907,9 @@
             },
             "cooling_energy_input": {
                 "name": "Energy input"
+            },
+            "pool_energy_input": {
+                "name": "Energy input pool"
             },
             "room_thermostat_temperature": {
                 "name": "Room thermostat"

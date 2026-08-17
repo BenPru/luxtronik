@@ -118,6 +118,7 @@ WRITABLE_PARAMETER_PREFIXES: Final = (
     "HEAT_ENERGY_INPUT",
     "DHW_ENERGY_INPUT",
     "COOLING_ENERGY_INPUT",
+    "POOL_ENERGY_INPUT",
     "SECOND_HEAT_GENERATOR_AMOUNT_COUNTER",
     "POWER_LIMIT_SWITCH",
     "THERMAL_POWER_LIMIT_SWITCH",
@@ -516,7 +517,7 @@ class LuxParameter(StrEnum):
     )
     P1136_HEAT_ENERGY_INPUT = "parameters.HEAT_ENERGY_INPUT"
     P1137_DHW_ENERGY_INPUT = "parameters.DHW_ENERGY_INPUT"
-    # ? P1138_SWIMMING_POOL_ENERGY_INPUT: Final = "parameters.Unknown_Parameter_1138" -->
+    P1138_POOL_ENERGY_INPUT = "parameters.POOL_ENERGY_INPUT"
     P1139_COOLING_ENERGY_INPUT = "parameters.COOLING_ENERGY_INPUT"
     P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER = (
         "parameters.SECOND_HEAT_GENERATOR_AMOUNT_COUNTER"
@@ -631,6 +632,7 @@ class LuxCalculation(StrEnum):
     C0146_APPROVAL_COOLING = "calculations.ID_WEB_FreigabKuehl"
     C0151_HEAT_AMOUNT_HEATING = "calculations.ID_WEB_WMZ_Heizung"
     C0152_DHW_HEAT_AMOUNT = "calculations.ID_WEB_WMZ_Brauchwasser"
+    C0153_POOL_HEAT_AMOUNT = "calculations.ID_WEB_WMZ_Schwimmbad"
     C0154_HEAT_AMOUNT_COUNTER = "calculations.ID_WEB_WMZ_Seit"  # 25668.9
     C0155_HEAT_AMOUNT_FLOW_RATE = "calculations.ID_WEB_WMZ_Durchfluss"
     C0156_ANALOG_OUT1 = "calculations.ID_WEB_AnalogOut1"
@@ -826,6 +828,8 @@ class SensorKey(StrEnum):
     HEAT_ENERGY_INPUT = "heat_energy_input"
     DHW_ENERGY_INPUT = "dhw_energy_input"
     COOLING_ENERGY_INPUT = "cooling_energy_input"
+    POOL_HEAT_AMOUNT = "pool_heat_amount"
+    POOL_ENERGY_INPUT = "pool_energy_input"
     COP_HEATING = "cop_heating"
     COP_DHW = "cop_dhw"
     DHW_TEMPERATURE = "dhw_temperature"
