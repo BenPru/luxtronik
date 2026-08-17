@@ -1,6 +1,9 @@
 """Luxtronik sensors definitions."""
 
 # region Imports
+from collections.abc import Mapping
+from types import MappingProxyType
+
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import (
     PERCENTAGE,
@@ -75,8 +78,15 @@ from .model import (
 #
 # Listed exhaustively rather than as a single series-2 exception so that every
 # generation states its scale where it can be checked. A generation missing
-# from the mapping falls back to the description's own `factor`.
-AUX_HEATER_ENERGY_FACTOR_BY_SERIES: dict[int, float] = {1: 0.1, 2: 0.1, 3: 1}
+# from the mapping falls back to the description's own `factor`; that includes
+# series 0, which is what firmware_series reports when the version could not be
+# read or parsed (the coordinator logs a warning about it first). Such a unit
+# deliberately keeps the series-3 scale - it is what this integration applied
+# before the split existed, so a controller it cannot identify never has its
+# total_increasing counter silently rescaled by ten behind the user's back.
+AUX_HEATER_ENERGY_FACTOR_BY_SERIES: Mapping[int, float] = MappingProxyType(
+    {1: 0.1, 2: 0.1, 3: 1}
+)
 
 SENSORS_STATUS: list[descr] = [
     descr(

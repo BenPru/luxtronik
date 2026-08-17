@@ -74,6 +74,8 @@ After setup, **Settings → Devices & Services → Luxtronik → Configure** let
 Entities and actions are organized into four logical devices in Home Assistant to keep things structured. Here is an overview of what each device does and how to use the most common entities.
 
 > **ℹ️ Note:** Not every entity documented below will exist on every installation. Each one is only created if your specific heat pump reports the corresponding feature as present (e.g. a solar collector, a second heat generator, cooling capability) or its firmware version meets that entity's minimum requirement. This means **updating your heat pump's firmware can make additional sensors and controls appear** in Home Assistant that weren't there before — if you're missing an entity mentioned here, check whether a firmware update is available (see [Advanced Features: Firmware Update Entity](ADVANCED_FEATURES.md#firmware-update-entity)) before assuming it's unsupported.
+>
+> A few entities — the pool heat and energy counters among them — are instead created only once their register reports something other than its idle value, because on a unit without that feature it never changes. This check runs when the integration starts, so if the feature is newly installed or has never run before, **restart Home Assistant or reload the integration** (Settings → Devices & Services → Luxtronik → ⋮ → Reload) once it has, to make those entities appear.
 
 ### 2.1 Heatpump
 This device represents the physical heat pump unit. It contains sensors and diagnostic entities such as electrical power consumption, thermal power output, operating hours, and current status.
