@@ -830,9 +830,52 @@ SENSORS: list[descr] = [
         native_precision=2,
         # 0.01 kWh raw unit, applied by the Energy2 datatype (see 1136 above).
         # This one reads 0.0 on every unit examined in #734, so its scale
-        # follows its two siblings by analogy and is not itself measured.
+        # follows its three siblings by analogy and is not itself measured.
     ),
     # endregion Cooling
+    # region Pool
+    #
+    # The controller reports pool heat and pool energy the same way it reports
+    # them for heating and DHW, but neither half was ever exposed: a unit
+    # without a pool reads 0.0 in both registers, and no diagnostics dump from
+    # a unit with one had been examined until #752.
+    descr(
+        key=SensorKey.POOL_HEAT_AMOUNT,
+        luxtronik_key=LC.C0153_POOL_HEAT_AMOUNT,
+        device_key=DeviceKey.heatpump,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_precision=1,
+        # 0.1 kWh, like its siblings 151 and 152 - the library's Energy
+        # datatype is the whole conversion. Confirmed on the #752 unit, whose
+        # controller page read 4364.1 kWh at the moment of the dump.
+        entity_active_formula="!= 0.0",
+    ),
+    descr(
+        key=SensorKey.POOL_ENERGY_INPUT,
+        luxtronik_key=LP.P1138_POOL_ENERGY_INPUT,
+        # There is no pool device, so this sits on the heat pump itself
+        # alongside the other whole-unit counters.
+        device_key=DeviceKey.heatpump,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_precision=2,
+        # 0.01 kWh raw unit, applied by the Energy2 datatype (see 1136 above),
+        # measured on the unit in #752: 113191 counts against 1131.9 kWh on
+        # the controller's own page, read at the same moment.
+        #
+        # Deliberately not gated on ID_Visi_Schwimmbad: that flag reads 0 on
+        # the very unit whose pool counter is populated, so it would hide the
+        # sensor from exactly the installations that have one. A machine
+        # without a pool reads 0.0 here, which is also why the register went
+        # unidentified for so long.
+        entity_active_formula="!= 0.0",
+    ),
+    # endregion Pool
 ]
 
 # region COP (instantaneous, no external meter)

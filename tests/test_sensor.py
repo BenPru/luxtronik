@@ -892,6 +892,13 @@ class TestEnergyInputScaling:
     def test_cooling_energy_input_scaling(self):
         self._assert_raw_converts_to(SensorKey.COOLING_ENERGY_INPUT, 12345, 123.45)
 
+    def test_pool_energy_input_scaling(self):
+        """The only reading of 1138 there is: the #752 unit showed 113191
+        counts against 1131.9 kWh on the controller's own page, which is what
+        identified the register in the first place.
+        """
+        self._assert_raw_converts_to(SensorKey.POOL_ENERGY_INPUT, 113191, 1131.91)
+
     def _converted_value(self, sensor_key: SensorKey, raw_value: int) -> float:
         description, datatype = _energy_input_case(sensor_key)
         converted = datatype.from_heatpump(raw_value)

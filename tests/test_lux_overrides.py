@@ -345,7 +345,7 @@ class TestUpstreamMaxDefinedIndex:
         assert key_exists(data, f"parameters.{short.parameters[1125].name}") is True
 
     def test_every_override_only_parameter_sits_above_the_range(self):
-        """The 13 indices that exist only because of lux_overrides are exactly the
+        """The 14 indices that exist only because of lux_overrides are exactly the
         ones the absence rule must be able to reach."""
         upstream_max = lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_PARAMETERS]
         override_only = {
@@ -356,6 +356,7 @@ class TestUpstreamMaxDefinedIndex:
         assert override_only == {
             1136,
             1137,
+            1138,
             1139,
             1140,
             1146,

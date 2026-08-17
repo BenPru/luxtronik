@@ -929,6 +929,9 @@
             "heat_amount_heating": {
                 "name": "Meter warmtehoeveelheid verwarming"
             },
+            "pool_heat_amount": {
+                "name": "Meter warmtehoeveelheid zwembad"
+            },
             "heat_amount_flow_rate": {
                 "name": "Meter warmtehoeveelheidsstroom"
             },
@@ -976,6 +979,9 @@
             },
             "cooling_energy_input": {
                 "name": "Gebruikte energie koeling"
+            },
+            "pool_energy_input": {
+                "name": "Gebruikte energie zwembad"
             },
             "current_power_consumption": {
                 "name": "Stroomverbruik"

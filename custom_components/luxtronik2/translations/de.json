@@ -932,6 +932,9 @@
             "heat_amount_heating": {
                 "name": "Z\u00e4hler W\u00e4rmemenge Heizung"
             },
+            "pool_heat_amount": {
+                "name": "Zähler Wärmemenge Schwimmbad"
+            },
             "heat_amount_flow_rate": {
                 "name": "Z\u00e4hler W\u00e4rmemenge Durchfluss"
             },
@@ -979,6 +982,9 @@
             },
             "cooling_energy_input": {
                 "name": "Eingesetzte Energie K\u00fchlung"
+            },
+            "pool_energy_input": {
+                "name": "Eingesetzte Energie Schwimmbad"
             },
             "additional_heat_generator_energy_p1140": {
                 "name": "Zus\u00e4tzlicher W\u00e4rmeerzeuger W\u00e4rmemenge (Firmware ab x.88)"

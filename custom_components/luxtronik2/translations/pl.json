@@ -929,6 +929,9 @@
             "heat_amount_heating": {
                 "name": "Ilo\u015b\u0107 ciep\u0142a grzewczego"
             },
+            "pool_heat_amount": {
+                "name": "Ilość ciepła basenu"
+            },
             "heat_amount_flow_rate": {
                 "name": "Nat\u0119\u017cenie przep\u0142ywu ilo\u015bci ciep\u0142a grzewczego"
             },
@@ -964,6 +967,9 @@
             },
             "cooling_energy_input": {
                 "name": "Energia zu\u017cyta na ch\u0142odzenie"
+            },
+            "pool_energy_input": {
+                "name": "Energia zużyta na basen"
             },
             "current_power_consumption": {
                 "name": "Pob\u00f3r mocy"

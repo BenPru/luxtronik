@@ -190,10 +190,18 @@ parameters_to_add_update = {
     # totals put the same upper bound under 2 at /10 on six further units.
     # Upstream's "kWh/10" note claims /10 for these and is simply wrong here;
     # it also sits on 1059 and calculations 151/152/154, which need /10.
-    # 1139 has read 0.0 on every unit seen so far, so it follows its two
+    # 1139 has read 0.0 on every unit seen so far, so it follows its three
     # siblings by analogy rather than by measurement.
+    #
+    # #752 confirmed the scale directly for the first time: on an LD9 whose
+    # controller page was photographed at the moment of the dump, 1136 read
+    # 543197 against a displayed 5431.9 kWh and 1137 read 222335 against
+    # 2223.3 kWh. The same unit identified 1138 as the pool counter - 113191
+    # against a displayed 1131.9 kWh - which had sat unregistered because a
+    # unit without a pool reads 0.0 there.
     1136: Energy2("HEAT_ENERGY_INPUT", False),
     1137: Energy2("DHW_ENERGY_INPUT", False),
+    1138: Energy2("POOL_ENERGY_INPUT", False),
     1139: Energy2("COOLING_ENERGY_INPUT", False),
     # Auxiliary-heater heat counters, both in 0.1 kWh units, so Energy's own
     # /10 is the whole conversion and their descriptions carry no factor. The
