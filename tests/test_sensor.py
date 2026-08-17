@@ -61,7 +61,7 @@ def _mock_entry():
     return entry
 
 
-def _mock_coordinator(data=None, *, last_update_success=True):
+def _mock_coordinator(data=None, *, last_update_success=True, firmware_series=3):
     if data is None:
         data = make_coordinator_data()
     coord = MagicMock()
@@ -70,6 +70,7 @@ def _mock_coordinator(data=None, *, last_update_success=True):
     coord.entity_active.return_value = True
     coord.entity_visible.return_value = True
     coord.get_device.return_value = MagicMock()
+    coord.firmware_series = firmware_series
     return coord
 
 
@@ -85,10 +86,10 @@ def _patch_entity(entity):
 # ===========================================================================
 
 
-def _make_sensor(description=None, data=None):
+def _make_sensor(description=None, data=None, *, firmware_series=3):
     hass = MagicMock()
     entry = _mock_entry()
-    coord = _mock_coordinator(data)
+    coord = _mock_coordinator(data, firmware_series=firmware_series)
     if description is None:
         description = LuxtronikSensorDescription(
             key=SensorKey.FLOW_OUT_TEMPERATURE,
@@ -916,24 +917,30 @@ class TestEnergyInputScaling:
 
 
 class TestAuxHeaterAmountScaling:
-    """Parameters 1059 and 1140 both count auxiliary-heater heat in 0.1 kWh
-    units, so the Energy datatype they are registered with is the whole
-    conversion and neither description carries a `factor`.
+    """Parameters 1059 and 1140 count auxiliary-heater heat in 0.1 kWh units
+    on a series-3 controller, so the Energy datatype they are registered with
+    is the whole conversion there, and in 0.01 kWh units on a series-2 one,
+    where the description supplies a further /10.
 
-    The scale is pinned by physics rather than by upstream's unit note:
-    energy divided by the aux heater's run time must equal its rated power
-    (parameter 1025). The values below are real readings from user
+    The series-3 scale is pinned by physics rather than by upstream's unit
+    note: energy divided by the aux heater's run time must equal its rated
+    power (parameter 1025). The values below are real readings from user
     diagnostics in #625 - 37539 counts over 420.03 hours of ZWE1 run time on
     a unit whose rated element is 9.0 kW, giving 8.94 kW at 0.1 kWh per count
     and 0.89 kW if a further /10 is applied on top, as #490 did.
+
+    The series-2 scale comes from #752, where an LD9 on V2.88.3 read 147140
+    counts against 1471.4 kWh on the controller's own web page.
     """
 
-    def _converted_value(self, sensor_key: SensorKey, raw_value: int) -> float:
+    def _converted_value(
+        self, sensor_key: SensorKey, raw_value: int, *, firmware_series: int = 3
+    ) -> float:
         description, datatype = _energy_input_case(sensor_key)
         converted = datatype.from_heatpump(raw_value)
         group, sensor_id = description.luxtronik_key.split(".", 1)
         data = make_coordinator_data(**{group: {sensor_id: converted}})
-        entity = _make_sensor(description, data)
+        entity = _make_sensor(description, data, firmware_series=firmware_series)
         entity._handle_coordinator_update(data)
         return entity._attr_native_value
 
@@ -958,3 +965,48 @@ class TestAuxHeaterAmountScaling:
             SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059, 37539
         )
         assert 8.0 <= kwh / 420.03 <= 9.5
+
+    def test_p1059_takes_a_further_tenth_on_series_2(self):
+        """The reading from #752: 147140 counts is 1471.4 kWh on that LD9."""
+        value = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+            147140,
+            firmware_series=2,
+        )
+        assert value == 1471.4
+
+    def test_p1140_takes_a_further_tenth_on_series_2(self):
+        """1140 follows 1059 by analogy - same element, same controller."""
+        value = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1140,
+            8410,
+            firmware_series=2,
+        )
+        assert value == 84.1
+
+    def test_series_1_follows_series_2(self):
+        """Assumed, not measured - no V1.x unit has ever been compared. A line
+        that went 0.01 -> 0.01 -> 0.1 across generations is plausible; one that
+        went 0.1 -> 0.01 -> 0.1 is not. The mapping states it outright so the
+        assumption is visible rather than arriving through a fallback (#752).
+        """
+        description, _ = _energy_input_case(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059
+        )
+        assert description.factor_by_firmware_series is not None
+        assert set(description.factor_by_firmware_series) == {1, 2, 3}
+        value = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+            147140,
+            firmware_series=1,
+        )
+        assert value == 1471.4
+
+    def test_series_3_is_unaffected_by_the_series_2_rule(self):
+        """The same register on a series-3 unit keeps the measured /10."""
+        value = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+            147140,
+            firmware_series=3,
+        )
+        assert value == 14714.0

@@ -41,6 +41,37 @@ from .model import (
 
 # endregion Imports
 
+# What one count of the auxiliary heater's heat counters (parameters 1059 and
+# 1140) is worth, per controller generation, on top of the /10 the Energy
+# datatype they are registered with in lux_overrides already applies.
+#
+# Series 3 - 0.1 kWh per count, so nothing further. Measured, not read off a
+#   unit note: energy divided by the aux heater's run time must equal the
+#   rated element power in parameter 1025, which it does on five units
+#   (MSW4-16, MSW2-6S, MSW2-9S, LW SEC 2; V3.79 through V3.92.3) at this
+#   scale and puts them all at an impossible 0.89 kW element without it.
+#   #490 applied the further /10 to everyone on one unverified display
+#   comparison; #625 measured it away again.
+# Series 2 - 0.01 kWh per count. An LD9 on V2.88.3 read 147140 counts against
+#   1471.4 kWh on the controller's own web page, and the one earlier report
+#   needing /100 also ran V2.88.3 (#752). Every unit behind the series-3
+#   figure above is a series 3, so that sample could not have shown this.
+#   It also puts 1059 back in line with the rest of its register family:
+#   parameters 852/854/878/879, the other ID_Waermemenge_* counters, are
+#   0.01 kWh on both generations (checked against calculations 151/152, which
+#   are 0.1 kWh, on 21 diagnostics dumps). Series 3 is where 1059 leaves it.
+# Series 1 - assumed to match series 2, never measured: there is no V1.x
+#   diagnostics dump in the corpus at all. A controller line that used 0.01 kWh
+#   on series 1, kept it on series 2 and changed to 0.1 on series 3 is a
+#   plausible history; one that used 0.1, switched to 0.01, then switched back
+#   is not. It also keeps series 1 inside the ID_Waermemenge_* family above.
+#   Still an assumption, and the one to revisit first - tracked in #752.
+#
+# Listed exhaustively rather than as a single series-2 exception so that every
+# generation states its scale where it can be checked. A generation missing
+# from the mapping falls back to the description's own `factor`.
+AUX_HEATER_ENERGY_FACTOR_BY_SERIES: dict[int, float] = {1: 0.1, 2: 0.1, 3: 1}
+
 SENSORS_STATUS: list[descr] = [
     descr(
         key=SensorKey.STATUS,
@@ -314,11 +345,9 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
         visibility=LV.V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
-        # Raw register unit is 0.1 kWh, applied by the Energy datatype this
-        # parameter is registered with in lux_overrides - hence no factor.
-        # #490 scaled it by a further /10 based on a single unverified display
-        # comparison; measured against the rated element power (parameter
-        # 1025) on five units, that reported a tenth of the real energy. #625.
+        # Register unit differs by controller generation - see
+        # AUX_HEATER_ENERGY_FACTOR_BY_SERIES for the measurements behind each.
+        factor_by_firmware_series=AUX_HEATER_ENERGY_FACTOR_BY_SERIES,
         native_precision=1,
     ),
     descr(
@@ -329,7 +358,11 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
-        # 0.1 kWh raw unit, applied by the Energy datatype (see 1059 above).
+        # Shares 1059's scale, by analogy rather than by measurement: it is
+        # the same physical element on the same controller, and no series-2
+        # unit has been seen with 1140 counting yet. Giving it its own scale
+        # would make a unit's total jump at the handover between the two.
+        factor_by_firmware_series=AUX_HEATER_ENERGY_FACTOR_BY_SERIES,
         native_precision=1,
         # Despite the name this is not the second heat generator (ZWE2) - it
         # counts the same element as 1059, which stops advancing once this
@@ -839,6 +872,9 @@ SENSORS_SUM: list[sum_descr] = [
         # Deliberately not EntityCategory.DIAGNOSTIC: diagnostic entities
         # cannot be selected in the energy dashboard, which is the main thing
         # a lifetime kWh counter is for.
+        #
+        # Both summands share one scale, so the same mapping covers the total.
+        factor_by_firmware_series=AUX_HEATER_ENERGY_FACTOR_BY_SERIES,
         native_precision=1,
     ),
 ]

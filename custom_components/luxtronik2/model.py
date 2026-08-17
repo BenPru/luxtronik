@@ -113,6 +113,18 @@ class LuxtronikSensorDescription(  # type: ignore  # pyright: ignore[reportIncom
     platform = Platform.SENSOR
     factor: float | None = None
     native_precision: int | None = None
+    factor_by_firmware_series: dict[int, float] | None = None
+    """Per-controller-generation override of `factor`, keyed by firmware major.
+
+    For the few registers whose *unit* differs between controller
+    generations rather than their presence - see the auxiliary heater energy
+    counters, 0.1 kWh on a series-3 controller and 0.01 kWh on a series-2 one
+    (#752). A series absent from the mapping falls back to `factor`.
+
+    This cannot live in the datatype the register is registered with: the
+    library overrides are applied once per process, while one process can
+    serve two config entries whose heat pumps are different generations.
+    """
 
 
 class LuxtronikIndexSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]

@@ -222,6 +222,19 @@ class TestCoordinatorProperties:
         minor = coord.firmware_version_minor
         assert minor == Version("90.0")
 
+    def test_firmware_series(self):
+        coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "V3.90.1"})
+        assert coord.firmware_series == 3
+
+    def test_firmware_series_of_a_luxtronik_2_0(self):
+        """The generation that counts aux heater energy in 0.01 kWh (#752)."""
+        coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "V2.88.3"})
+        assert coord.firmware_series == 2
+
+    def test_firmware_series_unparseable(self):
+        coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "invalid"})
+        assert coord.firmware_series == 0
+
     def test_serial_number(self):
         coord = _make_coordinator(
             parameters={

@@ -203,6 +203,22 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
 
+    @property
+    def _value_factor(self) -> float:
+        """Factor to apply to the decoded register value.
+
+        Normally the description's own `factor`, unless it declares a
+        different one for this controller generation - a handful of registers
+        hold the same quantity in a different unit per generation (#752).
+        """
+        descr = self.entity_description
+        by_series = descr.factor_by_firmware_series
+        if by_series is not None:
+            factor = by_series.get(self.coordinator.firmware_series)
+            if factor is not None:
+                return factor
+        return descr.factor or 1
+
     @callback
     def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
@@ -219,7 +235,7 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         elif self.entity_description.key == SensorKey.ERROR_REASON:
             self._attr_native_value = value
         elif isinstance(value, float | int):
-            factor = self.entity_description.factor or 1
+            factor = self._value_factor
             precision = self.entity_description.native_precision
             value = float(value) * factor
             if precision is not None:
@@ -535,7 +551,7 @@ class LuxtronikSumSensorEntity(LuxtronikSensorEntity):
             self._attr_native_value = None
         else:
             self._attr_available = True
-            total = sum(summands) * (descr.factor or 1)
+            total = sum(summands) * self._value_factor
             if descr.native_precision is not None:
                 total = round(total, descr.native_precision)
             self._attr_native_value = total
