@@ -25,7 +25,10 @@ from custom_components.luxtronik2.const import (
 )
 from custom_components.luxtronik2.model import LuxtronikSumSensorDescription
 from custom_components.luxtronik2.sensor import LuxtronikSumSensorEntity
-from custom_components.luxtronik2.sensor_entities_predefined import SENSORS_SUM
+from custom_components.luxtronik2.sensor_entities_predefined import (
+    SENSORS,
+    SENSORS_SUM,
+)
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",
@@ -190,6 +193,29 @@ class TestAuxHeaterEnergyTotalDescription:
             LP.P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER,
         )
         assert descr.native_unit_of_measurement == UnitOfEnergy.KILO_WATT_HOUR
+
+    def test_total_scales_exactly_like_its_summands(self):
+        """A total on a different scale from the registers it adds up would
+        be wrong on every series-2 unit, so all three share one mapping.
+        """
+        total = next(
+            d
+            for d in SENSORS_SUM
+            if d.key == SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY
+        )
+        summands = [
+            d
+            for d in SENSORS
+            if d.key
+            in (
+                SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+                SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1140,
+            )
+        ]
+        assert len(summands) == 2
+        for summand in summands:
+            assert summand.factor_by_firmware_series == total.factor_by_firmware_series
+            assert summand.factor == total.factor
 
     def test_is_selectable_in_the_energy_dashboard(self):
         """Diagnostic entities cannot be added there, so it must not be one."""

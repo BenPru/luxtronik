@@ -984,6 +984,24 @@ class TestAuxHeaterAmountScaling:
         )
         assert value == 84.1
 
+    def test_series_1_follows_series_2(self):
+        """Assumed, not measured - no V1.x unit has ever been compared. A line
+        that went 0.01 -> 0.01 -> 0.1 across generations is plausible; one that
+        went 0.1 -> 0.01 -> 0.1 is not. The mapping states it outright so the
+        assumption is visible rather than arriving through a fallback (#752).
+        """
+        description, _ = _energy_input_case(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059
+        )
+        assert description.factor_by_firmware_series is not None
+        assert set(description.factor_by_firmware_series) == {1, 2, 3}
+        value = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+            147140,
+            firmware_series=1,
+        )
+        assert value == 1471.4
+
     def test_series_3_is_unaffected_by_the_series_2_rule(self):
         """The same register on a series-3 unit keeps the measured /10."""
         value = self._converted_value(
