@@ -899,6 +899,17 @@ class TestEnergyInputScaling:
         """
         self._assert_raw_converts_to(SensorKey.POOL_ENERGY_INPUT, 113191, 1131.91)
 
+    def test_pool_heat_amount_scaling(self):
+        """The pool counters were read off the same page at the same moment:
+        calculation 153 showed 4364.1 kWh, so it is 0.1 kWh per count like its
+        siblings 151 and 152 and needs nothing beyond the Energy datatype.
+
+        Deliberately the module-level helper rather than this class's method of
+        the same name: 153 is a calculation, and the method resolves datatypes
+        through parameters_to_add_update, which holds no calculations.
+        """
+        _assert_raw_converts_to(SensorKey.POOL_HEAT_AMOUNT, 43641, 4364.1)
+
     def _converted_value(self, sensor_key: SensorKey, raw_value: int) -> float:
         description, datatype = _energy_input_case(sensor_key)
         converted = datatype.from_heatpump(raw_value)
@@ -1015,5 +1026,19 @@ class TestAuxHeaterAmountScaling:
             SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
             147140,
             firmware_series=3,
+        )
+        assert value == 14714.0
+
+    def test_unknown_series_keeps_the_series_3_scale(self):
+        """firmware_series is 0 when the version could not be read or parsed.
+        That is not in the mapping, so the entity falls back to the
+        description's own factor - deliberately the series-3 scale, which is
+        what the integration applied before the split existed, so an
+        unidentifiable controller keeps reading what it always read.
+        """
+        value = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+            147140,
+            firmware_series=0,
         )
         assert value == 14714.0

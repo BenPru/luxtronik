@@ -969,7 +969,7 @@
                 "name": "Energy input"
             },
             "pool_energy_input": {
-                "name": "Energy input pool"
+                "name": "Pool energy input"
             },
             "room_thermostat_temperature": {
                 "name": "Room thermostat"

@@ -74,6 +74,8 @@ After setup, **Settings → Devices & Services → Luxtronik → Configure** let
 Entities and actions are organized into four logical devices in Home Assistant to keep things structured. Here is an overview of what each device does and how to use the most common entities.
 
 > **ℹ️ Note:** Not every entity documented below will exist on every installation. Each one is only created if your specific heat pump reports the corresponding feature as present (e.g. a solar collector, a second heat generator, cooling capability) or its firmware version meets that entity's minimum requirement. This means **updating your heat pump's firmware can make additional sensors and controls appear** in Home Assistant that weren't there before — if you're missing an entity mentioned here, check whether a firmware update is available (see [Advanced Features: Firmware Update Entity](ADVANCED_FEATURES.md#firmware-update-entity)) before assuming it's unsupported.
+>
+> A few entities — the pool heat and energy counters among them — are instead created only once their register reports something other than its idle value, because on a unit without that feature it never changes. This check runs when the integration starts, so if the feature is newly installed or has never run before, **restart Home Assistant or reload the integration** (Settings → Devices & Services → Luxtronik → ⋮ → Reload) once it has, to make those entities appear.
 
 ### 2.1 Heatpump
 This device represents the physical heat pump unit. It contains sensors and diagnostic entities such as electrical power consumption, thermal power output, operating hours, and current status.
@@ -335,6 +337,10 @@ Not all heat pumps have built-in electrical energy metering. Some only show the 
 If you want to accurately measure the SCOP (Seasonal Coefficient of Performance) of your device, consider adding an external energy meter. Devices like Shelly offer a [16A power plug](https://www.shelly.com/en-nl/products/product-overview/1xplug) or [in-line/clamp energy meters](https://www.shelly.com/en-nl/products/energy-metering-energy-efficiency) that integrate perfectly with Home Assistant.
 
 The **Heating COP** and **DHW COP** sensors report an instantaneous efficiency ratio, and can use such an external meter directly as their power-consumption input instead of the heat pump's own reading — see [Advanced Features: COP Calculation and the External Power Sensor](ADVANCED_FEATURES.md#cop-calculation-and-the-external-power-sensor).
+
+> **⚠️ Series-2 controllers (firmware V2.x): the Additional heat generator energy sensors now read ten times lower.**
+> On a series-2 controller these counters step in 0.01 kWh, not the 0.1 kWh the integration previously assumed, so a unit that reported 14714 kWh now correctly reports 1471.4 kWh. Because they are total-increasing energy sensors, Home Assistant reads that one-off drop as a meter reset and books the first reading after the update as fresh consumption — a spurious spike of roughly the sensor's whole lifetime total in the energy dashboard.
+> To remove it, open **Developer Tools → Statistics**, find each *Additional heat generator energy* sensor, and use the **Fix issue / adjust sum** action on the day the update landed. Series-3 controllers (V3.x) are unaffected; their scale was verified in #625 and has not changed.
 
 ---
 
