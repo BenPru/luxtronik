@@ -517,6 +517,19 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return Version("0")
 
     @property
+    def firmware_series(self) -> int:
+        """Return the controller series, which is the firmware major version.
+
+        The major digit identifies the controller generation - V2.x is a
+        Luxtronik 2.0, V3.x a 2.1 - and never advances on a firmware update,
+        so it is a hardware fact rather than a version threshold. Only use it
+        where a register's *meaning* differs between generations; whether a
+        register exists is decided by reading it, not by this.
+        """
+        rel = self.firmware_package_version.release
+        return rel[0] if rel else 0
+
+    @property
     def firmware_version_minor(self) -> Version:
         """Return firmware 'minor' version as <minor>.<patch>.
         Example:

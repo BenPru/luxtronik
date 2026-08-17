@@ -47,13 +47,14 @@ def _mock_entry():
     return entry
 
 
-def _mock_coordinator(data):
+def _mock_coordinator(data, *, firmware_series=3):
     coord = MagicMock()
     coord.data = data
     coord.last_update_success = True
     coord.entity_active.return_value = True
     coord.entity_visible.return_value = True
     coord.get_device.return_value = MagicMock()
+    coord.firmware_series = firmware_series
     return coord
 
 
@@ -69,10 +70,10 @@ def _aux_energy_description() -> LuxtronikSumSensorDescription:
     )
 
 
-def _make_entity(data, description=None):
+def _make_entity(data, description=None, *, firmware_series=3):
     hass = MagicMock()
     entry = _mock_entry()
-    coord = _mock_coordinator(data)
+    coord = _mock_coordinator(data, firmware_series=firmware_series)
     description = description or _aux_energy_description()
     entity = LuxtronikSumSensorEntity(
         hass, entry, coord, description, DeviceKey.heatpump
@@ -140,6 +141,33 @@ class TestSumSensorHandleCoordinatorUpdate:
         entity = _make_entity(data, descr)
         entity._handle_coordinator_update(data)
         assert entity._attr_native_value == 7.0
+
+    def test_series_2_takes_a_further_tenth(self):
+        """Both summands are 0.01 kWh registers on a series-2 controller, so
+        the total carries the same /10 the individual sensors do (#752). The
+        decoded values here are the Energy datatype's own /10 already applied
+        to 147140 and 8410 counts.
+        """
+        descr = next(
+            d
+            for d in SENSORS_SUM
+            if d.key == SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY
+        )
+        data = make_coordinator_data(parameters={_P1059: 14714.0, _P1140: 841.0})
+        entity = _make_entity(data, descr, firmware_series=2)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == 1555.5
+
+    def test_series_3_total_is_unscaled(self):
+        descr = next(
+            d
+            for d in SENSORS_SUM
+            if d.key == SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY
+        )
+        data = make_coordinator_data(parameters={_P1059: 14714.0, _P1140: 841.0})
+        entity = _make_entity(data, descr, firmware_series=3)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == 15555.0
 
     def test_no_write_without_data(self):
         entity = _make_entity(make_coordinator_data(parameters={_P1059: 1.0}))

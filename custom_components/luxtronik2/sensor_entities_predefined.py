@@ -314,11 +314,28 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
         visibility=LV.V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
-        # Raw register unit is 0.1 kWh, applied by the Energy datatype this
-        # parameter is registered with in lux_overrides - hence no factor.
-        # #490 scaled it by a further /10 based on a single unverified display
-        # comparison; measured against the rated element power (parameter
-        # 1025) on five units, that reported a tenth of the real energy. #625.
+        # Raw register unit is 0.1 kWh on a series-3 controller, applied by
+        # the Energy datatype this parameter is registered with in
+        # lux_overrides - hence no plain factor. #490 scaled it by a further
+        # /10 based on a single unverified display comparison; measured
+        # against the rated element power (parameter 1025) on five units,
+        # that reported a tenth of the real energy. #625.
+        #
+        # Series-2 controllers count the same register in 0.01 kWh, which is
+        # the further /10 below: an LD9 on V2.88.3 read 147140 counts against
+        # 1471.4 kWh on its own web page, and the one other unit that ever
+        # needed /100 also ran V2.88.3 (#752). Every unit measured onto /10
+        # in #625 is a series 3 - that sample could not have shown this.
+        #
+        # It also makes 1059 consistent with the rest of its register family
+        # on a series-2 controller: parameters 852/854/878/879, the other
+        # ID_Waermemenge_* counters, are 0.01 kWh on every unit seen of
+        # either series (verified against calculations 151/152, which are
+        # 0.1 kWh, on 21 dumps). Series 3 is where 1059 leaves that family.
+        #
+        # No series-1 controller has been compared, so those keep the
+        # series-3 scale until one is.
+        factor_by_firmware_series={2: 0.1},
         native_precision=1,
     ),
     descr(
@@ -329,7 +346,13 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
-        # 0.1 kWh raw unit, applied by the Energy datatype (see 1059 above).
+        # 0.1 kWh raw unit, applied by the Energy datatype (see 1059 above),
+        # and the same 0.01 kWh unit on a series-2 controller. That last part
+        # is by analogy rather than by measurement - it is the same physical
+        # element on the same controller as 1059, and no series-2 unit has
+        # been seen with 1140 counting yet - but leaving it out would make a
+        # unit's total change scale mid-handover.
+        factor_by_firmware_series={2: 0.1},
         native_precision=1,
         # Despite the name this is not the second heat generator (ZWE2) - it
         # counts the same element as 1059, which stops advancing once this
@@ -839,6 +862,10 @@ SENSORS_SUM: list[sum_descr] = [
         # Deliberately not EntityCategory.DIAGNOSTIC: diagnostic entities
         # cannot be selected in the energy dashboard, which is the main thing
         # a lifetime kWh counter is for.
+        #
+        # Both summands share the series-2 unit, so one factor covers the
+        # total - see the two descriptions above (#752).
+        factor_by_firmware_series={2: 0.1},
         native_precision=1,
     ),
 ]
