@@ -11,19 +11,19 @@
                 "name": "Kompresor"
             },
             "pump_flow": {
-                "name": "Przep\u0142yw pompy"
+                "name": "Przepływ pompy"
             },
             "compressor_heater": {
-                "name": "Grza\u0142ka spr\u0119\u017carki"
+                "name": "Grzałka sprężarki"
             },
             "defrost_valve": {
-                "name": "Zaw\u00f3r odszraniania"
+                "name": "Zawór odszraniania"
             },
             "additional_heat_generator": {
-                "name": "Dodatkowy generator ciep\u0142a"
+                "name": "Dodatkowy generator ciepła"
             },
             "additional_heat_generator2": {
-                "name": "Dodatkowy generator ciep\u0142a 2"
+                "name": "Dodatkowy generator ciepła 2"
             },
             "disturbance_output": {
                 "name": "Stan systemu"
@@ -35,28 +35,28 @@
                 "name": "Dodatkowa pompa obiegowa"
             },
             "dhw_recirculation_pump": {
-                "name": "Pompa obiegowa ciep\u0142ej wody"
+                "name": "Pompa obiegowa ciepłej wody"
             },
             "dhw_circulation_pump": {
-                "name": "Pompa obiegowa ciep\u0142ej wody"
+                "name": "Pompa obiegowa ciepłej wody"
             },
             "dhw_charging_pump": {
-                "name": "Pompa \u0142aduj\u0105ca ciep\u0142\u0105 wod\u0119"
+                "name": "Pompa ładująca ciepłą wodę"
             },
             "solar_pump": {
                 "name": "Pompa solarna"
             },
             "approval_cooling": {
-                "name": "Zatwierdzenie ch\u0142odzenia"
+                "name": "Zatwierdzenie chłodzenia"
             },
             "defrost_end_flow_okay": {
-                "name": "Koniec odszraniania / Przep\u0142yw w porz\u0105dku"
+                "name": "Koniec odszraniania / Przepływ w porządku"
             },
             "motor_protection": {
                 "name": "Ochrona silnika"
             },
             "compressor2": {
-                "name": "Spr\u0119\u017carka 2"
+                "name": "Sprężarka 2"
             }
         },
         "switch": {
@@ -82,13 +82,13 @@
                 "name": "Optymalizacja pompy"
             },
             "heating_threshold": {
-                "name": "Pr\u00f3g ogrzewania"
+                "name": "Próg ogrzewania"
             },
             "domestic_water": {
-                "name": "Tryb AUTO ciep\u0142ej wody"
+                "name": "Tryb AUTO ciepłej wody"
             },
             "cooling": {
-                "name": "Ch\u0142odzenie"
+                "name": "Chłodzenie"
             },
             "pump_vent_hup": {
                 "name": "Wentylacja HUP"
@@ -102,21 +102,21 @@
         },
         "update": {
             "firmware": {
-                "name": "Oprogramowanie sprz\u0119towe"
+                "name": "Oprogramowanie sprzętowe"
             }
         },
         "number": {
             "release_second_heat_generator": {
-                "name": "Zwolni\u0107 drugi generator ciep\u0142a"
+                "name": "Zwolnić drugi generator ciepła"
             },
             "release_time_second_heat_generator": {
-                "name": "Czas zwolnienia drugiego generatora ciep\u0142a"
+                "name": "Czas zwolnienia drugiego generatora ciepła"
             },
             "pump_optimization": {
                 "name": "Optymalizacja pompy"
             },
             "heating_threshold": {
-                "name": "Pr\u00f3g ogrzewania"
+                "name": "Próg ogrzewania"
             },
             "electrical_power_limitation_value": {
                 "name": "Limit mocy"
@@ -125,124 +125,124 @@
                 "name": "Limit mocy cieplnej: Ogrzewanie"
             },
             "thermal_power_limitation_water": {
-                "name": "Limit mocy cieplnej: Ciep\u0142a woda"
+                "name": "Limit mocy cieplnej: Ciepła woda"
             },
             "thermal_power_limitation_cooling": {
-                "name": "Limit mocy cieplnej: Ch\u0142odzenie"
+                "name": "Limit mocy cieplnej: Chłodzenie"
             },
             "heating_target_correction": {
                 "name": "Korekcja celu grzewczego"
             },
             "heating_min_flow_out_temperature": {
-                "name": "Min. docelowy odp\u0142yw"
+                "name": "Min. docelowy odpływ"
             },
             "heating_curve_end_temperature": {
-                "name": "Punkt ko\u0144cowy krzywej grzewczej"
+                "name": "Punkt końcowy krzywej grzewczej"
             },
             "heating_curve_parallel_shift_temperature": {
-                "name": "R\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
+                "name": "Równoległe przesunięcie krzywej grzewczej"
             },
             "heating_curve_night_temperature": {
                 "name": "Nocna redukcja krzywej grzewczej"
             },
             "heating_curve_circuit1_end_temperature": {
-                "name": "Obw\u00f3d mieszany 1 punkt ko\u0144cowy krzywej grzewczej"
+                "name": "Obwód mieszany 1 punkt końcowy krzywej grzewczej"
             },
             "heating_curve_circuit1_parallel_shift_temperature": {
-                "name": "Obw\u00f3d mieszany 1 r\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
+                "name": "Obwód mieszany 1 równoległe przesunięcie krzywej grzewczej"
             },
             "heating_curve_circuit1_night_temperature": {
-                "name": "Obw\u00f3d mieszany 1 nocna redukcja krzywej grzewczej"
+                "name": "Obwód mieszany 1 nocna redukcja krzywej grzewczej"
             },
             "heating_curve_circuit2_end_temperature": {
-                "name": "Obw\u00f3d mieszany 2 punkt ko\u0144cowy krzywej grzewczej"
+                "name": "Obwód mieszany 2 punkt końcowy krzywej grzewczej"
             },
             "heating_curve_circuit2_parallel_shift_temperature": {
-                "name": "Obw\u00f3d mieszany 2 r\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
+                "name": "Obwód mieszany 2 równoległe przesunięcie krzywej grzewczej"
             },
             "heating_curve_circuit2_night_temperature": {
-                "name": "Obw\u00f3d mieszany 2 nocna redukcja krzywej grzewczej"
+                "name": "Obwód mieszany 2 nocna redukcja krzywej grzewczej"
             },
             "heating_curve_circuit3_end_temperature": {
-                "name": "Obw\u00f3d mieszany 3 punkt ko\u0144cowy krzywej grzewczej"
+                "name": "Obwód mieszany 3 punkt końcowy krzywej grzewczej"
             },
             "heating_curve_circuit3_parallel_shift_temperature": {
-                "name": "Obw\u00f3d mieszany 3 r\u00f3wnoleg\u0142e przesuni\u0119cie krzywej grzewczej"
+                "name": "Obwód mieszany 3 równoległe przesunięcie krzywej grzewczej"
             },
             "heating_curve_circuit3_night_temperature": {
-                "name": "Obw\u00f3d mieszany 3 nocna redukcja krzywej grzewczej"
+                "name": "Obwód mieszany 3 nocna redukcja krzywej grzewczej"
             },
             "dhw_target_temperature": {
-                "name": "Temperatura docelowa ciep\u0142ej wody"
+                "name": "Temperatura docelowa ciepłej wody"
             },
             "dhw_thermal_desinfection_target": {
                 "name": "Temperatura docelowa dezynfekcji termicznej"
             },
             "solar_pump_max_temperature_collector": {
-                "name": "Maks. temperatura kolektora s\u0142onecznego"
+                "name": "Maks. temperatura kolektora słonecznego"
             },
             "solar_pump_off_max_difference_temperature_boiler": {
-                "name": "Wy\u0142\u0105czenie maks. kolektor r\u00f3\u017cnicowy/kocio\u0142 (pompa solarna)"
+                "name": "Wyłączenie maks. kolektor różnicowy/kocioł (pompa solarna)"
             },
             "solar_pump_off_difference_temperature": {
-                "name": "R\u00f3\u017cnica wy\u0142\u0105czania kolektora/kot\u0142a (pompa solarna)"
+                "name": "Różnica wyłączania kolektora/kotła (pompa solarna)"
             },
             "solar_pump_on_difference_temperature": {
-                "name": "R\u00f3\u017cnica w\u0142\u0105czania kolektora/kot\u0142a (pompa solarna)"
+                "name": "Różnica włączania kolektora/kotła (pompa solarna)"
             },
             "dhw_hysteresis": {
-                "name": "Histereza ciep\u0142ej wody"
+                "name": "Histereza ciepłej wody"
             },
             "dhw_manual_frequency": {
-                "name": "DHW cz\u0119stotliwo\u015b\u0107 docelowa"
+                "name": "DHW częstotliwość docelowa"
             },
             "heating_room_temperature_impact_factor": {
-                "name": "Wsp\u00f3\u0142czynnik wp\u0142ywu temperatury pokojowej"
+                "name": "Współczynnik wpływu temperatury pokojowej"
             },
             "heating_maximum_circulation_pump_speed": {
-                "name": "Maksymalna pr\u0119dko\u015b\u0107 pompy obiegowej (ogrzewanie)"
+                "name": "Maksymalna prędkość pompy obiegowej (ogrzewanie)"
             },
             "heating_max_flow_out_increase_temperature": {
-                "name": "Maks. docelowy wzrost odp\u0142ywu"
+                "name": "Maks. docelowy wzrost odpływu"
             },
             "heating_hysteresis": {
                 "name": "Ogrzewanie histerezy"
             },
             "heating_night_lowering_to_temperature": {
-                "name": "Obni\u017cenie temperatury ogrzewania w nocy"
+                "name": "Obniżenie temperatury ogrzewania w nocy"
             },
             "efficiency_pump_nominal_voltage": {
-                "name": "Nominalne napi\u0119cie pompy wydajno\u015bciowej"
+                "name": "Nominalne napięcie pompy wydajnościowej"
             },
             "efficiency_pump_nominal_percentage": {
-                "name": "Nominalne procento pompy wydajno\u015bciowej"
+                "name": "Nominalne procento pompy wydajnościowej"
             },
             "efficiency_pump_minimal_voltage": {
-                "name": "Minimalne napi\u0119cie pompy wydajno\u015bciowej"
+                "name": "Minimalne napięcie pompy wydajnościowej"
             },
             "efficiency_pump_minimal_percentage": {
-                "name": "Minimalne procento pompy wydajno\u015bciowej"
+                "name": "Minimalne procento pompy wydajnościowej"
             },
             "cooling_start_delay_hours": {
-                "name": "Op\u00f3\u017anienie startu"
+                "name": "Opóźnienie startu"
             },
             "cooling_stop_delay_hours": {
-                "name": "Op\u00f3\u017anienie zatrzymania"
+                "name": "Opóźnienie zatrzymania"
             },
             "cooling_target_temperature_mk1": {
-                "name": "Docelowa temperatura ch\u0142odzenia"
+                "name": "Docelowa temperatura chłodzenia"
             },
             "cooling_target_temperature_mk2": {
-                "name": "Docelowa temperatura ch\u0142odzenia"
+                "name": "Docelowa temperatura chłodzenia"
             },
             "cooling_target_temperature_mk3": {
-                "name": "Docelowa temperatura ch\u0142odzenia"
+                "name": "Docelowa temperatura chłodzenia"
             },
             "cooling_min_flow_out_temperature": {
-                "name": "Minimalna temperatura zasilania ch\u0142odzenia"
+                "name": "Minimalna temperatura zasilania chłodzenia"
             },
             "heating_flow_out_temperature_target": {
-                "name": "R\u0119czna docelowa temperatura wyp\u0142ywu"
+                "name": "Ręczna docelowa temperatura wypływu"
             },
             "pump_vent_timer_h": {
                 "name": "Czas pracy odpowietrzania"
@@ -260,23 +260,23 @@
                 "name": "Czas optimizacji pompy"
             },
             "heat_source_input_temperature_min": {
-                "name": "Minimalna temperatura wej\u015bcia \u017ar\u00f3d\u0142a ciep\u0142a"
+                "name": "Minimalna temperatura wejścia źródła ciepła"
             },
             "cooling_threshold_temperature": {
-                "name": "Temperatura progu ch\u0142odzenia"
+                "name": "Temperatura progu chłodzenia"
             }
         },
         "sensor": {
             "status": {
-                "name": "Pompa ciep\u0142a",
+                "name": "Pompa ciepła",
                 "state": {
                     "heating": "Ogrzewanie",
-                    "hot_water": "Ciep\u0142a woda",
+                    "hot_water": "Ciepła woda",
                     "swimming_pool_solar": "Basen / Solar",
                     "evu": "Blokada sieci - brak zasilania",
-                    "defrost": "Rozmra\u017canie",
-                    "heating_external_source": "Zewn\u0119trzne \u017ar\u00f3d\u0142o ogrzewania",
-                    "cooling": "Ch\u0142odzenie",
+                    "defrost": "Rozmrażanie",
+                    "heating_external_source": "Zewnętrzne źródło ogrzewania",
+                    "cooling": "Chłodzenie",
                     "no_request": "Brak zapotrzebowania"
                 }
             },
@@ -284,103 +284,103 @@
                 "name": "Status SmartGrid",
                 "state": {
                     "evu_locked": "Zablokowane EVU",
-                    "reduced_operation": "Praca obni\u017cona",
+                    "reduced_operation": "Praca obniżona",
                     "normal_operation": "Praca normalna",
-                    "increased_operation": "Praca zwi\u0119kszona"
+                    "increased_operation": "Praca zwiększona"
                 }
             },
             "error_reason": {
-                "name": "Ostatni b\u0142\u0105d",
+                "name": "Ostatni błąd",
                 "state": {
-                    "701": "B\u0142\u0105d niskiego ci\u015bnienia.",
-                    "702": "Zatrzymanie przy niskim ci\u015bnieniu\nRESETUJ automat.",
-                    "703": "\u015brodek przeciw zamarzaniu\nProsz\u0119 wezwa\u0107 montera",
-                    "704": "B\u0142\u0105d gor\u0105cego gazu\nZresetuj w gg:mm",
-                    "705": "Zabezpieczenie silnika VEN\nProsz\u0119 wezwa\u0107 instalatora",
-                    "706": "Zabezpieczenie silnika BCP\nProsz\u0119 wezwa\u0107 instalatora",
-                    "707": "Kodowanie HP\nProsz\u0119 wezwa\u0107 instalatora",
-                    "708": "Czujnik powrotu\nProsz\u0119 wezwa\u0107 instalatora",
-                    "709": "Czujnik przep\u0142ywu\nProsz\u0119 wezwa\u0107 instalatora",
-                    "710": "Czujnik gor\u0105cego gazu\nProsz\u0119 wezwa\u0107 instalatora",
-                    "711": "Temperatura zewn\u0119trzna czujnik\nProsz\u0119 wezwa\u0107 instalatora",
-                    "712": "Czujnik ciep\u0142ej wody u\u017cytkowej.\nProsz\u0119 wezwa\u0107 instalatora",
-                    "713": "Czujnik HS-on\nProsz\u0119 wezwa\u0107 instalatora",
-                    "714": "Gor\u0105cy gaz SW\nResetuj w gg:mm",
-                    "715": "Wy\u0142\u0105czenie wysokiego ci\u015bnienia\nRESET auto.",
-                    "716": "Usterka wysokiego ci\u015bnienia\nProsz\u0119 wezwa\u0107 instalatora",
-                    "717": "Przep\u0142yw HS\nProsz\u0119 wezwa\u0107 instalatora",
+                    "701": "Błąd niskiego ciśnienia.",
+                    "702": "Zatrzymanie przy niskim ciśnieniu\nRESETUJ automat.",
+                    "703": "środek przeciw zamarzaniu\nProszę wezwać montera",
+                    "704": "Błąd gorącego gazu\nZresetuj w gg:mm",
+                    "705": "Zabezpieczenie silnika VEN\nProszę wezwać instalatora",
+                    "706": "Zabezpieczenie silnika BCP\nProszę wezwać instalatora",
+                    "707": "Kodowanie HP\nProszę wezwać instalatora",
+                    "708": "Czujnik powrotu\nProszę wezwać instalatora",
+                    "709": "Czujnik przepływu\nProszę wezwać instalatora",
+                    "710": "Czujnik gorącego gazu\nProszę wezwać instalatora",
+                    "711": "Temperatura zewnętrzna czujnik\nProszę wezwać instalatora",
+                    "712": "Czujnik ciepłej wody użytkowej.\nProszę wezwać instalatora",
+                    "713": "Czujnik HS-on\nProszę wezwać instalatora",
+                    "714": "Gorący gaz SW\nResetuj w gg:mm",
+                    "715": "Wyłączenie wysokiego ciśnienia\nRESET auto.",
+                    "716": "Usterka wysokiego ciśnienia\nProszę wezwać instalatora",
+                    "717": "Przepływ HS\nProszę wezwać instalatora",
                     "718": "Maks. temp. zew.\nRESET auto. w gg:mm",
                     "719": "Min. temp. zew.\nRESET auto. w gg:mm",
                     "720": "Temperatura HS\nRESET AUTO. w gg:mm",
-                    "721": "Wy\u0142\u0105czenie przy niskim ci\u015bnieniu\nRESET auto.",
-                    "722": "Tempdiff HW\nProsz\u0119 wezwa\u0107 instalatora",
-                    "723": "Tempdiff SW\nProsz\u0119 wezwa\u0107 instalatora",
-                    "724": "Rozmra\u017canie Tempdiff\nProsz\u0119 wezwa\u0107 instalatora",
-                    "725": "B\u0142\u0105d systemowy SW\nProsz\u0119 wezwa\u0107 instalatora",
-                    "726": "Czujnik obiegu mieszania 1\nProsz\u0119 wezwa\u0107 instalatora",
-                    "727": "Ci\u015bnienie solanki\nProsz\u0119 wezwa\u0107 instalatora",
-                    "728": "Czujnik HS wy\u0142\u0105czony\nProsz\u0119 wezwa\u0107 instalatora",
-                    "729": "B\u0142\u0105d pola wiruj\u0105cego\nProsz\u0119 wezwa\u0107 instalatora",
-                    "732": "Usterka ch\u0142odzenia\nProsz\u0119 wezwa\u0107 instalatora",
-                    "733": "Usterka anody\nProsz\u0119 wezwa\u0107 instalatora",
-                    "734": "Usterka anody\nProsz\u0119 wezwa\u0107 instalatora",
-                    "735": "B\u0142\u0105d zew. Pl\nProsz\u0119 zadzwoni\u0107 do montera",
-                    "736": "B\u0142\u0105d kolektora s\u0142onecznego\nProsz\u0119 wezwa\u0107 instalatora",
-                    "737": "B\u0142\u0105d zasobnika solarnego\nProsz\u0119 wezwa\u0107 instalatora",
-                    "738": "B\u0142\u0105d mieszania ko\u0142a 2\nProsz\u0119 wezwa\u0107 instalatora",
-                    "750": "Czujnik powrotu zewn\u0119trzny\nProsz\u0119 wezwa\u0107 instalatora",
-                    "751": "B\u0142\u0105d monitorowania fazy",
-                    "752": "B\u0142\u0105d przep\u0142ywu",
-                    "755": "Utracono po\u0142\u0105czenie z modu\u0142em slave\nZadzwo\u0144 do instalatora",
-                    "756": "Utracono po\u0142\u0105czenie z masterem\nZadzwo\u0144 do instalatora",
-                    "757": "Usterka niskiego ci\u015bnienia w urz\u0105dzeniu SW",
-                    "758": "Usterka rozmra\u017cania",
+                    "721": "Wyłączenie przy niskim ciśnieniu\nRESET auto.",
+                    "722": "Tempdiff HW\nProszę wezwać instalatora",
+                    "723": "Tempdiff SW\nProszę wezwać instalatora",
+                    "724": "Rozmrażanie Tempdiff\nProszę wezwać instalatora",
+                    "725": "Błąd systemowy SW\nProszę wezwać instalatora",
+                    "726": "Czujnik obiegu mieszania 1\nProszę wezwać instalatora",
+                    "727": "Ciśnienie solanki\nProszę wezwać instalatora",
+                    "728": "Czujnik HS wyłączony\nProszę wezwać instalatora",
+                    "729": "Błąd pola wirującego\nProszę wezwać instalatora",
+                    "732": "Usterka chłodzenia\nProszę wezwać instalatora",
+                    "733": "Usterka anody\nProszę wezwać instalatora",
+                    "734": "Usterka anody\nProszę wezwać instalatora",
+                    "735": "Błąd zew. Pl\nProszę zadzwonić do montera",
+                    "736": "Błąd kolektora słonecznego\nProszę wezwać instalatora",
+                    "737": "Błąd zasobnika solarnego\nProszę wezwać instalatora",
+                    "738": "Błąd mieszania koła 2\nProszę wezwać instalatora",
+                    "750": "Czujnik powrotu zewnętrzny\nProszę wezwać instalatora",
+                    "751": "Błąd monitorowania fazy",
+                    "752": "Błąd przepływu",
+                    "755": "Utracono połączenie z modułem slave\nZadzwoń do instalatora",
+                    "756": "Utracono połączenie z masterem\nZadzwoń do instalatora",
+                    "757": "Usterka niskiego ciśnienia w urządzeniu SW",
+                    "758": "Usterka rozmrażania",
                     "759": "Komunikat TDI",
-                    "760": "B\u0142\u0105d rozmra\u017cania",
-                    "761": "Przekroczenie limitu czasu LIN/utracono po\u0142\u0105czenie LIN",
+                    "760": "Błąd rozmrażania",
+                    "761": "Przekroczenie limitu czasu LIN/utracono połączenie LIN",
                     "762": "czujnik (wlot parownika)",
-                    "763": "czujnik (wlot spr\u0119\u017carki)",
-                    "764": "Czujnik Grza\u0142ka spr\u0119\u017carki",
+                    "763": "czujnik (wlot sprężarki)",
+                    "764": "Czujnik Grzałka sprężarki",
                     "765": "Przegrzanie",
-                    "766": "zakres funkcjonalny spr\u0119\u017carki",
+                    "766": "zakres funkcjonalny sprężarki",
                     "767": "STB E-Rod",
-                    "768": "Monitorowanie przep\u0142ywu",
-                    "769": "Sterowanie pomp\u0105",
+                    "768": "Monitorowanie przepływu",
+                    "769": "Sterowanie pompą",
                     "770": "Niskie przegrzanie",
                     "771": "Wysokie przegrzanie",
                     "776": "granica zastosowania-CP",
-                    "777": "Zaw\u00f3r rozpr\u0119\u017cny",
-                    "778": "Czujnik niskiego ci\u015bnienia",
-                    "779": "Czujnik wysokiego ci\u015bnienia",
+                    "777": "Zawór rozprężny",
+                    "778": "Czujnik niskiego ciśnienia",
+                    "779": "Czujnik wysokiego ciśnienia",
                     "780": "Czujnik EVI",
                     "781": "Temperatura cieczy czujnik przed EXV",
                     "782": "Temp. gazu zasysanego EVI czujnik",
-                    "783": "Komunikacja SEC \u2013 Falownik",
+                    "783": "Komunikacja SEC – Falownik",
                     "784": "Blokada VSS",
-                    "785": "Uszkodzona p\u0142yta SEC",
+                    "785": "Uszkodzona płyta SEC",
                     "787": "Alarm VD",
-                    "788": "Powa\u017cna usterka VSS",
+                    "788": "Poważna usterka VSS",
                     "789": "Nie znaleziono LIN/kodowania",
-                    "790": "Powa\u017cna usterka VSS",
-                    "791": "Utracono komunikacj\u0119 ModBus",
-                    "792": "Utracono po\u0142\u0105czenie LIN",
-                    "793": "Powa\u017cna usterka VSS",
-                    "730": "B\u0142\u0105d programu wygrzewania jastrychu\nProsz\u0119 wezwa\u0107 instalatora",
+                    "790": "Poważna usterka VSS",
+                    "791": "Utracono komunikację ModBus",
+                    "792": "Utracono połączenie LIN",
+                    "793": "Poważna usterka VSS",
+                    "730": "Błąd programu wygrzewania jastrychu\nProszę wezwać instalatora",
                     "731": "Przekroczenie czasu TDI",
-                    "739": "Czujnik obwodu mieszaj\u0105cego 3\nProsz\u0119 wezwa\u0107 instalatora",
+                    "739": "Czujnik obwodu mieszającego 3\nProszę wezwać instalatora",
                     "786": "Komunikacja SEC - HZ/IO",
-                    "794": "Przepi\u0119cie",
-                    "795": "Zbyt niskie napi\u0119cie",
-                    "796": "Wy\u0142\u0105czenie bezpiecze\u0144stwa",
-                    "797": "MLRH nie jest obs\u0142ugiwane",
+                    "794": "Przepięcie",
+                    "795": "Zbyt niskie napięcie",
+                    "796": "Wyłączenie bezpieczeństwa",
+                    "797": "MLRH nie jest obsługiwane",
                     "798": "ModBus wentylator",
                     "799": "ModBus ASB",
-                    "800": "B\u0142\u0105d desuperheatera",
+                    "800": "Błąd desuperheatera",
                     "802": "Wentylator skrzynki rozdzielczej",
                     "803": "Wentylator skrzynki rozdzielczej",
                     "806": "ModBus SEC",
-                    "807": "Utracone po\u0142\u0105czenie ModBus",
-                    "minus_1": "Nieznany b\u0142\u0105d"
+                    "807": "Utracone połączenie ModBus",
+                    "minus_1": "Nieznany błąd"
                 },
                 "state_attributes": {
                     "timestamp": {
@@ -389,217 +389,217 @@
                     "cause": {
                         "name": "Przyczyna",
                         "state": {
-                            "701": "Presostat niskiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142 wielokrotnie (LW) lub d\u0142u\u017cej ni\u017c 20 sekund (SW).",
-                            "702": "Tylko w urz\u0105dzeniach L/W: Niskie ci\u015bnienie w obiegu ch\u0142odniczym zadzia\u0142a\u0142o. Po pewnym czasie automatyczny restart pompy ciep\u0142a.",
-                            "703": "Tylko w urz\u0105dzeniach L/W: Je\u015bli pompa ciep\u0142a pracuje i temperatura zasilania < 5 \u00b0C, rozpoznawana jest ochrona przed zamarzaniem.",
-                            "704": "Przekroczono maksymaln\u0105 temperatur\u0119 gor\u0105cego gazu w obiegu ch\u0142odniczym. Automatyczny restart pompy ciep\u0142a po gg:mm.",
-                            "705": "Tylko w urz\u0105dzeniach L/W: Zadzia\u0142a\u0142o zabezpieczenie silnika wentylatora.",
-                            "706": "Tylko w urz\u0105dzeniach S/W i W/W: Zadzia\u0142a\u0142o zabezpieczenie silnika pompy solanki, wody studziennej lub spr\u0119\u017carki.",
-                            "707": "Przerwa lub zwarcie w mostku koduj\u0105cym w pompie ciep\u0142a po pierwszym uruchomieniu.",
+                            "701": "Presostat niskiego ciśnienia w obiegu chłodniczym zadziałał wielokrotnie (LW) lub dłużej niż 20 sekund (SW).",
+                            "702": "Tylko w urządzeniach L/W: Niskie ciśnienie w obiegu chłodniczym zadziałało. Po pewnym czasie automatyczny restart pompy ciepła.",
+                            "703": "Tylko w urządzeniach L/W: Jeśli pompa ciepła pracuje i temperatura zasilania < 5 °C, rozpoznawana jest ochrona przed zamarzaniem.",
+                            "704": "Przekroczono maksymalną temperaturę gorącego gazu w obiegu chłodniczym. Automatyczny restart pompy ciepła po gg:mm.",
+                            "705": "Tylko w urządzeniach L/W: Zadziałało zabezpieczenie silnika wentylatora.",
+                            "706": "Tylko w urządzeniach S/W i W/W: Zadziałało zabezpieczenie silnika pompy solanki, wody studziennej lub sprężarki.",
+                            "707": "Przerwa lub zwarcie w mostku kodującym w pompie ciepła po pierwszym uruchomieniu.",
                             "708": "Przerwa lub zwarcie czujnika powrotu.",
-                            "709": "Przerwa lub zwarcie czujnika zasilania.\nBrak wy\u0142\u0105czenia awaryjnego w urz\u0105dzeniach S/W i W/W.",
-                            "710": "Przerwa lub zwarcie czujnika gor\u0105cego gazu w obiegu ch\u0142odniczym.",
-                            "711": "Przerwa lub zwarcie czujnika temperatury zewn\u0119trznej.\nBrak wy\u0142\u0105czenia awaryjnego. Warto\u015b\u0107 sta\u0142a na -5 \u00b0C.",
-                            "712": "Przerwa lub zwarcie czujnika ciep\u0142ej wody.\nBrak wy\u0142\u0105czenia awaryjnego.",
-                            "713": "Przerwa lub zwarcie czujnika \u017ar\u00f3d\u0142a ciep\u0142a (wej\u015bcie).",
-                            "714": "Przekroczono granice termiczne pracy pompy ciep\u0142a.\nPrzygotowywanie ciep\u0142ej wody zablokowane na gg:mm.",
-                            "715": "Presostat wysokiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142. Po pewnym czasie automatyczny restart pompy ciep\u0142a.",
-                            "716": "Presostat wysokiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142 wielokrotnie.",
-                            "717": "Wy\u0142\u0105cznik przep\u0142ywu w urz\u0105dzeniach W/W zadzia\u0142a\u0142 podczas czasu wst\u0119pnego p\u0142ukania lub pracy.",
-                            "718": "Tylko w urz\u0105dzeniach L/W: Temperatura zewn\u0119trzna przekroczy\u0142a dopuszczaln\u0105 warto\u015b\u0107 maksymaln\u0105.",
-                            "719": "Tylko w urz\u0105dzeniach L/W: Temperatura zewn\u0119trzna spad\u0142a poni\u017cej dopuszczalnej warto\u015bci minimalnej.",
-                            "720": "Tylko w urz\u0105dzeniach S/W i W/W: Temperatura na wyj\u015bciu parownika wielokrotnie spad\u0142a poni\u017cej warto\u015bci bezpiecznej. Automatyczny restart pompy ciep\u0142a po gg:mm.",
-                            "721": "Presostat niskiego ci\u015bnienia w obiegu ch\u0142odniczym zadzia\u0142a\u0142. Po pewnym czasie automatyczny restart pompy ciep\u0142a (SW i WW).",
-                            "722": "R\u00f3\u017cnica temperatur w trybie grzewczym jest ujemna (=b\u0142\u0119dna).",
-                            "723": "R\u00f3\u017cnica temperatur w trybie ciep\u0142ej wody jest ujemna (=b\u0142\u0119dna).",
-                            "724": "R\u00f3\u017cnica temperatur w obiegu grzewczym podczas rozmra\u017cania > 15 K (=zagro\u017cenie zamarzaniem).",
-                            "725": "Awaria przygotowywania ciep\u0142ej wody, \u017c\u0105dana temperatura zasobnika jest znacznie ni\u017csza.",
-                            "726": "Przerwa lub zwarcie czujnika obiegu mieszaj\u0105cego 1.",
-                            "727": "Presostat ci\u015bnienia solanki zadzia\u0142a\u0142 podczas czasu wst\u0119pnego p\u0142ukania lub pracy.",
-                            "728": "Przerwa lub zwarcie czujnika \u017ar\u00f3d\u0142a ciep\u0142a na wyj\u015bciu.",
-                            "729": "Spr\u0119\u017carka bez mocy po w\u0142\u0105czeniu.",
-                            "730": "Program wygrzewania jastrychu nie osi\u0105gn\u0105\u0142 zadanego poziomu temperatury zasilania w wyznaczonym czasie. Program wygrzewania jastrychu jest kontynuowany.",
-                            "732": "Temperatura wody grzewczej wielokrotnie spad\u0142a poni\u017cej 16 \u00b0C.",
-                            "733": "Wej\u015bcie alarmowe anody obcego pr\u0105du zadzia\u0142a\u0142o.",
-                            "734": "B\u0142\u0105d 733 utrzymuje si\u0119 od ponad dw\u00f3ch tygodni, przygotowywanie ciep\u0142ej wody jest zablokowane.",
-                            "735": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika zewn\u0119trznego \u017ar\u00f3d\u0142a energii.",
-                            "736": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika kolektora s\u0142onecznego.",
-                            "737": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika zasobnika solarnego.",
-                            "738": "Tylko z zainstalowan\u0105 p\u0142yt\u0105 Comfort/rozszerzenia: Przerwa lub zwarcie czujnika obiegu mieszaj\u0105cego 2.",
-                            "750": "Przerwa lub zwarcie zewn\u0119trznego czujnika powrotu.",
-                            "751": "Przeka\u017anik kolejno\u015bci faz zadzia\u0142a\u0142.",
-                            "752": "Przeka\u017anik kolejno\u015bci faz lub wy\u0142\u0105cznik przep\u0142ywu zadzia\u0142a\u0142.",
-                            "755": "Modu\u0142 slave nie odpowiada\u0142 przez ponad 5 minut.",
-                            "756": "Modu\u0142 master nie odpowiada\u0142 przez ponad 5 minut.",
-                            "757": "Presostat niskiego ci\u015bnienia w urz\u0105dzeniu do ciep\u0142ej wody zadzia\u0142a\u0142 wielokrotnie lub d\u0142u\u017cej ni\u017c 20 sekund.",
-                            "758": "Rozmra\u017canie zosta\u0142o 5-krotnie z rz\u0119du zako\u0144czone z powodu zbyt niskiej temperatury zasilania.",
-                            "759": "Dezynfekcja termiczna nie mog\u0142a zosta\u0107 prawid\u0142owo przeprowadzona 3-krotnie z rz\u0119du.",
-                            "760": "Rozmra\u017canie zosta\u0142o 5-krotnie z rz\u0119du zako\u0144czone po maksymalnym czasie (silny wiatr na parownik).",
+                            "709": "Przerwa lub zwarcie czujnika zasilania.\nBrak wyłączenia awaryjnego w urządzeniach S/W i W/W.",
+                            "710": "Przerwa lub zwarcie czujnika gorącego gazu w obiegu chłodniczym.",
+                            "711": "Przerwa lub zwarcie czujnika temperatury zewnętrznej.\nBrak wyłączenia awaryjnego. Wartość stała na -5 °C.",
+                            "712": "Przerwa lub zwarcie czujnika ciepłej wody.\nBrak wyłączenia awaryjnego.",
+                            "713": "Przerwa lub zwarcie czujnika źródła ciepła (wejście).",
+                            "714": "Przekroczono granice termiczne pracy pompy ciepła.\nPrzygotowywanie ciepłej wody zablokowane na gg:mm.",
+                            "715": "Presostat wysokiego ciśnienia w obiegu chłodniczym zadziałał. Po pewnym czasie automatyczny restart pompy ciepła.",
+                            "716": "Presostat wysokiego ciśnienia w obiegu chłodniczym zadziałał wielokrotnie.",
+                            "717": "Wyłącznik przepływu w urządzeniach W/W zadziałał podczas czasu wstępnego płukania lub pracy.",
+                            "718": "Tylko w urządzeniach L/W: Temperatura zewnętrzna przekroczyła dopuszczalną wartość maksymalną.",
+                            "719": "Tylko w urządzeniach L/W: Temperatura zewnętrzna spadła poniżej dopuszczalnej wartości minimalnej.",
+                            "720": "Tylko w urządzeniach S/W i W/W: Temperatura na wyjściu parownika wielokrotnie spadła poniżej wartości bezpiecznej. Automatyczny restart pompy ciepła po gg:mm.",
+                            "721": "Presostat niskiego ciśnienia w obiegu chłodniczym zadziałał. Po pewnym czasie automatyczny restart pompy ciepła (SW i WW).",
+                            "722": "Różnica temperatur w trybie grzewczym jest ujemna (=błędna).",
+                            "723": "Różnica temperatur w trybie ciepłej wody jest ujemna (=błędna).",
+                            "724": "Różnica temperatur w obiegu grzewczym podczas rozmrażania > 15 K (=zagrożenie zamarzaniem).",
+                            "725": "Awaria przygotowywania ciepłej wody, żądana temperatura zasobnika jest znacznie niższa.",
+                            "726": "Przerwa lub zwarcie czujnika obiegu mieszającego 1.",
+                            "727": "Presostat ciśnienia solanki zadziałał podczas czasu wstępnego płukania lub pracy.",
+                            "728": "Przerwa lub zwarcie czujnika źródła ciepła na wyjściu.",
+                            "729": "Sprężarka bez mocy po włączeniu.",
+                            "730": "Program wygrzewania jastrychu nie osiągnął zadanego poziomu temperatury zasilania w wyznaczonym czasie. Program wygrzewania jastrychu jest kontynuowany.",
+                            "732": "Temperatura wody grzewczej wielokrotnie spadła poniżej 16 °C.",
+                            "733": "Wejście alarmowe anody obcego prądu zadziałało.",
+                            "734": "Błąd 733 utrzymuje się od ponad dwóch tygodni, przygotowywanie ciepłej wody jest zablokowane.",
+                            "735": "Tylko z zainstalowaną płytą Comfort/rozszerzenia: Przerwa lub zwarcie czujnika zewnętrznego źródła energii.",
+                            "736": "Tylko z zainstalowaną płytą Comfort/rozszerzenia: Przerwa lub zwarcie czujnika kolektora słonecznego.",
+                            "737": "Tylko z zainstalowaną płytą Comfort/rozszerzenia: Przerwa lub zwarcie czujnika zasobnika solarnego.",
+                            "738": "Tylko z zainstalowaną płytą Comfort/rozszerzenia: Przerwa lub zwarcie czujnika obiegu mieszającego 2.",
+                            "750": "Przerwa lub zwarcie zewnętrznego czujnika powrotu.",
+                            "751": "Przekaźnik kolejności faz zadziałał.",
+                            "752": "Przekaźnik kolejności faz lub wyłącznik przepływu zadziałał.",
+                            "755": "Moduł slave nie odpowiadał przez ponad 5 minut.",
+                            "756": "Moduł master nie odpowiadał przez ponad 5 minut.",
+                            "757": "Presostat niskiego ciśnienia w urządzeniu do ciepłej wody zadziałał wielokrotnie lub dłużej niż 20 sekund.",
+                            "758": "Rozmrażanie zostało 5-krotnie z rzędu zakończone z powodu zbyt niskiej temperatury zasilania.",
+                            "759": "Dezynfekcja termiczna nie mogła zostać prawidłowo przeprowadzona 3-krotnie z rzędu.",
+                            "760": "Rozmrażanie zostało 5-krotnie z rzędu zakończone po maksymalnym czasie (silny wiatr na parownik).",
                             "761": "Przekroczenie limitu czasu LIN.",
-                            "762": "B\u0142\u0105d czujnika T\u00fc (wlot spr\u0119\u017carki).",
-                            "763": "B\u0142\u0105d czujnika T\u00fc1 (wlot parownika).",
-                            "764": "B\u0142\u0105d czujnika grzejnika spr\u0119\u017carki.",
-                            "765": "Przegrzanie poni\u017cej 2K d\u0142u\u017cej ni\u017c 5 minut.",
-                            "766": "Praca 5 minut poza zakresem zastosowania spr\u0119\u017carki.",
-                            "767": "STB grza\u0142ki na SEC zosta\u0142 aktywowany.",
-                            "770": "Przegrzanie utrzymuje si\u0119 d\u0142ugotrwale poni\u017cej warto\u015bci granicznej.",
-                            "771": "Przegrzanie utrzymuje si\u0119 d\u0142ugotrwale powy\u017cej warto\u015bci granicznej.",
-                            "776": "Spr\u0119\u017carka pracuje d\u0142ugotrwale poza swoim zakresem zastosowania.",
-                            "777": "Zaw\u00f3r rozpr\u0119\u017cny uszkodzony.",
-                            "778": "Czujnik niskiego ci\u015bnienia uszkodzony.",
-                            "779": "Czujnik wysokiego ci\u015bnienia uszkodzony.",
+                            "762": "Błąd czujnika Tü (wlot sprężarki).",
+                            "763": "Błąd czujnika Tü1 (wlot parownika).",
+                            "764": "Błąd czujnika grzejnika sprężarki.",
+                            "765": "Przegrzanie poniżej 2K dłużej niż 5 minut.",
+                            "766": "Praca 5 minut poza zakresem zastosowania sprężarki.",
+                            "767": "STB grzałki na SEC został aktywowany.",
+                            "770": "Przegrzanie utrzymuje się długotrwale poniżej wartości granicznej.",
+                            "771": "Przegrzanie utrzymuje się długotrwale powyżej wartości granicznej.",
+                            "776": "Sprężarka pracuje długotrwale poza swoim zakresem zastosowania.",
+                            "777": "Zawór rozprężny uszkodzony.",
+                            "778": "Czujnik niskiego ciśnienia uszkodzony.",
+                            "779": "Czujnik wysokiego ciśnienia uszkodzony.",
                             "780": "Czujnik EVI uszkodzony.",
-                            "781": "Czujnik temperatury cieczy przed zaworem rozpr\u0119\u017cnym uszkodzony.",
+                            "781": "Czujnik temperatury cieczy przed zaworem rozprężnym uszkodzony.",
                             "782": "Czujnik temperatury gazu zasysanego EVI uszkodzony.",
-                            "783": "Komunikacja mi\u0119dzy SEC a falownikiem zak\u0142\u00f3cona.",
+                            "783": "Komunikacja między SEC a falownikiem zakłócona.",
                             "784": "Falownik zablokowany.",
-                            "785": "Wykryto b\u0142\u0105d na p\u0142ycie SEC.",
-                            "786": "Komunikacja mi\u0119dzy p\u0142ytk\u0105 SEC a HZ/IO zak\u0142\u00f3cona przez p\u0142ytk\u0119 SEC.",
-                            "787": "Spr\u0119\u017carka zg\u0142asza b\u0142\u0105d.",
-                            "788": "B\u0142\u0105d w falowniku.",
-                            "789": "Panel sterowania nie m\u00f3g\u0142 wykry\u0107 kodowania. Albo po\u0142\u0105czenie LIN jest przerwane, albo rezystor koduj\u0105cy nie jest rozpoznawany.",
-                            "790": "B\u0142\u0105d w zasilaniu falownika/spr\u0119\u017carki.",
-                            "791": "P\u0142yta SEC nie jest dost\u0119pna od d\u0142u\u017cszego czasu. 791 jest wyzwalany, gdy znaleziono p\u0142yt\u0119 HZIO (bez osobnego kodowania), ale nie rozpoznano na niej p\u0142yty SEC.",
-                            "792": "Nie znaleziono p\u0142yty g\u0142\u00f3wnej ani \u017cadnej konfiguracji.",
-                            "793": "B\u0142\u0105d temperatury w falowniku.",
-                            "minus_1": "Nieznany b\u0142\u0105d",
-                            "731": "Temperatura wymagana do dezynfekcji termicznej nie zosta\u0142a osi\u0105gni\u0119ta w ustawionym czasie prze\u0142\u0105czania.",
-                            "739": "Tylko przy zamontowanej p\u0142ytce rozszerze\u0144: przerwa lub zwarcie czujnika \u201eobwodu mieszaj\u0105cego 3\u201d.",
-                            "794": "Przepi\u0119cie na falowniku.",
-                            "795": "Zbyt niskie napi\u0119cie na falowniku.",
-                            "796": "Uruchomiono wej\u015bcie bezpiecze\u0144stwa. Przypadek 1: usterka falownika. Reset automatyczny. Przypadek 2: zadzia\u0142a\u0142y presostaty wysokiego ci\u015bnienia w obiegu ch\u0142odniczym. Reset automatyczny. Przypadek 3: tylko komunikat LWDV spowodowany wahaniami napi\u0119cia przekraczaj\u0105cymi dopuszczaln\u0105 norm\u0119.",
-                            "797": "Regulacja grza\u0142ki elektrycznej nie jest obs\u0142ugiwana.",
+                            "785": "Wykryto błąd na płycie SEC.",
+                            "786": "Komunikacja między płytką SEC a HZ/IO zakłócona przez płytkę SEC.",
+                            "787": "Sprężarka zgłasza błąd.",
+                            "788": "Błąd w falowniku.",
+                            "789": "Panel sterowania nie mógł wykryć kodowania. Albo połączenie LIN jest przerwane, albo rezystor kodujący nie jest rozpoznawany.",
+                            "790": "Błąd w zasilaniu falownika/sprężarki.",
+                            "791": "Płyta SEC nie jest dostępna od dłuższego czasu. 791 jest wyzwalany, gdy znaleziono płytę HZIO (bez osobnego kodowania), ale nie rozpoznano na niej płyty SEC.",
+                            "792": "Nie znaleziono płyty głównej ani żadnej konfiguracji.",
+                            "793": "Błąd temperatury w falowniku.",
+                            "minus_1": "Nieznany błąd",
+                            "731": "Temperatura wymagana do dezynfekcji termicznej nie została osiągnięta w ustawionym czasie przełączania.",
+                            "739": "Tylko przy zamontowanej płytce rozszerzeń: przerwa lub zwarcie czujnika „obwodu mieszającego 3”.",
+                            "794": "Przepięcie na falowniku.",
+                            "795": "Zbyt niskie napięcie na falowniku.",
+                            "796": "Uruchomiono wejście bezpieczeństwa. Przypadek 1: usterka falownika. Reset automatyczny. Przypadek 2: zadziałały presostaty wysokiego ciśnienia w obiegu chłodniczym. Reset automatyczny. Przypadek 3: tylko komunikat LWDV spowodowany wahaniami napięcia przekraczającymi dopuszczalną normę.",
+                            "797": "Regulacja grzałki elektrycznej nie jest obsługiwana.",
                             "798": "Brak komunikacji ModBus z wentylatorem od co najmniej 10 sekund. Reset automatyczny.",
-                            "799": "Brak komunikacji ModBus z p\u0142ytk\u0105 ASB od co najmniej 10 sekund. Reset automatyczny.",
-                            "800": "Wy\u0142\u0105czenie nast\u0119puje, gdy temperatura desuperheatera osi\u0105gnie \u2265 80\u00b0C. Urz\u0105dzenie zostaje wy\u0142\u0105czone i zapisywana jest warto\u015b\u0107 D0_Pause w historii wy\u0142\u0105cze\u0144. Urz\u0105dzenie jest ponownie dopuszczane do pracy po 2 godzinach. Je\u015bli wy\u0142\u0105czenie wyst\u0105pi 5 razy w ci\u0105gu 24 godzin, b\u0142\u0105d 800 zostaje zapisany w pami\u0119ci b\u0142\u0119d\u00f3w.",
-                            "802": "Wy\u0142\u0105czenie nast\u0119puje, gdy temperatura w skrzynce elektrycznej osi\u0105gnie \u2265 80\u00b0C. Gdy temperatura spadnie poni\u017cej 70\u00b0C, pompa ciep\u0142a uruchamia si\u0119 ponownie. Reset automatyczny.",
-                            "803": "B\u0142\u0105d 802 wyst\u0105pi\u0142 3 razy w ci\u0105gu 24 godzin. Wymagany r\u0119czny reset. Je\u015bli temperatura w skrzynce elektrycznej nadal wynosi \u2265 80\u00b0C, b\u0142\u0105d zostanie natychmiast wywo\u0142any ponownie.",
-                            "806": "P\u0142ytka SEC nie ma komunikacji ModBus od co najmniej 10 sekund lub zapytanie nie powiod\u0142o si\u0119 10 razy z rz\u0119du. Reset automatyczny.",
-                            "807": "Wszystkie mo\u017cliwe usterki komunikacji ModBus z komponentami urz\u0105dzenia wyst\u0119puj\u0105 jednocze\u015bnie od co najmniej 10 sekund. Reset automatyczny.",
-                            "768": "5-krotnie z rz\u0119du zbyt ma\u0142y przep\u0142yw przed rozmra\u017caniem.",
-                            "769": "Brak prawid\u0142owego sygna\u0142u przep\u0142ywu z pompy obiegowej. Reset automatyczny."
+                            "799": "Brak komunikacji ModBus z płytką ASB od co najmniej 10 sekund. Reset automatyczny.",
+                            "800": "Wyłączenie następuje, gdy temperatura desuperheatera osiągnie ≥ 80°C. Urządzenie zostaje wyłączone i zapisywana jest wartość D0_Pause w historii wyłączeń. Urządzenie jest ponownie dopuszczane do pracy po 2 godzinach. Jeśli wyłączenie wystąpi 5 razy w ciągu 24 godzin, błąd 800 zostaje zapisany w pamięci błędów.",
+                            "802": "Wyłączenie następuje, gdy temperatura w skrzynce elektrycznej osiągnie ≥ 80°C. Gdy temperatura spadnie poniżej 70°C, pompa ciepła uruchamia się ponownie. Reset automatyczny.",
+                            "803": "Błąd 802 wystąpił 3 razy w ciągu 24 godzin. Wymagany ręczny reset. Jeśli temperatura w skrzynce elektrycznej nadal wynosi ≥ 80°C, błąd zostanie natychmiast wywołany ponownie.",
+                            "806": "Płytka SEC nie ma komunikacji ModBus od co najmniej 10 sekund lub zapytanie nie powiodło się 10 razy z rzędu. Reset automatyczny.",
+                            "807": "Wszystkie możliwe usterki komunikacji ModBus z komponentami urządzenia występują jednocześnie od co najmniej 10 sekund. Reset automatyczny.",
+                            "768": "5-krotnie z rzędu zbyt mały przepływ przed rozmrażaniem.",
+                            "769": "Brak prawidłowego sygnału przepływu z pompy obiegowej. Reset automatyczny."
                         }
                     },
                     "remedy": {
-                        "name": "Rozwi\u0105zanie",
+                        "name": "Rozwiązanie",
                         "state": {
-                            "701": "Sprawd\u017a pomp\u0119 ciep\u0142a pod k\u0105tem nieszczelno\u015bci, punkt prze\u0142\u0105czania presostatu, rozmra\u017canie i minimaln\u0105 temperatur\u0119 powietrza.",
-                            "702": "Sprawd\u017a pomp\u0119 ciep\u0142a pod k\u0105tem nieszczelno\u015bci, punkt prze\u0142\u0105czania presostatu, rozmra\u017canie i minimaln\u0105 temperatur\u0119 powietrza.",
-                            "703": "Sprawd\u017a wydajno\u015b\u0107 pompy ciep\u0142a, zaw\u00f3r rozmra\u017caj\u0105cy i instalacj\u0119 grzewcz\u0105.",
-                            "704": "Sprawd\u017a ilo\u015b\u0107 czynnika ch\u0142odniczego, parowanie, przegrzanie, zasilanie, powr\u00f3t i minimaln\u0105 temperatur\u0119 \u017ar\u00f3d\u0142a ciep\u0142a.",
-                            "705": "Sprawd\u017a wentylator.",
-                            "706": "Sprawd\u017a ustawione warto\u015bci, spr\u0119\u017cark\u0119, BOSUP.",
-                            "707": "Sprawd\u017a rezystor koduj\u0105cy w pompie ciep\u0142a, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "708": "Sprawd\u017a czujnik powrotu, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "709": "Sprawd\u017a czujnik zasilania, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "710": "Sprawd\u017a czujnik gor\u0105cego gazu, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "711": "Sprawd\u017a czujnik temperatury zewn\u0119trznej, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "712": "Sprawd\u017a czujnik ciep\u0142ej wody, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "713": "Sprawd\u017a czujnik \u017ar\u00f3d\u0142a ciep\u0142a, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "714": "Sprawd\u017a przep\u0142yw ciep\u0142ej wody, wymiennik ciep\u0142a, temperatur\u0119 ciep\u0142ej wody i pomp\u0119 obiegow\u0105 ciep\u0142ej wody.",
-                            "715": "Sprawd\u017a przep\u0142yw wody grzewczej, przep\u0142yw nadmiarowy, temperatur\u0119 i kondensacj\u0119.",
-                            "716": "Sprawd\u017a przep\u0142yw wody grzewczej, przep\u0142yw nadmiarowy, temperatur\u0119 i kondensacj\u0119.",
-                            "717": "Sprawd\u017a przep\u0142yw, punkt prze\u0142\u0105czania DFS, filtr, odpowietrzenie.",
-                            "718": "Sprawd\u017a temperatur\u0119 zewn\u0119trzn\u0105 i ustawion\u0105 warto\u015b\u0107.",
-                            "719": "Sprawd\u017a temperatur\u0119 zewn\u0119trzn\u0105 i ustawion\u0105 warto\u015b\u0107.",
-                            "720": "Sprawd\u017a przep\u0142yw, filtr, odpowietrzenie, temperatur\u0119.",
-                            "721": "Sprawd\u017a punkt prze\u0142\u0105czania presostatu, przep\u0142yw po stronie \u017ar\u00f3d\u0142a ciep\u0142a.",
-                            "722": "Sprawd\u017a dzia\u0142anie i umiejscowienie czujnik\u00f3w zasilania i powrotu.",
-                            "723": "Sprawd\u017a dzia\u0142anie i umiejscowienie czujnik\u00f3w zasilania i powrotu.",
-                            "724": "Sprawd\u017a dzia\u0142anie i umiejscowienie czujnik\u00f3w zasilania i powrotu, wydajno\u015b\u0107 HUP, przep\u0142yw nadmiarowy i obiegi grzewcze.",
-                            "725": "Sprawd\u017a pomp\u0119 obiegow\u0105 CWU, nape\u0142nienie zasobnika, zawory odcinaj\u0105ce i zaw\u00f3r tr\u00f3jdro\u017cny. Odpowietrz wod\u0119 grzewcz\u0105 i CWU.",
-                            "726": "Sprawd\u017a czujnik obiegu mieszaj\u0105cego, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "727": "Sprawd\u017a ci\u015bnienie solanki i presostat ci\u015bnienia solanki.",
-                            "728": "Sprawd\u017a czujnik \u017ar\u00f3d\u0142a ciep\u0142a, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "729": "Sprawd\u017a pole wiruj\u0105ce i spr\u0119\u017cark\u0119.",
-                            "730": "Sprawd\u017a zapotrzebowanie mocy podczas wygrzewania jastrychu.",
-                            "732": "Sprawd\u017a mieszacz i pomp\u0119 obiegow\u0105 ogrzewania.",
-                            "733": "Sprawd\u017a przew\u00f3d po\u0142\u0105czeniowy anody i potencjostat. Nape\u0142nij zasobnik CWU.",
-                            "734": "Tymczasowo potwierd\u017a b\u0142\u0105d, aby przywr\u00f3ci\u0107 przygotowywanie ciep\u0142ej wody. Napraw b\u0142\u0105d 733.",
-                            "735": "Sprawd\u017a czujnik zewn\u0119trznego \u017ar\u00f3d\u0142a energii, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "736": "Sprawd\u017a czujnik kolektora s\u0142onecznego, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "737": "Sprawd\u017a czujnik zasobnika solarnego, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "738": "Sprawd\u017a czujnik obiegu mieszaj\u0105cego 2, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "750": "Sprawd\u017a zewn\u0119trzny czujnik powrotu, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "751": "Sprawd\u017a pole wiruj\u0105ce i przeka\u017anik kolejno\u015bci faz.",
-                            "752": "Patrz b\u0142\u0105d nr 751 i nr 717.",
-                            "755": "Sprawd\u017a po\u0142\u0105czenie sieciowe, prze\u0142\u0105cznik i adresy IP. W razie potrzeby ponownie uruchom wyszukiwanie pompy ciep\u0142a.",
-                            "756": "Sprawd\u017a po\u0142\u0105czenie sieciowe, prze\u0142\u0105cznik i adresy IP. W razie potrzeby ponownie uruchom wyszukiwanie pompy ciep\u0142a.",
-                            "757": "Przy 3-krotnym wyst\u0105pieniu tej usterki urz\u0105dzenie mo\u017ce odblokowa\u0107 wy\u0142\u0105cznie autoryzowany serwis!",
-                            "758": "Sprawd\u017a przep\u0142yw i czujnik zasilania.",
-                            "759": "Sprawd\u017a ustawienia drugiego \u017ar\u00f3d\u0142a ciep\u0142a i ogranicznik temperatury bezpiecze\u0144stwa.",
-                            "760": "Chro\u0144 wentylator i parownik przed silnym wiatrem.",
-                            "761": "Sprawd\u017a kabel/styk.",
-                            "762": "Sprawd\u017a czujnik, ewentualnie wymie\u0144.",
-                            "763": "Sprawd\u017a czujnik, ewentualnie wymie\u0144.",
-                            "764": "Sprawd\u017a czujnik, ewentualnie wymie\u0144.",
-                            "765": "Przy pierwszym uruchomieniu: sprawd\u017a pole wiruj\u0105ce, w przeciwnym razie zadzwo\u0144 do serwisu.",
-                            "766": "Sprawd\u017a pole wiruj\u0105ce.",
-                            "767": "Sprawd\u017a grza\u0142k\u0119 i ponownie wci\u015bnij bezpiecznik.",
-                            "770": "Sprawd\u017a czujnik temperatury, czujnik ci\u015bnienia i zaw\u00f3r rozpr\u0119\u017cny.",
-                            "771": "Sprawd\u017a czujnik temperatury, czujnik ci\u015bnienia, nape\u0142nienie i zaw\u00f3r rozpr\u0119\u017cny.",
-                            "776": "Sprawd\u017a termodynamik\u0119.",
-                            "777": "Sprawd\u017a zaw\u00f3r rozpr\u0119\u017cny, kabel po\u0142\u0105czeniowy i ewentualnie p\u0142yt\u0119 SEC.",
-                            "778": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "779": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "780": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "781": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "782": "Sprawd\u017a czujnik, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "783": "Sprawd\u017a kabel po\u0142\u0105czeniowy, kondensatory przeciwzak\u0142\u00f3ceniowe i okablowanie.",
-                            "784": "Wy\u0142\u0105cz ca\u0142\u0105 instalacj\u0119 na 2 minuty z zasilania. Przy powtarzaj\u0105cym si\u0119 b\u0142\u0119dzie sprawd\u017a falownik i spr\u0119\u017cark\u0119.",
-                            "785": "Wymie\u0144 p\u0142yt\u0119 SEC.",
-                            "786": "Sprawd\u017a okablowanie HZ/IO - p\u0142ytka SEC.",
-                            "787": "Potwierd\u017a usterk\u0119. Je\u015bli b\u0142\u0105d wyst\u0119puje wielokrotnie, wezwij autoryzowany serwis.",
-                            "788": "Sprawd\u017a falownik.",
-                            "789": "Sprawd\u017a kabel po\u0142\u0105czeniowy LIN/rezystor koduj\u0105cy.",
-                            "790": "Sprawd\u017a okablowanie, falownik i spr\u0119\u017cark\u0119.",
-                            "791": "Je\u015bli dotyczy konfiguracji SEC, sprawd\u017a kabel ModBus mi\u0119dzy HZIO a p\u0142yt\u0105 SEC. Sprawd\u017a r\u00f3wnie\u017c p\u0142yt\u0119 SEC, czy wszystko miga prawid\u0142owo. Je\u015bli to NIE jest konfiguracja z p\u0142yt\u0105 SEC (np. urz\u0105dzenie P184), sprawd\u017a rezystor koduj\u0105cy HZIO.",
-                            "792": "Sprawd\u017a wtyczk\u0119 koduj\u0105c\u0105 na p\u0142ycie LIN.",
-                            "793": "B\u0142\u0105d usuwa si\u0119 samoczynnie.",
-                            "739": "Sprawd\u017a czujnik \u201eobwodu mieszaj\u0105cego 3\u201d, wtyczk\u0119 i przew\u00f3d po\u0142\u0105czeniowy.",
-                            "794": "Sprawd\u017a zasilanie falownika.",
-                            "795": "Sprawd\u017a zasilanie falownika.",
-                            "796": "Przypadek 1: sprawd\u017a falownik. Usu\u0144 usterk\u0119. Przypadek 2: sprawd\u017a przep\u0142yw wody grzewczej, przelewy, czujnik temperatury zasilania i czujnik wysokiego ci\u015bnienia. Usu\u0144 usterk\u0119. Przypadek 3: nale\u017cy r\u0119cznie wy\u0142\u0105czy\u0107 i ponownie zabezpieczy\u0107.",
-                            "798": "Sprawd\u017a okablowanie ModBus wentylatora.",
-                            "799": "Sprawd\u017a okablowanie ModBus p\u0142ytki ASB.",
-                            "800": "Odbierz energi\u0119 z zasobnika desuperheatera. Urz\u0105dzenie mo\u017cna ponownie uruchomi\u0107, gdy tylko temperatura spadnie poni\u017cej 80\u00b0C.",
-                            "802": "Sprawd\u017a dzia\u0142anie wentylatora. Sprawd\u017a przew\u00f3d przy\u0142\u0105czeniowy. Sprawd\u017a czujnik. Sprawd\u017a otwory skrzynki rozdzielczej pod k\u0105tem zatkania.",
-                            "803": "Sprawd\u017a dzia\u0142anie wentylatora. Sprawd\u017a przew\u00f3d przy\u0142\u0105czeniowy. Sprawd\u017a czujnik. Sprawd\u017a otwory skrzynki rozdzielczej pod k\u0105tem zatkania.",
-                            "806": "Sprawd\u017a okablowanie ModBus p\u0142ytki SEC.",
-                            "807": "Sprawd\u017a interfejs ModBus na module steruj\u0105cym, przew\u00f3d po\u0142\u0105czeniowy do rozdzielacza ModBus oraz sam rozdzielacz ModBus. Sprawd\u017a okablowanie ModBus.",
-                            "768": "Sprawd\u017a przep\u0142yw wody grzewczej i przelewy. Usu\u0144 usterk\u0119.",
-                            "769": "Sprawd\u017a okablowanie obci\u0105\u017cenia i sterowanie pompy obiegowej. Usu\u0144 usterk\u0119."
+                            "701": "Sprawdź pompę ciepła pod kątem nieszczelności, punkt przełączania presostatu, rozmrażanie i minimalną temperaturę powietrza.",
+                            "702": "Sprawdź pompę ciepła pod kątem nieszczelności, punkt przełączania presostatu, rozmrażanie i minimalną temperaturę powietrza.",
+                            "703": "Sprawdź wydajność pompy ciepła, zawór rozmrażający i instalację grzewczą.",
+                            "704": "Sprawdź ilość czynnika chłodniczego, parowanie, przegrzanie, zasilanie, powrót i minimalną temperaturę źródła ciepła.",
+                            "705": "Sprawdź wentylator.",
+                            "706": "Sprawdź ustawione wartości, sprężarkę, BOSUP.",
+                            "707": "Sprawdź rezystor kodujący w pompie ciepła, wtyczkę i przewód połączeniowy.",
+                            "708": "Sprawdź czujnik powrotu, wtyczkę i przewód połączeniowy.",
+                            "709": "Sprawdź czujnik zasilania, wtyczkę i przewód połączeniowy.",
+                            "710": "Sprawdź czujnik gorącego gazu, wtyczkę i przewód połączeniowy.",
+                            "711": "Sprawdź czujnik temperatury zewnętrznej, wtyczkę i przewód połączeniowy.",
+                            "712": "Sprawdź czujnik ciepłej wody, wtyczkę i przewód połączeniowy.",
+                            "713": "Sprawdź czujnik źródła ciepła, wtyczkę i przewód połączeniowy.",
+                            "714": "Sprawdź przepływ ciepłej wody, wymiennik ciepła, temperaturę ciepłej wody i pompę obiegową ciepłej wody.",
+                            "715": "Sprawdź przepływ wody grzewczej, przepływ nadmiarowy, temperaturę i kondensację.",
+                            "716": "Sprawdź przepływ wody grzewczej, przepływ nadmiarowy, temperaturę i kondensację.",
+                            "717": "Sprawdź przepływ, punkt przełączania DFS, filtr, odpowietrzenie.",
+                            "718": "Sprawdź temperaturę zewnętrzną i ustawioną wartość.",
+                            "719": "Sprawdź temperaturę zewnętrzną i ustawioną wartość.",
+                            "720": "Sprawdź przepływ, filtr, odpowietrzenie, temperaturę.",
+                            "721": "Sprawdź punkt przełączania presostatu, przepływ po stronie źródła ciepła.",
+                            "722": "Sprawdź działanie i umiejscowienie czujników zasilania i powrotu.",
+                            "723": "Sprawdź działanie i umiejscowienie czujników zasilania i powrotu.",
+                            "724": "Sprawdź działanie i umiejscowienie czujników zasilania i powrotu, wydajność HUP, przepływ nadmiarowy i obiegi grzewcze.",
+                            "725": "Sprawdź pompę obiegową CWU, napełnienie zasobnika, zawory odcinające i zawór trójdrożny. Odpowietrz wodę grzewczą i CWU.",
+                            "726": "Sprawdź czujnik obiegu mieszającego, wtyczkę i przewód połączeniowy.",
+                            "727": "Sprawdź ciśnienie solanki i presostat ciśnienia solanki.",
+                            "728": "Sprawdź czujnik źródła ciepła, wtyczkę i przewód połączeniowy.",
+                            "729": "Sprawdź pole wirujące i sprężarkę.",
+                            "730": "Sprawdź zapotrzebowanie mocy podczas wygrzewania jastrychu.",
+                            "732": "Sprawdź mieszacz i pompę obiegową ogrzewania.",
+                            "733": "Sprawdź przewód połączeniowy anody i potencjostat. Napełnij zasobnik CWU.",
+                            "734": "Tymczasowo potwierdź błąd, aby przywrócić przygotowywanie ciepłej wody. Napraw błąd 733.",
+                            "735": "Sprawdź czujnik zewnętrznego źródła energii, wtyczkę i przewód połączeniowy.",
+                            "736": "Sprawdź czujnik kolektora słonecznego, wtyczkę i przewód połączeniowy.",
+                            "737": "Sprawdź czujnik zasobnika solarnego, wtyczkę i przewód połączeniowy.",
+                            "738": "Sprawdź czujnik obiegu mieszającego 2, wtyczkę i przewód połączeniowy.",
+                            "750": "Sprawdź zewnętrzny czujnik powrotu, wtyczkę i przewód połączeniowy.",
+                            "751": "Sprawdź pole wirujące i przekaźnik kolejności faz.",
+                            "752": "Patrz błąd nr 751 i nr 717.",
+                            "755": "Sprawdź połączenie sieciowe, przełącznik i adresy IP. W razie potrzeby ponownie uruchom wyszukiwanie pompy ciepła.",
+                            "756": "Sprawdź połączenie sieciowe, przełącznik i adresy IP. W razie potrzeby ponownie uruchom wyszukiwanie pompy ciepła.",
+                            "757": "Przy 3-krotnym wystąpieniu tej usterki urządzenie może odblokować wyłącznie autoryzowany serwis!",
+                            "758": "Sprawdź przepływ i czujnik zasilania.",
+                            "759": "Sprawdź ustawienia drugiego źródła ciepła i ogranicznik temperatury bezpieczeństwa.",
+                            "760": "Chroń wentylator i parownik przed silnym wiatrem.",
+                            "761": "Sprawdź kabel/styk.",
+                            "762": "Sprawdź czujnik, ewentualnie wymień.",
+                            "763": "Sprawdź czujnik, ewentualnie wymień.",
+                            "764": "Sprawdź czujnik, ewentualnie wymień.",
+                            "765": "Przy pierwszym uruchomieniu: sprawdź pole wirujące, w przeciwnym razie zadzwoń do serwisu.",
+                            "766": "Sprawdź pole wirujące.",
+                            "767": "Sprawdź grzałkę i ponownie wciśnij bezpiecznik.",
+                            "770": "Sprawdź czujnik temperatury, czujnik ciśnienia i zawór rozprężny.",
+                            "771": "Sprawdź czujnik temperatury, czujnik ciśnienia, napełnienie i zawór rozprężny.",
+                            "776": "Sprawdź termodynamikę.",
+                            "777": "Sprawdź zawór rozprężny, kabel połączeniowy i ewentualnie płytę SEC.",
+                            "778": "Sprawdź czujnik, wtyczkę i przewód połączeniowy.",
+                            "779": "Sprawdź czujnik, wtyczkę i przewód połączeniowy.",
+                            "780": "Sprawdź czujnik, wtyczkę i przewód połączeniowy.",
+                            "781": "Sprawdź czujnik, wtyczkę i przewód połączeniowy.",
+                            "782": "Sprawdź czujnik, wtyczkę i przewód połączeniowy.",
+                            "783": "Sprawdź kabel połączeniowy, kondensatory przeciwzakłóceniowe i okablowanie.",
+                            "784": "Wyłącz całą instalację na 2 minuty z zasilania. Przy powtarzającym się błędzie sprawdź falownik i sprężarkę.",
+                            "785": "Wymień płytę SEC.",
+                            "786": "Sprawdź okablowanie HZ/IO - płytka SEC.",
+                            "787": "Potwierdź usterkę. Jeśli błąd występuje wielokrotnie, wezwij autoryzowany serwis.",
+                            "788": "Sprawdź falownik.",
+                            "789": "Sprawdź kabel połączeniowy LIN/rezystor kodujący.",
+                            "790": "Sprawdź okablowanie, falownik i sprężarkę.",
+                            "791": "Jeśli dotyczy konfiguracji SEC, sprawdź kabel ModBus między HZIO a płytą SEC. Sprawdź również płytę SEC, czy wszystko miga prawidłowo. Jeśli to NIE jest konfiguracja z płytą SEC (np. urządzenie P184), sprawdź rezystor kodujący HZIO.",
+                            "792": "Sprawdź wtyczkę kodującą na płycie LIN.",
+                            "793": "Błąd usuwa się samoczynnie.",
+                            "739": "Sprawdź czujnik „obwodu mieszającego 3”, wtyczkę i przewód połączeniowy.",
+                            "794": "Sprawdź zasilanie falownika.",
+                            "795": "Sprawdź zasilanie falownika.",
+                            "796": "Przypadek 1: sprawdź falownik. Usuń usterkę. Przypadek 2: sprawdź przepływ wody grzewczej, przelewy, czujnik temperatury zasilania i czujnik wysokiego ciśnienia. Usuń usterkę. Przypadek 3: należy ręcznie wyłączyć i ponownie zabezpieczyć.",
+                            "798": "Sprawdź okablowanie ModBus wentylatora.",
+                            "799": "Sprawdź okablowanie ModBus płytki ASB.",
+                            "800": "Odbierz energię z zasobnika desuperheatera. Urządzenie można ponownie uruchomić, gdy tylko temperatura spadnie poniżej 80°C.",
+                            "802": "Sprawdź działanie wentylatora. Sprawdź przewód przyłączeniowy. Sprawdź czujnik. Sprawdź otwory skrzynki rozdzielczej pod kątem zatkania.",
+                            "803": "Sprawdź działanie wentylatora. Sprawdź przewód przyłączeniowy. Sprawdź czujnik. Sprawdź otwory skrzynki rozdzielczej pod kątem zatkania.",
+                            "806": "Sprawdź okablowanie ModBus płytki SEC.",
+                            "807": "Sprawdź interfejs ModBus na module sterującym, przewód połączeniowy do rozdzielacza ModBus oraz sam rozdzielacz ModBus. Sprawdź okablowanie ModBus.",
+                            "768": "Sprawdź przepływ wody grzewczej i przelewy. Usuń usterkę.",
+                            "769": "Sprawdź okablowanie obciążenia i sterowanie pompy obiegowej. Usuń usterkę."
                         }
                     }
                 }
             },
             "switchoff_reason": {
-                "name": "Pow\u00f3d wy\u0142\u0105czenia",
+                "name": "Powód wyłączenia",
                 "state": {
-                    "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
-                    "1": "Zak\u0142\u00f3cenie instalacji",
-                    "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                    "0": "Zakłócenie pompy ciepła",
+                    "1": "Zakłócenie instalacji",
+                    "2": "Tryb pracy drugiego generatora ciepła",
                     "3": "Blokada EVU",
                     "4": "",
                     "5": "Odszranianie powietrzem",
-                    "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
-                    "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
-                    "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                    "6": "Maksymalne ograniczenie temperatury użytkowania",
+                    "7": "Ograniczenie temperatury użytkowania minimalne",
+                    "8": "Niższe ograniczenie użytkowania",
                     "9": "Brak zapotrzebowania",
-                    "10": "Zewn\u0119trzne \u017ar\u00f3d\u0142o energii",
-                    "11": "Przep\u0142yw",
-                    "12": "Pauza niskiego ci\u015bnienia",
+                    "10": "Zewnętrzne źródło energii",
+                    "11": "Przepływ",
+                    "12": "Pauza niskiego ciśnienia",
                     "13": "Pauza przegrzania",
                     "14": "Pauza falownika",
                     "15": "Pauza desuperheatera",
-                    "16": "Tryb pracy prze\u0142\u0105czania",
-                    "17": "Inne wy\u0142\u0105czenie",
-                    "18": "Minimalny przep\u0142yw ch\u0142odzenia",
+                    "16": "Tryb pracy przełączania",
+                    "17": "Inne wyłączenie",
+                    "18": "Minimalny przepływ chłodzenia",
                     "19": "PV max",
-                    "20": "Pauza gor\u0105cego gazu",
-                    "21": "Pauza przegrzania gor\u0105cego gazu",
+                    "20": "Pauza gorącego gazu",
+                    "21": "Pauza przegrzania gorącego gazu",
                     "22": "Brak zapotrzebowania",
-                    "23": "Minimalna temperatura wylotowa dolnego \u017ar\u00f3d\u0142a przy ch\u0142odzeniu",
+                    "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                     "24": "LPC",
                     "25": "Restart",
                     "27": "Maksymalna temperatura zasilania"
@@ -609,32 +609,32 @@
                         "name": "Czas"
                     },
                     "code_1": {
-                        "name": "Przedostatnie wy\u0142\u0105czenie",
+                        "name": "Przedostatnie wyłączenie",
                         "state": {
-                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
-                            "1": "Zak\u0142\u00f3cenie instalacji",
-                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "0": "Zakłócenie pompy ciepła",
+                            "1": "Zakłócenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciepła",
                             "3": "Blokada EVU",
                             "4": "",
                             "5": "Odszranianie powietrzem",
-                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
-                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
-                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "6": "Maksymalne ograniczenie temperatury użytkowania",
+                            "7": "Ograniczenie temperatury użytkowania minimalne",
+                            "8": "Niższe ograniczenie użytkowania",
                             "9": "Brak zapotrzebowania",
-                            "10": "Zewn\u0119trzne \u017ar\u00f3d\u0142o energii",
-                            "11": "Przep\u0142yw",
-                            "12": "Pauza niskiego ci\u015bnienia",
+                            "10": "Zewnętrzne źródło energii",
+                            "11": "Przepływ",
+                            "12": "Pauza niskiego ciśnienia",
                             "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
                             "15": "Pauza desuperheatera",
-                            "16": "Tryb pracy prze\u0142\u0105czania",
-                            "17": "Inne wy\u0142\u0105czenie",
-                            "18": "Minimalny przep\u0142yw ch\u0142odzenia",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
                             "19": "PV max",
-                            "20": "Pauza gor\u0105cego gazu",
-                            "21": "Pauza przegrzania gor\u0105cego gazu",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
                             "22": "Brak zapotrzebowania",
-                            "23": "Minimalna temperatura wylotowa dolnego \u017ar\u00f3d\u0142a przy ch\u0142odzeniu",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
                             "25": "Restart",
                             "27": "Maksymalna temperatura zasilania"
@@ -644,125 +644,125 @@
                         "name": "Przedostatni czas"
                     },
                     "code_2": {
-                        "name": "Trzecie od ko\u0144ca wy\u0142\u0105czenie",
+                        "name": "Trzecie od końca wyłączenie",
                         "state": {
-                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
-                            "1": "Zak\u0142\u00f3cenie instalacji",
-                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "0": "Zakłócenie pompy ciepła",
+                            "1": "Zakłócenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciepła",
                             "3": "Blokada EVU",
                             "4": "",
                             "5": "Odszranianie powietrzem",
-                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
-                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
-                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "6": "Maksymalne ograniczenie temperatury użytkowania",
+                            "7": "Ograniczenie temperatury użytkowania minimalne",
+                            "8": "Niższe ograniczenie użytkowania",
                             "9": "Brak zapotrzebowania",
-                            "10": "Zewn\u0119trzne \u017ar\u00f3d\u0142o energii",
-                            "11": "Przep\u0142yw",
-                            "12": "Pauza niskiego ci\u015bnienia",
+                            "10": "Zewnętrzne źródło energii",
+                            "11": "Przepływ",
+                            "12": "Pauza niskiego ciśnienia",
                             "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
                             "15": "Pauza desuperheatera",
-                            "16": "Tryb pracy prze\u0142\u0105czania",
-                            "17": "Inne wy\u0142\u0105czenie",
-                            "18": "Minimalny przep\u0142yw ch\u0142odzenia",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
                             "19": "PV max",
-                            "20": "Pauza gor\u0105cego gazu",
-                            "21": "Pauza przegrzania gor\u0105cego gazu",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
                             "22": "Brak zapotrzebowania",
-                            "23": "Minimalna temperatura wylotowa dolnego \u017ar\u00f3d\u0142a przy ch\u0142odzeniu",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
                             "25": "Restart",
                             "27": "Maksymalna temperatura zasilania"
                         }
                     },
                     "timestamp_2": {
-                        "name": "Trzeci od ko\u0144ca czas"
+                        "name": "Trzeci od końca czas"
                     },
                     "code_3": {
-                        "name": "Czwarte od ko\u0144ca wy\u0142\u0105czenie",
+                        "name": "Czwarte od końca wyłączenie",
                         "state": {
-                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
-                            "1": "Zak\u0142\u00f3cenie instalacji",
-                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "0": "Zakłócenie pompy ciepła",
+                            "1": "Zakłócenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciepła",
                             "3": "Blokada EVU",
                             "4": "",
                             "5": "Odszranianie powietrzem",
-                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
-                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
-                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "6": "Maksymalne ograniczenie temperatury użytkowania",
+                            "7": "Ograniczenie temperatury użytkowania minimalne",
+                            "8": "Niższe ograniczenie użytkowania",
                             "9": "Brak zapotrzebowania",
-                            "10": "Zewn\u0119trzne \u017ar\u00f3d\u0142o energii",
-                            "11": "Przep\u0142yw",
-                            "12": "Pauza niskiego ci\u015bnienia",
+                            "10": "Zewnętrzne źródło energii",
+                            "11": "Przepływ",
+                            "12": "Pauza niskiego ciśnienia",
                             "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
                             "15": "Pauza desuperheatera",
-                            "16": "Tryb pracy prze\u0142\u0105czania",
-                            "17": "Inne wy\u0142\u0105czenie",
-                            "18": "Minimalny przep\u0142yw ch\u0142odzenia",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
                             "19": "PV max",
-                            "20": "Pauza gor\u0105cego gazu",
-                            "21": "Pauza przegrzania gor\u0105cego gazu",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
                             "22": "Brak zapotrzebowania",
-                            "23": "Minimalna temperatura wylotowa dolnego \u017ar\u00f3d\u0142a przy ch\u0142odzeniu",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
                             "25": "Restart",
                             "27": "Maksymalna temperatura zasilania"
                         }
                     },
                     "timestamp_3": {
-                        "name": "Czwarty od ko\u0144ca czas"
+                        "name": "Czwarty od końca czas"
                     },
                     "code_4": {
-                        "name": "Pi\u0105te od ko\u0144ca wy\u0142\u0105czenie",
+                        "name": "Piąte od końca wyłączenie",
                         "state": {
-                            "0": "Zak\u0142\u00f3cenie pompy ciep\u0142a",
-                            "1": "Zak\u0142\u00f3cenie instalacji",
-                            "2": "Tryb pracy drugiego generatora ciep\u0142a",
+                            "0": "Zakłócenie pompy ciepła",
+                            "1": "Zakłócenie instalacji",
+                            "2": "Tryb pracy drugiego generatora ciepła",
                             "3": "Blokada EVU",
                             "4": "",
                             "5": "Odszranianie powietrzem",
-                            "6": "Maksymalne ograniczenie temperatury u\u017cytkowania",
-                            "7": "Ograniczenie temperatury u\u017cytkowania minimalne",
-                            "8": "Ni\u017csze ograniczenie u\u017cytkowania",
+                            "6": "Maksymalne ograniczenie temperatury użytkowania",
+                            "7": "Ograniczenie temperatury użytkowania minimalne",
+                            "8": "Niższe ograniczenie użytkowania",
                             "9": "Brak zapotrzebowania",
-                            "10": "Zewn\u0119trzne \u017ar\u00f3d\u0142o energii",
-                            "11": "Przep\u0142yw",
-                            "12": "Pauza niskiego ci\u015bnienia",
+                            "10": "Zewnętrzne źródło energii",
+                            "11": "Przepływ",
+                            "12": "Pauza niskiego ciśnienia",
                             "13": "Pauza przegrzania",
                             "14": "Pauza falownika",
                             "15": "Pauza desuperheatera",
-                            "16": "Tryb pracy prze\u0142\u0105czania",
-                            "17": "Inne wy\u0142\u0105czenie",
-                            "18": "Minimalny przep\u0142yw ch\u0142odzenia",
+                            "16": "Tryb pracy przełączania",
+                            "17": "Inne wyłączenie",
+                            "18": "Minimalny przepływ chłodzenia",
                             "19": "PV max",
-                            "20": "Pauza gor\u0105cego gazu",
-                            "21": "Pauza przegrzania gor\u0105cego gazu",
+                            "20": "Pauza gorącego gazu",
+                            "21": "Pauza przegrzania gorącego gazu",
                             "22": "Brak zapotrzebowania",
-                            "23": "Minimalna temperatura wylotowa dolnego \u017ar\u00f3d\u0142a przy ch\u0142odzeniu",
+                            "23": "Minimalna temperatura wylotowa dolnego źródła przy chłodzeniu",
                             "24": "LPC",
                             "25": "Restart",
                             "27": "Maksymalna temperatura zasilania"
                         }
                     },
                     "timestamp_4": {
-                        "name": "Pi\u0105ty od ko\u0144ca czas"
+                        "name": "Piąty od końca czas"
                     }
                 }
             },
             "status_line_1": {
                 "name": "Stan 1",
                 "state": {
-                    "heatpump_running": "Pompa ciep\u0142a jest aktywna",
-                    "heatpump_idle": "Pompa ciep\u0142a jest nieaktywna",
-                    "heatpump_coming": "Pompa ciep\u0142a jest uruchamiana",
-                    "heatpump_shutdown": "Pompa ciep\u0142a wy\u0142\u0105cza si\u0119",
-                    "errorcode_slot_0": "Kod b\u0142\u0119du pompy ciep\u0142a w gnie\u017adzie 0",
+                    "heatpump_running": "Pompa ciepła jest aktywna",
+                    "heatpump_idle": "Pompa ciepła jest nieaktywna",
+                    "heatpump_coming": "Pompa ciepła jest uruchamiana",
+                    "heatpump_shutdown": "Pompa ciepła wyłącza się",
+                    "errorcode_slot_0": "Kod błędu pompy ciepła w gnieździe 0",
                     "pump_forerun": "Rozbieg pompy",
-                    "defrost": "Rozmra\u017canie",
-                    "waiting_on_lin_connection": "Oczekiwanie na po\u0142\u0105czenie LIN",
-                    "compressor_heating_up": "Spr\u0119\u017carka nagrzewa si\u0119",
-                    "compressor_heater": "Grza\u0142ka spr\u0119\u017carki"
+                    "defrost": "Rozmrażanie",
+                    "waiting_on_lin_connection": "Oczekiwanie na połączenie LIN",
+                    "compressor_heating_up": "Sprężarka nagrzewa się",
+                    "compressor_heater": "Grzałka sprężarki"
                 }
             },
             "status_line_2": {
@@ -777,64 +777,64 @@
                 "name": "Stan 3",
                 "state": {
                     "heating": "ogrzewanie",
-                    "defrost": "rozmra\u017canie",
-                    "cooling": "ch\u0142odzenie",
+                    "defrost": "rozmrażanie",
+                    "cooling": "chłodzenie",
                     "pump_forerun": "rozbieg pompy",
                     "thermal_desinfection": "dezynfekcja termiczna",
                     "swimming_pool_solar": "basen/solar",
                     "no_request": "brak zapotrzebowania",
                     "cycle_lock": "blokada cyklu",
                     "lock_time": "czas blokady",
-                    "domestic_water": "ciep\u0142a woda",
-                    "flow_monitoring": "monitorowanie przep\u0142ywu",
-                    "grid_switch_on_delay": "op\u00f3\u017anienie w\u0142\u0105czenia sieci",
+                    "domestic_water": "ciepła woda",
+                    "flow_monitoring": "monitorowanie przepływu",
+                    "grid_switch_on_delay": "opóźnienie włączenia sieci",
                     "info_bake_out_program": "Informacje o programie pieczenia",
-                    "heating_external_energy_source": "ogrzewanie z zewn\u0119trznego \u017ar\u00f3d\u0142a energii",
-                    "domestic_water_external_energy_source": "Zewn\u0119trzne \u017ar\u00f3d\u0142o energii ciep\u0142ej wody",
-                    "second_heat_generator_1_active": "drugi generator ciep\u0142a 1 aktywny"
+                    "heating_external_energy_source": "ogrzewanie z zewnętrznego źródła energii",
+                    "domestic_water_external_energy_source": "Zewnętrzne źródło energii ciepłej wody",
+                    "second_heat_generator_1_active": "drugi generator ciepła 1 aktywny"
                 }
             },
             "heat_source_output": {
-                "name": "Do \u017ar\u00f3d\u0142a ciep\u0142a"
+                "name": "Do źródła ciepła"
             },
             "heat_source_input_temperature": {
-                "name": "Wej\u015bcie \u017ar\u00f3d\u0142a ciep\u0142a"
+                "name": "Wejście źródła ciepła"
             },
             "outdoor_temperature": {
-                "name": "Temperatura zewn\u0119trzna"
+                "name": "Temperatura zewnętrzna"
             },
             "status_time": {
                 "name": "Czas stanu"
             },
             "outdoor_temperature_average": {
-                "name": "\u015arednia temperatura zewn\u0119trzna"
+                "name": "Średnia temperatura zewnętrzna"
             },
             "compressor1_impulses": {
-                "name": "Impulsy spr\u0119\u017carki 1"
+                "name": "Impulsy sprężarki 1"
             },
             "compressor1_operation_hours": {
-                "name": "Godziny pracy spr\u0119\u017carki 1"
+                "name": "Godziny pracy sprężarki 1"
             },
             "compressor2_impulses": {
-                "name": "Impulsy spr\u0119\u017carki 2"
+                "name": "Impulsy sprężarki 2"
             },
             "compressor2_operation_hours": {
-                "name": "Godziny pracy spr\u0119\u017carki 2"
+                "name": "Godziny pracy sprężarki 2"
             },
             "operation_hours": {
                 "name": "Godziny pracy"
             },
             "heat_amount_counter": {
-                "name": "Licznik ilo\u015bci ciep\u0142a"
+                "name": "Licznik ilości ciepła"
             },
             "hot_gas_temperature": {
-                "name": "Temperatura gor\u0105cego gazu"
+                "name": "Temperatura gorącego gazu"
             },
             "suction_compressor_temperature": {
-                "name": "Temperatura spr\u0119\u017carki ss\u0105cej"
+                "name": "Temperatura sprężarki ssącej"
             },
             "suction_evaporator_temperature": {
-                "name": "Temperatura parownika ss\u0105cego"
+                "name": "Temperatura parownika ssącego"
             },
             "compressor_heating_temperature": {
                 "name": "Kompresor"
@@ -846,106 +846,106 @@
                 "name": "Cel przegrzania"
             },
             "high_pressure": {
-                "name": "Wysokie ci\u015bnienie"
+                "name": "Wysokie ciśnienie"
             },
             "low_pressure": {
-                "name": "Niskie ci\u015bnienie"
+                "name": "Niskie ciśnienie"
             },
             "additional_heat_generator_operation_hours": {
-                "name": "Godziny pracy dodatkowego \u017a\u00f3d\u0142a ciep\u0142a"
+                "name": "Godziny pracy dodatkowego źódła ciepła"
             },
             "additional_heat_generator2_operation_hours": {
-                "name": "Godziny pracy dodatkowego \u017a\u00f3d\u0142a ciep\u0142a"
+                "name": "Godziny pracy dodatkowego źódła ciepła"
             },
             "analog_out1": {
-                "name": "Wyj\u015bcie analogowe 1"
+                "name": "Wyjście analogowe 1"
             },
             "analog_out2": {
-                "name": "Wyj\u015bcie analogowe 2"
+                "name": "Wyjście analogowe 2"
             },
             "current_heat_output": {
                 "name": "Aktualna moc cieplna"
             },
             "additional_heat_generator_energy_p1059": {
-                "name": "Ilo\u015b\u0107 ciep\u0142a dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a (firmware przed x.88)"
+                "name": "Ilość ciepła dodatkowego źródła ciepła (firmware przed x.88)"
             },
             "additional_heat_generator_energy": {
-                "name": "Ilo\u015b\u0107 ciep\u0142a dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a"
+                "name": "Ilość ciepła dodatkowego źródła ciepła"
             },
             "heat_source_output_temperature": {
-                "name": "Moc \u017ar\u00f3d\u0142a ciep\u0142a"
+                "name": "Moc źródła ciepła"
             },
             "pump_frequency": {
-                "name": "Cz\u0119stotliwo\u015b\u0107 pompy"
+                "name": "Częstotliwość pompy"
             },
             "domestic_water": {
-                "name": "Ciep\u0142a woda"
+                "name": "Ciepła woda"
             },
             "dhw_temperature": {
-                "name": "Temperatura ciep\u0142ej wody"
+                "name": "Temperatura ciepłej wody"
             },
             "dhw_operation_hours": {
-                "name": "Godziny pracy ciep\u0142ej wody"
+                "name": "Godziny pracy ciepłej wody"
             },
             "dhw_heat_amount": {
-                "name": "Ilo\u015b\u0107 ciep\u0142a ciep\u0142ej wody"
+                "name": "Ilość ciepła ciepłej wody"
             },
             "dhw_energy_input": {
-                "name": "Pob\u00f3r energii ciep\u0142ej wody"
+                "name": "Pobór energii ciepłej wody"
             },
             "cop_dhw": {
                 "name": "COP"
             },
             "flow_in_temperature": {
-                "name": "Temperatura na wej\u015bciu"
+                "name": "Temperatura na wejściu"
             },
             "flow_in_circuit1_temperature": {
-                "name": "Obw\u00f3d temperatury wlotowej 1"
+                "name": "Obwód temperatury wlotowej 1"
             },
             "flow_in_circuit2_temperature": {
-                "name": "Obw\u00f3d temperatury wlotowej 2"
+                "name": "Obwód temperatury wlotowej 2"
             },
             "flow_in_circuit3_temperature": {
-                "name": "Obw\u00f3d temperatury wlotowej 3"
+                "name": "Obwód temperatury wlotowej 3"
             },
             "flow_in_circuit1_target_temperature": {
-                "name": "Obw\u00f3d docelowej temperatury na wlocie 1"
+                "name": "Obwód docelowej temperatury na wlocie 1"
             },
             "flow_in_circuit2_target_temperature": {
-                "name": "Obw\u00f3d docelowej temperatury na wlocie 2"
+                "name": "Obwód docelowej temperatury na wlocie 2"
             },
             "flow_in_circuit3_target_temperature": {
-                "name": "Obw\u00f3d docelowej temperatury na wlocie 3"
+                "name": "Obwód docelowej temperatury na wlocie 3"
             },
             "flow_out_temperature": {
-                "name": "Temperatura na wyj\u015bciu"
+                "name": "Temperatura na wyjściu"
             },
             "flow_out_temperature_target": {
-                "name": "Docelowa temperatura na wyj\u015bciu"
+                "name": "Docelowa temperatura na wyjściu"
             },
             "operation_hours_heating": {
                 "name": "Godziny pracy ogrzewania"
             },
             "heat_amount_heating": {
-                "name": "Ilo\u015b\u0107 ciep\u0142a grzewczego"
+                "name": "Ilość ciepła grzewczego"
             },
             "pool_heat_amount": {
                 "name": "Ilość ciepła basenu"
             },
             "heat_amount_flow_rate": {
-                "name": "Nat\u0119\u017cenie przep\u0142ywu ilo\u015bci ciep\u0142a grzewczego"
+                "name": "Natężenie przepływu ilości ciepła grzewczego"
             },
             "heat_source_flow_rate": {
-                "name": "Nat\u0119\u017cenie przep\u0142ywu \u017ar\u00f3d\u0142a ciep\u0142a grzewczego"
+                "name": "Natężenie przepływu źródła ciepła grzewczego"
             },
             "heat_energy_input": {
-                "name": "Ogrzewanie wej\u015bciowe energii"
+                "name": "Ogrzewanie wejściowe energii"
             },
             "cop_heating": {
                 "name": "COP"
             },
             "flow_out_temperature_external": {
-                "name": "Zewn\u0119trzna temperatura na wyj\u015bciu"
+                "name": "Zewnętrzna temperatura na wyjściu"
             },
             "solar_collector_temperature": {
                 "name": "Kolektor solarny"
@@ -957,7 +957,7 @@
                 "name": "Godziny pracy trybu solarnego"
             },
             "operation_hours_cooling": {
-                "name": "Godziny pracy ch\u0142odzenia"
+                "name": "Godziny pracy chłodzenia"
             },
             "room_thermostat_temperature": {
                 "name": "Temperatura termostatu pokojowego"
@@ -966,16 +966,16 @@
                 "name": "Temperatura docelowa termostatu pokojowego"
             },
             "cooling_energy_input": {
-                "name": "Energia zu\u017cyta na ch\u0142odzenie"
+                "name": "Energia zużyta na chłodzenie"
             },
             "pool_energy_input": {
                 "name": "Energia zużyta na basen"
             },
             "current_power_consumption": {
-                "name": "Pob\u00f3r mocy"
+                "name": "Pobór mocy"
             },
             "additional_heat_generator_energy_p1140": {
-                "name": "Ilo\u015b\u0107 ciep\u0142a dodatkowego \u017ar\u00f3d\u0142a ciep\u0142a (firmware x.88 i nowszy)"
+                "name": "Ilość ciepła dodatkowego źródła ciepła (firmware x.88 i nowszy)"
             },
             "circulation_pump_delta": {
                 "name": "Cyrkulacyjna pompdelta"
@@ -984,10 +984,10 @@
                 "name": "Cyrkulacyjna pompdelta docelowa"
             },
             "pump_flow_delta": {
-                "name": "Delta przep\u0142ywu pompy"
+                "name": "Delta przepływu pompy"
             },
             "pump_flow_delta_target": {
-                "name": "Delta docelowa przep\u0142ywu pompy"
+                "name": "Delta docelowa przepływu pompy"
             },
             "ventilation_supply_air_temperature": {
                 "name": "Temperatura powietrza nawiewanego"
@@ -1016,51 +1016,51 @@
         },
         "date": {
             "away_dhw_startdate": {
-                "name": "Data rozpocz\u0119cia trybu nieobecno\u015bci - ciep\u0142a woda"
+                "name": "Data rozpoczęcia trybu nieobecności - ciepła woda"
             },
             "away_dhw_enddate": {
-                "name": "Data zako\u0144czenia trybu nieobecno\u015bci - ciep\u0142a woda"
+                "name": "Data zakończenia trybu nieobecności - ciepła woda"
             },
             "away_heating_startdate": {
-                "name": "Data rozpocz\u0119cia trybu nieobecno\u015bci - ogrzewanie"
+                "name": "Data rozpoczęcia trybu nieobecności - ogrzewanie"
             },
             "away_heating_enddate": {
-                "name": "Data zako\u0144czenia trybu nieobecno\u015bci - ogrzewanie"
+                "name": "Data zakończenia trybu nieobecności - ogrzewanie"
             }
         },
         "text": {
             "timer_dhw_schedule_week": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (tydzie\u0144)"
+                "name": "Harmonogram czasowy ciepłej wody (tydzień)"
             },
             "timer_dhw_schedule_weekday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (dni robocze)"
+                "name": "Harmonogram czasowy ciepłej wody (dni robocze)"
             },
             "timer_dhw_schedule_weekend": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (weekend)"
+                "name": "Harmonogram czasowy ciepłej wody (weekend)"
             },
             "timer_dhw_schedule_monday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (poniedzia\u0142ek)"
+                "name": "Harmonogram czasowy ciepłej wody (poniedziałek)"
             },
             "timer_dhw_schedule_tuesday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (wtorek)"
+                "name": "Harmonogram czasowy ciepłej wody (wtorek)"
             },
             "timer_dhw_schedule_wednesday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (\u015broda)"
+                "name": "Harmonogram czasowy ciepłej wody (środa)"
             },
             "timer_dhw_schedule_thursday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (czwartek)"
+                "name": "Harmonogram czasowy ciepłej wody (czwartek)"
             },
             "timer_dhw_schedule_friday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (pi\u0105tek)"
+                "name": "Harmonogram czasowy ciepłej wody (piątek)"
             },
             "timer_dhw_schedule_saturday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (sobota)"
+                "name": "Harmonogram czasowy ciepłej wody (sobota)"
             },
             "timer_dhw_schedule_sunday": {
-                "name": "Harmonogram czasowy ciep\u0142ej wody (niedziela)"
+                "name": "Harmonogram czasowy ciepłej wody (niedziela)"
             },
             "timer_heating_schedule_week": {
-                "name": "Harmonogram czasowy ogrzewania (tydzie\u0144)"
+                "name": "Harmonogram czasowy ogrzewania (tydzień)"
             },
             "timer_heating_schedule_weekday": {
                 "name": "Harmonogram czasowy ogrzewania (dni robocze)"
@@ -1069,19 +1069,19 @@
                 "name": "Harmonogram czasowy ogrzewania (weekend)"
             },
             "timer_heating_schedule_monday": {
-                "name": "Harmonogram czasowy ogrzewania (poniedzia\u0142ek)"
+                "name": "Harmonogram czasowy ogrzewania (poniedziałek)"
             },
             "timer_heating_schedule_tuesday": {
                 "name": "Harmonogram czasowy ogrzewania (wtorek)"
             },
             "timer_heating_schedule_wednesday": {
-                "name": "Harmonogram czasowy ogrzewania (\u015broda)"
+                "name": "Harmonogram czasowy ogrzewania (środa)"
             },
             "timer_heating_schedule_thursday": {
                 "name": "Harmonogram czasowy ogrzewania (czwartek)"
             },
             "timer_heating_schedule_friday": {
-                "name": "Harmonogram czasowy ogrzewania (pi\u0105tek)"
+                "name": "Harmonogram czasowy ogrzewania (piątek)"
             },
             "timer_heating_schedule_saturday": {
                 "name": "Harmonogram czasowy ogrzewania (sobota)"
@@ -1090,7 +1090,7 @@
                 "name": "Harmonogram czasowy ogrzewania (niedziela)"
             },
             "timer_ventilation_schedule_week": {
-                "name": "Harmonogram czasowy wentylacji (tydzie\u0144)"
+                "name": "Harmonogram czasowy wentylacji (tydzień)"
             },
             "timer_ventilation_schedule_weekday": {
                 "name": "Harmonogram czasowy wentylacji (dni robocze)"
@@ -1099,19 +1099,19 @@
                 "name": "Harmonogram czasowy wentylacji (weekend)"
             },
             "timer_ventilation_schedule_monday": {
-                "name": "Harmonogram czasowy wentylacji (poniedzia\u0142ek)"
+                "name": "Harmonogram czasowy wentylacji (poniedziałek)"
             },
             "timer_ventilation_schedule_tuesday": {
                 "name": "Harmonogram czasowy wentylacji (wtorek)"
             },
             "timer_ventilation_schedule_wednesday": {
-                "name": "Harmonogram czasowy wentylacji (\u015broda)"
+                "name": "Harmonogram czasowy wentylacji (środa)"
             },
             "timer_ventilation_schedule_thursday": {
                 "name": "Harmonogram czasowy wentylacji (czwartek)"
             },
             "timer_ventilation_schedule_friday": {
-                "name": "Harmonogram czasowy wentylacji (pi\u0105tek)"
+                "name": "Harmonogram czasowy wentylacji (piątek)"
             },
             "timer_ventilation_schedule_saturday": {
                 "name": "Harmonogram czasowy wentylacji (sobota)"
@@ -1122,25 +1122,25 @@
         },
         "select": {
             "thermal_desinfection_day": {
-                "name": "Dzie\u0144 dezynfekcji termicznej",
+                "name": "Dzień dezynfekcji termicznej",
                 "state": {
                     "none": "Brak",
-                    "monday": "Poniedzia\u0142ek",
+                    "monday": "Poniedziałek",
                     "tuesday": "Wtorek",
-                    "wednesday": "\u015aroda",
+                    "wednesday": "Środa",
                     "thursday": "Czwartek",
-                    "friday": "Pi\u0105tek",
+                    "friday": "Piątek",
                     "saturday": "Sobota",
                     "sunday": "Niedziela",
-                    "continuous": "Ci\u0105g\u0142y"
+                    "continuous": "Ciągły"
                 }
             },
             "heating_control_circuit_mode": {
                 "name": "Tryb sterowania obiegiem grzewczym",
                 "state": {
-                    "0": "Sterowanie krzyw\u0105 grzewcz\u0105 - wed\u0142ug temperatury zewn\u0119trznej",
-                    "1": "R\u0119cznie ustawiona temperatura",
-                    "2": "Wej\u015bcie analogowe"
+                    "0": "Sterowanie krzywą grzewczą - według temperatury zewnętrznej",
+                    "1": "Ręcznie ustawiona temperatura",
+                    "2": "Wejście analogowe"
                 }
             },
             "timer_dhw_program": {
@@ -1171,8 +1171,8 @@
                 "name": "Tryb PV",
                 "state": {
                     "automatic": "Automatyczny",
-                    "pv_off": "PV wy\u0142\u0105czony",
-                    "pool_off": "Basen wy\u0142\u0105czony",
+                    "pv_off": "PV wyłączony",
+                    "pool_off": "Basen wyłączony",
                     "pool_party": "Impreza basenowa",
                     "pool_holidays": "Wakacje basenowe"
                 }
@@ -1180,19 +1180,19 @@
             "heating_mode": {
                 "name": "Tryb ogrzewania",
                 "state": {
-                    "off": "Wy\u0142\u0105czony",
+                    "off": "Wyłączony",
                     "automatic": "Automatyczny",
-                    "second_heatsource": "Drugie \u017ar\u00f3d\u0142o ciep\u0142a",
+                    "second_heatsource": "Drugie źródło ciepła",
                     "party": "Tryb imprezowy",
                     "holidays": "Tryb wakacyjny"
                 }
             },
             "dhw_mode": {
-                "name": "Tryb ciep\u0142ej wody",
+                "name": "Tryb ciepłej wody",
                 "state": {
-                    "off": "Wy\u0142\u0105czony",
+                    "off": "Wyłączony",
                     "automatic": "Automatyczny",
-                    "second_heatsource": "Drugie \u017ar\u00f3d\u0142o ciep\u0142a",
+                    "second_heatsource": "Drugie źródło ciepła",
                     "party": "Tryb imprezowy",
                     "holidays": "Tryb wakacyjny"
                 }
@@ -1200,7 +1200,7 @@
             "heating_mode_mk1": {
                 "name": "Tryb ogrzewania MK1",
                 "state": {
-                    "off": "Wy\u0142\u0105czony",
+                    "off": "Wyłączony",
                     "automatic": "Automatyczny",
                     "party": "Tryb imprezowy",
                     "holidays": "Tryb wakacyjny"
@@ -1209,7 +1209,7 @@
             "heating_mode_mk2": {
                 "name": "Tryb ogrzewania MK2",
                 "state": {
-                    "off": "Wy\u0142\u0105czony",
+                    "off": "Wyłączony",
                     "automatic": "Automatyczny",
                     "party": "Tryb imprezowy",
                     "holidays": "Tryb wakacyjny"
@@ -1218,7 +1218,7 @@
             "heating_mode_mk3": {
                 "name": "Tryb ogrzewania MK3",
                 "state": {
-                    "off": "Wy\u0142\u0105czony",
+                    "off": "Wyłączony",
                     "automatic": "Automatyczny",
                     "party": "Tryb imprezowy",
                     "holidays": "Tryb wakacyjny"
@@ -1239,27 +1239,27 @@
                 "name": "Ogrzewanie"
             },
             "cooling_controller": {
-                "name": "Ch\u0142odzenie"
+                "name": "Chłodzenie"
             }
         },
         "water_heater": {
             "domestic_water": {
-                "name": "Ciep\u0142a woda"
+                "name": "Ciepła woda"
             }
         }
     },
     "device": {
         "heatpump": {
-            "name": "Pompa ciep\u0142a"
+            "name": "Pompa ciepła"
         },
         "heating": {
             "name": "Ogrzewanie"
         },
         "domestic_water": {
-            "name": "Ciep\u0142a woda"
+            "name": "Ciepła woda"
         },
         "cooling": {
-            "name": "Ch\u0142odzenie"
+            "name": "Chłodzenie"
         },
         "ventilation": {
             "name": "Wentylacja"
@@ -1267,30 +1267,30 @@
     },
     "config": {
         "abort": {
-            "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107 z Luxtronik pod adresem {host}.\\nB\u0142\u0105d: {connect_error}",
-            "cannot_identify": "Po\u0142\u0105czono z urz\u0105dzeniem pod adresem {host}, ale nie uda\u0142o si\u0119 odczyta\u0107 jego numeru seryjnego w celu identyfikacji.\\nB\u0142\u0105d: {error}",
-            "already_configured": "To urz\u0105dzenie jest ju\u017c skonfigurowane.",
-            "already_configured_serial": "Pompa ciep\u0142a pod adresem {host} zg\u0142asza numer seryjny {serial}, kt\u00f3ry jest ju\u017c skonfigurowany jako {existing_title} ({existing_host}). Oba adresy prowadz\u0105 do tej samej pompy ciep\u0142a - je\u015bli spodziewano si\u0119 dw\u00f3ch osobnych urz\u0105dze\u0144, sprawd\u017a przekierowanie port\u00f3w pod k\u0105tem duplikat\u00f3w.",
-            "reconfigure_successful": "Konfiguracja zosta\u0142a pomy\u015blnie zaktualizowana.",
-            "unique_id_mismatch": "Urz\u0105dzenie pod nowym adresem ma inn\u0105 to\u017csamo\u015b\u0107 ni\u017c aktualnie skonfigurowane urz\u0105dzenie.",
-            "already_in_progress": "Proces konfiguracji jest ju\u017c w toku.",
-            "devices_configured": "Wszystkie wybrane urz\u0105dzenia s\u0105 ju\u017c skonfigurowane.",
-            "options_error": "Wyst\u0105pi\u0142 b\u0142\u0105d podczas \u0142adowania opcji.",
-            "no_devices_found": "Nie znaleziono \u017cadnych urz\u0105dze\u0144 w sieci.",
-            "single_instance_allowed": "Ju\u017c skonfigurowano. Dozwolona jest tylko jedna instancja.",
-            "unknown": "Nieznany b\u0142\u0105d."
+            "cannot_connect": "Nie udało się połączyć z Luxtronik pod adresem {host}.\\nBłąd: {connect_error}",
+            "cannot_identify": "Połączono z urządzeniem pod adresem {host}, ale nie udało się odczytać jego numeru seryjnego w celu identyfikacji.\\nBłąd: {error}",
+            "already_configured": "To urządzenie jest już skonfigurowane.",
+            "already_configured_serial": "Pompa ciepła pod adresem {host} zgłasza numer seryjny {serial}, który jest już skonfigurowany jako {existing_title} ({existing_host}). Oba adresy prowadzą do tej samej pompy ciepła - jeśli spodziewano się dwóch osobnych urządzeń, sprawdź przekierowanie portów pod kątem duplikatów.",
+            "reconfigure_successful": "Konfiguracja została pomyślnie zaktualizowana.",
+            "unique_id_mismatch": "Urządzenie pod nowym adresem ma inną tożsamość niż aktualnie skonfigurowane urządzenie.",
+            "already_in_progress": "Proces konfiguracji jest już w toku.",
+            "devices_configured": "Wszystkie wybrane urządzenia są już skonfigurowane.",
+            "options_error": "Wystąpił błąd podczas ładowania opcji.",
+            "no_devices_found": "Nie znaleziono żadnych urządzeń w sieci.",
+            "single_instance_allowed": "Już skonfigurowano. Dozwolona jest tylko jedna instancja.",
+            "unknown": "Nieznany błąd."
         },
         "error": {
-            "address": "Nieprawid\u0142owy adres zdalny. Adres musi by\u0107 adresem IP lub rozpoznawaln\u0105 nazw\u0105 hosta.",
-            "address_in_use": "Wybrany port jest ju\u017c u\u017cywany w tym systemie.",
-            "cannot_connect": "Po\u0142\u0105czenie nie powiod\u0142o si\u0119. Sprawd\u017a host i port.",
-            "cannot_identify": "Po\u0142\u0105czono z urz\u0105dzeniem, ale nie uda\u0142o si\u0119 odczyta\u0107 jego numeru seryjnego w celu identyfikacji.",
-            "unknown": "Nieoczekiwany b\u0142\u0105d"
+            "address": "Nieprawidłowy adres zdalny. Adres musi być adresem IP lub rozpoznawalną nazwą hosta.",
+            "address_in_use": "Wybrany port jest już używany w tym systemie.",
+            "cannot_connect": "Połączenie nie powiodło się. Sprawdź host i port.",
+            "cannot_identify": "Połączono z urządzeniem, ale nie udało się odczytać jego numeru seryjnego w celu identyfikacji.",
+            "unknown": "Nieoczekiwany błąd"
         },
         "step": {
             "user": {
-                "title": "Instalacja pompy ciep\u0142a Luxtronik",
-                "description": "Wykryte urz\u0105dzenia ju\u017c skonfigurowane: {configured}",
+                "title": "Instalacja pompy ciepła Luxtronik",
+                "description": "Wykryte urządzenia już skonfigurowane: {configured}",
                 "data": {
                     "host": "Host",
                     "port": "Network Port",
@@ -1300,35 +1300,35 @@
                 "data_description": {
                     "host": "Nazwa hosta lub adres IP",
                     "port": "Zwykle 8889 lub 8888",
-                    "timeout": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 limit czasu.",
-                    "max_data_length": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 d\u0142ugo\u015b\u0107 pakietu danych."
+                    "timeout": "Jeśli sieć lub pompa ciepła działa wolno, można dostosować limit czasu.",
+                    "max_data_length": "Jeśli sieć lub pompa ciepła działa wolno, można dostosować długość pakietu danych."
                 }
             },
             "manual_entry": {
-                "title": "R\u0119czna konfiguracja Luxtronik",
-                "description": "Nie znaleziono nowych urz\u0105dze\u0144 lub wszystkie wykryte urz\u0105dzenia s\u0105 ju\u017c skonfigurowane. Mo\u017cesz r\u0119cznie wprowadzi\u0107 hosta i port."
+                "title": "Ręczna konfiguracja Luxtronik",
+                "description": "Nie znaleziono nowych urządzeń lub wszystkie wykryte urządzenia są już skonfigurowane. Możesz ręcznie wprowadzić hosta i port."
             },
             "select_devices": {
-                "title": "Wybierz urz\u0105dzenia do skonfigurowania",
-                "description": "Wybierz jedno lub wi\u0119cej urz\u0105dze\u0144 do dodania. Ju\u017c skonfigurowane urz\u0105dzenia: {configured}",
+                "title": "Wybierz urządzenia do skonfigurowania",
+                "description": "Wybierz jedno lub więcej urządzeń do dodania. Już skonfigurowane urządzenia: {configured}",
                 "data": {
-                    "select_device_to_configure": "Wybierz urz\u0105dzenie, kt\u00f3re chcesz skonfigurowa\u0107"
+                    "select_device_to_configure": "Wybierz urządzenie, które chcesz skonfigurować"
                 }
             },
             "reconfigure": {
-                "title": "Rekonfiguracja po\u0142\u0105czenia Luxtronik",
-                "description": "Zaktualizuj ustawienia po\u0142\u0105czenia dla pompy ciep\u0142a Luxtronik.",
+                "title": "Rekonfiguracja połączenia Luxtronik",
+                "description": "Zaktualizuj ustawienia połączenia dla pompy ciepła Luxtronik.",
                 "data": {
                     "host": "Host",
                     "port": "Port sieciowy",
                     "timeout": "Limit czasu gniazda sieciowego (s)",
-                    "max_data_length": "Maksymalna d\u0142ugo\u015b\u0107 pakietu danych"
+                    "max_data_length": "Maksymalna długość pakietu danych"
                 },
                 "data_description": {
                     "host": "Nazwa hosta lub adres IP",
                     "port": "Zwykle 8889 lub 8888",
-                    "timeout": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 limit czasu.",
-                    "max_data_length": "Je\u015bli sie\u0107 lub pompa ciep\u0142a dzia\u0142a wolno, mo\u017cna dostosowa\u0107 d\u0142ugo\u015b\u0107 pakietu danych."
+                    "timeout": "Jeśli sieć lub pompa ciepła działa wolno, można dostosować limit czasu.",
+                    "max_data_length": "Jeśli sieć lub pompa ciepła działa wolno, można dostosować długość pakietu danych."
                 }
             }
         }
@@ -1337,47 +1337,47 @@
         "step": {
             "user": {
                 "title": "Skonfiguruj opcje dla {name}",
-                "description": "Ustawienia dla pompy ciep\u0142a Luxtronik {name}.",
+                "description": "Ustawienia dla pompy ciepła Luxtronik {name}.",
                 "data": {
-                    "ha_sensor_indoor_temperature": "ID czujnika temperatury wewn\u0119trznej",
-                    "ha_sensor_current_power_consumption": "ID czujnika bie\u017c\u0105cego poboru mocy",
-                    "update_interval": "Interwa\u0142 aktualizacji"
+                    "ha_sensor_indoor_temperature": "ID czujnika temperatury wewnętrznej",
+                    "ha_sensor_current_power_consumption": "ID czujnika bieżącego poboru mocy",
+                    "update_interval": "Interwał aktualizacji"
                 },
                 "data_description": {
-                    "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJe\u015bli Luxtronik jest pod\u0142\u0105czony do sprz\u0119towego termostatu pokojowego, pozostaw to pole puste.",
-                    "ha_sensor_current_power_consumption": "Je\u015bli wbudowany pomiar bie\u017c\u0105cego poboru mocy pompy ciep\u0142a jest niedok\u0142adny, do oblicze\u0144 COP (ogrzewanie/CWU) mo\u017cna zamiast tego u\u017cy\u0107 zewn\u0119trznego czujnika mocy Home Assistant (np. inteligentnego gniazdka). Nie zmienia to warto\u015bci wy\u015bwietlanej przez sam czujnik bie\u017c\u0105cego poboru mocy.\nPozostaw puste, aby u\u017cywa\u0107 wbudowanego pomiaru pompy ciep\u0142a.",
-                    "update_interval": "Jak cz\u0119sto odpytywa\u0107 pomp\u0119 ciep\u0142a o nowe dane."
+                    "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJeśli Luxtronik jest podłączony do sprzętowego termostatu pokojowego, pozostaw to pole puste.",
+                    "ha_sensor_current_power_consumption": "Jeśli wbudowany pomiar bieżącego poboru mocy pompy ciepła jest niedokładny, do obliczeń COP (ogrzewanie/CWU) można zamiast tego użyć zewnętrznego czujnika mocy Home Assistant (np. inteligentnego gniazdka). Nie zmienia to wartości wyświetlanej przez sam czujnik bieżącego poboru mocy.\nPozostaw puste, aby używać wbudowanego pomiaru pompy ciepła.",
+                    "update_interval": "Jak często odpytywać pompę ciepła o nowe dane."
                 }
             }
         }
     },
     "exceptions": {
         "invalid_parameter_name": {
-            "message": "Nieprawid\u0142owa nazwa parametru: {parameter}"
+            "message": "Nieprawidłowa nazwa parametru: {parameter}"
         },
         "parameter_not_writable": {
-            "message": "Parametr {parameter} odrzucony \u2014 tylko parametry z prefiksami {prefixes} s\u0105 zapisywalne"
+            "message": "Parametr {parameter} odrzucony — tylko parametry z prefiksami {prefixes} są zapisywalne"
         },
         "ambiguous_write_target": {
-            "message": "Skonfigurowano wi\u0119cej ni\u017c jedn\u0105 pomp\u0119 ciep\u0142a Luxtronik ({count} za\u0142adowanych) \u2014 podaj device_id lub config_entry_id, aby wybra\u0107 cel zapisu"
+            "message": "Skonfigurowano więcej niż jedną pompę ciepła Luxtronik ({count} załadowanych) — podaj device_id lub config_entry_id, aby wybrać cel zapisu"
         },
         "invalid_write_target": {
-            "message": "Nie uda\u0142o si\u0119 znale\u017a\u0107 za\u0142adowanej pompy ciep\u0142a Luxtronik dla celu {target}"
+            "message": "Nie udało się znaleźć załadowanej pompy ciepła Luxtronik dla celu {target}"
         },
         "invalid_timer_schedule": {
-            "message": "Nieprawid\u0142owy harmonogram czasowy \"{value}\": oczekiwane s\u0105 wpisy \"HH:MM-HH:MM\" oddzielone znakiem \"/\", maksymalnie {max_rows} wpis\u00f3w"
+            "message": "Nieprawidłowy harmonogram czasowy \"{value}\": oczekiwane są wpisy \"HH:MM-HH:MM\" oddzielone znakiem \"/\", maksymalnie {max_rows} wpisów"
         },
         "write_confirmation_mismatch": {
-            "message": "Pompa ciep\u0142a Luxtronik nie potwierdzi\u0142a zapisanych warto\u015bci: {details}"
+            "message": "Pompa ciepła Luxtronik nie potwierdziła zapisanych wartości: {details}"
         },
         "write_confirmation_unavailable": {
-            "message": "Zapisano {parameters} do pompy ciep\u0142a Luxtronik, ale od\u015bwie\u017cenie potwierdzaj\u0105ce nie powiod\u0142o si\u0119 \u2014 wyniku nie uda\u0142o si\u0119 potwierdzi\u0107"
+            "message": "Zapisano {parameters} do pompy ciepła Luxtronik, ale odświeżenie potwierdzające nie powiodło się — wyniku nie udało się potwierdzić"
         }
     },
     "issues": {
         "connection_failed": {
-            "title": "Nie mo\u017cna po\u0142\u0105czy\u0107 si\u0119 z pomp\u0105 ciep\u0142a Luxtronik",
-            "description": "Integracja nie mog\u0142a po\u0142\u0105czy\u0107 si\u0119 z pomp\u0105 ciep\u0142a Luxtronik pod adresem **{host}:{port}**.\n\nB\u0142\u0105d: `{error}`\n\nSprawd\u017a, czy pompa ciep\u0142a jest w\u0142\u0105czona, po\u0142\u0105czenie sieciowe dzia\u0142a, a host/port s\u0105 poprawne. Mo\u017cesz zaktualizowa\u0107 ustawienia po\u0142\u0105czenia za pomoc\u0105 opcji **Rekonfiguruj** w menu integracji."
+            "title": "Nie można połączyć się z pompą ciepła Luxtronik",
+            "description": "Integracja nie mogła połączyć się z pompą ciepła Luxtronik pod adresem **{host}:{port}**.\n\nBłąd: `{error}`\n\nSprawdź, czy pompa ciepła jest włączona, połączenie sieciowe działa, a host/port są poprawne. Możesz zaktualizować ustawienia połączenia za pomocą opcji **Rekonfiguruj** w menu integracji."
         }
     }
 }
