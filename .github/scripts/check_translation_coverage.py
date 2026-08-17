@@ -5,6 +5,7 @@ import ast
 import json
 import logging
 from pathlib import Path
+import re
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -13,6 +14,12 @@ TRANS_DIR = ENTITY_DIR / "translations"
 CONST_FILE = ENTITY_DIR / "const.py"
 
 LANG_FILES = ["en.json", "de.json", "cs.json", "nl.json", "pl.json"]
+
+# An *effective* JSON \uXXXX escape: one whose backslash is not itself escaped.
+# "\\u0041" is an escaped backslash followed by the literal text u0041, not an
+# escape, so the run of backslashes is anchored and counted rather than just
+# looked behind.
+ASCII_ESCAPE = re.compile(r"(?<!\\)(?:\\\\)*\\u[0-9a-fA-F]{4}")
 
 ENTITY_CHECKS = [
     ("number_entities_predefined.py", "number"),
@@ -245,6 +252,33 @@ def find_device_translation_problems() -> list[str]:
     return problems
 
 
+def find_ascii_escaped_files() -> list[str]:
+    """Check that no language file spells non-ASCII characters as \\uXXXX escapes.
+
+    Home Assistant's hand-authored translation source, core's strings.json, is
+    plain UTF-8; the escaped translations/*.json shipped with core are Lokalise
+    build artifacts. This integration has no strings.json, so these files are
+    the authored source and follow the authored-source convention:
+    "Wärmemenge" is readable in a review diff, "W\\u00e4rmemenge" is not.
+
+    Both spellings parse to the same string, so nothing catches the drift at
+    runtime: it creeps back whenever a string is pasted from a tool that
+    defaults to `json.dump(..., ensure_ascii=True)`, and the next full rewrite
+    then churns every line in the file.
+    """
+    problems: list[str] = []
+    for lang_file in LANG_FILES:
+        raw = (TRANS_DIR / lang_file).read_text(encoding="utf-8")
+        matches = list(ASCII_ESCAPE.finditer(raw))
+        if matches:
+            line = raw.count("\n", 0, matches[0].start()) + 1
+            problems.append(
+                f"[{lang_file}] {len(matches)} \\uXXXX escape(s), first on line"
+                f" {line} ({matches[0].group(0)}) - write the character itself"
+            )
+    return problems
+
+
 def find_exceptions_translation_problems() -> list[str]:
     """Check that every top-level `exceptions.<key>.message` in en.json also
     exists (non-empty) in every other language file.
@@ -283,6 +317,7 @@ if __name__ == "__main__":
         + find_state_key_mismatches()
         + find_device_translation_problems()
         + find_exceptions_translation_problems()
+        + find_ascii_escaped_files()
     )
     if not all_problems:
         LOG.info("All translation files have complete coverage!")

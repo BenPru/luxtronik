@@ -1,0 +1,8 @@
+# Revisions that only reformat, so `git blame` should look straight through
+# them. GitHub honours this file automatically; locally, enable it once with:
+#
+#     git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style(translations): spell non-ascii characters literally in all language files
+# Replaced every \uXXXX escape in cs/de/en/nl/pl.json with the character itself.
+444472f16e8df9efe0aa2affb65779f3cf17031c

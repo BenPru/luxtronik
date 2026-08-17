@@ -58,6 +58,23 @@ def test_state_and_state_attribute_codes_match_across_locales() -> None:
     assert not problems, "\n" + "\n".join(problems)
 
 
+def test_translation_files_use_literal_utf8() -> None:
+    """No language file may spell non-ASCII characters as \\uXXXX escapes.
+
+    Home Assistant's hand-authored translation source (core's strings.json) is
+    plain UTF-8; core's escaped translations/*.json are Lokalise build output.
+    These files are hand-authored - this integration has no strings.json - so
+    they follow the authored-source convention.
+
+    Both spellings parse to the same string, so nothing catches the drift at
+    runtime: it creeps in whenever a string is pasted from a tool defaulting to
+    `json.dump(..., ensure_ascii=True)`, and then a reviewer cannot read the
+    diff and the next full rewrite churns every line in the file.
+    """
+    problems = check_translation_coverage.find_ascii_escaped_files()
+    assert not problems, "\n" + "\n".join(problems)
+
+
 def test_device_names_are_translated_at_top_level() -> None:
     """Every DeviceKey must have a `device.<key>.name` translation at the top level
     of every language file, not nested under `entity.device`.

@@ -1038,7 +1038,7 @@ class SensorAttrKey(StrEnum):
     TIMER_HEATPUMP_ON = "WP Seit (ID_WEB_Time_WPein_akt)"
     TIMER_ADD_HEAT_GENERATOR_ON = "ZWE1 seit (ID_WEB_Time_ZWE1_akt)"
     TIMER_SEC_HEAT_GENERATOR_ON = "ZWE2 seit (ID_WEB_Time_ZWE2_akt)"
-    TIMER_NET_INPUT_DELAY = "Netzeinschaltverz\u00f6gerung (ID_WEB_Timer_EinschVerz)"
+    TIMER_NET_INPUT_DELAY = "Netzeinschaltverzögerung (ID_WEB_Timer_EinschVerz)"
     TIMER_SCB_OFF = "Schaltspielsperre Aus-Zeit (ID_WEB_Time_SSPAUS_akt)"
     TIMER_SCB_ON = "Schaltspielsperre Ein-Zeit (ID_WEB_Time_SSPEIN_akt)"
     TIMER_COMPRESSOR_OFF = "VD-Stand (ID_WEB_Time_VDStd_akt)"
