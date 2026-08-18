@@ -384,9 +384,20 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         entity_active_formula="!= 0.0",
         # Shares 1059's scale, by analogy rather than by measurement: it is
-        # the same physical element on the same controller, and no series-2
-        # unit has been seen with 1140 counting yet. Giving it its own scale
-        # would make a unit's total jump at the handover between the two.
+        # the same physical element on the same controller. Giving it its own
+        # scale would make a unit's total jump at the handover between the
+        # two.
+        #
+        # The analogy is not worth chasing further: across the diagnostics
+        # corpus 1140 counts only on series 3 (six units, V3.88.0 through
+        # V3.92.3) and reads exactly 0 on every series-1 and series-2 unit,
+        # while the handover itself was watched happening on one MSW4-16
+        # during V3.92.1 (0 -> 330 -> 841). So the register starting to count
+        # looks like series-3 firmware behaviour rather than something the
+        # older lines have yet to do, and `entity_active_formula` keeps the
+        # entity from existing at all while it reads 0 - a wrong series-1 or
+        # series-2 factor here cannot reach a user unless a generation that
+        # has never counted starts to.
         factor_by_firmware_series=AUX_HEATER_ENERGY_FACTOR_BY_SERIES,
         native_precision=1,
         # Despite the name this is not the second heat generator (ZWE2) - it
