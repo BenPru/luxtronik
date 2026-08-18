@@ -67,14 +67,23 @@ from .model import (
 #   series but not the minor: a change at x.88 rather than between generations
 #   would fit it equally well and would leave older series-2 firmware reading
 #   ten times low. Keyed on the series because a counter's scale is a property
-#   of the controller line, not of a register set; a pre-x.88 series-2 dump is
-#   the second thing to check for after a V1.x one (#752).
-# Series 1 - assumed to match series 2, never measured: there is no V1.x
-#   diagnostics dump in the corpus at all. A controller line that used 0.01 kWh
-#   on series 1, kept it on series 2 and changed to 0.1 on series 3 is a
-#   plausible history; one that used 0.1, switched to 0.01, then switched back
-#   is not. It also keeps series 1 inside the ID_Waermemenge_* family above.
-#   Still an assumption, and the one to revisit first - tracked in #752.
+#   of the controller line, not of a register set; a pre-x.88 series-2 dump
+#   is what to look for (#752).
+# Series 1 - assumed to match series 2, still not measured. Five V1.x units
+#   are in the corpus now (V1.73, V1.77, V1.88.3 x2, V1.90.0) and none of
+#   them settles it: 1059 reads 0 on every one that returns it, and V1.73
+#   does not return it at all - its parameter block stops at 1021. The WZS
+#   on V1.90.0 reads 0 against 3037 h of ZWE1 run time and a working heat
+#   meter, which points at series 1 never filling the counter rather than
+#   filling it in another unit. Those dumps do settle the family argument
+#   above: the ID_Waermemenge_* counters are 0.01 kWh on series 1 as well
+#   (P0854 6449260 against calculation 151 64492.6 on V1.73, same ratio on
+#   V1.88.3 and V1.90.0), so it now rests on a measurement rather than on
+#   symmetry. A controller line that used 0.01 kWh on series 1, kept it on
+#   series 2 and changed to 0.1 on series 3 is a plausible history; one that
+#   used 0.1, switched to 0.01, then switched back is not. Still an
+#   assumption, but it can only bite on a series-1 unit that populates 1059,
+#   and no such unit has been seen - tracked in #752.
 #
 # Listed exhaustively rather than as a single series-2 exception so that every
 # generation states its scale where it can be checked. A generation missing
