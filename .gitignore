@@ -140,3 +140,6 @@ check_coverage.py
 
 # Git worktrees (local scratch, not part of the repo)
 .worktrees/
+
+# Heat pump diagnostics dumps (re-downloadable from GitHub issues, kept local)
+diagnostics/
