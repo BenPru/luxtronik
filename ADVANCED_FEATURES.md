@@ -87,9 +87,27 @@ Home Assistant's built-in **Download diagnostics** action (from the integration'
 - every currently-known `parameter`, `calculation`, and `visibility` value read from the heat pump (name + raw value),
 - device info,
 - a partially-masked MAC address (only the vendor prefix is kept),
+- a `heatpump_id` standing in for your serial number (see below),
 - the integration's own **recent log records** (see below).
 
 This is the most useful thing to attach to a bug report or support request, since it captures the exact raw values the integration saw at that moment, without needing you to manually list them.
+
+### Serial number and `heatpump_id`
+
+Your heat pump's serial number is not included. It is replaced by `heatpump_id`, a short hash of it, and the places it would otherwise appear are handled two ways:
+
+- **Blanked** where the field holds nothing else: `unique_id`, the device `serial_number` and `identifiers`, and parameters 874/875. (Parameter 876 `ID_WP_SerienNummer_INDEX` is not part of the serial and stays readable.)
+- **Swapped for `heatpump_id`** where the serial is embedded in a longer string: your `ha_sensor_prefix` (`luxtronik_<serial>` becomes `luxtronik_<heatpump_id>`), the config entry title, and any entity ids quoted in the embedded log records. This keeps those strings cross-referenceable — a log line about `select.luxtronik_<heatpump_id>_mode` is still recognisably about the same entity.
+
+The same substitution runs over the whole download for your host/IP, so it is also removed from places that are easy to overlook: the entry title, the discovery record of a DHCP-discovered heat pump, and calculation 91 `ID_WEB_AdresseIP_akt` — the controller's own IP address, which it reports as an ordinary register. Calculations 92-94 (netmask, broadcast, gateway) are left as-is.
+
+Your own Device Information page still shows the real serial; only the downloadable file is affected.
+
+`heatpump_id` exists so dumps stay useful without the serial: the same unit always produces the same id, so several dumps can be recognised as coming from one heat pump, and two config entries can be told apart — which is what most register-level analysis depends on.
+
+It is `sha256(unique_id)` truncated to 10 hex characters, where `unique_id` is the serial lowercased with `-` replaced by `_` — serial `330123-0145` hashes as the string `330123_0145`. That exact spelling matters if you want to re-key an older dump (one produced before this change, which still carries the serial) so it matches a newer one.
+
+It is a pseudonym, not a secret. A serial is a six-digit date plus a short index, which is a small enough space that someone determined could enumerate it against the hash. This keeps the plate-readable number out of a file you attach to a public issue; it is not a cryptographic guarantee, and you should not treat it as one.
 
 ### Log records in diagnostics
 
