@@ -1049,6 +1049,89 @@ class TestAsyncWrite:
 
 class TestAsyncWriteMany:
     @pytest.mark.asyncio
+    async def test_batch_does_not_inherit_entries_left_by_an_earlier_failure(self):
+        """A batch owns the queue: whatever an earlier failed write left
+        behind must not ride along on this one.
+
+        `_write`'s own `finally` cannot cover every case - a `connect()`
+        failure (the common one when the controller is rebooting) raises
+        before `_write` is ever entered, so the previous batch's entries are
+        still queued when this one starts.
+        """
+        coord = _make_coordinator_direct()
+
+        queue: dict[Any, Any] = {"stale_param": 500}
+        coord.client.parameters.queue = queue
+        coord.client.parameters.set = lambda target, value: queue.__setitem__(
+            target, value
+        )
+        written_batches: list[dict[Any, Any]] = []
+        coord.client.write = lambda: written_batches.append(dict(queue))
+
+        async def run(fn, *args):
+            return fn(*args)
+
+        coord.hass.async_add_executor_job = AsyncMock(side_effect=run)
+
+        async def fake_refresh():
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, "06:00")},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        await coord.async_write_many([("p1", "06:00")])
+
+        assert written_batches == [{"p1": "06:00"}]
+
+    @pytest.mark.asyncio
+    async def test_concurrent_batches_do_not_clear_each_other(self):
+        """An automation touching several entities fires several overlapping
+        writes. Clearing the queue at the start of a batch must never discard
+        a *different* batch's pending parameters - the clear, the queueing and
+        the flush are one critical section under `self._lock`.
+        """
+        coord = _make_coordinator_direct()
+
+        queue: dict[Any, Any] = {}
+        coord.client.parameters.queue = queue
+        coord.client.parameters.set = lambda target, value: queue.__setitem__(
+            target, value
+        )
+        written_batches: list[dict[Any, Any]] = []
+        coord.client.write = lambda: written_batches.append(dict(queue))
+
+        async def run(fn, *args):
+            # Yield control so the two batches genuinely interleave; without
+            # the lock this is where one would clear the other's queue.
+            await asyncio.sleep(0)
+            return fn(*args)
+
+        coord.hass.async_add_executor_job = AsyncMock(side_effect=run)
+
+        async def fake_refresh():
+            coord.data = LuxtronikCoordinatorData(
+                parameters={"p1": (0, "06:00"), "p2": (0, "22:00")},
+                calculations={},
+                visibilities={},
+            )
+
+        coord.async_refresh = fake_refresh
+
+        await asyncio.gather(
+            coord.async_write_many([("p1", "06:00")]),
+            coord.async_write_many([("p2", "22:00")]),
+        )
+
+        # Each batch flushed exactly its own parameter, and neither was lost.
+        assert sorted(written_batches, key=lambda batch: sorted(batch)) == [
+            {"p1": "06:00"},
+            {"p2": "22:00"},
+        ]
+
+    @pytest.mark.asyncio
     async def test_queues_all_pairs_before_single_write_call(self):
         coord = _make_coordinator_direct()
         coord.hass.async_add_executor_job = AsyncMock()
