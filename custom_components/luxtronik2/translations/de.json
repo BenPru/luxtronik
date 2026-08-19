@@ -983,6 +983,9 @@
             "cooling_energy_input": {
                 "name": "Eingesetzte Energie Kühlung"
             },
+            "cooling_heat_amount": {
+                "name": "Wärmemenge Kühlung"
+            },
             "pool_energy_input": {
                 "name": "Eingesetzte Energie Schwimmbad"
             },

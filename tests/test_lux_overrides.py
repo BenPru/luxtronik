@@ -21,6 +21,7 @@ from custom_components.luxtronik2.const import (
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
     PARSED_COUNT_ATTR,
+    WRITABLE_PARAMETER_PREFIXES,
     LuxSwitchoffReason,
 )
 from custom_components.luxtronik2.model import LuxtronikCoordinatorData
@@ -315,6 +316,30 @@ class TestRecordParsedBlockLengths:
         assert getattr(Parameters(), PARSED_COUNT_ATTR, None) is None
 
 
+class TestInventedParameterNames:
+    """Every name invented here has to be reachable by the write service."""
+
+    def test_every_invented_name_is_writable(self):
+        """const.py documents this as a rule to be kept by hand, so a new
+        override with a custom name silently loses the ability to be written
+        until someone remembers the second edit. The names that upstream
+        supplies all start with ID_ or Unknown_Parameter_ and are covered by
+        prefixes already; only the invented ones need checking.
+        """
+        invented = {
+            datatype.name
+            for datatype in lux_overrides.parameters_to_add_update.values()
+            if not datatype.name.startswith(("ID_", "Unknown_Parameter_"))
+        }
+        assert invented
+        unreachable = {
+            name
+            for name in invented
+            if not name.startswith(WRITABLE_PARAMETER_PREFIXES)
+        }
+        assert unreachable == set()
+
+
 class TestUpstreamMaxDefinedIndex:
     def test_pins_the_installed_library_range(self):
         """The absence rule only fires above this index, so an upstream bump must
@@ -345,7 +370,7 @@ class TestUpstreamMaxDefinedIndex:
         assert key_exists(data, f"parameters.{short.parameters[1125].name}") is True
 
     def test_every_override_only_parameter_sits_above_the_range(self):
-        """The 14 indices that exist only because of lux_overrides are exactly the
+        """The 15 indices that exist only because of lux_overrides are exactly the
         ones the absence rule must be able to reach."""
         upstream_max = lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_PARAMETERS]
         override_only = {
@@ -354,6 +379,7 @@ class TestUpstreamMaxDefinedIndex:
             if index > upstream_max
         }
         assert override_only == {
+            1135,
             1136,
             1137,
             1138,

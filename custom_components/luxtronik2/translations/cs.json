@@ -968,6 +968,9 @@
             "cooling_energy_input": {
                 "name": "Spotřebovaná energie pro chlazení"
             },
+            "cooling_heat_amount": {
+                "name": "Množství tepla pro chlazení"
+            },
             "pool_energy_input": {
                 "name": "Spotřebovaná energie pro bazén"
             },

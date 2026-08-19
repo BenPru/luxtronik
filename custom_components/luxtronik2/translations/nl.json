@@ -980,6 +980,9 @@
             "cooling_energy_input": {
                 "name": "Gebruikte energie koeling"
             },
+            "cooling_heat_amount": {
+                "name": "Hoeveelheid warmte koeling"
+            },
             "pool_energy_input": {
                 "name": "Gebruikte energie zwembad"
             },

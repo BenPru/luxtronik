@@ -865,8 +865,50 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
         # 0.01 kWh raw unit, applied by the Energy2 datatype (see 1136 above).
-        # This one reads 0.0 on every unit examined in #734, so its scale
-        # follows its three siblings by analogy and is not itself measured.
+        # It read 0.0 on every unit examined in #734, so its scale rested on
+        # its three siblings until #752 measured it: 83272 counts against
+        # 832.7 kWh on the controller's own page.
+        #
+        # Gated for the same reason as 1135 below - the two move together, and
+        # on most cooling units neither one does.
+        entity_active_formula="!= 0.0",
+    ),
+    descr(
+        key=SensorKey.COOLING_HEAT_AMOUNT,
+        luxtronik_key=LP.P1135_COOLING_HEAT_AMOUNT,
+        device_key=DeviceKey.cooling,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_precision=2,
+        # The cooling half of the heat-quantity family, and the counterpart of
+        # 1139 above: the controller carries one on each of its Energie and
+        # Gebruikte energie pages. 0.01 kWh raw unit, applied by the Energy2
+        # datatype and measured on the #752 LD5, whose Energie page read
+        # 4103.8 kWh against 410381 counts at the moment of the dump. Two
+        # series-3 units in the diagnostics corpus put the same scale beyond a
+        # factor of ten - see test_implied_cooling_power_is_physical - which is
+        # why this register, unlike 1059, needs no per-series split.
+        #
+        # It sat as Unknown_Parameter_1135 because a unit that never cools
+        # reads 0 there.
+        #
+        # Having the cooling device is not enough to have these counters: of
+        # the 11 units in the diagnostics corpus with cooling operating hours,
+        # 8 read exactly 0 in both 1135 and 1139, one of them after 10647
+        # hours of cooling. Only units whose heat-source outlet sensor is
+        # absent (TWA -50, so no passive-cooling circuit) were seen counting,
+        # which fits the two registers measuring active cooling only - though
+        # the dumps cannot prove that mechanism, only the pattern. Without the
+        # formula most cooling installations gain two permanently-zero
+        # entities.
+        #
+        # The cost is that a unit which starts cooling later needs a reload
+        # before the entities appear, since entity_active is evaluated at
+        # setup. That is the same trade the pool counters make, and it buys
+        # the majority case.
+        entity_active_formula="!= 0.0",
     ),
     # endregion Cooling
     # region Pool

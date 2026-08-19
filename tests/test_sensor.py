@@ -859,9 +859,10 @@ class TestVentilationFanScaling:
 
 
 class TestEnergyInputScaling:
-    """Parameters 1136/1137/1139 count energy input in 0.01 kWh units, so the
-    Energy2 datatype they are registered with is the whole conversion and none
-    of the three descriptions carries a `factor`.
+    """The 0.01 kWh counter family - energy input on 1136/1137/1138/1139 and
+    cooling heat quantity on 1135 - is registered with the Energy2 datatype,
+    which is the whole conversion, so none of the descriptions carries a
+    `factor`.
 
     The scale was measured in #734, not read off upstream's "kWh/10" note
     (which claims /10 for these registers and is wrong): regressing the
@@ -891,6 +892,17 @@ class TestEnergyInputScaling:
 
     def test_cooling_energy_input_scaling(self):
         self._assert_raw_converts_to(SensorKey.COOLING_ENERGY_INPUT, 12345, 123.45)
+
+    def test_cooling_heat_amount_scaling(self):
+        """The reading that identified 1135: the #752 LD5 showed 410381 counts
+        against 4103.8 kWh on the controller's own Energie page, read alongside
+        the cooling energy input on the same unit. It had sat as
+        Unknown_Parameter_1135 because a unit that never cools reads 0 there.
+
+        The only display comparison for this register, but not the only
+        evidence - see test_implied_cooling_power_is_physical.
+        """
+        self._assert_raw_converts_to(SensorKey.COOLING_HEAT_AMOUNT, 410381, 4103.81)
 
     def test_pool_energy_input_scaling(self):
         """The only reading of 1138 there is: the #752 unit showed 113191
@@ -932,6 +944,59 @@ class TestEnergyInputScaling:
         ):
             cop = heat_kwh / self._converted_value(sensor_key, counts)
             assert 1.0 < cop < 8.0
+
+    def test_cooling_counters_are_gated_on_having_counted(self):
+        """Both cooling counters sit behind "!= 0.0" because most cooling
+        installations never move them. Of the 11 units in the diagnostics
+        corpus with cooling operating hours, 8 read exactly 0 in both
+        registers - one of them after 10647 hours of cooling - so without the
+        gate the majority of cooling-capable units gain two entities that can
+        only ever report zero.
+
+        The two are gated identically because they move together: no unit in
+        the corpus has one counting while the other stays at 0.
+        """
+        for key in (SensorKey.COOLING_HEAT_AMOUNT, SensorKey.COOLING_ENERGY_INPUT):
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.entity_active_formula == "!= 0.0"
+
+    def test_implied_cooling_power_is_physical(self):
+        """1135's scale is measured against a controller display on one unit
+        only, so this pins it from the other direction across every unit in
+        the diagnostics corpus whose cooling counters have moved - the LD5
+        that carries the display reading plus two series-3 machines, which is
+        what rules out the per-series split that 1059 turned out to need in
+        this same issue.
+
+        Dividing the cooling heat quantity by the cooling operating hours
+        gives the average thermal power the unit sustained over its whole
+        cooling life, which cannot approach its rated capacity - no machine
+        runs flat out every hour it is enabled. At 0.01 kWh per count the
+        three units give 1.5, 5.6 and 4.0 kW, ordinary domestic figures. At
+        0.1 they give 15.0, 55.9 and 40.4 kW sustained averages, beyond the
+        rated output of anything in the corpus.
+
+        A plausibility bound rather than a proof - unlike the COP-below-1
+        argument above, a factor of ten is the only drift it can catch.
+        """
+        for counts, input_counts, cooling_seconds in (
+            # diagnostics/310304_024/2025-09-22.json, V3.92.0
+            (215339, 52526, 5159452),
+            # diagnostics/320503_0555/2026-08-19.json, V2.90.0 - the series-2
+            # unit whose controller page was read against this dump (#752).
+            (410381, 83272, 2642397),
+            # diagnostics/330715_0248/2024-07-11.json, V3.89.5
+            (37327, 6597, 332291),
+        ):
+            hours = cooling_seconds / 3600
+            heat_kwh = self._converted_value(SensorKey.COOLING_HEAT_AMOUNT, counts)
+            input_kwh = self._converted_value(
+                SensorKey.COOLING_ENERGY_INPUT, input_counts
+            )
+            assert 0.2 < heat_kwh / hours < 12.0
+            # Scale-invariant, so it says nothing about the factor - it is here
+            # to catch a pairing that stops being the same machine's counters.
+            assert 1.0 < heat_kwh / input_kwh < 10.0
 
 
 class TestAuxHeaterAmountScaling:
