@@ -895,7 +895,7 @@ SENSORS: list[descr] = [
         # reads 0 there.
         #
         # Having the cooling device is not enough to have these counters: of
-        # the 10 units in the diagnostics corpus with cooling operating hours,
+        # the 11 units in the diagnostics corpus with cooling operating hours,
         # 8 read exactly 0 in both 1135 and 1139, one of them after 10647
         # hours of cooling. Only units whose heat-source outlet sensor is
         # absent (TWA -50, so no passive-cooling circuit) were seen counting,

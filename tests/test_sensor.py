@@ -947,7 +947,7 @@ class TestEnergyInputScaling:
 
     def test_cooling_counters_are_gated_on_having_counted(self):
         """Both cooling counters sit behind "!= 0.0" because most cooling
-        installations never move them. Of the 10 units in the diagnostics
+        installations never move them. Of the 11 units in the diagnostics
         corpus with cooling operating hours, 8 read exactly 0 in both
         registers - one of them after 10647 hours of cooling - so without the
         gate the majority of cooling-capable units gain two entities that can
@@ -961,18 +961,19 @@ class TestEnergyInputScaling:
             assert description.entity_active_formula == "!= 0.0"
 
     def test_implied_cooling_power_is_physical(self):
-        """1135's scale rests on a single display comparison (an LD5, series
-        2), so this pins it from the other direction on the two units in the
-        diagnostics corpus whose cooling counters have moved - both series 3,
-        which is what rules out the per-series split that 1059 turned out to
-        need in this same issue.
+        """1135's scale is measured against a controller display on one unit
+        only, so this pins it from the other direction across every unit in
+        the diagnostics corpus whose cooling counters have moved - the LD5
+        that carries the display reading plus two series-3 machines, which is
+        what rules out the per-series split that 1059 turned out to need in
+        this same issue.
 
         Dividing the cooling heat quantity by the cooling operating hours
         gives the average thermal power the unit sustained over its whole
         cooling life, which cannot approach its rated capacity - no machine
-        runs flat out every hour it is enabled. At 0.01 kWh per count the two
-        units give 1.5 kW and 4.0 kW, ordinary domestic figures. At 0.1 they
-        give 15.0 kW and 40.4 kW sustained averages, the second beyond the
+        runs flat out every hour it is enabled. At 0.01 kWh per count the
+        three units give 1.5, 5.6 and 4.0 kW, ordinary domestic figures. At
+        0.1 they give 15.0, 55.9 and 40.4 kW sustained averages, beyond the
         rated output of anything in the corpus.
 
         A plausibility bound rather than a proof - unlike the COP-below-1
@@ -981,6 +982,9 @@ class TestEnergyInputScaling:
         for counts, input_counts, cooling_seconds in (
             # diagnostics/310304_024/2025-09-22.json, V3.92.0
             (215339, 52526, 5159452),
+            # diagnostics/320503_0555/2026-08-19.json, V2.90.0 - the series-2
+            # unit whose controller page was read against this dump (#752).
+            (410381, 83272, 2642397),
             # diagnostics/330715_0248/2024-07-11.json, V3.89.5
             (37327, 6597, 332291),
         ):
