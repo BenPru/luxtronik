@@ -968,6 +968,9 @@
             "cooling_energy_input": {
                 "name": "Energy input"
             },
+            "cooling_heat_amount": {
+                "name": "Heat amount"
+            },
             "pool_energy_input": {
                 "name": "Pool energy input"
             },

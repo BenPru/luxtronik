@@ -968,6 +968,9 @@
             "cooling_energy_input": {
                 "name": "Energia zużyta na chłodzenie"
             },
+            "cooling_heat_amount": {
+                "name": "Ilość ciepła chłodzenia"
+            },
             "pool_energy_input": {
                 "name": "Energia zużyta na basen"
             },

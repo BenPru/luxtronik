@@ -115,9 +115,15 @@ WRITABLE_PARAMETER_PREFIXES: Final = (
     "Unknown_Parameter_",
     "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
     "ELECTRICAL_POWER_LIMIT_VALUE",
+    # 1146/1147, writable and entity-backed, but missing here since they were
+    # invented - the number entities set them through the coordinator, so only
+    # the write service was refusing them.
+    "Extra_DHW_target_temp",
+    "Extra_DHW_duration",
     "HEAT_ENERGY_INPUT",
     "DHW_ENERGY_INPUT",
     "COOLING_ENERGY_INPUT",
+    "COOLING_HEAT_AMOUNT",
     "POOL_ENERGY_INPUT",
     "SECOND_HEAT_GENERATOR_AMOUNT_COUNTER",
     "POWER_LIMIT_SWITCH",
@@ -521,6 +527,7 @@ class LuxParameter(StrEnum):
     P1119_LAST_DEFROST_TIMESTAMP = (
         "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
     )
+    P1135_COOLING_HEAT_AMOUNT = "parameters.COOLING_HEAT_AMOUNT"
     P1136_HEAT_ENERGY_INPUT = "parameters.HEAT_ENERGY_INPUT"
     P1137_DHW_ENERGY_INPUT = "parameters.DHW_ENERGY_INPUT"
     P1138_POOL_ENERGY_INPUT = "parameters.POOL_ENERGY_INPUT"
@@ -838,6 +845,7 @@ class SensorKey(StrEnum):
     HEAT_ENERGY_INPUT = "heat_energy_input"
     DHW_ENERGY_INPUT = "dhw_energy_input"
     COOLING_ENERGY_INPUT = "cooling_energy_input"
+    COOLING_HEAT_AMOUNT = "cooling_heat_amount"
     POOL_HEAT_AMOUNT = "pool_heat_amount"
     POOL_ENERGY_INPUT = "pool_energy_input"
     COP_HEATING = "cop_heating"
