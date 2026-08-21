@@ -639,6 +639,107 @@ class TestLuxtronikReadWrite:
 
         mock_sock.sendall.assert_called_once()
 
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_clears_queue_when_the_ack_times_out(self, mock_socket_class):
+        """A write that fails must not stay queued.
+
+        Nothing retries `client.write()` - the coordinator raises to the
+        caller and the entity re-syncs to the device value - so an entry left
+        behind is never a pending retry, only a delayed replay.
+        """
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            TimeoutError("timed out"),
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42}
+
+        with pytest.raises(TimeoutError):
+            client._write()
+
+        assert client.parameters.queue == {}
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_failed_write_is_not_replayed_by_the_next_write(self, mock_socket_class):
+        """A parameter whose write failed must not ride along on a later,
+        unrelated write - the user was already told it was reverted."""
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+        mock_sock.recv.side_effect = [TimeoutError("timed out")]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {2: 500}  # DHW target, write times out
+
+        with pytest.raises(TimeoutError):
+            client._write()
+
+        # Later, an unrelated parameter is written over a healthy socket.
+        # `parameters.set` mutates the existing queue dict rather than
+        # replacing it, so a stale entry would still be in there.
+        mock_sock.reset_mock()
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            struct.pack(">i", 2),
+            struct.pack(">i", 3002),
+            struct.pack(">i", 108),
+        ]
+        client.parameters.queue[108] = 1
+
+        client._write()
+
+        written = [
+            struct.unpack(">iii", call.args[0])[1]
+            for call in mock_sock.sendall.call_args_list
+        ]
+        assert written == [108]
+
+    def test_parameters_set_mutates_the_queue_in_place(self):
+        """Characterisation test pinning the pinned library's contract.
+
+        `test_failed_write_is_not_replayed_by_the_next_write` reproduces the
+        replay by mutating `queue` directly, which is only a faithful model of
+        `Parameters.set` while `set` writes into the existing dict rather than
+        rebinding it. If a future luxtronik release rebinds, that test would
+        stop reproducing anything and still pass - this one fails loudly
+        instead.
+        """
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        queue = client.parameters.queue
+
+        client.parameters.set(2, 50.0)  # ID_Einst_BWS_akt, Celsius -> tenths
+
+        assert client.parameters.queue is queue
+        assert queue == {2: 500}
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_clears_acked_entries_when_a_later_one_fails(self, mock_socket_class):
+        """Partial batch failure (e.g. a multi-row timer schedule): entries the
+        controller already acked must not be written a second time."""
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            struct.pack(">i", 1),  # first parameter acked
+            TimeoutError("timed out"),  # second never acks
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42, 2: 43}
+
+        with pytest.raises(TimeoutError):
+            client._write()
+
+        assert client.parameters.queue == {}
+
 
 def _fragmented_recv(payload: bytes, chunk_sizes: list[int]):
     """Build a recv() side effect that serves ``payload`` in short reads.

@@ -225,6 +225,15 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """
         try:
             async with self._lock:
+                # This batch owns the queue. `_write` empties it on every exit
+                # path, but a failure before `_write` is entered - a
+                # `connect()` timeout while the controller reboots, or a
+                # `parameters.set` that raises partway through the loop below -
+                # leaves the previous batch's entries behind. Starting clean
+                # means a stale entry can never ride along on an unrelated
+                # write, whatever went wrong last time. Cleared in place: the
+                # library's `set` mutates whichever dict `queue` refers to.
+                self.client.parameters.queue.clear()
                 for parameter, value in pairs:
                     await self.hass.async_add_executor_job(
                         self.client.parameters.set, parameter, value

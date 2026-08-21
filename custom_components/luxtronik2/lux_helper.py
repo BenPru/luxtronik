@@ -332,9 +332,26 @@ class Luxtronik:
         )
 
     def _write(self):
+        """Flush the queued parameter writes to the heat pump.
+
+        The queue is always emptied, whether the flush succeeds or raises.
+        Nothing retries a failed `write()` - the coordinator raises to the
+        caller and the entity re-syncs to the device's value - so an entry
+        left behind is never a pending retry. It would instead be re-sent by
+        the *next* write of any other parameter, silently applying a value the
+        user was already told had been reverted, and re-applying entries the
+        controller had already acknowledged.
+        """
+        try:
+            self._flush_queue()
+        finally:
+            self.parameters.queue = {}
+
+    def _flush_queue(self):
+        """Send each queued parameter as a 3002 write and await its ack."""
         if self._socket is None:
             raise OSError("Cannot write: socket is not connected")
-        for index, value in self.parameters.queue.items():
+        for index, value in list(self.parameters.queue.items()):
             if isinstance(value, float):
                 value = int(value)
 
@@ -372,8 +389,6 @@ class Luxtronik:
                     echoed_index,
                     cmd,
                 )
-        # Flush queue after writing all values
-        self.parameters.queue = {}
 
     def _read_exact(self, count: int) -> bytes:
         """Receive exactly ``count`` bytes from the socket.
