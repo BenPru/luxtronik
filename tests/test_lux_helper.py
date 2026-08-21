@@ -12,6 +12,7 @@ from custom_components.luxtronik2.const import DEFAULT_MAX_DATA_LENGTH, DEFAULT_
 from custom_components.luxtronik2.lux_helper import (
     LUXTRONIK_DISCOVERY_MAGIC_PACKET,
     LUXTRONIK_DISCOVERY_RESPONSE_PREFIX,
+    LUXTRONIK_WRITE_ACK_TIMEOUT,
     Luxtronik,
     _is_socket_closed,
     discover,
@@ -534,6 +535,132 @@ class TestLuxtronikReadWrite:
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
         client._socket = None
         with pytest.raises(OSError, match="Cannot write"):
+            client._write()
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_reads_the_ack_under_a_short_timeout(self, mock_socket_class):
+        """The ack is 8 bytes, so it must not inherit the connection timeout.
+
+        A controller that reboots on a write (issue #761) never sends the ack
+        at all. Waiting out the full connection timeout for those 8 bytes
+        stalls the write for a minute and blocks Home Assistant's startup,
+        where a few seconds is already far more than a healthy controller
+        needs.
+        """
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        effective: list[float | None] = [60.0]
+        timeouts_while_reading_the_ack: list[float | None] = []
+        mock_sock.settimeout.side_effect = lambda value: effective.__setitem__(0, value)
+
+        def recv(_size):
+            timeouts_while_reading_the_ack.append(effective[0])
+            return struct.pack(
+                ">i", 3002 if len(timeouts_while_reading_the_ack) == 1 else 1
+            )
+
+        mock_sock.recv.side_effect = recv
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 60.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42}
+
+        client._write()
+
+        assert timeouts_while_reading_the_ack == [
+            LUXTRONIK_WRITE_ACK_TIMEOUT,
+            LUXTRONIK_WRITE_ACK_TIMEOUT,
+        ]
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_restores_the_connection_timeout_after_the_ack(
+        self, mock_socket_class
+    ):
+        """The short timeout covers the ack only.
+
+        The polling reads share this socket and move ~1900 values, so leaving
+        the ack's few seconds in place would make every later read far more
+        fragile than the user's configured timeout allows.
+        """
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+        mock_sock.recv.side_effect = [
+            struct.pack(">i", 3002),
+            struct.pack(">i", 1),
+        ]
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 60.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42}
+
+        client._write()
+
+        assert [call[0][0] for call in mock_sock.settimeout.call_args_list] == [
+            LUXTRONIK_WRITE_ACK_TIMEOUT,
+            60.0,
+        ]
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_never_waits_longer_for_the_ack_than_configured(
+        self, mock_socket_class
+    ):
+        """The ack timeout is a ceiling, not a floor.
+
+        The connection timeout is user-configurable, and someone who lowered
+        it below the ack timeout asked for a shorter wait, not a longer one.
+        """
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+
+        # Seeded with a sentinel, not the expected value: seeding 2.0 would
+        # let an implementation that never calls settimeout at all pass.
+        effective: list[float | None] = [None]
+        timeouts_while_reading_the_ack: list[float | None] = []
+        mock_sock.settimeout.side_effect = lambda value: effective.__setitem__(0, value)
+
+        def recv(_size):
+            timeouts_while_reading_the_ack.append(effective[0])
+            return struct.pack(
+                ">i", 3002 if len(timeouts_while_reading_the_ack) == 1 else 1
+            )
+
+        mock_sock.recv.side_effect = recv
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 2.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42}
+
+        client._write()
+
+        assert timeouts_while_reading_the_ack == [2.0, 2.0]
+
+    @patch("custom_components.luxtronik2.lux_helper.socket.socket")
+    def test_write_names_the_ack_timeout_when_no_ack_arrives(self, mock_socket_class):
+        """A hard-coded threshold must say when it is the one that fired.
+
+        `_read_write` deliberately does not log, so without this the failure
+        reaches the user as a bare "timed out" - indistinguishable from a poll
+        or connect timeout. Since 5 s is our choice rather than the user's
+        configured value, a controller that acks more slowly than we assumed
+        would otherwise produce an undiagnosable regression report.
+        """
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_socket_class.return_value = mock_sock
+        mock_sock.recv.side_effect = TimeoutError("timed out")
+
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 60.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        client.parameters.queue = {1: 42}
+
+        with pytest.raises(
+            TimeoutError,
+            match=r"No write acknowledgement for parameter 1 within 5\.0s",
+        ):
             client._write()
 
     @patch("custom_components.luxtronik2.lux_helper.socket.socket")
