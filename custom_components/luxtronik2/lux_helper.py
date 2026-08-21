@@ -46,6 +46,16 @@ LUXTRONIK_PARAMETERS_READ = 3003
 LUXTRONIK_CALCULATIONS_READ = 3004
 LUXTRONIK_VISIBILITIES_READ = 3005
 
+# A write acknowledgement is eight bytes and a healthy controller returns it
+# immediately: measured at 3 ms and 4 ms on an MSW4-16 / V3.92.1 over a wired
+# LAN, where reading ~1900 values on the same socket takes about 0.1 s. The
+# connection timeout (60 s by default) is therefore wildly out of proportion
+# here, and a controller that reboots on a write and never acks at all (issue
+# #761) stalls the write for that whole minute, which is long enough to block
+# Home Assistant's startup. 5 s leaves three orders of magnitude of headroom
+# over the measurement while capping the damage from a silent controller.
+LUXTRONIK_WRITE_ACK_TIMEOUT = 5.0
+
 
 def discover(
     broadcast_addresses: list[str] | None = None,
@@ -349,8 +359,10 @@ class Luxtronik:
 
     def _flush_queue(self):
         """Send each queued parameter as a 3002 write and await its ack."""
-        if self._socket is None:
+        sock = self._socket
+        if sock is None:
             raise OSError("Cannot write: socket is not connected")
+        ack_timeout = min(LUXTRONIK_WRITE_ACK_TIMEOUT, self._socket_timeout)
         for index, value in list(self.parameters.queue.items()):
             if isinstance(value, float):
                 value = int(value)
@@ -359,7 +371,7 @@ class Luxtronik:
                 LOGGER.warning("Parameter id '%s' or value '%s' invalid!", index, value)
                 continue
             data = struct.pack(">iii", LUXTRONIK_PARAMETERS_WRITE, index, value)
-            self._socket.sendall(data)
+            sock.sendall(data)
             # The controller acknowledges a 3002 write with two ints: the
             # echoed command (3002) and the echoed *parameter index* - NOT the
             # value it stored. Verified on an Alpha Innotec MSW4-16: writing
@@ -369,8 +381,32 @@ class Luxtronik:
             # the value was accepted, clamped or rejected - confirming a write
             # requires reading the parameter back (see the WRITE_CONFIRM_*
             # retry loop in coordinator.async_write_many).
-            cmd = self._read_int()
-            echoed_index = self._read_int()
+            #
+            # Only the ack runs on the short timeout; the connection timeout
+            # is restored immediately afterwards so the polling reads that
+            # share this socket keep their full budget. A timeout here
+            # propagates to `_read_write` - the only production caller - which
+            # disconnects, so a late ack can never be left in the stream to
+            # misalign the next read. That also means a stalled ack aborts the
+            # whole flush: a multi-parameter batch costs one ack timeout, not
+            # one per parameter.
+            sock.settimeout(ack_timeout)
+            try:
+                cmd = self._read_int()
+                echoed_index = self._read_int()
+            except TimeoutError as err:
+                # Re-raised with attribution rather than logged: `_read_write`
+                # logs nothing by design, so a bare "timed out" here is
+                # indistinguishable from a poll or connect timeout. This
+                # threshold is ours rather than the user's, so it has to name
+                # itself in the report. Still a TimeoutError, hence still an
+                # OSError, so the disconnect above still happens.
+                raise TimeoutError(
+                    f"No write acknowledgement for parameter {index} "
+                    f"within {ack_timeout:.1f}s"
+                ) from err
+            finally:
+                sock.settimeout(self._socket_timeout)
             LOGGER.debug(
                 "Parameter '%d' set to '%s' (ack cmd=%s echoed_index=%s)",
                 index,
