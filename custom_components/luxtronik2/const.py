@@ -16,7 +16,24 @@ import voluptuous as vol
 
 # region Constants Main
 DOMAIN: Final = "luxtronik2"
-CONFIG_ENTRY_VERSION: Final = 9
+# TEMPORARY, for issue #761 only - do not merge.
+#
+# This build is the 2026.07.30 release with one number changed. Home Assistant
+# refuses to load a config entry whose version is higher than the installed
+# integration supports (config_entries.py: "has version 10 which is higher than
+# the current version 9"), and it refuses before the integration is consulted -
+# so anyone who has run 2026.08.18 or later can no longer install 2026.07.30 to
+# test whether a bug predates it.
+#
+# Claiming 10 here is safe *for this specific pair of versions*: the 9 -> 10
+# migration (92e1455) only renamed the aux heater energy entities in the entity
+# registry and wrote `config_entry.data` back unchanged, so a version 10 entry
+# holds exactly the data this release already expects. The only visible effect
+# is that the two aux heater energy sensors are recreated under their previous
+# unique ids, leaving the renamed ones as orphans.
+#
+# Do not copy this trick to a version pair whose migration does transform data.
+CONFIG_ENTRY_VERSION: Final = 10
 NICKNAME_PREFIX: Final = "Home Assistant"
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
