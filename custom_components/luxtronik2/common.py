@@ -19,6 +19,7 @@ from .const import (
     PARSED_COUNT_ATTR,
     SMART_GRID_MODE_CODES,
     LuxCalculation as LC,
+    LuxMode,
     LuxOperationMode,
     LuxParameter as LP,
     LuxSmartGridStatus,
@@ -415,6 +416,25 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
     return value
 
 
+def _veto_cooling_when_switched_off(
+    mode: Any, coordinator: LuxtronikCoordinatorData
+) -> Any:
+    """Never report cooling while the cooling mode switch (P0108) is off.
+
+    With that switch off the heat pump is not permitted to cool at all, so a
+    cooling outcome can only be a false positive of one of the workarounds
+    above (or a controller glitch); it is downgraded to no_request. The check
+    is against the explicit off state so a unit that does not expose the
+    parameter (None) keeps its derived value.
+    """
+    if (
+        mode == LuxOperationMode.cooling
+        and get_sensor_data(coordinator, LP.P0108_MODE_COOLING) == LuxMode.off
+    ):
+        return LuxOperationMode.no_request
+    return mode
+
+
 def normalize_sensor_value(
     value: Any,
     coordinator: LuxtronikCoordinatorData | None,
@@ -460,7 +480,9 @@ def normalize_sensor_value(
     # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
 
     if sensor_id == LC.C0080_STATUS:
-        mode = _derive_operation_mode(value, coordinator)
+        mode = _veto_cooling_when_switched_off(
+            _derive_operation_mode(value, coordinator), coordinator
+        )
         # Transition hold: the controller briefly reports no_request while
         # moving from normal DHW heating into thermal disinfection, even though
         # the DHW recirculation pump keeps running (issue #519). The coordinator
@@ -469,6 +491,15 @@ def normalize_sensor_value(
         # cooling or heating is never masked.
         if mode == LuxOperationMode.no_request and coordinator.dhw_transition_hold:
             return LuxOperationMode.domestic_water
+        # Cooling hold: during (passive) cooling the controller drops to
+        # no_request for one or a few polls at a time while the circuit is
+        # still cooling, making the status flap minute by minute. The
+        # coordinator decides once per poll whether we are inside such a
+        # window (see _update_cooling_transition_hold); here we only honour
+        # that decision. Scoped to no_request so a genuine switch to another
+        # mode is never masked.
+        if mode == LuxOperationMode.no_request and coordinator.cooling_transition_hold:
+            return LuxOperationMode.cooling
         return mode
 
     # no changes needed, return sensor value

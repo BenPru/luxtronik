@@ -22,6 +22,7 @@ from custom_components.luxtronik2.const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
+    LuxMode,
     LuxOperationMode,
     LuxParameter as LP,
     LuxRoomThermostatType,
@@ -90,6 +91,8 @@ def _make_coordinator_direct(data=None):
     coord._config = {"host": "1.2.3.4", "port": 8889}
     coord.device_infos = {}
     coord._dhw_hold_until = None
+    coord._cooling_hold_until = None
+    coord._cooling_flow_target = None
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
     coord.update_interval = DEFAULT_UPDATE_INTERVAL
@@ -2142,3 +2145,198 @@ class TestDhwTransitionHold:
             self._data(LuxOperationMode.no_request, recirculation=True)
         )
         assert coord._dhw_hold_until == deadline
+
+
+# ===========================================================================
+# Cooling transition hold
+# ===========================================================================
+
+
+class TestCoolingTransitionHold:
+    """Cross-poll lifecycle of the cooling transition hold.
+
+    Mirrors TestDhwTransitionHold: during (passive) cooling the controller
+    drops to no_request for one or a few polls while still cooling, so the
+    coordinator bridges those dips: primarily by latching the flow-out target
+    (Sollwert_TRL) seen while genuinely cooling and holding for as long as it
+    stays pinned there, with hydraulic evidence as fallback when that register
+    is unavailable.
+    """
+
+    def _coord(self) -> LuxtronikCoordinator:
+        return _make_coordinator()
+
+    def _data(
+        self,
+        status: str,
+        approval: bool = False,
+        brine_pump: bool = False,
+        flow_rate: float = 0.0,
+        flow_target: float | None = 5.0,
+        mode_cooling: str = LuxMode.automatic,
+    ) -> LuxtronikCoordinatorData:
+        return make_coordinator_data(
+            calculations={
+                "ID_WEB_WP_BZ_akt": status,
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_FreigabKuehl": approval,
+                "ID_WEB_VBOout": brine_pump,
+                "ID_WEB_Durchfluss_WQ": flow_rate,
+                "ID_WEB_Sollwert_TRL_HZ": flow_target,
+                "ID_WEB_BUPout": False,
+                "ID_WEB_ZW1out": False,
+            },
+            parameters={
+                "ID_Einst_BA_Kuehl_akt": mode_cooling,
+            },
+        )
+
+    def test_cooling_poll_arms_the_hold_but_does_not_flag_it(self):
+        """While cooling is genuinely reported there is nothing to hold."""
+        coord = self._coord()
+        data = self._data(LuxOperationMode.cooling)
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is False
+        assert coord._cooling_hold_until is not None
+        assert coord._cooling_flow_target == 5.0
+
+    def test_pinned_target_bridges_the_dip(self, freezer):
+        """The no_request dip right after cooling must be flagged as held while
+        Sollwert_TRL is still pinned at the value latched during cooling -
+        observed on real hardware: pinned continuously across every dip, with
+        approval, pump and flow registers all unusable on that unit."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.cooling))
+        freezer.move_to("2026-08-27 12:01:00+00:00")
+        data = self._data(LuxOperationMode.no_request)
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is True
+
+    def test_target_move_releases_immediately_despite_other_evidence(self, freezer):
+        """The controller moves Sollwert_TRL on the exact minute a cooling
+        cycle ends, so a moved target ends the hold at once - hydraulic
+        afterrun (pump still on, approval still granted) must not add a tail."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.cooling))
+        freezer.move_to("2026-08-27 12:01:00+00:00")
+        data = self._data(
+            LuxOperationMode.no_request,
+            flow_target=15.0,
+            approval=True,
+            brine_pump=True,
+            flow_rate=1200.0,
+        )
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is False
+        assert coord._cooling_hold_until is None
+        assert coord._cooling_flow_target is None
+
+    def test_cooling_switched_off_releases_immediately(self, freezer):
+        """The cooling mode switch (P0108) off means cooling is not even
+        permitted - no dip can be a cooling dip, whatever the other registers
+        still show."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.cooling))
+        freezer.move_to("2026-08-27 12:01:00+00:00")
+        data = self._data(LuxOperationMode.no_request, mode_cooling=LuxMode.off)
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is False
+        assert coord._cooling_hold_until is None
+
+    def test_approval_bridges_when_target_unavailable(self, freezer):
+        """Without a usable Sollwert_TRL register the hold falls back to
+        hydraulic evidence: cooling approval."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(
+            self._data(LuxOperationMode.cooling, flow_target=None, approval=True)
+        )
+        freezer.move_to("2026-08-27 12:01:00+00:00")
+        data = self._data(LuxOperationMode.no_request, flow_target=None, approval=True)
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is True
+
+    def test_brine_pump_bridges_when_target_unavailable(self, freezer):
+        """Fallback evidence: the heat-source pump carries passive cooling on
+        units whose FreigabKuehl register never turns True."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(
+            self._data(LuxOperationMode.cooling, flow_target=None, brine_pump=True)
+        )
+        freezer.move_to("2026-08-27 12:01:00+00:00")
+        data = self._data(
+            LuxOperationMode.no_request, flow_target=None, brine_pump=True
+        )
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is True
+
+    def test_flow_rate_bridges_when_target_unavailable(self, freezer):
+        """Fallback evidence: a measured heat-source flow."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(
+            self._data(LuxOperationMode.cooling, flow_target=None, flow_rate=1200.0)
+        )
+        freezer.move_to("2026-08-27 12:01:00+00:00")
+        data = self._data(
+            LuxOperationMode.no_request, flow_target=None, flow_rate=1200.0
+        )
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is True
+
+    def test_no_hold_without_any_evidence(self, freezer):
+        """No target register, approval off, pump off, no flow: really ended."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(
+            self._data(LuxOperationMode.cooling, flow_target=None, approval=True)
+        )
+        freezer.move_to("2026-08-27 12:01:00+00:00")
+        data = self._data(LuxOperationMode.no_request, flow_target=None)
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is False
+        assert coord._cooling_hold_until is None
+
+    def test_hold_expires_after_the_configured_window(self, freezer):
+        """A target that never moves between cooling and idle degrades the
+        latch into a purely time-bounded bridge - the cap must end it."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.cooling))
+        freezer.move_to("2026-08-27 12:06:00+00:00")  # > COOLING_TRANSITION_HOLD
+        data = self._data(LuxOperationMode.no_request)
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is False
+        assert coord._cooling_hold_until is None
+
+    def test_hold_does_not_start_from_evidence_alone(self):
+        """Without a preceding genuine cooling poll nothing is bridged."""
+        coord = self._coord()
+        data = self._data(LuxOperationMode.no_request, approval=True, brine_pump=True)
+        coord._update_cooling_transition_hold(data)
+        assert data.cooling_transition_hold is False
+
+    def test_hold_rearms_on_every_genuine_cooling_poll(self, freezer):
+        """Persistent flapping keeps re-arming, so it is bridged indefinitely."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.cooling))
+        first_deadline = coord._cooling_hold_until
+        freezer.move_to("2026-08-27 12:04:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.cooling))
+        assert coord._cooling_hold_until is not None
+        assert coord._cooling_hold_until > first_deadline
+
+    def test_hold_does_not_extend_itself(self, freezer):
+        """The deadline is anchored to the last genuine cooling poll."""
+        coord = self._coord()
+        freezer.move_to("2026-08-27 12:00:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.cooling))
+        deadline = coord._cooling_hold_until
+        freezer.move_to("2026-08-27 12:02:00+00:00")
+        coord._update_cooling_transition_hold(self._data(LuxOperationMode.no_request))
+        assert coord._cooling_hold_until == deadline

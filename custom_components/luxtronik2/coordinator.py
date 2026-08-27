@@ -27,6 +27,7 @@ from .const import (
     CONF_PARAMETERS,
     CONF_UPDATE_INTERVAL,
     CONF_VISIBILITIES,
+    COOLING_TRANSITION_HOLD,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
@@ -39,6 +40,7 @@ from .const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxMkTypes,
+    LuxMode,
     LuxOperationMode,
     LuxParameter as LP,
     LuxRoomThermostatType,
@@ -118,6 +120,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.device_infos = dict[str, DeviceInfo]()
         # Deadline for the DHW transition hold; see _update_dhw_transition_hold().
         self._dhw_hold_until: datetime | None = None
+        # Deadline for the cooling transition hold; see
+        # _update_cooling_transition_hold().
+        self._cooling_hold_until: datetime | None = None
+        # Flow-out target latched on the last genuine cooling poll; see
+        # _cooling_evidence().
+        self._cooling_flow_target: float | None = None
         # Latch for the ventilation module; see has_ventilation.
         self._ventilation_detected = False
 
@@ -158,6 +166,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     visibilities=self.client.visibilities,
                 )
                 self._update_dhw_transition_hold(data)
+                self._update_cooling_transition_hold(data)
                 self.data = data
 
                 return self.data
@@ -197,6 +206,92 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return
 
         self._dhw_hold_until = None
+
+    def _update_cooling_transition_hold(self, data: LuxtronikCoordinatorData) -> None:
+        """Decide whether this poll falls inside a cooling transition hold.
+
+        During (passive) cooling the controller's raw status word and its
+        display lines intermittently drop to no_request for one or a few polls
+        while the circuit is still actively cooling, making the status sensor
+        flap cooling <-> no_request minute by minute. Reporting idle there
+        breaks utility meters and automations keyed on the operating mode, so
+        we bridge those dips for a bounded window.
+
+        The primary end-of-cycle signal is the flow-out target (Sollwert_TRL,
+        C0012): while a cooling request stands the controller pins it (on the
+        diagnosed hardware at a fixed 5.0, unrelated to any configurable
+        cooling setpoint, continuously across every dip) and moves it on the
+        exact minute the cycle ends. So the value seen on a genuine cooling
+        poll is latched, and the moment it changes the hold is dropped
+        immediately - no tail from the cap, no dependence on which register
+        the value happens to equal on a given unit. Matched with a tolerance
+        of one 0.1-step because it is a 0.1-step Celsius datatype.
+
+        Two immediate-release signals override everything: the target moving
+        away from its latched value, and the cooling mode switch (P0108) being
+        off - with cooling not even permitted, no dip can be a cooling dip.
+
+        On units whose target register does not move between cooling and idle
+        the latch match is trivially true, which degrades this into a purely
+        time-bounded bridge; that is why the cap stays. Units where C0012 is
+        unavailable fall back to hydraulic evidence: cooling approval
+        (FreigabKuehl, C0146 - permanently False on some units), the
+        heat-source pump (VBOout, C0043) or the heat-source flow rate (C0173).
+
+        Reading the status through get_sensor_data() here is safe and
+        deliberate for the same reason as in _update_dhw_transition_hold():
+        `data.cooling_transition_hold` is still False at this point, so the
+        value returned is the un-held mode.
+
+        The hold can only ever extend a cooling state that actually happened,
+        it is capped at COOLING_TRANSITION_HOLD, anchored to the last genuine
+        cooling poll, and it is scoped (in normalize_sensor_value) to
+        no_request polls only, so a genuine switch to another mode is never
+        masked and nothing can latch it indefinitely.
+        """
+        now = dt_util.utcnow()
+
+        if get_sensor_data(data, LC.C0080_STATUS) == LuxOperationMode.cooling:
+            self._cooling_hold_until = now + COOLING_TRANSITION_HOLD
+            target = get_sensor_data(data, LC.C0012_FLOW_OUT_TEMPERATURE_TARGET)
+            self._cooling_flow_target = (
+                float(target) if isinstance(target, (int, float)) else None
+            )
+            return
+
+        if (
+            self._cooling_hold_until is not None
+            and now < self._cooling_hold_until
+            and self._cooling_evidence(data)
+        ):
+            data.cooling_transition_hold = True
+            return
+
+        self._cooling_hold_until = None
+        self._cooling_flow_target = None
+
+    def _cooling_evidence(self, data: LuxtronikCoordinatorData) -> bool:
+        """Is the cooling request still standing during this no_request dip?
+
+        See _update_cooling_transition_hold for the full rationale.
+        """
+        # Cooling switched off at the controller ends any hold immediately.
+        if get_sensor_data(data, LP.P0108_MODE_COOLING) == LuxMode.off:
+            return False
+
+        target = get_sensor_data(data, LC.C0012_FLOW_OUT_TEMPERATURE_TARGET)
+        if self._cooling_flow_target is not None and isinstance(target, (int, float)):
+            # The latched target decides both ways: still pinned -> the
+            # request stands; moved -> the cycle ended, release immediately.
+            return abs(float(target) - self._cooling_flow_target) <= 0.1
+
+        # No usable target register: fall back to hydraulic evidence.
+        if get_sensor_data(data, LC.C0146_APPROVAL_COOLING):
+            return True
+        if get_sensor_data(data, LC.C0043_PUMP_FLOW):
+            return True
+        flow_rate = get_sensor_data(data, LC.C0173_HEAT_SOURCE_FLOW_RATE)
+        return isinstance(flow_rate, (int, float)) and flow_rate > 0
 
     async def async_write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
         """Write a single parameter to the heat pump and confirm it stuck.

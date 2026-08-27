@@ -59,6 +59,17 @@ DEFAULT_UPDATE_INTERVAL_OPTION: Final = next(
 # latch the status indefinitely.
 DHW_TRANSITION_HOLD: Final = timedelta(minutes=5)
 
+# Upper bound on how long the status sensor may keep reporting cooling after
+# the last genuinely reported cooling poll. During (passive) cooling the
+# controller's status word and display lines drop to no_request for one or a
+# few polls at a time while the circuit is still actively cooling - observed
+# as 1-3 minute dips every few minutes on real hardware. The primary release
+# is evidence-based and usually immediate (the flow-out target moving off its
+# latched cooling value - see LuxtronikCoordinator._cooling_evidence); this
+# cap only matters on units where that register does not move, so standing
+# evidence can never latch the status indefinitely.
+COOLING_TRANSITION_HOLD: Final = timedelta(minutes=5)
+
 
 SECOND_TO_HOUR_FACTOR: Final = 1 / 3600
 

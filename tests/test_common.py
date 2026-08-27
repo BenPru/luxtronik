@@ -21,6 +21,7 @@ from custom_components.luxtronik2.common import (
 )
 from custom_components.luxtronik2.const import (
     LuxCalculation as LC,
+    LuxMode,
     LuxOperationMode,
     LuxSmartGridStatus,
     LuxStatus1Option,
@@ -563,6 +564,97 @@ class TestNormalizeSensorValue:
             }
         )
         data.dhw_transition_hold = True
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.cooling
+
+    def test_cooling_hold_converts_no_request_to_cooling(self):
+        """During a cooling dip the status must stay cooling."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_BUPout": False,
+                "ID_WEB_ZW1out": False,
+            }
+        )
+        data.cooling_transition_hold = True
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.cooling
+
+    def test_no_cooling_hold_leaves_no_request_alone(self):
+        """Without an active hold the existing no_request behaviour is unchanged."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+            }
+        )
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.no_request
+
+    def test_cooling_hold_does_not_mask_heating(self):
+        """A cooling hold must never override a genuine switch to heating."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_VD1out": True,  # compressor running -> heating is genuine
+            }
+        )
+        data.cooling_transition_hold = True
+        result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
+        assert result == LuxOperationMode.heating
+
+    def test_dhw_hold_takes_precedence_over_cooling_hold(self):
+        """Both holds armed: DHW wins, matching the order in normalize_sensor_value."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_BUPout": True,
+                "ID_WEB_ZW1out": False,
+            }
+        )
+        data.dhw_transition_hold = True
+        data.cooling_transition_hold = True
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.domestic_water
+
+    def test_cooling_switch_off_vetoes_line3_cooling_rescue(self):
+        """With the cooling mode switch off, cooling is not permitted at all,
+        so even the line3=cooling rescue (#118) must not report cooling."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.cooling,
+            },
+            parameters={"ID_Einst_BA_Kuehl_akt": LuxMode.off},
+        )
+        result = normalize_sensor_value(
+            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        )
+        assert result == LuxOperationMode.no_request
+
+    def test_cooling_switch_off_vetoes_raw_cooling(self):
+        """Even a raw status word of cooling is downgraded with the switch off."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.cooling,
+            },
+            parameters={"ID_Einst_BA_Kuehl_akt": LuxMode.off},
+        )
+        result = normalize_sensor_value(LuxOperationMode.cooling, data, LC.C0080_STATUS)
+        assert result == LuxOperationMode.no_request
+
+    def test_missing_cooling_switch_keeps_cooling(self):
+        """A unit that does not expose P0108 (None) must not be vetoed."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.cooling,
+            }
+        )
         result = normalize_sensor_value(
             LuxOperationMode.no_request, data, LC.C0080_STATUS
         )

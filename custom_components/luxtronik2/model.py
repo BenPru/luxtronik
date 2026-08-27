@@ -56,6 +56,11 @@ class LuxtronikCoordinatorData:
     # Defaulted so every other construction site (tests, diagnostics) is unaffected.
     dhw_transition_hold: bool = False
 
+    # Derived once per poll by
+    # LuxtronikCoordinator._update_cooling_transition_hold(); same construction
+    # rationale as dhw_transition_hold above.
+    cooling_transition_hold: bool = False
+
 
 @dataclass
 class LuxtronikEntityAttributeDescription:
