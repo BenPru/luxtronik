@@ -31,7 +31,7 @@ from .timer_schedule_entities_predefined import TIMER_SCHEDULE_ENTITIES
 PARALLEL_UPDATES = 1
 
 _UNSET_TIME = "00:00"
-_PAIR_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d-([01]\d|2[0-3]):[0-5]\d$")
+_PAIR_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d-((?:[01]\d|2[0-3]):[0-5]\d|24:00)$")
 
 
 def _timer_schedule_unique_id(
