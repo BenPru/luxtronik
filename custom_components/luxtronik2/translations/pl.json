@@ -1396,7 +1396,7 @@
             "message": "Nie udało się znaleźć załadowanej pompy ciepła Luxtronik dla celu {target}"
         },
         "invalid_timer_schedule": {
-            "message": "Nieprawidłowy harmonogram czasowy \"{value}\": oczekiwane są wpisy \"HH:MM-HH:MM\" oddzielone znakiem \"/\", maksymalnie {max_rows} wpisów"
+            "message": "Nieprawidłowy harmonogram czasowy \"{value}\": oczekiwane są wpisy \"HH:MM-HH:MM\" oddzielone znakiem \"/\", maksymalnie {max_rows} wpisów. Godziny rozpoczęcia mieszczą się w zakresie od \"00:00\" do \"23:59\"; godziną zakończenia może być także \"24:00\", co oznacza to samo co \"00:00\" - północ"
         },
         "write_confirmation_mismatch": {
             "message": "Pompa ciepła Luxtronik nie potwierdziła zapisanych wartości: {details}"

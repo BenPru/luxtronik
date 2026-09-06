@@ -1396,7 +1396,7 @@
             "message": "Kon geen geladen Luxtronik-warmtepomp vinden voor doel {target}"
         },
         "invalid_timer_schedule": {
-            "message": "Ongeldig tijdschema \"{value}\": verwacht worden \"HH:MM-HH:MM\"-items gescheiden door \"/\", met maximaal {max_rows} items"
+            "message": "Ongeldig tijdschema \"{value}\": verwacht worden \"HH:MM-HH:MM\"-items gescheiden door \"/\", met maximaal {max_rows} items. Begintijden lopen van \"00:00\" tot \"23:59\"; als eindtijd is ook \"24:00\" toegestaan, wat hetzelfde betekent als \"00:00\" - middernacht"
         },
         "write_confirmation_mismatch": {
             "message": "De Luxtronik-warmtepomp heeft de geschreven waarde(n) niet bevestigd: {details}"

@@ -38,6 +38,20 @@ So to cover everything outside 12:00–18:00 on a five-window circuit like DHW, 
 
 > **ℹ️ Note:** the midnight reading of a trailing `00:00` is observed behaviour, not a documented one. The controller's manual (*Regelaar Deel 1*, document 83055200, revision iNL) covers `00:00-00:00` but says nothing about `HH:MM-00:00`. It is how real controllers store their schedules — including units whose active program uses such a window — so it is safe to rely on, but it is not quotable from the manual.
 
+#### `24:00` as an end time
+
+Most controllers only let you enter times up to `23:59`, and reject `24:00` outright — on those units the manufacturer's own app and web portal will not offer it either. A few controllers do accept it and store it, spelling the end of the day as `24:00` instead of `00:00` (issue [#787](https://github.com/BenPru/luxtronik/issues/787)). The two spellings mean the same window.
+
+The integration handles both without you having to configure anything:
+
+- `24:00` is always accepted as an end time in the text field, on any heat pump.
+- If your controller has never been seen holding a `24:00`, the integration writes `00:00` instead — the same window, in the spelling every controller stores. A `24:00` you type will therefore read back as `00:00`.
+- The first time the integration reads a `24:00` out of one of your schedule registers, it takes that as proof your controller supports it and remembers it for that heat pump. From then on `24:00` is written through unchanged.
+
+Since only the controller itself can put a `24:00` into a register, that observation is the evidence — there is nothing in the protocol that advertises the capability. If you want `24:00` on a controller that supports it, set it once on the controller or its web interface; the integration will pick it up from the next poll onwards.
+
+> **ℹ️ Note:** the poll that first spots a `24:00` reloads the integration once, so the change takes effect everywhere. It happens at most once per heat pump.
+
 **An empty schedule does not mean "no schedule".** What it does depends on the circuit's polarity, and the two are opposites: on DHW an empty schedule blocks nothing, so hot water follows the *Mode* setting alone; on heating it leaves the circuit lowered around the clock. Read your circuit's section below before clearing one.
 
 The timer program can be switched from Home Assistant as well as on the physical controller (or its web interface), and both directions are picked up automatically.

@@ -1396,7 +1396,7 @@
             "message": "Es konnte keine geladene Luxtronik-Wärmepumpe für das Ziel {target} ermittelt werden"
         },
         "invalid_timer_schedule": {
-            "message": "Ungültiger Zeitschaltplan \"{value}\": erwartet werden \"HH:MM-HH:MM\"-Einträge, getrennt durch \"/\", mit maximal {max_rows} Einträgen"
+            "message": "Ungültiger Zeitschaltplan \"{value}\": erwartet werden \"HH:MM-HH:MM\"-Einträge, getrennt durch \"/\", mit maximal {max_rows} Einträgen. Startzeiten reichen von \"00:00\" bis \"23:59\"; als Endzeit ist zusätzlich \"24:00\" möglich, was dasselbe bedeutet wie \"00:00\" - Mitternacht"
         },
         "write_confirmation_mismatch": {
             "message": "Die Luxtronik-Wärmepumpe hat die geschriebenen Werte nicht bestätigt: {details}"

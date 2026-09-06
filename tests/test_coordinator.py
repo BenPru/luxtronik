@@ -18,6 +18,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from conftest import make_coordinator_data
 from custom_components.luxtronik2.const import (
+    CONF_SUPPORTS_TIME_24_00,
     CONF_UPDATE_INTERVAL,
     DEFAULT_PORT,
     DEFAULT_UPDATE_INTERVAL,
@@ -40,6 +41,7 @@ from custom_components.luxtronik2.coordinator import (
     LuxtronikSerialNumberError,
     LuxtronikWriteError,
 )
+from custom_components.luxtronik2.lux_overrides import TimeOfDay
 from custom_components.luxtronik2.model import (
     LuxtronikCoordinatorData,
     LuxtronikEntityDescription,
@@ -93,6 +95,9 @@ def _make_coordinator_direct(data=None):
     coord._config = {"host": "1.2.3.4", "port": 8889}
     coord.device_infos = {}
     coord._dhw_hold_until = None
+    # Real coordinators always have one; `object.__new__` skips the base
+    # class __init__ that would set it.
+    coord.config_entry = None
     coord.async_request_refresh = AsyncMock()
     coord.async_refresh = AsyncMock()
     coord.update_interval = DEFAULT_UPDATE_INTERVAL
@@ -2312,3 +2317,93 @@ class TestCoordinatorSubDeviceParenting:
 
         assert "via_device_id" not in heating
         assert "serial_number" not in heating
+
+
+class TestDetectTime2400Support:
+    """Latching whether the controller stores "24:00" as a schedule end time.
+
+    See `_detect_time_24_00_support` and issue #787: most controllers cap at
+    "23:59", a few accept "24:00" and store 86400. Only the controller can
+    put that value in a register, so observing it is the proof.
+    """
+
+    @staticmethod
+    def _data(**times: str) -> LuxtronikCoordinatorData:
+        """Coordinator data whose schedule registers are real TimeOfDay sensors."""
+        data = make_coordinator_data()
+        sensors = {}
+        for name, value in times.items():
+            sensor = TimeOfDay(name)
+            sensor.value = value
+            sensors[name] = sensor
+        data.parameters._data = sensors
+        return data
+
+    @staticmethod
+    def _coordinator(hass, entry_data: dict[str, Any] | None = None):
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            data={
+                CONF_HOST: "192.168.1.100",
+                CONF_PORT: DEFAULT_PORT,
+                **(entry_data or {}),
+            },
+        )
+        entry.add_to_hass(hass)
+        coord = _make_coordinator(hass=hass)
+        coord.config_entry = entry
+        return coord, entry
+
+    async def test_latches_when_a_schedule_register_holds_24_00(
+        self, hass: HomeAssistant
+    ) -> None:
+        coord, entry = self._coordinator(hass)
+
+        coord._detect_time_24_00_support(
+            self._data(ID_Einst_BwWO_zeit_0_0="14:00", ID_Einst_BwWO_zeit_0_1="24:00")
+        )
+        await hass.async_block_till_done()
+
+        assert entry.data[CONF_SUPPORTS_TIME_24_00] is True
+
+    async def test_does_not_latch_without_a_24_00_anywhere(
+        self, hass: HomeAssistant
+    ) -> None:
+        coord, entry = self._coordinator(hass)
+
+        coord._detect_time_24_00_support(
+            self._data(ID_Einst_BwWO_zeit_0_0="14:00", ID_Einst_BwWO_zeit_0_1="23:59")
+        )
+        await hass.async_block_till_done()
+
+        assert CONF_SUPPORTS_TIME_24_00 not in entry.data
+
+    async def test_ignores_a_non_schedule_sensor_holding_the_string(
+        self, hass: HomeAssistant
+    ) -> None:
+        """Only TimeOfDay registers count - a stray string is not evidence."""
+        coord, entry = self._coordinator(hass)
+        data = make_coordinator_data(parameters={"ID_Something_Else": "24:00"})
+
+        coord._detect_time_24_00_support(data)
+        await hass.async_block_till_done()
+
+        assert CONF_SUPPORTS_TIME_24_00 not in entry.data
+
+    async def test_does_not_update_the_entry_again_once_latched(
+        self, hass: HomeAssistant
+    ) -> None:
+        """The entry update reloads the entry, so it must happen exactly once."""
+        coord, _entry = self._coordinator(hass, {CONF_SUPPORTS_TIME_24_00: True})
+
+        with patch.object(hass.config_entries, "async_update_entry") as update_entry:
+            coord._detect_time_24_00_support(self._data(ID_Einst_BwWO_zeit_0_1="24:00"))
+
+        update_entry.assert_not_called()
+
+    async def test_is_a_no_op_without_a_config_entry(self) -> None:
+        """Diagnostics and tests build coordinators with no entry attached."""
+        coord = _make_coordinator()
+        coord.config_entry = None
+
+        coord._detect_time_24_00_support(self._data(ID_Einst_BwWO_zeit_0_1="24:00"))
