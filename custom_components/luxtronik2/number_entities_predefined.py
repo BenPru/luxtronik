@@ -524,9 +524,13 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_min_value=DEFAULT_DHW_MIN_TEMPERATURE,
         native_max_value=65.0,
         native_step=0.5,
-        max_firmware_version_minor=Version("90.0"),
+        max_firmware_version_minor=Version("88.2"),
     ),
-    # Bug #280 since firmware 3.90.1 different set point
+    # Since minor 88.3 the controller targets P0105 (issue #280 reported it
+    # on 3.90.1; issue #785 measured a V1.90.0 unit cutting in and out on
+    # P0105 while P0002 held a different value). Same cutover as the water
+    # heater card, so both controls show and write the same register - see
+    # DHW_TARGET_REGISTERS.md.
     LuxtronikNumberDescription(
         key=SensorKey.DHW_TARGET_TEMPERATURE,
         luxtronik_key=LP.P0105_DHW_TARGET_TEMPERATURE,
@@ -537,7 +541,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_min_value=DEFAULT_DHW_MIN_TEMPERATURE,
         native_max_value=65.0,
         native_step=0.5,
-        min_firmware_version_minor=Version("90.1"),
+        min_firmware_version_minor=Version("88.3"),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.DHW_HYSTERESIS,

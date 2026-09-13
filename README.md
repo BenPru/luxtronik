@@ -39,7 +39,7 @@ Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs
 - **[ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)** — integration options, COP and the external power sensor, EVU/Smart Grid, diagnostics downloads, holiday scheduling, solar thermal, and the other entities that only appear on some hardware.
 - **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** — the editable weekly schedules for DHW, heating, and ventilation: entity list, time format, and what a window means on each circuit.
 - **[REPORTING_ISSUES.md](REPORTING_ISSUES.md)** — how to file a bug report that can be diagnosed on the first pass.
-- **[DHW_TARGET_REGISTERS.md](DHW_TARGET_REGISTERS.md)** — maintainer reference: what is known about the two hot water setpoint parameters, why the firmware thresholds for them differ per platform, and what to measure if your hot water target reads wrong.
+- **[DHW_TARGET_REGISTERS.md](DHW_TARGET_REGISTERS.md)** — maintainer reference: what is known about the two hot water setpoint parameters, why the two platforms gated them differently until September 2026, and what to measure if your hot water target reads wrong.
 
 ## ⚠️ Warning
 Some settings exposed by this integration can impact the performance of your heat pump. Misconfigurations may cause the controller to go into an error state, requiring a local manual reset. 

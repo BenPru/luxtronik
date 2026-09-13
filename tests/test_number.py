@@ -39,6 +39,7 @@ from custom_components.luxtronik2.model import (
 )
 from custom_components.luxtronik2.number import LuxtronikNumberEntity
 from custom_components.luxtronik2.number_entities_predefined import NUMBER_SENSORS
+from custom_components.luxtronik2.water_heater import WATER_HEATERS
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",
@@ -671,7 +672,7 @@ class TestFirmwareGatesAreSeriesAgnostic:
     """
 
     def test_dhw_target_modern_register_active_on_v1(self):
-        """P0105 is the 90.1+ DHW setpoint and must reach a V1.90.1 unit."""
+        """P0105 is the 88.3+ DHW setpoint and must reach a V1.90.1 unit."""
         coord = _coord_on_firmware("V1.90.1")
         desc = _number_desc(
             SensorKey.DHW_TARGET_TEMPERATURE, LP.P0105_DHW_TARGET_TEMPERATURE
@@ -679,7 +680,7 @@ class TestFirmwareGatesAreSeriesAgnostic:
         assert coord._is_version_not_compatible(desc) is False
 
     def test_dhw_target_legacy_register_hidden_on_v1(self):
-        """P0002 is the pre-90.1 setpoint; a V1.90.1 unit must not get it."""
+        """P0002 is the pre-88.3 setpoint; a V1.90.1 unit must not get it."""
         coord = _coord_on_firmware("V1.90.1")
         desc = _number_desc(
             SensorKey.DHW_TARGET_TEMPERATURE, LP.P0002_DHW_TARGET_TEMPERATURE
@@ -687,7 +688,7 @@ class TestFirmwareGatesAreSeriesAgnostic:
         assert coord._is_version_not_compatible(desc) is True
 
     def test_dhw_target_legacy_register_active_on_v2_below_cutover(self):
-        """A V2.88.0 unit predates the 90.1 change and keeps P0002."""
+        """A V2.88.0 unit predates the 88.3 change and keeps P0002."""
         coord = _coord_on_firmware("V2.88.0")
         desc = _number_desc(
             SensorKey.DHW_TARGET_TEMPERATURE, LP.P0002_DHW_TARGET_TEMPERATURE
@@ -701,6 +702,58 @@ class TestFirmwareGatesAreSeriesAgnostic:
             SensorKey.DHW_TARGET_TEMPERATURE, LP.P0105_DHW_TARGET_TEMPERATURE
         )
         assert coord._is_version_not_compatible(desc) is False
+
+    def test_dhw_target_modern_register_active_on_v1_90_0(self):
+        """Issue #785: a V1.90.0 unit controls on P0105 and ignores P0002.
+
+        Measured on the reporter's WZS 101 H/K: with P0002 written to 58 and
+        P0105 left at 54, the compressor cut in at 48 and out at 54 - exactly
+        P0105 with the 6 K hysteresis - without anyone touching the panel. So
+        P0002 is inert there and the number entity must expose P0105, which
+        moves the cutover below 90.0.
+        """
+        coord = _coord_on_firmware("V1.90.0")
+        assert (
+            coord._is_version_not_compatible(
+                _number_desc(
+                    SensorKey.DHW_TARGET_TEMPERATURE, LP.P0105_DHW_TARGET_TEMPERATURE
+                )
+            )
+            is False
+        )
+        assert (
+            coord._is_version_not_compatible(
+                _number_desc(
+                    SensorKey.DHW_TARGET_TEMPERATURE, LP.P0002_DHW_TARGET_TEMPERATURE
+                )
+            )
+            is True
+        )
+
+    def test_dhw_target_number_and_water_heater_share_one_cutover(self):
+        """Both platforms expose the same physical setpoint, so they must
+        switch registers at the same firmware minor - otherwise the number
+        entity and the water heater card show two different targets and
+        write two different registers (the divergence recorded in
+        DHW_TARGET_REGISTERS.md)."""
+
+        def gates(descs, key, register_attr):
+            return {
+                getattr(d, register_attr): (
+                    d.min_firmware_version_minor,
+                    d.max_firmware_version_minor,
+                )
+                for d in descs
+                if d.key == key
+            }
+
+        number_gates = gates(
+            NUMBER_SENSORS, SensorKey.DHW_TARGET_TEMPERATURE, "luxtronik_key"
+        )
+        heater_gates = gates(
+            WATER_HEATERS, SensorKey.DOMESTIC_WATER, "luxtronik_key_target_temperature"
+        )
+        assert number_gates == heater_gates
 
     def test_cooling_threshold_wide_range_active_on_v2(self):
         """The 92.1+ cooling threshold spans 10-35 C and must reach V2.92.1."""
