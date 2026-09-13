@@ -36,6 +36,7 @@ from custom_components.luxtronik2.coordinator import (
     WRITE_CONFIRM_INITIAL_DELAY,
     WRITE_CONFIRM_MAX_ATTEMPTS,
     WRITE_CONFIRM_MAX_DELAY,
+    WRITE_FOLLOWUP_DELAY,
     LuxtronikConnectionError,
     LuxtronikCoordinator,
     LuxtronikSerialNumberError,
@@ -95,6 +96,7 @@ def _make_coordinator_direct(data=None):
     coord._config = {"host": "1.2.3.4", "port": 8889}
     coord.device_infos = {}
     coord._dhw_hold_until = None
+    coord._write_followup_unsub = None
     # Real coordinators always have one; `object.__new__` skips the base
     # class __init__ that would set it.
     coord.config_entry = None
@@ -1606,6 +1608,121 @@ class TestWriteConfirmRetry:
 
         assert exc_info.value.translation_key == "write_confirmation_mismatch"
         assert refreshes == WRITE_CONFIRM_MAX_ATTEMPTS
+
+
+class TestWriteFollowUpRefresh:
+    """A confirmed write arms one delayed follow-up read.
+
+    The controller applies the written value immediately, but any behaviour
+    the value triggers (a DHW run starting after a setpoint change, say) takes
+    the controller a few seconds to compute. Without a follow-up read, Home
+    Assistant shows that reaction only on the next regular poll.
+    """
+
+    @staticmethod
+    def _confirming_coordinator(parameter: str, value: Any):
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock()
+
+        async def fake_refresh():
+            coord.data = LuxtronikCoordinatorData(
+                parameters={parameter: (0, value)}, calculations={}, visibilities={}
+            )
+
+        coord.async_refresh = fake_refresh
+        coord.async_request_refresh = AsyncMock()
+        return coord
+
+    @pytest.mark.asyncio
+    async def test_confirmed_write_schedules_follow_up_refresh(self):
+        coord = self._confirming_coordinator("p1", 42)
+        with patch(
+            "custom_components.luxtronik2.coordinator.async_call_later"
+        ) as call_later:
+            await coord.async_write("p1", 42)
+
+        call_later.assert_called_once()
+        hass, delay, action = call_later.call_args.args
+        assert hass is coord.hass
+        assert delay == WRITE_FOLLOWUP_DELAY
+
+        coord.async_request_refresh.assert_not_called()
+        await action(None)
+        coord.async_request_refresh.assert_awaited_once()
+        assert coord._write_followup_unsub is None
+
+    @pytest.mark.asyncio
+    async def test_burst_of_writes_keeps_only_last_follow_up(self):
+        coord = self._confirming_coordinator("p1", 42)
+        first_unsub = MagicMock()
+        second_unsub = MagicMock()
+        with patch(
+            "custom_components.luxtronik2.coordinator.async_call_later",
+            side_effect=[first_unsub, second_unsub],
+        ):
+            await coord.async_write("p1", 42)
+            await coord.async_write("p1", 42)
+
+        first_unsub.assert_called_once()
+        second_unsub.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_failed_write_schedules_no_follow_up(self):
+        coord = _make_coordinator_direct()
+        coord.hass.async_add_executor_job = AsyncMock(
+            side_effect=Exception("write fail")
+        )
+        with (
+            patch(
+                "custom_components.luxtronik2.coordinator.async_call_later"
+            ) as call_later,
+            pytest.raises(LuxtronikWriteError),
+        ):
+            await coord.async_write("p1", 1)
+
+        call_later.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_new_write_cancels_stale_follow_up_before_writing(self):
+        """The pending timer goes before the next write starts, not after it
+        confirms - so a follow-up armed by write A cannot fire in the middle
+        of write B's (possibly seconds-long) confirmation loop."""
+        coord = self._confirming_coordinator("p1", 42)
+        stale_unsub = MagicMock()
+        with patch(
+            "custom_components.luxtronik2.coordinator.async_call_later",
+            return_value=stale_unsub,
+        ):
+            await coord.async_write("p1", 42)
+
+        coord.hass.async_add_executor_job = AsyncMock(
+            side_effect=Exception("write fail")
+        )
+        with (
+            patch("custom_components.luxtronik2.coordinator.async_call_later"),
+            pytest.raises(LuxtronikWriteError),
+        ):
+            await coord.async_write("p1", 43)
+
+        stale_unsub.assert_called_once()
+        assert coord._write_followup_unsub is None
+
+    @pytest.mark.asyncio
+    async def test_shutdown_cancels_pending_follow_up(self):
+        coord = self._confirming_coordinator("p1", 42)
+        unsub = MagicMock()
+        with patch(
+            "custom_components.luxtronik2.coordinator.async_call_later",
+            return_value=unsub,
+        ):
+            await coord.async_write("p1", 42)
+
+        with patch.object(
+            LuxtronikCoordinator.__bases__[0], "async_shutdown", new_callable=AsyncMock
+        ):
+            await coord.async_shutdown()
+
+        unsub.assert_called_once()
 
 
 class TestWriteConfirmed:
