@@ -1398,6 +1398,9 @@
         "invalid_timer_schedule": {
             "message": "Ungültiger Zeitschaltplan \"{value}\": erwartet werden \"HH:MM-HH:MM\"-Einträge, getrennt durch \"/\", mit maximal {max_rows} Einträgen. Startzeiten reichen von \"00:00\" bis \"23:59\"; als Endzeit ist zusätzlich \"24:00\" möglich, was dasselbe bedeutet wie \"00:00\" - Mitternacht"
         },
+        "timer_schedule_all_day_unsupported": {
+            "message": "\"{value}\" kann nicht geschrieben werden: bei dieser Wärmepumpe wurde noch nie ein gespeichertes \"24:00\" beobachtet, und \"00:00-00:00\" würde ein unbenutztes Zeitfenster statt des ganzen Tages bedeuten. Verwenden Sie \"00:00-23:59\", oder stellen Sie einmal \"24:00\" direkt am Regler ein, damit die Integration es übernehmen kann"
+        },
         "write_confirmation_mismatch": {
             "message": "Die Luxtronik-Wärmepumpe hat die geschriebenen Werte nicht bestätigt: {details}"
         },

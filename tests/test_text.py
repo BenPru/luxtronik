@@ -438,6 +438,31 @@ class TestLuxtronikTimerScheduleText:
         assert (end0, "24:00") not in pairs
 
     @pytest.mark.asyncio
+    async def test_set_value_refuses_an_all_day_window_by_default(self):
+        """ "00:00-24:00" has no "00:00" spelling: it would become the unused row."""
+        entity, coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        coord.data = make_coordinator_data(parameters={start0: "14:00", end0: "22:00"})
+
+        with pytest.raises(ServiceValidationError) as excinfo:
+            await entity.async_set_value("00:00-24:00")
+
+        assert excinfo.value.translation_key == "timer_schedule_all_day_unsupported"
+        coord.async_write_many.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_set_value_writes_an_all_day_window_once_supported(self):
+        entity, coord, description = self._make_entity(supports_24_00=True)
+        start0, end0 = description.row_names[0]
+        coord.data = make_coordinator_data(parameters={start0: "14:00", end0: "22:00"})
+
+        await entity.async_set_value("00:00-24:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (start0, "00:00") in pairs
+        assert (end0, "24:00") in pairs
+
+    @pytest.mark.asyncio
     async def test_set_value_writes_24_00_verbatim_once_supported(self):
         entity, coord, description = self._make_entity(supports_24_00=True)
         start0, end0 = description.row_names[0]
@@ -454,8 +479,9 @@ class TestLuxtronikTimerScheduleText:
         """Editing another row must not rewrite a "24:00" the controller set.
 
         Without midnight-equivalence the normalized "00:00" would look like a
-        change, silently clearing a row the user never touched - and with it
-        the only evidence the capability latch has.
+        change, silently clearing a row the user never touched. (The entity
+        can still see "24:00" here because it snapshots the latch at setup,
+        while the reload that follows the coordinator's latch is pending.)
         """
         entity, coord, description = self._make_entity()
         start0, end0 = description.row_names[0]

@@ -238,9 +238,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if evidence is None:
             return
 
-        # Logging the parameter, not just the value: if this ever latches
-        # wrongly, the name is what makes the report diagnosable.
-        LOGGER.debug(
+        # Info, not debug: this reloads the entry once and permanently changes
+        # what a typed "24:00" writes, so it should be findable in a normal
+        # log. Logging the parameter, not just the value: if this ever
+        # latches wrongly, the name is what makes the report diagnosable.
+        LOGGER.info(
             "%s holds %s - writing that end time verbatim from now on",
             evidence,
             LUX_SCHEDULE_TIME_24_00,

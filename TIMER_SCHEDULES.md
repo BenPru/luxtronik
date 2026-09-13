@@ -46,6 +46,7 @@ The integration handles both without you having to configure anything:
 
 - `24:00` is always accepted as an end time in the text field, on any heat pump.
 - If your controller has never been seen holding a `24:00`, the integration writes `00:00` instead — the same window, in the spelling every controller stores. A `24:00` you type will therefore read back as `00:00`.
+- The one exception is a whole-day window, `00:00-24:00`: respelled it would become `00:00-00:00`, which is the *unused* row, so on such a controller the integration refuses it instead. Use `00:00-23:59` there.
 - The first time the integration reads a `24:00` out of one of your schedule registers, it takes that as proof your controller supports it and remembers it for that heat pump. From then on `24:00` is written through unchanged.
 
 Since only the controller itself can put a `24:00` into a register, that observation is the evidence — there is nothing in the protocol that advertises the capability. If you want `24:00` on a controller that supports it, set it once on the controller or its web interface; the integration will pick it up from the next poll onwards.

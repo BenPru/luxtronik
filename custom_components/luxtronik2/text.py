@@ -477,6 +477,21 @@ class LuxtronikTimerScheduleText(
             # everywhere else it becomes "00:00", the same instant in the
             # spelling every controller accepts. See
             # `LuxtronikCoordinator._detect_time_24_00_support`.
+            #
+            # The one window that cannot be respelled is the whole day:
+            # "00:00-00:00" is the unused row, so "00:00-24:00" would flip
+            # into the opposite of what was asked. Refuse it rather than
+            # silently choose "23:59" on the user's behalf.
+            if (
+                not self._supports_24_00
+                and start == _UNSET_TIME
+                and typed_end == LUX_SCHEDULE_TIME_24_00
+            ):
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="timer_schedule_all_day_unsupported",
+                    translation_placeholders={"value": value},
+                )
             end = (
                 typed_end
                 if self._supports_24_00 or typed_end != LUX_SCHEDULE_TIME_24_00

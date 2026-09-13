@@ -1398,6 +1398,9 @@
         "invalid_timer_schedule": {
             "message": "Invalid timer schedule \"{value}\": expected \"HH:MM-HH:MM\" entries separated by \"/\", with at most {max_rows} entries. Start times run from \"00:00\" to \"23:59\"; an end time may also be \"24:00\", which means the same as \"00:00\" - midnight"
         },
+        "timer_schedule_all_day_unsupported": {
+            "message": "Cannot write \"{value}\": this heat pump has not been seen to store \"24:00\", and \"00:00-00:00\" would mean an unused window instead of the whole day. Use \"00:00-23:59\", or set a \"24:00\" once on the controller itself so the integration can pick it up"
+        },
         "write_confirmation_mismatch": {
             "message": "Luxtronik heat pump did not confirm the written value(s): {details}"
         },

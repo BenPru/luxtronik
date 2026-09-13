@@ -2401,6 +2401,21 @@ class TestDetectTime2400Support:
 
         update_entry.assert_not_called()
 
+    async def test_latches_from_a_poll(self, hass: HomeAssistant) -> None:
+        """The detection has to be wired into `_async_update_data` itself."""
+        coord, entry = self._coordinator(hass)
+        data = self._data(
+            ID_Einst_BwWO_zeit_0_0="14:00", ID_Einst_BwWO_zeit_0_1="24:00"
+        )
+        coord.client.parameters = data.parameters
+        coord.client.calculations = data.calculations
+        coord.client.visibilities = data.visibilities
+
+        await coord._async_update_data()
+        await hass.async_block_till_done()
+
+        assert entry.data[CONF_SUPPORTS_TIME_24_00] is True
+
     async def test_is_a_no_op_without_a_config_entry(self) -> None:
         """Diagnostics and tests build coordinators with no entry attached."""
         coord = _make_coordinator()
