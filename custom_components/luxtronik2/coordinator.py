@@ -17,6 +17,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from packaging.version import InvalidVersion, Version
@@ -79,6 +80,14 @@ from .model import LuxtronikCoordinatorData, LuxtronikEntityDescription
 WRITE_CONFIRM_MAX_ATTEMPTS = 6
 WRITE_CONFIRM_INITIAL_DELAY = 0.1
 WRITE_CONFIRM_MAX_DELAY = 1.0
+# Seconds after a confirmed write before one follow-up read. The controller
+# stores a written value at once, but whatever behaviour it triggers (a DHW
+# run starting after a setpoint change, say) takes it a few seconds to work
+# out; without this read that reaction only shows up on the next regular poll.
+# Relies on the confirming `async_refresh` having cleared the coordinator's
+# request-refresh debouncer, so the follow-up runs at +4 s rather than being
+# held back by the debouncer's 10 s cooldown.
+WRITE_FOLLOWUP_DELAY = 4.0
 
 # Values a temperature register reports when nothing is wired to it. 0.0 is
 # the absent-hardware reading; 5.0 and 75.0 are the controller's placeholders,
@@ -125,6 +134,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._dhw_hold_until: datetime | None = None
         # Latch for the ventilation module; see has_ventilation.
         self._ventilation_detected = False
+        # Cancels the pending follow-up read; see _schedule_write_followup().
+        self._write_followup_unsub: Callable[[], None] | None = None
 
         update_interval: timedelta = DEFAULT_UPDATE_INTERVAL
         raw = config.get(CONF_UPDATE_INTERVAL)
@@ -281,6 +292,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         keeping the optimistic one.
         """
         try:
+            # A follow-up armed by the previous write must not fire in the
+            # middle of this one; it is re-armed once this write confirms.
+            self._cancel_write_followup()
             async with self._lock:
                 # This batch owns the queue. `_write` empties it on every exit
                 # path, but a failure before `_write` is entered - a
@@ -366,11 +380,37 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     translation_placeholders={"details": "; ".join(mismatches)},
                 )
 
+            self._schedule_write_followup()
             return self.data
         except HomeAssistantError:
             raise
         except Exception as err:
             raise LuxtronikWriteError(f"Write error: {err}") from err
+
+    @callback
+    def _schedule_write_followup(self) -> None:
+        """Arm one follow-up read WRITE_FOLLOWUP_DELAY after the latest write.
+
+        A burst of writes (a multi-row schedule edit, several numbers in a
+        row) re-arms the same timer rather than stacking reads, so it costs a
+        single extra read after the last write of the burst.
+        """
+        self._cancel_write_followup()
+
+        async def _followup(_now: datetime) -> None:
+            self._write_followup_unsub = None
+            LOGGER.debug("Follow-up refresh (%.1f s after write)", WRITE_FOLLOWUP_DELAY)
+            await self.async_request_refresh()
+
+        self._write_followup_unsub = async_call_later(
+            self.hass, WRITE_FOLLOWUP_DELAY, _followup
+        )
+
+    @callback
+    def _cancel_write_followup(self) -> None:
+        if self._write_followup_unsub is not None:
+            self._write_followup_unsub()
+            self._write_followup_unsub = None
 
     @staticmethod
     async def connect(  # pragma: no cover
@@ -1044,6 +1084,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     async def async_shutdown(self) -> None:
         """Make sure a coordinator is shut down as well as its connection."""
+        self._cancel_write_followup()
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
             await self.hass.async_add_executor_job(self.client.disconnect)
