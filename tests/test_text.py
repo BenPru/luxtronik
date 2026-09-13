@@ -22,6 +22,7 @@ from conftest import DEFAULT_PARAMETERS, make_coordinator_data
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
+    CONF_SUPPORTS_TIME_24_00,
     CONFIG_ENTRY_VERSION,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
@@ -228,6 +229,38 @@ class TestParseSchedule:
         with pytest.raises(ServiceValidationError):
             _parse_schedule("06:00_22:00", 5)  # wrong separator
 
+    def test_rejects_24_00_as_a_start_time(self):
+        from custom_components.luxtronik2.text import _parse_schedule
+
+        with pytest.raises(ServiceValidationError):
+            _parse_schedule("24:00-06:00", 5)
+
+    def test_rejects_times_past_24_00(self):
+        from custom_components.luxtronik2.text import _parse_schedule
+
+        for value in ("06:00-24:01", "06:00-25:00"):
+            with pytest.raises(ServiceValidationError):
+                _parse_schedule(value, 5)
+
+    def test_returns_24_00_as_typed(self):
+        """The parser reports what was typed; the write path decides the rest."""
+        from custom_components.luxtronik2.text import _parse_schedule
+
+        assert _parse_schedule("14:00-24:00", 5) == [("14:00", "24:00")]
+
+    def test_rejects_a_trailing_newline(self):
+        """A trailing newline must not slip past - "$" matches before one.
+
+        It would be compared as a string against the device value and against
+        "24:00" on the write path, and `TimeOfDay.to_heatpump` strips it - so
+        a newline would defeat the normalization and send 86400 to a
+        controller never shown to accept it.
+        """
+        from custom_components.luxtronik2.text import _parse_schedule
+
+        with pytest.raises(ServiceValidationError):
+            _parse_schedule("14:00-24:00" + chr(10), 5)
+
 
 # ===========================================================================
 # LuxtronikTimerScheduleText
@@ -235,7 +268,12 @@ class TestParseSchedule:
 
 
 class TestLuxtronikTimerScheduleText:
-    def _make_entity(self, key=SK.TIMER_DHW_SCHEDULE_WEEK, parameters=None):
+    def _make_entity(
+        self,
+        key=SK.TIMER_DHW_SCHEDULE_WEEK,
+        parameters=None,
+        supports_24_00: bool = False,
+    ):
         from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
 
         description = next(d for d in TIMER_SCHEDULE_ENTITIES if d.key == key)
@@ -243,6 +281,8 @@ class TestLuxtronikTimerScheduleText:
         data = make_coordinator_data(parameters=parameters or {})
         coord = _mock_coordinator(data)
         entry = _mock_entry()
+        if supports_24_00:
+            entry.data[CONF_SUPPORTS_TIME_24_00] = True
 
         with patch("homeassistant.helpers.frame.report_usage"):
             entity = LuxtronikTimerScheduleText(
@@ -382,6 +422,145 @@ class TestLuxtronikTimerScheduleText:
 
         coord.async_write_many.assert_not_called()
         coord.async_write.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_set_value_writes_midnight_for_24_00_by_default(self):
+        """A "24:00" typed in HA reaches an unproven controller as "00:00"."""
+        entity, coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        data = make_coordinator_data(parameters={start0: "14:00", end0: "22:00"})
+        coord.data = data
+
+        await entity.async_set_value("14:00-24:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (end0, "00:00") in pairs
+        assert (end0, "24:00") not in pairs
+
+    @pytest.mark.asyncio
+    async def test_set_value_refuses_an_all_day_window_by_default(self):
+        """ "00:00-24:00" has no "00:00" spelling: it would become the unused row."""
+        entity, coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        coord.data = make_coordinator_data(parameters={start0: "14:00", end0: "22:00"})
+
+        with pytest.raises(ServiceValidationError) as excinfo:
+            await entity.async_set_value("00:00-24:00")
+
+        assert excinfo.value.translation_key == "timer_schedule_all_day_unsupported"
+        coord.async_write_many.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_set_value_writes_an_all_day_window_once_supported(self):
+        entity, coord, description = self._make_entity(supports_24_00=True)
+        start0, end0 = description.row_names[0]
+        coord.data = make_coordinator_data(parameters={start0: "14:00", end0: "22:00"})
+
+        await entity.async_set_value("00:00-24:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (start0, "00:00") in pairs
+        assert (end0, "24:00") in pairs
+
+    @pytest.mark.asyncio
+    async def test_set_value_writes_24_00_verbatim_once_supported(self):
+        entity, coord, description = self._make_entity(supports_24_00=True)
+        start0, end0 = description.row_names[0]
+        data = make_coordinator_data(parameters={start0: "14:00", end0: "22:00"})
+        coord.data = data
+
+        await entity.async_set_value("14:00-24:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (end0, "24:00") in pairs
+
+    @pytest.mark.asyncio
+    async def test_set_value_leaves_an_existing_24_00_alone(self):
+        """Editing another row must not rewrite a "24:00" the controller set.
+
+        Without midnight-equivalence the normalized "00:00" would look like a
+        change, silently clearing a row the user never touched. (The entity
+        can still see "24:00" here because it snapshots the latch at setup,
+        while the reload that follows the coordinator's latch is pending.)
+        """
+        entity, coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        start1, end1 = description.row_names[1]
+        row_values = {name: "00:00" for pair in description.row_names for name in pair}
+        row_values[start0] = "14:00"
+        row_values[end0] = "24:00"
+        data = make_coordinator_data(parameters=row_values)
+        coord.data = data
+
+        await entity.async_set_value("14:00-24:00/07:30-21:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert [name for name, _ in pairs] == [start1, end1]
+
+    @pytest.mark.asyncio
+    async def test_set_value_can_clear_a_24_00_once_supported(self):
+        """With the latch armed the user's spelling is authoritative again."""
+        entity, coord, description = self._make_entity(supports_24_00=True)
+        start0, end0 = description.row_names[0]
+        row_values = {name: "00:00" for pair in description.row_names for name in pair}
+        row_values[start0] = "14:00"
+        row_values[end0] = "24:00"
+        data = make_coordinator_data(parameters=row_values)
+        coord.data = data
+
+        await entity.async_set_value("14:00-00:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (end0, "00:00") in pairs
+
+    @pytest.mark.asyncio
+    async def test_set_value_clears_a_row_holding_24_00(self):
+        """Clearing a row must leave it unused, not turn it into an all-day one.
+
+        A row left at start=00:00 / end=24:00 is not an unused row: only a
+        both-00:00 pair is (see TIMER_SCHEDULES.md). On DHW that would block
+        hot water around the clock - the opposite of what clearing the field
+        asks for.
+        """
+        entity, coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        row_values = {name: "00:00" for pair in description.row_names for name in pair}
+        row_values[start0] = "18:00"
+        row_values[end0] = "24:00"
+        data = make_coordinator_data(parameters=row_values)
+        coord.data = data
+
+        await entity.async_set_value("")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (start0, "00:00") in pairs
+        assert (end0, "00:00") in pairs
+
+    @pytest.mark.asyncio
+    async def test_set_value_overwrites_a_24_00_row_with_a_real_window(self):
+        """Only a typed "24:00" is protected - any other end time wins."""
+        entity, coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        row_values = {name: "00:00" for pair in description.row_names for name in pair}
+        row_values[start0] = "18:00"
+        row_values[end0] = "24:00"
+        data = make_coordinator_data(parameters=row_values)
+        coord.data = data
+
+        await entity.async_set_value("18:00-22:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert (end0, "22:00") in pairs
+
+    def test_handle_coordinator_update_preserves_a_device_24_00(self):
+        """Read path never normalizes - it shows what the register holds."""
+        entity, _coord, description = self._make_entity()
+        start0, end0 = description.row_names[0]
+        data = make_coordinator_data(parameters={start0: "14:00", end0: "24:00"})
+
+        entity._handle_coordinator_update(data)
+
+        assert entity._attr_native_value == "14:00-24:00"
 
     @pytest.mark.asyncio
     async def test_set_value_rejects_invalid_input(self):

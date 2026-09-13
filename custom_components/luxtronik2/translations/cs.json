@@ -1396,7 +1396,10 @@
             "message": "Nepodařilo se najít načtené tepelné čerpadlo Luxtronik pro cíl {target}"
         },
         "invalid_timer_schedule": {
-            "message": "Neplatný časový plán \"{value}\": očekávají se položky \"HH:MM-HH:MM\" oddělené znakem \"/\", maximálně {max_rows} položek"
+            "message": "Neplatný časový plán \"{value}\": očekávají se položky \"HH:MM-HH:MM\" oddělené znakem \"/\", maximálně {max_rows} položek. Počáteční časy jsou v rozsahu \"00:00\" až \"23:59\"; koncový čas může být také \"24:00\", což znamená totéž jako \"00:00\" - půlnoc"
+        },
+        "timer_schedule_all_day_unsupported": {
+            "message": "Nelze zapsat \"{value}\": u tohoto tepelného čerpadla nebylo dosud pozorováno uložené \"24:00\" a \"00:00-00:00\" by znamenalo nepoužité okno místo celého dne. Použijte \"00:00-23:59\", nebo jednou nastavte \"24:00\" přímo na regulátoru, aby si to integrace převzala"
         },
         "write_confirmation_mismatch": {
             "message": "Tepelné čerpadlo Luxtronik nepotvrdilo zapsané hodnoty: {details}"

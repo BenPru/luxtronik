@@ -23,7 +23,14 @@ from homeassistant.helpers.entity_registry import (
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
 from .common import get_sensor_data, key_exists
-from .const import CONF_HA_SENSOR_PREFIX, DOMAIN, LOGGER, DeviceKey
+from .const import (
+    CONF_HA_SENSOR_PREFIX,
+    CONF_SUPPORTS_TIME_24_00,
+    DOMAIN,
+    LOGGER,
+    LUX_SCHEDULE_TIME_24_00,
+    DeviceKey,
+)
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikTimerScheduleTextDescription
 from .timer_schedule_entities_predefined import TIMER_SCHEDULE_ENTITIES
@@ -31,7 +38,12 @@ from .timer_schedule_entities_predefined import TIMER_SCHEDULE_ENTITIES
 PARALLEL_UPDATES = 1
 
 _UNSET_TIME = "00:00"
-_PAIR_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d-([01]\d|2[0-3]):[0-5]\d$")
+# "24:00" is accepted in the end position only - a start time of "24:00" would
+# be meaningless. Accepting it says nothing about whether the controller can
+# store it; see `_parse_schedule`.
+_PAIR_PATTERN = re.compile(
+    r"^([01]\d|2[0-3]):[0-5]\d-((?:[01]\d|2[0-3]):[0-5]\d|24:00)$"
+)
 
 
 def _timer_schedule_unique_id(
@@ -341,6 +353,10 @@ async def async_setup_entry(  # pragma: no cover
 def _parse_schedule(value: str, max_rows: int) -> list[tuple[str, str]]:
     """Parse a "HH:MM-HH:MM/HH:MM-HH:MM/..." schedule string into pairs.
 
+    Returns exactly what the user typed, "24:00" included; deciding what
+    actually reaches the device is `async_set_value`'s job, because that
+    decision needs the value currently on the device as well.
+
     Raises ServiceValidationError if the string doesn't match the expected
     shape or supplies more entries than the block has rows.
     """
@@ -348,8 +364,12 @@ def _parse_schedule(value: str, max_rows: int) -> list[tuple[str, str]]:
         return []
 
     entries = value.split("/")
+    # fullmatch, not match: "$" also matches before a trailing newline, and a
+    # trailing-newline end time slipping through would defeat the "24:00"
+    # handling in `async_set_value`, which compares the end time as a
+    # string.
     if len(entries) > max_rows or not all(
-        _PAIR_PATTERN.match(entry) for entry in entries
+        _PAIR_PATTERN.fullmatch(entry) for entry in entries
     ):
         raise ServiceValidationError(
             translation_domain=DOMAIN,
@@ -385,6 +405,14 @@ class LuxtronikTimerScheduleText(
         )
         self.entity_id = _timer_schedule_unique_id(entry, description)
         self._attr_unique_id = self.entity_id
+        # Refreshed by the reload that arming the flag triggers, which
+        # rebuilds every entity (see
+        # `LuxtronikCoordinator._detect_time_24_00_support`). It is stale for
+        # the length of that reload, and on first setup the flag is armed
+        # before the update listener is even registered - the write-diff
+        # guard in `async_set_value` is what covers those gaps, so it is not
+        # dead code.
+        self._supports_24_00 = bool(entry.data.get(CONF_SUPPORTS_TIME_24_00, False))
         self._attr_mode = TextMode.TEXT
         self._attr_native_min = 0
         # Each "HH:MM-HH:MM" pair is 11 chars, joined by a single "/". The
@@ -442,12 +470,49 @@ class LuxtronikTimerScheduleText(
         data = self.coordinator.data
         writes: list[tuple[str, str]] = []
         for index, (start_name, end_name) in enumerate(row_names):
-            start, end = (
+            start, typed_end = (
                 pairs[index] if index < len(pairs) else (_UNSET_TIME, _UNSET_TIME)
             )
+            # "24:00" only reaches a controller already known to store it;
+            # everywhere else it becomes "00:00", the same instant in the
+            # spelling every controller accepts. See
+            # `LuxtronikCoordinator._detect_time_24_00_support`.
+            #
+            # The one window that cannot be respelled is the whole day:
+            # "00:00-00:00" is the unused row, so "00:00-24:00" would flip
+            # into the opposite of what was asked. Refuse it rather than
+            # silently choose "23:59" on the user's behalf.
+            if (
+                not self._supports_24_00
+                and start == _UNSET_TIME
+                and typed_end == LUX_SCHEDULE_TIME_24_00
+            ):
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="timer_schedule_all_day_unsupported",
+                    translation_placeholders={"value": value},
+                )
+            end = (
+                typed_end
+                if self._supports_24_00 or typed_end != LUX_SCHEDULE_TIME_24_00
+                else _UNSET_TIME
+            )
+
             if get_sensor_data(data, f"parameters.{start_name}") != start:
                 writes.append((start_name, start))
-            if get_sensor_data(data, f"parameters.{end_name}") != end:
+            current_end = get_sensor_data(data, f"parameters.{end_name}")
+            if current_end != end and not (
+                # The user asked for the midnight the device already holds,
+                # just spelled the other way: leave it alone rather than
+                # rewrite it as part of an edit to some other row. Keyed on
+                # what was *typed*, not on the normalized `end`, so clearing a
+                # row still clears it - "00:00" here is a request for an
+                # unused row, and a row left at 86400 would read back as an
+                # all-day window instead (see TIMER_SCHEDULES.md).
+                not self._supports_24_00
+                and typed_end == LUX_SCHEDULE_TIME_24_00
+                and current_end == LUX_SCHEDULE_TIME_24_00
+            ):
                 writes.append((end_name, end))
 
         if writes:

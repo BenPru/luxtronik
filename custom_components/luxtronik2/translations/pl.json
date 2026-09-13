@@ -1396,7 +1396,10 @@
             "message": "Nie udało się znaleźć załadowanej pompy ciepła Luxtronik dla celu {target}"
         },
         "invalid_timer_schedule": {
-            "message": "Nieprawidłowy harmonogram czasowy \"{value}\": oczekiwane są wpisy \"HH:MM-HH:MM\" oddzielone znakiem \"/\", maksymalnie {max_rows} wpisów"
+            "message": "Nieprawidłowy harmonogram czasowy \"{value}\": oczekiwane są wpisy \"HH:MM-HH:MM\" oddzielone znakiem \"/\", maksymalnie {max_rows} wpisów. Godziny rozpoczęcia mieszczą się w zakresie od \"00:00\" do \"23:59\"; godziną zakończenia może być także \"24:00\", co oznacza to samo co \"00:00\" - północ"
+        },
+        "timer_schedule_all_day_unsupported": {
+            "message": "Nie można zapisać \"{value}\": w tej pompie ciepła nie zaobserwowano dotąd zapisanej wartości \"24:00\", a \"00:00-00:00\" oznaczałoby nieużywane okno zamiast całego dnia. Użyj \"00:00-23:59\" albo ustaw raz \"24:00\" bezpośrednio na sterowniku, aby integracja mogła to przejąć"
         },
         "write_confirmation_mismatch": {
             "message": "Pompa ciepła Luxtronik nie potwierdziła zapisanych wartości: {details}"

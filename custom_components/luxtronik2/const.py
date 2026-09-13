@@ -82,6 +82,17 @@ CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: Final = "ha_sensor_current_power_consu
 
 CONF_MAX_DATA_LENGTH: Final = "max_data_length"
 
+# Latched into the config entry the first time a schedule register is seen
+# holding LUX_SCHEDULE_TIME_24_00 - see
+# LuxtronikCoordinator._detect_time_24_00_support(). Absence reads as False,
+# so no config entry migration is needed.
+CONF_SUPPORTS_TIME_24_00: Final = "supports_time_24_00"
+
+# End-of-day spelling some controllers accept for a schedule end time, stored
+# as 86400 seconds. Most controllers cap at "23:59" and reject it - see
+# TIMER_SCHEDULES.md and issue #787.
+LUX_SCHEDULE_TIME_24_00: Final = "24:00"
+
 DEFAULT_HOST: Final = ""
 DEFAULT_PORT: Final = 8889
 DEFAULT_TIMEOUT: Final = 60.0

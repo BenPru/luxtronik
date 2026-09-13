@@ -26,6 +26,7 @@ from .const import (
     CONF_CALCULATIONS,
     CONF_MAX_DATA_LENGTH,
     CONF_PARAMETERS,
+    CONF_SUPPORTS_TIME_24_00,
     CONF_UPDATE_INTERVAL,
     CONF_VISIBILITIES,
     DEFAULT_MAX_DATA_LENGTH,
@@ -36,6 +37,7 @@ from .const import (
     DOMAIN,
     LOGGER,
     LUX_PARAMETER_MK_SENSORS,
+    LUX_SCHEDULE_TIME_24_00,
     UPDATE_INTERVAL_OPTIONS,
     DeviceKey,
     LuxCalculation as LC,
@@ -47,6 +49,7 @@ from .const import (
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
 from .lux_overrides import (
+    TimeOfDay,
     isolate_instance_data,
     name_unknown_visibilities_correctly,
     record_parsed_block_lengths,
@@ -160,6 +163,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     visibilities=self.client.visibilities,
                 )
                 self._update_dhw_transition_hold(data)
+                self._detect_time_24_00_support(data)
                 self.data = data
 
                 return self.data
@@ -199,6 +203,57 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return
 
         self._dhw_hold_until = None
+
+    def _detect_time_24_00_support(self, data: LuxtronikCoordinatorData) -> None:
+        """Latch whether this controller accepts "24:00" as a schedule end time.
+
+        Most controllers cap schedule times at "23:59" and reject "24:00"; a
+        few accept it and store 86400 (issue #787). Nothing in the protocol
+        advertises which behaviour a unit has, but a register can only hold
+        86400 because the controller itself put it there - so seeing the value
+        once is proof that this firmware accepts it, and is the only evidence
+        available.
+
+        Latched into the config entry rather than kept in memory: the evidence
+        disappears the moment the user edits that row away, and the capability
+        must not disappear with it. Absence of the key reads as False, so no
+        entry migration is needed.
+
+        Matching on the datatype rather than on a parameter index list keeps
+        this correct if `lux_overrides` ever maps another circuit's schedule
+        parameters to `TimeOfDay`.
+        """
+        entry = self.config_entry
+        if entry is None or entry.data.get(CONF_SUPPORTS_TIME_24_00):
+            return
+        evidence = next(
+            (
+                sensor.name
+                for sensor in data.parameters.parameters.values()
+                if isinstance(sensor, TimeOfDay)
+                and sensor.value == LUX_SCHEDULE_TIME_24_00
+            ),
+            None,
+        )
+        if evidence is None:
+            return
+
+        # Info, not debug: this reloads the entry once and permanently changes
+        # what a typed "24:00" writes, so it should be findable in a normal
+        # log. Logging the parameter, not just the value: if this ever
+        # latches wrongly, the name is what makes the report diagnosable.
+        LOGGER.info(
+            "%s holds %s - writing that end time verbatim from now on",
+            evidence,
+            LUX_SCHEDULE_TIME_24_00,
+        )
+        # Updating the entry fires the update listener, which reloads the
+        # entry (see `__init__.update_listener`). That is how the new
+        # capability reaches the schedule entities, and it happens exactly
+        # once: the guard above sees the flag on every later poll.
+        self.hass.config_entries.async_update_entry(
+            entry, data={**entry.data, CONF_SUPPORTS_TIME_24_00: True}
+        )
 
     async def async_write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
         """Write a single parameter to the heat pump and confirm it stuck.
