@@ -581,10 +581,49 @@ class TestTimerScheduleDatatypeCoverage:
         update_Luxtronik_Parameters()
         return Parameters.parameters
 
-    def test_ventilation_selector_is_a_timer_program(self):
-        from custom_components.luxtronik2.lux_overrides import TimerProgram
+    def test_ventilation_selector_has_its_own_code_table(self):
+        """P895 is offset by 3 from the other circuits (#789).
 
-        assert isinstance(self._applied()[895], TimerProgram)
+        A controller with a ventilation module reports 3 for week and 4 for
+        5+2 (read off the Lueftung -> Zeitschaltprogramm menu); the heating
+        and DHW selectors report 0 and 1 for the same shapes.
+        """
+        from custom_components.luxtronik2.lux_overrides import (
+            TimerProgram,
+            VentilationTimerProgram,
+        )
+
+        selector = self._applied()[895]
+        assert isinstance(selector, VentilationTimerProgram)
+        assert not isinstance(selector, TimerProgram)
+        assert selector.from_heatpump(3) == "week"
+        assert selector.from_heatpump(4) == "5+2"
+        assert selector.from_heatpump(5) == "days"
+        assert selector.to_heatpump("week") == 3
+        assert selector.to_heatpump("5+2") == 4
+        assert selector.to_heatpump("days") == 5
+
+    def test_ventilation_selector_reads_zero_as_no_module(self):
+        """Every sampled unit without a module reports 0; that is not a shape.
+
+        0 must decode to None without tripping the unknown-code warning,
+        which skips raw 0 only when the table has no entry for it.
+        """
+        selector = self._applied()[895]
+        assert 0 not in selector.codes
+        assert selector.from_heatpump(0) is None
+
+    def test_pool_selector_is_a_time_of_day(self):
+        """P607 is a time slot, not a mode selector (#789).
+
+        Three units (V3.86.1, V3.90.1, V3.92.3) report 23400/25200/27000
+        there - 06:30/07:00/07:30 - each followed by an end time in 608. The
+        upstream name ``ID_Einst_SuSwb_akt`` is a guess; nothing reads it.
+        """
+        from custom_components.luxtronik2.lux_overrides import TimeOfDay
+
+        assert isinstance(self._applied()[607], TimeOfDay)
+        assert self._applied()[607].from_heatpump(27000) == "07:30"
 
     def test_ventilation_times_are_time_of_day(self):
         from custom_components.luxtronik2.lux_overrides import TimeOfDay

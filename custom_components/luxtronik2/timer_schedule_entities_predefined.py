@@ -147,8 +147,9 @@ _VENTILATION_CIRCUIT = _TimerCircuit(
     name_builder=_row_names_block_row_col,
     device_key=DeviceKey.ventilation,
 )
-# The selector's week/5+2/days codes are assumed to match the other circuits;
-# see lux_overrides.update_Luxtronik_Parameters. Also inferred, not sampled.
+# The selector's codes are offset by 3 from the other circuits (3/4/5, see
+# lux_overrides.VentilationTimerProgram); week and 5+2 were sampled on a real
+# module (#789), days is inferred. The row/column naming is still inferred.
 
 _VENTILATION_WEEKDAYS: tuple[tuple[SK, int], ...] = (
     (SK.TIMER_VENTILATION_SCHEDULE_MONDAY, 0),
