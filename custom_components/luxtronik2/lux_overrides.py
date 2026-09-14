@@ -147,7 +147,10 @@ class VentilationTimerProgram(SelectionBase):
     Lueftung -> Zeitschaltprogramm menu reports 3 for week and 4 for 5+2, so
     5 for days is inferred, not sampled. Every unit without a module reports
     0, which is "no module" rather than a shape - deliberately absent from
-    the table so it decodes to None without the unknown-code warning.
+    the table so it decodes to None without the unknown-code warning. Should
+    a unit with a module ever report 0, the ventilation select shows an
+    empty state and no schedule text entity is active; no such unit has
+    been seen.
     """
 
     codes = {

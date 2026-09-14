@@ -506,6 +506,22 @@ class TestUnknownSelectionCodeWarning:
         assert BivalenceLevel("ID_WEB_BIV_Stufe_akt").from_heatpump(0) is None
         assert caplog.text == ""
 
+    def test_ventilation_selector_without_module_does_not_warn(
+        self, restore_selection_base, caplog
+    ):
+        """P895 reads 0 on every unit without a ventilation module (#789)."""
+        from custom_components.luxtronik2.lux_overrides import (
+            VentilationTimerProgram,
+        )
+
+        lux_overrides.warn_on_unknown_selection_codes()
+        selector = VentilationTimerProgram("ID_Einst_SuLuf_akt")
+        assert selector.from_heatpump(0) is None
+        assert caplog.text == ""
+        # A module unit on a code outside 3-5 must still ask to be reported.
+        assert selector.from_heatpump(6) is None
+        assert "ID_Einst_SuLuf_akt" in caplog.text
+
 
 class TestSwitchoffCodes:
     def test_table_matches_switchoff_reason_translations(self):
