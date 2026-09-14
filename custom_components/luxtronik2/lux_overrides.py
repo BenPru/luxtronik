@@ -140,6 +140,26 @@ class TimerProgram(SelectionBase):
     }
 
 
+class VentilationTimerProgram(SelectionBase):
+    """The ventilation circuit's selector (P895) counts from 3, not 0.
+
+    Read off a KHZ LWC 60 with a ventilation module (#789): the controller's
+    Lueftung -> Zeitschaltprogramm menu reports 3 for week and 4 for 5+2, so
+    5 for days is inferred, not sampled. Every unit without a module reports
+    0, which is "no module" rather than a shape - deliberately absent from
+    the table so it decodes to None without the unknown-code warning. Should
+    a unit with a module ever report 0, the ventilation select shows an
+    empty state and no schedule text entity is active; no such unit has
+    been seen.
+    """
+
+    codes = {
+        3: "week",
+        4: "5+2",
+        5: "days",
+    }
+
+
 class KnownCodeSelection(SelectionBase):
     """SelectionBase that keeps a code it does not know instead of dropping it.
 
@@ -342,13 +362,22 @@ def update_Luxtronik_Parameters():
     # handful of TimerProgram mode selectors interspersed. 162-667 holds the
     # heating, mixing, DHW, circulation-pump and pool circuits; the
     # ventilation circuit sits apart at 895 (selector) and 896-955 (times).
-    timer_program_numbers = {222, 283, 344, 405, 506, 607, 895}
+    # 607 is named ID_Einst_SuSwb_akt upstream but holds a time of day on
+    # every unit seen with a non-zero value there (06:30/07:00/07:30, each
+    # followed by an end time in 608 - #789), so it stays in the time range.
+    timer_program_numbers = {222, 283, 344, 405, 506}
+    ventilation_selector_number = 895
     schedule_numbers = list(range(162, 668)) + list(range(895, 956))
     time_of_day_numbers = [
-        n for n in schedule_numbers if n not in timer_program_numbers
+        n
+        for n in schedule_numbers
+        if n not in timer_program_numbers and n != ventilation_selector_number
     ]
     update_Luxtronik_Parameter_Classes(time_of_day_numbers, TimeOfDay)
     update_Luxtronik_Parameter_Classes(list(timer_program_numbers), TimerProgram)
+    update_Luxtronik_Parameter_Classes(
+        [ventilation_selector_number], VentilationTimerProgram
+    )
 
     # Mode selectors the upstream library still models as Unknown. Both are
     # driven by a select entity, and an Unknown parameter has no to_heatpump,

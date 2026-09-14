@@ -115,14 +115,15 @@ The schedule only has an effect while the heating *Mode* is **Automatic** — *P
 | **Ventilation Timer Schedule (Weekend)** | Text | Exists while *Weekday/Weekend* is active; covers Saturday-Sunday. |
 | **Ventilation Timer Schedule (Monday)** … **(Sunday)** | Text | One entity per day of the week, present while *Per day* is active. |
 
-> **ℹ️ No unit with a ventilation module has been sampled yet, so four things here are inferred rather than confirmed:**
+> **ℹ️ Only the program selector has been checked against a real ventilation module so far, so three things here are inferred rather than confirmed:**
 >
 > 1. That a window *raises* the ventilation stage, rather than blocking it the way a DHW window does.
 > 2. That the schedule applies only while *Ventilation mode* is *Automatic*.
-> 3. That the program selector uses the same *week / 5+2 / per day* codes as the other circuits.
-> 4. That the leading index in its parameter names distinguishes start time from end time.
+> 3. That the leading index in its parameter names distinguishes start time from end time.
 >
-> Items 3 and 4 are inferred from the firmware's parameter naming (and are marked as such in the code); items 1 and 2 are inferred from how the other circuits behave. If the shape you select doesn't match what the controller shows, if start and end times look swapped, or if the module behaves the opposite way round from what is described here, please open an issue with a [diagnostics download](ADVANCED_FEATURES.md#diagnostics-download) attached — that is exactly the evidence needed to settle all four.
+> Item 3 is inferred from the firmware's parameter naming (and is marked as such in the code); items 1 and 2 are inferred from how the other circuits behave. If start and end times look swapped, or if the module behaves the opposite way round from what is described here, please open an issue with a [diagnostics download](ADVANCED_FEATURES.md#diagnostics-download) attached — that is exactly the evidence needed to settle all three.
+>
+> The selector itself does **not** use the same codes as the other circuits: a KHZ LWC 60 with a module reports `3` for *Week* and `4` for *Weekdays + weekend* (issue #789), so *Per day* is taken to be `5`; units without a module report `0`. The controller's own menu labels the middle option *5+3*.
 
 ## Extending to other circuits
 
@@ -134,10 +135,10 @@ The remaining timer-program circuits share the same underlying shape (mode selec
 | Mixing circuit 2 (Mk2) | `ID_Einst_SuMk2_akt2` (344) | `SuMk2Wo` / `SuMk225` / `SuMk2Tg` | 3 |
 | Mixing circuit 3 (Mk3) | `ID_Einst_SuMk3_akt2` (788) | `SuMk3Wo` / `SuMk325` / `SuMk3Tg` | 3 |
 | Circulation pump (ZIP) | `ID_Einst_SuZIP_akt` (506) | `SuZIPWo` / `SuZIP25` / `SuZIPTg` | 5 |
-| Pool (Swb) | `ID_Einst_SuSwb_akt` (607) | `SuSwbWo` / `SuSwb25` / `SuSwbTg` | 3 |
+| Pool (Swb) | *unknown* — see below | `SuSwbWo` / `SuSwb25` / `SuSwbTg` | 3 |
 | All circuits combined (All) | `ID_Einst_SuAll_akt2` (161) | `SuAllWo` / `SuAll25` / `SuAllTg` | 3 |
 
-> **⚠️ Several circuits expose *two* plausible selector parameters, an `_akt` and an `_akt2`, and the one that works is not always the first.** DHW's live selector is `ID_Einst_SUBW_akt2` (405), not `ID_Einst_SUBW_akt` (19); Mk2 and Mk3 and the combined block are the same way. The reliable rule in the library's parameter table is that a circuit's selector sits **immediately before its own time block** — 405 precedes the DHW block at 406, 222 precedes heating's 223, 895 precedes ventilation's 896. The selectors above were picked by that rule; confirm against a diagnostics dump before wiring one up.
+> **⚠️ Several circuits expose *two* plausible selector parameters, an `_akt` and an `_akt2`, and the one that works is not always the first.** DHW's live selector is `ID_Einst_SUBW_akt2` (405), not `ID_Einst_SUBW_akt` (19); Mk2 and Mk3 and the combined block are the same way. The reliable rule in the library's parameter table is that a circuit's selector sits **immediately before its own time block** — 405 precedes the DHW block at 406, 222 precedes heating's 223, 895 precedes ventilation's 896. The selectors above were picked by that rule; confirm against a diagnostics dump before wiring one up. The pool circuit shows why: parameter 607 is named `ID_Einst_SuSwb_akt`, yet three units with a non-zero value there report a time of day (06:30, 07:00, 07:30), each followed by an end time in 608 — so it is a time slot and the integration types it as one. Where the pool selector actually lives is not known.
 
 Adding one is additive: define a `_TimerCircuit` in `timer_schedule_entities_predefined.py` (mirroring `_HEATING_CIRCUIT`) with that circuit's selector name, row count, `WO`/`25`/`TG` parameter prefixes and name builder, then call `_build_circuit_entities` with a matching set of `SensorKey` entries and translations. No changes to `text.py` itself should be needed — its logic, including the per-circuit active-shape sync that enables and disables entities as a program changes, is already generic per `LuxtronikTimerScheduleTextDescription`. A select entity for the new circuit's own mode selector is one description in `select_entities_predefined.py`, reusing `raw_option_map` to map the HA option names onto the raw `week` / `5+2` / `days` values.
 
