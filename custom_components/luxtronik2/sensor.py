@@ -33,6 +33,7 @@ from .const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxParameter as LP,
+    LuxRoomThermostatType,
     SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
@@ -50,6 +51,7 @@ from .sensor_entities_predefined import (
     SENSORS,
     SENSORS_COP,
     SENSORS_INDEX,
+    SENSORS_ROOM_THERMOSTAT_TYPE,
     SENSORS_STATUS,
     SENSORS_SUM,
 )
@@ -74,7 +76,7 @@ async def async_setup_entry(
 
     unavailable_keys = [
         i.luxtronik_key
-        for i in SENSORS + SENSORS_STATUS
+        for i in SENSORS + SENSORS_STATUS + SENSORS_ROOM_THERMOSTAT_TYPE
         if not key_exists(coordinator.data, i.luxtronik_key)
         and i.luxtronik_key != LC.UNSET
     ]
@@ -131,6 +133,19 @@ async def async_setup_entry(
             )
             for description in SENSORS_INDEX
             if coordinator.entity_active(description)
+        ]
+    )
+
+    async_add_entities(
+        [
+            LuxtronikRoomThermostatTypeSensor(
+                hass, entry, coordinator, description, description.device_key
+            )
+            for description in SENSORS_ROOM_THERMOSTAT_TYPE
+            if (
+                coordinator.entity_active(description)
+                and key_exists(coordinator.data, description.luxtronik_key)
+            )
         ]
     )
 
@@ -424,6 +439,40 @@ class LuxtronikIndexSensor(LuxtronikSensorEntity):
         if value_timestamp is None:
             return None
         return datetime.fromtimestamp(value_timestamp, UTC)
+
+
+class LuxtronikRoomThermostatTypeSensor(LuxtronikSensorEntity):
+    """The room unit the controller has detected, as the coordinator derives it.
+
+    Reads `coordinator.room_thermostat_type` rather than the register so the
+    RBE / RBE Plus split (which needs the RBE firmware version) matches what
+    climate.py acts on. P0033 keeps its integer datatype on purpose: giving
+    it a selection datatype would break that property's `int(raw)` (#773).
+    """
+
+    _unknown_code_logged = False
+
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """Handle updated data from the coordinator."""
+        thermostat_type = self.coordinator.room_thermostat_type
+        if isinstance(thermostat_type, LuxRoomThermostatType):
+            self._attr_native_value = thermostat_type.name
+        else:
+            if thermostat_type is not None and not self._unknown_code_logged:
+                # An ENUM sensor cannot report a code it has no option for;
+                # log it once so the new code can be added from an issue.
+                LOGGER.warning(
+                    "Room thermostat type %s is not known to this integration; "
+                    "the room thermostat type sensor shows unknown - please "
+                    "open an issue with a diagnostics download",
+                    thermostat_type,
+                )
+                self._unknown_code_logged = True
+            self._attr_native_value = None
+        self.async_write_ha_state()
 
 
 class LuxtronikCopSensorEntity(LuxtronikSensorEntity):

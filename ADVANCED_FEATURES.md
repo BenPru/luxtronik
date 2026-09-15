@@ -48,7 +48,7 @@ The Heating and Cooling climate entities' **Target Temperature** field does not 
 
 In other words: with an older/no room control unit, moving the Heating climate card's target temperature is really nudging the *heating curve* up or down by a few degrees (exactly like the **Target Temperature Correction** Number entity, because it's the same parameter), and the Cooling card's target temperature is really setting the *outdoor temperature* cooling waits for, not a room or flow temperature. Only a newer RBE ("RBE Plus", firmware ≥ 2.0) or a "Smart" room unit turns these into genuine room-temperature setpoints.
 
-There is currently no dedicated entity showing which type your system has been detected as. To check it yourself, look at parameter `P0033` (`room_thermostat_type`) in a [diagnostics download](#diagnostics-download) — `0`/`1`/`2`/`3` are None/RFV/RFV-K/RFV-DK, `4` is RBE (check the RBE firmware version reported alongside it to tell old RBE from RBE Plus), and `5` is "Smart". The **Room Thermostat Temperature** and **Room Thermostat Target** sensors (and the **Room temperature impact factor** setting) only exist when a room thermostat is connected, so their presence on your Heating device confirms *some* room unit is connected, but not which behavior applies.
+The **Room thermostat type** diagnostic sensor on the Heating device shows which type your system has been detected as: `None`, `RFV`, `RFV-K`, `RFV-DK`, `RBE`, `RBE Plus` or `Smart`. The **Room Thermostat Temperature** and **Room Thermostat Target** sensors (and the **Room temperature impact factor** setting) only exist when a room thermostat is connected.
 
 ## COP Calculation and the External Power Sensor
 

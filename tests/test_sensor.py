@@ -14,7 +14,9 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfVolumeFlowRate,
 )
+from homeassistant.helpers.entity import EntityCategory
 from luxtronik.calculations import Calculations
+import pytest
 
 from conftest import make_coordinator_data
 from custom_components.luxtronik2 import lux_overrides
@@ -29,6 +31,7 @@ from custom_components.luxtronik2.const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxOperationMode,
+    LuxRoomThermostatType,
     LuxSmartGridStatus,
     LuxStatus1Option,
     LuxStatus3Option,
@@ -42,10 +45,14 @@ from custom_components.luxtronik2.model import (
 )
 from custom_components.luxtronik2.sensor import (
     LuxtronikIndexSensor,
+    LuxtronikRoomThermostatTypeSensor,
     LuxtronikSensorEntity,
     LuxtronikStatusSensorEntity,
 )
-from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
+from custom_components.luxtronik2.sensor_entities_predefined import (
+    SENSORS,
+    SENSORS_ROOM_THERMOSTAT_TYPE,
+)
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",
@@ -1182,3 +1189,71 @@ class TestPumpPwmSensors:
         hup = next(d for d in SENSORS if d.key == SensorKey.CIRCULATION_PUMP_PWM)
         assert vbo.luxtronik_key == "calculations.ID_WEB_HZIO_PWM"
         assert hup.luxtronik_key == "calculations.HUP_PWM"
+
+
+# ===========================================================================
+# LuxtronikRoomThermostatTypeSensor
+# ===========================================================================
+
+
+def _make_room_thermostat_type_sensor(thermostat_type):
+    """Build the sensor over a coordinator reporting `thermostat_type`.
+
+    The value is the coordinator's *derived* type (RBE vs RBE Plus needs the
+    RBE firmware version too), so the coordinator property is what is mocked,
+    not the register.
+    """
+    coord = _mock_coordinator()
+    coord.room_thermostat_type = thermostat_type
+    description = SENSORS_ROOM_THERMOSTAT_TYPE[0]
+    entity = LuxtronikRoomThermostatTypeSensor(
+        MagicMock(), _mock_entry(), coord, description, description.device_key
+    )
+    _patch_entity(entity)
+    entity._handle_coordinator_update()
+    return entity
+
+
+class TestRoomThermostatTypeSensor:
+    """A diagnostic showing which room unit the controller has detected -
+    the reason a climate card has no current temperature, or why its target
+    is a heating-curve offset rather than a room setpoint (ADVANCED_FEATURES).
+    """
+
+    def test_description(self):
+        assert len(SENSORS_ROOM_THERMOSTAT_TYPE) == 1
+        description = SENSORS_ROOM_THERMOSTAT_TYPE[0]
+        assert description.key == SensorKey.ROOM_THERMOSTAT_TYPE
+        assert description.luxtronik_key == "parameters.ID_Einst_RFVEinb_akt"
+        assert description.device_key == DeviceKey.heating
+        assert description.entity_category == EntityCategory.DIAGNOSTIC
+        assert description.device_class == SensorDeviceClass.ENUM
+        assert description.options == [e.name for e in LuxRoomThermostatType]
+        # This entity exists precisely to explain why the V0122-gated ones
+        # do not, so it must not share their gate.
+        assert description.visibility == LuxVisibility.UNSET
+
+    @pytest.mark.parametrize("thermostat_type", list(LuxRoomThermostatType))
+    def test_reports_the_derived_type_name(self, thermostat_type):
+        entity = _make_room_thermostat_type_sensor(thermostat_type)
+        assert entity.native_value == thermostat_type.name
+
+    def test_unknown_when_type_is_undetermined(self):
+        entity = _make_room_thermostat_type_sensor(None)
+        assert entity.native_value is None
+
+    def test_unrecognised_code_is_unknown_and_logged(self):
+        """A code the enum lacks cannot be an ENUM option; surface it in the
+        log so the next controller generation gets added from an issue."""
+        with patch("custom_components.luxtronik2.sensor.LOGGER") as mock_logger:
+            entity = _make_room_thermostat_type_sensor(99)
+        assert entity.native_value is None
+        mock_logger.warning.assert_called_once()
+        assert 99 in mock_logger.warning.call_args.args
+
+    def test_unrecognised_code_is_logged_once_per_entity(self):
+        with patch("custom_components.luxtronik2.sensor.LOGGER") as mock_logger:
+            entity = _make_room_thermostat_type_sensor(99)
+            entity._handle_coordinator_update()
+            entity._handle_coordinator_update()
+        assert mock_logger.warning.call_count == 1

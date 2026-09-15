@@ -978,6 +978,18 @@
             "room_thermostat_temperature_target": {
                 "name": "Doel kamerthermostaat"
             },
+            "room_thermostat_type": {
+                "name": "Type kamerthermostaat",
+                "state": {
+                    "none": "Geen",
+                    "rfv": "RFV",
+                    "rfv_k": "RFV-K",
+                    "rfv_dk": "RFV-DK",
+                    "rbe": "RBE",
+                    "rbe_plus": "RBE Plus",
+                    "smart": "Smart"
+                }
+            },
             "pump_flow_delta_target": {
                 "name": "Pekelcirculatiepomp Delta Target"
             },
