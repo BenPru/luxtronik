@@ -715,6 +715,26 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         except Exception:
             return None
 
+    def _room_thermostat_present(self) -> bool | None:
+        """Is a room thermostat fitted, as far as P0033 can tell.
+
+        `ID_Visi_SysEin_Raumstation` (V0122) reads 1 on all 29 units in the
+        diagnostics corpus, including the 24 with P0033 = 0 - it gates the
+        settings-menu entry, not the device - so the room-thermostat
+        registers (C0227/C0228) would otherwise carry a permanent 0.0 on
+        most installs. Like the solar gate this decides in `entity_active`,
+        so the entities are not created at all rather than merely disabled
+        by default. None when P0033 is absent, so nothing is decided.
+
+        Only `none` is treated as absent. The RFV types (1-3) are analogue
+        dials with no temperature sensor of their own, so C0227 may well
+        read 0.0 there too, but the corpus holds no RFV unit to confirm it.
+        """
+        rt = self.room_thermostat_type
+        if rt is None:
+            return None
+        return rt is not LuxRoomThermostatType.none
+
     _VISIBILITY_FORMULA_OPERATORS: Final[dict[str, Callable[[Any, Any], bool]]] = {
         ">": operator.gt,
         ">=": operator.ge,
@@ -879,6 +899,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LV.V0250_SOLAR,
         ]:
             return self._detect_solar_present()
+        if (
+            description.visibility == LV.V0122_ROOM_THERMOSTAT
+            and self._room_thermostat_present() is False
+        ):
+            return False
 
         if not self.device_key_active(description.device_key):
             return False

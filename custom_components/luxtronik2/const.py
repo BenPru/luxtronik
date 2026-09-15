@@ -1015,6 +1015,7 @@ class SensorKey(StrEnum):
     APPROVAL_COOLING = "approval_cooling"
     ROOM_THERMOSTAT_TEMPERATURE = "room_thermostat_temperature"
     ROOM_THERMOSTAT_TEMPERATURE_TARGET = "room_thermostat_temperature_target"
+    ROOM_THERMOSTAT_TYPE = "room_thermostat_type"
     COOLING_START_DELAY_HOURS = "cooling_start_delay_hours"
     COOLING_STOP_DELAY_HOURS = "cooling_stop_delay_hours"
     COOLING_OUTDOOR_TEMP_THRESHOLD = "cooling_threshold_temperature"

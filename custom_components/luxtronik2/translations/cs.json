@@ -993,6 +993,18 @@
             "room_thermostat_temperature_target": {
                 "name": "požadovaná teplota termostatu místnosti"
             },
+            "room_thermostat_type": {
+                "name": "Typ pokojového termostatu",
+                "state": {
+                    "none": "Žádný",
+                    "rfv": "RFV",
+                    "rfv_k": "RFV-K",
+                    "rfv_dk": "RFV-DK",
+                    "rbe": "RBE",
+                    "rbe_plus": "RBE Plus",
+                    "smart": "Smart"
+                }
+            },
             "pump_flow_delta_target": {
                 "name": "požadovaný rozdíl průtoku čerpadla"
             },

@@ -978,6 +978,18 @@
             "room_thermostat_temperature_target": {
                 "name": "Temperatura docelowa termostatu pokojowego"
             },
+            "room_thermostat_type": {
+                "name": "Typ termostatu pokojowego",
+                "state": {
+                    "none": "Brak",
+                    "rfv": "RFV",
+                    "rfv_k": "RFV-K",
+                    "rfv_dk": "RFV-DK",
+                    "rbe": "RBE",
+                    "rbe_plus": "RBE Plus",
+                    "smart": "Smart"
+                }
+            },
             "cooling_energy_input": {
                 "name": "Energia zużyta na chłodzenie"
             },

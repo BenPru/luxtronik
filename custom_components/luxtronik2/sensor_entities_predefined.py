@@ -24,6 +24,7 @@ from .const import (
     LuxCalculation as LC,
     LuxOperationMode,
     LuxParameter as LP,
+    LuxRoomThermostatType,
     LuxSmartGridStatus,
     LuxStatus1Option,
     LuxStatus3Option,
@@ -116,6 +117,23 @@ SENSORS_STATUS: list[descr] = [
         luxtronik_key=LC.UNSET,  # Calculated from EVU and EVU2 inputs
         device_class=SensorDeviceClass.ENUM,
         options=[e.value for e in LuxSmartGridStatus],
+    ),
+]
+
+# The controller's detected room unit, as the coordinator derives it (RBE vs
+# RBE Plus needs the RBE firmware version too, so this is not the bare P0033).
+# It is what climate.py acts on, and it explains why a climate card shows no
+# current temperature or why its setpoint is a heating-curve offset. No
+# visibility gate on purpose: it must exist precisely when the V0122-gated
+# room-thermostat entities do not.
+SENSORS_ROOM_THERMOSTAT_TYPE: list[descr] = [
+    descr(
+        key=SensorKey.ROOM_THERMOSTAT_TYPE,
+        luxtronik_key=LP.P0033_ROOM_THERMOSTAT_TYPE,
+        device_key=DeviceKey.heating,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.ENUM,
+        options=[e.name for e in LuxRoomThermostatType],
     ),
 ]
 

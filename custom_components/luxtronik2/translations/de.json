@@ -981,6 +981,18 @@
             "room_thermostat_temperature_target": {
                 "name": "Raum Thermostat Soll"
             },
+            "room_thermostat_type": {
+                "name": "Raumthermostat-Typ",
+                "state": {
+                    "none": "Keiner",
+                    "rfv": "RFV",
+                    "rfv_k": "RFV-K",
+                    "rfv_dk": "RFV-DK",
+                    "rbe": "RBE",
+                    "rbe_plus": "RBE Plus",
+                    "smart": "Smart"
+                }
+            },
             "pump_flow_delta_target": {
                 "name": "Soleumwälzpumpe Delta Ziel"
             },
