@@ -6,7 +6,7 @@ This page documents integration features that go beyond the basic entity tables 
 
 Beyond the initial setup, this integration has an **Options** flow: go to **Settings → Devices & Services → Luxtronik → Configure** to reach it. It lets you change, after setup and without removing/re-adding the integration:
 
-- **External indoor temperature sensor** — replaces the heat pump's own room-thermostat reading (`Room Thermostat Temperature`) as the *current temperature* shown on the Heating climate entity, if you have a more accurate HA temperature sensor elsewhere in the house.
+- **External indoor temperature sensor** — replaces the heat pump's own room-thermostat reading (`Room Thermostat Temperature`) as the *current temperature* shown on the Heating climate entity, if you have a more accurate HA temperature sensor elsewhere in the house. If no room thermostat is connected to the heat pump, the climate card shows no current temperature at all unless you set this option.
 - **External power consumption sensor** — see [COP calculation](#cop-calculation-and-the-external-power-sensor) below.
 - **Update interval** — how often the integration polls the heat pump for new data.
 
@@ -48,7 +48,7 @@ The Heating and Cooling climate entities' **Target Temperature** field does not 
 
 In other words: with an older/no room control unit, moving the Heating climate card's target temperature is really nudging the *heating curve* up or down by a few degrees (exactly like the **Target Temperature Correction** Number entity, because it's the same parameter), and the Cooling card's target temperature is really setting the *outdoor temperature* cooling waits for, not a room or flow temperature. Only a newer RBE ("RBE Plus", firmware ≥ 2.0) or a "Smart" room unit turns these into genuine room-temperature setpoints.
 
-There is currently no dedicated entity showing which type your system has been detected as. To check it yourself, look at parameter `P0033` (`room_thermostat_type`) in a [diagnostics download](#diagnostics-download) — `0`/`1`/`2`/`3` are None/RFV/RFV-K/RFV-DK, `4` is RBE (check the RBE firmware version reported alongside it to tell old RBE from RBE Plus), and `5` is "Smart". The **Room Thermostat Temperature** and **Room Thermostat Target** sensors (if visible on your Heating device at all) confirm *some* room unit is connected, but not which behavior applies.
+There is currently no dedicated entity showing which type your system has been detected as. To check it yourself, look at parameter `P0033` (`room_thermostat_type`) in a [diagnostics download](#diagnostics-download) — `0`/`1`/`2`/`3` are None/RFV/RFV-K/RFV-DK, `4` is RBE (check the RBE firmware version reported alongside it to tell old RBE from RBE Plus), and `5` is "Smart". The **Room Thermostat Temperature** and **Room Thermostat Target** sensors (and the **Room temperature impact factor** setting) only exist when a room thermostat is connected, so their presence on your Heating device confirms *some* room unit is connected, but not which behavior applies.
 
 ## COP Calculation and the External Power Sensor
 

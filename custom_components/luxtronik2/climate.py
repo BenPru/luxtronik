@@ -305,15 +305,28 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
                 description.luxtronik_key_current_temperature,
             )
         elif description.luxtronik_key_current_temperature == LuxCalculation.UNSET:
-            description = replace(
-                description,
-                luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
-            )
-            LOGGER.debug(
-                "[INIT,%s] Using default indoor temp sensor: %s",
-                domain,
-                description.luxtronik_key_current_temperature,
-            )
+            if (
+                getattr(coordinator, "room_thermostat_type", None)
+                is LuxRoomThermostatType.none
+            ):
+                # Without a room thermostat C0227 reads a permanent 0.0 (24
+                # of the 29 units in the diagnostics corpus). Leaving the key
+                # UNSET keeps current_temperature at None, which the climate
+                # card renders as "no reading" rather than "0 °C".
+                LOGGER.debug(
+                    "[INIT,%s] No room thermostat fitted, current temperature not reported",
+                    domain,
+                )
+            else:
+                description = replace(
+                    description,
+                    luxtronik_key_current_temperature=LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE,
+                )
+                LOGGER.debug(
+                    "[INIT,%s] Using default indoor temp sensor: %s",
+                    domain,
+                    description.luxtronik_key_current_temperature,
+                )
 
         # ✅ Set the final description ONCE
         self.entity_description = description
@@ -380,14 +393,14 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
             self._last_hvac_mode_before_preset = None
 
         key = self.entity_description.luxtronik_key_current_temperature
-        if key is None or key == "":
+        if key is None or key == "" or key == LuxCalculation.UNSET:
             self._attr_current_temperature = None
         elif key.startswith("sensor."):
             temp = self.hass.states.get(key)
             self._attr_current_temperature = (
                 state_as_number_or_none(temp, 0.0) if temp is not None else None
             )
-        elif key != LuxCalculation.UNSET:
+        else:
             self._attr_current_temperature = get_sensor_data(data, key)
 
         key_tar = self.entity_description.luxtronik_key_target_temperature

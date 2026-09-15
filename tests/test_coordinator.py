@@ -31,6 +31,7 @@ from custom_components.luxtronik2.const import (
     LuxRoomThermostatType,
     LuxStatus3Option,
     LuxVisibility as LV,
+    SensorKey,
 )
 from custom_components.luxtronik2.coordinator import (
     WRITE_CONFIRM_INITIAL_DELAY,
@@ -47,6 +48,7 @@ from custom_components.luxtronik2.model import (
     LuxtronikCoordinatorData,
     LuxtronikEntityDescription,
 )
+from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
 
 # ===========================================================================
 # Helpers
@@ -712,6 +714,73 @@ class TestEntityVisible:
 
 
 class TestEntityActive:
+    def test_room_thermostat_inactive_without_thermostat(self):
+        """V0122 is the menu entry, not the device: it reads 1 on every unit
+        in the diagnostics corpus, including the 24 with P0033 = 0 whose
+        room-thermostat registers then sit at 0.0 forever. P0033 decides,
+        and like the solar gate it does so here rather than in
+        entity_visible, so the entities are not created at all - a
+        default-disabled flag would have left every existing install with
+        its 0 °C sensors.
+        """
+        coord = _make_coordinator(
+            visibilities={"ID_Visi_SysEin_Raumstation": 1},
+            parameters={"ID_Einst_RFVEinb_akt": 0},
+        )
+        desc = LuxtronikEntityDescription(
+            key="test",
+            visibility=LV.V0122_ROOM_THERMOSTAT,
+        )
+        assert coord.entity_active(desc) is False
+
+    def test_room_thermostat_active_with_thermostat(self):
+        coord = _make_coordinator(
+            visibilities={"ID_Visi_SysEin_Raumstation": 1},
+            parameters={"ID_Einst_RFVEinb_akt": 4},
+        )
+        desc = LuxtronikEntityDescription(
+            key="test",
+            visibility=LV.V0122_ROOM_THERMOSTAT,
+        )
+        assert coord.entity_active(desc) is True
+
+    def test_room_thermostat_active_unknown_type_counts_as_present(self):
+        """A code the enum does not know is still a fitted thermostat."""
+        coord = _make_coordinator(
+            visibilities={"ID_Visi_SysEin_Raumstation": 1},
+            parameters={"ID_Einst_RFVEinb_akt": 99},
+        )
+        desc = LuxtronikEntityDescription(
+            key="test",
+            visibility=LV.V0122_ROOM_THERMOSTAT,
+        )
+        assert coord.entity_active(desc) is True
+
+    def test_room_thermostat_active_without_p0033(self):
+        """Without P0033 there is nothing to decide on, so the gate stands
+        aside and the entity is created."""
+        coord = _make_coordinator(visibilities={"ID_Visi_SysEin_Raumstation": 1})
+        desc = LuxtronikEntityDescription(
+            key="test",
+            visibility=LV.V0122_ROOM_THERMOSTAT,
+        )
+        assert coord.entity_active(desc) is True
+
+    def test_room_thermostat_sensors_not_created_without_thermostat(self):
+        """The join: the two predefined C0227/C0228 sensors carry V0122, so
+        the gate above is what keeps them out of async_setup_entry."""
+        coord = _make_coordinator(
+            visibilities={"ID_Visi_SysEin_Raumstation": 1},
+            parameters={"ID_Einst_RFVEinb_akt": 0},
+        )
+        for key in (
+            SensorKey.ROOM_THERMOSTAT_TEMPERATURE,
+            SensorKey.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
+        ):
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.visibility == LV.V0122_ROOM_THERMOSTAT
+            assert coord.entity_active(description) is False
+
     def test_version_incompatible(self):
         coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "V3.90.1"})
         desc = LuxtronikEntityDescription(

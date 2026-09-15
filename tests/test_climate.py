@@ -264,6 +264,76 @@ class TestClimateConfiguredIndoorTempSensor:
 
 
 # ===========================================================================
+# climate.py — current temperature source vs room thermostat type
+# ===========================================================================
+
+
+def _update_with_room_temp(thermostat, room_temp: float, ha_state=None):
+    _patch_entity(thermostat)
+    if ha_state is not None:
+        mock_state = MagicMock()
+        mock_state.state = ha_state
+        thermostat.hass.states.get.return_value = mock_state
+    data = make_coordinator_data(
+        parameters={"ID_Ba_Hz_akt": LuxMode.automatic},
+        calculations={
+            "ID_WEB_WP_BZ_akt": LuxOperationMode.heating,
+            "ID_WEB_RBE_RT_Ist": room_temp,
+        },
+    )
+    thermostat._handle_coordinator_update(data)
+
+
+class TestClimateNoRoomThermostat:
+    """P0033 = 0 means no room thermostat is fitted, and C0227 then reads a
+    permanent 0.0 (24 of 29 units in the diagnostics corpus). A climate card
+    showing 0 °C as the room temperature is worse than one showing none.
+    """
+
+    def test_no_thermostat_reports_no_current_temperature(self):
+        coord = _mock_coordinator()
+        coord.room_thermostat_type = LuxRoomThermostatType.none
+        thermostat = LuxtronikThermostat(
+            MagicMock(), _mock_entry(), coord, THERMOSTATS_OTHER[0]
+        )
+        _update_with_room_temp(thermostat, 0.0)
+        assert thermostat.current_temperature is None
+
+    def test_no_thermostat_still_uses_configured_ha_sensor(self):
+        """A sensor picked in the options flow is the user's own room
+        temperature and wins regardless of what the controller has fitted."""
+        coord = _mock_coordinator()
+        coord.room_thermostat_type = LuxRoomThermostatType.none
+        entry = _mock_entry()
+        entry.options = {CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.my_temp"}
+        thermostat = LuxtronikThermostat(
+            MagicMock(), entry, coord, THERMOSTATS_OTHER[0]
+        )
+        _update_with_room_temp(thermostat, 0.0, ha_state="20.5")
+        thermostat.hass.states.get.assert_called_with("sensor.my_temp")
+        assert thermostat.current_temperature == 20.5
+
+    def test_rbe_thermostat_reads_c0227(self):
+        coord = _mock_coordinator()
+        coord.room_thermostat_type = LuxRoomThermostatType.rbe
+        thermostat = LuxtronikThermostat(
+            MagicMock(), _mock_entry(), coord, THERMOSTATS_OTHER[0]
+        )
+        _update_with_room_temp(thermostat, 21.8)
+        assert thermostat.current_temperature == 21.8
+
+    def test_unknown_thermostat_type_reads_c0227(self):
+        """None (P0033 absent) is not evidence of a missing thermostat."""
+        coord = _mock_coordinator()
+        coord.room_thermostat_type = None
+        thermostat = LuxtronikThermostat(
+            MagicMock(), _mock_entry(), coord, THERMOSTATS_OTHER[0]
+        )
+        _update_with_room_temp(thermostat, 21.8)
+        assert thermostat.current_temperature == 21.8
+
+
+# ===========================================================================
 # climate.py — key None/empty and sensor.* branches (lines 337, 339-340)
 # ===========================================================================
 
