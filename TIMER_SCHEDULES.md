@@ -123,7 +123,7 @@ The schedule only has an effect while the heating *Mode* is **Automatic** — *P
 >
 > Item 3 is inferred from the firmware's parameter naming (and is marked as such in the code); items 1 and 2 are inferred from how the other circuits behave. If start and end times look swapped, or if the module behaves the opposite way round from what is described here, please open an issue with a [diagnostics download](ADVANCED_FEATURES.md#diagnostics-download) attached — that is exactly the evidence needed to settle all three.
 >
-> The selector itself does **not** use the same codes as the other circuits: a KHZ LWC 60 with a module reports `3` for *Week* and `4` for *Weekdays + weekend* (issue #789), so *Per day* is taken to be `5`; units without a module report `0`. The controller's own menu labels the middle option *5+3*.
+> The selector itself does **not** use the same codes as the other circuits: a KHZ LWC 60 with a module reports `3` for *Week*, `4` for *Weekdays + weekend* and `5` for *Per day* (issue #789); units without a module report `0`. The controller's own menu labels the middle option *5+3*.
 
 ## Extending to other circuits
 

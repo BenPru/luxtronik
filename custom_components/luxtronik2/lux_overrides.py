@@ -144,8 +144,8 @@ class VentilationTimerProgram(SelectionBase):
     """The ventilation circuit's selector (P895) counts from 3, not 0.
 
     Read off a KHZ LWC 60 with a ventilation module (#789): the controller's
-    Lueftung -> Zeitschaltprogramm menu reports 3 for week and 4 for 5+2, so
-    5 for days is inferred, not sampled. Every unit without a module reports
+    Lueftung -> Zeitschaltprogramm menu reports 3 for week, 4 for 5+2 and 5
+    for days - all three sampled. Every unit without a module reports
     0, which is "no module" rather than a shape - deliberately absent from
     the table so it decodes to None without the unknown-code warning. Should
     a unit with a module ever report 0, the ventilation select shows an
