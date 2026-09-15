@@ -13,10 +13,16 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
     CONF_TIMEOUT,
+    MAJOR_VERSION,
+    MINOR_VERSION,
     Platform as P,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
+from homeassistant.exceptions import (
+    ConfigEntryError,
+    ConfigEntryNotReady,
+    ServiceValidationError,
+)
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
 from homeassistant.helpers.entity_registry import (
     async_get,
@@ -34,6 +40,7 @@ from .const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
     LOGGER,
+    MIN_HA_VERSION,
     PLATFORMS,
     SERVICE_WRITE,
     SERVICE_WRITE_SCHEMA,
@@ -47,10 +54,32 @@ from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 type LuxtronikConfigEntry = ConfigEntry[LuxtronikCoordinator]
 
 
+def _check_ha_version() -> None:
+    """Refuse to run on a Home Assistant core older than `MIN_HA_VERSION`.
+
+    HACS gates downloads on hacs.json, but a manual install (or a stale HACS
+    data store, #799) can land this release on an older core. There the
+    `via_device_id` in the sub-device infos fails deep inside the device
+    registry with a bare TypeError, and every sub-device entity goes
+    unavailable while the heat pump device sets up fine. Fail loud instead -
+    and before migration, so the entry keeps the version the remedy release
+    can still load (a `CONFIG_ENTRY_VERSION` bump is a one-way door).
+    """
+    if (MAJOR_VERSION, MINOR_VERSION) < MIN_HA_VERSION:
+        raise ConfigEntryError(
+            "Luxtronik requires Home Assistant "
+            f"{MIN_HA_VERSION[0]}.{MIN_HA_VERSION[1]} or newer; this core is "
+            f"{MAJOR_VERSION}.{MINOR_VERSION}. Update Home Assistant, or install "
+            "release 2026.08.29, the last one supporting older cores"
+        )
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) -> bool:
     """Set up Luxtronik from a config entry."""
 
     config = entry.data
+
+    _check_ha_version()
 
     try:
         coordinator = await connect_and_get_coordinator(hass, entry)
@@ -277,6 +306,7 @@ async def update_listener(
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Migrate old entry to the latest version."""
+    _check_ha_version()
     current_version = config_entry.version
     latest_version = CONFIG_ENTRY_VERSION
 
