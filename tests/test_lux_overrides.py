@@ -600,9 +600,9 @@ class TestTimerScheduleDatatypeCoverage:
     def test_ventilation_selector_has_its_own_code_table(self):
         """P895 is offset by 3 from the other circuits (#789).
 
-        A controller with a ventilation module reports 3 for week and 4 for
-        5+2 (read off the Lueftung -> Zeitschaltprogramm menu); the heating
-        and DHW selectors report 0 and 1 for the same shapes.
+        A controller with a ventilation module reports 3 for week, 4 for 5+2
+        and 5 for days (read off the Lueftung -> Zeitschaltprogramm menu);
+        the heating and DHW selectors report 0, 1 and 2 for the same shapes.
         """
         from custom_components.luxtronik2.lux_overrides import (
             TimerProgram,
