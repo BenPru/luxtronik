@@ -15,7 +15,7 @@ still the reasoning that limits what the measurement proves.
 
 | | parameter | controller label | meaning |
 |---|---|---|---|
-| **P0002** | `ID_Einst_BWS_akt` | "Deckung WP" | the temperature reachable by the compressor alone. The controller **lowers this by itself** when the setpoint cannot be reached (documented in the AIT manual), so it is not a pure user setting. |
+| **P0002** | `ID_Einst_BWS_akt` | "Deckung WP" | the temperature reachable by the compressor alone. The controller **lowers this by itself** when the setpoint cannot be reached (documented in the AIT manual, and observed in [#793](#793-how-deckung-wp-moves-2026-09-15)), so it is not a pure user setting. |
 | **P0105** | `ID_Soll_BWS_akt` | "Wunschwert" | the desired value, shown as the primary figure on the controller display. |
 | **C0018** | `ID_WEB_Einst_BWS_akt` | "Warmwasser-Soll" | read-only; P0002 plus any Smart Grid offset below minor ~90.1, `min(P0002, P0105)` plus offset from there. It was long read as "the effective target", but the [V1.90.0 measurement](#the-v190-measurement-2026-09-13) showed a pump obeying P0105 while C0018 tracked P0002 — so below 90.1 it mirrors a register, not the compressor's behaviour. |
 
@@ -250,8 +250,50 @@ displayed figure changes either way.
 Also worth knowing: the corpus contains **no V1.x or V2.x dump at minor ≥ 90.1**
 at all. If a report arrives from one, it is the first of its kind — capture it.
 
+## #793: how "Deckung WP" moves (2026-09-15)
+
+[#793](https://github.com/BenPru/luxtronik/issues/793) (WZS, **V1.81**, 1-min
+polling) is the only case where a user logged P0002 minute by minute while a
+DHW run failed, so it is the best evidence on the manual's rules. The Luxtronik
+2.0 part-1 manual (83055200, rev. i, 2022, p. 22, "Trinkwarmwassertemperatur
+ohne Nachheizung") describes a sequence: when the pump **shuts down on an
+operating limit** (Einsatzgrenze), the tank temperature reached is *set as*
+Deckung WP, which becomes the regulating value; each later run that cannot get
+back to Deckung WP lowers it by 1 K, each one that does raises it 0.5 K
+towards the Wunschwert. The Wunschwert itself never moves. The manual does not
+say what ends a run in the 1 K case — a limit trip with the tank already close,
+the maximum DHW runtime, heating priority or an EVU lock would all look the
+same in P0002.
+
+What the reporter saw, with no `3002` in his DEBUG log and later reproduced
+with the integration disabled:
+
+- Runs ending below Deckung WP: P0002 stepped 50→49→48→47, 1 K each, near the
+  end of a run.
+- One run on 2026-09-08 aborted twice on the **flow limit**: flow ~64.1 °C with
+  P0149 `ID_Einst_TVLmax_akt` = 64 °C, hot gas 88–91 °C, tank at 44.7 then
+  43.9 °C. At that moment P0002 jumped **48 → 43** — the tank temperature
+  actually reached, not a 1 K step. That is the limit-shutdown case verbatim.
+  Consistent with the corpus unit `241125_0195` (V1.73) drifting 48 → 44
+  unobserved.
+- The manual's recovery rule (successful runs bring Deckung WP back towards the
+  Wunschwert in 0.5 K steps) stops *at* the Wunschwert. His later snapshot had
+  P0002 (49) *above* P0105 (48), which recovery cannot produce; that fits him
+  lowering the Wunschwert on the panel mid-troubleshooting after P0002 had
+  already climbed back. A P0002 > P0105 snapshot therefore says nothing about
+  the integration either way.
+
+Consequences for this document: below 88.3 the `number` entity exposes a
+controller-managed value that moves on its own; a "target decreases by itself"
+report on such firmware is the controller, not a write, and the first thing to
+check is whether flow/hot-gas hit a limit at the drop. Disabling the
+integration removes the observer, not the effect. He did not attach his dump
+(local network data survived redaction), so V1.81 is still absent from the
+corpus.
+
 ## Related
 
 - [#280](https://github.com/BenPru/luxtronik/issues/280) — the original thread; contains the FW 3.79, 3.90.0 and 2.88.3 observations, and the Smart Grid explanation of C0018.
 - [#428](https://github.com/BenPru/luxtronik/issues/428) — V3.92.0, P0002 showing "Deckung WP" instead of the setpoint.
+- [#793](https://github.com/BenPru/luxtronik/issues/793) — V1.81, P0002 "decreasing by itself"; the Deckung-WP mechanics above.
 - [#517](https://github.com/BenPru/luxtronik/issues/517) — unrelated to the thresholds: the `firmware_version_minor` crash on two-part versions introduced alongside `fecdf38`, since fixed.
