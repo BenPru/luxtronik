@@ -17,6 +17,10 @@ import voluptuous as vol
 # region Constants Main
 DOMAIN: Final = "luxtronik2"
 CONFIG_ENTRY_VERSION: Final = 10
+# Oldest Home Assistant core that can set up the integration - the sub-devices
+# are parented with `via_device_id`, which the device registry only accepts
+# from 2026.8. Mirrors `homeassistant` in hacs.json (guarded by a test).
+MIN_HA_VERSION: Final[tuple[int, int]] = (2026, 8)
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
 

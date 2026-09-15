@@ -59,7 +59,7 @@ It is used by manufacturers such as:
 - Nibe, 
 - Wolf Heiztechnik.
 
-> **ℹ️ Home Assistant version:** this integration requires **Home Assistant 2026.8 or newer**. HACS will simply not offer you a newer release on an older core, so nothing breaks if you stay behind — you keep the release you have until you update Home Assistant. If you install manually instead of through HACS, note that releases after [2026.08.29](https://github.com/BenPru/luxtronik/releases/tag/2026.08.29) will fail to set up on Home Assistant 2026.7 or older; that release is the last one supporting those versions.
+> **ℹ️ Home Assistant version:** this integration requires **Home Assistant 2026.8 or newer**. HACS should not offer you a newer release on an older core, so normally nothing breaks if you stay behind — you keep the release you have until you update Home Assistant. If a newer release does land on Home Assistant 2026.7 or older (a manual install, or HACS letting it through), the integration refuses to set up with a *"requires Home Assistant 2026.8 or newer"* error: either update Home Assistant, or redownload [2026.08.29](https://github.com/BenPru/luxtronik/releases/tag/2026.08.29), the last release supporting those versions.
 
 
 ---

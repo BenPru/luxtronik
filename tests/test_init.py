@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
-from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
+from homeassistant.exceptions import (
+    ConfigEntryError,
+    ConfigEntryNotReady,
+    ServiceValidationError,
+)
 import pytest
 
 from conftest import make_coordinator_data
@@ -34,6 +40,7 @@ from custom_components.luxtronik2.const import (
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
     DOMAIN,
+    MIN_HA_VERSION,
     PLATFORMS,
     SERVICE_WRITE,
     WRITABLE_PARAMETER_PREFIXES,
@@ -1412,3 +1419,78 @@ class TestRemoveLegacySmartGridSwitch:
         with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
             await _async_remove_legacy_smart_grid_switch(hass, entry)
         ent_reg.async_remove.assert_not_called()
+
+
+# ===========================================================================
+# Home Assistant version guard (#799)
+# ===========================================================================
+
+
+_MIN_MAJOR, _MIN_MINOR = MIN_HA_VERSION
+_REQUIRES_PATTERN = rf"{_MIN_MAJOR}\.{_MIN_MINOR} or newer"
+
+
+class TestHomeAssistantVersionGuard:
+    """Setup must fail loud on a core older than the one the devices need.
+
+    `via_device_id` in the sub-device infos arrived in Home Assistant 2026.8;
+    an older core rejects it deep inside `async_get_or_create` with a bare
+    TypeError, so the heat pump device sets up and every sub-device entity
+    goes unavailable (#799). A clear ConfigEntryError before connecting is
+    the reachable alternative.
+    """
+
+    @pytest.mark.asyncio
+    async def test_old_core_raises_config_entry_error_before_connecting(self):
+        hass = MagicMock()
+        entry = _mock_entry()
+        with (
+            patch("custom_components.luxtronik2.MAJOR_VERSION", _MIN_MAJOR),
+            patch("custom_components.luxtronik2.MINOR_VERSION", _MIN_MINOR - 1),
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+            ) as connect,
+            pytest.raises(ConfigEntryError, match=_REQUIRES_PATTERN),
+        ):
+            await async_setup_entry(hass, entry)
+        connect.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_old_core_refuses_migration_before_touching_the_entry(self):
+        """The entry must keep a version the remedy release can still load."""
+        hass = MagicMock()
+        entry = _mock_entry(version=1)
+        with (
+            patch("custom_components.luxtronik2.MAJOR_VERSION", _MIN_MAJOR),
+            patch("custom_components.luxtronik2.MINOR_VERSION", _MIN_MINOR - 1),
+            pytest.raises(ConfigEntryError, match=_REQUIRES_PATTERN),
+        ):
+            await async_migrate_entry(hass, entry)
+        hass.config_entries.async_update_entry.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_minimum_core_sets_up(self):
+        hass = MagicMock()
+        hass.config_entries.async_forward_entry_setups = AsyncMock()
+        hass.services.has_service.return_value = False
+        entry = _mock_entry()
+        coordinator = MagicMock()
+        coordinator.manufacturer = "Alpha Innotec"
+        with (
+            patch("custom_components.luxtronik2.MAJOR_VERSION", _MIN_MAJOR),
+            patch("custom_components.luxtronik2.MINOR_VERSION", _MIN_MINOR),
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+                return_value=coordinator,
+            ),
+        ):
+            assert await async_setup_entry(hass, entry) is True
+
+    def test_hacs_json_minimum_matches_guard(self):
+        """HACS gates downloads on hacs.json; the guard must agree with it."""
+        hacs = json.loads(
+            (Path(__file__).resolve().parents[1] / "hacs.json").read_text("utf-8")
+        )
+        assert hacs["homeassistant"] == f"{_MIN_MAJOR}.{_MIN_MINOR}.0"
