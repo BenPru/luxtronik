@@ -14,6 +14,7 @@ from luxtronik.datatypes import (
     Percent,
     Percent2,
     Power,
+    Seconds,
     SelectionBase,
     SwitchoffFile,
     Timestamp,
@@ -450,22 +451,45 @@ def update_Luxtronik_Parameters():
     Parameters.parameters.update(parameters_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
     Calculations.calculations.update(calculations_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
 
-    # example bulk update of parameter classes for a range of numbers
-    Celsius_numbers = [14, 15, 16, 141, 142, 143, 774, 775, 776] + [17, 47, 90, 93, 111]
+    # Temperature settings stored as tenths of a degree. The last six are
+    # limit temperatures upstream `main` types as Celsius too; all 30 units
+    # in the diagnostics corpus hold plausible tenths there: 84 at 650-700,
+    # 87 at 350-650, 91 at 350-450, 92 at -200/-220, 94 at 1150-1400 and
+    # 96 at 500 on every unit.
+    Celsius_numbers = (
+        [14, 15, 16, 141, 142, 143, 774, 775, 776]
+        + [17, 47, 90, 93, 111]
+        + [84, 87, 91, 92, 94, 96]
+    )
     update_Luxtronik_Parameter_Classes(Celsius_numbers, Celsius)
 
     # Kelvin temperature-difference parameters stored as tenths.
     delta_temperature_numbers = [88, 89]
     update_Luxtronik_Parameter_Classes(delta_temperature_numbers, Kelvin)
 
+    # Operating-time counters (ID_Zaehler_BetrZeit*) in seconds, the
+    # parameter-side mirrors of calculations 56-66, and the heat-quantity
+    # date (ID_Waermemenge_Datum) as a Unix timestamp - eight corpus units
+    # sit on its 2018-01-01 factory default, eight more on 0, which the
+    # library's Timestamp renders as 1970-01-01 (as it does for 6/7/731/732).
+    # Typed as upstream `main` does; nothing reads them, this only makes
+    # diagnostics dumps readable.
+    operating_time_numbers = [668, 669, 670, 671, 672, 673, 728, 729, 730, 859]
+    update_Luxtronik_Parameter_Classes(operating_time_numbers, Seconds)
+    update_Luxtronik_Parameter_Classes([880], Timestamp)
+
     # Timer program schedule parameters: mostly TimeOfDay entries, with a
     # handful of TimerProgram mode selectors interspersed. 162-667 holds the
-    # heating, mixing, DHW, circulation-pump and pool circuits.
+    # heating, mixing circuits 1/2, DHW, circulation-pump and pool circuits;
+    # mixing circuit 3 sits apart at 788 (selector) and 789-848 (times).
     # 607 is named ID_Einst_SuSwb_akt upstream but holds a time of day on
     # every unit seen with a non-zero value there (06:30/07:00/07:30, each
     # followed by an end time in 608 - #789), so it stays in the time range.
-    timer_program_numbers = {222, 283, 344, 405, 506}
-    time_of_day_numbers = [n for n in range(162, 668) if n not in timer_program_numbers]
+    timer_program_numbers = {222, 283, 344, 405, 506, 788}
+    schedule_numbers = list(range(162, 668)) + list(range(788, 849))
+    time_of_day_numbers = [
+        n for n in schedule_numbers if n not in timer_program_numbers
+    ]
     update_Luxtronik_Parameter_Classes(time_of_day_numbers, TimeOfDay)
     update_Luxtronik_Parameter_Classes(list(timer_program_numbers), TimerProgram)
     # The ventilation circuit sits apart at 895 (selector) and 896-955, and
