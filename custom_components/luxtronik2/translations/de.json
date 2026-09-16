@@ -1123,35 +1123,65 @@
             "timer_heating_schedule_sunday": {
                 "name": "Heizungs-Zeitschaltplan (Sonntag)"
             },
-            "timer_ventilation_schedule_week": {
-                "name": "Lüftungs-Zeitschaltplan (Woche)"
+            "timer_ventilation_day_schedule_week": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Woche)"
             },
-            "timer_ventilation_schedule_weekday": {
-                "name": "Lüftungs-Zeitschaltplan (Werktage)"
+            "timer_ventilation_day_schedule_weekday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Werktage)"
             },
-            "timer_ventilation_schedule_weekend": {
-                "name": "Lüftungs-Zeitschaltplan (Wochenende)"
+            "timer_ventilation_day_schedule_weekend": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Wochenende)"
             },
-            "timer_ventilation_schedule_monday": {
-                "name": "Lüftungs-Zeitschaltplan (Montag)"
+            "timer_ventilation_day_schedule_monday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Montag)"
             },
-            "timer_ventilation_schedule_tuesday": {
-                "name": "Lüftungs-Zeitschaltplan (Dienstag)"
+            "timer_ventilation_day_schedule_tuesday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Dienstag)"
             },
-            "timer_ventilation_schedule_wednesday": {
-                "name": "Lüftungs-Zeitschaltplan (Mittwoch)"
+            "timer_ventilation_day_schedule_wednesday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Mittwoch)"
             },
-            "timer_ventilation_schedule_thursday": {
-                "name": "Lüftungs-Zeitschaltplan (Donnerstag)"
+            "timer_ventilation_day_schedule_thursday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Donnerstag)"
             },
-            "timer_ventilation_schedule_friday": {
-                "name": "Lüftungs-Zeitschaltplan (Freitag)"
+            "timer_ventilation_day_schedule_friday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Freitag)"
             },
-            "timer_ventilation_schedule_saturday": {
-                "name": "Lüftungs-Zeitschaltplan (Samstag)"
+            "timer_ventilation_day_schedule_saturday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Samstag)"
             },
-            "timer_ventilation_schedule_sunday": {
-                "name": "Lüftungs-Zeitschaltplan (Sonntag)"
+            "timer_ventilation_day_schedule_sunday": {
+                "name": "Lüftungs-Zeitschaltplan Tag (Sonntag)"
+            },
+            "timer_ventilation_night_schedule_week": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Woche)"
+            },
+            "timer_ventilation_night_schedule_weekday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Werktage)"
+            },
+            "timer_ventilation_night_schedule_weekend": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Wochenende)"
+            },
+            "timer_ventilation_night_schedule_monday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Montag)"
+            },
+            "timer_ventilation_night_schedule_tuesday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Dienstag)"
+            },
+            "timer_ventilation_night_schedule_wednesday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Mittwoch)"
+            },
+            "timer_ventilation_night_schedule_thursday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Donnerstag)"
+            },
+            "timer_ventilation_night_schedule_friday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Freitag)"
+            },
+            "timer_ventilation_night_schedule_saturday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Samstag)"
+            },
+            "timer_ventilation_night_schedule_sunday": {
+                "name": "Lüftungs-Zeitschaltplan Nacht (Sonntag)"
             }
         },
         "select": {

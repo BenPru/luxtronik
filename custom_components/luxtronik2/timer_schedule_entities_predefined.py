@@ -1,22 +1,23 @@
 """Predefined timer-program schedule text entities.
 
-Covers the DHW (Bw) and heating (Hkr) circuits. The remaining timer-program
-circuits (Mk1/Mk2/ZIP/Swb) follow the same pattern and need one
-`_TimerCircuit` instance plus translations each; see the
-"lux-timer-program-parameter-layout" memory for their selector/prefix values.
+Covers the DHW (Bw), heating (Hkr) and ventilation (Luf) circuits. The
+remaining timer-program circuits (Mk1/Mk2/Mk3/ZIP/Swb) follow the DHW and
+heating pattern and need one `_TimerCircuit` instance plus translations
+each; see the "lux-timer-program-parameter-layout" memory for their
+selector/prefix values.
 
-The ventilation circuit (Luf, selector 895, times 896-955) is deliberately
-not wired up. Its registers do not follow the one-time-per-register layout
-this module models: each holds a whole start-end window (see
-`lux_overrides.TimeOfDay2`), in two blocks of three rows per schedule shape
-(`..._zeit_0_<row>_<col>` and `..._zeit_1_<row>_<col>`) whose meaning has
-not been read off a controller yet (#789). Wiring them up with a guessed
-shape would force a unique_id migration later; the `SensorKey`s and
-translations are kept ready for when the layout is settled.
+The ventilation circuit stores its windows differently (#789): each
+register 896-955 packs a whole start-end window (`lux_overrides.TimeOfDay2`),
+and every schedule shape has *two* blocks of three rows - block 0 is the
+schedule page the controller marks with a sun symbol (day mode), block 1 the
+page with a moon symbol (night mode), read off a KHZ LWC 60. The two blocks
+are modelled as two circuits sharing one selector, so each shape yields a
+day and a night entity.
 """
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 
 from homeassistant.const import EntityCategory
 
@@ -42,8 +43,9 @@ class _TimerCircuit:
     Each prefix is also the parameter-name prefix under which the firmware
     exposes the actual start/end times. The name shape that follows it is
     decided per circuit by `name_builder` below (DHW and heating share
-    ``<prefix>_zeit_<row>_<slot>``, see `_row_names_row_slot`); ``row`` is
-    the schedule slot within a day (0-based, up to `rows` per day) and
+    ``<prefix>_zeit_<row>_<slot>``, see `_row_names_row_slot`; ventilation
+    packs both halves into one register, see `_row_names_packed`); ``row``
+    is the schedule slot within a day (0-based, up to `rows` per day) and
     ``column`` is 0 for the same-schedule block, 0/1 for weekday/weekend,
     and 0-6 for Monday-Sunday.
     """
@@ -59,11 +61,13 @@ class _TimerCircuit:
     same_schedule_prefix: str
     weekday_weekend_prefix: str
     per_day_prefix: str
-    #: Builds the (start_name, end_name) pairs for one block. The layout is
-    #: per circuit so a circuit with another naming scheme can supply its
-    #: own. Deliberately has no default: a default here would make it a
-    #: class attribute and bind as a method on access.
-    name_builder: Callable[[str, int, int], tuple[tuple[str, str], ...]]
+    #: Builds the register names of one block, one tuple per row: a
+    #: ``(start_name, end_name)`` pair, or a 1-tuple for a register that
+    #: packs the whole window (see `LuxtronikTimerScheduleTextDescription`).
+    #: The layout is per circuit so a circuit with another naming scheme
+    #: can supply its own. Deliberately has no default: a default here would
+    #: make it a class attribute and bind as a method on access.
+    name_builder: Callable[[str, int, int], tuple[tuple[str, ...], ...]]
     device_key: DeviceKey
 
 
@@ -80,6 +84,20 @@ def _row_names_row_slot(
         (f"{prefix}_zeit_{row}_{2 * col}", f"{prefix}_zeit_{row}_{2 * col + 1}")
         for row in range(rows)
     )
+
+
+def _row_names_packed(
+    block: int, prefix: str, rows: int, col: int
+) -> tuple[tuple[str, ...], ...]:
+    """Build the 1-tuples of a ``<prefix>_zeit_<block>_<row>_<2*col>`` block.
+
+    Ventilation names (896-955) keep the ``2*col`` slot numbering of the
+    two-register layout although a single register now holds the whole
+    window - the odd slots simply do not exist. ``block`` selects the day
+    (0) or night (1) schedule; bind it with `functools.partial` to get a
+    `_TimerCircuit.name_builder`.
+    """
+    return tuple((f"{prefix}_zeit_{block}_{row}_{2 * col}",) for row in range(rows))
 
 
 # Numbers verified against a real diagnostics dump for parameters 162-667.
@@ -123,6 +141,52 @@ _HEATING_WEEKDAYS: tuple[tuple[SK, int], ...] = (
     (SK.TIMER_HEATING_SCHEDULE_FRIDAY, 4),
     (SK.TIMER_HEATING_SCHEDULE_SATURDAY, 5),
     (SK.TIMER_HEATING_SCHEDULE_SUNDAY, 6),
+)
+
+
+# Verified against the diagnostics dump and controller photos of a KHZ LWC 60
+# with a ventilation module (#789): selector 895, windows 896-955. Both
+# circuits read the same selector; the mode ("week"/"5+2"/"days") applies to
+# the day and the night block alike.
+_VENTILATION_DAY_CIRCUIT = _TimerCircuit(
+    mode_selector_name="ID_Einst_SuLuf_akt",
+    rows=3,
+    # Mixed-case `Wo`/`Tg`: again the upstream library's literal spellings.
+    same_schedule_prefix="ID_Einst_SuLufWo",
+    weekday_weekend_prefix="ID_Einst_SuLuf25",
+    per_day_prefix="ID_Einst_SuLufTg",
+    name_builder=partial(_row_names_packed, 0),
+    device_key=DeviceKey.ventilation,
+)
+
+_VENTILATION_NIGHT_CIRCUIT = _TimerCircuit(
+    mode_selector_name="ID_Einst_SuLuf_akt",
+    rows=3,
+    same_schedule_prefix="ID_Einst_SuLufWo",
+    weekday_weekend_prefix="ID_Einst_SuLuf25",
+    per_day_prefix="ID_Einst_SuLufTg",
+    name_builder=partial(_row_names_packed, 1),
+    device_key=DeviceKey.ventilation,
+)
+
+_VENTILATION_DAY_WEEKDAYS: tuple[tuple[SK, int], ...] = (
+    (SK.TIMER_VENTILATION_DAY_SCHEDULE_MONDAY, 0),
+    (SK.TIMER_VENTILATION_DAY_SCHEDULE_TUESDAY, 1),
+    (SK.TIMER_VENTILATION_DAY_SCHEDULE_WEDNESDAY, 2),
+    (SK.TIMER_VENTILATION_DAY_SCHEDULE_THURSDAY, 3),
+    (SK.TIMER_VENTILATION_DAY_SCHEDULE_FRIDAY, 4),
+    (SK.TIMER_VENTILATION_DAY_SCHEDULE_SATURDAY, 5),
+    (SK.TIMER_VENTILATION_DAY_SCHEDULE_SUNDAY, 6),
+)
+
+_VENTILATION_NIGHT_WEEKDAYS: tuple[tuple[SK, int], ...] = (
+    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_MONDAY, 0),
+    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_TUESDAY, 1),
+    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEDNESDAY, 2),
+    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_THURSDAY, 3),
+    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_FRIDAY, 4),
+    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_SATURDAY, 5),
+    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_SUNDAY, 6),
 )
 
 
@@ -196,5 +260,19 @@ TIMER_SCHEDULE_ENTITIES: list[LuxtronikTimerScheduleTextDescription] = (
         weekday_key=SK.TIMER_HEATING_SCHEDULE_WEEKDAY,
         weekend_key=SK.TIMER_HEATING_SCHEDULE_WEEKEND,
         day_keys=_HEATING_WEEKDAYS,
+    )
+    + _build_circuit_entities(
+        _VENTILATION_DAY_CIRCUIT,
+        week_key=SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEK,
+        weekday_key=SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEKDAY,
+        weekend_key=SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEKEND,
+        day_keys=_VENTILATION_DAY_WEEKDAYS,
+    )
+    + _build_circuit_entities(
+        _VENTILATION_NIGHT_CIRCUIT,
+        week_key=SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEK,
+        weekday_key=SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKDAY,
+        weekend_key=SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKEND,
+        day_keys=_VENTILATION_NIGHT_WEEKDAYS,
     )
 )

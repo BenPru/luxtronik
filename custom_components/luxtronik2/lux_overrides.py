@@ -137,15 +137,13 @@ class TimeOfDay2(Base):
     like the other timer circuits: each 32-bit value carries the whole
     window, start minute-of-day in the low 16 bits and end minute-of-day in
     the high 16 bits. Derived from the first unit with a live ventilation
-    module (#789): its dump rendered the registers under `TimeOfDay`, which
-    drops seconds, so the end halves are exact and the start halves are
-    known to the hour and assumed on the minute. The inverter silence timer
-    (1093-1113) packs the same way: one corpus unit holds 27526320 =
-    0x01A404B0 = 20:00-07:00 there with the raw value intact, the one exact
-    confirmation. Upstream `main` assigns a `TimeOfDay2` to both blocks, so
-    the name is kept for a drop-in swap once that library ships. The one
-    deliberate difference: hours are zero-padded, because the schedule text
-    entities budget a fixed-width pair (see `TimeOfDay`).
+    module (#789) and confirmed minute for minute against photographs of
+    its controller pages. The inverter silence timer (1093-1113) packs the
+    same way: one corpus unit holds 27526320 = 0x01A404B0 = 20:00-07:00
+    there with the raw value intact. Upstream `main` assigns a `TimeOfDay2`
+    to both blocks, so the name is kept for a drop-in swap once that library
+    ships. The one deliberate difference: hours are zero-padded, because the
+    schedule text entities budget a fixed-width pair (see `TimeOfDay`).
 
     `to_heatpump` refuses a half outside the day: in a packed register an
     oversized start would spill into the end field's bits.

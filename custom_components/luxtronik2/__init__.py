@@ -604,17 +604,23 @@ async def _async_remove_legacy_smart_grid_switch(
         )
 
 
-_WITHDRAWN_VENTILATION_SCHEDULE_KEYS = (
-    SK.TIMER_VENTILATION_SCHEDULE_WEEK,
-    SK.TIMER_VENTILATION_SCHEDULE_WEEKDAY,
-    SK.TIMER_VENTILATION_SCHEDULE_WEEKEND,
-    SK.TIMER_VENTILATION_SCHEDULE_MONDAY,
-    SK.TIMER_VENTILATION_SCHEDULE_TUESDAY,
-    SK.TIMER_VENTILATION_SCHEDULE_WEDNESDAY,
-    SK.TIMER_VENTILATION_SCHEDULE_THURSDAY,
-    SK.TIMER_VENTILATION_SCHEDULE_FRIDAY,
-    SK.TIMER_VENTILATION_SCHEDULE_SATURDAY,
-    SK.TIMER_VENTILATION_SCHEDULE_SUNDAY,
+# Literal keys, not `SensorKey` members: these entities no longer exist and
+# their keys were dropped from the enum. Their successors carry a `_day_` /
+# `_night_` infix, so no live unique_id can collide with this list.
+_WITHDRAWN_VENTILATION_SCHEDULE_KEYS = tuple(
+    f"timer_ventilation_schedule_{shape}"
+    for shape in (
+        "week",
+        "weekday",
+        "weekend",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+    )
 )
 
 
@@ -626,10 +632,12 @@ async def _async_remove_withdrawn_ventilation_schedule_entities(
     They read registers 896-955 as single times of day, but each holds a
     packed start-end window (#789, `lux_overrides.TimeOfDay2`), so on the
     only kind of unit that has them - one with a ventilation module - they
-    never showed a valid state. The text platform's sync only manages the
-    blocks it still describes; left alone, the active block would linger as
-    "no longer provided" and the others stay disabled by the integration
-    forever. Same lazy approach as the SmartGrid switch above.
+    never showed a valid state. Their replacements are separate day and
+    night schedule entities under new unique_ids (see
+    `timer_schedule_entities_predefined`). The text platform's sync only
+    manages the blocks it still describes; left alone, the old active block
+    would linger as "no longer provided" and the others stay disabled by the
+    integration forever. Same lazy approach as the SmartGrid switch above.
     """
     prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
     ent_reg = async_get(hass)

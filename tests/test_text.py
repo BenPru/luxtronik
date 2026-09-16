@@ -87,8 +87,8 @@ class TestTimerScheduleTable:
         problems = []
         for description in TIMER_SCHEDULE_ENTITIES:
             names = [description.mode_selector_name]
-            for start_name, end_name in description.row_names:
-                names.extend([start_name, end_name])
+            for row in description.row_names:
+                names.extend(row)
             for name in names:
                 if name not in known_names:
                     problems.append(f"{description.key}: {name!r} not in Parameters")
@@ -96,7 +96,8 @@ class TestTimerScheduleTable:
         assert not problems, "\n".join(problems)
 
     def test_entity_count(self):
-        assert len(TIMER_SCHEDULE_ENTITIES) == 20
+        # 10 DHW + 10 heating + 10 ventilation day + 10 ventilation night
+        assert len(TIMER_SCHEDULE_ENTITIES) == 40
 
     def test_row_counts_per_circuit(self):
         """DHW has 5 slots per day, the heating circuit only 3."""
@@ -152,26 +153,49 @@ class TestTimerScheduleTable:
         assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEKEND] == "5+2"
         assert by_key[SK.TIMER_HEATING_SCHEDULE_MONDAY] == "days"
 
-    def test_ventilation_circuit_is_not_wired_up(self):
-        """No ventilation schedule entity until the register layout is settled.
+    def test_ventilation_row_names_are_packed_day_and_night_blocks(self):
+        """Ventilation rows are 1-tuples on the block the key names (#789).
 
-        The first unit sampled with a live module (#789) showed 896-955 hold
-        one packed start-end window per register, in two blocks whose
-        meaning is still unknown, so the (start_name, end_name) row model
-        cannot describe them yet. Wiring them up with a guessed shape would
-        force a unique_id migration once the answer arrives.
+        Register names verified against a KHZ LWC 60 dump: block 0 is the
+        controller's sun (day) page, block 1 its moon (night) page, and the
+        column keeps the `2*col` slot numbering of the two-register layout.
         """
         from custom_components.luxtronik2.const import DeviceKey
 
-        assert not any(
-            d.device_key is DeviceKey.ventilation for d in TIMER_SCHEDULE_ENTITIES
+        by_key = {d.key: d for d in TIMER_SCHEDULE_ENTITIES}
+        day_week = by_key[SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEK]
+        night_week = by_key[SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEK]
+        assert day_week.device_key is DeviceKey.ventilation
+        assert day_week.mode_selector_name == "ID_Einst_SuLuf_akt"
+        assert night_week.mode_selector_name == "ID_Einst_SuLuf_akt"
+        assert day_week.row_names == (
+            ("ID_Einst_SuLufWo_zeit_0_0_0",),
+            ("ID_Einst_SuLufWo_zeit_0_1_0",),
+            ("ID_Einst_SuLufWo_zeit_0_2_0",),
         )
-        assert not any(
-            name.startswith("ID_Einst_SuLuf")
-            for d in TIMER_SCHEDULE_ENTITIES
-            for pair in d.row_names
-            for name in pair
+        assert night_week.row_names == (
+            ("ID_Einst_SuLufWo_zeit_1_0_0",),
+            ("ID_Einst_SuLufWo_zeit_1_1_0",),
+            ("ID_Einst_SuLufWo_zeit_1_2_0",),
         )
+        assert by_key[SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEKEND].row_names[0] == (
+            "ID_Einst_SuLuf25_zeit_0_0_2",
+        )
+        assert by_key[SK.TIMER_VENTILATION_NIGHT_SCHEDULE_SUNDAY].row_names[2] == (
+            "ID_Einst_SuLufTg_zeit_1_2_12",
+        )
+
+    def test_ventilation_active_modes(self):
+        by_key = {d.key: d.active_mode for d in TIMER_SCHEDULE_ENTITIES}
+        for block in ("DAY", "NIGHT"):
+            assert by_key[SK[f"TIMER_VENTILATION_{block}_SCHEDULE_WEEK"]] == "week"
+            assert by_key[SK[f"TIMER_VENTILATION_{block}_SCHEDULE_WEEKDAY"]] == "5+2"
+            assert by_key[SK[f"TIMER_VENTILATION_{block}_SCHEDULE_WEEKEND"]] == "5+2"
+            assert by_key[SK[f"TIMER_VENTILATION_{block}_SCHEDULE_MONDAY"]] == "days"
+
+    def test_every_row_is_a_pair_or_a_packed_register(self):
+        for d in TIMER_SCHEDULE_ENTITIES:
+            assert all(len(row) in (1, 2) for row in d.row_names), d.key
 
 
 # ===========================================================================
@@ -327,6 +351,42 @@ class TestLuxtronikTimerScheduleText:
         coord.data = None
         entity._handle_coordinator_update(None)  # should not crash
 
+    def test_packed_rows_render_the_window_as_is(self):
+        """The reporter's day block (#789): three packed windows, verbatim."""
+        entity, _, description = self._make_entity(
+            key=SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEK
+        )
+        (r0,), (r1,), (r2,) = description.row_names
+        data = make_coordinator_data(
+            parameters={r0: "05:00-08:30", r1: "10:00-11:00", r2: "20:00-21:00"}
+        )
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == "05:00-08:30/10:00-11:00/20:00-21:00"
+        assert len(entity._attr_native_value) == entity._attr_native_max
+
+    def test_packed_rows_skip_unset_and_missing_registers(self):
+        entity, _, description = self._make_entity(
+            key=SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEK
+        )
+        (r0,), (r1,), _ = description.row_names
+        data = make_coordinator_data(parameters={r0: "00:00-00:00", r1: "22:00-05:00"})
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == "22:00-05:00"
+
+    def test_packed_rows_through_the_real_datatype(self):
+        """End to end: raw register -> TimeOfDay2 -> entity state."""
+        from custom_components.luxtronik2.lux_overrides import TimeOfDay2
+
+        entity, _, description = self._make_entity(
+            key=SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEK
+        )
+        (r0,), _, _ = description.row_names
+        # 05:00-08:30: start 300 in the low word, end 510 in the high word.
+        raw = (510 << 16) | 300
+        data = make_coordinator_data(parameters={r0: TimeOfDay2.from_heatpump(raw)})
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == "05:00-08:30"
+
     def test_an_over_long_value_is_dropped_instead_of_raised(self, caplog):
         """A register the datatype cannot render within budget must not
         take every listener update down with it.
@@ -442,6 +502,45 @@ class TestLuxtronikTimerScheduleText:
 
         coord.async_write_many.assert_not_called()
         coord.async_write.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_set_value_writes_whole_windows_to_packed_rows(self):
+        """One (name, "HH:MM-HH:MM") write per changed packed row, the
+        rest cleared to the unused window."""
+        entity, coord, description = self._make_entity(
+            key=SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEK
+        )
+        (r0,), (r1,), (r2,) = description.row_names
+        data = make_coordinator_data(
+            parameters={r0: "05:00-08:30", r1: "10:00-11:00", r2: "20:00-21:00"}
+        )
+        coord.data = data
+        coord.async_write_many = AsyncMock(return_value=data)
+
+        await entity.async_set_value("05:00-08:30/12:00-13:00")
+
+        coord.async_write_many.assert_awaited_once()
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert pairs == [(r1, "12:00-13:00"), (r2, "00:00-00:00")]
+
+    @pytest.mark.asyncio
+    async def test_packed_rows_never_receive_24_00(self):
+        """A packed half holds 0-1439, so 24:00 is respelled 00:00 even on a
+        controller whose seconds registers store 86400."""
+        entity, coord, description = self._make_entity(
+            key=SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEK, supports_24_00=True
+        )
+        (r0,), _, _ = description.row_names
+        coord.data = make_coordinator_data(parameters={r0: "00:00-00:00"})
+
+        await entity.async_set_value("22:00-24:00")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert pairs[0] == (r0, "22:00-00:00")
+
+        with pytest.raises(ServiceValidationError) as excinfo:
+            await entity.async_set_value("00:00-24:00")
+        assert excinfo.value.translation_key == "timer_schedule_all_day_unsupported"
 
     @pytest.mark.asyncio
     async def test_set_value_writes_midnight_for_24_00_by_default(self):

@@ -333,11 +333,15 @@ class TestTimerProgramSelects:
             TIMER_SCHEDULE_ENTITIES,
         )
 
-        # The ventilation schedule entities are withdrawn until their packed
-        # register layout is settled (#789); its selector is checked above.
         selectors = {
             SensorKey.TIMER_HEATING_SCHEDULE_WEEK: (
                 LuxParameter.P0222_TIMER_PROGRAM_HEATING
+            ),
+            SensorKey.TIMER_VENTILATION_DAY_SCHEDULE_WEEK: (
+                LuxParameter.P0895_TIMER_PROGRAM_VENTILATION
+            ),
+            SensorKey.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEK: (
+                LuxParameter.P0895_TIMER_PROGRAM_VENTILATION
             ),
         }
         for schedule_key, parameter in selectors.items():
