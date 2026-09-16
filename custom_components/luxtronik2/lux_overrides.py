@@ -352,9 +352,10 @@ def update_Luxtronik_Parameters():
     Calculations.calculations.update(calculations_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
 
     # Temperature settings stored as tenths of a degree. The last six are
-    # limit temperatures upstream `main` types as Celsius too; every unit in
-    # the diagnostics corpus holds them as tenths (700, 560, 350, -200,
-    # 1150, 500 for 84, 87, 91, 92, 94, 96).
+    # limit temperatures upstream `main` types as Celsius too; all 30 units
+    # in the diagnostics corpus hold plausible tenths there: 84 at 650-700,
+    # 87 at 350-650, 91 at 350-450, 92 at -200/-220, 94 at 1150-1400 and
+    # 96 at 500 on every unit.
     Celsius_numbers = (
         [14, 15, 16, 141, 142, 143, 774, 775, 776]
         + [17, 47, 90, 93, 111]
@@ -369,8 +370,10 @@ def update_Luxtronik_Parameters():
     # Operating-time counters (ID_Zaehler_BetrZeit*) in seconds, the
     # parameter-side mirrors of calculations 56-66, and the heat-quantity
     # date (ID_Waermemenge_Datum) as a Unix timestamp - eight corpus units
-    # sit on its 2018-01-01 factory default. Typed as upstream `main` does;
-    # nothing reads them, this only makes diagnostics dumps readable.
+    # sit on its 2018-01-01 factory default, eight more on 0, which the
+    # library's Timestamp renders as 1970-01-01 (as it does for 6/7/731/732).
+    # Typed as upstream `main` does; nothing reads them, this only makes
+    # diagnostics dumps readable.
     operating_time_numbers = [668, 669, 670, 671, 672, 673, 728, 729, 730, 859]
     update_Luxtronik_Parameter_Classes(operating_time_numbers, Seconds)
     update_Luxtronik_Parameter_Classes([880], Timestamp)

@@ -683,15 +683,18 @@ class TestTimerScheduleDatatypeCoverage:
         assert parameters[789].name == "ID_Einst_SuMk3Wo_zeit_0_0"
         assert parameters[789].from_heatpump(34200) == "09:30"
         assert parameters[848].name == "ID_Einst_SuMk3Tg_zeit_2_13"
-        # The block ends at 848; 849 is not a schedule register.
-        assert not isinstance(parameters[849], TimeOfDay)
+        # The block is 788-848: 787 (ID_SU_FstdMK3) and 849
+        # (ID_Ba_Hz_MK3_saved) are not schedule registers.
+        assert not isinstance(parameters[787], TimeOfDay | TimerProgram)
+        assert not isinstance(parameters[849], TimeOfDay | TimerProgram)
 
 
 class TestUpstreamCelsiusParameters:
     """Six limit temperatures upstream `main` types as Celsius (tenths).
 
-    Every unit in the corpus stores them as tenths (700, 560, 350, -200,
-    1150, 500), which also matches the setting each one names.
+    All 30 corpus units store plausible tenths (84 at 650-700, 87 at
+    350-650, 91 at 350-450, 92 at -200/-220, 94 at 1150-1400, 96 at 500
+    everywhere), which also matches the setting each one names.
     """
 
     _EXPECTED = {
@@ -760,15 +763,18 @@ class TestUpstreamCounterParameters:
         assert parameters[668].from_heatpump(60515833) == 60515833
 
     def test_heat_quantity_date_is_a_timestamp(self):
-        from datetime import datetime
+        from datetime import date, datetime
 
         from luxtronik.datatypes import Timestamp
 
         parameter = self._applied()[880]
         assert parameter.name == "ID_Waermemenge_Datum"
         assert isinstance(parameter, Timestamp)
-        # Eight corpus units sit on the 2018-01-01 factory default.
-        assert isinstance(parameter.from_heatpump(1514768400), datetime)
+        # Eight corpus units sit on the 2018-01-01 factory default
+        # (01:00 UTC; the library renders it in the host's local zone).
+        rendered = parameter.from_heatpump(1514768400)
+        assert isinstance(rendered, datetime)
+        assert rendered.date() in (date(2017, 12, 31), date(2018, 1, 1))
 
 
 class TestSmartGridMode:
