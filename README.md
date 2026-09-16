@@ -37,7 +37,7 @@ Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs
 **Other documents in this repository:**
 
 - **[ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)** — integration options, COP and the external power sensor, EVU/Smart Grid, diagnostics downloads, holiday scheduling, solar thermal, and the other entities that only appear on some hardware.
-- **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** — the editable weekly schedules for DHW, heating, and ventilation: entity list, time format, and what a window means on each circuit.
+- **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** — the editable weekly schedules for DHW, heating and ventilation: entity list, time format, and what a window means on each circuit.
 - **[REPORTING_ISSUES.md](REPORTING_ISSUES.md)** — how to file a bug report that can be diagnosed on the first pass.
 - **[DHW_TARGET_REGISTERS.md](DHW_TARGET_REGISTERS.md)** — maintainer reference: what is known about the two hot water setpoint parameters, why the two platforms gated them differently until September 2026, and what to measure if your hot water target reads wrong.
 
@@ -194,7 +194,7 @@ Some units have an integrated ventilation module (controlled ventilation with he
 Basic entities:
 | Name | Entity Type | Units | Description |
 | :--- | :--- | :--- | :--- |
-| **Ventilation mode** | Select | - | The module's operating mode: *Automatic* / *Party* / *Holidays* / *Off*. As on the heating circuit, the programmed timer schedule is expected to apply only in *Automatic* — see the note below. |
+| **Ventilation mode** | Select | - | The module's operating mode: *Automatic* / *Party* / *Holidays* / *Off*. The programmed timer schedule applies only in *Automatic*; on the one unit observed so far (#729), *Party* ran the nominal stage and *Holidays* the humidity-protection stage continuously — see TIMER_SCHEDULES.md. |
 | **Supply air temperature** | Sensor | °C | Temperature of the air being supplied to the rooms. |
 | **Exhaust air temperature** | Sensor | °C | Temperature of the air being extracted from the rooms. |
 | **Supply fan setpoint** / **Exhaust fan setpoint** | Sensor | % | How hard each fan is currently being driven, as a percentage of its full analog output. These are modulating outputs, so the value tracks the active stage rather than just on/off. |
@@ -204,7 +204,7 @@ Advanced entities (diagnostic, read-only):
 | :--- | :--- | :--- | :--- |
 | **Humidity protection stage** / **Reduced stage** / **Nominal stage** / **Intensive stage** | Sensor | m³/h | The four airflow rates configured on the controller for the DIN 1946-6 ventilation stages. They show how the module is commissioned, and let you interpret a fan setpoint: on a 400 m³/h unit, a *Nominal stage* of 250 m³/h corresponds to a 62.5 % fan setpoint. |
 
-The module also has an editable weekly schedule (*Ventilation timer program* select + *Ventilation Timer Schedule* text entities) — see **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)**, including which parts of its behaviour are still unconfirmed.
+The module's weekly schedule is exposed as a *Ventilation timer program* select plus **day** and **night** schedule text entities — the controller keeps a sun (day) and a moon (night) page per shape, and in *Automatic* a day window releases the nominal stage, a night window the reduced stage. See **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** for the entity list and the evidence behind that mapping.
 
 > **ℹ️ Note:** The stage entities are deliberately read-only sensors rather than writable Number entities: their scale (m³/h with no conversion) is established from a single system, and a wrong unit on a display is a cosmetic problem while a wrong unit on a write is not. Set the stages on the controller itself.
 

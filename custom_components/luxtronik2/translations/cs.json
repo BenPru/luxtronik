@@ -1126,35 +1126,65 @@
             "timer_heating_schedule_sunday": {
                 "name": "Časový plán vytápění (neděle)"
             },
-            "timer_ventilation_schedule_week": {
-                "name": "Časový plán větrání (týden)"
+            "timer_ventilation_day_schedule_week": {
+                "name": "Časový plán větrání den (týden)"
             },
-            "timer_ventilation_schedule_weekday": {
-                "name": "Časový plán větrání (pracovní dny)"
+            "timer_ventilation_day_schedule_weekday": {
+                "name": "Časový plán větrání den (pracovní dny)"
             },
-            "timer_ventilation_schedule_weekend": {
-                "name": "Časový plán větrání (víkend)"
+            "timer_ventilation_day_schedule_weekend": {
+                "name": "Časový plán větrání den (víkend)"
             },
-            "timer_ventilation_schedule_monday": {
-                "name": "Časový plán větrání (pondělí)"
+            "timer_ventilation_day_schedule_monday": {
+                "name": "Časový plán větrání den (pondělí)"
             },
-            "timer_ventilation_schedule_tuesday": {
-                "name": "Časový plán větrání (úterý)"
+            "timer_ventilation_day_schedule_tuesday": {
+                "name": "Časový plán větrání den (úterý)"
             },
-            "timer_ventilation_schedule_wednesday": {
-                "name": "Časový plán větrání (středa)"
+            "timer_ventilation_day_schedule_wednesday": {
+                "name": "Časový plán větrání den (středa)"
             },
-            "timer_ventilation_schedule_thursday": {
-                "name": "Časový plán větrání (čtvrtek)"
+            "timer_ventilation_day_schedule_thursday": {
+                "name": "Časový plán větrání den (čtvrtek)"
             },
-            "timer_ventilation_schedule_friday": {
-                "name": "Časový plán větrání (pátek)"
+            "timer_ventilation_day_schedule_friday": {
+                "name": "Časový plán větrání den (pátek)"
             },
-            "timer_ventilation_schedule_saturday": {
-                "name": "Časový plán větrání (sobota)"
+            "timer_ventilation_day_schedule_saturday": {
+                "name": "Časový plán větrání den (sobota)"
             },
-            "timer_ventilation_schedule_sunday": {
-                "name": "Časový plán větrání (neděle)"
+            "timer_ventilation_day_schedule_sunday": {
+                "name": "Časový plán větrání den (neděle)"
+            },
+            "timer_ventilation_night_schedule_week": {
+                "name": "Časový plán větrání noc (týden)"
+            },
+            "timer_ventilation_night_schedule_weekday": {
+                "name": "Časový plán větrání noc (pracovní dny)"
+            },
+            "timer_ventilation_night_schedule_weekend": {
+                "name": "Časový plán větrání noc (víkend)"
+            },
+            "timer_ventilation_night_schedule_monday": {
+                "name": "Časový plán větrání noc (pondělí)"
+            },
+            "timer_ventilation_night_schedule_tuesday": {
+                "name": "Časový plán větrání noc (úterý)"
+            },
+            "timer_ventilation_night_schedule_wednesday": {
+                "name": "Časový plán větrání noc (středa)"
+            },
+            "timer_ventilation_night_schedule_thursday": {
+                "name": "Časový plán větrání noc (čtvrtek)"
+            },
+            "timer_ventilation_night_schedule_friday": {
+                "name": "Časový plán větrání noc (pátek)"
+            },
+            "timer_ventilation_night_schedule_saturday": {
+                "name": "Časový plán větrání noc (sobota)"
+            },
+            "timer_ventilation_night_schedule_sunday": {
+                "name": "Časový plán větrání noc (neděle)"
             }
         },
         "select": {

@@ -317,12 +317,21 @@ class LuxtronikTimerScheduleTextDescription(
 ):
     """Class describing a single timer-program schedule block as an editable text entity.
 
-    Reads/writes multiple raw Luxtronik parameters (one pair per row) as a
+    Reads/writes multiple raw Luxtronik parameters (one row per window) as a
     delimited "start-end/start-end/..." string, so ``luxtronik_key`` is left
     unused (stays at its ``LuxParameter.UNSET`` default).
+
+    Each ``row_names`` entry is one window of the block, in one of two
+    register layouts:
+
+    - ``(start_name, end_name)``: two ``TimeOfDay`` registers, one per half
+      (DHW, heating).
+    - ``(name,)``: a single ``TimeOfDay2`` register that packs the whole
+      window and already reads/writes as ``"HH:MM-HH:MM"`` (ventilation,
+      #789).
     """
 
     platform = Platform.TEXT
     mode_selector_name: str = ""
     active_mode: str = ""
-    row_names: tuple[tuple[str, str], ...] = ()
+    row_names: tuple[tuple[str] | tuple[str, str], ...] = ()

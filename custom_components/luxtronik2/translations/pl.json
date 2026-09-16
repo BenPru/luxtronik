@@ -1126,35 +1126,65 @@
             "timer_heating_schedule_sunday": {
                 "name": "Harmonogram czasowy ogrzewania (niedziela)"
             },
-            "timer_ventilation_schedule_week": {
-                "name": "Harmonogram czasowy wentylacji (tydzień)"
+            "timer_ventilation_day_schedule_week": {
+                "name": "Harmonogram czasowy wentylacji dzień (tydzień)"
             },
-            "timer_ventilation_schedule_weekday": {
-                "name": "Harmonogram czasowy wentylacji (dni robocze)"
+            "timer_ventilation_day_schedule_weekday": {
+                "name": "Harmonogram czasowy wentylacji dzień (dni robocze)"
             },
-            "timer_ventilation_schedule_weekend": {
-                "name": "Harmonogram czasowy wentylacji (weekend)"
+            "timer_ventilation_day_schedule_weekend": {
+                "name": "Harmonogram czasowy wentylacji dzień (weekend)"
             },
-            "timer_ventilation_schedule_monday": {
-                "name": "Harmonogram czasowy wentylacji (poniedziałek)"
+            "timer_ventilation_day_schedule_monday": {
+                "name": "Harmonogram czasowy wentylacji dzień (poniedziałek)"
             },
-            "timer_ventilation_schedule_tuesday": {
-                "name": "Harmonogram czasowy wentylacji (wtorek)"
+            "timer_ventilation_day_schedule_tuesday": {
+                "name": "Harmonogram czasowy wentylacji dzień (wtorek)"
             },
-            "timer_ventilation_schedule_wednesday": {
-                "name": "Harmonogram czasowy wentylacji (środa)"
+            "timer_ventilation_day_schedule_wednesday": {
+                "name": "Harmonogram czasowy wentylacji dzień (środa)"
             },
-            "timer_ventilation_schedule_thursday": {
-                "name": "Harmonogram czasowy wentylacji (czwartek)"
+            "timer_ventilation_day_schedule_thursday": {
+                "name": "Harmonogram czasowy wentylacji dzień (czwartek)"
             },
-            "timer_ventilation_schedule_friday": {
-                "name": "Harmonogram czasowy wentylacji (piątek)"
+            "timer_ventilation_day_schedule_friday": {
+                "name": "Harmonogram czasowy wentylacji dzień (piątek)"
             },
-            "timer_ventilation_schedule_saturday": {
-                "name": "Harmonogram czasowy wentylacji (sobota)"
+            "timer_ventilation_day_schedule_saturday": {
+                "name": "Harmonogram czasowy wentylacji dzień (sobota)"
             },
-            "timer_ventilation_schedule_sunday": {
-                "name": "Harmonogram czasowy wentylacji (niedziela)"
+            "timer_ventilation_day_schedule_sunday": {
+                "name": "Harmonogram czasowy wentylacji dzień (niedziela)"
+            },
+            "timer_ventilation_night_schedule_week": {
+                "name": "Harmonogram czasowy wentylacji noc (tydzień)"
+            },
+            "timer_ventilation_night_schedule_weekday": {
+                "name": "Harmonogram czasowy wentylacji noc (dni robocze)"
+            },
+            "timer_ventilation_night_schedule_weekend": {
+                "name": "Harmonogram czasowy wentylacji noc (weekend)"
+            },
+            "timer_ventilation_night_schedule_monday": {
+                "name": "Harmonogram czasowy wentylacji noc (poniedziałek)"
+            },
+            "timer_ventilation_night_schedule_tuesday": {
+                "name": "Harmonogram czasowy wentylacji noc (wtorek)"
+            },
+            "timer_ventilation_night_schedule_wednesday": {
+                "name": "Harmonogram czasowy wentylacji noc (środa)"
+            },
+            "timer_ventilation_night_schedule_thursday": {
+                "name": "Harmonogram czasowy wentylacji noc (czwartek)"
+            },
+            "timer_ventilation_night_schedule_friday": {
+                "name": "Harmonogram czasowy wentylacji noc (piątek)"
+            },
+            "timer_ventilation_night_schedule_saturday": {
+                "name": "Harmonogram czasowy wentylacji noc (sobota)"
+            },
+            "timer_ventilation_night_schedule_sunday": {
+                "name": "Harmonogram czasowy wentylacji noc (niedziela)"
             }
         },
         "select": {
