@@ -719,6 +719,58 @@ class TestUpstreamCelsiusParameters:
             assert parameter.from_heatpump(raw) == value, number
 
 
+class TestUpstreamCounterParameters:
+    """Operating-time counters and the heat-quantity date, typed as upstream
+    `main` does. Nothing in the integration reads these registers (the
+    sensors use the calculation mirrors 56-66); this only makes diagnostics
+    dumps readable.
+    """
+
+    _SECONDS = {
+        668: "ID_Zaehler_BetrZeitWP",
+        669: "ID_Zaehler_BetrZeitVD1",
+        670: "ID_Zaehler_BetrZeitVD2",
+        671: "ID_Zaehler_BetrZeitZWE1",
+        672: "ID_Zaehler_BetrZeitZWE2",
+        673: "ID_Zaehler_BetrZeitZWE3",
+        728: "ID_Zaehler_BetrZeitHz",
+        729: "ID_Zaehler_BetrZeitBW",
+        730: "ID_Zaehler_BetrZeitKue",
+        859: "ID_Zaehler_BetrZeitSW",
+    }
+
+    def _applied(self):
+        from luxtronik.parameters import Parameters
+
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        return Parameters.parameters
+
+    def test_operating_time_counters_are_seconds(self):
+        from luxtronik.datatypes import Seconds
+
+        parameters = self._applied()
+        for number, name in self._SECONDS.items():
+            assert parameters[number].name == name, number
+            assert isinstance(parameters[number], Seconds), number
+        # 60515833 s on one corpus unit, i.e. about 700 days of runtime.
+        assert parameters[668].from_heatpump(60515833) == 60515833
+
+    def test_heat_quantity_date_is_a_timestamp(self):
+        from datetime import datetime
+
+        from luxtronik.datatypes import Timestamp
+
+        parameter = self._applied()[880]
+        assert parameter.name == "ID_Waermemenge_Datum"
+        assert isinstance(parameter, Timestamp)
+        # Eight corpus units sit on the 2018-01-01 factory default.
+        assert isinstance(parameter.from_heatpump(1514768400), datetime)
+
+
 class TestSmartGridMode:
     """P1030 is a four-option mode selector, so it needs a real datatype.
 

@@ -13,6 +13,7 @@ from luxtronik.datatypes import (
     Percent,
     Percent2,
     Power,
+    Seconds,
     SelectionBase,
     SwitchoffFile,
     Timestamp,
@@ -364,6 +365,15 @@ def update_Luxtronik_Parameters():
     # Kelvin temperature-difference parameters stored as tenths.
     delta_temperature_numbers = [88, 89]
     update_Luxtronik_Parameter_Classes(delta_temperature_numbers, Kelvin)
+
+    # Operating-time counters (ID_Zaehler_BetrZeit*) in seconds, the
+    # parameter-side mirrors of calculations 56-66, and the heat-quantity
+    # date (ID_Waermemenge_Datum) as a Unix timestamp - eight corpus units
+    # sit on its 2018-01-01 factory default. Typed as upstream `main` does;
+    # nothing reads them, this only makes diagnostics dumps readable.
+    operating_time_numbers = [668, 669, 670, 671, 672, 673, 728, 729, 730, 859]
+    update_Luxtronik_Parameter_Classes(operating_time_numbers, Seconds)
+    update_Luxtronik_Parameter_Classes([880], Timestamp)
 
     # Timer program schedule parameters: mostly TimeOfDay entries, with a
     # handful of TimerProgram mode selectors interspersed. 162-667 holds the
