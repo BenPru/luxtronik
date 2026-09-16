@@ -350,8 +350,15 @@ def update_Luxtronik_Parameters():
     Parameters.parameters.update(parameters_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
     Calculations.calculations.update(calculations_to_add_update)  # pyright: ignore[reportCallIssue, reportArgumentType]
 
-    # example bulk update of parameter classes for a range of numbers
-    Celsius_numbers = [14, 15, 16, 141, 142, 143, 774, 775, 776] + [17, 47, 90, 93, 111]
+    # Temperature settings stored as tenths of a degree. The last six are
+    # limit temperatures upstream `main` types as Celsius too; every unit in
+    # the diagnostics corpus holds them as tenths (700, 560, 350, -200,
+    # 1150, 500 for 84, 87, 91, 92, 94, 96).
+    Celsius_numbers = (
+        [14, 15, 16, 141, 142, 143, 774, 775, 776]
+        + [17, 47, 90, 93, 111]
+        + [84, 87, 91, 92, 94, 96]
+    )
     update_Luxtronik_Parameter_Classes(Celsius_numbers, Celsius)
 
     # Kelvin temperature-difference parameters stored as tenths.
@@ -360,14 +367,17 @@ def update_Luxtronik_Parameters():
 
     # Timer program schedule parameters: mostly TimeOfDay entries, with a
     # handful of TimerProgram mode selectors interspersed. 162-667 holds the
-    # heating, mixing, DHW, circulation-pump and pool circuits; the
-    # ventilation circuit sits apart at 895 (selector) and 896-955 (times).
+    # heating, mixing circuits 1/2, DHW, circulation-pump and pool circuits;
+    # mixing circuit 3 sits apart at 788 (selector) and 789-848 (times), the
+    # ventilation circuit at 895 (selector) and 896-955 (times).
     # 607 is named ID_Einst_SuSwb_akt upstream but holds a time of day on
     # every unit seen with a non-zero value there (06:30/07:00/07:30, each
     # followed by an end time in 608 - #789), so it stays in the time range.
-    timer_program_numbers = {222, 283, 344, 405, 506}
+    timer_program_numbers = {222, 283, 344, 405, 506, 788}
     ventilation_selector_number = 895
-    schedule_numbers = list(range(162, 668)) + list(range(895, 956))
+    schedule_numbers = (
+        list(range(162, 668)) + list(range(788, 849)) + list(range(895, 956))
+    )
     time_of_day_numbers = [
         n
         for n in schedule_numbers

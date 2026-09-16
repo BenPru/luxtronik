@@ -661,6 +661,63 @@ class TestTimerScheduleDatatypeCoverage:
         for number in (223, 282):
             assert isinstance(parameters[number], TimeOfDay), number
 
+    def test_mixing_circuit_3_block_is_covered(self):
+        """788-848 is the Mk3 circuit, apart from the 162-667 run.
+
+        Same selector + WO/25/TG shape as the others (upstream `main` types
+        it that way); two corpus units carry 34200 / 18000 (09:30 / 05:00)
+        in 789, the rest hold 0.
+        """
+        from custom_components.luxtronik2.lux_overrides import (
+            TimeOfDay,
+            TimerProgram,
+        )
+
+        parameters = self._applied()
+        selector = parameters[788]
+        assert selector.name == "ID_Einst_SuMk3_akt2"
+        assert isinstance(selector, TimerProgram)
+        assert selector.from_heatpump(0) == "week"
+        for number in (789, 848):
+            assert isinstance(parameters[number], TimeOfDay), number
+        assert parameters[789].name == "ID_Einst_SuMk3Wo_zeit_0_0"
+        assert parameters[789].from_heatpump(34200) == "09:30"
+        assert parameters[848].name == "ID_Einst_SuMk3Tg_zeit_2_13"
+        # The block ends at 848; 849 is not a schedule register.
+        assert not isinstance(parameters[849], TimeOfDay)
+
+
+class TestUpstreamCelsiusParameters:
+    """Six limit temperatures upstream `main` types as Celsius (tenths).
+
+    Every unit in the corpus stores them as tenths (700, 560, 350, -200,
+    1150, 500), which also matches the setting each one names.
+    """
+
+    _EXPECTED = {
+        84: ("ID_Sollwert_TLG_max", 700, 70.0),
+        87: ("ID_Einst_TRBegr_akt", 560, 56.0),
+        91: ("ID_Einst_TAmax_akt", 350, 35.0),
+        92: ("ID_Einst_TAmin_akt", -200, -20.0),
+        94: ("ID_Einst_THGmax_akt", 1150, 115.0),
+        96: ("ID_Einst_TV2VDBW_akt", 500, 50.0),
+    }
+
+    def test_are_celsius_in_tenths(self):
+        from luxtronik.datatypes import Celsius
+        from luxtronik.parameters import Parameters
+
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        for number, (name, raw, value) in self._EXPECTED.items():
+            parameter = Parameters.parameters[number]
+            assert parameter.name == name, number
+            assert isinstance(parameter, Celsius), number
+            assert parameter.from_heatpump(raw) == value, number
+
 
 class TestSmartGridMode:
     """P1030 is a four-option mode selector, so it needs a real datatype.
