@@ -319,6 +319,59 @@ class TestTimeOfDay2:
             )
 
 
+class TestSilenceTimerParameters:
+    """1087-1113: the inverter silent-mode switch, selector and windows.
+
+    Names and types follow upstream `main`. The corpus has the switch and
+    the selector at 0 everywhere; pump 340716_0104 (V3.92.1) holds
+    27526320 = 0x01A404B0 in 1093 and 1096 - a 20:00-07:00 window with
+    the raw value intact, the one exact confirmation of the TimeOfDay2
+    packing. The selector's codes are unsampled: if a unit reports one
+    outside 0-2 the unknown-code warning surfaces it, as it did for 895.
+    """
+
+    def _applied(self):
+        from luxtronik.parameters import Parameters
+
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        return Parameters.parameters
+
+    def test_silent_mode_switch(self):
+        from custom_components.luxtronik2.lux_overrides import OnOffMode
+
+        switch = self._applied()[1087]
+        assert switch.name == "SILENT_MODE"
+        assert isinstance(switch, OnOffMode)
+        assert switch.from_heatpump(0) == "off"
+        assert switch.from_heatpump(1) == "on"
+        assert switch.to_heatpump("on") == 1
+        # Unknown codes stay visible rather than collapsing into None.
+        assert switch.from_heatpump(2) == 2
+
+    def test_silence_program_selector(self):
+        from custom_components.luxtronik2.lux_overrides import TimerProgram
+
+        selector = self._applied()[1092]
+        assert selector.name == "ID_Einst_SuSilence"
+        assert isinstance(selector, TimerProgram)
+        assert selector.from_heatpump(0) == "week"
+
+    def test_silence_windows_are_packed(self):
+        from custom_components.luxtronik2.lux_overrides import TimeOfDay2
+
+        parameters = self._applied()
+        for index in range(21):
+            parameter = parameters[1093 + index]
+            assert parameter.name == f"ID_Einst_SilenceTimer_{index}", index
+            assert isinstance(parameter, TimeOfDay2), index
+        assert parameters[1093].from_heatpump(27526320) == "20:00-07:00"
+        assert not isinstance(parameters[1114], TimeOfDay2)
+
+
 class TestFrequencyAutomatic:
     from custom_components.luxtronik2.lux_overrides import FrequencyAutomatic
 

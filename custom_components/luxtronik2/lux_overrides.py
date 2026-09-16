@@ -139,12 +139,13 @@ class TimeOfDay2(Base):
     the high 16 bits. Derived from the first unit with a live ventilation
     module (#789): its dump rendered the registers under `TimeOfDay`, which
     drops seconds, so the end halves are exact and the start halves are
-    known to the hour and assumed on the minute. Upstream `main` assigns a
-    `TimeOfDay2` with the same packing to these registers - and to the
-    inverter silence timer 1093-1113, not applied here - so the name is
-    kept for a drop-in swap once that library ships. The one deliberate
-    difference: hours are zero-padded, because the schedule text entities
-    budget a fixed-width pair (see `TimeOfDay`).
+    known to the hour and assumed on the minute. The inverter silence timer
+    (1093-1113) packs the same way: one corpus unit holds 27526320 =
+    0x01A404B0 = 20:00-07:00 there with the raw value intact, the one exact
+    confirmation. Upstream `main` assigns a `TimeOfDay2` to both blocks, so
+    the name is kept for a drop-in swap once that library ships. The one
+    deliberate difference: hours are zero-padded, because the schedule text
+    entities budget a fixed-width pair (see `TimeOfDay`).
 
     `to_heatpump` refuses a half outside the day: in a packed register an
     oversized start would spill into the end field's bits.
@@ -253,6 +254,14 @@ class HeatingCircuitControlMode(KnownCodeSelection):
     codes = dict(HEATING_CONTROL_MODE_CODES)
 
 
+class OnOffMode(KnownCodeSelection):
+    """OnOffMode datatype for a plain enable flag stored as 0/1 (P1087)."""
+
+    measurement_type = "selection"
+
+    codes = {0: "off", 1: "on"}
+
+
 class PoolPVMode(SelectionBase):
     """PoolPVMode datatype, converts from and to a PoolPVMode"""
 
@@ -310,6 +319,17 @@ parameters_to_add_update = {
     1120: Kelvin("SMART_GRID_HEATING_REDUCTION", True),
     1121: Kelvin("SMART_GRID_HEATING_INCREASE", True),
     1122: Kelvin("SMART_GRID_DHW_INCREASE", True),
+    # Inverter silent mode, named after upstream `main`: an on/off switch, a
+    # timer-program selector and 21 packed start-end windows. The corpus has
+    # the switch and selector at 0 on every unit, so the selector's codes
+    # are unsampled (the unknown-code warning reports anything outside the
+    # copied table); the windows are pinned by one unit holding 20:00-07:00.
+    1087: OnOffMode("SILENT_MODE", True),
+    1092: TimerProgram("ID_Einst_SuSilence", True),
+    **{
+        1093 + index: TimeOfDay2(f"ID_Einst_SilenceTimer_{index}", True)
+        for index in range(21)
+    },
     1146: Celsius("Extra_DHW_target_temp", True),
     1147: SecondsToHours("Extra_DHW_duration", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
