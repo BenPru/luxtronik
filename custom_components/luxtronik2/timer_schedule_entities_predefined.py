@@ -67,7 +67,7 @@ class _TimerCircuit:
     #: The layout is per circuit so a circuit with another naming scheme
     #: can supply its own. Deliberately has no default: a default here would
     #: make it a class attribute and bind as a method on access.
-    name_builder: Callable[[str, int, int], tuple[tuple[str, ...], ...]]
+    name_builder: Callable[[str, int, int], tuple[tuple[str] | tuple[str, str], ...]]
     device_key: DeviceKey
 
 
@@ -88,7 +88,7 @@ def _row_names_row_slot(
 
 def _row_names_packed(
     block: int, prefix: str, rows: int, col: int
-) -> tuple[tuple[str, ...], ...]:
+) -> tuple[tuple[str] | tuple[str, str], ...]:
     """Build the 1-tuples of a ``<prefix>_zeit_<block>_<row>_<2*col>`` block.
 
     Ventilation names (896-955) keep the ``2*col`` slot numbering of the

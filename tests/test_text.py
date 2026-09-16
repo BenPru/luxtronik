@@ -524,6 +524,23 @@ class TestLuxtronikTimerScheduleText:
         assert pairs == [(r1, "12:00-13:00"), (r2, "00:00-00:00")]
 
     @pytest.mark.asyncio
+    async def test_empty_string_clears_every_packed_row(self):
+        entity, coord, description = self._make_entity(
+            key=SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEK
+        )
+        (r0,), (r1,), (r2,) = description.row_names
+        data = make_coordinator_data(
+            parameters={r0: "05:00-08:30", r1: "10:00-11:00", r2: "00:00-00:00"}
+        )
+        coord.data = data
+        coord.async_write_many = AsyncMock(return_value=data)
+
+        await entity.async_set_value("")
+
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert pairs == [(r0, "00:00-00:00"), (r1, "00:00-00:00")]
+
+    @pytest.mark.asyncio
     async def test_packed_rows_never_receive_24_00(self):
         """A packed half holds 0-1439, so 24:00 is respelled 00:00 even on a
         controller whose seconds registers store 86400."""
@@ -743,6 +760,30 @@ class TestActiveScheduleDescriptions:
     def test_missing_selector_parameter_yields_nothing(self):
         """A selector that this controller does not have is a real answer: no blocks."""
         assert self._call({}) == []
+
+    def test_ventilation_selector_yields_the_day_and_night_blocks(self):
+        """Two circuits on one selector: both blocks of the shape come up."""
+        assert self._call({"ID_Einst_SuLuf_akt": "5+2"}) == [
+            SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEKDAY,
+            SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEKEND,
+            SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKDAY,
+            SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKEND,
+        ]
+
+    def test_unreadable_ventilation_selector_freezes_both_blocks(self):
+        """Day and night share the selector, so they freeze together."""
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        data = make_coordinator_data(parameters={"ID_Einst_SuLuf_akt": None})
+        coord = _mock_coordinator(data)
+        active, unreadable = _active_schedule_descriptions(coord, data)
+        assert active == []
+        assert unreadable == {"ID_Einst_SuLuf_akt"}
+        frozen = {
+            d.key for d in TIMER_SCHEDULE_ENTITIES if d.mode_selector_name in unreadable
+        }
+        assert len(frozen) == 20
+        assert all("timer_ventilation_" in key for key in frozen)
 
     def test_inactive_entity_yields_nothing(self):
         assert self._call({self._SELECTOR: "week"}, entity_active=False) == []

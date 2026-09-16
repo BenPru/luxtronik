@@ -192,7 +192,7 @@ Some units have an integrated ventilation module (controlled ventilation with he
 Basic entities:
 | Name | Entity Type | Units | Description |
 | :--- | :--- | :--- | :--- |
-| **Ventilation mode** | Select | - | The module's operating mode: *Automatic* / *Party* / *Holidays* / *Off*. The programmed timer schedule applies only in *Automatic*; *Party* runs the nominal stage and *Holidays* the humidity-protection stage continuously. |
+| **Ventilation mode** | Select | - | The module's operating mode: *Automatic* / *Party* / *Holidays* / *Off*. The programmed timer schedule applies only in *Automatic*; on the one unit observed so far (#729), *Party* ran the nominal stage and *Holidays* the humidity-protection stage continuously — see TIMER_SCHEDULES.md. |
 | **Supply air temperature** | Sensor | °C | Temperature of the air being supplied to the rooms. |
 | **Exhaust air temperature** | Sensor | °C | Temperature of the air being extracted from the rooms. |
 | **Supply fan setpoint** / **Exhaust fan setpoint** | Sensor | % | How hard each fan is currently being driven, as a percentage of its full analog output. These are modulating outputs, so the value tracks the active stage rather than just on/off. |

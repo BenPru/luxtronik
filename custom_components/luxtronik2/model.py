@@ -334,4 +334,4 @@ class LuxtronikTimerScheduleTextDescription(
     platform = Platform.TEXT
     mode_selector_name: str = ""
     active_mode: str = ""
-    row_names: tuple[tuple[str, ...], ...] = ()
+    row_names: tuple[tuple[str] | tuple[str, str], ...] = ()
