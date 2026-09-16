@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import UTC, datetime
 from typing import Final
 
 from luxtronik.calculations import Calculations
@@ -58,6 +59,32 @@ class Energy2(Base):
 
     def to_heatpump(self, value):
         return int(value * 100)
+
+
+class UtcTimestamp(Base):
+    """Unix epoch register as an aware UTC datetime; 0 means "never".
+
+    The library's `Timestamp` returns a naive datetime in the host's local
+    zone and maps 0 to the epoch itself, so a TIMESTAMP-class sensor on it
+    would show 1970-01-01 on a unit that has never recorded the event and
+    trip HA's tz-aware requirement on one that has.
+    """
+
+    measurement_type = "timestamp"
+
+    @classmethod
+    def from_heatpump(cls, value):
+        if not isinstance(value, int) or value <= 0:
+            return None
+        return datetime.fromtimestamp(value, UTC)
+
+    @classmethod
+    def to_heatpump(cls, value):
+        if isinstance(value, int):
+            return value
+        if isinstance(value, datetime):
+            return int(value.timestamp())
+        return None
 
 
 class SecondsToHours(Base):
@@ -245,6 +272,12 @@ parameters_to_add_update = {
     993: Celsius("ID_Einst_min_VL_Kuehl", True),
     979: Celsius("ID_Einst_Minimale_Ruecklaufsolltemperatur", True),
     1045: FrequencyAutomatic("ID_Einst_P155_DHW_Freq", True),
+    # Time of the last defrost cycle, named after upstream `main`. Only
+    # V3-series air units populate it (7 of 30 corpus pumps, V3.88-V3.92);
+    # every V1/V2 air unit reads 0 even with a live defrost timer, brine
+    # units always 0, and a V1.73 unit does not return the register at all.
+    # Read-only: the controller stamps it itself.
+    1119: UtcTimestamp("LAST_DEFROST_TIMESTAMP", False),
     # Smart Grid temperature offsets, #765. Upstream leaves all three as
     # Unknown_Parameter_112x / Unknown and marks them non-writeable; the
     # controller writes them from its own service menu, so that flag is

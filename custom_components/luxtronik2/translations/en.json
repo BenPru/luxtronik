@@ -882,6 +882,9 @@
             "current_power_consumption": {
                 "name": "Current power consumption"
             },
+            "last_defrost": {
+                "name": "Last defrost"
+            },
             "additional_heat_generator_energy_p1059": {
                 "name": "Additional heat generator energy (firmware before x.88)"
             },
