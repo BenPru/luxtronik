@@ -1422,6 +1422,80 @@ class TestRemoveLegacySmartGridSwitch:
 
 
 # ===========================================================================
+# _async_remove_withdrawn_ventilation_schedule_entities
+# ===========================================================================
+
+
+class TestRemoveWithdrawnVentilationScheduleEntities:
+    """The ventilation schedule text entities were withdrawn (#789).
+
+    Releases 2026.08.15 - 2026.09.16 registered up to ten of them on a unit
+    with a ventilation module, the active block enabled and the rest
+    disabled by the integration. Nothing would ever touch those entries
+    again: the active one would linger as "no longer provided", the others
+    stay disabled forever. They never held a valid state, so nothing worth
+    keeping is lost by removing them.
+    """
+
+    _KEYS = (
+        "week",
+        "weekday",
+        "weekend",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+    )
+
+    @pytest.mark.asyncio
+    async def test_removes_every_registered_block(self):
+        from custom_components.luxtronik2 import (
+            _async_remove_withdrawn_ventilation_schedule_entities,
+        )
+
+        hass = MagicMock()
+        entry = _mock_entry()
+        ent_reg = MagicMock()
+        registered = {
+            f"text.luxtronik2_timer_ventilation_schedule_{k}"
+            for k in ("week", "monday")
+        }
+        ent_reg.async_get_entity_id.side_effect = lambda _d, _p, uid: (
+            uid if uid in registered else None
+        )
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
+
+        looked_up = {c.args[2] for c in ent_reg.async_get_entity_id.call_args_list}
+        assert looked_up == {
+            f"text.luxtronik2_timer_ventilation_schedule_{k}" for k in self._KEYS
+        }
+        assert all(
+            c.args[:2] == ("text", DOMAIN)
+            for c in ent_reg.async_get_entity_id.call_args_list
+        )
+        removed = {c.args[0] for c in ent_reg.async_remove.call_args_list}
+        assert removed == registered
+
+    @pytest.mark.asyncio
+    async def test_does_nothing_without_a_module(self):
+        from custom_components.luxtronik2 import (
+            _async_remove_withdrawn_ventilation_schedule_entities,
+        )
+
+        hass = MagicMock()
+        entry = _mock_entry()
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.return_value = None
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
+        ent_reg.async_remove.assert_not_called()
+
+
+# ===========================================================================
 # Home Assistant version guard (#799)
 # ===========================================================================
 

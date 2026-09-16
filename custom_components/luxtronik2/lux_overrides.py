@@ -158,6 +158,54 @@ class TimeOfDay(Base):
         return val
 
 
+class TimeOfDay2(Base):
+    """A start-end window packed into one register, rendered "HH:MM-HH:MM".
+
+    The ventilation schedule (896-955) does not store one time per register
+    like the other timer circuits: each 32-bit value carries the whole
+    window, start minute-of-day in the low 16 bits and end minute-of-day in
+    the high 16 bits. Derived from the first unit with a live ventilation
+    module (#789) and confirmed minute for minute against photographs of
+    its controller pages. The inverter silence timer (1093-1113) packs the
+    same way: one corpus unit holds 27526320 = 0x01A404B0 = 20:00-07:00
+    there with the raw value intact. Upstream `main` assigns a `TimeOfDay2`
+    to both blocks, so the name is kept for a drop-in swap once that library
+    ships. The one deliberate difference: hours are zero-padded, because the
+    schedule text entities budget a fixed-width pair (see `TimeOfDay`).
+
+    `to_heatpump` refuses a half outside the day: in a packed register an
+    oversized start would spill into the end field's bits.
+    """
+
+    datatype_class = "timeofday2"
+
+    @classmethod
+    def from_heatpump(cls, value):
+        if not isinstance(value, int):
+            return None
+        start = value & 0xFFFF
+        end = value >> 16
+        return f"{start // 60:02d}:{start % 60:02d}-{end // 60:02d}:{end % 60:02d}"
+
+    @classmethod
+    def to_heatpump(cls, value):
+        if isinstance(value, int):
+            return value
+        if not isinstance(value, str):
+            return None
+        try:
+            start_text, end_text = value.split("-")
+            start_hours, start_minutes = (int(v) for v in start_text.split(":"))
+            end_hours, end_minutes = (int(v) for v in end_text.split(":"))
+        except ValueError:
+            return None
+        start = start_hours * 60 + start_minutes
+        end = end_hours * 60 + end_minutes
+        if not (0 <= start < 1440 and 0 <= end < 1440):
+            return None
+        return (end << 16) | start
+
+
 class TimerProgram(SelectionBase):
     """TimerProgram datatype, converts from and to list of TimerProgram codes"""
 
@@ -232,6 +280,14 @@ class HeatingCircuitControlMode(KnownCodeSelection):
     codes = dict(HEATING_CONTROL_MODE_CODES)
 
 
+class OnOffMode(KnownCodeSelection):
+    """OnOffMode datatype for a plain enable flag stored as 0/1 (P1087)."""
+
+    measurement_type = "selection"
+
+    codes = {0: "off", 1: "on"}
+
+
 class PoolPVMode(SelectionBase):
     """PoolPVMode datatype, converts from and to a PoolPVMode"""
 
@@ -295,6 +351,17 @@ parameters_to_add_update = {
     1120: Kelvin("SMART_GRID_HEATING_REDUCTION", True),
     1121: Kelvin("SMART_GRID_HEATING_INCREASE", True),
     1122: Kelvin("SMART_GRID_DHW_INCREASE", True),
+    # Inverter silent mode, named after upstream `main`: an on/off switch, a
+    # timer-program selector and 21 packed start-end windows. The corpus has
+    # the switch and selector at 0 on every unit, so the selector's codes
+    # are unsampled (the unknown-code warning reports anything outside the
+    # copied table); the windows are pinned by one unit holding 20:00-07:00.
+    1087: OnOffMode("SILENT_MODE", True),
+    1092: TimerProgram("ID_Einst_SuSilence", True),
+    **{
+        1093 + index: TimeOfDay2(f"ID_Einst_SilenceTimer_{index}", True)
+        for index in range(21)
+    },
     1146: Celsius("Extra_DHW_target_temp", True),
     1147: SecondsToHours("Extra_DHW_duration", True),
     1148: Celsius("HEATING_TARGET_TEMP_ROOM_THERMOSTAT", True),
@@ -414,26 +481,22 @@ def update_Luxtronik_Parameters():
     # Timer program schedule parameters: mostly TimeOfDay entries, with a
     # handful of TimerProgram mode selectors interspersed. 162-667 holds the
     # heating, mixing circuits 1/2, DHW, circulation-pump and pool circuits;
-    # mixing circuit 3 sits apart at 788 (selector) and 789-848 (times), the
-    # ventilation circuit at 895 (selector) and 896-955 (times).
+    # mixing circuit 3 sits apart at 788 (selector) and 789-848 (times).
     # 607 is named ID_Einst_SuSwb_akt upstream but holds a time of day on
     # every unit seen with a non-zero value there (06:30/07:00/07:30, each
     # followed by an end time in 608 - #789), so it stays in the time range.
     timer_program_numbers = {222, 283, 344, 405, 506, 788}
-    ventilation_selector_number = 895
-    schedule_numbers = (
-        list(range(162, 668)) + list(range(788, 849)) + list(range(895, 956))
-    )
+    schedule_numbers = list(range(162, 668)) + list(range(788, 849))
     time_of_day_numbers = [
-        n
-        for n in schedule_numbers
-        if n not in timer_program_numbers and n != ventilation_selector_number
+        n for n in schedule_numbers if n not in timer_program_numbers
     ]
     update_Luxtronik_Parameter_Classes(time_of_day_numbers, TimeOfDay)
     update_Luxtronik_Parameter_Classes(list(timer_program_numbers), TimerProgram)
-    update_Luxtronik_Parameter_Classes(
-        [ventilation_selector_number], VentilationTimerProgram
-    )
+    # The ventilation circuit sits apart at 895 (selector) and 896-955, and
+    # its time registers use a different storage format: one packed
+    # start-end window per register (#789, see TimeOfDay2).
+    update_Luxtronik_Parameter_Classes([895], VentilationTimerProgram)
+    update_Luxtronik_Parameter_Classes(list(range(896, 956)), TimeOfDay2)
 
     # Mode selectors the upstream library still models as Unknown. Both are
     # driven by a select entity, and an Unknown parameter has no to_heatpump,

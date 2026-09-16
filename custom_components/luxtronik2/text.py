@@ -38,6 +38,9 @@ from .timer_schedule_entities_predefined import TIMER_SCHEDULE_ENTITIES
 PARALLEL_UPDATES = 1
 
 _UNSET_TIME = "00:00"
+# A packed `TimeOfDay2` register renders both halves at once; this is its
+# unused-row spelling (start 0, end 0).
+_UNSET_WINDOW = f"{_UNSET_TIME}-{_UNSET_TIME}"
 # "24:00" is accepted in the end position only - a start time of "24:00" would
 # be meaningless. Accepting it says nothing about whether the controller can
 # store it; see `_parse_schedule`.
@@ -385,7 +388,8 @@ class LuxtronikTimerScheduleText(
 ):
     """A single timer-program schedule block, edited as a delimited string.
 
-    Reads/writes multiple raw parameters (one start/end pair per row) at
+    Reads/writes multiple raw parameters (one start/end pair per row, or one
+    packed window register per row - see the description's `row_names`) at
     once, so it deliberately does not go through `LuxtronikEntity`'s
     `luxtronik_key`-based state handling -- reading and writing are fully
     custom, similar to how `LuxtronikDateEntity` bypasses `_get_value`.
@@ -416,10 +420,14 @@ class LuxtronikTimerScheduleText(
         self._attr_mode = TextMode.TEXT
         self._attr_native_min = 0
         # Each "HH:MM-HH:MM" pair is 11 chars, joined by a single "/". The
-        # width is guaranteed by the `TimeOfDay` datatype, which always
-        # renders "HH:MM" - see its docstring in `lux_overrides`.
+        # width is guaranteed by the `TimeOfDay` and `TimeOfDay2` datatypes,
+        # which always render "HH:MM" halves - see their docstrings in
+        # `lux_overrides`.
         self._attr_native_max = len(description.row_names) * 12 - 1
         self._attr_native_value = None
+        # Last over-budget value warned about; never reset on purpose, so a
+        # value that comes back after a good poll is not reported twice.
+        self._reported_over_long: str | None = None
 
     @property
     def available(self) -> bool:
@@ -443,13 +451,43 @@ class LuxtronikTimerScheduleText(
             return
 
         pairs = []
-        for start_name, end_name in self.entity_description.row_names:
+        for names in self.entity_description.row_names:
+            if len(names) == 1:
+                # Packed register: the datatype already renders the window.
+                window = get_sensor_data(data, f"parameters.{names[0]}")
+                if window in (None, _UNSET_WINDOW):
+                    continue
+                pairs.append(window)
+                continue
+            start_name, end_name = names
             start = get_sensor_data(data, f"parameters.{start_name}")
             end = get_sensor_data(data, f"parameters.{end_name}")
             if start in (None, _UNSET_TIME) and end in (None, _UNSET_TIME):
                 continue
             pairs.append(f"{start}-{end}")
-        self._attr_native_value = "/".join(pairs)
+        value = "/".join(pairs)
+
+        # `TextEntity.state` raises past `native_max`, and the coordinator
+        # reports that as an unexpected listener error on every poll. The
+        # budget holds as long as the datatype renders fixed-width pairs, so
+        # an overrun means the registers do not hold what this entity
+        # assumes (the ventilation block once decoded as "9284:21", #789).
+        # Report it once and show no state rather than break every update.
+        if len(value) > self._attr_native_max:
+            if value != self._reported_over_long:
+                self._reported_over_long = value
+                LOGGER.warning(
+                    "%s: schedule %r does not fit the %d-character budget - "
+                    "the registers behind it are not decoded as expected; "
+                    "please report this at "
+                    "https://github.com/BenPru/luxtronik/issues with the "
+                    "integration diagnostics download",
+                    self.entity_id,
+                    value,
+                    self._attr_native_max,
+                )
+            value = None
+        self._attr_native_value = value
 
         super()._handle_coordinator_update()
 
@@ -469,10 +507,16 @@ class LuxtronikTimerScheduleText(
 
         data = self.coordinator.data
         writes: list[tuple[str, str]] = []
-        for index, (start_name, end_name) in enumerate(row_names):
+        for index, names in enumerate(row_names):
             start, typed_end = (
                 pairs[index] if index < len(pairs) else (_UNSET_TIME, _UNSET_TIME)
             )
+            # A packed register holds minutes 0-1439 per half, so "24:00"
+            # can never be stored there whatever the per-entry latch says;
+            # it is always respelled as "00:00". `TimeOfDay2.to_heatpump`
+            # would otherwise reject 1440 and the row would silently stay.
+            packed = len(names) == 1
+            supports_24_00 = self._supports_24_00 and not packed
             # "24:00" only reaches a controller already known to store it;
             # everywhere else it becomes "00:00", the same instant in the
             # spelling every controller accepts. See
@@ -483,7 +527,7 @@ class LuxtronikTimerScheduleText(
             # into the opposite of what was asked. Refuse it rather than
             # silently choose "23:59" on the user's behalf.
             if (
-                not self._supports_24_00
+                not supports_24_00
                 and start == _UNSET_TIME
                 and typed_end == LUX_SCHEDULE_TIME_24_00
             ):
@@ -494,10 +538,17 @@ class LuxtronikTimerScheduleText(
                 )
             end = (
                 typed_end
-                if self._supports_24_00 or typed_end != LUX_SCHEDULE_TIME_24_00
+                if supports_24_00 or typed_end != LUX_SCHEDULE_TIME_24_00
                 else _UNSET_TIME
             )
 
+            if packed:
+                window = f"{start}-{end}"
+                if get_sensor_data(data, f"parameters.{names[0]}") != window:
+                    writes.append((names[0], window))
+                continue
+
+            start_name, end_name = names
             if get_sensor_data(data, f"parameters.{start_name}") != start:
                 writes.append((start_name, start))
             current_end = get_sensor_data(data, f"parameters.{end_name}")
@@ -509,7 +560,7 @@ class LuxtronikTimerScheduleText(
                 # row still clears it - "00:00" here is a request for an
                 # unused row, and a row left at 86400 would read back as an
                 # all-day window instead (see TIMER_SCHEDULES.md).
-                not self._supports_24_00
+                not supports_24_00
                 and typed_end == LUX_SCHEDULE_TIME_24_00
                 and current_end == LUX_SCHEDULE_TIME_24_00
             ):

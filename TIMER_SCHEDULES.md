@@ -2,9 +2,9 @@
 
 Several circuits on the heat pump controller can be programmed with a weekly schedule directly on the controller (or its firmware's built-in web interface). This integration exposes those schedules as editable Home Assistant entities so they can be read and changed without touching the physical controller.
 
-Three circuits are wired up: **DHW (Bw)**, **heating (Hkr)**, and the **ventilation module (Luf)**. The remaining timer-program circuits — mixing circuits 1/2/3 (Mk1/Mk2/Mk3), circulation pump (ZIP), pool (Swb), and the combined "all circuits" block — are still deferred; see [Extending to other circuits](#extending-to-other-circuits) below.
+Three circuits are wired up: **DHW (Bw)**, **heating (Hkr)** and the **ventilation module (Luf)** — the last one as separate day and night schedules, see [Ventilation Timer Schedule](#ventilation-timer-schedule). The remaining timer-program circuits — mixing circuits 1/2/3 (Mk1/Mk2/Mk3), circulation pump (ZIP), pool (Swb), and the combined "all circuits" block — are still deferred; see [Extending to other circuits](#extending-to-other-circuits) below.
 
-**A schedule window does not mean the same thing on every circuit.** On DHW it *blocks* heating; on the heating circuit it *raises* the circuit into day mode. Read your circuit's section below before programming it.
+**A schedule window does not mean the same thing on every circuit.** On DHW it *blocks* heating; on the heating circuit it *raises* the circuit into day mode; on ventilation it *releases* a fan stage. Read your circuit's section below before programming it.
 
 ## How a schedule is programmed
 
@@ -103,27 +103,26 @@ So `06:00-12:00/13:00-22:00` runs the heating raised in the morning and again fr
 
 The schedule only has an effect while the heating *Mode* is **Automatic** — *Party* holds day mode and *Holidays* holds setback regardless of the programmed times.
 
-## Ventilation Timer Schedule
+## Ventilation Timer Schedule (Day / Night Release Times)
 
-**On the Ventilation device**, so these entities only exist if your unit has an integrated ventilation module (see [README § 2.5 Ventilation](README.md#25-ventilation)). Up to **3 windows per day**. The module is *expected* to follow the heating circuit's raise/setback pattern rather than DHW's blocking one — a window raising the stage rather than suppressing ventilation — but see the note below: that has not been confirmed against a physical unit.
+**On the Ventilation device**, so it only exists if your unit has an integrated ventilation module (see [README § 2.5 Ventilation](README.md#25-ventilation)).
+
+The ventilation circuit keeps **two schedules per shape**, matching the two pages the controller shows under *Lüftung → Zeitschaltprogramm*: one marked with a **sun symbol (day mode)** and one with a **moon symbol (night mode)**. Each page holds up to three windows, and the *Ventilation timer program* shape applies to both pages at once.
 
 | Name | Entity Type | Description |
 | :--- | :--- | :--- |
 | **Ventilation timer program** | Select | Which schedule shape the controller uses: *Whole week*, *Weekdays + weekend*, or *Per day*. |
-| **Ventilation Timer Schedule (Week)** | Text | Exists while the *Week* shape is active. |
-| **Ventilation Timer Schedule (Weekdays)** | Text | Exists while *Weekday/Weekend* is active; covers Monday-Friday. |
-| **Ventilation Timer Schedule (Weekend)** | Text | Exists while *Weekday/Weekend* is active; covers Saturday-Sunday. |
-| **Ventilation Timer Schedule (Monday)** … **(Sunday)** | Text | One entity per day of the week, present while *Per day* is active. |
+| **Ventilation Day Schedule (Week)** / **Ventilation Night Schedule (Week)** | Text | The sun and moon pages while the *Week* shape is active. |
+| **Ventilation Day Schedule (Weekdays)** / **(Weekend)** and the **Night** counterparts | Text | Exist while *Weekday/Weekend* is active; *Weekdays* covers Monday-Friday, *Weekend* Saturday-Sunday. |
+| **Ventilation Day Schedule (Monday)** … **(Sunday)** and the **Night** counterparts | Text | One day and one night entity per day of the week, present while *Per day* is active. |
 
-> **ℹ️ Only the program selector has been checked against a real ventilation module so far, so three things here are inferred rather than confirmed:**
->
-> 1. That a window *raises* the ventilation stage, rather than blocking it the way a DHW window does.
-> 2. That the schedule applies only while *Ventilation mode* is *Automatic*.
-> 3. That the leading index in its parameter names distinguishes start time from end time.
->
-> Item 3 is inferred from the firmware's parameter naming (and is marked as such in the code); items 1 and 2 are inferred from how the other circuits behave. If start and end times look swapped, or if the module behaves the opposite way round from what is described here, please open an issue with a [diagnostics download](ADVANCED_FEATURES.md#diagnostics-download) attached — that is exactly the evidence needed to settle all three.
->
-> The selector itself does **not** use the same codes as the other circuits: a KHZ LWC 60 with a module reports `3` for *Week*, `4` for *Weekdays + weekend* and `5` for *Per day* (issue #789); units without a module report `0`. The controller's own menu labels the middle option *5+3*.
+The selector does **not** use the same codes as the other circuits: a KHZ LWC 60 with a module reports `3` for *Week*, `4` for *Weekdays + weekend* and `5` for *Per day* (issue #789); units without a module report `0`. The controller's own menu lists the three as *Woche (Mo-So)*, *5+2 (Mo-Fr, Sa-So)* and *Tage (Mo, Di, …)*.
+
+**What a window does.** The windows are *release* times, like heating's, not blocking times like DHW's. Read off one LWC 407 with a 400 m³/h module (#729) while its mode was *Automatic*: inside a **day** window the fans ran at the *Nominal stage*, inside a **night** window at the *Reduced stage*, and outside every window they were off (the controller showed *Lüftung: Aus* and both fan setpoints read 0 %). *Party* runs the nominal stage and *Holidays* the humidity-protection stage continuously, regardless of the programmed times, and the *Intensive stage* is only reachable through the controller's separate *Intensivlüftung* menu, never through a schedule. This mapping rests on one unit's recorder history; if yours behaves differently, please say so in #789.
+
+A night window may cross midnight: `22:00-05:00` is an ordinary entry on the moon page (the controller itself was programmed that way on the #789 unit), and `18:00-00:00` runs until the end of the day, as on the other circuits. `24:00` cannot be stored on this circuit at all — it is always written back as `00:00` — so `00:00-24:00` is refused, exactly as on a controller without `24:00` support.
+
+> **ℹ️ Register layout, for the curious.** The ventilation time registers are stored differently from every other circuit: instead of one time per register, each register holds a whole `start-end` window (start minute in the low 16 bits, end minute in the high 16 bits — the layout the upstream `python-luxtronik` library calls `TimeOfDay2`). The decoding was confirmed minute for minute against photographs of the controller's pages. Releases 2026.08.15 to 2026.09.16 exposed these registers as if they were single times; on the reporting unit they rendered as `9284:21-5461:42/...`, and Home Assistant rejected the over-long state on every poll. Those entities were named without the day/night distinction and are removed automatically on the next start; the schedules above replace them under new names.
 
 ## Extending to other circuits
 
@@ -145,5 +144,5 @@ Adding one is additive: define a `_TimerCircuit` in `timer_schedule_entities_pre
 Three things do *not* generalise, and cost a bug each time they are assumed:
 
 - **The parameter-name spelling is per circuit and must be copied verbatim from the library**, never derived: DHW uses `WO`/`TG`, heating uses `W0` (with a digit zero) and `TG`, ventilation uses `Wo`/`Tg`.
-- **The naming layout differs too.** DHW and heating name their parameters `<prefix>_zeit_<row>_<slot>`, with the start/end distinction in the trailing slot; ventilation puts it first, as `<prefix>_zeit_<0|1>_<row>_<2*col>`. That is why `_TimerCircuit` takes a `name_builder`. Check which layout a new circuit uses against a real diagnostics dump before wiring it up.
+- **The storage layout can differ too.** DHW and heating name their parameters `<prefix>_zeit_<row>_<slot>` with one time per register; ventilation names them `<prefix>_zeit_<0|1>_<row>_<2*col>` and packs a whole window into each register (see above). `_TimerCircuit` takes a `name_builder` for the naming, and a row may be a `(start, end)` register pair or a single packed register — `text.py` handles both. Check the layout against a real diagnostics dump before wiring a circuit up — the ventilation guess cost a release.
 - **The direction of a window is per circuit.** DHW blocks, heating raises; neither polarity can be assumed to carry over to the pool or the circulation pump. Confirm each new circuit against the controller manual before documenting it.

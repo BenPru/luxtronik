@@ -337,7 +337,10 @@ class TestTimerProgramSelects:
             SensorKey.TIMER_HEATING_SCHEDULE_WEEK: (
                 LuxParameter.P0222_TIMER_PROGRAM_HEATING
             ),
-            SensorKey.TIMER_VENTILATION_SCHEDULE_WEEK: (
+            SensorKey.TIMER_VENTILATION_DAY_SCHEDULE_WEEK: (
+                LuxParameter.P0895_TIMER_PROGRAM_VENTILATION
+            ),
+            SensorKey.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEK: (
                 LuxParameter.P0895_TIMER_PROGRAM_VENTILATION
             ),
         }

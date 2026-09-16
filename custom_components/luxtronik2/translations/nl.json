@@ -1126,35 +1126,65 @@
             "timer_heating_schedule_sunday": {
                 "name": "Verwarming tijdschema (zondag)"
             },
-            "timer_ventilation_schedule_week": {
-                "name": "Ventilatie tijdschema (week)"
+            "timer_ventilation_day_schedule_week": {
+                "name": "Ventilatie tijdschema dag (week)"
             },
-            "timer_ventilation_schedule_weekday": {
-                "name": "Ventilatie tijdschema (werkdagen)"
+            "timer_ventilation_day_schedule_weekday": {
+                "name": "Ventilatie tijdschema dag (werkdagen)"
             },
-            "timer_ventilation_schedule_weekend": {
-                "name": "Ventilatie tijdschema (weekend)"
+            "timer_ventilation_day_schedule_weekend": {
+                "name": "Ventilatie tijdschema dag (weekend)"
             },
-            "timer_ventilation_schedule_monday": {
-                "name": "Ventilatie tijdschema (maandag)"
+            "timer_ventilation_day_schedule_monday": {
+                "name": "Ventilatie tijdschema dag (maandag)"
             },
-            "timer_ventilation_schedule_tuesday": {
-                "name": "Ventilatie tijdschema (dinsdag)"
+            "timer_ventilation_day_schedule_tuesday": {
+                "name": "Ventilatie tijdschema dag (dinsdag)"
             },
-            "timer_ventilation_schedule_wednesday": {
-                "name": "Ventilatie tijdschema (woensdag)"
+            "timer_ventilation_day_schedule_wednesday": {
+                "name": "Ventilatie tijdschema dag (woensdag)"
             },
-            "timer_ventilation_schedule_thursday": {
-                "name": "Ventilatie tijdschema (donderdag)"
+            "timer_ventilation_day_schedule_thursday": {
+                "name": "Ventilatie tijdschema dag (donderdag)"
             },
-            "timer_ventilation_schedule_friday": {
-                "name": "Ventilatie tijdschema (vrijdag)"
+            "timer_ventilation_day_schedule_friday": {
+                "name": "Ventilatie tijdschema dag (vrijdag)"
             },
-            "timer_ventilation_schedule_saturday": {
-                "name": "Ventilatie tijdschema (zaterdag)"
+            "timer_ventilation_day_schedule_saturday": {
+                "name": "Ventilatie tijdschema dag (zaterdag)"
             },
-            "timer_ventilation_schedule_sunday": {
-                "name": "Ventilatie tijdschema (zondag)"
+            "timer_ventilation_day_schedule_sunday": {
+                "name": "Ventilatie tijdschema dag (zondag)"
+            },
+            "timer_ventilation_night_schedule_week": {
+                "name": "Ventilatie tijdschema nacht (week)"
+            },
+            "timer_ventilation_night_schedule_weekday": {
+                "name": "Ventilatie tijdschema nacht (werkdagen)"
+            },
+            "timer_ventilation_night_schedule_weekend": {
+                "name": "Ventilatie tijdschema nacht (weekend)"
+            },
+            "timer_ventilation_night_schedule_monday": {
+                "name": "Ventilatie tijdschema nacht (maandag)"
+            },
+            "timer_ventilation_night_schedule_tuesday": {
+                "name": "Ventilatie tijdschema nacht (dinsdag)"
+            },
+            "timer_ventilation_night_schedule_wednesday": {
+                "name": "Ventilatie tijdschema nacht (woensdag)"
+            },
+            "timer_ventilation_night_schedule_thursday": {
+                "name": "Ventilatie tijdschema nacht (donderdag)"
+            },
+            "timer_ventilation_night_schedule_friday": {
+                "name": "Ventilatie tijdschema nacht (vrijdag)"
+            },
+            "timer_ventilation_night_schedule_saturday": {
+                "name": "Ventilatie tijdschema nacht (zaterdag)"
+            },
+            "timer_ventilation_night_schedule_sunday": {
+                "name": "Ventilatie tijdschema nacht (zondag)"
             }
         },
         "select": {
