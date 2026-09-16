@@ -882,6 +882,9 @@
             "current_power_consumption": {
                 "name": "Leistungsaufnahme"
             },
+            "last_defrost": {
+                "name": "Letzte Abtauung"
+            },
             "additional_heat_generator_energy_p1059": {
                 "name": "Zusätzlicher Wärmeerzeuger Wärmemenge (Firmware vor x.88)"
             },

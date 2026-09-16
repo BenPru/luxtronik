@@ -1002,6 +1002,9 @@
             "current_power_consumption": {
                 "name": "Pobór mocy"
             },
+            "last_defrost": {
+                "name": "Ostatnie odszranianie"
+            },
             "additional_heat_generator_energy_p1140": {
                 "name": "Ilość ciepła dodatkowego źródła ciepła (firmware x.88 i nowszy)"
             },

@@ -372,6 +372,53 @@ class TestSilenceTimerParameters:
         assert not isinstance(parameters[1114], TimeOfDay2)
 
 
+class TestUtcTimestamp:
+    """Epoch registers rendered as an aware UTC datetime, 0 meaning "never".
+
+    The library's `Timestamp` returns a naive local-time datetime and maps 0
+    to the epoch itself; neither works for a TIMESTAMP-class sensor.
+    """
+
+    from custom_components.luxtronik2.lux_overrides import UtcTimestamp
+
+    def test_zero_is_none(self):
+        assert self.UtcTimestamp.from_heatpump(0) is None
+
+    def test_epoch_becomes_an_aware_utc_datetime(self):
+        from datetime import UTC, datetime
+
+        value = self.UtcTimestamp.from_heatpump(1753190960)
+        assert value == datetime(2025, 7, 22, 13, 29, 20, tzinfo=UTC)
+        assert value.tzinfo is UTC
+
+    def test_non_int_is_none(self):
+        assert self.UtcTimestamp.from_heatpump(None) is None
+        assert self.UtcTimestamp.from_heatpump("1753190960") is None
+
+    def test_to_heatpump_roundtrips(self):
+        from datetime import UTC, datetime
+
+        assert (
+            self.UtcTimestamp.to_heatpump(datetime(2025, 7, 22, 13, 29, 20, tzinfo=UTC))
+            == 1753190960
+        )
+        assert self.UtcTimestamp.to_heatpump(1753190960) == 1753190960
+        assert self.UtcTimestamp.to_heatpump(None) is None
+
+    def test_registered_on_parameter_1119(self):
+        from luxtronik.parameters import Parameters
+
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        parameter = Parameters.parameters[1119]
+        assert parameter.name == "LAST_DEFROST_TIMESTAMP"
+        assert isinstance(parameter, self.UtcTimestamp)
+        assert parameter.writeable is False
+
+
 class TestFrequencyAutomatic:
     from custom_components.luxtronik2.lux_overrides import FrequencyAutomatic
 
@@ -472,7 +519,8 @@ class TestInventedParameterNames:
         invented = {
             datatype.name
             for datatype in lux_overrides.parameters_to_add_update.values()
-            if not datatype.name.startswith(("ID_", "Unknown_Parameter_"))
+            if datatype.writeable
+            and not datatype.name.startswith(("ID_", "Unknown_Parameter_"))
         }
         assert invented
         unreachable = {

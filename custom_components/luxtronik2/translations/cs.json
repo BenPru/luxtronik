@@ -882,6 +882,9 @@
             "current_power_consumption": {
                 "name": "Aktuální spotřeba energie"
             },
+            "last_defrost": {
+                "name": "Poslední odmrazování"
+            },
             "additional_heat_generator_energy_p1059": {
                 "name": "Množství tepla dodatečného zdroje (firmware před x.88)"
             },

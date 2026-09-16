@@ -1020,6 +1020,9 @@
             "current_power_consumption": {
                 "name": "Stroomverbruik"
             },
+            "last_defrost": {
+                "name": "Laatste ontdooiing"
+            },
             "additional_heat_generator_energy_p1140": {
                 "name": "Warmtehoeveelheid extra warmtegenerator (firmware x.88 en later)"
             },

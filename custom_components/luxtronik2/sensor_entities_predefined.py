@@ -653,6 +653,19 @@ SENSORS: list[descr] = [
         entity_registry_enabled_default=False,
         native_precision=0,
     ),
+    descr(
+        key=SensorKey.LAST_DEFROST,
+        luxtronik_key=LP.P1119_LAST_DEFROST_TIMESTAMP,
+        device_class=SensorDeviceClass.TIMESTAMP,
+        icon="mdi:snowflake-melt",
+        # The gate is the None check inside the entity_active_formula
+        # branch of `entity_active`: the datatype decodes a raw 0 (never
+        # defrosted, brine unit, pre-V3 firmware) to None, the same as a
+        # register the controller did not return. The formula's only job is
+        # to route through that branch - the comparison itself never runs
+        # numerically on a datetime and is always True there.
+        entity_active_formula="!= 0",
+    ),
     # endregion Main heatpump
     # region Heating
     descr(

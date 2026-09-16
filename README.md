@@ -114,6 +114,8 @@ This device represents the physical heat pump unit. It contains sensors and diag
 
 Depending on your hardware, you may also see PV-linked pool control, Smart Grid / power-limitation switches, or a second (backup) heat generator's settings on this device — see [Advanced Features](ADVANCED_FEATURES.md) for those.
 
+Air-source units with a newer (V3-series) controller also get a **Last defrost** timestamp sensor. The entity appears once the controller has recorded a defrost cycle — a freshly installed unit shows it after its first defrost and the next integration restart or reload. Older controllers (V1/V2 firmware) and brine/water units never fill this register, so they do not get the entity.
+
 ### 2.2 Heating
 This device controls the space heating functionality (e.g., underfloor heating or radiators).
 

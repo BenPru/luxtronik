@@ -117,9 +117,9 @@ SERVICE_WRITE_SCHEMA = vol.Schema(
 )
 
 # Raw parameter name prefixes/names the write_parameter service accepts.
-# Keep in sync with lux_overrides.parameters_to_add_update: every custom
-# (non-"ID_"-prefixed) invented name used there needs an entry here too,
-# or the service will reject writes to it.
+# Keep in sync with lux_overrides.parameters_to_add_update: every writable
+# custom (non-"ID_"-prefixed) invented name used there needs an entry here
+# too, or the service will reject writes to it.
 WRITABLE_PARAMETER_PREFIXES: Final = (
     "ID_Einst_",
     "ID_Ba_",
@@ -574,9 +574,9 @@ class LuxParameter(StrEnum):
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = "parameters.ID_Waermemenge_ZWE"
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
-    P1119_LAST_DEFROST_TIMESTAMP = (
-        "parameters.Unknown_Parameter_1119"  # 1685073431 -> 26.5.23 05:57
-    )
+    # Named by lux_overrides (upstream: Unknown_Parameter_1119). Unix epoch,
+    # 0 = never; populated on V3-series air units only.
+    P1119_LAST_DEFROST_TIMESTAMP = "parameters.LAST_DEFROST_TIMESTAMP"
     # Smart Grid offsets, only reachable on the controller while P1030 is on
     # (HMD2 manual 83055600 rev d, p.43). Kelvin deltas in tenths - see
     # lux_overrides.parameters_to_add_update for the evidence. #765
@@ -835,6 +835,7 @@ class SensorKey(StrEnum):
     STATUS_LINE_2 = "status_line_2"
     STATUS_LINE_3 = "status_line_3"
     HEAT_SOURCE_INPUT_TEMPERATURE = "heat_source_input_temperature"
+    LAST_DEFROST = "last_defrost"
     HEAT_SOURCE_INPUT_TEMPERATURE_MIN = "heat_source_input_temperature_min"
     OUTDOOR_TEMPERATURE = "outdoor_temperature"
     OUTDOOR_TEMPERATURE_AVERAGE = "outdoor_temperature_average"
