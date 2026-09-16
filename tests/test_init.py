@@ -96,7 +96,7 @@ class TestWriteParameterValidation:
             "ID_Sollwert_KuCft1_akt",
             "ID_SU_FrkdHz",
             "ID_RBE_Einflussfaktor_RT_akt",
-            "Unknown_Parameter_1119",
+            "Unknown_Parameter_1118",
             "HEATING_TARGET_TEMP_ROOM_THERMOSTAT",
             "ELECTRICAL_POWER_LIMIT_VALUE",
             "POWER_LIMIT_SWITCH",
