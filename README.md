@@ -37,7 +37,7 @@ Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs
 **Other documents in this repository:**
 
 - **[ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)** — integration options, COP and the external power sensor, EVU/Smart Grid, diagnostics downloads, holiday scheduling, solar thermal, and the other entities that only appear on some hardware.
-- **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** — the editable weekly schedules for DHW, heating, and ventilation: entity list, time format, and what a window means on each circuit.
+- **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** — the editable weekly schedules for DHW and heating: entity list, time format, and what a window means on each circuit; and why ventilation's is not there yet.
 - **[REPORTING_ISSUES.md](REPORTING_ISSUES.md)** — how to file a bug report that can be diagnosed on the first pass.
 - **[DHW_TARGET_REGISTERS.md](DHW_TARGET_REGISTERS.md)** — maintainer reference: what is known about the two hot water setpoint parameters, why the two platforms gated them differently until September 2026, and what to measure if your hot water target reads wrong.
 
@@ -202,7 +202,7 @@ Advanced entities (diagnostic, read-only):
 | :--- | :--- | :--- | :--- |
 | **Humidity protection stage** / **Reduced stage** / **Nominal stage** / **Intensive stage** | Sensor | m³/h | The four airflow rates configured on the controller for the DIN 1946-6 ventilation stages. They show how the module is commissioned, and let you interpret a fan setpoint: on a 400 m³/h unit, a *Nominal stage* of 250 m³/h corresponds to a 62.5 % fan setpoint. |
 
-The module also has an editable weekly schedule (*Ventilation timer program* select + *Ventilation Timer Schedule* text entities) — see **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)**, including which parts of its behaviour are still unconfirmed.
+The module's weekly schedule is only partly exposed: the *Ventilation timer program* select is there, the schedule text entities are not yet — the controller stores the ventilation windows in a different format that is still being mapped out. See **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** for the details and what evidence would help.
 
 > **ℹ️ Note:** The stage entities are deliberately read-only sensors rather than writable Number entities: their scale (m³/h with no conversion) is established from a single system, and a wrong unit on a display is a cosmetic problem while a wrong unit on a write is not. Set the stages on the controller itself.
 

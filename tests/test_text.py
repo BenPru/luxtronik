@@ -96,7 +96,7 @@ class TestTimerScheduleTable:
         assert not problems, "\n".join(problems)
 
     def test_entity_count(self):
-        assert len(TIMER_SCHEDULE_ENTITIES) == 30
+        assert len(TIMER_SCHEDULE_ENTITIES) == 20
 
     def test_row_counts_per_circuit(self):
         """DHW has 5 slots per day, the heating circuit only 3."""
@@ -152,41 +152,25 @@ class TestTimerScheduleTable:
         assert by_key[SK.TIMER_HEATING_SCHEDULE_WEEKEND] == "5+2"
         assert by_key[SK.TIMER_HEATING_SCHEDULE_MONDAY] == "days"
 
-    def test_ventilation_selector_and_device(self):
+    def test_ventilation_circuit_is_not_wired_up(self):
+        """No ventilation schedule entity until the register layout is settled.
+
+        The first unit sampled with a live module (#789) showed 896-955 hold
+        one packed start-end window per register, in two blocks whose
+        meaning is still unknown, so the (start_name, end_name) row model
+        cannot describe them yet. Wiring them up with a guessed shape would
+        force a unique_id migration once the answer arrives.
+        """
         from custom_components.luxtronik2.const import DeviceKey
 
-        description = next(
-            d
+        assert not any(
+            d.device_key is DeviceKey.ventilation for d in TIMER_SCHEDULE_ENTITIES
+        )
+        assert not any(
+            name.startswith("ID_Einst_SuLuf")
             for d in TIMER_SCHEDULE_ENTITIES
-            if d.key == SK.TIMER_VENTILATION_SCHEDULE_WEEK
-        )
-        assert description.mode_selector_name == "ID_Einst_SuLuf_akt"
-        assert description.device_key is DeviceKey.ventilation
-        assert len(description.row_names) == 3
-
-    def test_ventilation_row_names_use_the_leading_start_end_index(self):
-        """Ventilation names are `<prefix>_zeit_<0|1>_<row>_<2*col>`.
-
-        The start and end blocks are interleaved in the parameter numbering
-        (starts 896-925, ends 926-955), unlike every other circuit where the
-        end sits immediately after its start.
-        """
-        by_key = {d.key: d.row_names for d in TIMER_SCHEDULE_ENTITIES}
-        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_WEEK][0] == (
-            "ID_Einst_SuLufWo_zeit_0_0_0",
-            "ID_Einst_SuLufWo_zeit_1_0_0",
-        )
-        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_WEEKEND][2] == (
-            "ID_Einst_SuLuf25_zeit_0_2_2",
-            "ID_Einst_SuLuf25_zeit_1_2_2",
-        )
-        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_WEDNESDAY][1] == (
-            "ID_Einst_SuLufTg_zeit_0_1_4",
-            "ID_Einst_SuLufTg_zeit_1_1_4",
-        )
-        assert by_key[SK.TIMER_VENTILATION_SCHEDULE_SUNDAY][2] == (
-            "ID_Einst_SuLufTg_zeit_0_2_12",
-            "ID_Einst_SuLufTg_zeit_1_2_12",
+            for pair in d.row_names
+            for name in pair
         )
 
 
@@ -342,6 +326,42 @@ class TestLuxtronikTimerScheduleText:
         entity, coord, _ = self._make_entity()
         coord.data = None
         entity._handle_coordinator_update(None)  # should not crash
+
+    def test_an_over_long_value_is_dropped_instead_of_raised(self, caplog):
+        """A register the datatype cannot render within budget must not
+        take every listener update down with it.
+
+        `TextEntity.state` raises ValueError past `native_max`, and the
+        coordinator logs that as an unexpected listener error on every poll
+        - the failure the first ventilation-module unit hit when 896-955
+        decoded as "9284:21" (#789).
+        """
+        entity, _, description = self._make_entity(key=SK.TIMER_HEATING_SCHEDULE_WEEK)
+        garbage = (
+            ("9284:21", "5461:42"),
+            ("12015:06", "13653:32"),
+            ("22937:56", "18022:40"),
+        )
+        parameters = {}
+        for (start_name, end_name), (start, end) in zip(
+            description.row_names, garbage, strict=True
+        ):
+            parameters[start_name] = start
+            parameters[end_name] = end
+        data = make_coordinator_data(parameters=parameters)
+        rendered = "9284:21-5461:42/12015:06-13653:32/22937:56-18022:40"
+
+        # What HA does with the value if it gets through - the contract
+        # the guard exists for.
+        entity._attr_native_value = rendered
+        with pytest.raises(ValueError, match="too long"):
+            _ = entity.state
+
+        entity._handle_coordinator_update(data)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value is None
+        assert entity.state is None
+        assert caplog.text.count(rendered) == 1
 
     def test_available_when_mode_matches(self):
         selector = next(
@@ -660,22 +680,21 @@ class TestActiveScheduleDescriptions:
         assert [d.key for d in active] == [SK.TIMER_HEATING_SCHEDULE_WEEK]
         assert unreadable == {self._SELECTOR}
 
-    def test_ventilation_blocks_are_skipped_without_a_ventilation_module(self):
-        """`entity_active` is False for the ventilation device on such a unit."""
+    def test_blocks_of_an_inactive_device_are_skipped(self):
+        """`entity_active` is False for a device the unit does not have."""
         from custom_components.luxtronik2.const import DeviceKey
         from custom_components.luxtronik2.text import _active_schedule_descriptions
 
         data = make_coordinator_data(
-            parameters={self._SELECTOR: "week", "ID_Einst_SuLuf_akt": "week"}
+            parameters={self._SELECTOR: "week", "ID_Einst_SuHkr_akt": "week"}
         )
         coord = _mock_coordinator(data)
         coord.entity_active.side_effect = lambda description: (
-            description.device_key is not DeviceKey.ventilation
+            description.device_key is not DeviceKey.heating
         )
         active, unreadable = _active_schedule_descriptions(coord, data)
         keys = [d.key for d in active]
-        assert SK.TIMER_DHW_SCHEDULE_WEEK in keys
-        assert SK.TIMER_VENTILATION_SCHEDULE_WEEK not in keys
+        assert keys == [SK.TIMER_DHW_SCHEDULE_WEEK]
         assert unreadable == set()
 
     def test_data_none_still_yields_no_information(self):

@@ -120,6 +120,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     coordinator.async_register_devices()
     await _async_delete_legacy_devices(hass, entry, coordinator)
     await _async_remove_legacy_smart_grid_switch(hass, entry)
+    await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
@@ -601,6 +602,48 @@ async def _async_remove_legacy_smart_grid_switch(
             "Smart Grid mode select",
             entity_id,
         )
+
+
+_WITHDRAWN_VENTILATION_SCHEDULE_KEYS = (
+    SK.TIMER_VENTILATION_SCHEDULE_WEEK,
+    SK.TIMER_VENTILATION_SCHEDULE_WEEKDAY,
+    SK.TIMER_VENTILATION_SCHEDULE_WEEKEND,
+    SK.TIMER_VENTILATION_SCHEDULE_MONDAY,
+    SK.TIMER_VENTILATION_SCHEDULE_TUESDAY,
+    SK.TIMER_VENTILATION_SCHEDULE_WEDNESDAY,
+    SK.TIMER_VENTILATION_SCHEDULE_THURSDAY,
+    SK.TIMER_VENTILATION_SCHEDULE_FRIDAY,
+    SK.TIMER_VENTILATION_SCHEDULE_SATURDAY,
+    SK.TIMER_VENTILATION_SCHEDULE_SUNDAY,
+)
+
+
+async def _async_remove_withdrawn_ventilation_schedule_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> None:
+    """Drop the ventilation schedule text entities 2026.08.15-2026.09.16 made.
+
+    They read registers 896-955 as single times of day, but each holds a
+    packed start-end window (#789, `lux_overrides.TimeOfDay2`), so on the
+    only kind of unit that has them - one with a ventilation module - they
+    never showed a valid state. The text platform's sync only manages the
+    blocks it still describes; left alone, the active block would linger as
+    "no longer provided" and the others stay disabled by the integration
+    forever. Same lazy approach as the SmartGrid switch above.
+    """
+    prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
+    ent_reg = async_get(hass)
+    for key in _WITHDRAWN_VENTILATION_SCHEDULE_KEYS:
+        # Mirrors text._timer_schedule_unique_id for the withdrawn keys.
+        unique_id = f"{P.TEXT}.{prefix}_{key}"
+        entity_id = ent_reg.async_get_entity_id(P.TEXT, DOMAIN, unique_id)
+        if entity_id is not None:
+            ent_reg.async_remove(entity_id)
+            LOGGER.info(
+                "Removed the withdrawn ventilation schedule entity %s - see "
+                "TIMER_SCHEDULES.md for why it is gone",
+                entity_id,
+            )
 
 
 async def _fix_select_entity_unique_ids(

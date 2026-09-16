@@ -420,6 +420,9 @@ class LuxtronikTimerScheduleText(
         # renders "HH:MM" - see its docstring in `lux_overrides`.
         self._attr_native_max = len(description.row_names) * 12 - 1
         self._attr_native_value = None
+        # Last over-budget value warned about; never reset on purpose, so a
+        # value that comes back after a good poll is not reported twice.
+        self._reported_over_long: str | None = None
 
     @property
     def available(self) -> bool:
@@ -449,7 +452,29 @@ class LuxtronikTimerScheduleText(
             if start in (None, _UNSET_TIME) and end in (None, _UNSET_TIME):
                 continue
             pairs.append(f"{start}-{end}")
-        self._attr_native_value = "/".join(pairs)
+        value = "/".join(pairs)
+
+        # `TextEntity.state` raises past `native_max`, and the coordinator
+        # reports that as an unexpected listener error on every poll. The
+        # budget holds as long as the datatype renders fixed-width pairs, so
+        # an overrun means the registers do not hold what this entity
+        # assumes (the ventilation block once decoded as "9284:21", #789).
+        # Report it once and show no state rather than break every update.
+        if len(value) > self._attr_native_max:
+            if value != self._reported_over_long:
+                self._reported_over_long = value
+                LOGGER.warning(
+                    "%s: schedule %r does not fit the %d-character budget - "
+                    "the registers behind it are not decoded as expected; "
+                    "please report this at "
+                    "https://github.com/BenPru/luxtronik/issues with the "
+                    "integration diagnostics download",
+                    self.entity_id,
+                    value,
+                    self._attr_native_max,
+                )
+            value = None
+        self._attr_native_value = value
 
         super()._handle_coordinator_update()
 

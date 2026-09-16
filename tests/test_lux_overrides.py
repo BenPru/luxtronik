@@ -243,6 +243,82 @@ class TestTimeOfDay:
         assert self.TimeOfDay.from_heatpump(raw) == "07:30"
 
 
+class TestTimeOfDay2:
+    """Packed start/end window, as upstream `main` types 896-955.
+
+    The six raw values are the ventilation week block of the first unit
+    with a live module (#789, diagnostics 210304_08d), reconstructed from
+    the dump's `TimeOfDay` rendering: that drops seconds, so the high
+    (end) halves are exact while the low (start) halves are assumed to sit
+    on the full minute. Low 16 bits = start minute-of-day, high 16 bits =
+    end minute-of-day.
+    """
+
+    from custom_components.luxtronik2.lux_overrides import TimeOfDay2
+
+    _SAMPLED = (
+        (0x01FE012C, "05:00-08:30"),
+        (0x02940258, "10:00-11:00"),
+        (0x04EC04B0, "20:00-21:00"),
+        (0x012C0528, "22:00-05:00"),
+        (0x02EE02D0, "12:00-12:30"),
+        (0x03DE03C0, "16:00-16:30"),
+    )
+
+    def test_from_heatpump_decodes_the_sampled_registers(self):
+        for raw, rendered in self._SAMPLED:
+            assert self.TimeOfDay2.from_heatpump(raw) == rendered, hex(raw)
+
+    def test_from_heatpump_zero_pads_hours(self):
+        """Upstream renders "5:00-8:30"; the text entities budget a fixed
+        11-character pair, so hours are padded here."""
+        assert self.TimeOfDay2.from_heatpump(0x01FE012C) == "05:00-08:30"
+        assert self.TimeOfDay2.from_heatpump(0) == "00:00-00:00"
+
+    def test_from_heatpump_is_eleven_characters_for_any_minute_of_day_pair(self):
+        """The invariant the schedule text entities' `native_max` assumes.
+
+        A half outside the day (a garbage register) renders wider; the
+        entity guard in `text.py` is what catches that.
+        """
+        for start in range(0, 24 * 60, 97):
+            for end in range(0, 24 * 60, 131):
+                raw = (end << 16) | start
+                assert len(self.TimeOfDay2.from_heatpump(raw)) == 11, hex(raw)
+
+    def test_from_heatpump_non_int_returns_none(self):
+        assert self.TimeOfDay2.from_heatpump("05:00-08:30") is None
+        assert self.TimeOfDay2.from_heatpump(None) is None
+        assert self.TimeOfDay2.from_heatpump(1.5) is None
+
+    def test_to_heatpump_packs_start_low_and_end_high(self):
+        for raw, rendered in self._SAMPLED:
+            assert self.TimeOfDay2.to_heatpump(rendered) == raw, rendered
+
+    def test_to_heatpump_passes_through_int(self):
+        assert self.TimeOfDay2.to_heatpump(0x01FE012C) == 0x01FE012C
+
+    def test_to_heatpump_rejects_anything_else(self):
+        assert self.TimeOfDay2.to_heatpump(None) is None
+        assert self.TimeOfDay2.to_heatpump(1.5) is None
+        assert self.TimeOfDay2.to_heatpump("05:00") is None
+        assert self.TimeOfDay2.to_heatpump("05:00-08:30-09:00") is None
+        assert self.TimeOfDay2.to_heatpump("5-8") is None
+
+    def test_to_heatpump_rejects_a_half_outside_the_day(self):
+        """A start past 65535 minutes would spill into the end field."""
+        assert self.TimeOfDay2.to_heatpump("24:00-08:30") is None
+        assert self.TimeOfDay2.to_heatpump("05:00-24:00") is None
+        assert self.TimeOfDay2.to_heatpump("1092:15-05:00") is None
+        assert self.TimeOfDay2.to_heatpump("23:59-23:59") == (1439 << 16) | 1439
+
+    def test_roundtrip(self):
+        for raw, _ in self._SAMPLED:
+            assert (
+                self.TimeOfDay2.to_heatpump(self.TimeOfDay2.from_heatpump(raw)) == raw
+            )
+
+
 class TestFrequencyAutomatic:
     from custom_components.luxtronik2.lux_overrides import FrequencyAutomatic
 
@@ -641,14 +717,19 @@ class TestTimerScheduleDatatypeCoverage:
         assert isinstance(self._applied()[607], TimeOfDay)
         assert self._applied()[607].from_heatpump(27000) == "07:30"
 
-    def test_ventilation_times_are_time_of_day(self):
-        from custom_components.luxtronik2.lux_overrides import TimeOfDay
+    def test_ventilation_times_are_packed_windows(self):
+        """896-955 hold a whole start-end window per register (#789).
+
+        The first unit with a live ventilation module rendered them as
+        "9284:21" under `TimeOfDay`; decoded as two 16-bit minute-of-day
+        halves the same registers read 05:00-08:30 and so on.
+        """
+        from custom_components.luxtronik2.lux_overrides import TimeOfDay2
 
         parameters = self._applied()
-        # First and last of both the start block (896-925) and the
-        # interleaved end block (926-955).
         for number in (896, 925, 926, 955):
-            assert isinstance(parameters[number], TimeOfDay), number
+            assert isinstance(parameters[number], TimeOfDay2), number
+        assert parameters[896].from_heatpump(0x01FE012C) == "05:00-08:30"
 
     def test_heating_block_is_still_covered(self):
         from custom_components.luxtronik2.lux_overrides import (
