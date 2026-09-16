@@ -31,6 +31,7 @@ from custom_components.luxtronik2.const import (
     DeviceKey,
     LuxCalculation as LC,
     LuxOperationMode,
+    LuxParameter as LP,
     LuxRoomThermostatType,
     LuxSmartGridStatus,
     LuxStatus1Option,
@@ -792,6 +793,49 @@ def _assert_raw_converts_to(
     entity = _make_sensor(description, data)
     entity._handle_coordinator_update(data)
     assert entity._attr_native_value == expected
+
+
+class TestLastDefrostSensor:
+    """P1119 `LAST_DEFROST_TIMESTAMP` as a timestamp sensor on the heat pump.
+
+    Populated only on V3-series air units (7 of 30 corpus pumps, all
+    V3.88-V3.92); every V1/V2 air unit reads 0 even with a live defrost
+    timer, so the entity is gated on the register holding a value.
+    """
+
+    def _description(self):
+        return next(d for d in SENSORS if d.key == SensorKey.LAST_DEFROST)
+
+    def test_description(self):
+        description = self._description()
+        assert description.luxtronik_key == LP.P1119_LAST_DEFROST_TIMESTAMP
+        assert description.luxtronik_key == "parameters.LAST_DEFROST_TIMESTAMP"
+        assert description.device_key is DeviceKey.heatpump
+        assert description.device_class is SensorDeviceClass.TIMESTAMP
+        assert description.state_class is None
+        assert description.entity_category is None
+        assert description.entity_active_formula == "!= 0"
+
+    def test_state_is_the_aware_datetime_from_the_register(self):
+        lux_overrides.update_Luxtronik_Parameters()
+        description = self._description()
+        from luxtronik.parameters import Parameters
+
+        converted = Parameters.parameters[1119].from_heatpump(1753190960)
+        data = make_coordinator_data(parameters={"LAST_DEFROST_TIMESTAMP": converted})
+        entity = _make_sensor(description, data)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value == datetime(
+            2025, 7, 22, 13, 29, 20, tzinfo=UTC
+        )
+        assert entity.native_value.tzinfo is not None
+
+    def test_never_defrosted_reads_unknown(self):
+        description = self._description()
+        data = make_coordinator_data(parameters={"LAST_DEFROST_TIMESTAMP": None})
+        entity = _make_sensor(description, data)
+        entity._handle_coordinator_update(data)
+        assert entity._attr_native_value is None
 
 
 class TestVentilationStageSetpoints:

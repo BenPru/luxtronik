@@ -853,6 +853,46 @@ class TestEntityActive:
         )
         assert coord.entity_active(desc) is False
 
+    def test_last_defrost_needs_a_populated_register(self):
+        """P1119 is 0 on every V1/V2 and brine unit in the corpus and absent
+        on old firmware; only V3 air units hold a timestamp. The datatype
+        maps 0 to None, so the generic formula path (which treats None as
+        "not returned") is the whole gate - no special case needed.
+        """
+        from datetime import UTC, datetime
+
+        description = next(d for d in SENSORS if d.key == SensorKey.LAST_DEFROST)
+        assert description.entity_active_formula is not None
+
+        never = _make_coordinator(parameters={"LAST_DEFROST_TIMESTAMP": None})
+        assert never.entity_active(description) is False
+        absent = _make_coordinator(parameters={})
+        assert absent.entity_active(description) is False
+        defrosted = _make_coordinator(
+            parameters={
+                "LAST_DEFROST_TIMESTAMP": datetime(2025, 7, 22, 13, 29, tzinfo=UTC)
+            }
+        )
+        assert defrosted.entity_active(description) is True
+
+    def test_last_defrost_raw_zero_through_the_real_datatype(self):
+        """Pins the two halves together: a raw 0 really decodes to the None
+        the gate acts on, and a raw epoch really passes it."""
+        from luxtronik.parameters import Parameters
+
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_Parameters,
+        )
+
+        update_Luxtronik_Parameters()
+        datatype = Parameters.parameters[1119]
+        description = next(d for d in SENSORS if d.key == SensorKey.LAST_DEFROST)
+        for raw, expected in ((0, False), (1753190960, True)):
+            coord = _make_coordinator(
+                parameters={"LAST_DEFROST_TIMESTAMP": datatype.from_heatpump(raw)}
+            )
+            assert coord.entity_active(description) is expected, raw
+
     def test_version_not_compatible(self):
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=True)
