@@ -468,6 +468,14 @@ SENSORS: list[descr] = [
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
     ),
+    # A module can run without an exhaust sensor: two LWC407s (#729, #807)
+    # hold this register on the controller's unwired-sensor placeholder 5.0
+    # for days while supply air drifts, and the controller's own display
+    # never shows the value. The gate is only 5.0 - the formula grammar is
+    # one comparison, 0.0 on both channels already means no ventilation
+    # device (has_ventilation), and 75.0 has not been seen on this channel.
+    # Supply air is not gated: it can genuinely pass through 5.0 after heat
+    # recovery on a cold morning, and no unwired supply channel is known.
     descr(
         key=SensorKey.VENTILATION_EXHAUST_AIR_TEMPERATURE,
         device_key=DeviceKey.ventilation,
@@ -475,6 +483,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_active_formula="!= 5.0",
     ),
     # VZU/VAB are analog fan outputs, so they carry the modulation level a
     # binary sensor would discard. Same per-mille encoding as the analog

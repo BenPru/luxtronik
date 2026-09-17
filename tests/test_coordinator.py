@@ -893,6 +893,41 @@ class TestEntityActive:
             )
             assert coord.entity_active(description) is expected, raw
 
+    def test_exhaust_air_temperature_needs_a_wired_sensor(self):
+        """Two LWC407s (#729, #807) run a ventilation module whose exhaust
+        channel is not wired: the register sits on the controller's 5.0
+        placeholder for days while supply air drifts. The ventilation device
+        still exists on the live supply channel, but the exhaust sensor must
+        not - a flat 5 C the controller's own display never shows is not a
+        reading. Supply air is deliberately not gated: it can genuinely pass
+        through 5.0 after heat recovery on a cold morning, and no unwired
+        supply channel has been reported.
+        """
+        exhaust = next(
+            d for d in SENSORS if d.key == SensorKey.VENTILATION_EXHAUST_AIR_TEMPERATURE
+        )
+        supply = next(
+            d for d in SENSORS if d.key == SensorKey.VENTILATION_SUPPLY_AIR_TEMPERATURE
+        )
+        unwired = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 22.4,
+                "ID_WEB_Temp_Lueftung_Abluft": 5.0,
+            }
+        )
+        assert unwired.device_key_active(DeviceKey.ventilation) is True
+        assert unwired.entity_active(exhaust) is False
+        assert unwired.entity_active(supply) is True
+
+        wired = _make_coordinator(
+            calculations={
+                "ID_WEB_Temp_Lueftung_Zuluft": 5.0,
+                "ID_WEB_Temp_Lueftung_Abluft": 21.2,
+            }
+        )
+        assert wired.entity_active(exhaust) is True
+        assert wired.entity_active(supply) is True
+
     def test_version_not_compatible(self):
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=True)
