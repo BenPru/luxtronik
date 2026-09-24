@@ -92,12 +92,30 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
         self._attr_cache = {}
         self._attr_device_info = coordinator.get_device(device_info_ident)
 
-        # UNSET (value "UNSET" in all three key enums) means the entity has no
-        # register - derived sensors, the manual EVU2 switch - so there is
-        # nothing to point at; slicing the name gave "NSET UNSET".
         self._attr_extra_state_attributes = {}
+        self._set_luxtronik_key_attributes()
+
+        self._attr_state = self._get_value(description.luxtronik_key)
+
+    def _set_luxtronik_key_attributes(self) -> None:
+        """Name the registers this entity reads in its attributes.
+
+        From `self.entity_description`, so a subclass that swaps a key in
+        after `__init__` (climate's current temperature) calls this again.
+
+        UNSET (value "UNSET" in all three key enums) means no register -
+        derived sensors, the manual EVU2 switch - so there is nothing to point
+        at; slicing the name gave "NSET UNSET".
+        """
+        description = self.entity_description
+        attrs = self._attr_extra_state_attributes
+        for name in [
+            k for k in attrs if k == SA.LUXTRONIK_KEY or k.startswith("luxtronik_key_")
+        ]:
+            del attrs[name]
+
         if description.luxtronik_key != _UNSET:
-            self._attr_extra_state_attributes[SA.LUXTRONIK_KEY] = (
+            attrs[SA.LUXTRONIK_KEY] = (
                 f"{description.luxtronik_key.name[1:5]} "
                 f"{description.luxtronik_key.value}"
             )
@@ -108,13 +126,9 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
                 if value is None or value == _UNSET:
                     continue
                 if isinstance(value, StrEnum):
-                    self._attr_extra_state_attributes[field] = (
-                        f"{value.name[1:5]} {value.value}"
-                    )
+                    attrs[field] = f"{value.name[1:5]} {value.value}"
                 else:
-                    self._attr_extra_state_attributes[field] = value
-
-        self._attr_state = self._get_value(description.luxtronik_key)
+                    attrs[field] = value
 
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
