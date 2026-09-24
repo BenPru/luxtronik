@@ -96,13 +96,15 @@ If you disable the switch, SG2 counts as open once Home Assistant has reloaded t
 <details>
 <summary>⚙️ Example: copy an SG2 relay's state onto the switch</summary>
 
-Replace `switch.sg2_relay` with the entity that drives your SG2 contact, and `switch.luxtronik_evu2_manual` with the switch's entity id. Newer installs include the heat pump's serial number in it, for example `switch.luxtronik_<serial>_evu2_manual`. The second trigger re-syncs whenever the Luxtronik switch comes up, after a restart or a reload, in case the relay changed in the meantime. It fires only once the switch exists, so a slow or retried setup is covered too. An unavailable relay changes nothing.
+Replace `switch.sg2_relay` with the entity that drives your SG2 contact, and `switch.luxtronik_evu2_manual` with the switch's entity id. Newer installs include the heat pump's serial number in it, for example `switch.luxtronik_<serial>_evu2_manual`. The other two triggers re-sync in case the relay changed while the switch was not running: the start trigger after a normal restart, the `unavailable` one after a reload of the integration or a slow or retried setup. An unavailable relay changes nothing.
 
 ```yaml
 alias: "Luxtronik: follow the SG2 relay"
 triggers:
   - trigger: state
     entity_id: switch.sg2_relay
+  - trigger: homeassistant
+    event: start
   - trigger: state
     entity_id: switch.luxtronik_evu2_manual
     from: unavailable
