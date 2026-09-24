@@ -250,6 +250,16 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if evu2_manual_input_required(data):
             data.evu2_manual = self._evu2_manual
 
+    @property
+    def evu2_manual(self) -> bool:
+        """The SG2 state set through the manual switch, applied or not.
+
+        `data.evu2_manual` says whether it is applied - None while SmartGrid
+        is off. The switch shows this instead, so it keeps showing the
+        setting then and does not get stored as off on the next reload.
+        """
+        return self._evu2_manual
+
     @callback
     def async_restore_evu2_manual(self) -> None:
         """Load the manual SG2 value from its switch's last state (#500).

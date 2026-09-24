@@ -320,17 +320,27 @@ class TestReadSmartGridInputs:
 
 
 class TestEvu2ManualInputRequired:
-    """Which models get a manual EVU2 input instead of calc 185 (#500)."""
+    """Which units get a manual EVU2 input instead of calc 185 (#500)."""
+
+    def _data(self, model, smart_grid="plus_minus"):
+        return make_coordinator_data(
+            parameters={"ID_Einst_SmartGrid": smart_grid},
+            calculations={"ID_WEB_Code_WP_akt": model},
+        )
 
     @pytest.mark.parametrize("model", ["MSW2-9S"])
-    def test_listed_model(self, model):
-        data = make_coordinator_data(calculations={"ID_WEB_Code_WP_akt": model})
-        assert evu2_manual_input_required(data) is True
+    @pytest.mark.parametrize("smart_grid", ["plus_minus", "sg_1_0", "sg_1_1"])
+    def test_listed_model_with_smart_grid_on(self, model, smart_grid):
+        assert evu2_manual_input_required(self._data(model, smart_grid)) is True
+
+    @pytest.mark.parametrize("smart_grid", ["off", 0, None])
+    def test_listed_model_with_smart_grid_off(self, smart_grid):
+        """With SG off nothing reads SG2, so there is nothing to supply."""
+        assert evu2_manual_input_required(self._data("MSW2-9S", smart_grid)) is False
 
     @pytest.mark.parametrize("model", ["MSW2-6S", "MSW4-16", "WZS", "", None])
     def test_other_models(self, model):
-        data = make_coordinator_data(calculations={"ID_WEB_Code_WP_akt": model})
-        assert evu2_manual_input_required(data) is False
+        assert evu2_manual_input_required(self._data(model)) is False
 
     def test_missing_model_register(self):
         assert evu2_manual_input_required(make_coordinator_data()) is False

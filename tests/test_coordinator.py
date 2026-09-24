@@ -2695,14 +2695,45 @@ class TestEvu2Manual:
     """The user-supplied SG2 state on units where no register reports it."""
 
     def _coord(self, model: str = "MSW2-9S") -> LuxtronikCoordinator:
-        coord = _make_coordinator(calculations={"ID_WEB_Code_WP_akt": model})
+        coord = _make_coordinator(
+            parameters={"ID_Einst_SmartGrid": "plus_minus"},
+            calculations={"ID_WEB_Code_WP_akt": model},
+        )
         coord.async_update_listeners = MagicMock()
         return coord
 
-    def _poll(self, coord: LuxtronikCoordinator, model: str = "MSW2-9S"):
-        data = make_coordinator_data(calculations={"ID_WEB_Code_WP_akt": model})
+    def _poll(
+        self,
+        coord: LuxtronikCoordinator,
+        model: str = "MSW2-9S",
+        smart_grid: str = "plus_minus",
+    ):
+        data = make_coordinator_data(
+            parameters={"ID_Einst_SmartGrid": smart_grid},
+            calculations={"ID_WEB_Code_WP_akt": model},
+        )
         coord._apply_evu2_manual(data)
         return data
+
+    def test_is_none_with_smart_grid_off(self):
+        """The switch does not exist then, so its value must not steer anything."""
+        coord = self._coord()
+        coord.set_evu2_manual(True)
+        assert self._poll(coord, smart_grid="off").evu2_manual is None
+
+    def test_setting_is_readable_whether_applied_or_not(self):
+        """The switch shows this, so it must not vanish while SG is off."""
+        coord = self._coord()
+        coord.set_evu2_manual(True)
+        self._poll(coord, smart_grid="off")
+        assert coord.evu2_manual is True
+
+    def test_value_survives_smart_grid_off_and_on(self):
+        """Turning SG off and on again within a session keeps the setting."""
+        coord = self._coord()
+        coord.set_evu2_manual(True)
+        self._poll(coord, smart_grid="off")
+        assert self._poll(coord).evu2_manual is True
 
     def test_defaults_to_off_on_a_listed_model(self):
         """Off is what calc 185 reads there today, so nothing moves on upgrade."""
@@ -2762,7 +2793,11 @@ class TestEvu2ManualRestore:
     def _coord(self, hass: HomeAssistant, model: str = "MSW2-9S"):
         from custom_components.luxtronik2.const import CONF_HA_SENSOR_PREFIX
 
-        coord = _make_coordinator(hass=hass, calculations={"ID_WEB_Code_WP_akt": model})
+        coord = _make_coordinator(
+            hass=hass,
+            parameters={"ID_Einst_SmartGrid": "plus_minus"},
+            calculations={"ID_WEB_Code_WP_akt": model},
+        )
         coord._config = {**coord._config, CONF_HA_SENSOR_PREFIX: DOMAIN}
         coord._apply_evu2_manual(coord.data)
         return coord
@@ -2870,7 +2905,9 @@ class TestEvu2ManualRestore:
         """Entry-less coordinators (config flow) carry no entity prefix."""
         self._register(hass, "on", f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
         coord = _make_coordinator(
-            hass=hass, calculations={"ID_WEB_Code_WP_akt": "MSW2-9S"}
+            hass=hass,
+            parameters={"ID_Einst_SmartGrid": "plus_minus"},
+            calculations={"ID_WEB_Code_WP_akt": "MSW2-9S"},
         )
         coord._apply_evu2_manual(coord.data)
 

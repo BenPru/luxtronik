@@ -3,7 +3,6 @@
 # region Imports
 from __future__ import annotations
 
-from dataclasses import replace
 from typing import Any
 
 from homeassistant.components.switch import ENTITY_ID_FORMAT, SwitchEntity
@@ -13,18 +12,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
-from .common import (
-    evu2_manual_input_required,
-    get_sensor_data,
-    key_exists,
-    smart_grid_enabled,
-)
-from .const import (
-    CONF_HA_SENSOR_PREFIX,
-    LOGGER,
-    DeviceKey,
-    LuxParameter as LP,
-)
+from .common import evu2_manual_input_required, get_sensor_data, key_exists
+from .const import CONF_HA_SENSOR_PREFIX, LOGGER, DeviceKey
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikSwitchDescription
 from .switch_entities_predefined import EVU2_MANUAL_SWITCH, SWITCHES
@@ -68,18 +57,16 @@ async def async_setup_entry(
         )
     ]
 
-    if evu2_manual_input_required(coordinator.data) and key_exists(
-        coordinator.data, LP.P1030_SMART_GRID_SWITCH
-    ):
-        # Enabled by default only where SmartGrid is on: nothing reads the
-        # value otherwise, and a user who turns SG on later can enable it.
-        description = replace(
-            EVU2_MANUAL_SWITCH,
-            entity_registry_enabled_default=smart_grid_enabled(coordinator.data),
-        )
+    if evu2_manual_input_required(coordinator.data):
+        # Only while SmartGrid is on, like the SG offset numbers: turning SG on
+        # later makes it appear after a reload.
         entities.append(
             LuxtronikEvu2ManualSwitch(
-                hass, entry, coordinator, description, description.device_key
+                hass,
+                entry,
+                coordinator,
+                EVU2_MANUAL_SWITCH,
+                EVU2_MANUAL_SWITCH.device_key,
             )
         )
 
@@ -161,11 +148,16 @@ class LuxtronikEvu2ManualSwitch(LuxtronikSwitchEntity):
     def _handle_coordinator_update(
         self, data: LuxtronikCoordinatorData | None = None
     ) -> None:
-        """Reflect the value the coordinator holds; there is no register."""
+        """Show the setting the coordinator holds; there is no register.
+
+        The setting rather than `data.evu2_manual`, which is None while
+        SmartGrid is off: showing off then would be stored as the last state
+        on the next reload and lose the setting.
+        """
         data = self.coordinator.data if data is None else data
         if data is None:
             return
-        self._attr_is_on = bool(data.evu2_manual)
+        self._attr_is_on = self.coordinator.evu2_manual
         self.async_write_ha_state()
 
     async def async_turn_on(self, **kwargs: Any) -> None:

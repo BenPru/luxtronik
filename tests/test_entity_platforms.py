@@ -159,11 +159,10 @@ class TestSwitchAsyncSetupEntry:
         assert switches[0].entity_description.entity_registry_enabled_default is True
 
     @pytest.mark.asyncio
-    async def test_manual_evu2_switch_starts_disabled_with_smart_grid_off(self):
-        """Nothing reads it until SG is on, so do not clutter the device page."""
-        switches = await self._setup_evu2("MSW2-9S", smart_grid=0)
-        assert len(switches) == 1
-        assert switches[0].entity_description.entity_registry_enabled_default is False
+    @pytest.mark.parametrize("smart_grid", ["off", 0])
+    async def test_no_manual_evu2_switch_with_smart_grid_off(self, smart_grid):
+        """Like the SG offset numbers: it appears after a reload once SG is on."""
+        assert await self._setup_evu2("MSW2-9S", smart_grid=smart_grid) == []
 
     @pytest.mark.asyncio
     async def test_no_manual_evu2_switch_on_other_models(self):
@@ -186,6 +185,7 @@ class TestLuxtronikEvu2ManualSwitch:
         data = make_coordinator_data()
         data.evu2_manual = evu2_manual
         coord = _mock_coordinator(data)
+        coord.evu2_manual = evu2_manual
         with patch("homeassistant.helpers.frame.report_usage"):
             entity = LuxtronikEvu2ManualSwitch(
                 MagicMock(),
@@ -201,14 +201,25 @@ class TestLuxtronikEvu2ManualSwitch:
         entity, _ = self._make()
         assert entity.entity_id == f"switch.{DOMAIN}_{SK.EVU2_MANUAL}"
 
-    def test_state_follows_coordinator_data(self):
+    def test_state_follows_the_coordinator_setting(self):
         entity, coord = self._make(evu2_manual=True)
         entity._handle_coordinator_update()
         assert entity._attr_is_on is True
 
-        coord.data.evu2_manual = False
+        coord.evu2_manual = False
         entity._handle_coordinator_update()
         assert entity._attr_is_on is False
+
+    def test_keeps_showing_the_setting_while_smart_grid_is_off(self):
+        """SG off stops the value being applied, not the setting itself.
+
+        Showing off here would get stored as the last state on the next
+        reload, and the setting would be lost when SG is turned back on.
+        """
+        entity, coord = self._make(evu2_manual=True)
+        coord.data.evu2_manual = None  # what _apply_evu2_manual leaves with SG off
+        entity._handle_coordinator_update()
+        assert entity._attr_is_on is True
 
     def test_handle_coordinator_update_none_data(self):
         entity, coord = self._make(evu2_manual=True)
