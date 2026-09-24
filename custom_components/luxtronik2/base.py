@@ -40,6 +40,8 @@ from .model import (
 
 # endregion Imports
 
+_UNSET = LP.UNSET.value
+
 
 class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
     CoordinatorEntity[LuxtronikCoordinator],
@@ -90,17 +92,20 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
         self._attr_cache = {}
         self._attr_device_info = coordinator.get_device(device_info_ident)
 
-        self._attr_extra_state_attributes = {
-            SA.LUXTRONIK_KEY: (
+        # UNSET (value "UNSET" in all three key enums) means the entity has no
+        # register - derived sensors, the manual EVU2 switch - so there is
+        # nothing to point at; slicing the name gave "NSET UNSET".
+        self._attr_extra_state_attributes = {}
+        if description.luxtronik_key != _UNSET:
+            self._attr_extra_state_attributes[SA.LUXTRONIK_KEY] = (
                 f"{description.luxtronik_key.name[1:5]} "
                 f"{description.luxtronik_key.value}"
             )
-        }
 
         for field in description.__dataclass_fields__:
             if field.startswith("luxtronik_key_"):
                 value = getattr(description, field)
-                if value is None:
+                if value is None or value == _UNSET:
                     continue
                 if isinstance(value, StrEnum):
                     self._attr_extra_state_attributes[field] = (
