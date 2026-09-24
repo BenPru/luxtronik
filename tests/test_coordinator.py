@@ -98,6 +98,7 @@ def _make_coordinator_direct(data=None):
     coord._config = {"host": "1.2.3.4", "port": 8889}
     coord.device_infos = {}
     coord._dhw_hold_until = None
+    coord._evu2_manual = False
     coord._write_followup_unsub = None
     # Real coordinators always have one; `object.__new__` skips the base
     # class __init__ that would set it.
@@ -2752,6 +2753,10 @@ class TestEvu2ManualRestore:
     Restoring it in the switch is too late: platforms set up concurrently, so
     the SmartGrid status sensor could publish a state computed from the default
     and flip once the switch arrived - a spurious change on every restart.
+
+    Every test seeds the data the way setup does - the first refresh has run,
+    and applied the default, before the restore - and asserts on the data the
+    entities read, not on the coordinator's private copy.
     """
 
     def _coord(self, hass: HomeAssistant, model: str = "MSW2-9S"):
@@ -2759,9 +2764,12 @@ class TestEvu2ManualRestore:
 
         coord = _make_coordinator(hass=hass, calculations={"ID_WEB_Code_WP_akt": model})
         coord._config = {**coord._config, CONF_HA_SENSOR_PREFIX: DOMAIN}
+        coord._apply_evu2_manual(coord.data)
         return coord
 
-    def _register(self, hass: HomeAssistant, state: str, object_id: str):
+    def _register(
+        self, hass: HomeAssistant, state: str, object_id: str, disabled_by=None
+    ):
         from homeassistant.core import State
         from homeassistant.helpers import entity_registry as er
         from pytest_homeassistant_custom_component.common import mock_restore_cache
@@ -2771,6 +2779,7 @@ class TestEvu2ManualRestore:
             DOMAIN,
             f"switch.{DOMAIN}_{SensorKey.EVU2_MANUAL}",
             suggested_object_id=object_id,
+            disabled_by=disabled_by,
         )
         mock_restore_cache(hass, [State(entity.entity_id, state)])
 
@@ -2783,7 +2792,21 @@ class TestEvu2ManualRestore:
 
         coord.async_restore_evu2_manual()
 
+        assert coord.data.evu2_manual is expected
         assert coord._evu2_manual is expected
+
+    async def test_restored_value_reaches_the_resolver(
+        self, hass: HomeAssistant
+    ) -> None:
+        """What the SmartGrid status sensor computes its first state from."""
+        from custom_components.luxtronik2.common import read_smart_grid_inputs
+
+        self._register(hass, "on", f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
+        coord = self._coord(hass)
+
+        coord.async_restore_evu2_manual()
+
+        assert read_smart_grid_inputs(coord.data)[1] is True
 
     async def test_follows_a_renamed_entity_id(self, hass: HomeAssistant) -> None:
         """Users rename entity ids; the unique id is what stays put."""
@@ -2792,7 +2815,28 @@ class TestEvu2ManualRestore:
 
         coord.async_restore_evu2_manual()
 
-        assert coord._evu2_manual is True
+        assert coord.data.evu2_manual is True
+
+    async def test_disabled_switch_is_not_restored(self, hass: HomeAssistant) -> None:
+        """A disabled switch means open, not its last value.
+
+        Otherwise it would keep steering the status with no visible entity to
+        change it, until the restore cache expired it and the status changed
+        again on its own.
+        """
+        from homeassistant.helpers import entity_registry as er
+
+        self._register(
+            hass,
+            "on",
+            f"{DOMAIN}_{SensorKey.EVU2_MANUAL}",
+            disabled_by=er.RegistryEntryDisabler.USER,
+        )
+        coord = self._coord(hass)
+
+        coord.async_restore_evu2_manual()
+
+        assert coord.data.evu2_manual is False
 
     @pytest.mark.parametrize("state", ["unavailable", "unknown"])
     async def test_ignores_states_without_a_value(
@@ -2803,14 +2847,14 @@ class TestEvu2ManualRestore:
 
         coord.async_restore_evu2_manual()
 
-        assert coord._evu2_manual is False
+        assert coord.data.evu2_manual is False
 
     async def test_first_setup_has_nothing_to_restore(
         self, hass: HomeAssistant
     ) -> None:
         coord = self._coord(hass)
         coord.async_restore_evu2_manual()
-        assert coord._evu2_manual is False
+        assert coord.data.evu2_manual is False
 
     async def test_other_models_are_left_alone(self, hass: HomeAssistant) -> None:
         self._register(hass, "on", f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
@@ -2818,7 +2862,7 @@ class TestEvu2ManualRestore:
 
         coord.async_restore_evu2_manual()
 
-        assert coord._evu2_manual is False
+        assert coord.data.evu2_manual is None
 
     async def test_without_a_prefix_nothing_is_looked_up(
         self, hass: HomeAssistant
@@ -2828,7 +2872,8 @@ class TestEvu2ManualRestore:
         coord = _make_coordinator(
             hass=hass, calculations={"ID_WEB_Code_WP_akt": "MSW2-9S"}
         )
+        coord._apply_evu2_manual(coord.data)
 
         coord.async_restore_evu2_manual()
 
-        assert coord._evu2_manual is False
+        assert coord.data.evu2_manual is False

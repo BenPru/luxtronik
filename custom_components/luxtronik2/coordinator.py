@@ -266,14 +266,24 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if prefix is None or not evu2_manual_input_required(self.data):
             return
         unique_id = SWITCH_ENTITY_ID_FORMAT.format(f"{prefix}_{SensorKey.EVU2_MANUAL}")
-        entity_id = er.async_get(self.hass).async_get_entity_id(
-            Platform.SWITCH, DOMAIN, unique_id
-        )
+        registry = er.async_get(self.hass)
+        entity_id = registry.async_get_entity_id(Platform.SWITCH, DOMAIN, unique_id)
         if entity_id is None:
             return
+        entry = registry.async_get(entity_id)
+        if entry is not None and entry.disabled_by is not None:
+            # A disabled switch means open. Restoring its last value would let
+            # it steer the status with no visible entity to change it, until
+            # the restore cache expired and the status changed on its own.
+            return
         stored = restore_state.async_get(self.hass).last_states.get(entity_id)
-        if stored is not None and stored.state.state in (STATE_ON, STATE_OFF):
-            self._evu2_manual = stored.state.state == STATE_ON
+        if stored is None or stored.state.state not in (STATE_ON, STATE_OFF):
+            return
+        self._evu2_manual = stored.state.state == STATE_ON
+        # The first refresh has already run by now and applied the default;
+        # without this the restored value would only land at the next poll.
+        if self.data is not None:
+            self._apply_evu2_manual(self.data)
 
     @callback
     def set_evu2_manual(self, value: bool) -> None:
