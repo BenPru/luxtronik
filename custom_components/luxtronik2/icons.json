@@ -156,6 +156,7 @@
       "pump_optimization": { "default": "mdi:tune" },
       "heating_threshold": { "default": "mdi:download-outline" },
       "pump_vent_hup": { "default": "mdi:pump" },
+      "pump_vent_zup": { "default": "mdi:pump" },
       "pump_vent_active": { "default": "mdi:pump" },
       "domestic_water": {
         "state": {

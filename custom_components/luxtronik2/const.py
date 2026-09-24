@@ -509,6 +509,7 @@ class LuxParameter(StrEnum):
         "parameters.ID_Einst_TDC_Max_akt"
     )
     P0678_VENTING_HUP_ACTIVE = "parameters.ID_Einst_Entl_Typ_0"
+    P0679_VENTING_ZUP_ACTIVE = "parameters.ID_Einst_Entl_Typ_1"
     P0695_MODE_HZ_MK1 = "parameters.ID_Ba_Hz_MK1_akt"
     P0696_MODE_HZ_MK2 = "parameters.ID_Ba_Hz_MK2_akt"
     P0779_MODE_HZ_MK3 = "parameters.ID_Ba_Hz_MK3_akt"
@@ -1036,6 +1037,7 @@ class SensorKey(StrEnum):
     SMART_GRID_DHW_INCREASE = "smart_grid_dhw_increase"
     SWITCHOFF_REASON = "switchoff_reason"
     PUMP_VENT_HUP = "pump_vent_hup"
+    PUMP_VENT_ZUP = "pump_vent_zup"
     PUMP_VENT_TIMER_H = "pump_vent_timer_h"
     PUMP_VENT_ACTIVE = "pump_vent_active"
     THERMAL_DESINFECTION_DAY = "thermal_desinfection_day"

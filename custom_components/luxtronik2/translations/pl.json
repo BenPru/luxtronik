@@ -93,6 +93,9 @@
             "pump_vent_hup": {
                 "name": "Wentylacja HUP"
             },
+            "pump_vent_zup": {
+                "name": "Wentylacja ZUP"
+            },
             "pump_vent_active": {
                 "name": "Aktywne odpowietrzanie"
             }

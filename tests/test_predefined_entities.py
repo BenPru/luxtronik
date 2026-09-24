@@ -14,7 +14,12 @@ import custom_components.luxtronik2 as luxtronik2
 from custom_components.luxtronik2.binary_sensor_entities_predefined import (
     BINARY_SENSORS,
 )
-from custom_components.luxtronik2.const import LuxParameter, LuxVisibility
+from custom_components.luxtronik2.const import (
+    DeviceKey,
+    LuxParameter,
+    LuxVisibility,
+    SensorKey,
+)
 from custom_components.luxtronik2.coordinator import LuxtronikCoordinator
 from custom_components.luxtronik2.date_entities_predefined import CALENDAR_ENTITIES
 from custom_components.luxtronik2.model import LuxtronikEntityDescription
@@ -79,6 +84,24 @@ class TestSwitchPredefined:
         for sw in SWITCHES:
             assert sw.key is not None
             assert sw.luxtronik_key is not None
+
+    def test_vent_zup_targets_parameter_679(self):
+        """The ZUP venting switch drives ID_Einst_Entl_Typ_1 (P679).
+
+        Only Typ_0 = HUP was known; Typ_1 = ZUP was inferred from the menu
+        order and confirmed on hardware in discussion #802. The visibility
+        flag ID_Visi_Enlt_ZUP reads 1 on every unit in the corpus, so it
+        cannot gate anything - the switch is ungated and off by default.
+        """
+        from luxtronik.parameters import Parameters
+
+        (zup,) = [sw for sw in SWITCHES if sw.key == SensorKey.PUMP_VENT_ZUP]
+        assert zup.luxtronik_key == LuxParameter.P0679_VENTING_ZUP_ACTIVE
+        assert Parameters().get(679).name == "ID_Einst_Entl_Typ_1"
+        assert zup.luxtronik_key.value == "parameters.ID_Einst_Entl_Typ_1"
+        assert zup.visibility == LuxVisibility.UNSET
+        assert zup.entity_registry_enabled_default is False
+        assert zup.device_key == DeviceKey.heating
 
 
 class TestSensorPredefined:

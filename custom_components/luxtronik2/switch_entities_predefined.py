@@ -75,6 +75,15 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0163_PUMP_VENT_HUP,
     ),
+    # No visibility gate: ID_Visi_Enlt_ZUP reads 1 on every known unit, with
+    # or without a ZUP fitted, so it cannot tell the two apart (#802).
+    LuxtronikSwitchDescription(
+        device_key=DeviceKey.heating,
+        luxtronik_key=LP.P0679_VENTING_ZUP_ACTIVE,
+        key=SensorKey.PUMP_VENT_ZUP,
+        entity_category=EntityCategory.CONFIG,
+        entity_registry_enabled_default=False,
+    ),
     LuxtronikSwitchDescription(
         device_key=DeviceKey.heating,
         luxtronik_key=LP.P0158_VENTING_ACTIVE,

@@ -93,6 +93,9 @@
             "pump_vent_hup": {
                 "name": "Entlüften HUP"
             },
+            "pump_vent_zup": {
+                "name": "Entlüften ZUP"
+            },
             "pump_vent_active": {
                 "name": "Entlüften aktiv"
             }
