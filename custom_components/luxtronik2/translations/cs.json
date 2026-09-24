@@ -93,8 +93,11 @@
             "pump_vent_hup": {
                 "name": "Odvětrávání HUP"
             },
+            "pump_vent_zup": {
+                "name": "Odvětrávání ZUP"
+            },
             "pump_vent_active": {
-                "name": "Odvětrávání aktiví"
+                "name": "Odvětrávání aktivní"
             }
         },
         "update": {

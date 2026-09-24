@@ -91,7 +91,10 @@
                 "name": "Chłodzenie"
             },
             "pump_vent_hup": {
-                "name": "Wentylacja HUP"
+                "name": "Odpowietrzanie HUP"
+            },
+            "pump_vent_zup": {
+                "name": "Odpowietrzanie ZUP"
             },
             "pump_vent_active": {
                 "name": "Aktywne odpowietrzanie"

@@ -93,6 +93,9 @@
             "pump_vent_hup": {
                 "name": "Venting HUP"
             },
+            "pump_vent_zup": {
+                "name": "Venting ZUP"
+            },
             "pump_vent_active": {
                 "name": "Venting active"
             }
