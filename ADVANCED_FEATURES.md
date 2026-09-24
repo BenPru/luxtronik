@@ -80,9 +80,10 @@ Nothing is written to the heat pump. The switch only feeds the Smart Grid Status
 Like the Smart Grid offset numbers, the switch only exists while Smart Grid is on:
 
 - **Smart Grid turned on after setup:** the switch appears after the integration is reloaded (*Settings → Devices & services → Luxtronik → Reload*) or Home Assistant restarts.
-- **Smart Grid turned off:** the switch stops working and shows as no longer provided after the next reload, and the **EVU2** binary sensor goes back to the controller's reading. If you turn Smart Grid back on within 7 days, the switch returns with its old setting. After that it starts at off.
+- **Smart Grid turned off:** the switch stops having an effect straight away, and the **EVU2** binary sensor goes back to the controller's reading. After the next reload the switch shows as no longer provided.
+- **Smart Grid turned back on:** the switch returns with its old setting, as long as Home Assistant still remembers it. Home Assistant drops remembered states about a week after the entity was removed, once it has restarted since. After that the switch starts at off.
 
-If you disable the switch, SG2 counts as open.
+If you disable the switch, SG2 counts as open once Home Assistant has reloaded the integration, which it does about 30 seconds after you disable it.
 
 **How to set it up**
 
@@ -95,15 +96,16 @@ If you disable the switch, SG2 counts as open.
 <details>
 <summary>⚙️ Example: copy an SG2 relay's state onto the switch</summary>
 
-Replace `switch.sg2_relay` with the entity that drives your SG2 contact, and `switch.luxtronik_evu2_manual` with the switch's entity id. Newer installs include the heat pump's serial number in it, for example `switch.luxtronik_<serial>_evu2_manual`. The start trigger re-syncs after a restart, in case the relay changed while Home Assistant was down. An unavailable relay changes nothing.
+Replace `switch.sg2_relay` with the entity that drives your SG2 contact, and `switch.luxtronik_evu2_manual` with the switch's entity id. Newer installs include the heat pump's serial number in it, for example `switch.luxtronik_<serial>_evu2_manual`. The second trigger re-syncs whenever the Luxtronik switch comes up, after a restart or a reload, in case the relay changed in the meantime. It fires only once the switch exists, so a slow or retried setup is covered too. An unavailable relay changes nothing.
 
 ```yaml
 alias: "Luxtronik: follow the SG2 relay"
 triggers:
   - trigger: state
     entity_id: switch.sg2_relay
-  - trigger: homeassistant
-    event: start
+  - trigger: state
+    entity_id: switch.luxtronik_evu2_manual
+    from: unavailable
 actions:
   - choose:
       - conditions:
