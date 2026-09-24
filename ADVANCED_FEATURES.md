@@ -135,6 +135,18 @@ Two config entities (disabled by default, category *Configuration*) control when
 
 Both entities — and the **Additional Heat Generator** running-state binary sensor — only appear if your unit reports having a second heat generator installed. Setting the temperature threshold too high, or the delay too short, causes the backup heater to engage more often than necessary, increasing electricity cost; setting them too conservatively risks insufficient heat output during cold snaps.
 
+## Pump Venting
+
+The controller has a venting program that runs a pump in on/off cycles to push trapped air out of its circuit — the same program as the venting menu on the controller display, typically used after filling or topping up the system. It is driven by three kinds of entities, all in the Config category of the Heating device:
+
+- **Venting HUP** / **Venting ZUP** switches select which pump the program runs: the heating circulation pump (HUP) or the additional circulation pump (ZUP). *Venting ZUP* is **disabled by default**, because the controller does not report whether a ZUP is fitted — enable it from the entity registry if yours has one.
+- **Venting runtime** (number, 1–6 h, **disabled by default**) sets how long the program runs.
+- **Venting active** starts and stops the program.
+
+To vent a pump: set *Venting runtime*, turn on the pump's switch, and turn on *Venting active* right after. On at least one unit the pump selection was dropped when *Venting active* didn't follow within a few seconds; if the pump switch has flipped back off before you got there, repeat both steps more quickly. While the program runs, **Circulation pump heating** (HUP) or **Additional circulation pump** (ZUP) shows the pump turning on and off — short pauses are part of the cycle, not a fault. Turn *Venting active* off to stop early.
+
+The controller's menu also lists other pumps (BUP, ZIP, the brine/fan pump, mixer circuits). They are not exposed yet: which parameter selects which pump has only been confirmed on hardware for the HUP and ZUP ([#802](https://github.com/BenPru/luxtronik/discussions/802)).
+
 ## Defrost (De-icing)
 
 Air-source heat pumps periodically defrost their outdoor unit by briefly reversing the refrigerant cycle. Two binary sensors reflect this: **Defrost Valve** (the reversing valve is open) and **Defrost End / Flow OK** (the defrost cycle completed with acceptable flow). Seeing these toggle, or the heat pump's Status sensor briefly showing "Defrost", is normal periodic behavior on air/water systems — not a fault — and typically lasts a few minutes.
