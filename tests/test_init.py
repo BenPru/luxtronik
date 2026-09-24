@@ -740,6 +740,39 @@ class TestAsyncSetupEntry:
         mock_prune.assert_awaited_once_with(hass, entry, coordinator)
 
     @pytest.mark.asyncio
+    async def test_restores_manual_evu2_before_platforms(self):
+        """#500: the SmartGrid status must never see the default on a restart."""
+        hass = MagicMock()
+        order: list[str] = []
+        hass.config_entries.async_forward_entry_setups = AsyncMock(
+            side_effect=lambda *a: order.append("platforms")
+        )
+        hass.services.has_service.return_value = False
+        entry = _mock_entry()
+
+        coordinator = MagicMock()
+        coordinator.manufacturer = "Alpha Innotec"
+        coordinator.async_config_entry_first_refresh = AsyncMock()
+        coordinator.async_restore_evu2_manual = MagicMock(
+            side_effect=lambda: order.append("restore")
+        )
+
+        with (
+            patch(
+                "custom_components.luxtronik2.connect_and_get_coordinator",
+                new_callable=AsyncMock,
+                return_value=coordinator,
+            ),
+            patch(
+                "custom_components.luxtronik2._async_delete_legacy_devices",
+                new_callable=AsyncMock,
+            ),
+        ):
+            await async_setup_entry(hass, entry)
+
+        assert order == ["restore", "platforms"]
+
+    @pytest.mark.asyncio
     async def test_connection_failure_raises_not_ready(self):
         hass = MagicMock()
         entry = _mock_entry()

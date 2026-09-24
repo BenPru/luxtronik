@@ -426,6 +426,18 @@ SMART_GRID_MODE_CODES: Final[dict[int, str]] = {
     3: "sg_1_1",
 }
 
+# Models whose SG2 contact no register reports, so the SmartGrid status reads
+# EVU2 from a switch the user sets instead (#500). On these units calc 185
+# ID_WEB_HZIO_EVU2 stays 0 whatever the contact does - confirmed by two owners,
+# one with SG2 wired permanently closed and one switching it through a relay -
+# and the RFV terminal Luxtronik 2.0 uses for SG2 reads 0.0 as well.
+#
+# Deliberately a list of confirmed models rather than a data test: C0185 reads 0
+# in every dump collected so far, SG-enabled or not, so no value in the data
+# separates "contact open" from "contact not reported". Add a model here only on
+# an owner's confirmation that closing SG2 leaves calc 185 at 0.
+EVU2_MANUAL_INPUT_MODELS: Final[tuple[str, ...]] = ("MSW2-9S",)
+
 DAY_SELECTOR_OPTIONS: Final[list[str]] = [
     "none",
     *DAY_NAME_TO_PARAM.keys(),
@@ -1002,6 +1014,7 @@ class SensorKey(StrEnum):
     SOLAR_PUMP_MAX_TEMPERATURE_COLLECTOR = "solar_pump_max_temperature_collector"
     EVU_UNLOCKED = "evu_unlocked"
     EVU2 = "evu2"
+    EVU2_MANUAL = "evu2_manual"
     SMART_GRID_STATUS = "smart_grid_status"
     COMPRESSOR = "compressor"
     COMPRESSOR2 = "compressor2"

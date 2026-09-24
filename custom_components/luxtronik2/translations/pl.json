@@ -60,6 +60,9 @@
             }
         },
         "switch": {
+            "evu2_manual": {
+                "name": "Wejście EVU2 (ręcznie)"
+            },
             "remote_maintenance": {
                 "name": "Zdalna konserwacja"
             },

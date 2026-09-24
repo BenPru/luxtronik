@@ -11,20 +11,38 @@ import re
 from types import MappingProxyType
 from typing import Any, Final
 
+from homeassistant.components.switch import ENTITY_ID_FORMAT as SWITCH_ENTITY_ID_FORMAT
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PORT,
+    CONF_TIMEOUT,
+    STATE_OFF,
+    STATE_ON,
+    Platform,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import (
+    device_registry as dr,
+    entity_registry as er,
+    restore_state,
+)
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from packaging.version import InvalidVersion, Version
 
-from .common import get_sensor_data, normalize_sensor_value, smart_grid_enabled
+from .common import (
+    evu2_manual_input_required,
+    get_sensor_data,
+    normalize_sensor_value,
+    smart_grid_enabled,
+)
 from .const import (
     CONF_CALCULATIONS,
+    CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     CONF_PARAMETERS,
     CONF_SUPPORTS_TIME_24_00,
@@ -47,6 +65,7 @@ from .const import (
     LuxParameter as LP,
     LuxRoomThermostatType,
     LuxVisibility as LV,
+    SensorKey,
 )
 from .lux_helper import Luxtronik, get_manufacturer_by_model
 from .lux_overrides import (
@@ -134,6 +153,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._dhw_hold_until: datetime | None = None
         # Latch for the ventilation module; see has_ventilation.
         self._ventilation_detected = False
+        # User-supplied SG2 state; see _apply_evu2_manual.
+        self._evu2_manual = False
         # Cancels the pending follow-up read; see _schedule_write_followup().
         self._write_followup_unsub: Callable[[], None] | None = None
 
@@ -175,6 +196,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                 )
                 self._update_dhw_transition_hold(data)
                 self._detect_time_24_00_support(data)
+                self._apply_evu2_manual(data)
                 self.data = data
 
                 return self.data
@@ -214,6 +236,56 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return
 
         self._dhw_hold_until = None
+
+    def _apply_evu2_manual(self, data: LuxtronikCoordinatorData) -> None:
+        """Carry the user-supplied SG2 state into this poll's data (#500).
+
+        Only on the models listed in EVU2_MANUAL_INPUT_MODELS, whose SG2
+        contact no register reports. Everywhere else the field stays None and
+        the SmartGrid inputs are read from the controller as before.
+
+        The value lives on the coordinator because every poll builds fresh
+        data; the switch that sets it restores it across restarts.
+        """
+        if evu2_manual_input_required(data):
+            data.evu2_manual = self._evu2_manual
+
+    @callback
+    def async_restore_evu2_manual(self) -> None:
+        """Load the manual SG2 value from its switch's last state (#500).
+
+        Called before the platforms are set up. The switch cannot restore the
+        value itself: platforms set up concurrently, so the SmartGrid status
+        sensor could publish a state computed from the default first and flip
+        once the switch arrived - a spurious state change on every restart.
+
+        Looked up through the entity registry by unique id, which stays put
+        when the user renames the entity id.
+        """
+        prefix = self._config.get(CONF_HA_SENSOR_PREFIX)
+        if prefix is None or not evu2_manual_input_required(self.data):
+            return
+        unique_id = SWITCH_ENTITY_ID_FORMAT.format(f"{prefix}_{SensorKey.EVU2_MANUAL}")
+        entity_id = er.async_get(self.hass).async_get_entity_id(
+            Platform.SWITCH, DOMAIN, unique_id
+        )
+        if entity_id is None:
+            return
+        stored = restore_state.async_get(self.hass).last_states.get(entity_id)
+        if stored is not None and stored.state.state in (STATE_ON, STATE_OFF):
+            self._evu2_manual = stored.state.state == STATE_ON
+
+    @callback
+    def set_evu2_manual(self, value: bool) -> None:
+        """Set the SG2 state from the manual switch and push it out now.
+
+        Applied to the current data as well, so the SmartGrid status follows a
+        toggle straight away rather than at the next poll.
+        """
+        self._evu2_manual = value
+        if self.data is not None:
+            self._apply_evu2_manual(self.data)
+        self.async_update_listeners()
 
     def _detect_time_24_00_support(self, data: LuxtronikCoordinatorData) -> None:
         """Latch whether this controller accepts "24:00" as a schedule end time.

@@ -60,6 +60,9 @@
             }
         },
         "switch": {
+            "evu2_manual": {
+                "name": "EVU2 input (manual)"
+            },
             "remote_maintenance": {
                 "name": "Remote maintenance"
             },

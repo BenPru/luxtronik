@@ -3,6 +3,7 @@
 # region Imports
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any
 
 from homeassistant.components.switch import ENTITY_ID_FORMAT, SwitchEntity
@@ -12,11 +13,21 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
-from .common import get_sensor_data, key_exists
-from .const import CONF_HA_SENSOR_PREFIX, LOGGER, DeviceKey
+from .common import (
+    evu2_manual_input_required,
+    get_sensor_data,
+    key_exists,
+    smart_grid_enabled,
+)
+from .const import (
+    CONF_HA_SENSOR_PREFIX,
+    LOGGER,
+    DeviceKey,
+    LuxParameter as LP,
+)
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
 from .model import LuxtronikSwitchDescription
-from .switch_entities_predefined import SWITCHES
+from .switch_entities_predefined import EVU2_MANUAL_SWITCH, SWITCHES
 
 # endregion Imports
 
@@ -46,18 +57,33 @@ async def async_setup_entry(
         # missing keys are expected and not an error.
         LOGGER.debug("Not present in Luxtronik data, skipping: %s", unavailable_keys)
 
-    async_add_entities(
-        [
-            LuxtronikSwitchEntity(
+    entities: list[LuxtronikSwitchEntity] = [
+        LuxtronikSwitchEntity(
+            hass, entry, coordinator, description, description.device_key
+        )
+        for description in SWITCHES
+        if (
+            coordinator.entity_active(description)
+            and key_exists(coordinator.data, description.luxtronik_key)
+        )
+    ]
+
+    if evu2_manual_input_required(coordinator.data) and key_exists(
+        coordinator.data, LP.P1030_SMART_GRID_SWITCH
+    ):
+        # Enabled by default only where SmartGrid is on: nothing reads the
+        # value otherwise, and a user who turns SG on later can enable it.
+        description = replace(
+            EVU2_MANUAL_SWITCH,
+            entity_registry_enabled_default=smart_grid_enabled(coordinator.data),
+        )
+        entities.append(
+            LuxtronikEvu2ManualSwitch(
                 hass, entry, coordinator, description, description.device_key
             )
-            for description in SWITCHES
-            if (
-                coordinator.entity_active(description)
-                and key_exists(coordinator.data, description.luxtronik_key)
-            )
-        ]
-    )
+        )
+
+    async_add_entities(entities)
 
 
 class LuxtronikSwitchEntity(LuxtronikEntity[LuxtronikSwitchDescription], SwitchEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -114,3 +140,38 @@ class LuxtronikSwitchEntity(LuxtronikEntity[LuxtronikSwitchDescription], SwitchE
         )
 
         self._handle_coordinator_update(data)
+
+
+class LuxtronikEvu2ManualSwitch(LuxtronikSwitchEntity):
+    """The SG2 contact, set by hand where the controller does not report it (#500).
+
+    On the models in EVU2_MANUAL_INPUT_MODELS no register follows the SG2
+    contact, so the SmartGrid status cannot tell state 2 from state 3 (or 1
+    from 4) on its own. This switch stands in for the contact: set it once if
+    SG2 is wired permanently, or drive it from an automation that follows
+    whatever switches the contact.
+
+    Nothing is written to the heat pump. The value lives on the coordinator,
+    which feeds it to the SmartGrid status sensor and the EVU2 binary sensor.
+    The coordinator also restores it across restarts, from this switch's last
+    state, before any platform is set up - see async_restore_evu2_manual.
+    """
+
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """Reflect the value the coordinator holds; there is no register."""
+        data = self.coordinator.data if data is None else data
+        if data is None:
+            return
+        self._attr_is_on = bool(data.evu2_manual)
+        self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Mark the SG2 contact as closed."""
+        self.coordinator.set_evu2_manual(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Mark the SG2 contact as open."""
+        self.coordinator.set_evu2_manual(False)

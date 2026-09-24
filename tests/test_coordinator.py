@@ -2683,3 +2683,152 @@ class TestDetectTime2400Support:
         coord.config_entry = None
 
         coord._detect_time_24_00_support(self._data(ID_Einst_BwWO_zeit_0_1="24:00"))
+
+
+# ===========================================================================
+# Manual EVU2 input (#500)
+# ===========================================================================
+
+
+class TestEvu2Manual:
+    """The user-supplied SG2 state on units where no register reports it."""
+
+    def _coord(self, model: str = "MSW2-9S") -> LuxtronikCoordinator:
+        coord = _make_coordinator(calculations={"ID_WEB_Code_WP_akt": model})
+        coord.async_update_listeners = MagicMock()
+        return coord
+
+    def _poll(self, coord: LuxtronikCoordinator, model: str = "MSW2-9S"):
+        data = make_coordinator_data(calculations={"ID_WEB_Code_WP_akt": model})
+        coord._apply_evu2_manual(data)
+        return data
+
+    def test_defaults_to_off_on_a_listed_model(self):
+        """Off is what calc 185 reads there today, so nothing moves on upgrade."""
+        coord = self._coord()
+        assert self._poll(coord).evu2_manual is False
+
+    def test_is_none_on_other_models(self):
+        """None tells the resolver to keep reading calc 185."""
+        coord = self._coord("MSW4-16")
+        coord.set_evu2_manual(True)
+        assert self._poll(coord, "MSW4-16").evu2_manual is None
+
+    def test_value_carries_into_every_later_poll(self):
+        """Each poll builds fresh data, so the value must live on the coordinator."""
+        coord = self._coord()
+        coord.set_evu2_manual(True)
+        assert self._poll(coord).evu2_manual is True
+        assert self._poll(coord).evu2_manual is True
+
+    def test_set_applies_to_current_data_and_notifies(self):
+        """The status sensor must follow a toggle now, not at the next poll."""
+        coord = self._coord()
+        coord._apply_evu2_manual(coord.data)
+
+        coord.set_evu2_manual(True)
+
+        assert coord.data.evu2_manual is True
+        coord.async_update_listeners.assert_called_once()
+
+    def test_set_on_other_models_leaves_data_alone(self):
+        coord = self._coord("MSW4-16")
+        coord.set_evu2_manual(True)
+        assert coord.data.evu2_manual is None
+
+    @pytest.mark.asyncio
+    async def test_wired_into_async_update_data(self):
+        coord = self._coord()
+        coord.set_evu2_manual(True)
+
+        data = await coord._async_update_data()
+
+        assert data.evu2_manual is True
+
+
+class TestEvu2ManualRestore:
+    """The manual SG2 value is loaded before any platform computes a state.
+
+    Restoring it in the switch is too late: platforms set up concurrently, so
+    the SmartGrid status sensor could publish a state computed from the default
+    and flip once the switch arrived - a spurious change on every restart.
+    """
+
+    def _coord(self, hass: HomeAssistant, model: str = "MSW2-9S"):
+        from custom_components.luxtronik2.const import CONF_HA_SENSOR_PREFIX
+
+        coord = _make_coordinator(hass=hass, calculations={"ID_WEB_Code_WP_akt": model})
+        coord._config = {**coord._config, CONF_HA_SENSOR_PREFIX: DOMAIN}
+        return coord
+
+    def _register(self, hass: HomeAssistant, state: str, object_id: str):
+        from homeassistant.core import State
+        from homeassistant.helpers import entity_registry as er
+        from pytest_homeassistant_custom_component.common import mock_restore_cache
+
+        entity = er.async_get(hass).async_get_or_create(
+            "switch",
+            DOMAIN,
+            f"switch.{DOMAIN}_{SensorKey.EVU2_MANUAL}",
+            suggested_object_id=object_id,
+        )
+        mock_restore_cache(hass, [State(entity.entity_id, state)])
+
+    @pytest.mark.parametrize(("state", "expected"), [("on", True), ("off", False)])
+    async def test_restores_last_state(
+        self, hass: HomeAssistant, state: str, expected: bool
+    ) -> None:
+        self._register(hass, state, f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
+        coord = self._coord(hass)
+
+        coord.async_restore_evu2_manual()
+
+        assert coord._evu2_manual is expected
+
+    async def test_follows_a_renamed_entity_id(self, hass: HomeAssistant) -> None:
+        """Users rename entity ids; the unique id is what stays put."""
+        self._register(hass, "on", "sg2_contact")
+        coord = self._coord(hass)
+
+        coord.async_restore_evu2_manual()
+
+        assert coord._evu2_manual is True
+
+    @pytest.mark.parametrize("state", ["unavailable", "unknown"])
+    async def test_ignores_states_without_a_value(
+        self, hass: HomeAssistant, state: str
+    ) -> None:
+        self._register(hass, state, f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
+        coord = self._coord(hass)
+
+        coord.async_restore_evu2_manual()
+
+        assert coord._evu2_manual is False
+
+    async def test_first_setup_has_nothing_to_restore(
+        self, hass: HomeAssistant
+    ) -> None:
+        coord = self._coord(hass)
+        coord.async_restore_evu2_manual()
+        assert coord._evu2_manual is False
+
+    async def test_other_models_are_left_alone(self, hass: HomeAssistant) -> None:
+        self._register(hass, "on", f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
+        coord = self._coord(hass, "MSW4-16")
+
+        coord.async_restore_evu2_manual()
+
+        assert coord._evu2_manual is False
+
+    async def test_without_a_prefix_nothing_is_looked_up(
+        self, hass: HomeAssistant
+    ) -> None:
+        """Entry-less coordinators (config flow) carry no entity prefix."""
+        self._register(hass, "on", f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
+        coord = _make_coordinator(
+            hass=hass, calculations={"ID_WEB_Code_WP_akt": "MSW2-9S"}
+        )
+
+        coord.async_restore_evu2_manual()
+
+        assert coord._evu2_manual is False
