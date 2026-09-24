@@ -66,7 +66,68 @@ The integration learns these lockout windows by observing the heat pump's own op
 
 **Smart Grid Status** is a related but separate sensor: it only reports a value while *Smart Grid mode* (see [Smart Grid & Power Limitation](#smart-grid--power-limitation) below) is set to something other than `Off`, and derives an SG-ready state from the heat pump's two EVU input signals. **Which state a given pair of signals means depends on the selected mode** — the controller keeps a separate state table for `+/-`, `SG 1.0` and `SG 1.1`, so for example both contacts closed is `Increased operation` under `+/-`, a `Start command` under `SG 1.0`, and `Power limitation` under `SG 1.1`.
 
-**EVU2 input (manual)** (switch, config category) exists on the **MSW2-9S** only. That model does not report its second SG contact (SG2) to the integration at all, so without help the Smart Grid Status can never show the states that need SG2 closed. The switch stands in for the contact: nothing is written to the heat pump, the integration just uses its value as SG2. If SG2 is wired permanently closed, turn it on once. If a relay or another device switches SG2, drive the switch from an automation that follows that device. The **EVU2** binary sensor shows the same value, so the two always agree. The switch keeps its setting across restarts, and it is disabled by default when Smart Grid mode is `Off` at setup. If you turn Smart Grid on later, enable the switch yourself under the heat pump device. While the switch is disabled, SG2 counts as open.
+### EVU2 input (manual): MSW2-9S only
+
+The **MSW2-9S** does not report its second SG contact (SG2) to the integration. The heat pump itself reacts to the contact normally, but the register the integration reads stays at 0 whatever SG2 does. Without help, the Smart Grid Status therefore always assumes SG2 is open and shows the wrong state whenever it is closed.
+
+On this model, while **Smart Grid mode** is not `Off`, the integration adds an **EVU2 input (manual)** switch (config category, on the heat pump device). You tell the integration through it whether SG2 is closed:
+
+- **On:** SG2 closed
+- **Off:** SG2 open
+
+Nothing is written to the heat pump. The switch only feeds the Smart Grid Status sensor and the **EVU2** binary sensor, which shows the same value so the two always agree. SG1 is read from the controller as before.
+
+Like the Smart Grid offset numbers, the switch only exists while Smart Grid is on:
+
+- **Smart Grid turned on after setup:** the switch appears after the integration is reloaded (*Settings → Devices & services → Luxtronik → Reload*) or Home Assistant restarts.
+- **Smart Grid turned off:** the switch stops working and shows as no longer provided after the next reload, and the **EVU2** binary sensor goes back to the controller's reading. If you turn Smart Grid back on within 7 days, the switch returns with its old setting. After that it starts at off.
+
+If you disable the switch, SG2 counts as open.
+
+**How to set it up**
+
+1. Make sure Smart Grid mode is not `Off`, and find **EVU2 input (manual)** on the heat pump device. If it is missing, reload the integration.
+2. Choose the case that matches your wiring:
+   - **SG2 wired permanently closed** (a common way to get normal or increased operation without an energy manager): turn the switch on once. It keeps its setting across restarts.
+   - **SG2 switched by a relay, energy manager or PV controller:** if Home Assistant knows that device's state, let an automation copy it onto the switch (example below). If Home Assistant cannot see the SG2 state, the integration cannot know it either, and the Smart Grid Status will be wrong while SG2 is closed.
+3. Compare the **Smart Grid Status** with the operating state the controller display shows. If they disagree, check that the switch matches the actual SG2 contact.
+
+<details>
+<summary>⚙️ Example: copy an SG2 relay's state onto the switch</summary>
+
+Replace `switch.sg2_relay` with the entity that drives your SG2 contact, and `switch.luxtronik_evu2_manual` with the switch's entity id. Newer installs include the heat pump's serial number in it, for example `switch.luxtronik_<serial>_evu2_manual`. The start trigger re-syncs after a restart, in case the relay changed while Home Assistant was down. An unavailable relay changes nothing.
+
+```yaml
+alias: "Luxtronik: follow the SG2 relay"
+triggers:
+  - trigger: state
+    entity_id: switch.sg2_relay
+  - trigger: homeassistant
+    event: start
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: switch.sg2_relay
+            state: "on"
+        sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: switch.luxtronik_evu2_manual
+      - conditions:
+          - condition: state
+            entity_id: switch.sg2_relay
+            state: "off"
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.luxtronik_evu2_manual
+mode: restart
+```
+
+</details>
+
+If you own another model whose Smart Grid Status never shows SG2 closed, please [open an issue](REPORTING_ISSUES.md) with a diagnostics download taken while SG2 is closed. The switch is added per model, only after an owner confirms the model is affected.
 
 ## Domestic Water Status During Thermal Disinfection
 
@@ -169,6 +230,8 @@ The **PV Mode** select entity (disabled by default) controls how the heat pump r
 - **Smart Grid mode** (select, config category): picks the SG-ready variant, mirroring the controller's own *Service → Einstellungen → System Einstellung → Smart Grid* menu — `Off` (Nein), `+/-`, `SG 1.0` or `SG 1.1`. With anything but `Off`, the **Smart Grid Status** sensor (see [EVU / Grid-Lock Status](#evu--grid-lock-status)) becomes available.
 
   The three on-modes are *not* interchangeable: each has its own state table, and `SG 1.1` in particular turns both contacts closed into a power limitation, which on a heat pump without a speed-controlled compressor can shut the unit down. Only change this if you know which variant your installation is wired for.
+
+  On an **MSW2-9S**, also see [EVU2 input (manual)](#evu2-input-manual-msw2-9s-only): that model does not report the SG2 contact, so you have to tell the integration its state.
 
   This replaces the older *Smart Grid* switch entity (`switch.<prefix>_smartgrid`), which could only express on/off: toggling it off and on rewrote the mode to `+/-` and silently changed the setting on controllers running `SG 1.0` or `SG 1.1`.
 - **Smart Grid heating reduction** / **Smart Grid heating increase** / **Smart Grid hot water increase** (numbers, config category): the setpoint offsets the controller applies in the SG operating states — the heating setpoint is lowered by the reduction in state 2 and raised by the increase in state 4, where the DHW setpoint is raised too. Which contacts produce those states depends on the mode: under `+/-` state 2 is both contacts open and state 4 is both closed, while `SG 1.0` and `SG 1.1` read both-open as normal operation and have no reduced state at all (`SG 1.1` has no state 4 either). Ranges follow the controller's own limits: −0.5 to −25 K, 0.5 to 5 K and 0.5 to 10 K respectively, all in 0.5 K steps, defaulting to −2 / +2 / +2 K.
