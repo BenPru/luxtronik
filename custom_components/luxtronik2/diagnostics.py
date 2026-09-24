@@ -82,6 +82,15 @@ async def async_get_config_entry_diagnostics(
         ),
         "calculations": _dump_items(coordinator.data.calculations.calculations),
         "visibilities": _dump_items(coordinator.data.visibilities.visibilities),
+        # Values the integration derives rather than reads, so the registers
+        # above cannot explain them. The manual SG2 input (#500): the switch
+        # setting, and what the SmartGrid status used - None when the value
+        # is not applied (SmartGrid off, or not an EVU2_MANUAL_INPUT_MODELS
+        # unit) and SG2 comes from the registers as usual.
+        "derived": {
+            "evu2_manual": coordinator.evu2_manual,
+            "evu2_manual_applied": coordinator.data.evu2_manual,
+        },
         "log_records": get_captured_log_records(),
     }
     # Substitute once, over the finished payload. Doing it per-section is how
