@@ -259,6 +259,12 @@ def smart_grid_enabled(coordinator: LuxtronikCoordinatorData) -> bool:
     return smart_grid_mode(coordinator) != SMART_GRID_OFF
 
 
+def evu2_manual_model(coordinator: LuxtronikCoordinatorData) -> bool:
+    """Is this a model whose controller does not report its SG2 contact (#500)?"""
+    model = get_sensor_data(coordinator, LC.C0078_MODEL_CODE, warn_unset=False)
+    return model in EVU2_MANUAL_INPUT_MODELS
+
+
 def evu2_manual_input_required(coordinator: LuxtronikCoordinatorData) -> bool:
     """Does the user have to supply this unit's SG2 contact (#500)?
 
@@ -269,8 +275,7 @@ def evu2_manual_input_required(coordinator: LuxtronikCoordinatorData) -> bool:
     Read off the data rather than the coordinator so the switch platform can
     gate on it at setup with the same answer the coordinator applies per poll.
     """
-    model = get_sensor_data(coordinator, LC.C0078_MODEL_CODE, warn_unset=False)
-    return model in EVU2_MANUAL_INPUT_MODELS and smart_grid_enabled(coordinator)
+    return evu2_manual_model(coordinator) and smart_grid_enabled(coordinator)
 
 
 def read_smart_grid_inputs(

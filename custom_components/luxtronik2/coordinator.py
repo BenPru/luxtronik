@@ -36,6 +36,7 @@ from packaging.version import InvalidVersion, Version
 
 from .common import (
     evu2_manual_input_required,
+    evu2_manual_model,
     get_sensor_data,
     normalize_sensor_value,
     smart_grid_enabled,
@@ -273,7 +274,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         when the user renames the entity id.
         """
         prefix = self._config.get(CONF_HA_SENSOR_PREFIX)
-        if prefix is None or not evu2_manual_input_required(self.data):
+        # The model alone, not SmartGrid being on: turning SG on with the
+        # select does not reload, so the setting has to be loaded already.
+        # Whether it is applied stays the per-poll decision.
+        if prefix is None or not evu2_manual_model(self.data):
             return
         unique_id = SWITCH_ENTITY_ID_FORMAT.format(f"{prefix}_{SensorKey.EVU2_MANUAL}")
         registry = er.async_get(self.hass)

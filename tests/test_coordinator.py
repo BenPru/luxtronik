@@ -2914,3 +2914,31 @@ class TestEvu2ManualRestore:
         coord.async_restore_evu2_manual()
 
         assert coord.data.evu2_manual is False
+
+    async def test_smart_grid_off_at_startup_still_loads_the_setting(
+        self, hass: HomeAssistant
+    ) -> None:
+        """Turning SG on with the select must apply the setting, not the default.
+
+        No reload follows that select change, so the value has to be loaded at
+        startup even while SG is off; whether it is applied stays the per-poll
+        decision.
+        """
+        self._register(hass, "on", f"{DOMAIN}_{SensorKey.EVU2_MANUAL}")
+        coord = self._coord(hass)
+        sg_off = make_coordinator_data(
+            parameters={"ID_Einst_SmartGrid": "off"},
+            calculations={"ID_WEB_Code_WP_akt": "MSW2-9S"},
+        )
+        coord.data = sg_off
+        coord._apply_evu2_manual(sg_off)
+
+        coord.async_restore_evu2_manual()
+        assert coord.data.evu2_manual is None
+
+        sg_on = make_coordinator_data(
+            parameters={"ID_Einst_SmartGrid": "plus_minus"},
+            calculations={"ID_WEB_Code_WP_akt": "MSW2-9S"},
+        )
+        coord._apply_evu2_manual(sg_on)
+        assert sg_on.evu2_manual is True
