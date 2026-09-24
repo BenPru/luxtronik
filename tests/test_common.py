@@ -10,6 +10,7 @@ from conftest import make_coordinator_data
 from custom_components.luxtronik2.common import (
     async_get_mac_address,
     convert_to_int_if_possible,
+    evu2_manual_input_required,
     get_sensor_data,
     key_exists,
     normalize_sensor_value,
@@ -290,6 +291,59 @@ class TestReadSmartGridInputs:
             assert read_smart_grid_inputs(
                 _sg_data(evu_in=True, hzio_evu2=1, rfv=-5.0, rfv_type=rfv_type)
             ) == (True, True)
+
+    def test_manual_evu2_replaces_hzio(self):
+        """On a unit whose SG2 contact no register reports, the user says (#500).
+
+        The manual value replaces calc 185 outright, in both directions - the
+        register reads 0 forever there, so it has nothing to contribute.
+        """
+        data = _sg_data(evu_in=False, hzio_evu2=0)
+        data.evu2_manual = True
+        assert read_smart_grid_inputs(data) == (False, True)
+
+        data = _sg_data(evu_in=False, hzio_evu2=1)
+        data.evu2_manual = False
+        assert read_smart_grid_inputs(data) == (False, False)
+
+    def test_rfv_wiring_beats_manual_evu2(self):
+        """A reading the controller reports outranks one the user typed in."""
+        data = _sg_data(evu_in=False, rfv=-5.0)
+        data.evu2_manual = False
+        assert read_smart_grid_inputs(data) == (False, True)
+
+    def test_no_manual_evu2_keeps_hzio(self):
+        """None is "this unit has no manual input" - every unit but the listed models."""
+        data = _sg_data(evu_in=True, hzio_evu2=1)
+        assert data.evu2_manual is None
+        assert read_smart_grid_inputs(data) == (True, True)
+
+
+class TestEvu2ManualInputRequired:
+    """Which units get a manual EVU2 input instead of calc 185 (#500)."""
+
+    def _data(self, model, smart_grid="plus_minus"):
+        return make_coordinator_data(
+            parameters={"ID_Einst_SmartGrid": smart_grid},
+            calculations={"ID_WEB_Code_WP_akt": model},
+        )
+
+    @pytest.mark.parametrize("model", ["MSW2-9S"])
+    @pytest.mark.parametrize("smart_grid", ["plus_minus", "sg_1_0", "sg_1_1"])
+    def test_listed_model_with_smart_grid_on(self, model, smart_grid):
+        assert evu2_manual_input_required(self._data(model, smart_grid)) is True
+
+    @pytest.mark.parametrize("smart_grid", ["off", 0, None])
+    def test_listed_model_with_smart_grid_off(self, smart_grid):
+        """With SG off nothing reads SG2, so there is nothing to supply."""
+        assert evu2_manual_input_required(self._data("MSW2-9S", smart_grid)) is False
+
+    @pytest.mark.parametrize("model", ["MSW2-6S", "MSW4-16", "WZS", "", None])
+    def test_other_models(self, model):
+        assert evu2_manual_input_required(self._data(model)) is False
+
+    def test_missing_model_register(self):
+        assert evu2_manual_input_required(make_coordinator_data()) is False
 
 
 # ===========================================================================

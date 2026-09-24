@@ -15,6 +15,7 @@ from .const import (
     CONF_CALCULATIONS,
     CONF_PARAMETERS,
     CONF_VISIBILITIES,
+    EVU2_MANUAL_INPUT_MODELS,
     LOGGER,
     PARSED_COUNT_ATTR,
     SMART_GRID_MODE_CODES,
@@ -258,6 +259,25 @@ def smart_grid_enabled(coordinator: LuxtronikCoordinatorData) -> bool:
     return smart_grid_mode(coordinator) != SMART_GRID_OFF
 
 
+def evu2_manual_model(coordinator: LuxtronikCoordinatorData) -> bool:
+    """Is this a model whose controller does not report its SG2 contact (#500)?"""
+    model = get_sensor_data(coordinator, LC.C0078_MODEL_CODE, warn_unset=False)
+    return model in EVU2_MANUAL_INPUT_MODELS
+
+
+def evu2_manual_input_required(coordinator: LuxtronikCoordinatorData) -> bool:
+    """Does the user have to supply this unit's SG2 contact (#500)?
+
+    Only on the models whose controller does not report it, and only while
+    SmartGrid is on - with it off nothing reads SG2, the same reason the SG
+    offset numbers only exist then.
+
+    Read off the data rather than the coordinator so the switch platform can
+    gate on it at setup with the same answer the coordinator applies per poll.
+    """
+    return evu2_manual_model(coordinator) and smart_grid_enabled(coordinator)
+
+
 def read_smart_grid_inputs(
     coordinator: LuxtronikCoordinatorData,
 ) -> tuple[bool, bool]:
@@ -303,6 +323,11 @@ def read_smart_grid_inputs(
     table promises. That is the mode, not the inputs - the unit runs "SG 1.1",
     where that pair means power limitation, and the user confirmed it locks
     up there and stops doing so under "SG 1.0".
+
+    Where neither register carries SG2 (the models in EVU2_MANUAL_INPUT_MODELS),
+    the user supplies it through a switch and `coordinator.evu2_manual` holds
+    that value in place of calc 185 (#500). It ranks below the RFV reading on
+    purpose: something the controller reports beats something typed in.
     """
     evu1 = _as_bool(get_sensor_data(coordinator, LC.C0031_EVU_UNLOCKED))
     rfv = get_sensor_data(coordinator, LC.C0023_ROOM_STATION_RFV)
@@ -327,6 +352,9 @@ def read_smart_grid_inputs(
             evu1,
         )
         return evu1, rfv_value < 0
+
+    if coordinator.evu2_manual is not None:
+        return evu1, coordinator.evu2_manual
 
     return evu1, _as_bool(get_sensor_data(coordinator, LC.C0185_EVU2))
 

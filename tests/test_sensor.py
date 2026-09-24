@@ -364,6 +364,14 @@ class TestSmartGridStatus:
         entity._handle_coordinator_update()
         assert entity._attr_native_value == LuxSmartGridStatus.power_limitation
 
+    def test_manual_evu2_drives_the_status(self):
+        """#500: Zaschii's MSW2-9S sits at state 3 with SG2 wired closed, while
+        calc 185 reads 0 and so reports state 2."""
+        entity = self._make_smartgrid_sensor(evu=0, evu2=0)
+        entity.coordinator.data.evu2_manual = True
+        entity._handle_coordinator_update()
+        assert entity._attr_native_value == LuxSmartGridStatus.normal
+
     def test_sg_1_0_open_contacts_are_normal_operation(self):
         """Mode 2 has no reduced state - both open is plain normal operation."""
         entity = self._make_smartgrid_sensor(evu=0, evu2=0, smartgrid_enabled="sg_1_0")

@@ -40,6 +40,7 @@ from custom_components.luxtronik2.const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
     DeviceKey,
+    LuxCalculation,
     LuxMode,
     LuxOperationMode,
     LuxRoomThermostatType,
@@ -451,3 +452,40 @@ class TestClimateUnmappedMode:
         thermostat._handle_coordinator_update(data)
         assert thermostat._attr_hvac_mode == HVAC_MODE_MAPPING_HEAT[LuxMode.party]
         assert thermostat._attr_preset_mode == HVAC_PRESET_MAPPING[LuxMode.party]
+
+
+class TestClimateKeyAttributes:
+    """The luxtronik_key_current_temperature attribute names what is really read."""
+
+    def test_current_temperature_key_attribute_names_c0227(self):
+        """The attribute is built before the key is swapped in, so it has to be
+        rebuilt from the final description - it used to read "NSET UNSET"."""
+        coord = _mock_coordinator()
+        coord.room_thermostat_type = LuxRoomThermostatType.rbe
+        thermostat = LuxtronikThermostat(
+            MagicMock(), _mock_entry(), coord, THERMOSTATS_OTHER[0]
+        )
+        attrs = thermostat._attr_extra_state_attributes
+        assert attrs["luxtronik_key_current_temperature"] == (
+            f"0227 {LuxCalculation.C0227_ROOM_THERMOSTAT_TEMPERATURE.value}"
+        )
+
+    def test_current_temperature_key_attribute_names_the_configured_sensor(self):
+        coord = _mock_coordinator()
+        coord.room_thermostat_type = LuxRoomThermostatType.none
+        entry = _mock_entry()
+        entry.options = {CONF_HA_SENSOR_INDOOR_TEMPERATURE: "sensor.my_temp"}
+        thermostat = LuxtronikThermostat(
+            MagicMock(), entry, coord, THERMOSTATS_OTHER[0]
+        )
+        attrs = thermostat._attr_extra_state_attributes
+        assert attrs["luxtronik_key_current_temperature"] == "sensor.my_temp"
+
+    def test_no_current_temperature_key_attribute_without_a_thermostat(self):
+        coord = _mock_coordinator()
+        coord.room_thermostat_type = LuxRoomThermostatType.none
+        thermostat = LuxtronikThermostat(
+            MagicMock(), _mock_entry(), coord, THERMOSTATS_OTHER[0]
+        )
+        attrs = thermostat._attr_extra_state_attributes
+        assert "luxtronik_key_current_temperature" not in attrs

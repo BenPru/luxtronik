@@ -839,3 +839,49 @@ class TestBaseFormattedDataFallback:
         )
         result = entity.formatted_data(attr)
         assert result == "42"
+
+
+# ===========================================================================
+# luxtronik_key attributes for entities without a register
+# ===========================================================================
+
+
+class TestLuxtronikKeyAttribute:
+    """UNSET means "no register", so there is nothing to point at.
+
+    The attribute used to read "NSET UNSET" - the enum name sliced as if it
+    were a P/C index - on the SmartGrid status sensor and the manual EVU2
+    switch (#500).
+    """
+
+    def _attrs(self, description):
+        entity = LuxtronikEntity(_mock_coordinator(), description, DeviceKey.heatpump)
+        return entity._attr_extra_state_attributes
+
+    @pytest.mark.parametrize("unset", [LP.UNSET, LC.UNSET])
+    def test_no_luxtronik_key_attribute_without_a_register(self, unset):
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.SMART_GRID_STATUS,
+            luxtronik_key=unset,
+            device_key=DeviceKey.heatpump,
+        )
+        assert SA.LUXTRONIK_KEY not in self._attrs(desc)
+
+    def test_luxtronik_key_attribute_names_the_register(self):
+        desc = LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+        )
+        assert self._attrs(desc)[SA.LUXTRONIK_KEY] == (
+            f"0011 {LC.C0011_FLOW_OUT_TEMPERATURE.value}"
+        )
+
+    def test_unset_secondary_key_is_skipped(self):
+        """`luxtronik_key_*` fields default to UNSET on every description."""
+        desc = LuxtronikIndexSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+        )
+        assert "luxtronik_key_timestamp" not in self._attrs(desc)

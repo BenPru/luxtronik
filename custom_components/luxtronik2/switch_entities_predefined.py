@@ -118,3 +118,14 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
     ),
     # endregion Cooling
 ]
+
+# The SG2 contact of the SmartGrid interface, set by the user on the models
+# whose controller does not report it (#500). Not in SWITCHES: no register sits
+# behind it, so the generic register-presence filter would always drop it.
+# switch.py adds it on EVU2_MANUAL_INPUT_MODELS only, and only while SmartGrid
+# is on - which is also why it can be enabled by default.
+EVU2_MANUAL_SWITCH = LuxtronikSwitchDescription(
+    key=SensorKey.EVU2_MANUAL,
+    entity_category=EntityCategory.CONFIG,
+    entity_registry_enabled_default=True,
+)

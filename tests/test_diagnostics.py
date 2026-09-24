@@ -659,3 +659,36 @@ class TestPayloadWideScrubbing:
 
         _warn_if_unscrubbed({"anything": "330123_0145"}, {})
         assert "survived redaction" not in caplog.text
+
+
+class TestDerivedValues:
+    """Values the integration derives rather than reads, which a dump of the
+    registers alone cannot show (#500)."""
+
+    async def _diagnostics(self, setting: bool, applied: bool | None):
+        from custom_components.luxtronik2.diagnostics import (
+            async_get_config_entry_diagnostics,
+        )
+
+        coordinator = _coordinator_with("330123_0145")
+        coordinator.evu2_manual = setting
+        coordinator.data.evu2_manual = applied
+        hass = MagicMock()
+        hass.async_add_executor_job = AsyncMock(return_value=None)
+        return await async_get_config_entry_diagnostics(hass, _entry_for(coordinator))
+
+    @pytest.mark.asyncio
+    async def test_manual_evu2_setting_and_applied_value(self):
+        """On an MSW2-9S the status reads SG2 from the switch, not calc 185."""
+        result = await self._diagnostics(setting=True, applied=True)
+        assert result["derived"] == {
+            "evu2_manual": True,
+            "evu2_manual_applied": True,
+        }
+
+    @pytest.mark.asyncio
+    async def test_setting_not_applied(self):
+        """SG off, or any other model: the status reads calc 185 as before."""
+        result = await self._diagnostics(setting=True, applied=None)
+        assert result["derived"]["evu2_manual"] is True
+        assert result["derived"]["evu2_manual_applied"] is None

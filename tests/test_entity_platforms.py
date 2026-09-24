@@ -128,6 +128,119 @@ class TestSwitchAsyncSetupEntry:
         entities = add.call_args[0][0]
         assert len(entities) > 0
 
+    async def _setup_evu2(self, model, smart_grid="plus_minus"):
+        from custom_components.luxtronik2.switch import (
+            LuxtronikEvu2ManualSwitch,
+            async_setup_entry,
+        )
+
+        parameters = {} if smart_grid is None else {"ID_Einst_SmartGrid": smart_grid}
+        data = make_coordinator_data(
+            parameters=parameters,
+            calculations={"ID_WEB_Code_WP_akt": model},
+        )
+        coord = _mock_coordinator(data)
+        entry = _mock_entry()
+        entry.runtime_data = coord
+        add = MagicMock()
+
+        with patch("homeassistant.helpers.frame.report_usage"):
+            await async_setup_entry(MagicMock(), entry, add)
+
+        return [
+            e for e in add.call_args[0][0] if isinstance(e, LuxtronikEvu2ManualSwitch)
+        ]
+
+    @pytest.mark.asyncio
+    async def test_adds_manual_evu2_switch_on_listed_model(self):
+        """#500: an MSW2-9S never reports its SG2 contact."""
+        switches = await self._setup_evu2("MSW2-9S")
+        assert len(switches) == 1
+        assert switches[0].entity_description.entity_registry_enabled_default is True
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("smart_grid", ["off", 0])
+    async def test_no_manual_evu2_switch_with_smart_grid_off(self, smart_grid):
+        """Like the SG offset numbers: it appears after a reload once SG is on."""
+        assert await self._setup_evu2("MSW2-9S", smart_grid=smart_grid) == []
+
+    @pytest.mark.asyncio
+    async def test_no_manual_evu2_switch_on_other_models(self):
+        assert await self._setup_evu2("MSW4-16") == []
+
+    @pytest.mark.asyncio
+    async def test_no_manual_evu2_switch_without_smart_grid_register(self):
+        assert await self._setup_evu2("MSW2-9S", smart_grid=None) == []
+
+
+class TestLuxtronikEvu2ManualSwitch:
+    """HA-side stand-in for the SG2 contact on units that do not report it (#500)."""
+
+    def _make(self, evu2_manual=False):
+        from custom_components.luxtronik2.switch import LuxtronikEvu2ManualSwitch
+        from custom_components.luxtronik2.switch_entities_predefined import (
+            EVU2_MANUAL_SWITCH,
+        )
+
+        data = make_coordinator_data()
+        data.evu2_manual = evu2_manual
+        coord = _mock_coordinator(data)
+        coord.evu2_manual = evu2_manual
+        with patch("homeassistant.helpers.frame.report_usage"):
+            entity = LuxtronikEvu2ManualSwitch(
+                MagicMock(),
+                _mock_entry(),
+                coord,
+                EVU2_MANUAL_SWITCH,
+                DeviceKey.heatpump,
+            )
+        _patch_entity_hass(entity)
+        return entity, coord
+
+    def test_entity_id(self):
+        entity, _ = self._make()
+        assert entity.entity_id == f"switch.{DOMAIN}_{SK.EVU2_MANUAL}"
+
+    def test_state_follows_the_coordinator_setting(self):
+        entity, coord = self._make(evu2_manual=True)
+        entity._handle_coordinator_update()
+        assert entity._attr_is_on is True
+
+        coord.evu2_manual = False
+        entity._handle_coordinator_update()
+        assert entity._attr_is_on is False
+
+    def test_keeps_showing_the_setting_while_smart_grid_is_off(self):
+        """SG off stops the value being applied, not the setting itself.
+
+        Showing off here would get stored as the last state on the next
+        reload, and the setting would be lost when SG is turned back on.
+        """
+        entity, coord = self._make(evu2_manual=True)
+        coord.data.evu2_manual = None  # what _apply_evu2_manual leaves with SG off
+        entity._handle_coordinator_update()
+        assert entity._attr_is_on is True
+
+    def test_handle_coordinator_update_none_data(self):
+        entity, coord = self._make(evu2_manual=True)
+        coord.data = None
+        entity._handle_coordinator_update(None)
+        entity.async_write_ha_state.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_turn_on_sets_the_coordinator_value_and_writes_nothing(self):
+        """There is no register behind this switch - nothing goes to the pump."""
+        entity, coord = self._make()
+        await entity.async_turn_on()
+        coord.set_evu2_manual.assert_called_once_with(True)
+        coord.async_write.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_turn_off(self):
+        entity, coord = self._make()
+        await entity.async_turn_off()
+        coord.set_evu2_manual.assert_called_once_with(False)
+
 
 # ===========================================================================
 # LuxtronikSwitchEntity
@@ -337,6 +450,14 @@ class TestLuxtronikBinarySensorEntity:
             self._evu2_data(hzio_evu2=0, rfv=-5.0, smart_grid=0)
         )
         assert entity._attr_is_on is False
+
+    def test_evu2_mirrors_the_manual_input(self):
+        """#500: shows what the status sensor uses, not calc 185's permanent 0."""
+        entity = self._make_evu2_sensor()
+        data = self._evu2_data(hzio_evu2=0)
+        data.evu2_manual = True
+        entity._handle_coordinator_update(data)
+        assert entity._attr_is_on is True
 
 
 # ===========================================================================

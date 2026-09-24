@@ -56,6 +56,11 @@ class LuxtronikCoordinatorData:
     # Defaulted so every other construction site (tests, diagnostics) is unaffected.
     dhw_transition_hold: bool = False
 
+    # The SG2 state the user set on a model that does not report it (#500), put
+    # here each poll by LuxtronikCoordinator._apply_evu2_manual(). None on every
+    # other model, which tells read_smart_grid_inputs to keep reading calc 185.
+    evu2_manual: bool | None = None
+
 
 @dataclass
 class LuxtronikEntityAttributeDescription:

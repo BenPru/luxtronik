@@ -399,7 +399,7 @@ To protect your system from accidental misconfiguration, several advanced config
 - **Heating Curve Parameters:** (End temperature, Parallel shift, Night offset) These define how the heat pump reacts to outdoor temperatures. They are typically configured once during commissioning by your installer. Use [mnemotron.de's heating curve visualizer](https://mnemotron.de/lux/heatcurve.html) to plot the exact resulting curve for your parameter values before changing them.
 - **Heating Threshold Temperature:** The outdoor temperature above which the heating completely stops.
 - **Second Heat Generator Settings:** The outdoor temperature and delay that determine when the backup electric heater is allowed to engage. See [Advanced Features: Second Heat Generator](ADVANCED_FEATURES.md#second-heat-generator-backup-electric-heater).
-- **Smart Grid / PV Mode:** Controls tied to SG-ready and PV-surplus signals — see [Advanced Features](ADVANCED_FEATURES.md#smart-grid--power-limitation).
+- **Smart Grid / PV Mode:** Controls tied to SG-ready and PV-surplus signals — see [Advanced Features](ADVANCED_FEATURES.md#smart-grid--power-limitation). On an MSW2-9S, the Smart Grid Status also needs the [EVU2 input (manual)](ADVANCED_FEATURES.md#evu2-input-manual-msw2-9s-only) switch.
 
 > **Tip:** Do not modify the heating curve or power limits frequently via automations. Heat pumps are slow-reacting systems and perform best when left running with stable parameters.
 

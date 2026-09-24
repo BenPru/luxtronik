@@ -126,6 +126,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
 
     entry.runtime_data = coordinator
 
+    # Before the platforms, so no entity ever computes a state from the default.
+    coordinator.async_restore_evu2_manual()
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # 🛠️ Update title on initial setup only

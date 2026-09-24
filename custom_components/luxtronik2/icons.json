@@ -142,6 +142,7 @@
     },
     "switch": {
       "remote_maintenance": { "default": "mdi:remote-desktop" },
+      "evu2_manual": { "default": "mdi:numeric-2-circle-outline" },
       "efficiency_pump": { "default": "mdi:leaf-circle" },
       "pump_heat_control": { "default": "mdi:pump" },
       "electrical_power_limitation_switch": { "default": "mdi:download-lock" },

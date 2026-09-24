@@ -330,6 +330,8 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
 
         # ✅ Set the final description ONCE
         self.entity_description = description
+        # Base built these from the description before the swap above.
+        self._set_luxtronik_key_attributes()
 
         prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key.value}")  # pyright: ignore[reportAttributeAccessIssue]

@@ -60,6 +60,9 @@
             }
         },
         "switch": {
+            "evu2_manual": {
+                "name": "EVU2-Eingang (manuell)"
+            },
             "remote_maintenance": {
                 "name": "Fernwartung"
             },
