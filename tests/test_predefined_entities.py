@@ -7,10 +7,12 @@ import importlib
 import pkgutil
 from unittest.mock import patch
 
+from luxtronik.parameters import Parameters
 from packaging.version import Version
 
 from conftest import make_coordinator_data
 import custom_components.luxtronik2 as luxtronik2
+from custom_components.luxtronik2 import lux_overrides
 from custom_components.luxtronik2.binary_sensor_entities_predefined import (
     BINARY_SENSORS,
 )
@@ -273,6 +275,65 @@ class TestVisibilityGates:
             if descr.entity_active_formula is None
         ]
         assert offenders == []
+
+    def test_every_entity_active_key_guards_a_register_of_its_own(self):
+        """A declared gate also requires the entity's own register to be
+        returned, so a keyed description without one could never exist.
+        """
+        offenders = [
+            (type(descr).__name__, descr.key)
+            for descr in _all_descriptions()
+            if descr.entity_active_key is not None
+            and descr.luxtronik_key == LuxParameter.UNSET
+        ]
+        assert offenders == []
+
+    def test_every_entity_active_formula_parses(self):
+        """A formula that does not parse logs a warning and then falls
+        through to True - the entity is created on every install. `in 3, 4`
+        (a space after the comma) is the easy way to get there.
+        """
+        offenders = []
+        for descr in _all_descriptions():
+            formula = descr.entity_active_formula
+            if formula is None:
+                continue
+            parts = formula.split()
+            if (
+                len(parts) != 2
+                or parts[0] not in {"==", "!=", "<", "<=", ">", ">=", "in"}
+                or (parts[0] == "in" and "" in parts[1].split(","))
+            ):
+                offenders.append((type(descr).__name__, descr.key, formula))
+        assert offenders == []
+
+    def test_numeric_gates_read_numeric_registers(self):
+        """A numeric threshold on a register that decodes to a name fails
+        open: `"none" != 0` compares as strings and is True, so the entity
+        comes back on every install with nothing in the log (#773, #777).
+        P0033 is the likely next one - `LuxRoomThermostatType` already
+        exists. If a register here gains a selection datatype, rewrite its
+        gate as an `in` list of codes and names, as the MK gates do.
+        """
+        lux_overrides.update_Luxtronik_Parameters()
+        parameters = Parameters()
+        checked = []
+        for descr in _all_descriptions():
+            key = descr.entity_active_key
+            formula = descr.entity_active_formula
+            if not isinstance(key, LuxParameter) or formula is None:
+                continue
+            threshold = formula.split()[1]
+            try:
+                float(threshold)
+            except ValueError:
+                continue
+            datatype = parameters.get(key.rsplit(".", 1)[1])
+            decoded = datatype.from_heatpump(0)
+            assert not isinstance(decoded, str), (descr.key, key, decoded)
+            checked.append(descr.key)
+        # Guard the guard: the P0033 and P1010 gates must be among them.
+        assert len(checked) >= 2
 
     def test_no_description_pairs_a_special_gate_with_a_formula(self):
         """`_special_visibility` answers before `visibility_formula` is read.

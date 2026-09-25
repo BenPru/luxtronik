@@ -128,8 +128,8 @@ SENSORS_STATUS: list[descr] = [
 # RBE Plus needs the RBE firmware version too, so this is not the bare P0033).
 # It is what climate.py acts on, and it explains why a climate card shows no
 # current temperature or why its setpoint is a heating-curve offset. No
-# visibility gate on purpose: it must exist precisely when the V0122-gated
-# room-thermostat entities do not.
+# gate on purpose: it explains why the P0033-gated room-thermostat
+# entities are missing, so it must exist whether or not they do.
 SENSORS_ROOM_THERMOSTAT_TYPE: list[descr] = [
     descr(
         key=SensorKey.ROOM_THERMOSTAT_TYPE,

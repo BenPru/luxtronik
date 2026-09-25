@@ -873,10 +873,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         selection datatypes as their codes become known, and the register
         would then read "cooling" rather than 3. Unlike the visibility gate
         that raised in #773, this comparison fails silently: it evaluates
-        False and takes the mixing-circuit entities - and, through
-        `_detect_cooling_mk`, the whole cooling device - away from every
-        affected user, with nothing in the log to say so. Accepting both
-        spellings of the same answer costs a tuple.
+        False and, through `_detect_cooling_mk`, takes the whole cooling
+        device away from every affected user, with nothing in the log to
+        say so. Accepting both spellings of the same answer costs a tuple.
+        The cooling-target entities gate on the same two answers through
+        their declared `in` formula.
         """
         return any(
             value == mk_type.value or value == mk_type.name

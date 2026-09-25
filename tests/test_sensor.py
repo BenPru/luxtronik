@@ -1387,9 +1387,10 @@ class TestRoomThermostatTypeSensor:
         assert description.entity_category == EntityCategory.DIAGNOSTIC
         assert description.device_class == SensorDeviceClass.ENUM
         assert description.options == [e.name for e in LuxRoomThermostatType]
-        # This entity exists precisely to explain why the V0122-gated ones
-        # do not, so it must not share their gate.
+        # This entity exists to explain why the P0033-gated ones are
+        # missing, so it must not share their gate.
         assert description.visibility == LuxVisibility.UNSET
+        assert description.entity_active_key is None
 
     @pytest.mark.parametrize("thermostat_type", list(LuxRoomThermostatType))
     def test_reports_the_derived_type_name(self, thermostat_type):
