@@ -29,7 +29,7 @@ from homeassistant.helpers.entity_registry import (
 )
 
 from . import log_capture  # noqa: F401 - attaches the diagnostics log-capture handler
-from .common import convert_to_int_if_possible
+from .common import normalize_write_value
 from .const import (
     ATTR_PARAMETER,
     ATTR_VALUE,
@@ -180,8 +180,8 @@ def setup_hass_services(hass: HomeAssistant, entry: LuxtronikConfigEntry):
                 translation_placeholders={"parameter": str(parameter)},
             )
 
-        # convert to int needed for Unknown parameters
-        value = convert_to_int_if_possible(service.data.get(ATTR_VALUE))
+        # int for identity datatypes (Unknown, ...), float kept for scaled ones
+        value = normalize_write_value(service.data.get(ATTR_VALUE))
 
         # Only allow writing to known writable parameter prefixes
         if not parameter.startswith(WRITABLE_PARAMETER_PREFIXES):

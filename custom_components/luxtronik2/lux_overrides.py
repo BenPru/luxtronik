@@ -59,7 +59,8 @@ class Energy2(Base):
         return value / 100
 
     def to_heatpump(self, value):
-        return int(value * 100)
+        # round, not int: 0.29 * 100 is 28.999999999999996 in binary floating point
+        return round(value * 100)
 
 
 class UtcTimestamp(Base):

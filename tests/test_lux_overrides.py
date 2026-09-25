@@ -196,6 +196,17 @@ class TestEnergy2:
         assert converter.to_heatpump(2699.38) == 269938
         assert converter.to_heatpump(0.0) == 0
 
+    @pytest.mark.parametrize(
+        ("value", "raw"), [(0.29, 29), (0.57, 57), (-81.85, -8185)]
+    )
+    def test_to_heatpump_rounds_instead_of_truncating(self, value, raw):
+        # 0.29 * 100 == 28.999999999999996 in binary floating point, which
+        # int() truncated to 28.
+        from custom_components.luxtronik2.lux_overrides import Energy2
+
+        converter = Energy2("HEAT_ENERGY_INPUT", False)
+        assert converter.to_heatpump(value) == raw
+
 
 class TestTimeOfDay:
     from custom_components.luxtronik2.lux_overrides import TimeOfDay

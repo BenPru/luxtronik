@@ -122,19 +122,6 @@ class TestWriteParameterValidation:
 
 
 # ===========================================================================
-# convert_to_int_if_possible (used by service handler)
-# ===========================================================================
-
-
-class TestConvertToIntInService:
-    def test_int_conversion(self):
-        from custom_components.luxtronik2.common import convert_to_int_if_possible
-
-        assert convert_to_int_if_possible("42") == 42
-        assert convert_to_int_if_possible("not_a_number") == "not_a_number"
-
-
-# ===========================================================================
 # _identifiers_exists
 # ===========================================================================
 
@@ -1046,6 +1033,37 @@ class TestWriteParameterService:
 
         mock_entry.runtime_data.async_write.assert_awaited_once_with(
             "ID_Einst_BWS_akt", 42
+        )
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(("raw", "expected"), [(-1.5, -1.5), ("-1.5", -1.5)])
+    async def test_write_decimal_value_reaches_coordinator_untruncated(
+        self, raw, expected
+    ):
+        """#811: -1.5 on the 0.5 K heating curve offset arrived as -1."""
+        from homeassistant.config_entries import ConfigEntryState
+
+        from custom_components.luxtronik2.const import SERVICE_WRITE_SCHEMA
+
+        hass = MagicMock()
+        hass.services.has_service = MagicMock(return_value=False)
+        setup_hass_services(hass, _mock_entry())
+        handler = hass.services.async_register.call_args[0][2]
+
+        mock_entry = MagicMock()
+        mock_entry.state = ConfigEntryState.LOADED
+        mock_entry.runtime_data = _mock_coordinator(hass)
+        hass.config_entries.async_entries = MagicMock(return_value=[mock_entry])
+
+        service = MagicMock()
+        service.data = SERVICE_WRITE_SCHEMA(
+            {ATTR_PARAMETER: "ID_Einst_WK_akt", ATTR_VALUE: raw}
+        )
+
+        await handler(service)
+
+        mock_entry.runtime_data.async_write.assert_awaited_once_with(
+            "ID_Einst_WK_akt", expected
         )
 
     @pytest.mark.asyncio

@@ -3,6 +3,7 @@
 # region Imports
 from functools import partial
 from ipaddress import IPv6Address, ip_address
+import math
 from typing import Any
 
 from getmac import get_mac_address
@@ -554,8 +555,22 @@ async def async_get_mac_address(hass: HomeAssistant, host: str) -> str | None:
     return device_registry.format_mac(mac_address)
 
 
-def convert_to_int_if_possible(value: str) -> int | str:
-    try:
-        return int(value)
-    except ValueError:
+def normalize_write_value(value: Any) -> Any:
+    """Normalize a `luxtronik2.write` service value before it is queued.
+
+    Integral numbers become `int`: identity datatypes (Unknown, Seconds, ...)
+    queue the value unchanged and `Luxtronik.write()` skips anything that is
+    not an int. Fractional numbers stay `float` so scaled datatypes (Celsius
+    x10, ...) can convert them - `int(-1.5)` wrote -1 (#811). Numeric strings
+    from the text selector are parsed the same way; anything else (selection
+    names, bools, non-finite numbers) passes through unchanged.
+    """
+    if isinstance(value, bool):
         return value
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return value
+    if not math.isfinite(number):
+        return value
+    return int(number) if number.is_integer() else number
