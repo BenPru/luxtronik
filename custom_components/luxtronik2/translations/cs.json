@@ -960,6 +960,18 @@
             "pool_heat_amount": {
                 "name": "Množství tepla pro bazén"
             },
+            "heat_amount_heating_compressor_2": {
+                "name": "Množství tepla pro topení kompresor 2"
+            },
+            "dhw_heat_amount_compressor_2": {
+                "name": "Množství tepla pro TUV kompresor 2"
+            },
+            "pool_heat_amount_compressor_2": {
+                "name": "Množství tepla pro bazén kompresor 2"
+            },
+            "heat_amount_counter_compressor_2": {
+                "name": "Množství tepla kompresor 2"
+            },
             "heat_amount_flow_rate": {
                 "name": "Množství tepla"
             },

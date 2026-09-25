@@ -1022,7 +1022,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             if self.get_value(description.luxtronik_key) is None:
                 return False
         if description.entity_active_formula is not None:
-            active_value = self.get_value(description.luxtronik_key)
+            active_value = self.get_value(
+                description.entity_active_key or description.luxtronik_key
+            )
             if active_value is None:
                 # The controller did not return this register, so the formula
                 # has nothing to decide on. Creating the entity anyway leaves

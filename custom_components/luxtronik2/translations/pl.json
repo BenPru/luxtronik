@@ -951,6 +951,18 @@
             "pool_heat_amount": {
                 "name": "Ilość ciepła basenu"
             },
+            "heat_amount_heating_compressor_2": {
+                "name": "Ilość ciepła grzewczego sprężarka 2"
+            },
+            "dhw_heat_amount_compressor_2": {
+                "name": "Ilość ciepła ciepłej wody sprężarka 2"
+            },
+            "pool_heat_amount_compressor_2": {
+                "name": "Ilość ciepła basenu sprężarka 2"
+            },
+            "heat_amount_counter_compressor_2": {
+                "name": "Licznik ilości ciepła sprężarka 2"
+            },
             "heat_amount_flow_rate": {
                 "name": "Natężenie przepływu ilości ciepła grzewczego"
             },
