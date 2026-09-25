@@ -583,7 +583,8 @@ class TestSmartGridOffsetEntities:
 
     @pytest.mark.asyncio
     async def test_not_created_when_smart_grid_is_off(self):
-        keys = await self._setup_keys(self._coordinator(0))
+        # Decoded, as the SmartGridMode datatype reports it on a real unit.
+        keys = await self._setup_keys(self._coordinator("off"))
         assert not (self._KEYS & keys)
         # Other numbers are unaffected - the gate is not tearing the platform
         # down wholesale.

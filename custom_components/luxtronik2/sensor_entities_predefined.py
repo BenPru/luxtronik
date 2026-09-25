@@ -827,7 +827,13 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        visibility=LV.V0122_ROOM_THERMOSTAT,
+        # Only with a room thermostat fitted (P0033 != 0 = none). V0122 is no
+        # use here: it gates the settings-menu entry, not the device, and
+        # reads 1 on all 29 corpus units, including the 24 with P0033 = 0
+        # whose C0227/C0228 then sit at 0.0 forever. The RFV types (1-3) are
+        # analogue dials that may read 0.0 too; no RFV unit to confirm it.
+        entity_active_key=LP.P0033_ROOM_THERMOSTAT_TYPE,
+        entity_active_formula="!= 0",
     ),
     descr(
         key=SensorKey.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
@@ -836,7 +842,8 @@ SENSORS: list[descr] = [
         entity_category=None,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        visibility=LV.V0122_ROOM_THERMOSTAT,
+        entity_active_key=LP.P0033_ROOM_THERMOSTAT_TYPE,
+        entity_active_formula="!= 0",
     ),
     # endregion Heating
     # region Domestic water
