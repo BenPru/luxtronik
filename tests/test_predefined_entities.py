@@ -7,10 +7,12 @@ import importlib
 import pkgutil
 from unittest.mock import patch
 
+from luxtronik.parameters import Parameters
 from packaging.version import Version
 
 from conftest import make_coordinator_data
 import custom_components.luxtronik2 as luxtronik2
+from custom_components.luxtronik2 import lux_overrides
 from custom_components.luxtronik2.binary_sensor_entities_predefined import (
     BINARY_SENSORS,
 )
@@ -210,32 +212,48 @@ class TestFirmwareVersionFields:
 class TestVisibilityGates:
     """Every gate must survive the value its register actually reports."""
 
-    def test_no_parameter_gate_breaks_on_a_decoded_value(self):
-        """A parameter used as a visibility gate may decode to a name.
+    def test_no_description_gates_on_a_parameter_through_visibility(self):
+        """A parameter that decides whether an entity should exist belongs in
+        `entity_active_key`, which decides existence and is declared on the
+        description. As a `visibility` it only decides enabled-by-default,
+        and a mode-valued one needed its own rule in the coordinator (#773,
+        #815). Visibility flags stay in `visibility`.
+        """
+        offenders = [
+            (type(descr).__name__, descr.key)
+            for descr in _all_descriptions()
+            if isinstance(descr.visibility, LuxParameter)
+        ]
+        assert offenders == []
+
+    def test_no_declared_gate_breaks_on_a_decoded_value(self):
+        """A gate register may decode to a name.
 
         `lux_overrides` gives selection datatypes to parameters as their codes
         become known, and such a register then reads "plus_minus" rather than
-        1. A gate that assumes a number raises `TypeError` from the entity
-        constructor, which aborts `async_setup_entry` for the whole platform:
-        that is how #773 lost every number entity, not just the three gated
-        ones. Visibility flags themselves are always numeric; parameters are
-        the ones that can change type under us, so they are what this sweeps.
+        1. A gate that raised on that would abort `async_setup_entry` for the
+        whole platform: that is how #773 lost every number entity, not just
+        the three gated ones.
         """
         gated = [
             descr
             for descr in _all_descriptions()
-            if isinstance(descr.visibility, LuxParameter)
+            if descr.entity_active_key is not None
         ]
-        # Guard the guard: no parameter gates left means nothing was checked.
+        # Guard the guard: nothing gated means nothing was checked.
         assert gated
 
         coord = object.__new__(LuxtronikCoordinator)
-        coord.data = make_coordinator_data(
-            parameters={"ID_Einst_SmartGrid": "plus_minus"}
-        )
-        with patch.object(LuxtronikCoordinator, "get_value", return_value="plus_minus"):
+        coord.data = make_coordinator_data()
+        with (
+            patch.object(LuxtronikCoordinator, "get_value", return_value="plus_minus"),
+            patch.object(
+                LuxtronikCoordinator, "_is_version_not_compatible", return_value=False
+            ),
+            patch.object(LuxtronikCoordinator, "device_key_active", return_value=True),
+        ):
             for descr in gated:
-                assert isinstance(coord.entity_visible(descr), bool), descr.key
+                assert isinstance(coord.entity_active(descr), bool), descr.key
 
     def test_every_entity_active_key_has_a_formula(self):
         """`entity_active_key` names the register `entity_active_formula`
@@ -258,6 +276,65 @@ class TestVisibilityGates:
         ]
         assert offenders == []
 
+    def test_every_entity_active_key_guards_a_register_of_its_own(self):
+        """A declared gate also requires the entity's own register to be
+        returned, so a keyed description without one could never exist.
+        """
+        offenders = [
+            (type(descr).__name__, descr.key)
+            for descr in _all_descriptions()
+            if descr.entity_active_key is not None
+            and descr.luxtronik_key == LuxParameter.UNSET
+        ]
+        assert offenders == []
+
+    def test_every_entity_active_formula_parses(self):
+        """A formula that does not parse logs a warning and then falls
+        through to True - the entity is created on every install. `in 3, 4`
+        (a space after the comma) is the easy way to get there.
+        """
+        offenders = []
+        for descr in _all_descriptions():
+            formula = descr.entity_active_formula
+            if formula is None:
+                continue
+            parts = formula.split()
+            if (
+                len(parts) != 2
+                or parts[0] not in {"==", "!=", "<", "<=", ">", ">=", "in"}
+                or (parts[0] == "in" and "" in parts[1].split(","))
+            ):
+                offenders.append((type(descr).__name__, descr.key, formula))
+        assert offenders == []
+
+    def test_numeric_gates_read_numeric_registers(self):
+        """A numeric threshold on a register that decodes to a name fails
+        open: `"none" != 0` compares as strings and is True, so the entity
+        comes back on every install with nothing in the log (#773, #777).
+        P0033 is the likely next one - `LuxRoomThermostatType` already
+        exists. If a register here gains a selection datatype, rewrite its
+        gate as an `in` list of codes and names, as the MK gates do.
+        """
+        lux_overrides.update_Luxtronik_Parameters()
+        parameters = Parameters()
+        checked = []
+        for descr in _all_descriptions():
+            key = descr.entity_active_key
+            formula = descr.entity_active_formula
+            if not isinstance(key, LuxParameter) or formula is None:
+                continue
+            threshold = formula.split()[1]
+            try:
+                float(threshold)
+            except ValueError:
+                continue
+            datatype = parameters.get(key.rsplit(".", 1)[1])
+            decoded = datatype.from_heatpump(0)
+            assert not isinstance(decoded, str), (descr.key, key, decoded)
+            checked.append(descr.key)
+        # Guard the guard: the P0033 and P1010 gates must be among them.
+        assert len(checked) >= 2
+
     def test_no_description_pairs_a_special_gate_with_a_formula(self):
         """`_special_visibility` answers before `visibility_formula` is read.
 
@@ -278,7 +355,6 @@ class TestVisibilityGates:
                 LuxVisibility.V0059_DHW_CIRCULATION_PUMP,
                 LuxVisibility.V0059A_DHW_CHARGING_PUMP,
                 LuxVisibility.V0005_COOLING,
-                LuxParameter.P1030_SMART_GRID_SWITCH,
             )
         ]
         assert offenders == []

@@ -39,7 +39,6 @@ from .common import (
     evu2_manual_model,
     get_sensor_data,
     normalize_sensor_value,
-    smart_grid_enabled,
 )
 from .const import (
     CONF_CALCULATIONS,
@@ -811,26 +810,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         except Exception:
             return None
 
-    def _room_thermostat_present(self) -> bool | None:
-        """Is a room thermostat fitted, as far as P0033 can tell.
-
-        `ID_Visi_SysEin_Raumstation` (V0122) reads 1 on all 29 units in the
-        diagnostics corpus, including the 24 with P0033 = 0 - it gates the
-        settings-menu entry, not the device - so the room-thermostat
-        registers (C0227/C0228) would otherwise carry a permanent 0.0 on
-        most installs. Like the solar gate this decides in `entity_active`,
-        so the entities are not created at all rather than merely disabled
-        by default. None when P0033 is absent, so nothing is decided.
-
-        Only `none` is treated as absent. The RFV types (1-3) are analogue
-        dials with no temperature sensor of their own, so C0227 may well
-        read 0.0 there too, but the corpus holds no RFV unit to confirm it.
-        """
-        rt = self.room_thermostat_type
-        if rt is None:
-            return None
-        return rt is not LuxRoomThermostatType.none
-
     _VISIBILITY_FORMULA_OPERATORS: Final[dict[str, Callable[[Any, Any], bool]]] = {
         ">": operator.gt,
         ">=": operator.ge,
@@ -846,6 +825,13 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             LOGGER.warning("Invalid visibility formula: %s", formula)
             return None
         op_str, threshold_str = parts
+        if op_str == "in":
+            # `in a,b,c` - equal to any item, each compared exactly as `==`
+            # would, so a raw code and its decoded name can share one list.
+            return any(
+                self._evaluate_visibility_formula(value, f"== {item}")
+                for item in threshold_str.split(",")
+            )
         op_func = self._VISIBILITY_FORMULA_OPERATORS.get(op_str)
         if op_func is None:
             LOGGER.warning("Unsupported operator in visibility formula: %s", formula)
@@ -887,10 +873,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         selection datatypes as their codes become known, and the register
         would then read "cooling" rather than 3. Unlike the visibility gate
         that raised in #773, this comparison fails silently: it evaluates
-        False and takes the mixing-circuit entities - and, through
-        `_detect_cooling_mk`, the whole cooling device - away from every
-        affected user, with nothing in the log to say so. Accepting both
-        spellings of the same answer costs a tuple.
+        False and, through `_detect_cooling_mk`, takes the whole cooling
+        device away from every affected user, with nothing in the log to
+        say so. Accepting both spellings of the same answer costs a tuple.
+        The cooling-target entities gate on the same two answers through
+        their declared `in` formula.
         """
         return any(
             value == mk_type.value or value == mk_type.name
@@ -900,15 +887,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     def _special_visibility(self, visibility: LV | LP) -> bool | None:
         """Decide the gates a plain numeric read cannot decide.
 
-        Two kinds live here. Flags the controller sets unreliably (solar, the
-        DHW pump pair, cooling) are detected from the registers instead. And
-        parameters that hold a *mode* rather than a flag: P1030 decodes to a
-        name like "plus_minus", so comparing it to 0 raises (#773). That one
-        is decided here and in `entity_active` through the same
-        `smart_grid_enabled` helper, so the two cannot disagree about whether
-        Smart Grid is on - note that this method only drives
-        `entity_registry_enabled_default`, while `entity_active` is what
-        decides whether an entity exists at all.
+        Flags the controller sets unreliably (solar, the DHW pump pair,
+        cooling) are detected from the registers instead. Note that this
+        method only drives `entity_registry_enabled_default`, while
+        `entity_active` is what decides whether an entity exists at all - a
+        register that decides existence is declared on the description
+        through `entity_active_key` rather than handled here.
 
         Returns None for the gates that are ordinary numeric flags.
         """
@@ -924,10 +908,6 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return not self._detect_dhw_circulation_pump_present()
         if visibility == LV.V0005_COOLING:
             return self.detect_cooling_present()
-        if visibility == LP.P1030_SMART_GRID_SWITCH:
-            # P1030 holds a mode, so it needs the helper rather than a
-            # truthiness test - see the note in entity_active. #765, #773
-            return smart_grid_enabled(self.data)
         return None
 
     def _visibility_flag_set(self, value: Any, visibility: LV | LP) -> bool:
@@ -980,48 +960,35 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return self._visibility_flag_set(visibility_result, description.visibility)
 
     def entity_active(self, description: LuxtronikEntityDescription) -> bool:
-        """Is description activated."""
+        """Does the entity exist at all on this heat pump?
+
+        Register-based gates are declared on the description through
+        `entity_active_key` / `entity_active_formula`, not special-cased here.
+        What remains here cannot be declared: firmware compatibility, the
+        device gates, and solar, which is a heuristic over several registers.
+        """
         if self._is_version_not_compatible(description):
             return False
-        if description.visibility in [
-            LP.P0042_MIXING_CIRCUIT1_TYPE,
-            LP.P0130_MIXING_CIRCUIT2_TYPE,
-            LP.P0780_MIXING_CIRCUIT3_TYPE,
-        ]:
-            return self._mk_type_can_cool(self.get_value(description.visibility))
         if description.visibility in [
             LV.V0038_SOLAR_COLLECTOR,
             LV.V0039_SOLAR_BUFFER,
             LV.V0250_SOLAR,
         ]:
             return self._detect_solar_present()
-        if (
-            description.visibility == LV.V0122_ROOM_THERMOSTAT
-            and self._room_thermostat_present() is False
-        ):
-            return False
-
         if not self.device_key_active(description.device_key):
             return False
-        if description.visibility == LP.P1030_SMART_GRID_SWITCH:
-            # The Smart Grid offsets do not exist in the controller's own menu
-            # while Smart Grid is off (HMD2 manual 83055600 rev d, p.30), so
-            # they should not exist here either - 25 of the 29 pumps in the
-            # diagnostics corpus are in that state and would otherwise carry
-            # three permanently-unused entities. P1030 holds a mode rather
-            # than a flag, hence the helper instead of a truthiness test. #765
-            if not smart_grid_enabled(self.data):
-                return False
-            # `key_exists` cannot stand in for a presence check here: its
-            # `_register_returned` only infers absence above
-            # UPSTREAM_MAX_DEFINED_INDEX (1125), and these three sit below it.
-            # One corpus unit returns P1030 but ends its parameter block
-            # before 1120, and would get three unwritable entities stuck on
-            # unknown. Reading None cannot mean "present but undecodable" for
-            # a Kelvin register, so it means the controller never sent it.
-            if self.get_value(description.luxtronik_key) is None:
-                return False
         if description.entity_active_formula is not None:
+            if (
+                description.entity_active_key is not None
+                and self.get_value(description.luxtronik_key) is None
+            ):
+                # The gate says yes, but the controller never sent the
+                # entity's own register, so it would sit on unknown forever
+                # (#738). `key_exists` cannot stand in for this: its
+                # `_register_returned` only infers absence above
+                # UPSTREAM_MAX_DEFINED_INDEX (1125) - one corpus unit returns
+                # P1030 but ends its parameter block before 1120.
+                return False
             active_value = self.get_value(
                 description.entity_active_key or description.luxtronik_key
             )

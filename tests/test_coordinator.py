@@ -48,6 +48,7 @@ from custom_components.luxtronik2.model import (
     LuxtronikCoordinatorData,
     LuxtronikEntityDescription,
 )
+from custom_components.luxtronik2.number_entities_predefined import NUMBER_SENSORS
 from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
 
 # ===========================================================================
@@ -575,26 +576,6 @@ class TestEntityVisible:
         desc.visibility = LV.V0059A_DHW_CHARGING_PUMP
         assert coord.entity_visible(desc) is True
 
-    def test_smart_grid_visibility_reads_the_mode(self):
-        """P1030 decodes to a mode name, not a flag, so it cannot be compared
-        to 0 - doing so raised and took the whole number platform down. #773
-        """
-        coord = _make_coordinator(parameters={"ID_Einst_SmartGrid": "plus_minus"})
-        desc = LuxtronikEntityDescription(
-            key="test",
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_visible(desc) is True
-
-    def test_smart_grid_visibility_off(self):
-        """The same gate entity_active applies, so the two cannot disagree."""
-        coord = _make_coordinator(parameters={"ID_Einst_SmartGrid": "off"})
-        desc = LuxtronikEntityDescription(
-            key="test",
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_visible(desc) is False
-
     def test_non_numeric_visibility_value_is_visible(self):
         """A visibility register a datatype decodes to a name must not raise.
 
@@ -715,73 +696,6 @@ class TestEntityVisible:
 
 
 class TestEntityActive:
-    def test_room_thermostat_inactive_without_thermostat(self):
-        """V0122 is the menu entry, not the device: it reads 1 on every unit
-        in the diagnostics corpus, including the 24 with P0033 = 0 whose
-        room-thermostat registers then sit at 0.0 forever. P0033 decides,
-        and like the solar gate it does so here rather than in
-        entity_visible, so the entities are not created at all - a
-        default-disabled flag would have left every existing install with
-        its 0 °C sensors.
-        """
-        coord = _make_coordinator(
-            visibilities={"ID_Visi_SysEin_Raumstation": 1},
-            parameters={"ID_Einst_RFVEinb_akt": 0},
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            visibility=LV.V0122_ROOM_THERMOSTAT,
-        )
-        assert coord.entity_active(desc) is False
-
-    def test_room_thermostat_active_with_thermostat(self):
-        coord = _make_coordinator(
-            visibilities={"ID_Visi_SysEin_Raumstation": 1},
-            parameters={"ID_Einst_RFVEinb_akt": 4},
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            visibility=LV.V0122_ROOM_THERMOSTAT,
-        )
-        assert coord.entity_active(desc) is True
-
-    def test_room_thermostat_active_unknown_type_counts_as_present(self):
-        """A code the enum does not know is still a fitted thermostat."""
-        coord = _make_coordinator(
-            visibilities={"ID_Visi_SysEin_Raumstation": 1},
-            parameters={"ID_Einst_RFVEinb_akt": 99},
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            visibility=LV.V0122_ROOM_THERMOSTAT,
-        )
-        assert coord.entity_active(desc) is True
-
-    def test_room_thermostat_active_without_p0033(self):
-        """Without P0033 there is nothing to decide on, so the gate stands
-        aside and the entity is created."""
-        coord = _make_coordinator(visibilities={"ID_Visi_SysEin_Raumstation": 1})
-        desc = LuxtronikEntityDescription(
-            key="test",
-            visibility=LV.V0122_ROOM_THERMOSTAT,
-        )
-        assert coord.entity_active(desc) is True
-
-    def test_room_thermostat_sensors_not_created_without_thermostat(self):
-        """The join: the two predefined C0227/C0228 sensors carry V0122, so
-        the gate above is what keeps them out of async_setup_entry."""
-        coord = _make_coordinator(
-            visibilities={"ID_Visi_SysEin_Raumstation": 1},
-            parameters={"ID_Einst_RFVEinb_akt": 0},
-        )
-        for key in (
-            SensorKey.ROOM_THERMOSTAT_TEMPERATURE,
-            SensorKey.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
-        ):
-            description = next(d for d in SENSORS if d.key == key)
-            assert description.visibility == LV.V0122_ROOM_THERMOSTAT
-            assert coord.entity_active(description) is False
-
     def test_version_incompatible(self):
         coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "V3.90.1"})
         desc = LuxtronikEntityDescription(
@@ -935,147 +849,6 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         assert coord.entity_active(desc) is False
 
-    def test_mixing_circuit_cooling(self):
-        coord = _make_coordinator_direct()
-        coord._is_version_not_compatible = MagicMock(return_value=False)
-        coord.get_value = MagicMock(return_value=LuxMkTypes.cooling.value)
-        desc = MagicMock(spec=LuxtronikEntityDescription)
-        desc.visibility = LP.P0042_MIXING_CIRCUIT1_TYPE
-        desc.device_key = DeviceKey.heatpump
-        assert coord.entity_active(desc) is True
-
-    def test_mixing_circuit_not_cooling(self):
-        coord = _make_coordinator_direct()
-        coord._is_version_not_compatible = MagicMock(return_value=False)
-        coord.get_value = MagicMock(return_value=0)
-        desc = MagicMock(spec=LuxtronikEntityDescription)
-        desc.visibility = LP.P0042_MIXING_CIRCUIT1_TYPE
-        desc.device_key = DeviceKey.heatpump
-        assert coord.entity_active(desc) is False
-
-    def test_mixing_circuit_cooling_as_a_decoded_name(self):
-        """The type register may gain a datatype and decode to a name.
-
-        This comparison never raises the way the visibility gate did - it
-        would quietly evaluate False and take the three mixing-circuit
-        entities away from every affected user, which is a worse failure
-        than a crash because nothing reports it. #773
-        """
-        coord = _make_coordinator_direct()
-        coord._is_version_not_compatible = MagicMock(return_value=False)
-        coord.get_value = MagicMock(return_value=LuxMkTypes.cooling.name)
-        desc = MagicMock(spec=LuxtronikEntityDescription)
-        desc.visibility = LP.P0042_MIXING_CIRCUIT1_TYPE
-        desc.device_key = DeviceKey.heatpump
-        assert coord.entity_active(desc) is True
-
-    def test_smart_grid_offsets_inactive_when_switched_off(self):
-        """P1030 = 0 means the Smart Grid submenu does not exist on the
-        controller either, so its three offsets must not become entities
-        (#765). 25 of the 29 pumps in the diagnostics corpus are in this
-        state.
-        """
-        coord = _make_coordinator(
-            calculations={
-                "ID_WEB_SoftStand": "V3.90.1",
-                "ID_WEB_Zaehler_BetrZeitHz": 100,
-            },
-            parameters={"ID_Einst_SmartGrid": "off"},
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            luxtronik_key=LP.P1120_SMART_GRID_HEATING_REDUCTION,
-            device_key=DeviceKey.heating,
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_active(desc) is False
-
-    def test_smart_grid_offsets_active_when_switched_on(self):
-        coord = _make_coordinator(
-            calculations={
-                "ID_WEB_SoftStand": "V3.90.1",
-                "ID_WEB_Zaehler_BetrZeitHz": 100,
-            },
-            parameters={
-                "ID_Einst_SmartGrid": "plus_minus",
-                "SMART_GRID_HEATING_REDUCTION": -2.0,
-            },
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            luxtronik_key=LP.P1120_SMART_GRID_HEATING_REDUCTION,
-            device_key=DeviceKey.heating,
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_active(desc) is True
-
-    def test_smart_grid_offsets_active_for_non_flag_mode_value(self):
-        """P1030 holds a mode, not a flag: the Luxtronik 2.0 unit in #669
-        reports 3 ("SG 1.1") with Smart Grid on, and the WZS in the corpus
-        does too. An `== 1` gate would wrongly drop the entities there.
-        """
-        coord = _make_coordinator(
-            calculations={
-                "ID_WEB_SoftStand": "V3.90.1",
-                "ID_WEB_Zaehler_BetrZeitHz": 100,
-            },
-            parameters={
-                "ID_Einst_SmartGrid": "sg_1_1",
-                "SMART_GRID_HEATING_REDUCTION": -2.0,
-            },
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            luxtronik_key=LP.P1120_SMART_GRID_HEATING_REDUCTION,
-            device_key=DeviceKey.heating,
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_active(desc) is True
-
-    def test_smart_grid_offsets_need_the_register_to_be_returned(self):
-        """`key_exists` cannot gate these: `_register_returned` only infers
-        absence above UPSTREAM_MAX_DEFINED_INDEX, which is 1125, so 1120-1122
-        sit inside upstream's range and pass unconditionally.
-
-        The controller in diagnostics/200927_014f returns P1030 but stops its
-        parameter block before 1120. With Smart Grid on, such a unit would
-        otherwise get three permanently unknown, unwritable entities - the
-        same failure #738 fixed elsewhere.
-        """
-        coord = _make_coordinator(
-            calculations={
-                "ID_WEB_SoftStand": "V3.90.1",
-                "ID_WEB_Zaehler_BetrZeitHz": 100,
-            },
-            parameters={"ID_Einst_SmartGrid": "plus_minus"},
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            luxtronik_key=LP.P1120_SMART_GRID_HEATING_REDUCTION,
-            device_key=DeviceKey.heating,
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_active(desc) is False
-
-    def test_smart_grid_offsets_inactive_when_p1030_is_absent(self):
-        """A controller that never returns P1030 cannot be running Smart
-        Grid, so the gate must fall closed rather than open.
-        """
-        coord = _make_coordinator(
-            calculations={
-                "ID_WEB_SoftStand": "V3.90.1",
-                "ID_WEB_Zaehler_BetrZeitHz": 100,
-            },
-            parameters={"SMART_GRID_HEATING_REDUCTION": -2.0},
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            luxtronik_key=LP.P1120_SMART_GRID_HEATING_REDUCTION,
-            device_key=DeviceKey.heating,
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_active(desc) is False
-
     @staticmethod
     def _twin_description() -> LuxtronikEntityDescription:
         return LuxtronikEntityDescription(
@@ -1136,29 +909,6 @@ class TestEntityActive:
             parameters={"ID_Waermemenge_Hz_2": 0.0},
         )
         assert coord.entity_active(self._twin_description()) is False
-
-    def test_smart_grid_dhw_offset_needs_a_dhw_circuit(self):
-        """The Smart Grid gate must not overrule the device gate: a unit
-        without domestic water has no DHW setpoint to raise.
-        """
-        coord = _make_coordinator(
-            calculations={
-                "ID_WEB_SoftStand": "V3.90.1",
-                "ID_WEB_Zaehler_BetrZeitHz": 100,
-                "ID_WEB_Zaehler_BetrZeitBW": 0,
-            },
-            parameters={
-                "ID_Einst_SmartGrid": "plus_minus",
-                "SMART_GRID_DHW_INCREASE": 2.0,
-            },
-        )
-        desc = LuxtronikEntityDescription(
-            key="test",
-            luxtronik_key=LP.P1122_SMART_GRID_DHW_INCREASE,
-            device_key=DeviceKey.domestic_water,
-            visibility=LP.P1030_SMART_GRID_SWITCH,
-        )
-        assert coord.entity_active(desc) is False
 
     def test_solar_visibility_active(self):
         coord = _make_coordinator_direct()
@@ -1249,6 +999,207 @@ class TestEntityActive:
 # ===========================================================================
 # get_value / get_sensor
 # ===========================================================================
+
+
+class TestFormulaInOperator:
+    """`in a,b,...` is `==` against each item, with the same coercions."""
+
+    def test_matches_a_raw_code(self):
+        coord = _make_coordinator_direct()
+        assert coord._evaluate_visibility_formula(3, "in 3,4,cooling") is True
+
+    def test_matches_a_decoded_name(self):
+        coord = _make_coordinator_direct()
+        assert coord._evaluate_visibility_formula("cooling", "in 3,4,cooling") is True
+
+    def test_matches_a_float_code(self):
+        coord = _make_coordinator_direct()
+        assert coord._evaluate_visibility_formula(4.0, "in 3,4") is True
+
+    def test_misses(self):
+        coord = _make_coordinator_direct()
+        assert coord._evaluate_visibility_formula(2, "in 3,4,cooling") is False
+        assert coord._evaluate_visibility_formula("load", "in 3,4,cooling") is False
+
+
+def _number(key: SensorKey):
+    return next(d for d in NUMBER_SENSORS if d.key == key)
+
+
+def _sensor(key: SensorKey):
+    return next(d for d in SENSORS if d.key == key)
+
+
+class TestDeclaredActiveGates:
+    """Gates declared on the predefined descriptions through
+    `entity_active_key`, exercised on the real descriptions so a test fails
+    if the declaration is dropped, not only if the coordinator breaks.
+    """
+
+    # region Room thermostat - P0033, not V0122
+    # V0122 is the menu entry, not the device: it reads 1 on every unit in the
+    # diagnostics corpus, including the 24 with P0033 = 0 whose room-
+    # thermostat registers then sit at 0.0 forever. P0033 decides.
+    ROOM_THERMOSTAT = (
+        (SENSORS, SensorKey.ROOM_THERMOSTAT_TEMPERATURE),
+        (SENSORS, SensorKey.ROOM_THERMOSTAT_TEMPERATURE_TARGET),
+        (NUMBER_SENSORS, SensorKey.HEATING_ROOM_TEMPERATURE_IMPACT_FACTOR),
+    )
+
+    @staticmethod
+    def _room_thermostat_coord(p0033: Any = None) -> LuxtronikCoordinator:
+        parameters: dict[str, Any] = {"ID_RBE_Einflussfaktor_RT_akt": 100}
+        if p0033 is not None:
+            parameters["ID_Einst_RFVEinb_akt"] = p0033
+        return _make_coordinator(
+            visibilities={"ID_Visi_SysEin_Raumstation": 1},
+            parameters=parameters,
+            calculations={"ID_WEB_RBE_RT_Ist": 21.0, "ID_WEB_RBE_RT_Soll": 21.5},
+        )
+
+    def _room_thermostat_active(self, p0033: Any) -> list[bool]:
+        coord = self._room_thermostat_coord(p0033)
+        return [
+            coord.entity_active(next(d for d in group if d.key == key))
+            for group, key in self.ROOM_THERMOSTAT
+        ]
+
+    def test_room_thermostat_entities_not_created_without_thermostat(self):
+        assert self._room_thermostat_active(0) == [False, False, False]
+
+    def test_room_thermostat_entities_created_with_thermostat(self):
+        assert self._room_thermostat_active(4) == [True, True, True]
+
+    def test_room_thermostat_unknown_type_counts_as_present(self):
+        """A code the enum does not know is still a fitted thermostat."""
+        assert self._room_thermostat_active(99) == [True, True, True]
+
+    def test_room_thermostat_entities_not_created_without_p0033(self):
+        """A controller that never returns P0033 cannot report a thermostat,
+        so the gate falls closed - the #738 rule every declared gate follows.
+        """
+        assert self._room_thermostat_active(None) == [False, False, False]
+
+    # endregion Room thermostat
+    # region Mixing-circuit cooling targets
+
+    @staticmethod
+    def _mk1_cooling_active(mk1_type: Any) -> bool:
+        coord = _make_coordinator(
+            parameters={
+                "ID_Einst_MK1Typ_akt": mk1_type,
+                "ID_Sollwert_KuCft1_akt": 20.0,
+            },
+        )
+        return coord.entity_active(_number(SensorKey.COOLING_TARGET_TEMPERATURE_MK1))
+
+    def test_mixing_circuit_cooling(self):
+        assert self._mk1_cooling_active(3) is True
+
+    def test_mixing_circuit_heating_cooling(self):
+        assert self._mk1_cooling_active(4) is True
+
+    def test_mixing_circuit_not_cooling(self):
+        assert self._mk1_cooling_active(0) is False
+        assert self._mk1_cooling_active(2) is False
+
+    def test_mixing_circuit_cooling_as_a_decoded_name(self):
+        """The type register may gain a datatype and decode to a name. A
+        formula that only knew the codes would quietly evaluate False and take
+        the cooling targets away from every affected user, with nothing in
+        the log - worse than the crash of #773.
+        """
+        assert self._mk1_cooling_active("cooling") is True
+        assert self._mk1_cooling_active("heating_cooling") is True
+
+    def test_every_mixing_circuit_declares_its_own_type(self):
+        for key, type_register in (
+            (SensorKey.COOLING_TARGET_TEMPERATURE_MK1, LP.P0042_MIXING_CIRCUIT1_TYPE),
+            (SensorKey.COOLING_TARGET_TEMPERATURE_MK2, LP.P0130_MIXING_CIRCUIT2_TYPE),
+            (SensorKey.COOLING_TARGET_TEMPERATURE_MK3, LP.P0780_MIXING_CIRCUIT3_TYPE),
+        ):
+            assert _number(key).entity_active_key == type_register, key
+
+    # endregion Mixing-circuit cooling targets
+    # region Smart Grid offsets - P1030
+
+    SMART_GRID_OFFSETS = (
+        SensorKey.SMART_GRID_HEATING_REDUCTION,
+        SensorKey.SMART_GRID_HEATING_INCREASE,
+        SensorKey.SMART_GRID_DHW_INCREASE,
+    )
+
+    @staticmethod
+    def _smart_grid_coord(
+        smart_grid: Any = None, *, offsets: bool = True, dhw: bool = True
+    ) -> LuxtronikCoordinator:
+        parameters: dict[str, Any] = {}
+        if smart_grid is not None:
+            parameters["ID_Einst_SmartGrid"] = smart_grid
+        if offsets:
+            parameters |= {
+                "SMART_GRID_HEATING_REDUCTION": -2.0,
+                "SMART_GRID_HEATING_INCREASE": 2.0,
+                "SMART_GRID_DHW_INCREASE": 2.0,
+            }
+        return _make_coordinator(
+            calculations={
+                "ID_WEB_SoftStand": "V3.90.1",
+                "ID_WEB_Zaehler_BetrZeitHz": 100,
+                "ID_WEB_Zaehler_BetrZeitBW": 100 if dhw else 0,
+            },
+            parameters=parameters,
+        )
+
+    def _smart_grid_active(self, coord: LuxtronikCoordinator) -> list[bool]:
+        return [coord.entity_active(_number(key)) for key in self.SMART_GRID_OFFSETS]
+
+    def test_smart_grid_offsets_not_created_when_switched_off(self):
+        """P1030 off means the Smart Grid submenu does not exist on the
+        controller either (#765). 25 of the 29 pumps in the corpus are here.
+        The SmartGridMode datatype decodes it, so off reads "off".
+        """
+        coord = self._smart_grid_coord("off")
+        assert self._smart_grid_active(coord) == [False, False, False]
+
+    def test_smart_grid_offsets_created_when_switched_on(self):
+        for mode in ("plus_minus", "sg_1_0", "sg_1_1"):
+            coord = self._smart_grid_coord(mode)
+            assert self._smart_grid_active(coord) == [True, True, True], mode
+
+    def test_smart_grid_offsets_created_for_an_unknown_mode(self):
+        """An undocumented code passes the SmartGridMode datatype through as
+        an int. smart_grid_enabled counts that as on, and so must the gate.
+        """
+        coord = self._smart_grid_coord(5)
+        assert self._smart_grid_active(coord) == [True, True, True]
+
+    def test_smart_grid_offsets_not_created_when_p1030_is_absent(self):
+        coord = self._smart_grid_coord(None)
+        assert self._smart_grid_active(coord) == [False, False, False]
+
+    def test_smart_grid_offsets_need_their_own_register(self):
+        """The controller in diagnostics/200927_014f returns P1030 but stops
+        its parameter block before 1120. With Smart Grid on it would get three
+        permanently unknown, unwritable entities - the failure #738 fixed.
+        """
+        coord = self._smart_grid_coord("plus_minus", offsets=False)
+        assert self._smart_grid_active(coord) == [False, False, False]
+
+    def test_smart_grid_dhw_offset_needs_a_dhw_circuit(self):
+        """The declared gate must not overrule the device gate."""
+        coord = self._smart_grid_coord("plus_minus", dhw=False)
+        assert self._smart_grid_active(coord) == [True, True, False]
+
+    # endregion Smart Grid offsets
+
+    def test_twin_counter_needs_its_own_register(self):
+        """A twin whose parameter block ends before 1015 gets no entity."""
+        coord = _make_coordinator(parameters={"ID_Einst_isTwin": True})
+        assert (
+            coord.entity_active(_sensor(SensorKey.HEAT_AMOUNT_HEATING_COMPRESSOR_2))
+            is False
+        )
 
 
 class TestCoordinatorGetValue:

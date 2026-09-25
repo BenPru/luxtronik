@@ -464,7 +464,9 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
-        visibility=LV.V0122_ROOM_THERMOSTAT,
+        # Only with a room thermostat fitted - see the room-thermostat sensors.
+        entity_active_key=LP.P0033_ROOM_THERMOSTAT_TYPE,
+        entity_active_formula="!= 0",
     ),
     LuxtronikNumberDescription(
         key=SensorKey.PUMP_VENT_TIMER_H,
@@ -497,7 +499,13 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LP.P1030_SMART_GRID_SWITCH,
+        # Only while Smart Grid is on: the controller menu hides these while
+        # it is off (HMD2 manual 83055600 rev d, p.30), and 25 of the 29
+        # pumps in the corpus are. P1030 decodes to a mode name, and an
+        # undocumented code passes through as an int, which counts as on -
+        # the same answer smart_grid_enabled gives. #765
+        entity_active_key=LP.P1030_SMART_GRID_SWITCH,
+        entity_active_formula="!= off",
     ),
     LuxtronikNumberDescription(
         key=SensorKey.SMART_GRID_HEATING_INCREASE,
@@ -510,7 +518,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LP.P1030_SMART_GRID_SWITCH,
+        entity_active_key=LP.P1030_SMART_GRID_SWITCH,
+        entity_active_formula="!= off",
     ),
     # endregion Heating
     # region Domestic water
@@ -620,7 +629,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LP.P1030_SMART_GRID_SWITCH,
+        entity_active_key=LP.P1030_SMART_GRID_SWITCH,
+        entity_active_formula="!= off",
     ),
     # region Solar
     LuxtronikNumberDescription(
@@ -742,7 +752,12 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=30.0,
         native_step=0.5,
         mode=NumberMode.BOX,
-        visibility=LP.P0042_MIXING_CIRCUIT1_TYPE,
+        # Only on a circuit that can cool (type 3 = cooling, 4 =
+        # heating_cooling). The names are listed too so the gate keeps
+        # working if the type register ever gets a selection datatype;
+        # a codes-only list would then fail silently (#773).
+        entity_active_key=LP.P0042_MIXING_CIRCUIT1_TYPE,
+        entity_active_formula="in 3,4,cooling,heating_cooling",
     ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK2,
@@ -755,7 +770,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=30.0,
         native_step=0.5,
         mode=NumberMode.BOX,
-        visibility=LP.P0130_MIXING_CIRCUIT2_TYPE,
+        entity_active_key=LP.P0130_MIXING_CIRCUIT2_TYPE,
+        entity_active_formula="in 3,4,cooling,heating_cooling",
     ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK3,
@@ -768,7 +784,8 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=30.0,
         native_step=0.5,
         mode=NumberMode.BOX,
-        visibility=LP.P0780_MIXING_CIRCUIT3_TYPE,
+        entity_active_key=LP.P0780_MIXING_CIRCUIT3_TYPE,
+        entity_active_formula="in 3,4,cooling,heating_cooling",
     ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_MIN_FLOW_OUT_TEMPERATURE,
