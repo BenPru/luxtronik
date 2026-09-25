@@ -9,11 +9,11 @@ import pytest
 from conftest import make_coordinator_data
 from custom_components.luxtronik2.common import (
     async_get_mac_address,
-    convert_to_int_if_possible,
     evu2_manual_input_required,
     get_sensor_data,
     key_exists,
     normalize_sensor_value,
+    normalize_write_value,
     read_smart_grid_inputs,
     smart_grid_enabled,
     smart_grid_mode,
@@ -737,26 +737,58 @@ class TestStateAsNumberOrNone:
 
 
 # ===========================================================================
-# convert_to_int_if_possible
+# normalize_write_value
 # ===========================================================================
 
 
-class TestConvertToIntIfPossible:
+class TestNormalizeWriteValue:
     def test_int_string(self):
-        assert convert_to_int_if_possible("42") == 42
+        assert normalize_write_value("42") == 42
 
     def test_negative_int_string(self):
-        assert convert_to_int_if_possible("-5") == -5
+        assert normalize_write_value("-5") == -5
 
     def test_non_numeric_string(self):
-        assert convert_to_int_if_possible("hello") == "hello"
+        assert normalize_write_value("hello") == "hello"
 
-    def test_float_string(self):
-        # float strings cannot be converted to int directly
-        assert convert_to_int_if_possible("3.14") == "3.14"
+    def test_float_string_becomes_float(self):
+        # The text selector sends "22.5"; left a string, the write's
+        # read-back (22.5) never matched it and confirmation failed (#811).
+        assert normalize_write_value("22.5") == 22.5
+
+    def test_fractional_float_is_not_truncated(self):
+        # int(-1.5) == -1 wrote -1.0 K to a 0.5 K-step register (#811).
+        result = normalize_write_value(-1.5)
+        assert result == -1.5
+        assert isinstance(result, float)
+
+    def test_integral_float_becomes_int(self):
+        # Identity datatypes (Unknown, Seconds, ...) queue the value as-is and
+        # Luxtronik.write() skips anything that is not an int.
+        result = normalize_write_value(22.0)
+        assert result == 22
+        assert isinstance(result, int)
+
+    def test_integral_float_string_becomes_int(self):
+        result = normalize_write_value("22.0")
+        assert result == 22
+        assert isinstance(result, int)
+
+    def test_int_passes_through(self):
+        result = normalize_write_value(3)
+        assert result == 3
+        assert isinstance(result, int)
+
+    def test_bool_passes_through(self):
+        assert normalize_write_value(True) is True
+
+    @pytest.mark.parametrize("value", ["nan", "inf", "-inf"])
+    def test_non_finite_string_is_left_alone(self, value):
+        # Passing a non-finite float on crashes the datatype's int() conversion.
+        assert normalize_write_value(value) == value
 
     def test_empty_string(self):
-        assert convert_to_int_if_possible("") == ""
+        assert normalize_write_value("") == ""
 
 
 # ===========================================================================
