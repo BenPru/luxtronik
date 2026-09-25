@@ -210,7 +210,12 @@ The controller has a venting program that runs a pump in on/off cycles to push t
 - **Venting runtime** (number, 1–6 h, **disabled by default**) sets how long the program runs.
 - **Venting active** starts and stops the program.
 
-To vent a pump: set *Venting runtime*, turn on the pump's switch, and turn on *Venting active* right after. On at least one unit the pump selection was dropped when *Venting active* didn't follow within a few seconds; if the pump switch has flipped back off before you got there, repeat both steps more quickly. While the program runs, **Circulation pump heating** (HUP) or **Additional circulation pump** (ZUP) shows the pump turning on and off — short pauses are part of the cycle, not a fault. Turn *Venting active* off to stop early.
+To vent a pump: set *Venting runtime*, turn on the pump's switch, then turn on *Venting active*. Units differ in how they handle the gap between the last two steps:
+
+- On some units the selection stays on by itself, and the selected pump may already start running before *Venting active* is on. The controller may not respond for a short while after each write, so if turning on *Venting active* doesn't take effect, wait about half a minute and try again.
+- On at least one unit the selection was dropped when *Venting active* didn't follow within a few seconds. If the pump switch has flipped back off before you got there, repeat both steps more quickly.
+
+While the program runs, **Circulation pump heating** (HUP) or **Additional circulation pump** (ZUP) shows the pump turning on and off — short pauses are part of the cycle, not a fault. Turn *Venting active* off to stop early.
 
 The controller's menu also lists other pumps (BUP, ZIP, the brine/fan pump, mixer circuits). They are not exposed yet: which parameter selects which pump has only been confirmed on hardware for the HUP and ZUP ([#802](https://github.com/BenPru/luxtronik/discussions/802)).
 
