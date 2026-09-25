@@ -85,6 +85,10 @@ from .model import (
 #   used 0.1, switched to 0.01, then switched back is not. Still an
 #   assumption, but it can only bite on a series-1 unit that populates 1059,
 #   and no such unit has been seen - tracked in #752.
+# Series 4 - 0.1 kWh per count, measured the same way as series 3: the first
+#   series-4 unit (#782, an LD7 on V4.81.3) read 15798 counts against 1579.8
+#   kWh on its own display, over 634807 s of ZWE1 run time on a 9.0 kW
+#   element (P1025 = 90) - 8.96 kW at this scale.
 #
 # Listed exhaustively rather than as a single series-2 exception so that every
 # generation states its scale where it can be checked. A generation missing
@@ -95,7 +99,7 @@ from .model import (
 # before the split existed, so a controller it cannot identify never has its
 # total_increasing counter silently rescaled by ten behind the user's back.
 AUX_HEATER_ENERGY_FACTOR_BY_SERIES: Mapping[int, float] = MappingProxyType(
-    {1: 0.1, 2: 0.1, 3: 1}
+    {1: 0.1, 2: 0.1, 3: 1, 4: 1}
 )
 
 SENSORS_STATUS: list[descr] = [
@@ -992,6 +996,61 @@ SENSORS: list[descr] = [
         # datatype is the whole conversion. Confirmed on the #752 unit, whose
         # controller page read 4364.1 kWh at the moment of the dump.
         entity_active_formula="!= 0.0",
+    ),
+    # Compressor 2 of a twin (master/slave) unit. Calculations 151-154 above
+    # count compressor 1 only - on the #782 LD7 they equal 854/878/852 / 100
+    # exactly, and the controller shows each compressor on its own page - so
+    # these are not part of the figures above. Every single unit returns
+    # 1015-1018 reading 0, so they exist only where P1010 says twin. Two
+    # decimals, as for the other 0.01 kWh counters (1135-1139). #815
+    descr(
+        key=SensorKey.HEAT_AMOUNT_HEATING_COMPRESSOR_2,
+        luxtronik_key=LP.P1015_HEAT_AMOUNT_HEATING_2,
+        device_key=DeviceKey.heating,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_precision=2,
+        entity_active_key=LP.P1010_IS_TWIN,
+        entity_active_formula="!= 0",
+    ),
+    descr(
+        key=SensorKey.DHW_HEAT_AMOUNT_COMPRESSOR_2,
+        luxtronik_key=LP.P1016_DHW_HEAT_AMOUNT_2,
+        device_key=DeviceKey.domestic_water,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_precision=2,
+        entity_active_key=LP.P1010_IS_TWIN,
+        entity_active_formula="!= 0",
+    ),
+    descr(
+        key=SensorKey.POOL_HEAT_AMOUNT_COMPRESSOR_2,
+        luxtronik_key=LP.P1017_POOL_HEAT_AMOUNT_2,
+        device_key=DeviceKey.heatpump,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_precision=2,
+        # Its own register, like 153: a twin without a pool reads 0 here, and
+        # so does every single unit, so this one gate covers both. Unmeasured -
+        # the only twin seen has no pool - but it is the same family as 1015.
+        entity_active_formula="!= 0.0",
+    ),
+    descr(
+        key=SensorKey.HEAT_AMOUNT_COUNTER_COMPRESSOR_2,
+        luxtronik_key=LP.P1018_HEAT_AMOUNT_COUNTER_2,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_precision=2,
+        entity_active_key=LP.P1010_IS_TWIN,
+        entity_active_formula="!= 0",
     ),
     descr(
         key=SensorKey.POOL_ENERGY_INPUT,

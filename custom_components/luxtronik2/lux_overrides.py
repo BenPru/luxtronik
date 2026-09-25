@@ -389,6 +389,17 @@ parameters_to_add_update = {
     # - 83272 counts against a displayed 832.7 kWh - and identified 1135 as the
     # cooling heat quantity, 410381 counts against a displayed 4103.8 kWh. 1135
     # had sat unregistered because a unit that never cools reads 0 there.
+    #
+    # Compressor 2's copy of the 852/854/878/879 family on a twin unit, same
+    # 0.01 kWh units: the #782 LD7 (V4.81.3) read 10802976 on 1015 against
+    # 108029.7 kWh on its Wärmemenge page 2, and 1016/1018 matched the same
+    # way. 1010 is the twin flag that gates them - 1 on that unit, 0 on every
+    # other pump in the diagnostics corpus. Names are the library's own. #815
+    1010: Bool("ID_Einst_isTwin", False),
+    1015: Energy2("ID_Waermemenge_Hz_2", False),
+    1016: Energy2("ID_Waermemenge_BW_2", False),
+    1017: Energy2("ID_Waermemenge_SW_2", False),
+    1018: Energy2("ID_Waermemenge_Seit_2", False),
     1135: Energy2("COOLING_HEAT_AMOUNT", False),
     1136: Energy2("HEAT_ENERGY_INPUT", False),
     1137: Energy2("DHW_ENERGY_INPUT", False),

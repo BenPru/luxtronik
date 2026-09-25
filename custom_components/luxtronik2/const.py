@@ -584,6 +584,14 @@ class LuxParameter(StrEnum):
     P1030_SMART_GRID_SWITCH = "parameters.ID_Einst_SmartGrid"
     P1033_PUMP_HEAT_CONTROL = "parameters.ID_Einst_P155_PumpHeatCtrl"
     P1045_DHW_FREQUENCY_CONTROL = "parameters.ID_Einst_P155_DHW_Freq"
+    # Twin (master/slave) units: P1010 flags the second compressor, and
+    # 1015-1018 are its copy of the 854/878/879/852 counters. Every single
+    # unit returns the block too, reading 0, hence the gate on P1010. #815
+    P1010_IS_TWIN = "parameters.ID_Einst_isTwin"
+    P1015_HEAT_AMOUNT_HEATING_2 = "parameters.ID_Waermemenge_Hz_2"
+    P1016_DHW_HEAT_AMOUNT_2 = "parameters.ID_Waermemenge_BW_2"
+    P1017_POOL_HEAT_AMOUNT_2 = "parameters.ID_Waermemenge_SW_2"
+    P1018_HEAT_AMOUNT_COUNTER_2 = "parameters.ID_Waermemenge_Seit_2"
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = "parameters.ID_Waermemenge_ZWE"
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
@@ -930,6 +938,10 @@ class SensorKey(StrEnum):
     COOLING_HEAT_AMOUNT = "cooling_heat_amount"
     POOL_HEAT_AMOUNT = "pool_heat_amount"
     POOL_ENERGY_INPUT = "pool_energy_input"
+    HEAT_AMOUNT_HEATING_COMPRESSOR_2 = "heat_amount_heating_compressor_2"
+    DHW_HEAT_AMOUNT_COMPRESSOR_2 = "dhw_heat_amount_compressor_2"
+    POOL_HEAT_AMOUNT_COMPRESSOR_2 = "pool_heat_amount_compressor_2"
+    HEAT_AMOUNT_COUNTER_COMPRESSOR_2 = "heat_amount_counter_compressor_2"
     COP_HEATING = "cop_heating"
     COP_DHW = "cop_dhw"
     DHW_TEMPERATURE = "dhw_temperature"

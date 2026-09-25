@@ -1076,6 +1076,67 @@ class TestEntityActive:
         )
         assert coord.entity_active(desc) is False
 
+    @staticmethod
+    def _twin_description() -> LuxtronikEntityDescription:
+        return LuxtronikEntityDescription(
+            key="test",
+            luxtronik_key=LP.P1015_HEAT_AMOUNT_HEATING_2,
+            device_key=DeviceKey.heating,
+            entity_active_key=LP.P1010_IS_TWIN,
+            entity_active_formula="!= 0",
+        )
+
+    def test_entity_active_key_reads_another_register(self):
+        """The formula judges `entity_active_key` rather than the entity's own
+        register, so a description can declare "exists only if some other
+        register says so" without a gate of its own in this class. Here the
+        own register counts, but P1010 says single unit - the entity must not
+        exist (#815).
+        """
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={"ID_Einst_isTwin": False, "ID_Waermemenge_Hz_2": 5.0},
+        )
+        assert coord.entity_active(self._twin_description()) is False
+
+    def test_compressor_2_counters_inactive_on_single_unit(self):
+        """Every non-twin pump in the diagnostics corpus returns the whole
+        compressor-2 block, reading 0, so presence alone would give each of
+        them four dead energy sensors. P1010 decides instead (#815).
+        """
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={"ID_Einst_isTwin": False, "ID_Waermemenge_Hz_2": 0.0},
+        )
+        assert coord.entity_active(self._twin_description()) is False
+
+    def test_compressor_2_counters_active_on_twin_unit(self):
+        """The #782 LD7 reads isTwin = 1 and counts on 1015-1018."""
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={"ID_Einst_isTwin": True, "ID_Waermemenge_Hz_2": 108029.76},
+        )
+        assert coord.entity_active(self._twin_description()) is True
+
+    def test_entity_active_key_ignores_own_register_value(self):
+        """A twin whose compressor-2 counter still reads 0 (fresh install, no
+        DHW cycle yet) must still get the entity: the gate is P1010, not the
+        counter moving.
+        """
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={"ID_Einst_isTwin": True, "ID_Waermemenge_Hz_2": 0.0},
+        )
+        assert coord.entity_active(self._twin_description()) is True
+
+    def test_compressor_2_counters_inactive_when_p1010_is_absent(self):
+        """A controller that never returns P1010 is not a twin: fall closed."""
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={"ID_Waermemenge_Hz_2": 0.0},
+        )
+        assert coord.entity_active(self._twin_description()) is False
+
     def test_smart_grid_dhw_offset_needs_a_dhw_circuit(self):
         """The Smart Grid gate must not overrule the device gate: a unit
         without domestic water has no DHW setpoint to raise.

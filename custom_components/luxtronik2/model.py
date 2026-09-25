@@ -86,6 +86,14 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     visibility: LuxVisibility | LuxParameter = LuxVisibility.UNSET
     visibility_formula: str | None = None
     entity_active_formula: str | None = None
+    # The register `entity_active_formula` judges; None means the entity's own
+    # `luxtronik_key`. Ignored without a formula. Unlike a plain `visibility`
+    # flag, which only decides whether an entity starts enabled, this decides
+    # whether it exists at all - so a niche feature can keep its entities off
+    # every other install by declaring its gate here, without a special case
+    # in the coordinator. A register the controller does not return fails the
+    # gate. #815
+    entity_active_key: LuxParameter | LuxCalculation | LuxVisibility | None = None
     # All four are compared against a Version with `<` / `>`, so they must be
     # Version instances - a bare int or an Enum member raises TypeError at
     # entity setup, because Version.__lt__ returns NotImplemented and neither

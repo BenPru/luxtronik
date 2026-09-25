@@ -957,6 +957,18 @@
             "pool_heat_amount": {
                 "name": "Zähler Wärmemenge Schwimmbad"
             },
+            "heat_amount_heating_compressor_2": {
+                "name": "Zähler Wärmemenge Heizung Verdichter 2"
+            },
+            "dhw_heat_amount_compressor_2": {
+                "name": "Wärmemenge Verdichter 2"
+            },
+            "pool_heat_amount_compressor_2": {
+                "name": "Zähler Wärmemenge Schwimmbad Verdichter 2"
+            },
+            "heat_amount_counter_compressor_2": {
+                "name": "Zähler Wärmemenge Verdichter 2"
+            },
             "heat_amount_flow_rate": {
                 "name": "Zähler Wärmemenge Durchfluss"
             },

@@ -960,6 +960,18 @@
             "pool_heat_amount": {
                 "name": "Pool heat amount"
             },
+            "heat_amount_heating_compressor_2": {
+                "name": "Heating heat amount compressor 2"
+            },
+            "dhw_heat_amount_compressor_2": {
+                "name": "Heat amount compressor 2"
+            },
+            "pool_heat_amount_compressor_2": {
+                "name": "Pool heat amount compressor 2"
+            },
+            "heat_amount_counter_compressor_2": {
+                "name": "Heat amount counter compressor 2"
+            },
             "heat_amount_flow_rate": {
                 "name": "Heating heat amount flow rate"
             },

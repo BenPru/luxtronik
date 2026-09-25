@@ -1165,13 +1165,33 @@ class TestAuxHeaterAmountScaling:
             SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059
         )
         assert description.factor_by_firmware_series is not None
-        assert set(description.factor_by_firmware_series) == {1, 2, 3}
+        assert set(description.factor_by_firmware_series) == {1, 2, 3, 4}
         value = self._converted_value(
             SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
             147140,
             firmware_series=1,
         )
         assert value == 1471.4
+
+    def test_series_4_is_measured_at_the_series_3_scale(self):
+        """The first series-4 unit (#782, an LD7 on V4.81.3) read 15798 counts
+        against 1579.8 kWh on its display, over 634807 s of ZWE1 run time on
+        a 9.0 kW element (P1025 = 90): 8.96 kW at 0.1 kWh per count. The
+        fallback would give the same number, but the mapping states the
+        measurement rather than leaving it to the fallback.
+        """
+        description, _ = _energy_input_case(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059
+        )
+        assert description.factor_by_firmware_series is not None
+        assert description.factor_by_firmware_series.get(4) == 1
+        kwh = self._converted_value(
+            SensorKey.ADDITIONAL_HEAT_GENERATOR_ENERGY_P1059,
+            15798,
+            firmware_series=4,
+        )
+        assert kwh == 1579.8
+        assert 8.5 <= kwh / (634807 / 3600) <= 9.5
 
     def test_series_3_is_unaffected_by_the_series_2_rule(self):
         """The same register on a series-3 unit keeps the measured /10."""
@@ -1195,6 +1215,92 @@ class TestAuxHeaterAmountScaling:
             firmware_series=0,
         )
         assert value == 14714.0
+
+
+class TestCompressor2HeatAmounts:
+    """Parameters 1015-1018 are compressor 2's copy of the 852/854/878/879
+    counter family on a twin (master/slave) unit, in the same 0.01 kWh units.
+
+    The raw values are from the #782 LD7 (V4.81.3), photographed on the
+    controller's Wärmemenge page 2 at the time of the dump. The display drops
+    the last digit rather than rounding: 10802976 counts showed as 108029.7.
+    """
+
+    TWIN_KEYS = (
+        SensorKey.HEAT_AMOUNT_HEATING_COMPRESSOR_2,
+        SensorKey.DHW_HEAT_AMOUNT_COMPRESSOR_2,
+        SensorKey.POOL_HEAT_AMOUNT_COMPRESSOR_2,
+        SensorKey.HEAT_AMOUNT_COUNTER_COMPRESSOR_2,
+    )
+
+    def _converted_value(self, sensor_key: SensorKey, raw_value: int) -> float:
+        description, datatype = _energy_input_case(sensor_key)
+        converted = datatype.from_heatpump(raw_value)
+        group, sensor_id = description.luxtronik_key.split(".", 1)
+        data = make_coordinator_data(**{group: {sensor_id: converted}})
+        entity = _make_sensor(description, data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_heating_scaling(self):
+        value = self._converted_value(
+            SensorKey.HEAT_AMOUNT_HEATING_COMPRESSOR_2, 10802976
+        )
+        assert value == 108029.76
+
+    def test_dhw_scaling(self):
+        value = self._converted_value(SensorKey.DHW_HEAT_AMOUNT_COMPRESSOR_2, 6194614)
+        assert value == 61946.14
+
+    def test_counter_scaling(self):
+        """1018 is the "seit" counter, the display's 155282.6 kWh."""
+        value = self._converted_value(
+            SensorKey.HEAT_AMOUNT_COUNTER_COMPRESSOR_2, 15528261
+        )
+        assert value == 155282.61
+
+    def test_twin_counters_gated_on_the_twin_flag(self):
+        """Every non-twin unit returns 1015-1018 reading 0, so only P1010
+        can tell a twin apart - and the gate must decide existence, not just
+        enabled-by-default, so it is `entity_active_*` rather than
+        `visibility` (#815).
+        """
+        for key in (
+            SensorKey.HEAT_AMOUNT_HEATING_COMPRESSOR_2,
+            SensorKey.DHW_HEAT_AMOUNT_COMPRESSOR_2,
+            SensorKey.HEAT_AMOUNT_COUNTER_COMPRESSOR_2,
+        ):
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.entity_active_key == LP.P1010_IS_TWIN, key
+            assert description.entity_active_formula == "!= 0", key
+
+    def test_twin_flag_decodes_from_the_wire(self):
+        """The gate tests inject True/False; this pins that the raw 0/1 the
+        controller sends is what becomes them, so the gate is exercised
+        through the real datatype rather than only through injected values.
+        """
+        datatype = parameters_to_add_update[1010]
+        assert datatype.name == "ID_Einst_isTwin"
+        assert datatype.from_heatpump(1) is True
+        assert datatype.from_heatpump(0) is False
+
+    def test_energy_dashboard_ready(self):
+        for key in self.TWIN_KEYS:
+            description = next(d for d in SENSORS if d.key == key)
+            assert description.state_class == SensorStateClass.TOTAL_INCREASING
+            assert description.device_class == SensorDeviceClass.ENERGY
+            assert description.native_unit_of_measurement == "kWh"
+
+    def test_pool_counter_needs_a_pool(self):
+        """Like calculation 153, it judges its own register: a twin without a
+        pool reads 0 on 1017, and so does every single unit, so this one gate
+        covers both.
+        """
+        description = next(
+            d for d in SENSORS if d.key == SensorKey.POOL_HEAT_AMOUNT_COMPRESSOR_2
+        )
+        assert description.entity_active_key is None
+        assert description.entity_active_formula == "!= 0.0"
 
 
 class TestPumpPwmSensors:

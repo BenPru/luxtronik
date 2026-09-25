@@ -951,6 +951,18 @@
             "pool_heat_amount": {
                 "name": "Meter warmtehoeveelheid zwembad"
             },
+            "heat_amount_heating_compressor_2": {
+                "name": "Meter warmtehoeveelheid verwarming compressor 2"
+            },
+            "dhw_heat_amount_compressor_2": {
+                "name": "Hoeveelheid warmte compressor 2"
+            },
+            "pool_heat_amount_compressor_2": {
+                "name": "Meter warmtehoeveelheid zwembad compressor 2"
+            },
+            "heat_amount_counter_compressor_2": {
+                "name": "Warmtehoeveelheidsmeter compressor 2"
+            },
             "heat_amount_flow_rate": {
                 "name": "Meter warmtehoeveelheidsstroom"
             },
