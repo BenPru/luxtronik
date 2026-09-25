@@ -1274,6 +1274,16 @@ class TestCompressor2HeatAmounts:
             assert description.entity_active_key == LP.P1010_IS_TWIN, key
             assert description.entity_active_formula == "!= 0", key
 
+    def test_twin_flag_decodes_from_the_wire(self):
+        """The gate tests inject True/False; this pins that the raw 0/1 the
+        controller sends is what becomes them, so the gate is exercised
+        through the real datatype rather than only through injected values.
+        """
+        datatype = parameters_to_add_update[1010]
+        assert datatype.name == "ID_Einst_isTwin"
+        assert datatype.from_heatpump(1) is True
+        assert datatype.from_heatpump(0) is False
+
     def test_energy_dashboard_ready(self):
         for key in self.TWIN_KEYS:
             description = next(d for d in SENSORS if d.key == key)

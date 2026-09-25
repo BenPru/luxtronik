@@ -237,6 +237,27 @@ class TestVisibilityGates:
             for descr in gated:
                 assert isinstance(coord.entity_visible(descr), bool), descr.key
 
+    def test_every_entity_active_key_has_a_formula(self):
+        """`entity_active_key` names the register `entity_active_formula`
+        judges, and `entity_active` only reads it when there is a formula. A
+        key copied without its formula would leave the entity ungated with
+        nothing to say so - on every install, which is exactly what the field
+        exists to prevent (#815).
+        """
+        keyed = [
+            descr
+            for descr in _all_descriptions()
+            if descr.entity_active_key is not None
+        ]
+        # Guard the guard: nothing keyed means nothing was checked.
+        assert keyed
+        offenders = [
+            (type(descr).__name__, descr.key)
+            for descr in keyed
+            if descr.entity_active_formula is None
+        ]
+        assert offenders == []
+
     def test_no_description_pairs_a_special_gate_with_a_formula(self):
         """`_special_visibility` answers before `visibility_formula` is read.
 
