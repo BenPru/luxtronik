@@ -166,7 +166,7 @@ class TestClimateExtraStoredData:
         d = data.as_dict()
         assert d["_attr_target_temperature"] is None
         assert d["_attr_hvac_mode"] is None
-        assert d["last_hvac_mode_before_preset"] is None
+        assert d["_last_hvac_mode_before_preset"] is None
 
 
 # ===========================================================================
@@ -541,6 +541,28 @@ class TestClimatePresetReturnMode:
         await thermostat.async_set_preset_mode(preset)
         await thermostat.async_set_preset_mode(PRESET_NONE)
         coord.async_write.assert_awaited_with("ID_Ba_Hz_akt", mode)
+
+    @pytest.mark.asyncio
+    async def test_return_mode_survives_a_restart(self):
+        """base.py restores extra data with setattr(entity, key, value), so every
+        stored field must be named exactly like the entity attribute."""
+        thermostat, _ = self._thermostat(LuxMode.automatic)
+        await thermostat.async_set_preset_mode(PRESET_AWAY)
+        stored = thermostat.extra_restore_state_data.as_dict()
+
+        restarted, coord = self._thermostat(LuxMode.holidays)
+        restarted._last_hvac_mode_before_preset = None
+        for key, value in stored.items():
+            setattr(restarted, key, value)
+        restarted._handle_coordinator_update(coord.data)
+        await restarted.async_set_preset_mode(PRESET_NONE)
+        coord.async_write.assert_awaited_with("ID_Ba_Hz_akt", LuxMode.automatic)
+
+    def test_stored_fields_are_entity_attributes(self):
+        # The RBE subclass carries every field; its own one
+        # (_last_written_correction) is a harmless extra on the base class.
+        for name in LuxtronikClimateExtraStoredData.__dataclass_fields__:
+            assert hasattr(LuxtronikRbeCalculatedThermostat, name), name
 
     @pytest.mark.asyncio
     async def test_switching_between_presets_keeps_the_first_mode(self):

@@ -308,7 +308,11 @@ class LuxtronikClimateExtraStoredData(ExtraStoredData):
     _attr_target_temperature: float | None = None
     _attr_hvac_mode: HVACMode | str | None = None
     _attr_preset_mode: str | None = None
-    last_hvac_mode_before_preset: str | None = None
+    # base.py restores each field with setattr(entity, name, value), so the
+    # name must match the entity attribute. Stores from before the rename hold
+    # the old key with an hvac mode ("heat") that P0003 cannot take; it is
+    # deliberately not migrated.
+    _last_hvac_mode_before_preset: str | None = None
     # Calculated RBE room target (#684): the P0001 last written or adopted.
     _last_written_correction: float | None = None
 
