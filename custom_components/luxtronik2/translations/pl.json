@@ -1435,12 +1435,14 @@
                 "data": {
                     "ha_sensor_indoor_temperature": "ID czujnika temperatury wewnętrznej",
                     "ha_sensor_current_power_consumption": "ID czujnika bieżącego poboru mocy",
-                    "update_interval": "Interwał aktualizacji"
+                    "update_interval": "Interwał aktualizacji",
+                    "rbe_calculated_room_target": "Ustaw docelową temperaturę pomieszczenia w Home Assistant (RBE)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Termostat do sterowania ogrzewaniem jest tworzony w Home Assistant. Rzeczywista temperatura jest ustawiana przez czujnik Home Assistant.\nJeśli Luxtronik jest podłączony do sprzętowego termostatu pokojowego, pozostaw to pole puste.",
                     "ha_sensor_current_power_consumption": "Jeśli wbudowany pomiar bieżącego poboru mocy pompy ciepła jest niedokładny, do obliczeń COP (ogrzewanie/CWU) można zamiast tego użyć zewnętrznego czujnika mocy Home Assistant (np. inteligentnego gniazdka). Nie zmienia to wartości wyświetlanej przez sam czujnik bieżącego poboru mocy.\nPozostaw puste, aby używać wbudowanego pomiaru pompy ciepła.",
-                    "update_interval": "Jak często odpytywać pompę ciepła o nowe dane."
+                    "update_interval": "Jak często odpytywać pompę ciepła o nowe dane.",
+                    "rbe_calculated_room_target": "Cel termostatu ogrzewania staje się temperaturą pomieszczenia. Home Assistant dostosowuje korektę krzywej grzewczej (Temperatura +/-) tak, aby pompa ciepła zachowywała się, jakby pokrętło RBE było ustawione na ten cel. Cel może odbiegać od pokrętła RBE najwyżej o 5 K podzielone przez współczynnik wpływu temperatury pomieszczenia. Własny program obniżenia RBE jest nadpisywany. Pompa ciepła reguluje według własnego pomiaru temperatury pomieszczenia w RBE: wybrany powyżej czujnik temperatury wewnętrznej jest tylko wyświetlany na karcie i nie jest do tego używany."
                 }
             }
         }

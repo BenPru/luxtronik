@@ -1,3 +1,5 @@
+from typing import Any
+
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.helpers import selector
 import voluptuous as vol
@@ -6,6 +8,7 @@ from .const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_MAX_DATA_LENGTH,
+    CONF_RBE_CALCULATED_ROOM_TARGET,
     CONF_UPDATE_INTERVAL,
     DEFAULT_HOST,
     DEFAULT_MAX_DATA_LENGTH,
@@ -38,38 +41,44 @@ def build_options_schema(
     current_indoor_temp: str | None = None,
     current_power_consumption_sensor: str | None = None,
     current_interval: str | None = None,
+    show_rbe_calculated_room_target: bool = False,
+    current_rbe_calculated_room_target: bool = False,
 ) -> vol.Schema:
     interval_options = [
         selector.SelectOptionDict(value=k, label=k) for k in UPDATE_INTERVAL_OPTIONS
     ]
-    return vol.Schema(
-        {
+    fields: dict[Any, Any] = {
+        vol.Optional(
+            CONF_HA_SENSOR_INDOOR_TEMPERATURE,
+            description={"suggested_value": current_indoor_temp},
+        ): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="sensor", device_class="temperature")
+        ),
+        vol.Optional(
+            CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
+            description={"suggested_value": current_power_consumption_sensor},
+        ): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="sensor", device_class="power")
+        ),
+        vol.Optional(
+            CONF_UPDATE_INTERVAL,
+            default=current_interval or DEFAULT_UPDATE_INTERVAL_OPTION,
+            description={
+                "suggested_value": current_interval or DEFAULT_UPDATE_INTERVAL_OPTION
+            },
+        ): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=interval_options,
+                mode=selector.SelectSelectorMode.DROPDOWN,
+            )
+        ),
+    }
+    # Only offered for a plain RBE (#684); the caller decides.
+    if show_rbe_calculated_room_target:
+        fields[
             vol.Optional(
-                CONF_HA_SENSOR_INDOOR_TEMPERATURE,
-                description={"suggested_value": current_indoor_temp},
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain="sensor", device_class="temperature"
-                )
-            ),
-            vol.Optional(
-                CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
-                description={"suggested_value": current_power_consumption_sensor},
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor", device_class="power")
-            ),
-            vol.Optional(
-                CONF_UPDATE_INTERVAL,
-                default=current_interval or DEFAULT_UPDATE_INTERVAL_OPTION,
-                description={
-                    "suggested_value": current_interval
-                    or DEFAULT_UPDATE_INTERVAL_OPTION
-                },
-            ): selector.SelectSelector(
-                selector.SelectSelectorConfig(
-                    options=interval_options,
-                    mode=selector.SelectSelectorMode.DROPDOWN,
-                )
-            ),
-        }
-    )
+                CONF_RBE_CALCULATED_ROOM_TARGET,
+                default=current_rbe_calculated_room_target,
+            )
+        ] = selector.BooleanSelector()
+    return vol.Schema(fields)

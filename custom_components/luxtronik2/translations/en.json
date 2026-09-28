@@ -1435,12 +1435,14 @@
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature",
                     "ha_sensor_current_power_consumption": "Sensor ID for the current power consumption",
-                    "update_interval": "Update interval"
+                    "update_interval": "Update interval",
+                    "rbe_calculated_room_target": "Set the room target in Home Assistant (RBE)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
                     "ha_sensor_current_power_consumption": "If the heat pump's built-in current power consumption reading is inaccurate, an external Home Assistant power sensor (e.g. a smart plug) can be used instead for the Heating/DHW COP calculations. This does not change what the Current power consumption sensor itself displays.\nLeave empty to use the heat pump's built-in reading.",
-                    "update_interval": "How often to poll the heat pump for new data."
+                    "update_interval": "How often to poll the heat pump for new data.",
+                    "rbe_calculated_room_target": "The Heating thermostat's target becomes a room temperature. Home Assistant adjusts the heating curve correction (Temperature +/-) so the heat pump behaves as if the RBE dial were set to that target. The target can be at most 5 K divided by the room temperature impact factor away from the RBE dial. The RBE's own setback schedule is overridden. The heat pump regulates on the RBE's own room reading: an indoor temperature sensor selected above is only displayed on the card and is not used for this."
                 }
             }
         }

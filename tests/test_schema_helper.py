@@ -22,6 +22,7 @@ except ImportError:  # pragma: no cover - older Home Assistant
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
+    CONF_RBE_CALCULATED_ROOM_TARGET,
     CONF_UPDATE_INTERVAL,
     DEFAULT_PORT,
     DEFAULT_UPDATE_INTERVAL_OPTION,
@@ -181,5 +182,22 @@ class TestBuildOptionsSchema:
         with a 500 (TypeError: Object of type timedelta is not JSON serializable).
         """
         schema = build_options_schema()
+        converted = _to_field_list(schema, custom_serializer=cv.custom_serializer)
+        json.dumps(converted)  # must not raise
+
+    def test_rbe_option_hidden_by_default(self):
+        schema = build_options_schema()
+        assert CONF_RBE_CALCULATED_ROOM_TARGET not in {str(k) for k in schema.schema}
+
+    def test_rbe_option_shown_defaults_to_current_value(self):
+        schema = build_options_schema(
+            show_rbe_calculated_room_target=True,
+            current_rbe_calculated_room_target=True,
+        )
+        result = cast(dict[str, Any], schema({}))
+        assert result[CONF_RBE_CALCULATED_ROOM_TARGET] is True
+
+    def test_rbe_option_schema_is_json_serializable(self):
+        schema = build_options_schema(show_rbe_calculated_room_target=True)
         converted = _to_field_list(schema, custom_serializer=cv.custom_serializer)
         json.dumps(converted)  # must not raise

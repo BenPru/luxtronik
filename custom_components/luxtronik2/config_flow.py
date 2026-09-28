@@ -20,6 +20,7 @@ from .const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
+    CONF_RBE_CALCULATED_ROOM_TARGET,
     CONF_UPDATE_INTERVAL,
     CONFIG_ENTRY_VERSION,
     DEFAULT_HOST,
@@ -29,6 +30,7 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL_OPTION,
     DOMAIN,
     LOGGER,
+    LuxRoomThermostatType,
 )
 from .coordinator import (
     LuxtronikConnectionError,
@@ -550,6 +552,18 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
             key, self.config_entry.data.get(key, default)
         )
 
+    def _rbe_calculated_room_target_available(self) -> bool:
+        """Offer the RBE room target option only for a plain RBE (#684).
+
+        Unloaded entries have no runtime data; the field is then hidden and a
+        stored value is kept by `async_step_user`.
+        """
+        coordinator = getattr(self.config_entry, "runtime_data", None)
+        return (
+            getattr(coordinator, "room_thermostat_type", None)
+            is LuxRoomThermostatType.rbe
+        )
+
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -587,6 +601,12 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                 )
                 new_options[CONF_UPDATE_INTERVAL] = update_interval
 
+                # Absent while the field is hidden: keep the stored value.
+                if CONF_RBE_CALCULATED_ROOM_TARGET in user_input:
+                    new_options[CONF_RBE_CALCULATED_ROOM_TARGET] = bool(
+                        user_input[CONF_RBE_CALCULATED_ROOM_TARGET]
+                    )
+
                 return self.async_create_entry(title="", data=new_options)
 
             current_indoor_temp = self._get_value(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
@@ -603,6 +623,10 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
                     current_indoor_temp=current_indoor_temp,
                     current_power_consumption_sensor=current_power_consumption_sensor,
                     current_interval=current_interval,
+                    show_rbe_calculated_room_target=self._rbe_calculated_room_target_available(),
+                    current_rbe_calculated_room_target=bool(
+                        self._get_value(CONF_RBE_CALCULATED_ROOM_TARGET, False)
+                    ),
                 ),
                 description_placeholders={"name": self.config_entry.title},
             )

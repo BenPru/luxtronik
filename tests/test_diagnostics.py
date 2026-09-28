@@ -11,7 +11,10 @@ from homeassistant.const import CONF_HOST
 import pytest
 
 from conftest import FakeSensorItem
-from custom_components.luxtronik2.const import DEFAULT_PORT
+from custom_components.luxtronik2.const import (
+    CONF_RBE_CALCULATED_ROOM_TARGET,
+    DEFAULT_PORT,
+)
 from custom_components.luxtronik2.diagnostics import (
     SERIAL_PARAMETER_INDICES,
     _dump_items,
@@ -92,6 +95,36 @@ class TestAsyncGetConfigEntryDiagnostics:
         # Host and serial-derived unique_id must be fully redacted (M9).
         assert result["entry"]["data"]["host"] == REDACTED
         assert result["entry"]["unique_id"] == REDACTED
+
+    @pytest.mark.asyncio
+    async def test_rbe_option_visible_in_diagnostics(self):
+        """A dump must tell whether the RBE room target option (#684) is on."""
+        from custom_components.luxtronik2.diagnostics import (
+            async_get_config_entry_diagnostics,
+        )
+
+        hass = MagicMock()
+        hass.async_add_executor_job = AsyncMock(return_value=None)
+        coordinator = MagicMock()
+        coordinator.async_request_refresh = AsyncMock()
+        coordinator.data.parameters.parameters = {}
+        coordinator.data.calculations.calculations = {}
+        coordinator.data.visibilities.visibilities = {}
+        coordinator.unique_id = "20230101_0ff"
+        coordinator.serial_number = "20230101-0ff"
+        coordinator.device_infos = {}
+        entry = MagicMock()
+        entry.runtime_data = coordinator
+        entry.unique_id = "20230101_0ff"
+        entry.data = {"host": "192.168.1.100", "port": DEFAULT_PORT}
+        entry.as_dict.return_value = {
+            "data": {"host": "192.168.1.100"},
+            "options": {CONF_RBE_CALCULATED_ROOM_TARGET: True},
+        }
+
+        result = await async_get_config_entry_diagnostics(hass, entry)
+
+        assert result["entry"]["options"][CONF_RBE_CALCULATED_ROOM_TARGET] is True
 
     @pytest.mark.asyncio
     async def test_includes_and_redacts_captured_log_records(self):

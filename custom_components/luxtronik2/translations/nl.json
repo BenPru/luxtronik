@@ -1435,12 +1435,14 @@
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
                     "ha_sensor_current_power_consumption": "Sensor-ID voor het huidige stroomverbruik",
-                    "update_interval": "Update-interval"
+                    "update_interval": "Update-interval",
+                    "rbe_calculated_room_target": "Kamerdoeltemperatuur instellen in Home Assistant (RBE)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
                     "ha_sensor_current_power_consumption": "Als de ingebouwde meting van het huidige stroomverbruik van de warmtepomp onnauwkeurig is, kan in plaats daarvan een externe Home Assistant-stroomsensor (bijvoorbeeld een slimme stekker) worden gebruikt voor de COP-berekeningen (verwarming/warm water). Dit verandert niet wat de sensor voor het huidige stroomverbruik zelf weergeeft.\nLaat leeg om de ingebouwde meting van de warmtepomp te gebruiken.",
-                    "update_interval": "Hoe vaak de warmtepomp wordt bevraagd voor nieuwe gegevens."
+                    "update_interval": "Hoe vaak de warmtepomp wordt bevraagd voor nieuwe gegevens.",
+                    "rbe_calculated_room_target": "Het doel van de verwarmingsthermostaat wordt een kamertemperatuur. Home Assistant past de stooklijncorrectie (Temperatuur +/-) zo aan dat de warmtepomp zich gedraagt alsof de RBE-knop op dat doel staat. Het doel mag hoogstens 5 K gedeeld door de ruimte-invloedsfactor van de RBE-knop afwijken. Het eigen verlagingsprogramma van de RBE wordt overschreven. De warmtepomp regelt op de eigen kamertemperatuur van de RBE: een hierboven gekozen binnentemperatuursensor wordt alleen op de kaart getoond en hiervoor niet gebruikt."
                 }
             }
         }
