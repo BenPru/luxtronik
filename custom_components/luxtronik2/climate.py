@@ -543,7 +543,11 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
                 k for k, v in HVAC_PRESET_MAPPING.items() if v == preset_mode
             )
             if self._last_hvac_mode_before_preset is None:
-                self._last_hvac_mode_before_preset = self._attr_hvac_mode
+                # The Luxtronik mode, not the HA hvac mode: it is written back
+                # to P0003 when the preset ends, which cannot take "heat".
+                self._last_hvac_mode_before_preset = get_sensor_data(
+                    self.coordinator.data, self.entity_description.luxtronik_key
+                )
         elif self._last_hvac_mode_before_preset is not None:
             lux_mode = self._last_hvac_mode_before_preset
             self._last_hvac_mode_before_preset = None

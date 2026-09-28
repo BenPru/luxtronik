@@ -502,6 +502,55 @@ class TestClimateKeyAttributes:
         assert "luxtronik_key_current_temperature" not in attrs
 
 
+class TestClimatePresetReturnMode:
+    """Ending a preset writes back the Luxtronik mode that was active before.
+
+    It used to remember the HA hvac mode ("heat"), which P0003 cannot take:
+    the library converts it to None, the write is dropped and the heat pump
+    stays in Holidays.
+    """
+
+    @staticmethod
+    def _thermostat(mode):
+        coord = _mock_coordinator()
+        thermostat = LuxtronikThermostat(
+            MagicMock(), _mock_entry(), coord, THERMOSTATS_OTHER[0]
+        )
+        _patch_entity(thermostat)
+
+        def data_for(lux_mode):
+            return make_coordinator_data(
+                parameters={"ID_Ba_Hz_akt": lux_mode},
+                calculations={"ID_WEB_WP_BZ_akt": LuxOperationMode.heating},
+            )
+
+        async def write(name, value):
+            coord.data = data_for(value)
+            return coord.data
+
+        coord.async_write = AsyncMock(side_effect=write)
+        coord.data = data_for(mode)
+        thermostat._handle_coordinator_update(coord.data)
+        return thermostat, coord
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("mode", [LuxMode.automatic, LuxMode.off, LuxMode.party])
+    @pytest.mark.parametrize("preset", [PRESET_AWAY, PRESET_BOOST])
+    async def test_preset_none_returns_to_previous_lux_mode(self, mode, preset):
+        thermostat, coord = self._thermostat(mode)
+        await thermostat.async_set_preset_mode(preset)
+        await thermostat.async_set_preset_mode(PRESET_NONE)
+        coord.async_write.assert_awaited_with("ID_Ba_Hz_akt", mode)
+
+    @pytest.mark.asyncio
+    async def test_switching_between_presets_keeps_the_first_mode(self):
+        thermostat, coord = self._thermostat(LuxMode.automatic)
+        await thermostat.async_set_preset_mode(PRESET_AWAY)
+        await thermostat.async_set_preset_mode(PRESET_BOOST)
+        await thermostat.async_set_preset_mode(PRESET_NONE)
+        coord.async_write.assert_awaited_with("ID_Ba_Hz_akt", LuxMode.automatic)
+
+
 # ===========================================================================
 # Plain RBE room target (#684)
 # ===========================================================================
