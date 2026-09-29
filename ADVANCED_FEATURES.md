@@ -6,9 +6,10 @@ This page documents integration features that go beyond the basic entity tables 
 
 Beyond the initial setup, this integration has an **Options** flow: go to **Settings → Devices & Services → Luxtronik → Configure** to reach it. It lets you change, after setup and without removing/re-adding the integration:
 
-- **External indoor temperature sensor** — replaces the heat pump's own room-thermostat reading (`Room Thermostat Temperature`) as the *current temperature* shown on the Heating climate entity, if you have a more accurate HA temperature sensor elsewhere in the house. If no room thermostat is connected to the heat pump, the climate card shows no current temperature at all unless you set this option.
+- **External indoor temperature sensor** — replaces the heat pump's own room-thermostat reading (`Room Thermostat Temperature`) as the *current temperature* shown on the Heating climate entity, if you have a more accurate HA temperature sensor elsewhere in the house. If no room thermostat is connected to the heat pump, the climate card shows no current temperature at all unless you set this option. With the RBE room target option on, the sensor is still **only used for display** — it is not used to calculate the heating correction; the heat pump regulates on the RBE's own reading.
 - **External power consumption sensor** — see [COP calculation](#cop-calculation-and-the-external-power-sensor) below.
 - **Update interval** — how often the integration polls the heat pump for new data.
+- **Set the room target in Home Assistant (RBE)** — only offered with a plain RBE room unit. See [Room target for a plain RBE](#room-target-for-a-plain-rbe).
 
 ## DHW Manual Frequency (Matching Compressor Power to Solar Surplus)
 
@@ -43,12 +44,31 @@ The Heating and Cooling climate entities' **Target Temperature** field does not 
 
 | Detected type | Heating Target Temperature | Cooling Target Temperature |
 | :--- | :--- | :--- |
-| None / RFV / RFV-K / RFV-DK / RBE older than firmware 2.0 | A **correction offset**, −5…+5 °C, added to the heating curve — the same value as the **Target Temperature Correction** Number entity. Not an absolute room temperature. | The **Minimal Outdoor Temperature** threshold that must be exceeded before cooling is allowed to run at all — an outdoor-air value, not a room or water temperature. |
+| None / RFV / RFV-K / RFV-DK / RBE older than firmware 2.0 | A **correction offset**, −5…+5 °C, added to the heating curve — the same value as the **Target Temperature Correction** Number entity. Not an absolute room temperature. With a plain RBE, the **Set the room target in Home Assistant (RBE)** option turns it into a room temperature instead — see [Room target for a plain RBE](#room-target-for-a-plain-rbe). | The **Minimal Outdoor Temperature** threshold that must be exceeded before cooling is allowed to run at all — an outdoor-air value, not a room or water temperature. |
 | RBE firmware 2.0+ ("RBE Plus"), or a directly reported "Smart" room unit | An actual **absolute desired room temperature**, read from and written to the room control unit itself. | Same absolute room-temperature parameter as Heating above — heating and cooling share one target, since both are driven by the same physical room unit. |
 
 In other words: with an older/no room control unit, moving the Heating climate card's target temperature is really nudging the *heating curve* up or down by a few degrees (exactly like the **Target Temperature Correction** Number entity, because it's the same parameter), and the Cooling card's target temperature is really setting the *outdoor temperature* cooling waits for, not a room or flow temperature. Only a newer RBE ("RBE Plus", firmware ≥ 2.0) or a "Smart" room unit turns these into genuine room-temperature setpoints.
 
 The **Room thermostat type** diagnostic sensor on the Heating device shows which type your system has been detected as: `None`, `RFV`, `RFV-K`, `RFV-DK`, `RBE`, `RBE Plus` or `Smart`. The **Room Thermostat Temperature** and **Room Thermostat Target** sensors (and the **Room temperature impact factor** setting) only exist when a room thermostat is connected.
+
+### Room target for a plain RBE
+
+With a plain RBE (not RBE Plus), the room target is the dial on the RBE itself and cannot be written. The **Set the room target in Home Assistant (RBE)** option (off by default) turns the Heating climate target into a room temperature anyway:
+
+- The heat pump already shifts its heating curve by *room temperature impact factor × (RBE target − room)*. The integration adds *factor × (your target − RBE target)* through the **Target Temperature Correction** (P0001). Together the heat pump behaves as if the RBE dial were set to your target. (Here the factor is the impact factor as a fraction: 170 % = 1.7.)
+- **The room temperature that counts is the RBE's own reading.** The heat pump measures the room with the RBE and applies the room correction itself. If you selected an **External indoor temperature sensor** in the options, it is only shown as the current temperature on the climate card; it is **not** used by this feature and does not affect the heating. Place the RBE in the room you want to control.
+- P0001 only changes when your target, the RBE dial or the impact factor changes. There is no control loop on the room temperature, and if Home Assistant is down the last correction stays correct.
+- Changing the **Target Temperature Correction** yourself (display, number entity, automation) moves the climate target accordingly.
+- The attributes `room_target_rbe`, `correction` and `effective_room_target` show what the heat pump actually aims for; P0001 is written in 0.5 K steps, so the effective target can be up to 0.25 K ÷ factor off.
+
+Limitations:
+
+1. **Range:** P0001 is limited to ±5 K, so the target can be at most 5 K ÷ factor away from the RBE dial (±2.5 K at 200 %). Keep the dial near the temperatures you use.
+2. **The RBE's own setback schedule is overridden:** when the dial target changes, Home Assistant rewrites P0001 to keep your target. Schedule a night setback in Home Assistant instead.
+3. **Room far above the dial:** the controller limits its own room correction to about −2.1 K, but P0001 is added outside that limit. When the room is more than about 2.1 K ÷ factor above the RBE dial (1.2 K at 170 %), the curve is lowered less than a real RBE set to your target would.
+4. **Proportional control only:** as with a native RBE, the room settles where the curve plus the room correction matches the heat loss, which can be slightly off the target if the heating curve is badly set.
+5. **No room influence:** with the impact factor at 0 % the option cannot work; the climate entity then offers no target temperature.
+6. **An external indoor sensor is display-only:** the regulation always follows the RBE's own room reading. The external indoor temperature sensor from the options changes only the current temperature shown on the card, never the correction written to the heat pump.
 
 ## COP Calculation and the External Power Sensor
 
