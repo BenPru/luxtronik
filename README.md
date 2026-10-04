@@ -37,7 +37,7 @@ Big thanks to [all community members](https://github.com/BenPru/luxtronik/graphs
 **Other documents in this repository:**
 
 - **[ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)** — integration options, COP and the external power sensor, EVU/Smart Grid, diagnostics downloads, holiday scheduling, solar thermal, and the other entities that only appear on some hardware.
-- **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** — the editable weekly schedules for DHW, heating and ventilation: entity list, time format, and what a window means on each circuit.
+- **[TIMER_SCHEDULES.md](TIMER_SCHEDULES.md)** — the editable weekly schedules for DHW, heating, ventilation and the circulation pump: entity list, time format, and what a window means on each circuit.
 - **[REPORTING_ISSUES.md](REPORTING_ISSUES.md)** — how to file a bug report that can be diagnosed on the first pass.
 - **[DHW_TARGET_REGISTERS.md](DHW_TARGET_REGISTERS.md)** — maintainer reference: what is known about the two hot water setpoint parameters, why the two platforms gated them differently until September 2026, and what to measure if your hot water target reads wrong.
 
@@ -177,6 +177,8 @@ Advanced entities:
 | **DHW Manual Frequency** | Number | Hz | Forces the compressor to a fixed frequency during DHW heating instead of the heat pump's own automatic choice (`0` = Automatic). Useful for solar self-consumption — see [Advanced Features: DHW Manual Frequency](ADVANCED_FEATURES.md#dhw-manual-frequency-matching-compressor-power-to-solar-surplus). |
 | **Away/Holiday Start & End Date** | Date | - | Pre-schedule a future DHW Holiday period (auto start and return), independent of the Heating device's own dates — see [Advanced Features: Away / Holiday Scheduling](ADVANCED_FEATURES.md#away--holiday-scheduling). |
 | **Hot water timer program** | Select | - | Which blocking-time schedule shape the controller uses: *Whole week*, *Weekdays + weekend*, or *Per day*. Switching it swaps which schedule entities are present — see [TIMER_SCHEDULES.md](TIMER_SCHEDULES.md). |
+| **Circulation pump timer program** & **Circulation Pump Release Times** | Select / Text | - | The circulation pump's own weekly schedule of release windows — only with a circulation pump (*Warmwasser 2* = ZIP). Rewriting it from an automation is how to run the pump on demand — see [Advanced Features: Circulation Pump Control](ADVANCED_FEATURES.md#circulation-pump-control). |
+| **Circulation pump run time / pause per cycle** | Number | min | How the pump cycles inside a release window; a pause of `0` runs it continuously. |
 
 > **ℹ️ Note:** It is not possible to trigger a thermal disinfection cycle on demand, or move it off its fixed nightly time, using the *Thermal Desinfection Day* select alone. It can be emulated at a time of your choosing by temporarily setting *Thermal Desinfection Day* to `continuous` and raising the *DHW Target Temperature* to the *Thermal Desinfection Target Temperature* value — this makes the heat pump's normal (immediate) heating logic reach disinfection temperature right away, instead of waiting for its own nightly schedule. See the *Legionella prevention using solar power* example below. The **Thermal Desinfection Target Temperature** entity also exposes a `last_thermal_desinfection` timestamp attribute (last time the DHW temperature rose above that target), handy for gating an automation like the example to "at most once a week".
 

@@ -686,6 +686,41 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         visibility=LV.V0038_SOLAR_COLLECTOR,
     ),
     # endregion Solar
+    # region Circulation pump
+    # "Taktzeiten": how long the circulation pump runs and pauses inside each
+    # window of its timer schedule. Factory default 5/5; an off time of 0 runs
+    # it without pause for the whole window (Lux 2.0/2.1 manual 83055200o,
+    # p. 28). Values above 10 min are snapped to the controller's 5-minute
+    # steps in number.py. Gated like the schedule itself: ZIP only (#310).
+    LuxtronikNumberDescription(
+        key=SensorKey.CIRCULATION_ON_TIME,
+        luxtronik_key=LP.P0697_CIRCULATION_ON_TIME,
+        device_key=DeviceKey.domestic_water,
+        device_class=NumberDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        native_min_value=1,
+        native_max_value=120,
+        native_step=1,
+        entity_category=EntityCategory.CONFIG,
+        mode=NumberMode.BOX,
+        entity_active_key=LP.P0085_DHW_CHARGING_PUMP,
+        entity_active_formula="!= 1",
+    ),
+    LuxtronikNumberDescription(
+        key=SensorKey.CIRCULATION_OFF_TIME,
+        luxtronik_key=LP.P0698_CIRCULATION_OFF_TIME,
+        device_key=DeviceKey.domestic_water,
+        device_class=NumberDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        native_min_value=0,
+        native_max_value=120,
+        native_step=1,
+        entity_category=EntityCategory.CONFIG,
+        mode=NumberMode.BOX,
+        entity_active_key=LP.P0085_DHW_CHARGING_PUMP,
+        entity_active_formula="!= 1",
+    ),
+    # endregion Circulation pump
     # endregion Domestic water
     # region Cooling
     LuxtronikNumberDescription(

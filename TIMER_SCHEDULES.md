@@ -2,9 +2,9 @@
 
 Several circuits on the heat pump controller can be programmed with a weekly schedule directly on the controller (or its firmware's built-in web interface). This integration exposes those schedules as editable Home Assistant entities so they can be read and changed without touching the physical controller.
 
-Three circuits are wired up: **DHW (Bw)**, **heating (Hkr)** and the **ventilation module (Luf)** — the last one as separate day and night schedules, see [Ventilation Timer Schedule](#ventilation-timer-schedule). The remaining timer-program circuits — mixing circuits 1/2/3 (Mk1/Mk2/Mk3), circulation pump (ZIP), pool (Swb), and the combined "all circuits" block — are still deferred; see [Extending to other circuits](#extending-to-other-circuits) below.
+Four circuits are wired up: **DHW (Bw)**, **heating (Hkr)**, the **ventilation module (Luf)** — as separate day and night schedules, see [Ventilation Timer Schedule](#ventilation-timer-schedule) — and the **DHW circulation pump (ZIP)**. The remaining timer-program circuits — mixing circuits 1/2/3 (Mk1/Mk2/Mk3), pool (Swb), and the combined "all circuits" block — are still deferred; see [Extending to other circuits](#extending-to-other-circuits) below.
 
-**A schedule window does not mean the same thing on every circuit.** On DHW it *blocks* heating; on the heating circuit it *raises* the circuit into day mode; on ventilation it *releases* a fan stage. Read your circuit's section below before programming it.
+**A schedule window does not mean the same thing on every circuit.** On DHW it *blocks* heating; on the heating circuit it *raises* the circuit into day mode; on ventilation it *releases* a fan stage; on the circulation pump it *releases* the pump. Read your circuit's section below before programming it.
 
 ## How a schedule is programmed
 
@@ -22,7 +22,7 @@ Each schedule entity holds that day's time windows as a single string of `HH:MM-
 12:00-13:00/22:00-23:30
 ```
 
-Set the value to an empty string to clear all windows for that entity. How many windows fit per day differs per circuit (5 for DHW, 3 for heating and ventilation), and times are always whole minutes — the controller cannot set seconds.
+Set the value to an empty string to clear all windows for that entity. How many windows fit per day differs per circuit (5 for DHW and the circulation pump, 3 for heating and ventilation), and times are always whole minutes — the controller cannot set seconds.
 
 ### What the times mean
 
@@ -53,7 +53,7 @@ Since only the controller itself can put a `24:00` into a register, that observa
 
 > **ℹ️ Note:** the poll that first spots a `24:00` reloads the integration once, so the change takes effect everywhere. It happens at most once per heat pump.
 
-**An empty schedule does not mean "no schedule".** What it does depends on the circuit's polarity, and the two are opposites: on DHW an empty schedule blocks nothing, so hot water follows the *Mode* setting alone; on heating it leaves the circuit lowered around the clock. Read your circuit's section below before clearing one.
+**An empty schedule does not mean "no schedule".** What it does depends on the circuit's polarity, and the two are opposites: on DHW an empty schedule blocks nothing, so hot water follows the *Mode* setting alone; on heating it leaves the circuit lowered around the clock; on the circulation pump it keeps the pump off. Read your circuit's section below before clearing one.
 
 The timer program can be switched from Home Assistant as well as on the physical controller (or its web interface), and both directions are picked up automatically.
 
@@ -124,6 +124,35 @@ A night window may cross midnight: `22:00-05:00` is an ordinary entry on the moo
 
 > **ℹ️ Register layout, for the curious.** The ventilation time registers are stored differently from every other circuit: instead of one time per register, each register holds a whole `start-end` window (start minute in the low 16 bits, end minute in the high 16 bits — the layout the upstream `python-luxtronik` library calls `TimeOfDay2`). The decoding was confirmed minute for minute against photographs of the controller's pages. Releases 2026.08.15 to 2026.09.16 exposed these registers as if they were single times; on the reporting unit they rendered as `9284:21-5461:42/...`, and Home Assistant rejected the over-long state on every poll. Those entities were named without the day/night distinction and are removed automatically on the next start; the schedules above replace them under new names.
 
+## Circulation Pump Timer Schedule (Release Times)
+
+**On the DHW device**, and only if the controller drives its circulation output as a circulation pump: the setting *Warmwasser 2* (parameter 85) must be **ZIP**. On **BLP** that output charges the hot water tank instead, the controller hides its own *Zirkulation* menu, and these entities do not exist either.
+
+Up to **5 windows per day**, and each window is a **release window**: the pump may run inside it and stays off outside every window. The controller manual describes the windows as "the times in which the circulation pump should run" (*Betriebsanleitung Heizungs- und Wärmepumpenregler 2.0/2.1*, document 83055200oDE, section "Zirkulation"), and owners on V2.88, V3.89 and V3.92 firmware confirmed it in [#310](https://github.com/BenPru/luxtronik/issues/310).
+
+| Name | Entity Type | Description |
+| :--- | :--- | :--- |
+| **Circulation pump timer program** | Select | Which schedule shape the controller uses: *Whole week*, *Weekdays + weekend*, or *Per day*. |
+| **Circulation Pump Release Times (Week)** | Text | Exists while the *Week* shape is active. |
+| **Circulation Pump Release Times (Weekdays)** / **(Weekend)** | Text | Exist while *Weekday/Weekend* is active. |
+| **Circulation Pump Release Times (Monday)** … **(Sunday)** | Text | One entity per day of the week, present while *Per day* is active. |
+| **Circulation pump run time per cycle** | Number | Minutes the pump runs per cycle inside a window (controller: *Taktzeiten*, "Zeit ein"). 1-120, factory default 5. |
+| **Circulation pump pause per cycle** | Number | Minutes the pump pauses per cycle inside a window ("Zeit aus"). 0-120, factory default 5. **`0` runs the pump without a pause for the whole window.** |
+
+**The pump cycles inside a window.** With the factory default of 5/5 it runs five minutes, pauses five, and so on until the window closes; set the pause to `0` for continuous running. The controller's own menu sets these in 1-minute steps up to 10 minutes and in 5-minute steps above that, so a value above 10 entered in Home Assistant is rounded to the nearest 5 before it is written.
+
+What the common values do:
+
+| Value | Effect |
+| :--- | :--- |
+| *(empty)* or `00:00-00:00` | Pump off around the clock — a row is unused only when both halves are `00:00`, so this is the same as clearing the field. |
+| `00:00-23:59` | Pump released all day, with a one-minute gap before midnight. That gap is irrelevant for a pump that cycles anyway; on a controller that stores `24:00` (see [`24:00` as an end time](#2400-as-an-end-time)) `00:00-24:00` closes it. |
+| `06:00-08:00/17:00-22:00` | Released in the morning and the evening only. |
+
+> **ℹ️ Note:** `00:00-00:00` means *off* here, where on the heating circuit the same window means *permanently lowered*. Both follow from the same rule — the window is unused — but the result is the opposite of "all day" on both circuits.
+
+Writing a schedule from an automation is how to switch the pump on demand — see [Advanced Features: Circulation Pump Control](ADVANCED_FEATURES.md#circulation-pump-control).
+
 ## Extending to other circuits
 
 The remaining timer-program circuits share the same underlying shape (mode selector + Week/5+2/Per-day time blocks), just with different parameter-name prefixes and row counts:
@@ -133,7 +162,6 @@ The remaining timer-program circuits share the same underlying shape (mode selec
 | Mixing circuit 1 (Mk1) | `ID_Einst_SuMk1_akt` (283) | `SuMk1W0` / `SuMk125` / `SuMk1TG` | 3 |
 | Mixing circuit 2 (Mk2) | `ID_Einst_SuMk2_akt2` (344) | `SuMk2Wo` / `SuMk225` / `SuMk2Tg` | 3 |
 | Mixing circuit 3 (Mk3) | `ID_Einst_SuMk3_akt2` (788) | `SuMk3Wo` / `SuMk325` / `SuMk3Tg` | 3 |
-| Circulation pump (ZIP) | `ID_Einst_SuZIP_akt` (506) | `SuZIPWo` / `SuZIP25` / `SuZIPTg` | 5 |
 | Pool (Swb) | *unknown* — see below | `SuSwbWo` / `SuSwb25` / `SuSwbTg` | 3 |
 | All circuits combined (All) | `ID_Einst_SuAll_akt2` (161) | `SuAllWo` / `SuAll25` / `SuAllTg` | 3 |
 
@@ -145,4 +173,4 @@ Three things do *not* generalise, and cost a bug each time they are assumed:
 
 - **The parameter-name spelling is per circuit and must be copied verbatim from the library**, never derived: DHW uses `WO`/`TG`, heating uses `W0` (with a digit zero) and `TG`, ventilation uses `Wo`/`Tg`.
 - **The storage layout can differ too.** DHW and heating name their parameters `<prefix>_zeit_<row>_<slot>` with one time per register; ventilation names them `<prefix>_zeit_<0|1>_<row>_<2*col>` and packs a whole window into each register (see above). `_TimerCircuit` takes a `name_builder` for the naming, and a row may be a `(start, end)` register pair or a single packed register — `text.py` handles both. Check the layout against a real diagnostics dump before wiring a circuit up — the ventilation guess cost a release.
-- **The direction of a window is per circuit.** DHW blocks, heating raises; neither polarity can be assumed to carry over to the pool or the circulation pump. Confirm each new circuit against the controller manual before documenting it.
+- **The direction of a window is per circuit.** DHW blocks, heating raises, ventilation and the circulation pump release; no polarity can be assumed to carry over to the pool or the mixing circuits. Confirm each new circuit against the controller manual before documenting it.

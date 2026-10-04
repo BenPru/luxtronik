@@ -910,6 +910,83 @@ class TestEntityActive:
         )
         assert coord.entity_active(self._twin_description()) is False
 
+    @staticmethod
+    def _circulation_descriptions() -> list[LuxtronikEntityDescription]:
+        """Every circulation entity: schedule blocks, program select, cycle times."""
+        from custom_components.luxtronik2.select_entities_predefined import (
+            SELECT_ENTITIES,
+        )
+        from custom_components.luxtronik2.timer_schedule_entities_predefined import (
+            TIMER_SCHEDULE_ENTITIES,
+        )
+
+        keys = {
+            SensorKey.TIMER_CIRCULATION_PROGRAM,
+            SensorKey.CIRCULATION_ON_TIME,
+            SensorKey.CIRCULATION_OFF_TIME,
+        }
+        found = [
+            d
+            for d in [*TIMER_SCHEDULE_ENTITIES, *SELECT_ENTITIES, *NUMBER_SENSORS]
+            if d.key in keys or d.key.startswith("timer_circulation_schedule_")
+        ]
+        # 10 schedule blocks + select + two cycle times
+        assert len(found) == 13
+        return found
+
+    @staticmethod
+    def _circulation_coordinator(p0085: int) -> LuxtronikCoordinator:
+        return _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitBW": 100},
+            parameters={
+                "ID_Einst_BWZIP_akt": p0085,
+                "ID_Einst_SuZIP_akt": "week",
+                "ID_Einst_Zirk_Ein_akt": 5,
+                "ID_Einst_Zirk_Aus_akt": 5,
+            },
+        )
+
+    def test_circulation_entities_exist_when_the_output_is_zip(self):
+        """P0085 = 0 is "Warmwasser 2: ZIP" - every corpus unit reads it (#310)."""
+        coord = self._circulation_coordinator(0)
+        for description in self._circulation_descriptions():
+            assert coord.entity_active(description) is True, description.key
+
+    def test_circulation_entities_absent_when_the_output_is_blp(self):
+        """On BLP the output charges the DHW tank and the controller hides its
+        circulation menu, so the integration offers none of it either.
+        """
+        coord = self._circulation_coordinator(1)
+        for description in self._circulation_descriptions():
+            assert coord.entity_active(description) is False, description.key
+
+    def test_unreadable_circulation_selector_freezes_its_schedule(self):
+        """A selector that decodes to None this poll must freeze its circuit.
+
+        The circulation blocks name P0506 as their own register for the
+        declared gate, so `entity_active` alone reads the same None as "not
+        active" - which would disable the blocks and reload the entry on the
+        next good poll. The selector check has to run first. Real coordinator,
+        not a mocked `entity_active`, because the interaction is the bug.
+        """
+        from custom_components.luxtronik2.text import _active_schedule_descriptions
+
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitBW": 100},
+            parameters={
+                "ID_Einst_BWZIP_akt": 0,
+                "ID_Einst_SuZIP_akt": None,
+                "ID_Einst_SUBW_akt2": "week",
+                # No ventilation module: P895 reads 0, which decodes to None
+                # on every poll and must not count as "unreadable".
+                "ID_Einst_SuLuf_akt": None,
+            },
+        )
+        assert coord.has_ventilation is False
+        active, unreadable = _active_schedule_descriptions(coord, coord.data)
+        assert unreadable == {"ID_Einst_SuZIP_akt"}
+        assert [d.key for d in active] == [SensorKey.TIMER_DHW_SCHEDULE_WEEK]
+
     def test_solar_visibility_active(self):
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)

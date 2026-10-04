@@ -1,8 +1,8 @@
 """Predefined timer-program schedule text entities.
 
-Covers the DHW (Bw), heating (Hkr) and ventilation (Luf) circuits. The
-remaining timer-program circuits (Mk1/Mk2/Mk3/ZIP/Swb) follow the DHW and
-heating pattern and need one `_TimerCircuit` instance plus translations
+Covers the DHW (Bw), heating (Hkr), ventilation (Luf) and circulation pump
+(ZIP) circuits. The remaining timer-program circuits (Mk1/Mk2/Mk3/Swb) follow
+the DHW and heating pattern and need one `_TimerCircuit` instance plus translations
 each; see the "lux-timer-program-parameter-layout" memory for their
 selector/prefix values.
 
@@ -21,7 +21,7 @@ from functools import partial
 
 from homeassistant.const import EntityCategory
 
-from .const import DeviceKey, SensorKey as SK
+from .const import DeviceKey, LuxParameter, SensorKey as SK
 from .model import LuxtronikTimerScheduleTextDescription
 
 
@@ -69,6 +69,14 @@ class _TimerCircuit:
     #: make it a class attribute and bind as a method on access.
     name_builder: Callable[[str, int, int], tuple[tuple[str] | tuple[str, str], ...]]
     device_key: DeviceKey
+    #: A declarative existence gate for the whole circuit, see
+    #: `LuxtronikEntityDescription.entity_active_key`. A gated circuit also
+    #: names its mode selector as `selector_key`: `entity_active` requires the
+    #: entity's own register to be returned (#738), and a schedule block has
+    #: no single register of its own.
+    selector_key: LuxParameter = LuxParameter.UNSET
+    entity_active_key: LuxParameter | None = None
+    entity_active_formula: str | None = None
 
 
 def _row_names_row_slot(
@@ -190,6 +198,37 @@ _VENTILATION_NIGHT_WEEKDAYS: tuple[tuple[SK, int], ...] = (
 )
 
 
+# Verified against the diagnostics corpus: selector 506 and windows 507-606
+# hold "week"/"5+2" and real times on the units that program them. The windows
+# are release times - "the times in which the circulation pump should run"
+# (Lux 2.0/2.1 manual 83055200o, p. 28), which four owners confirmed in #310.
+# The controller shows its circulation menu only while "Warmwasser 2" (P0085)
+# is ZIP rather than BLP, and the entities follow it.
+_CIRCULATION_CIRCUIT = _TimerCircuit(
+    mode_selector_name="ID_Einst_SuZIP_akt",
+    rows=5,
+    # Mixed-case `Wo`/`Tg`, as on ventilation.
+    same_schedule_prefix="ID_Einst_SuZIPWo",
+    weekday_weekend_prefix="ID_Einst_SuZIP25",
+    per_day_prefix="ID_Einst_SuZIPTg",
+    name_builder=_row_names_row_slot,
+    device_key=DeviceKey.domestic_water,
+    selector_key=LuxParameter.P0506_TIMER_PROGRAM_CIRCULATION,
+    entity_active_key=LuxParameter.P0085_DHW_CHARGING_PUMP,
+    entity_active_formula="!= 1",
+)
+
+_CIRCULATION_WEEKDAYS: tuple[tuple[SK, int], ...] = (
+    (SK.TIMER_CIRCULATION_SCHEDULE_MONDAY, 0),
+    (SK.TIMER_CIRCULATION_SCHEDULE_TUESDAY, 1),
+    (SK.TIMER_CIRCULATION_SCHEDULE_WEDNESDAY, 2),
+    (SK.TIMER_CIRCULATION_SCHEDULE_THURSDAY, 3),
+    (SK.TIMER_CIRCULATION_SCHEDULE_FRIDAY, 4),
+    (SK.TIMER_CIRCULATION_SCHEDULE_SATURDAY, 5),
+    (SK.TIMER_CIRCULATION_SCHEDULE_SUNDAY, 6),
+)
+
+
 def _build_circuit_entities(
     circuit: _TimerCircuit,
     week_key: SK,
@@ -204,6 +243,9 @@ def _build_circuit_entities(
             device_key=circuit.device_key,
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
+            luxtronik_key=circuit.selector_key,
+            entity_active_key=circuit.entity_active_key,
+            entity_active_formula=circuit.entity_active_formula,
             active_mode="week",
             row_names=circuit.name_builder(
                 circuit.same_schedule_prefix, circuit.rows, 0
@@ -214,6 +256,9 @@ def _build_circuit_entities(
             device_key=circuit.device_key,
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
+            luxtronik_key=circuit.selector_key,
+            entity_active_key=circuit.entity_active_key,
+            entity_active_formula=circuit.entity_active_formula,
             active_mode="5+2",
             row_names=circuit.name_builder(
                 circuit.weekday_weekend_prefix, circuit.rows, 0
@@ -224,6 +269,9 @@ def _build_circuit_entities(
             device_key=circuit.device_key,
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
+            luxtronik_key=circuit.selector_key,
+            entity_active_key=circuit.entity_active_key,
+            entity_active_formula=circuit.entity_active_formula,
             active_mode="5+2",
             row_names=circuit.name_builder(
                 circuit.weekday_weekend_prefix, circuit.rows, 1
@@ -236,6 +284,9 @@ def _build_circuit_entities(
             device_key=circuit.device_key,
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
+            luxtronik_key=circuit.selector_key,
+            entity_active_key=circuit.entity_active_key,
+            entity_active_formula=circuit.entity_active_formula,
             active_mode="days",
             row_names=circuit.name_builder(
                 circuit.per_day_prefix, circuit.rows, day_index
@@ -274,5 +325,12 @@ TIMER_SCHEDULE_ENTITIES: list[LuxtronikTimerScheduleTextDescription] = (
         weekday_key=SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKDAY,
         weekend_key=SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKEND,
         day_keys=_VENTILATION_NIGHT_WEEKDAYS,
+    )
+    + _build_circuit_entities(
+        _CIRCULATION_CIRCUIT,
+        week_key=SK.TIMER_CIRCULATION_SCHEDULE_WEEK,
+        weekday_key=SK.TIMER_CIRCULATION_SCHEDULE_WEEKDAY,
+        weekend_key=SK.TIMER_CIRCULATION_SCHEDULE_WEEKEND,
+        day_keys=_CIRCULATION_WEEKDAYS,
     )
 )

@@ -322,6 +322,15 @@ class TestTimerProgramSelects:
         assert description.device_key is DeviceKey.ventilation
         assert description.options == ["week", "weekday_weekend", "daily"]
 
+    def test_circulation_program_select(self):
+        """Gated like the circulation schedules: only on a ZIP output (#310)."""
+        description = self._description(SensorKey.TIMER_CIRCULATION_PROGRAM)
+        assert description.luxtronik_key == LuxParameter.P0506_TIMER_PROGRAM_CIRCULATION
+        assert description.device_key is DeviceKey.domestic_water
+        assert description.options == ["week", "weekday_weekend", "daily"]
+        assert description.entity_active_key == LuxParameter.P0085_DHW_CHARGING_PUMP
+        assert description.entity_active_formula == "!= 1"
+
     def test_parameter_strings_match_the_schedule_selectors(self):
         """The select and the schedule entities must drive the same register.
 
@@ -342,6 +351,9 @@ class TestTimerProgramSelects:
             ),
             SensorKey.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEK: (
                 LuxParameter.P0895_TIMER_PROGRAM_VENTILATION
+            ),
+            SensorKey.TIMER_CIRCULATION_SCHEDULE_WEEK: (
+                LuxParameter.P0506_TIMER_PROGRAM_CIRCULATION
             ),
         }
         for schedule_key, parameter in selectors.items():

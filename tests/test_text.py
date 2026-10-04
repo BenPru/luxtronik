@@ -96,8 +96,8 @@ class TestTimerScheduleTable:
         assert not problems, "\n".join(problems)
 
     def test_entity_count(self):
-        # 10 DHW + 10 heating + 10 ventilation day + 10 ventilation night
-        assert len(TIMER_SCHEDULE_ENTITIES) == 40
+        # 10 each: DHW, heating, ventilation day, ventilation night, circulation
+        assert len(TIMER_SCHEDULE_ENTITIES) == 50
 
     def test_row_counts_per_circuit(self):
         """DHW has 5 slots per day, the heating circuit only 3."""
@@ -192,6 +192,54 @@ class TestTimerScheduleTable:
             assert by_key[SK[f"TIMER_VENTILATION_{block}_SCHEDULE_WEEKDAY"]] == "5+2"
             assert by_key[SK[f"TIMER_VENTILATION_{block}_SCHEDULE_WEEKEND"]] == "5+2"
             assert by_key[SK[f"TIMER_VENTILATION_{block}_SCHEDULE_MONDAY"]] == "days"
+
+    def test_circulation_circuit(self):
+        """Selector 506 and windows 507-606, five rows a day (#310).
+
+        Spelled `SuZIPWo`/`SuZIP25`/`SuZIPTg` upstream - mixed case again,
+        unlike DHW's `WO`/`TG`.
+        """
+        from custom_components.luxtronik2.const import DeviceKey
+
+        by_key = {d.key: d for d in TIMER_SCHEDULE_ENTITIES}
+        week = by_key[SK.TIMER_CIRCULATION_SCHEDULE_WEEK]
+        assert week.device_key is DeviceKey.domestic_water
+        assert week.mode_selector_name == "ID_Einst_SuZIP_akt"
+        assert len(week.row_names) == 5
+        assert week.row_names[0] == (
+            "ID_Einst_SuZIPWo_zeit_0_0",
+            "ID_Einst_SuZIPWo_zeit_0_1",
+        )
+        assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_WEEKEND].row_names[0] == (
+            "ID_Einst_SuZIP25_zeit_0_2",
+            "ID_Einst_SuZIP25_zeit_0_3",
+        )
+        assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_SUNDAY].row_names[4] == (
+            "ID_Einst_SuZIPTg_zeit_4_12",
+            "ID_Einst_SuZIPTg_zeit_4_13",
+        )
+        assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_WEEKDAY].active_mode == "5+2"
+        assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_MONDAY].active_mode == "days"
+
+    def test_only_circulation_is_gated_on_the_zip_output(self):
+        """The controller shows its circulation menu only while "Warmwasser 2"
+        (P0085) is ZIP; on BLP the output is a DHW charging pump and the
+        circulation times mean nothing. The selector stands in as the
+        entity's own register for the #738 presence check.
+        """
+        from custom_components.luxtronik2.const import LuxParameter as LP
+
+        for d in TIMER_SCHEDULE_ENTITIES:
+            if d.luxtronik_key != LP.UNSET:
+                # `selector_key` and `mode_selector_name` name one register.
+                assert d.luxtronik_key.value == f"parameters.{d.mode_selector_name}"
+            if d.mode_selector_name == "ID_Einst_SuZIP_akt":
+                assert d.luxtronik_key == LP.P0506_TIMER_PROGRAM_CIRCULATION
+                assert d.entity_active_key == LP.P0085_DHW_CHARGING_PUMP
+                assert d.entity_active_formula == "!= 1"
+            else:
+                assert d.luxtronik_key == LP.UNSET, d.key
+                assert d.entity_active_key is None, d.key
 
     def test_every_row_is_a_pair_or_a_packed_register(self):
         for d in TIMER_SCHEDULE_ENTITIES:
@@ -768,6 +816,11 @@ class TestActiveScheduleDescriptions:
             SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEKEND,
             SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKDAY,
             SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEEKEND,
+        ]
+
+    def test_circulation_selector_yields_its_block(self):
+        assert self._call({"ID_Einst_SuZIP_akt": "week"}) == [
+            SK.TIMER_CIRCULATION_SCHEDULE_WEEK
         ]
 
     def test_unreadable_ventilation_selector_freezes_both_blocks(self):

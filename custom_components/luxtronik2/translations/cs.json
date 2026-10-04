@@ -118,6 +118,12 @@
             "pump_optimization": {
                 "name": "Optimalizace čerpadla"
             },
+            "circulation_on_time": {
+                "name": "Cirkulace TUV doba chodu v cyklu"
+            },
+            "circulation_off_time": {
+                "name": "Cirkulace TUV pauza v cyklu"
+            },
             "electrical_power_limitation_value": {
                 "name": "Limit výkonu"
             },
@@ -1203,6 +1209,36 @@
             },
             "timer_ventilation_night_schedule_sunday": {
                 "name": "Časový plán větrání noc (neděle)"
+            },
+            "timer_circulation_schedule_week": {
+                "name": "Časy chodu cirkulace TUV (týden)"
+            },
+            "timer_circulation_schedule_weekday": {
+                "name": "Časy chodu cirkulace TUV (pracovní dny)"
+            },
+            "timer_circulation_schedule_weekend": {
+                "name": "Časy chodu cirkulace TUV (víkend)"
+            },
+            "timer_circulation_schedule_monday": {
+                "name": "Časy chodu cirkulace TUV (pondělí)"
+            },
+            "timer_circulation_schedule_tuesday": {
+                "name": "Časy chodu cirkulace TUV (úterý)"
+            },
+            "timer_circulation_schedule_wednesday": {
+                "name": "Časy chodu cirkulace TUV (středa)"
+            },
+            "timer_circulation_schedule_thursday": {
+                "name": "Časy chodu cirkulace TUV (čtvrtek)"
+            },
+            "timer_circulation_schedule_friday": {
+                "name": "Časy chodu cirkulace TUV (pátek)"
+            },
+            "timer_circulation_schedule_saturday": {
+                "name": "Časy chodu cirkulace TUV (sobota)"
+            },
+            "timer_circulation_schedule_sunday": {
+                "name": "Časy chodu cirkulace TUV (neděle)"
             }
         },
         "select": {
@@ -1246,6 +1282,14 @@
             },
             "timer_ventilation_program": {
                 "name": "Časový program větrání",
+                "state": {
+                    "week": "Celý týden",
+                    "weekday_weekend": "Pracovní dny + víkend",
+                    "daily": "Jednotlivé dny"
+                }
+            },
+            "timer_circulation_program": {
+                "name": "Časový program cirkulace TUV",
                 "state": {
                     "week": "Celý týden",
                     "weekday_weekend": "Pracovní dny + víkend",

@@ -108,6 +108,8 @@
       "thermal_power_limitation_cooling": { "default": "mdi:snowflake" },
       "heating_target_correction": { "default": "mdi:plus-minus-variant" },
       "pump_optimization": { "default": "mdi:timer-settings" },
+      "circulation_on_time": { "default": "mdi:timer-play-outline" },
+      "circulation_off_time": { "default": "mdi:timer-pause-outline" },
       "heating_threshold": { "default": "mdi:download-outline" },
       "heating_min_flow_out_temperature": { "default": "mdi:waves-arrow-left" },
       "heating_curve_end_temperature": { "default": "mdi:chart-bell-curve" },

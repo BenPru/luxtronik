@@ -118,6 +118,12 @@
             "pump_optimization": {
                 "name": "Pompoptimalisatie"
             },
+            "circulation_on_time": {
+                "name": "Circulatiepomp looptijd per cyclus"
+            },
+            "circulation_off_time": {
+                "name": "Circulatiepomp pauze per cyclus"
+            },
             "electrical_power_limitation_value": {
                 "name": "Stroom limiet"
             },
@@ -1203,6 +1209,36 @@
             },
             "timer_ventilation_night_schedule_sunday": {
                 "name": "Ventilatie tijdschema nacht (zondag)"
+            },
+            "timer_circulation_schedule_week": {
+                "name": "Circulatiepomp vrijgavetijden (week)"
+            },
+            "timer_circulation_schedule_weekday": {
+                "name": "Circulatiepomp vrijgavetijden (werkdagen)"
+            },
+            "timer_circulation_schedule_weekend": {
+                "name": "Circulatiepomp vrijgavetijden (weekend)"
+            },
+            "timer_circulation_schedule_monday": {
+                "name": "Circulatiepomp vrijgavetijden (maandag)"
+            },
+            "timer_circulation_schedule_tuesday": {
+                "name": "Circulatiepomp vrijgavetijden (dinsdag)"
+            },
+            "timer_circulation_schedule_wednesday": {
+                "name": "Circulatiepomp vrijgavetijden (woensdag)"
+            },
+            "timer_circulation_schedule_thursday": {
+                "name": "Circulatiepomp vrijgavetijden (donderdag)"
+            },
+            "timer_circulation_schedule_friday": {
+                "name": "Circulatiepomp vrijgavetijden (vrijdag)"
+            },
+            "timer_circulation_schedule_saturday": {
+                "name": "Circulatiepomp vrijgavetijden (zaterdag)"
+            },
+            "timer_circulation_schedule_sunday": {
+                "name": "Circulatiepomp vrijgavetijden (zondag)"
             }
         },
         "select": {
@@ -1246,6 +1282,14 @@
             },
             "timer_ventilation_program": {
                 "name": "Ventilatie tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
+            "timer_circulation_program": {
+                "name": "Circulatiepomp tijdprogramma",
                 "state": {
                     "week": "Hele week",
                     "weekday_weekend": "Werkdagen + weekend",

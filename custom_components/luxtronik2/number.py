@@ -34,6 +34,21 @@ from .number_entities_predefined import NUMBER_SENSORS
 
 PARALLEL_UPDATES = 1
 
+# The controller's circulation "Taktzeiten" menu steps by 1 min up to 10 min
+# and by 5 min above that (manual 83055200o, p. 28). HA numbers have a single
+# step, so a value the menu could not set is snapped before it is written.
+_CIRCULATION_CYCLE_KEYS = frozenset(
+    {SensorKey.CIRCULATION_ON_TIME, SensorKey.CIRCULATION_OFF_TIME}
+)
+
+
+def _snap_circulation_cycle_minutes(value: float) -> int:
+    """Round to whole minutes up to 10, and to the nearest 5 above."""
+    minutes = round(value)
+    if minutes <= 10:
+        return minutes
+    return max(10, 5 * round(minutes / 5))
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -146,6 +161,8 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
                 value,
             )
             return
+        if self.entity_description.key in _CIRCULATION_CYCLE_KEYS:
+            value = _snap_circulation_cycle_minutes(value)
 
         self._pending_value = value
         await self._debouncer.async_call()
