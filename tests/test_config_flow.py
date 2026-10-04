@@ -20,11 +20,13 @@ from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
+    CONF_RBE_CALCULATED_ROOM_TARGET,
     CONF_UPDATE_INTERVAL,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
     DOMAIN,
+    LuxRoomThermostatType,
 )
 from custom_components.luxtronik2.coordinator import (
     LuxtronikConnectionError,
@@ -777,6 +779,70 @@ class TestOptionsFlow:
         flow.async_create_entry.assert_called_once()
         call_kwargs = flow.async_create_entry.call_args[1]
         assert call_kwargs["data"][CONF_UPDATE_INTERVAL] == "1 minute (default)"
+
+    @staticmethod
+    def _entry_with_thermostat(rt, options=None):
+        entry = MagicMock()
+        entry.data = {CONF_HOST: "1.2.3.4", CONF_PORT: 8889}
+        entry.options = options or {}
+        entry.title = "Test HP"
+        entry.runtime_data.room_thermostat_type = rt
+        return entry
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("rt", "shown"),
+        [
+            (LuxRoomThermostatType.rbe, True),
+            (LuxRoomThermostatType.rbe_plus, False),
+            (LuxRoomThermostatType.smart, False),
+            (LuxRoomThermostatType.none, False),
+            (None, False),
+        ],
+    )
+    async def test_rbe_option_only_for_plain_rbe(self, rt, shown):
+        flow = _make_options_flow(self._entry_with_thermostat(rt))
+        flow.hass = MagicMock()
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        await flow.async_step_user(None)
+        schema = flow.async_show_form.call_args[1]["data_schema"]
+        keys = {str(k) for k in schema.schema}
+        assert (CONF_RBE_CALCULATED_ROOM_TARGET in keys) is shown
+
+    @pytest.mark.asyncio
+    async def test_rbe_option_hidden_when_entry_not_loaded(self):
+        entry = self._entry_with_thermostat(None)
+        del entry.runtime_data  # an unloaded entry has no runtime_data
+        flow = _make_options_flow(entry)
+        flow.hass = MagicMock()
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        await flow.async_step_user(None)
+        schema = flow.async_show_form.call_args[1]["data_schema"]
+        assert CONF_RBE_CALCULATED_ROOM_TARGET not in {str(k) for k in schema.schema}
+
+    @pytest.mark.asyncio
+    async def test_rbe_option_saved(self):
+        flow = _make_options_flow(
+            self._entry_with_thermostat(LuxRoomThermostatType.rbe)
+        )
+        flow.hass = MagicMock()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+        await flow.async_step_user({CONF_RBE_CALCULATED_ROOM_TARGET: True})
+        data = flow.async_create_entry.call_args[1]["data"]
+        assert data[CONF_RBE_CALCULATED_ROOM_TARGET] is True
+
+    @pytest.mark.asyncio
+    async def test_rbe_option_kept_when_field_hidden(self):
+        flow = _make_options_flow(
+            self._entry_with_thermostat(
+                None, options={CONF_RBE_CALCULATED_ROOM_TARGET: True}
+            )
+        )
+        flow.hass = MagicMock()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+        await flow.async_step_user({})
+        data = flow.async_create_entry.call_args[1]["data"]
+        assert data[CONF_RBE_CALCULATED_ROOM_TARGET] is True
 
     @pytest.mark.asyncio
     async def test_step_user_clears_legacy_indoor_temp_from_data(self):

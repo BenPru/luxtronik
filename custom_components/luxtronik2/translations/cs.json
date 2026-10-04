@@ -1479,12 +1479,14 @@
                 "data": {
                     "ha_sensor_indoor_temperature": "ID senzoru vnitřní teploty",
                     "ha_sensor_current_power_consumption": "ID senzoru aktuální spotřeby energie",
-                    "update_interval": "Interval aktualizace"
+                    "update_interval": "Interval aktualizace",
+                    "rbe_calculated_room_target": "Nastavit cílovou teplotu místnosti v Home Assistant (RBE)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Termostat pro řízení vytápění je vytvořen v Home Assistant. Skutečná teplota je nastavena senzorem Home Assistant.\nPokud je Luxtronik připojen k hardwarovému pokojovému termostatu, ponechte toto pole prázdné.",
                     "ha_sensor_current_power_consumption": "Pokud je vestavěné měření aktuální spotřeby energie tepelného čerpadla nepřesné, lze pro výpočty COP (vytápění/TUV) místo toho použít externí senzor výkonu Home Assistant (např. chytrou zásuvku). Toto nezmění hodnotu zobrazovanou samotným senzorem aktuální spotřeby energie.\nPonechte prázdné pro použití vestavěného měření tepelného čerpadla.",
-                    "update_interval": "Jak často se má tepelné čerpadlo dotazovat na nová data."
+                    "update_interval": "Jak často se má tepelné čerpadlo dotazovat na nová data.",
+                    "rbe_calculated_room_target": "Cíl termostatu vytápění se stane teplotou místnosti. Home Assistant upravuje korekci topné křivky (Teplota +/-) tak, aby se tepelné čerpadlo chovalo, jako by byl kolečko RBE nastaven na tento cíl. Cíl se smí od kolečka RBE lišit nejvýše o 5 K dělené faktorem vlivu prostorové teploty. Vlastní útlumový program RBE je přepsán. Tepelné čerpadlo reguluje podle vlastního měření teploty místnosti v RBE: výše zvolený senzor vnitřní teploty se pouze zobrazuje na kartě a pro tuto funkci se nepoužívá."
                 }
             }
         }

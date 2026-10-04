@@ -83,6 +83,9 @@ PARSED_COUNT_ATTR: Final = "luxtronik_parsed_count"
 CONF_HA_SENSOR_PREFIX: Final = "ha_sensor_prefix"
 CONF_HA_SENSOR_INDOOR_TEMPERATURE: Final = "ha_sensor_indoor_temperature"
 CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION: Final = "ha_sensor_current_power_consumption"
+# Opt-in for plain RBE units: the heating climate target becomes a room
+# temperature that is turned into the P0001 curve correction (issue #684).
+CONF_RBE_CALCULATED_ROOM_TARGET: Final = "rbe_calculated_room_target"
 
 CONF_MAX_DATA_LENGTH: Final = "max_data_length"
 

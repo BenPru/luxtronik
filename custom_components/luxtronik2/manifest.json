@@ -43,8 +43,7 @@
   ],
   "requirements": [
     "luxtronik==0.3.14",
-    "getmac~=0.9.5",
-    "packaging>=26.2"
+    "getmac~=0.9.5"
   ],
-  "version": "2026.09.25"
+  "version": "2026.09.29"
 }

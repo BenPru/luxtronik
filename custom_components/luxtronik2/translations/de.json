@@ -1479,12 +1479,14 @@
                 "data": {
                     "ha_sensor_indoor_temperature": "Sensor-ID für die Raumtemperatur",
                     "ha_sensor_current_power_consumption": "Sensor-ID für den aktuellen Stromverbrauch",
-                    "update_interval": "Aktualisierungsintervall"
+                    "update_interval": "Aktualisierungsintervall",
+                    "rbe_calculated_room_target": "Raumsolltemperatur in Home Assistant einstellen (RBE)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Ein Thermostat zur Heizungssteuerung wird in Home Assistant erstellt. Die tatsächliche Temperatur wird von einem Home Assistant-Sensor gesetzt.\nWenn Luxtronik mit einem Hardware-Raumthermostat verbunden ist, sollte dieses Feld leer bleiben.",
                     "ha_sensor_current_power_consumption": "Wenn die eingebaute Messung des aktuellen Stromverbrauchs der Wärmepumpe ungenau ist, kann stattdessen ein externer Home Assistant-Stromsensor (z. B. eine Smart-Steckdose) für die COP-Berechnungen (Heizung/Warmwasser) verwendet werden. Dies ändert nicht, was der Sensor für den aktuellen Stromverbrauch selbst anzeigt.\nLeer lassen, um die eingebaute Messung der Wärmepumpe zu verwenden.",
-                    "update_interval": "Wie oft die Wärmepumpe nach neuen Daten abgefragt wird."
+                    "update_interval": "Wie oft die Wärmepumpe nach neuen Daten abgefragt wird.",
+                    "rbe_calculated_room_target": "Der Sollwert des Heizungsthermostats wird zu einer Raumtemperatur. Home Assistant passt die Heizkurvenkorrektur (Temperatur +/-) so an, dass sich die Wärmepumpe verhält, als wäre das RBE-Rad auf diesen Wert eingestellt. Der Sollwert darf höchstens 5 K geteilt durch den Raumeinflussfaktor vom RBE-Rad abweichen. Das eigene Absenkprogramm des RBE wird übersteuert. Die Wärmepumpe regelt auf die eigene Raumtemperatur des RBE: ein oben gewählter Innentemperatursensor wird nur auf der Karte angezeigt und hierfür nicht verwendet."
                 }
             }
         }
