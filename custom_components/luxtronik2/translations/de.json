@@ -118,6 +118,12 @@
             "pump_optimization": {
                 "name": "Pumpenoptimierung"
             },
+            "circulation_on_time": {
+                "name": "Zirkulation Taktzeit Ein"
+            },
+            "circulation_off_time": {
+                "name": "Zirkulation Taktzeit Aus"
+            },
             "electrical_power_limitation_value": {
                 "name": "Leistungslimit"
             },
@@ -1203,6 +1209,36 @@
             },
             "timer_ventilation_night_schedule_sunday": {
                 "name": "Lüftungs-Zeitschaltplan Nacht (Sonntag)"
+            },
+            "timer_circulation_schedule_week": {
+                "name": "Zirkulation Schaltzeiten (Woche)"
+            },
+            "timer_circulation_schedule_weekday": {
+                "name": "Zirkulation Schaltzeiten (Werktage)"
+            },
+            "timer_circulation_schedule_weekend": {
+                "name": "Zirkulation Schaltzeiten (Wochenende)"
+            },
+            "timer_circulation_schedule_monday": {
+                "name": "Zirkulation Schaltzeiten (Montag)"
+            },
+            "timer_circulation_schedule_tuesday": {
+                "name": "Zirkulation Schaltzeiten (Dienstag)"
+            },
+            "timer_circulation_schedule_wednesday": {
+                "name": "Zirkulation Schaltzeiten (Mittwoch)"
+            },
+            "timer_circulation_schedule_thursday": {
+                "name": "Zirkulation Schaltzeiten (Donnerstag)"
+            },
+            "timer_circulation_schedule_friday": {
+                "name": "Zirkulation Schaltzeiten (Freitag)"
+            },
+            "timer_circulation_schedule_saturday": {
+                "name": "Zirkulation Schaltzeiten (Samstag)"
+            },
+            "timer_circulation_schedule_sunday": {
+                "name": "Zirkulation Schaltzeiten (Sonntag)"
             }
         },
         "select": {
@@ -1246,6 +1282,14 @@
             },
             "timer_ventilation_program": {
                 "name": "Lüftung Zeitprogramm",
+                "state": {
+                    "week": "Ganze Woche",
+                    "weekday_weekend": "Werktage + Wochenende",
+                    "daily": "Einzelne Tage"
+                }
+            },
+            "timer_circulation_program": {
+                "name": "Zirkulation Zeitprogramm",
                 "state": {
                     "week": "Ganze Woche",
                     "weekday_weekend": "Werktage + Wochenende",

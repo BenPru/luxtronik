@@ -141,6 +141,84 @@ Two limits are deliberate: the hold never *starts* a `domestic_water` state on i
 
 A visible side effect: for up to 5 minutes after *any* domestic-water cycle ends, not just before a disinfection run, the Status sensor lingers on `domestic_water` while the pump is still circulating.
 
+## Circulation Pump Control
+
+The controller has no "circulation pump on" command; it runs the circulation pump (ZIP) from its own **timer schedule**, cycling it on and off inside each programmed window. The integration exposes that schedule and the cycle times on the DHW device, so on-demand or presence-based circulation is a matter of rewriting the schedule from an automation. The entities, and what each value means, are described in [Timer Schedules: Circulation Pump](TIMER_SCHEDULES.md#circulation-pump-timer-schedule-release-times). The **Circulation pump** binary sensor shows whether the pump is actually running.
+
+They only exist while the controller's *Warmwasser 2* setting is **ZIP**. If yours is set to BLP, the output charges the hot water tank and there is no circulation function to control.
+
+> **⚠️ Do not write parameter 85 (`ID_Einst_BWZIP_akt`) to switch the pump.** It is the *Warmwasser 2* setting itself: it changes what the output *is* (circulation pump or tank charging pump), not whether it runs. Earlier advice in [#310](https://github.com/BenPru/luxtronik/issues/310) used it as an on/off switch. It looked like one because on BLP the output runs only while hot water is being heated (and 30 seconds after), which is also why the pump "still turned itself on" for long stretches.
+
+### Presence- or demand-based circulation
+
+Keep your normal schedule in a **Text helper** (for example `input_text.circulation_normal_schedule` holding `06:00-08:00/17:00-22:00`), clear the circulation schedule while the pump is not wanted, and write the helper back when it is. Restoring from the helper rather than from the schedule's own previous state means a re-triggered automation can never "restore" a temporary value.
+
+The examples assume the *Whole week* program; with another shape, target that shape's entity. Entity IDs start with your integration's sensor prefix — `luxtronik_<serial>` on a new install — so copy the real ID from the entity's settings into the `schedule` variable.
+
+```yaml
+alias: Circulation follows presence
+mode: restart
+triggers:
+  - trigger: state
+    entity_id: zone.home
+variables:
+  schedule: text.luxtronik_<serial>_timer_circulation_schedule_week
+actions:
+  - action: text.set_value
+    target:
+      entity_id: "{{ schedule }}"
+    data:
+      value: >-
+        {{ states('input_text.circulation_normal_schedule')
+           if states('zone.home') | int(0) > 0 else '' }}
+```
+
+For a one-off run (a bathroom motion sensor, a button), release the pump all day, wait, and put the normal schedule back. With `mode: restart` a new trigger simply extends the run:
+
+```yaml
+alias: Run circulation pump now
+mode: restart
+sequence:
+  - variables:
+      schedule: text.luxtronik_<serial>_timer_circulation_schedule_week
+  - action: text.set_value
+    target:
+      entity_id: "{{ schedule }}"
+    data:
+      value: "00:00-23:59"
+  - delay: "00:05:00"
+  - action: text.set_value
+    target:
+      entity_id: "{{ schedule }}"
+    data:
+      value: "{{ states('input_text.circulation_normal_schedule') }}"
+```
+
+Two things to keep in mind:
+
+- **The pump still cycles inside the window.** At the factory 5/5 *Taktzeiten* it may be in its pause when you release it. Set **Circulation pump pause per cycle** to `0` once if you want it to run continuously whenever it is released.
+- **Each schedule change is a controller write**, followed by a read-back to confirm it. Switch on presence or on demand, not every minute.
+
+Older posts in #310 do the same with `luxtronik2.write` on the raw `ID_Einst_SuZIPWo_zeit_*` registers (seconds since midnight). That still works, but the schedule entities take `HH:MM` and validate the windows for you.
+
+### Alternatives outside this integration
+
+- **Modbus (SHI interface).** Recent firmware also offers a Modbus TCP interface, and two owners on V3.92.1 report that holding register `10070` switches the circulation pump directly, using Home Assistant's own [Modbus integration](https://www.home-assistant.io/integrations/modbus/). Without `verify:` the pump was reported to stop again after about 10 minutes. This integration does not use the Modbus interface; that may change once the underlying [python-luxtronik](https://github.com/Bouni/python-luxtronik) library supports it.
+
+  ```yaml
+  modbus:
+    - name: heatpump_modbus
+      type: tcp
+      host: 192.168.1.10  # your heat pump
+      port: 502
+      switches:
+        - name: "Circulation pump"
+          address: 10070
+          verify:
+  ```
+
+- **A smart plug** in the pump's supply, switched by Home Assistant. Leave the controller's schedule released all day so the plug alone decides.
+
 ## Firmware Update Entity
 
 The **Firmware** update entity checks Alpha Innotec's public download portal (once per hour) for a newer firmware build than the one currently installed, comparing versions semantically. If a newer version exists, its release notes panel shows: a link to the manufacturer's firmware page for your specific model, a direct download link, localized (German/English) update instructions, and the raw change log fetched from the portal.

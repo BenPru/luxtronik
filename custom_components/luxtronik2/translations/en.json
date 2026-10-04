@@ -118,6 +118,12 @@
             "pump_optimization": {
                 "name": "Pump optimization"
             },
+            "circulation_on_time": {
+                "name": "Circulation pump run time per cycle"
+            },
+            "circulation_off_time": {
+                "name": "Circulation pump pause per cycle"
+            },
             "electrical_power_limitation_value": {
                 "name": "Power limit"
             },
@@ -1203,6 +1209,36 @@
             },
             "timer_ventilation_night_schedule_sunday": {
                 "name": "Ventilation Night Schedule (Sunday)"
+            },
+            "timer_circulation_schedule_week": {
+                "name": "Circulation Pump Release Times (Week)"
+            },
+            "timer_circulation_schedule_weekday": {
+                "name": "Circulation Pump Release Times (Weekdays)"
+            },
+            "timer_circulation_schedule_weekend": {
+                "name": "Circulation Pump Release Times (Weekend)"
+            },
+            "timer_circulation_schedule_monday": {
+                "name": "Circulation Pump Release Times (Monday)"
+            },
+            "timer_circulation_schedule_tuesday": {
+                "name": "Circulation Pump Release Times (Tuesday)"
+            },
+            "timer_circulation_schedule_wednesday": {
+                "name": "Circulation Pump Release Times (Wednesday)"
+            },
+            "timer_circulation_schedule_thursday": {
+                "name": "Circulation Pump Release Times (Thursday)"
+            },
+            "timer_circulation_schedule_friday": {
+                "name": "Circulation Pump Release Times (Friday)"
+            },
+            "timer_circulation_schedule_saturday": {
+                "name": "Circulation Pump Release Times (Saturday)"
+            },
+            "timer_circulation_schedule_sunday": {
+                "name": "Circulation Pump Release Times (Sunday)"
             }
         },
         "select": {
@@ -1246,6 +1282,14 @@
             },
             "timer_ventilation_program": {
                 "name": "Ventilation timer program",
+                "state": {
+                    "week": "Whole week",
+                    "weekday_weekend": "Weekdays + weekend",
+                    "daily": "Per day"
+                }
+            },
+            "timer_circulation_program": {
+                "name": "Circulation pump timer program",
                 "state": {
                     "week": "Whole week",
                     "weekday_weekend": "Weekdays + weekend",

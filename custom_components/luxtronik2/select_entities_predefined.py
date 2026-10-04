@@ -103,6 +103,18 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         options=timer_program_options,
         raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
     ),
+    # Only while "Warmwasser 2" (P0085) drives the output as a circulation
+    # pump (ZIP); on BLP it charges the DHW tank and has no program (#310).
+    LuxtronikSelectEntityDescription(
+        key=SK.TIMER_CIRCULATION_PROGRAM,
+        device_key=DeviceKey.domestic_water,
+        luxtronik_key=LuxParameter.P0506_TIMER_PROGRAM_CIRCULATION,
+        entity_category=EntityCategory.CONFIG,
+        options=timer_program_options,
+        raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
+        entity_active_key=LuxParameter.P0085_DHW_CHARGING_PUMP,
+        entity_active_formula="!= 1",
+    ),
     LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_SELECTOR,
         device_key=DeviceKey.heating,

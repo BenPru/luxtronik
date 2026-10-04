@@ -118,6 +118,12 @@
             "pump_optimization": {
                 "name": "Optymalizacja pompy"
             },
+            "circulation_on_time": {
+                "name": "Pompa cyrkulacyjna czas pracy w cyklu"
+            },
+            "circulation_off_time": {
+                "name": "Pompa cyrkulacyjna przerwa w cyklu"
+            },
             "heating_threshold": {
                 "name": "Próg ogrzewania"
             },
@@ -1203,6 +1209,36 @@
             },
             "timer_ventilation_night_schedule_sunday": {
                 "name": "Harmonogram czasowy wentylacji noc (niedziela)"
+            },
+            "timer_circulation_schedule_week": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (tydzień)"
+            },
+            "timer_circulation_schedule_weekday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (dni robocze)"
+            },
+            "timer_circulation_schedule_weekend": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (weekend)"
+            },
+            "timer_circulation_schedule_monday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (poniedziałek)"
+            },
+            "timer_circulation_schedule_tuesday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (wtorek)"
+            },
+            "timer_circulation_schedule_wednesday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (środa)"
+            },
+            "timer_circulation_schedule_thursday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (czwartek)"
+            },
+            "timer_circulation_schedule_friday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (piątek)"
+            },
+            "timer_circulation_schedule_saturday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (sobota)"
+            },
+            "timer_circulation_schedule_sunday": {
+                "name": "Czasy pracy pompy cyrkulacyjnej (niedziela)"
             }
         },
         "select": {
@@ -1246,6 +1282,14 @@
             },
             "timer_ventilation_program": {
                 "name": "Program czasowy wentylacji",
+                "state": {
+                    "week": "Cały tydzień",
+                    "weekday_weekend": "Dni robocze + weekend",
+                    "daily": "Poszczególne dni"
+                }
+            },
+            "timer_circulation_program": {
+                "name": "Program czasowy pompy cyrkulacyjnej",
                 "state": {
                     "week": "Cały tydzień",
                     "weekday_weekend": "Dni robocze + weekend",

@@ -456,6 +456,7 @@ class LuxParameter(StrEnum):
     P0004_MODE_DHW = "parameters.ID_Ba_Bw_akt"
     P0222_TIMER_PROGRAM_HEATING = "parameters.ID_Einst_SuHkr_akt"
     P0405_TIMER_PROGRAM_DHW = "parameters.ID_Einst_SUBW_akt2"
+    P0506_TIMER_PROGRAM_CIRCULATION = "parameters.ID_Einst_SuZIP_akt"
     # luxtronik*_heating_curve*
     P0011_HEATING_CURVE_END_TEMPERATURE = "parameters.ID_Einst_HzHwHKE_akt"
     P0012_HEATING_CURVE_PARALLEL_SHIFT_TEMPERATURE = "parameters.ID_Einst_HzHKRANH_akt"
@@ -524,6 +525,9 @@ class LuxParameter(StrEnum):
     P0679_VENTING_ZUP_ACTIVE = "parameters.ID_Einst_Entl_Typ_1"
     P0695_MODE_HZ_MK1 = "parameters.ID_Ba_Hz_MK1_akt"
     P0696_MODE_HZ_MK2 = "parameters.ID_Ba_Hz_MK2_akt"
+    # Circulation pump "Taktzeiten": minutes on / off within a release window.
+    P0697_CIRCULATION_ON_TIME = "parameters.ID_Einst_Zirk_Ein_akt"
+    P0698_CIRCULATION_OFF_TIME = "parameters.ID_Einst_Zirk_Aus_akt"
     P0779_MODE_HZ_MK3 = "parameters.ID_Ba_Hz_MK3_akt"
     P0699_HEATING_THRESHOLD = "parameters.ID_Einst_Heizgrenze"
     P0700_HEATING_THRESHOLD_TEMPERATURE = "parameters.ID_Einst_Heizgrenze_Temp"
@@ -975,6 +979,8 @@ class SensorKey(StrEnum):
     RELEASE_TIME_SECOND_HEAT_GENERATOR = "release_time_second_heat_generator"
     HEATING_TARGET_CORRECTION = "heating_target_correction"
     PUMP_OPTIMIZATION_TIME = "pump_optimization_time"
+    CIRCULATION_ON_TIME = "circulation_on_time"
+    CIRCULATION_OFF_TIME = "circulation_off_time"
     HEATING_THRESHOLD_TEMPERATURE = "heating_threshold_temperature"
     HEATING_MIN_FLOW_OUT_TEMPERATURE = "heating_min_flow_out_temperature"
     HEATING_CONTROL_CIRCUIT_MODE = "heating_control_circuit_mode"
@@ -1079,6 +1085,7 @@ class SensorKey(StrEnum):
     TIMER_DHW_PROGRAM = "timer_dhw_program"
     TIMER_HEATING_PROGRAM = "timer_heating_program"
     TIMER_VENTILATION_PROGRAM = "timer_ventilation_program"
+    TIMER_CIRCULATION_PROGRAM = "timer_circulation_program"
     TIMER_DHW_SCHEDULE_WEEK = "timer_dhw_schedule_week"
     TIMER_DHW_SCHEDULE_WEEKDAY = "timer_dhw_schedule_weekday"
     TIMER_DHW_SCHEDULE_WEEKEND = "timer_dhw_schedule_weekend"
@@ -1137,6 +1144,17 @@ class SensorKey(StrEnum):
         "timer_ventilation_night_schedule_saturday"
     )
     TIMER_VENTILATION_NIGHT_SCHEDULE_SUNDAY = "timer_ventilation_night_schedule_sunday"
+
+    TIMER_CIRCULATION_SCHEDULE_WEEK = "timer_circulation_schedule_week"
+    TIMER_CIRCULATION_SCHEDULE_WEEKDAY = "timer_circulation_schedule_weekday"
+    TIMER_CIRCULATION_SCHEDULE_WEEKEND = "timer_circulation_schedule_weekend"
+    TIMER_CIRCULATION_SCHEDULE_MONDAY = "timer_circulation_schedule_monday"
+    TIMER_CIRCULATION_SCHEDULE_TUESDAY = "timer_circulation_schedule_tuesday"
+    TIMER_CIRCULATION_SCHEDULE_WEDNESDAY = "timer_circulation_schedule_wednesday"
+    TIMER_CIRCULATION_SCHEDULE_THURSDAY = "timer_circulation_schedule_thursday"
+    TIMER_CIRCULATION_SCHEDULE_FRIDAY = "timer_circulation_schedule_friday"
+    TIMER_CIRCULATION_SCHEDULE_SATURDAY = "timer_circulation_schedule_saturday"
+    TIMER_CIRCULATION_SCHEDULE_SUNDAY = "timer_circulation_schedule_sunday"
 
 
 # endregion Keys

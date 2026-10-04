@@ -331,8 +331,10 @@ class LuxtronikTimerScheduleTextDescription(
     """Class describing a single timer-program schedule block as an editable text entity.
 
     Reads/writes multiple raw Luxtronik parameters (one row per window) as a
-    delimited "start-end/start-end/..." string, so ``luxtronik_key`` is left
-    unused (stays at its ``LuxParameter.UNSET`` default).
+    delimited "start-end/start-end/..." string, so ``luxtronik_key`` is not
+    read for state. It stays at its ``LuxParameter.UNSET`` default, except on
+    a circuit gated through ``entity_active_key``, which names its mode
+    selector there for `entity_active`'s own-register check (#738, #310).
 
     Each ``row_names`` entry is one window of the block, in one of two
     register layouts:

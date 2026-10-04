@@ -196,6 +196,56 @@ class TestNumberAsyncSetValue:
         entity.coordinator.async_write.assert_not_awaited()
 
 
+class TestCirculationCycleTimes:
+    """The controller's "Taktzeiten" menu steps by 1 min up to 10 and by 5 min
+    above that (Lux 2.0/2.1 manual 83055200o, p. 28), so a value it could not
+    set itself is snapped before it is written (#310).
+    """
+
+    @staticmethod
+    def _entity(key: SensorKey):
+        description = next(d for d in NUMBER_SENSORS if d.key == key)
+        entity = _make_number_entity(make_coordinator_data(), description)
+        entity._debouncer = MagicMock()
+        entity._debouncer.async_call = AsyncMock()
+        return entity
+
+    @pytest.mark.parametrize(
+        ("requested", "written"),
+        [(0, 0), (1, 1), (7, 7), (10, 10), (12, 10), (13, 15), (118, 120)],
+    )
+    @pytest.mark.asyncio
+    async def test_value_is_snapped_to_a_controller_step(self, requested, written):
+        for key in (SensorKey.CIRCULATION_ON_TIME, SensorKey.CIRCULATION_OFF_TIME):
+            entity = self._entity(key)
+            await entity.async_set_native_value(float(requested))
+            assert entity._pending_value == written, key
+            # Load-bearing: Luxtronik.write drops any value that is not an
+            # int, and these Unknown registers pass it through unconverted.
+            assert type(entity._pending_value) is int, key
+
+    @pytest.mark.asyncio
+    async def test_other_numbers_are_not_snapped(self):
+        entity = _make_number_entity()
+        entity._debouncer = MagicMock()
+        entity._debouncer.async_call = AsyncMock()
+        await entity.async_set_native_value(13.0)
+        assert entity._pending_value == 13.0
+
+    def test_ranges_follow_the_manual(self):
+        """On: 1-120 min. Off: 0-120 min, where 0 runs the pump without
+        pause for the whole release window.
+        """
+        on = next(d for d in NUMBER_SENSORS if d.key == SensorKey.CIRCULATION_ON_TIME)
+        off = next(d for d in NUMBER_SENSORS if d.key == SensorKey.CIRCULATION_OFF_TIME)
+        assert (on.native_min_value, on.native_max_value) == (1, 120)
+        assert (off.native_min_value, off.native_max_value) == (0, 120)
+        assert on.luxtronik_key == LP.P0697_CIRCULATION_ON_TIME
+        assert off.luxtronik_key == LP.P0698_CIRCULATION_OFF_TIME
+        assert on.device_key is DeviceKey.domestic_water
+        assert off.device_key is DeviceKey.domestic_water
+
+
 # ===========================================================================
 # formatted_data (TIMESTAMP_LAST_OVER)
 # ===========================================================================
