@@ -2116,6 +2116,14 @@ class TestDetectionMethods:
         )
         assert coord._detect_solar_present() is True
 
+    @pytest.mark.parametrize(("flag", "expected"), [(1, True), (0, False)])
+    def test_has_solar_is_the_detection(self, flag, expected):
+        coord = _make_coordinator(
+            visibilities={"ID_Visi_Solar": flag},
+            parameters={"ID_BSTD_Solar": 0},
+        )
+        assert coord.has_solar is expected
+
     def test_detect_solar_by_operation_hours(self):
         coord = _make_coordinator(
             visibilities={"ID_Visi_Solar": 0},
@@ -2123,7 +2131,10 @@ class TestDetectionMethods:
         )
         assert coord._detect_solar_present() is True
 
-    def test_detect_solar_by_collector_temp(self):
+    def test_detect_solar_ignores_collector_temp(self):
+        # The only unit in the diagnostics corpus with solar reads 5.0 on its
+        # collector sensor, and every unit with V0038 set reads 5.0 too, so
+        # the collector reading carries no evidence either way (#820).
         coord = _make_coordinator(
             visibilities={
                 "ID_Visi_Solar": 0,
@@ -2132,19 +2143,54 @@ class TestDetectionMethods:
             parameters={"ID_BSTD_Solar": 0},
             calculations={"ID_WEB_Temperatur_TSK": 25.0},
         )
-        assert coord._detect_solar_present() is True
+        assert coord._detect_solar_present() is False
 
     def test_detect_solar_by_buffer_temp(self):
         coord = _make_coordinator(
+            visibilities={"ID_Visi_Solar": 0},
+            parameters={"ID_BSTD_Solar": 0},
+            calculations={"ID_WEB_Temperatur_TSS": 50.0},
+        )
+        assert coord._detect_solar_present() is True
+
+    @pytest.mark.parametrize(
+        "buffer_temp",
+        [
+            # An unwired buffer sensor reads 150.0 on 13 corpus units and 0.0
+            # on 18 others - the 0.0 ones all detected phantom solar (#820).
+            0.0,
+            150.0,
+            None,
+        ],
+    )
+    def test_detect_solar_ignores_unwired_buffer_sensor(self, buffer_temp):
+        coord = _make_coordinator(
             visibilities={
                 "ID_Visi_Solar": 0,
-                "ID_Visi_Temp_Solarkoll": 0,
+                "ID_Visi_Temp_Solarkoll": 1,
                 "ID_Visi_Temp_Solarsp": 1,
             },
             parameters={"ID_BSTD_Solar": 0},
             calculations={
                 "ID_WEB_Temperatur_TSK": 5.0,
-                "ID_WEB_Temperatur_TSS": 50.0,
+                "ID_WEB_Temperatur_TSS": buffer_temp,
+            },
+        )
+        assert coord._detect_solar_present() is False
+
+    def test_detect_solar_known_false_positive_buffer_mirrors_dhw(self):
+        # Known false positive, kept on purpose: an LWC407 on V1.90.0
+        # (210304_08d) copies its DHW sensor into TSS (40.8/40.8 and
+        # 44.4/44.4 in two dumps) with no solar fitted. Treating a mirror as
+        # "no solar" would also hide a real solar system whose buffer sensor
+        # sits in the DHW tank and happens to read the same value.
+        coord = _make_coordinator(
+            visibilities={"ID_Visi_Solar": 0},
+            parameters={"ID_BSTD_Solar": 0},
+            calculations={
+                "ID_WEB_Temperatur_TSK": 0.0,
+                "ID_WEB_Temperatur_TSS": 44.4,
+                "ID_WEB_Temperatur_TBW": 44.4,
             },
         )
         assert coord._detect_solar_present() is True

@@ -323,7 +323,7 @@ Air-source heat pumps periodically defrost their outdoor unit by briefly reversi
 
 ## Solar Thermal Collector
 
-If your system has an integrated **solar thermal collector** feeding the DHW tank (not to be confused with solar PV / electricity generation, which this integration doesn't monitor directly), several entities appear under the DHW device once the heat pump reports a collector is present:
+If your system has an integrated **solar thermal collector** feeding the DHW tank (not to be confused with solar PV / electricity generation, which this integration doesn't monitor directly), several entities appear under the DHW device once the heat pump reports solar - its solar flag, solar operating hours, or a live solar buffer temperature:
 - **Solar Collector** / **Solar Buffer** temperature sensors,
 - **Solar Pump** running-state binary sensor and its operating-hours counter,
 - Configuration numbers for the solar pump's on/off temperature-difference thresholds (collector vs. tank) and the maximum collector temperature.

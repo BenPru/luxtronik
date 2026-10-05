@@ -25,10 +25,12 @@ from homeassistant.exceptions import (
 )
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
 from homeassistant.helpers.entity_registry import (
+    async_entries_for_device,
     async_get,
 )
 
 from . import log_capture  # noqa: F401 - attaches the diagnostics log-capture handler
+from .binary_sensor_entities_predefined import BINARY_SENSORS
 from .common import normalize_write_value
 from .const import (
     ATTR_PARAMETER,
@@ -45,9 +47,13 @@ from .const import (
     SERVICE_WRITE,
     SERVICE_WRITE_SCHEMA,
     WRITABLE_PARAMETER_PREFIXES,
+    DeviceKey,
+    LuxVisibility as LV,
     SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
+from .number_entities_predefined import NUMBER_SENSORS
+from .sensor_entities_predefined import SENSORS
 
 # endregion Imports
 
@@ -121,6 +127,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     await _async_delete_legacy_devices(hass, entry, coordinator)
     await _async_remove_legacy_smart_grid_switch(hass, entry)
     await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
+    await _async_remove_undetected_solar_entities(hass, entry, coordinator)
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
@@ -655,6 +662,69 @@ async def _async_remove_withdrawn_ventilation_schedule_entities(
                 "TIMER_SCHEDULES.md for why it is gone",
                 entity_id,
             )
+
+
+_SOLAR_VISIBILITIES = (
+    LV.V0038_SOLAR_COLLECTOR,
+    LV.V0039_SOLAR_BUFFER,
+    LV.V0250_SOLAR,
+)
+
+
+async def _async_remove_undetected_solar_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry, coordinator: LuxtronikCoordinator
+) -> None:
+    """Drop solar entities left behind by the old solar heuristic (#820).
+
+    Until 2026.10 it detected solar on 19 of the 33 heat pumps in the
+    diagnostics corpus, none of which has it. The fixed heuristic no longer
+    creates those entities, but their registry entries would linger as "no
+    longer provided". Same lazy approach as the SmartGrid switch above, but
+    gated on the live detection: on a unit that does have solar they are the
+    real thing.
+
+    A controller that does not return V0250 at all is left alone: every
+    unit in the corpus returns it, so its absence means an unknown register
+    layout, not "no solar". Removing is destructive (it drops the user's
+    name, area and labels), and a false negative would do it to a real
+    solar install.
+
+    The solar entities sit on the DHW device. On a unit without hot water
+    they were the only thing that put that device in the registry, so it
+    goes too once nothing is left on it - that also tidies an empty DHW
+    device on a heating-only unit that never had phantom solar.
+    """
+    if coordinator.get_value(LV.V0250_SOLAR) is None or coordinator.has_solar:
+        return
+    prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
+    ent_reg = async_get(hass)
+    for platform, descriptions in (
+        (P.BINARY_SENSOR, BINARY_SENSORS),
+        (P.NUMBER, NUMBER_SENSORS),
+        (P.SENSOR, SENSORS),
+    ):
+        for description in descriptions:
+            if description.visibility not in _SOLAR_VISIBILITIES:
+                continue
+            # Mirrors the entity_id/unique_id the platforms assign.
+            unique_id = f"{platform}.{prefix}_{description.key}"
+            entity_id = ent_reg.async_get_entity_id(platform, DOMAIN, unique_id)
+            if entity_id is not None:
+                ent_reg.async_remove(entity_id)
+                LOGGER.info(
+                    "Removed %s - solar is not present on this heat pump",
+                    entity_id,
+                )
+    if coordinator.has_domestic_water:
+        return
+    dev_reg = dr.async_get(hass)
+    dhw_info = coordinator.device_infos[DeviceKey.domestic_water]
+    device = dev_reg.async_get_device(identifiers=dhw_info.get("identifiers", set()))
+    if device is None:
+        return
+    if not async_entries_for_device(ent_reg, device.id, include_disabled_entities=True):
+        dev_reg.async_remove_device(device.id)
+        LOGGER.info("Removed the empty hot water device - no hot water detected")
 
 
 async def _fix_select_entity_unique_ids(
