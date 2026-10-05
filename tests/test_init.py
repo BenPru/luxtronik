@@ -1647,6 +1647,24 @@ class TestRemoveUndetectedSolarEntities:
         dev_reg.async_remove_device.assert_not_called()
 
     @pytest.mark.asyncio
+    async def test_keeps_everything_when_the_solar_flag_is_not_returned(self):
+        # Every corpus unit returns V0250, so a controller that does not has
+        # an unknown register layout: "no solar" is not established there.
+        coord = self._coordinator(has_solar=False, has_domestic_water=False)
+        coord.get_value.side_effect = lambda key: (
+            None if key == "visibilities.ID_Visi_Solar" else 0
+        )
+        ent_reg, dev_reg, remaining = self._registries(
+            {"sensor.luxtronik2_solar_buffer_temperature"}
+        )
+
+        await self._run(coord, ent_reg, dev_reg, remaining)
+
+        coord.get_value.assert_any_call("visibilities.ID_Visi_Solar")
+        ent_reg.async_remove.assert_not_called()
+        dev_reg.async_remove_device.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_removes_the_emptied_dhw_device_without_hot_water(self):
         coord = self._coordinator(has_solar=False, has_domestic_water=False)
         ent_reg, dev_reg, remaining = self._registries(

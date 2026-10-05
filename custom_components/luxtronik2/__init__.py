@@ -683,11 +683,18 @@ async def _async_remove_undetected_solar_entities(
     gated on the live detection: on a unit that does have solar they are the
     real thing.
 
+    A controller that does not return V0250 at all is left alone: every
+    unit in the corpus returns it, so its absence means an unknown register
+    layout, not "no solar". Removing is destructive (it drops the user's
+    name, area and labels), and a false negative would do it to a real
+    solar install.
+
     The solar entities sit on the DHW device. On a unit without hot water
     they were the only thing that put that device in the registry, so it
-    goes too once nothing is left on it.
+    goes too once nothing is left on it - that also tidies an empty DHW
+    device on a heating-only unit that never had phantom solar.
     """
-    if coordinator.has_solar:
+    if coordinator.get_value(LV.V0250_SOLAR) is None or coordinator.has_solar:
         return
     prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
     ent_reg = async_get(hass)

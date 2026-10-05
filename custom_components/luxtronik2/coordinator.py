@@ -110,9 +110,9 @@ WRITE_FOLLOWUP_DELAY = 4.0
 
 # Values a temperature register reports when nothing is wired to it. 0.0 is
 # the absent-hardware reading; 5.0 and 75.0 are the controller's placeholders,
-# observed on unconnected TRL_ext / TEE / TFB1-3 channels (issue #729) and
-# already relied on by _detect_solar_present() for the collector (5.0) and
-# buffer (150.0, buffer-specific and deliberately not in this set) sensors.
+# observed on unconnected TRL_ext / TEE / TFB1-3 channels (issue #729).
+# _detect_solar_present() keeps its own buffer pair (0.0 / 150.0): 150.0 is
+# buffer-specific and deliberately not in this set.
 LUX_TEMPERATURE_SENTINELS: Final[frozenset[float]] = frozenset({0.0, 5.0, 75.0})
 
 
@@ -1055,8 +1055,8 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         installations that asked for it.
 
         Sentinels are therefore treated as absent readings rather than as
-        values, the same shape as _detect_solar_present()'s 5.0 / 150.0
-        checks.
+        values, the same shape as _detect_solar_present()'s 0.0 / 150.0
+        buffer check.
 
         Latched on: once a plausible reading has been seen, this stays True
         for the lifetime of the config entry. The evidence is a live
