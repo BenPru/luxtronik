@@ -1547,6 +1547,154 @@ class TestRemoveWithdrawnVentilationScheduleEntities:
 
 
 # ===========================================================================
+# _async_remove_undetected_solar_entities
+# ===========================================================================
+
+
+class TestRemoveUndetectedSolarEntities:
+    """Phantom solar entities are removed once solar is no longer detected (#820).
+
+    Until 2026.10 the solar heuristic fired on 19 of the 33 heat pumps in the
+    diagnostics corpus. With the heuristic fixed those entities are no longer
+    created, but their registry entries would linger as "no longer provided",
+    and on a unit without hot water the DHW device would stay behind holding
+    nothing.
+    """
+
+    _SOLAR_UNIQUE_IDS = {
+        ("binary_sensor", "binary_sensor.luxtronik2_solar_pump"),
+        ("number", "number.luxtronik2_solar_pump_on_difference_temperature"),
+        ("number", "number.luxtronik2_solar_pump_off_difference_temperature"),
+        (
+            "number",
+            "number.luxtronik2_solar_pump_off_max_difference_temperature_boiler",
+        ),
+        ("number", "number.luxtronik2_solar_pump_max_temperature_collector"),
+        ("sensor", "sensor.luxtronik2_solar_collector_temperature"),
+        ("sensor", "sensor.luxtronik2_solar_buffer_temperature"),
+        ("sensor", "sensor.luxtronik2_operation_hours_solar"),
+    }
+
+    @staticmethod
+    def _coordinator(*, has_solar, has_domestic_water):
+        coord = MagicMock()
+        coord.has_solar = has_solar
+        coord.has_domestic_water = has_domestic_water
+        coord.device_infos = {
+            "domestic_water": {"identifiers": {(DOMAIN, "dhw")}},
+        }
+        return coord
+
+    @staticmethod
+    def _registries(registered, remaining_on_device=()):
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.side_effect = lambda _p, _d, uid: (
+            uid if uid in registered else None
+        )
+        dev_reg = MagicMock()
+        dev_reg.async_get_device.return_value = MagicMock(id="dhw_device_id")
+        return ent_reg, dev_reg, list(remaining_on_device)
+
+    async def _run(self, coord, ent_reg, dev_reg, remaining):
+        from custom_components.luxtronik2 import (
+            _async_remove_undetected_solar_entities,
+        )
+
+        with (
+            patch("custom_components.luxtronik2.async_get", return_value=ent_reg),
+            patch("custom_components.luxtronik2.dr.async_get", return_value=dev_reg),
+            patch(
+                "custom_components.luxtronik2.async_entries_for_device",
+                return_value=remaining,
+            ) as entries_for_device,
+        ):
+            await _async_remove_undetected_solar_entities(
+                MagicMock(), _mock_entry(), coord
+            )
+        return entries_for_device
+
+    @pytest.mark.asyncio
+    async def test_removes_every_registered_solar_entity(self):
+        coord = self._coordinator(has_solar=False, has_domestic_water=True)
+        registered = {
+            "sensor.luxtronik2_solar_buffer_temperature",
+            "binary_sensor.luxtronik2_solar_pump",
+        }
+        ent_reg, dev_reg, remaining = self._registries(registered)
+
+        await self._run(coord, ent_reg, dev_reg, remaining)
+
+        looked_up = {
+            (c.args[0], c.args[2]) for c in ent_reg.async_get_entity_id.call_args_list
+        }
+        assert looked_up == self._SOLAR_UNIQUE_IDS
+        assert all(
+            c.args[1] == DOMAIN for c in ent_reg.async_get_entity_id.call_args_list
+        )
+        removed = {c.args[0] for c in ent_reg.async_remove.call_args_list}
+        assert removed == registered
+
+    @pytest.mark.asyncio
+    async def test_keeps_everything_when_solar_is_detected(self):
+        coord = self._coordinator(has_solar=True, has_domestic_water=False)
+        ent_reg, dev_reg, remaining = self._registries(
+            {"sensor.luxtronik2_solar_buffer_temperature"}
+        )
+
+        await self._run(coord, ent_reg, dev_reg, remaining)
+
+        ent_reg.async_remove.assert_not_called()
+        dev_reg.async_remove_device.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_removes_the_emptied_dhw_device_without_hot_water(self):
+        coord = self._coordinator(has_solar=False, has_domestic_water=False)
+        ent_reg, dev_reg, remaining = self._registries(
+            {"sensor.luxtronik2_solar_buffer_temperature"}
+        )
+
+        entries_for_device = await self._run(coord, ent_reg, dev_reg, remaining)
+
+        dev_reg.async_get_device.assert_called_once_with(identifiers={(DOMAIN, "dhw")})
+        entries_for_device.assert_called_once_with(
+            ent_reg, "dhw_device_id", include_disabled_entities=True
+        )
+        dev_reg.async_remove_device.assert_called_once_with("dhw_device_id")
+
+    @pytest.mark.asyncio
+    async def test_keeps_the_dhw_device_while_entities_remain_on_it(self):
+        coord = self._coordinator(has_solar=False, has_domestic_water=False)
+        ent_reg, dev_reg, remaining = self._registries(
+            set(), remaining_on_device=[MagicMock()]
+        )
+
+        await self._run(coord, ent_reg, dev_reg, remaining)
+
+        dev_reg.async_remove_device.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_keeps_the_dhw_device_with_hot_water(self):
+        coord = self._coordinator(has_solar=False, has_domestic_water=True)
+        ent_reg, dev_reg, remaining = self._registries(set())
+
+        await self._run(coord, ent_reg, dev_reg, remaining)
+
+        dev_reg.async_get_device.assert_not_called()
+        dev_reg.async_remove_device.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_tolerates_an_unregistered_dhw_device(self):
+        coord = self._coordinator(has_solar=False, has_domestic_water=False)
+        ent_reg, dev_reg, remaining = self._registries(set())
+        dev_reg.async_get_device.return_value = None
+
+        entries_for_device = await self._run(coord, ent_reg, dev_reg, remaining)
+
+        entries_for_device.assert_not_called()
+        dev_reg.async_remove_device.assert_not_called()
+
+
+# ===========================================================================
 # Home Assistant version guard (#799)
 # ===========================================================================
 

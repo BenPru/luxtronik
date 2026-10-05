@@ -1023,6 +1023,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return val is not None and val > 0
 
     @property
+    def has_solar(self) -> bool:
+        """Is solar present - see _detect_solar_present."""
+        return self._detect_solar_present()
+
+    @property
     def has_cooling(self) -> bool:
         """Is cooling activated."""
         val = self.get_value(LC.C0066_OPERATION_HOURS_COOLING)
@@ -1138,24 +1143,28 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         return cooling_mk
 
     def _detect_solar_present(self) -> bool:
-        """Detect and returns True if solar is present."""
+        """Detect and returns True if solar is present.
+
+        The solar flag or a solar run decides first. Of the temperatures only
+        the buffer reading is consulted, and only as a fallback for a fresh
+        install that has neither yet. The visibility flags V0038/V0039 read 1
+        on units without solar, and the collector reading is no evidence
+        either way: the one unit in the diagnostics corpus with solar reads
+        5.0 on its collector and 150.0 on its buffer. An unwired buffer sensor
+        reads 150.0 on some units and 0.0 on others - the 0.0 ones all
+        detected phantom solar (#820).
+
+        Known false positive: a unit that copies its DHW sensor into the
+        buffer register (an LWC407 on V1.90.0 does). Treating that mirror as
+        "no solar" would also hide a real buffer sensor in the DHW tank that
+        happens to read the same, so it is accepted.
+        """
         if bool(self.get_value(LV.V0250_SOLAR)):
             return True
         if (self.get_value(LP.P0882_SOLAR_OPERATION_HOURS) or 0) > 0.01:
             return True
-        collector_temp = self.get_value(LC.C0026_SOLAR_COLLECTOR_TEMPERATURE)
-        if (
-            bool(self.get_value(LV.V0038_SOLAR_COLLECTOR))
-            and collector_temp is not None
-            and float(collector_temp) != 5.0
-        ):
-            return True
         buffer_temp = self.get_value(LC.C0027_SOLAR_BUFFER_TEMPERATURE)
-        return (
-            bool(self.get_value(LV.V0039_SOLAR_BUFFER))
-            and buffer_temp is not None
-            and float(buffer_temp) != 150.0
-        )
+        return buffer_temp is not None and float(buffer_temp) not in (0.0, 150.0)
 
     def _detect_dhw_circulation_pump_present(self) -> bool:
         """Detect and returns True if DHW circulation pump is present."""
