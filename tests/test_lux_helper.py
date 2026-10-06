@@ -99,6 +99,8 @@ class TestGetManufacturerFirmwareUrlByModel:
     def test_alpha_innotec(self):
         url = get_manufacturer_firmware_url_by_model("LWP 10", 0)
         assert "layout=1" in url
+        url = get_manufacturer_firmware_url_by_model("LP16V", 0)
+        assert "layout=1" in url
 
     def test_novelan(self):
         url = get_manufacturer_firmware_url_by_model("BW model", 0)
