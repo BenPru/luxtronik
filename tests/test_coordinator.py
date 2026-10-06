@@ -339,6 +339,15 @@ class TestDeviceKeyActive:
         )
         assert coord.device_key_active(DeviceKey.domestic_water) is True
 
+    def test_domestic_water_hours_win_over_an_unwired_reading(self):
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Zaehler_BetrZeitBW": 100,
+                "ID_WEB_Temperatur_TBW": 75.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.domestic_water) is True
+
     @pytest.mark.parametrize(
         "dhw_temp",
         [

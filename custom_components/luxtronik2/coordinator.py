@@ -1077,9 +1077,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         poll. Without the latch the device would come and go across polls,
         and `text.py` (the only per-poll caller of `entity_active`) would
         tear its schedule entities down and rebuild them each time. The
-        other capability gates do not need this: `has_domestic_water` and
-        `has_cooling` read cumulative operating-hour counters, which cannot
-        decrease.
+        other capability gates do not need this. `has_cooling` reads a
+        cumulative operating-hour counter, which cannot decrease.
+        `has_domestic_water` falls back to the live DHW temperature only
+        until the first DHW run, and a tank reading exactly a sentinel in
+        that window is too unlikely to be worth a latch.
 
         Not persisted, so a restart re-detects from scratch. That also
         clears the latch if the module is genuinely removed.
