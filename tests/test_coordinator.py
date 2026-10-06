@@ -325,6 +325,50 @@ class TestDeviceKeyActive:
         coord = _make_coordinator(calculations={"ID_WEB_Zaehler_BetrZeitBW": 0})
         assert coord.device_key_active(DeviceKey.domestic_water) is False
 
+    def test_domestic_water_active_on_a_fresh_install(self):
+        """A freshly commissioned pump has a DHW sensor but no DHW hours yet.
+
+        #820's reporter saw no hot water entities until the first DHW run;
+        9ZW215 in the diagnostics corpus reads 17.7 C with 23 s of DHW hours.
+        """
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Zaehler_BetrZeitBW": 0,
+                "ID_WEB_Temperatur_TBW": 17.7,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.domestic_water) is True
+
+    def test_domestic_water_hours_win_over_an_unwired_reading(self):
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Zaehler_BetrZeitBW": 100,
+                "ID_WEB_Temperatur_TBW": 75.0,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.domestic_water) is True
+
+    @pytest.mark.parametrize(
+        "dhw_temp",
+        [
+            # The three heating-only units in the corpus (V3.90/V3.92) read
+            # 75.0; 0.0 and 5.0 are the other unwired-sensor placeholders.
+            75.0,
+            0.0,
+            5.0,
+            # A controller that does not return the register at all.
+            None,
+        ],
+    )
+    def test_domestic_water_inactive_with_an_unwired_dhw_sensor(self, dhw_temp):
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_Zaehler_BetrZeitBW": 0,
+                "ID_WEB_Temperatur_TBW": dhw_temp,
+            }
+        )
+        assert coord.device_key_active(DeviceKey.domestic_water) is False
+
     def test_cooling_active(self):
         coord = _make_coordinator(calculations={"ID_WEB_Zaehler_BetrZeitKue": 100})
         assert coord.device_key_active(DeviceKey.cooling) is True
