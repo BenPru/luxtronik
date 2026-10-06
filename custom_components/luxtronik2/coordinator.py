@@ -1018,9 +1018,20 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
     @property
     def has_domestic_water(self) -> bool:
-        """Is domestic water activated."""
+        """Is domestic water activated.
+
+        DHW operating hours prove it, but a freshly commissioned pump has
+        none until its first DHW run (#820), so a wired DHW sensor counts
+        too. The three heating-only units in the diagnostics corpus read
+        75.0 on it; 0.0 and 5.0, the other unwired placeholders, are treated
+        the same since no unit with hot water reads them. A wired sensor does
+        not prove DHW is configured, but the corpus holds no counterexample.
+        """
         val = self.get_value(LC.C0065_OPERATION_HOURS_DHW)
-        return val is not None and val > 0
+        if val is not None and val > 0:
+            return True
+        dhw_temp = self.get_value(LC.C0017_DHW_TEMPERATURE)
+        return dhw_temp is not None and float(dhw_temp) not in LUX_TEMPERATURE_SENTINELS
 
     @property
     def has_solar(self) -> bool:
