@@ -385,7 +385,7 @@ LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]]
     LuxOperationMode.cooling: "mdi:air-conditioner",
 }
 
-LUX_MODELS_ALPHA_INNOTEC = ["LWP", "LWV", "MSW", "SWC", "SWP"]
+LUX_MODELS_ALPHA_INNOTEC = ["LP", "LWP", "LWV", "MSW", "SWC", "SWP"]
 LUX_MODELS_NOVELAN = ["BW", "LA", "LD", "LI", "SI", "ZLW"]
 LUX_MODELS_OTHER = ["CB", "CI", "CN", "CS"]
 # endregion Lux Definitions
