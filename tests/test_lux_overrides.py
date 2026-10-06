@@ -42,7 +42,10 @@ class TestUpdateLuxtronikHeatpumpCodes:
         assert HeatpumpCode.codes[0] == "ERC"
         assert HeatpumpCode.codes[27] == "L1S"
         assert HeatpumpCode.codes[88] == "LP8V"
-        assert len(HeatpumpCode.codes) == 89
+        assert HeatpumpCode.codes[89] == "LP11V"
+        # alpha innotec Hybrox 16, read off the controller display (#819)
+        assert HeatpumpCode.codes[90] == "LP16V"
+        assert len(HeatpumpCode.codes) == 91
 
 
 class TestUpdateLuxtronikParameters:

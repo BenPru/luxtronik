@@ -44,6 +44,8 @@ class TestGetManufacturerByModel:
         assert get_manufacturer_by_model("MSW 6") == "Alpha Innotec"
         assert get_manufacturer_by_model("SWC model") == "Alpha Innotec"
         assert get_manufacturer_by_model("SWP test") == "Alpha Innotec"
+        # LP16V = alpha innotec Hybrox 16 (#819)
+        assert get_manufacturer_by_model("LP16V") == "Alpha Innotec"
 
     def test_unknown_model(self):
         assert get_manufacturer_by_model("UNKNOWN") is None
@@ -96,6 +98,8 @@ class TestGetManufacturerFirmwareUrlByModel:
 
     def test_alpha_innotec(self):
         url = get_manufacturer_firmware_url_by_model("LWP 10", 0)
+        assert "layout=1" in url
+        url = get_manufacturer_firmware_url_by_model("LP16V", 0)
         assert "layout=1" in url
 
     def test_novelan(self):

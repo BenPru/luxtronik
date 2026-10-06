@@ -874,4 +874,6 @@ def update_Luxtronik_HeatpumpCodes():
         86: "MSW1-4S",
         87: "LP5V",
         88: "LP8V",
+        89: "LP11V",
+        90: "LP16V",
     }
