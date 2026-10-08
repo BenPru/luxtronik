@@ -207,6 +207,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
 
                 return self.data
             except Exception as err:
+                # The first good poll after this is a first cooling counter
+                # reading again: compared with the reading from before the
+                # gap, it would report cooling for whatever ran meanwhile.
+                self._cooling_counter = None
+                self._cooling_counter_read_at = None
+                self._cooling_counter_running = False
                 raise UpdateFailed(f"Error fetching data: {err}") from err
 
     def _update_dhw_transition_hold(self, data: LuxtronikCoordinatorData) -> None:

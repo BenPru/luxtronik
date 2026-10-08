@@ -3200,6 +3200,35 @@ class TestCoolingCounter:
         freezer.move_to("2026-10-09 12:01:00+00:00")
         assert self._poll(coord, 10504638) is False
 
+    def test_glitch_reading_keeps_a_running_verdict(self, freezer):
+        """A glitch poll during real cooling must not clear it (the #773 kind
+        of one-poll flicker)."""
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        freezer.move_to("2026-10-09 12:00:30+00:00")
+        assert self._poll(coord, 10504668) is True
+        freezer.move_to("2026-10-09 12:01:00+00:00")
+        assert self._poll(coord, 0) is True
+        freezer.move_to("2026-10-09 12:01:30+00:00")
+        assert self._poll(coord, 10504728) is True
+
+    @pytest.mark.asyncio
+    async def test_failed_poll_starts_the_counter_afresh(self, freezer):
+        """After an outage the first good poll is a first reading again.
+
+        Comparing it against the pre-outage reading would report cooling
+        for whatever ran during the gap, though the unit may be idle now.
+        """
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        coord.hass.async_add_executor_job = AsyncMock(side_effect=OSError("down"))
+        with pytest.raises(UpdateFailed):
+            await coord._async_update_data()
+        freezer.move_to("2026-10-09 15:00:00+00:00")
+        assert self._poll(coord, 10514638) is False
+
     def test_lower_reading_rebaselines_without_running(self, freezer):
         """A genuine counter reset becomes the new baseline."""
         coord = _make_coordinator()
