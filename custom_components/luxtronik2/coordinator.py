@@ -48,6 +48,7 @@ from .const import (
     CONF_SUPPORTS_TIME_24_00,
     CONF_UPDATE_INTERVAL,
     CONF_VISIBILITIES,
+    COOLING_COUNTER_MIN_SPACING,
     DEFAULT_MAX_DATA_LENGTH,
     DEFAULT_PORT,
     DEFAULT_TIMEOUT,
@@ -151,6 +152,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self.device_infos = dict[str, DeviceInfo]()
         # Deadline for the DHW transition hold; see _update_dhw_transition_hold().
         self._dhw_hold_until: datetime | None = None
+        # Last valid cooling counter reading; see _update_cooling_counter().
+        self._cooling_counter: int | None = None
+        self._cooling_counter_read_at: datetime | None = None
+        self._cooling_counter_running = False
         # Latch for the ventilation module; see has_ventilation.
         self._ventilation_detected = False
         # User-supplied SG2 state; see _apply_evu2_manual.
@@ -195,6 +200,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
                     visibilities=self.client.visibilities,
                 )
                 self._update_dhw_transition_hold(data)
+                self._update_cooling_counter(data)
                 self._detect_time_24_00_support(data)
                 self._apply_evu2_manual(data)
                 self.data = data
@@ -236,6 +242,40 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return
 
         self._dhw_hold_until = None
+
+    def _update_cooling_counter(self, data: LuxtronikCoordinatorData) -> None:
+        """Decide whether the controller's cooling counter is running.
+
+        The controller reports passive cooling as no_request with status line
+        3 on heating - the same state as an idle heat pump in the heating
+        season (#404). The old temperature heuristic could not tell the two
+        apart: a 0.1 K tick in the return temperature flipped an idle unit to
+        cooling every minute or two (#826). C0066 counts the seconds the
+        controller spends cooling, updated every second, so it rising between
+        two polls is the controller's own answer.
+
+        A reading of 0 or None (a glitch poll reads every register as 0) is
+        ignored, keeping both the verdict and the baseline. A read too close to
+        the last one keeps the verdict too. A lower reading is a counter reset
+        and becomes the new baseline.
+        """
+        value = get_sensor_data(data, LC.C0066_OPERATION_HOURS_COOLING)
+        try:
+            seconds = int(value)
+        except (TypeError, ValueError):
+            seconds = 0
+        now = dt_util.utcnow()
+
+        if seconds > 0 and (
+            self._cooling_counter_read_at is None
+            or now - self._cooling_counter_read_at >= COOLING_COUNTER_MIN_SPACING
+        ):
+            previous = self._cooling_counter
+            self._cooling_counter_running = previous is not None and seconds > previous
+            self._cooling_counter = seconds
+            self._cooling_counter_read_at = now
+
+        data.cooling_counter_running = self._cooling_counter_running
 
     def _apply_evu2_manual(self, data: LuxtronikCoordinatorData) -> None:
         """Carry the user-supplied SG2 state into this poll's data (#500).

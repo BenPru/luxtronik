@@ -86,10 +86,13 @@ async def async_get_config_entry_diagnostics(
         # above cannot explain them. The manual SG2 input (#500): the switch
         # setting, and what the SmartGrid status used - None when the value
         # is not applied (SmartGrid off, or not an EVU2_MANUAL_INPUT_MODELS
-        # unit) and SG2 comes from the registers as usual.
+        # unit) and SG2 comes from the registers as usual. Whether the cooling
+        # counter rose since the previous poll - the only thing that turns
+        # no_request + heating into cooling (#826).
         "derived": {
             "evu2_manual": coordinator.evu2_manual,
             "evu2_manual_applied": coordinator.data.evu2_manual,
+            "cooling_counter_running": coordinator.data.cooling_counter_running,
         },
         "log_records": get_captured_log_records(),
     }
