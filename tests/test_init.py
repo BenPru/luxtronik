@@ -13,6 +13,7 @@ from homeassistant.exceptions import (
     ConfigEntryNotReady,
     ServiceValidationError,
 )
+from packaging.requirements import Requirement
 import pytest
 
 from conftest import make_coordinator_data
@@ -1781,10 +1782,6 @@ class TestHomeAssistantVersionGuard:
         ):
             assert await async_setup_entry(hass, entry) is True
 
-    def test_minimum_is_the_first_core_shipping_probatio(self):
-        """HA 2026.9 ships probatio, which the schemas are built with."""
-        assert MIN_HA_VERSION == (2026, 9)
-
     @pytest.mark.asyncio
     async def test_error_names_the_last_release_for_each_older_core(self):
         """2026.8 keeps 2026.10.06; 2026.7 and older keep 2026.08.29."""
@@ -1797,13 +1794,15 @@ class TestHomeAssistantVersionGuard:
         assert "2026.10.06" in str(err.value)
         assert "2026.08.29" in str(err.value)
 
-    def test_manifest_requires_probatio(self):
+    def test_manifest_requires_probatio_the_minimum_core_ships(self):
         """Keeps the guard reachable on a core that does not ship probatio.
 
         The schemas import probatio at module level, before setup runs the
         guard. Declared as a requirement, Home Assistant installs it on 2026.8
         so the import succeeds and the user sees the guard's message instead
-        of a bare "No module named 'probatio'".
+        of a bare "No module named 'probatio'". The floor must admit 0.11.4,
+        which Home Assistant 2026.9 pins: anything higher makes pip fight that
+        constraint, and setup fails with "Requirements not found" instead.
         """
         manifest = json.loads(
             (
@@ -1813,7 +1812,13 @@ class TestHomeAssistantVersionGuard:
                 / "manifest.json"
             ).read_text("utf-8")
         )
-        assert any(r.startswith("probatio") for r in manifest["requirements"])
+        probatio = [
+            Requirement(r)
+            for r in manifest["requirements"]
+            if Requirement(r).name == "probatio"
+        ]
+        assert len(probatio) == 1
+        assert probatio[0].specifier.contains("0.11.4")
 
     def test_no_module_imports_voluptuous(self):
         """Home Assistant types its schemas as probatio from 2026.10."""
@@ -1822,7 +1827,7 @@ class TestHomeAssistantVersionGuard:
         )
         offenders = [
             f.name
-            for f in package.glob("*.py")
+            for f in package.rglob("*.py")
             if re.search(r"^\s*(import|from) voluptuous\b", f.read_text("utf-8"), re.M)
         ]
         assert offenders == []

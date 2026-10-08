@@ -7,17 +7,13 @@ from typing import Any, cast
 
 from homeassistant.const import CONF_HOST, CONF_PORT
 import homeassistant.helpers.config_validation as cv
-import pytest
-import voluptuous as vol
+import probatio as vol
 
-try:
-    # Home Assistant 2026.9 serializes flow schemas with probatio, and
-    # cv.custom_serializer returns probatio's UNSUPPORTED sentinel. Feeding
-    # that to voluptuous_serialize leaks the sentinel into the output, so
-    # follow whichever library this HA version actually uses.
-    from probatio import to_field_list as _to_field_list
-except ImportError:  # pragma: no cover - older Home Assistant
-    from voluptuous_serialize import convert as _to_field_list
+# Home Assistant serializes flow schemas with probatio from 2026.9, the oldest
+# core the integration supports, and cv.custom_serializer returns probatio's
+# UNSUPPORTED sentinel, which voluptuous_serialize would leak into the output.
+from probatio import to_field_list as _to_field_list
+import pytest
 
 from custom_components.luxtronik2.const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,

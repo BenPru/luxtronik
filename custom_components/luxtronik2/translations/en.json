@@ -1416,7 +1416,8 @@
             "options_error": "An error occurred while loading the options.",
             "no_devices_found": "No devices found on the network.",
             "single_instance_allowed": "Already configured. Only one instance is allowed.",
-            "unknown": "Unknown error."
+            "unknown": "Unknown error.",
+            "unsupported_ha_version": "This version of Luxtronik requires Home Assistant {min_version} or newer; you run {ha_version}. Update Home Assistant, or install the last release supporting your version: 2026.10.06 for Home Assistant 2026.8, 2026.08.29 for 2026.7 and older."
         },
         "error": {
             "address": "Invalid remote-address insert. The address has to be an IP address or a resolvable hostname.",
@@ -1489,6 +1490,9 @@
                     "rbe_calculated_room_target": "The Heating thermostat's target becomes a room temperature. Home Assistant adjusts the heating curve correction (Temperature +/-) so the heat pump behaves as if the RBE dial were set to that target. The target can be at most 5 K divided by the room temperature impact factor away from the RBE dial. The RBE's own setback schedule is overridden. The heat pump regulates on the RBE's own room reading: an indoor temperature sensor selected above is only displayed on the card and is not used for this."
                 }
             }
+        },
+        "abort": {
+            "unsupported_ha_version": "This version of Luxtronik requires Home Assistant {min_version} or newer; you run {ha_version}. Update Home Assistant, or install the last release supporting your version: 2026.10.06 for Home Assistant 2026.8, 2026.08.29 for 2026.7 and older."
         }
     },
     "exceptions": {
