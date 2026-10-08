@@ -706,6 +706,7 @@ class TestDerivedValues:
         coordinator = _coordinator_with("330123_0145")
         coordinator.evu2_manual = setting
         coordinator.data.evu2_manual = applied
+        coordinator.data.cooling_counter_running = False
         hass = MagicMock()
         hass.async_add_executor_job = AsyncMock(return_value=None)
         return await async_get_config_entry_diagnostics(hass, _entry_for(coordinator))
@@ -717,7 +718,22 @@ class TestDerivedValues:
         assert result["derived"] == {
             "evu2_manual": True,
             "evu2_manual_applied": True,
+            "cooling_counter_running": False,
         }
+
+    @pytest.mark.asyncio
+    async def test_cooling_counter_verdict_is_dumped(self):
+        """The next #826-style report shows what the cooling gate decided."""
+        from custom_components.luxtronik2.diagnostics import (
+            async_get_config_entry_diagnostics,
+        )
+
+        coordinator = _coordinator_with("330123_0145")
+        coordinator.data.cooling_counter_running = True
+        hass = MagicMock()
+        hass.async_add_executor_job = AsyncMock(return_value=None)
+        result = await async_get_config_entry_diagnostics(hass, _entry_for(coordinator))
+        assert result["derived"]["cooling_counter_running"] is True
 
     @pytest.mark.asyncio
     async def test_setting_not_applied(self):

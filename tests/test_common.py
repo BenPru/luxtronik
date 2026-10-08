@@ -497,106 +497,64 @@ class TestNormalizeSensorValue:
         )
         assert result == LuxOperationMode.cooling
 
-    def test_status_no_request_active_cooling_detected(self):
-        """If no_request + status_line3=heating but temps indicate cooling → returns cooling."""
+    def _line3_heating(self, counter_running: bool, **calculations):
+        """no_request + status line 3 heating: the state passive cooling hides in."""
         data = make_coordinator_data(
             calculations={
                 "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.heating,
-                "ID_WEB_Temperatur_TVL": 20.0,  # C0010 flow in
-                "ID_WEB_Temperatur_TRL": 25.0,  # C0011 flow out (> in)
-                "ID_WEB_Temperatur_TWE": 10.0,  # C0204 heat source in
-                "ID_WEB_Temperatur_TWA": 15.0,  # C0024 heat source out (> in)
-                "ID_WEB_Durchfluss_WQ": 5.0,  # C0173 flow rate (> 0)
-                "ID_WEB_VBOout": True,  # C0043 pump flow (True)
+                **calculations,
             }
         )
-        result = normalize_sensor_value(
+        data.cooling_counter_running = counter_running
+        return normalize_sensor_value(
             LuxOperationMode.no_request, data, LC.C0080_STATUS
         )
-        assert result == LuxOperationMode.cooling
 
-    def test_cooling_survives_a_flow_meter_dropout(self):
-        """A single-poll zero from the heat-source flow meter must not clear cooling.
+    def test_running_cooling_counter_reports_cooling(self):
+        """The controller reports passive cooling as no_request + heating (#404).
 
-        Issue #773: on a cooling unit the flow register drops to 0 for exactly
-        one poll while the pump output stays on, which flipped the status to
-        no_request on ~20% of polls. Either register is enough to show the
-        machine is circulating, so one dropping out must not clear cooling.
+        Its own cooling counter (C0066) is what tells that state apart from an
+        idle heat pump.
         """
-        data = make_coordinator_data(
-            calculations={
-                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.heating,
-                "ID_WEB_Temperatur_TVL": 17.4,
-                "ID_WEB_Temperatur_TRL": 18.7,  # +1.3 K, house water warms up
-                "ID_WEB_Temperatur_TWE": 13.1,
-                "ID_WEB_Temperatur_TWA": 14.9,  # +1.8 K, heat source warms
-                "ID_WEB_Durchfluss_WQ": 0.0,  # C0173 dropout
-                "ID_WEB_VBOout": True,  # C0043 source pump still running
-            }
-        )
-        result = normalize_sensor_value(
-            LuxOperationMode.no_request, data, LC.C0080_STATUS
-        )
+        result = self._line3_heating(counter_running=True)
         assert result == LuxOperationMode.cooling
 
-    def test_cooling_survives_a_lagging_pump_register(self):
-        """The mirror case: real flow while the pump register reads False.
+    def test_cooling_temperatures_without_counter_stay_no_request(self):
+        """Temperatures that look like cooling no longer report cooling (#826).
 
-        Units 330612_0542, 330123_0145 and 350909_0135 in the diagnostics
-        corpus all report over 900 l/h with VBOout False, so the pump
-        register can drop out just as the flow register can.
+        On an idle MSW2-9S the return read 0.1 K above the flow and the brine
+        outlet sat 1 K above the inlet with the brine flow showing 400 l/h, so
+        the old temperature heuristic flipped the status to cooling every
+        minute or two while the cooling counter never moved.
         """
-        data = make_coordinator_data(
-            calculations={
-                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.heating,
-                "ID_WEB_Temperatur_TVL": 17.4,
-                "ID_WEB_Temperatur_TRL": 18.7,
-                "ID_WEB_Temperatur_TWE": 13.1,
-                "ID_WEB_Temperatur_TWA": 14.9,
-                "ID_WEB_Durchfluss_WQ": 887.0,
-                "ID_WEB_VBOout": False,
-            }
-        )
-        result = normalize_sensor_value(
-            LuxOperationMode.no_request, data, LC.C0080_STATUS
-        )
-        assert result == LuxOperationMode.cooling
-
-    def test_cooling_needs_something_circulating(self):
-        """With neither flow nor pump there is no circulation - not cooling."""
-        data = make_coordinator_data(
-            calculations={
-                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.heating,
-                "ID_WEB_Temperatur_TVL": 17.4,
-                "ID_WEB_Temperatur_TRL": 18.7,
-                "ID_WEB_Temperatur_TWE": 13.1,
-                "ID_WEB_Temperatur_TWA": 14.9,
-                "ID_WEB_Durchfluss_WQ": 0.0,
-                "ID_WEB_VBOout": False,
-            }
-        )
-        result = normalize_sensor_value(
-            LuxOperationMode.no_request, data, LC.C0080_STATUS
+        result = self._line3_heating(
+            counter_running=False,
+            ID_WEB_Temperatur_TVL=29.1,
+            ID_WEB_Temperatur_TRL=29.2,
+            ID_WEB_Temperatur_TWE=16.5,
+            ID_WEB_Temperatur_TWA=17.5,
+            ID_WEB_Durchfluss_WQ=400.0,
+            ID_WEB_VBOout=False,
         )
         assert result == LuxOperationMode.no_request
 
-    def test_status_no_request_not_active_cooling(self):
-        """If no_request + status_line3=heating but temps don't indicate cooling → stays no_request."""
-        data = make_coordinator_data(
-            calculations={
-                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.heating,
-                "ID_WEB_Temperatur_TVL": 25.0,  # flow in > out → not cooling
-                "ID_WEB_Temperatur_TRL": 20.0,
-                "ID_WEB_Temperatur_TWE": 10.0,
-                "ID_WEB_Temperatur_TWA": 15.0,
-                "ID_WEB_Durchfluss_WQ": 5.0,
-                "ID_WEB_VBOout": True,
-            }
+    def test_running_counter_reports_cooling_whatever_the_temperatures(self):
+        """A flow-meter dropout or a 0.1 K tick must not clear real cooling.
+
+        Issue #773: the flow register dropped to 0 for one poll on ~20% of
+        polls through every cooling cycle. With the counter deciding, none of
+        the temperature or circulation readings can veto cooling.
+        """
+        result = self._line3_heating(
+            counter_running=True,
+            ID_WEB_Temperatur_TVL=25.0,
+            ID_WEB_Temperatur_TRL=20.0,
+            ID_WEB_Temperatur_TWE=15.0,
+            ID_WEB_Temperatur_TWA=10.0,
+            ID_WEB_Durchfluss_WQ=0.0,
+            ID_WEB_VBOout=False,
         )
-        result = normalize_sensor_value(
-            LuxOperationMode.no_request, data, LC.C0080_STATUS
-        )
-        assert result == LuxOperationMode.no_request
+        assert result == LuxOperationMode.cooling
 
     def test_status_line3_thermal_desinfection_maps_to_domestic_water(self):
         """If status_line3 is thermal_desinfection, C0080_STATUS becomes domestic_water."""

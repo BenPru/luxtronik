@@ -61,6 +61,11 @@ class LuxtronikCoordinatorData:
     # other model, which tells read_smart_grid_inputs to keep reading calc 185.
     evu2_manual: bool | None = None
 
+    # Whether the controller's cooling counter (C0066) rose since the previous
+    # poll, put here each poll by LuxtronikCoordinator._update_cooling_counter().
+    # Tells passive cooling apart from an idle heat pump (#404, #826).
+    cooling_counter_running: bool = False
+
 
 @dataclass
 class LuxtronikEntityAttributeDescription:

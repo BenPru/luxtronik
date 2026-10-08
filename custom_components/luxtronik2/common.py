@@ -417,30 +417,16 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
         ):
             return LuxOperationMode.cooling
 
+        # Passive cooling reads as no_request + heating, exactly like an idle
+        # heat pump (#404). Only the controller's cooling counter running
+        # tells them apart; temperatures cannot (#826). See
+        # LuxtronikCoordinator._update_cooling_counter().
         if (
             status_line3_raw is not None
             and status_line3_raw == LuxStatus3Option.heating
+            and coordinator.cooling_counter_running
         ):
-            T_in = get_sensor_data(coordinator, LC.C0010_FLOW_IN_TEMPERATURE)
-            T_out = get_sensor_data(coordinator, LC.C0011_FLOW_OUT_TEMPERATURE)
-            T_heat_in = get_sensor_data(
-                coordinator, LC.C0019_HEAT_SOURCE_INPUT_TEMPERATURE
-            )
-            T_heat_out = get_sensor_data(
-                coordinator, LC.C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE
-            )
-            Flow_WQ = get_sensor_data(coordinator, LC.C0173_HEAT_SOURCE_FLOW_RATE)
-            Pump = get_sensor_data(coordinator, LC.C0043_PUMP_FLOW)
-            # Flow rate and pump are OR-ed rather than AND-ed: either one is
-            # enough to show the machine is circulating. AND-ing them let one
-            # register veto the other, and both are seen dropping out on their
-            # own - in #773 the flow rate read 0 for a single poll while the
-            # pump stayed on, clearing cooling on roughly a fifth of all polls,
-            # and units 330612_0542, 330123_0145 and 350909_0135 in the corpus
-            # show the reverse, over 900 l/h with the pump register False. The
-            # two temperature deltas stay AND-ed: they discriminate cooling.
-            if (T_out > T_in) and (T_heat_out > T_heat_in) and ((Flow_WQ > 0) or Pump):
-                return LuxOperationMode.cooling
+            return LuxOperationMode.cooling
 
     if (
         value == LuxOperationMode.heating

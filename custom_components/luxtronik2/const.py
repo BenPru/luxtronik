@@ -63,6 +63,11 @@ DEFAULT_UPDATE_INTERVAL_OPTION: Final = next(
 # latch the status indefinitely.
 DHW_TRANSITION_HOLD: Final = timedelta(minutes=5)
 
+# Two reads of the cooling counter closer together than this cannot tell a
+# running counter from a stopped one: it counts whole seconds, and a write's
+# confirming reads come 0.1 s apart. Such a read keeps the previous verdict.
+COOLING_COUNTER_MIN_SPACING: Final = timedelta(seconds=2)
+
 
 SECOND_TO_HOUR_FACTOR: Final = 1 / 3600
 

@@ -99,6 +99,9 @@ def _make_coordinator_direct(data=None):
     coord._config = {"host": "1.2.3.4", "port": 8889}
     coord.device_infos = {}
     coord._dhw_hold_until = None
+    coord._cooling_counter = None
+    coord._cooling_counter_read_at = None
+    coord._cooling_counter_running = False
     coord._evu2_manual = False
     coord._write_followup_unsub = None
     # Real coordinators always have one; `object.__new__` skips the base
@@ -3121,3 +3124,126 @@ class TestEvu2ManualRestore:
         )
         coord._apply_evu2_manual(sg_on)
         assert sg_on.evu2_manual is True
+
+
+# ===========================================================================
+# Cooling counter (issue #826)
+# ===========================================================================
+
+
+class TestCoolingCounter:
+    """Whether the controller's own cooling counter (C0066) is running.
+
+    It decides between passive cooling and an idle heat pump, which the
+    controller both reports as no_request + status line 3 heating (#404, #826).
+    """
+
+    def _poll(self, coord: LuxtronikCoordinator, seconds) -> bool:
+        data = make_coordinator_data(
+            calculations={"ID_WEB_Zaehler_BetrZeitKue": seconds}
+        )
+        coord._update_cooling_counter(data)
+        return data.cooling_counter_running
+
+    def test_first_poll_has_nothing_to_compare(self, freezer):
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        assert self._poll(coord, 10504638) is False
+
+    def test_counter_rising_between_polls_is_running(self, freezer):
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        freezer.move_to("2026-10-09 12:00:30+00:00")
+        assert self._poll(coord, 10504668) is True
+
+    def test_counter_flat_between_polls_is_not_running(self, freezer):
+        """The #826 case: the cooling counter never moved."""
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        freezer.move_to("2026-10-09 12:00:30+00:00")
+        self._poll(coord, 10504668)
+        freezer.move_to("2026-10-09 12:01:00+00:00")
+        assert self._poll(coord, 10504668) is False
+
+    def test_reads_within_the_same_second_keep_the_verdict(self, freezer):
+        """A write's confirming reads come 0.1 s apart.
+
+        The counter counts whole seconds, so two of those reads can return the
+        same value while cooling runs. Too soon to tell is not "stopped".
+        """
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        freezer.move_to("2026-10-09 12:00:30+00:00")
+        self._poll(coord, 10504668)
+        freezer.move_to("2026-10-09 12:00:30.300000+00:00")
+        assert self._poll(coord, 10504668) is True
+        # The early read did not move the baseline: the next regular poll
+        # still compares against 10504668 and sees the counter rise.
+        freezer.move_to("2026-10-09 12:01:00+00:00")
+        assert self._poll(coord, 10504698) is True
+
+    @pytest.mark.parametrize("glitch", [0, None])
+    def test_glitch_reading_is_ignored(self, freezer, glitch):
+        """A poll where every register reads 0 (seen on 7 Oct) proves nothing.
+
+        It keeps the verdict and the baseline, so the poll after it is not
+        mistaken for the counter jumping from 0 to its full value.
+        """
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        freezer.move_to("2026-10-09 12:00:30+00:00")
+        assert self._poll(coord, glitch) is False
+        freezer.move_to("2026-10-09 12:01:00+00:00")
+        assert self._poll(coord, 10504638) is False
+
+    def test_glitch_reading_keeps_a_running_verdict(self, freezer):
+        """A glitch poll during real cooling must not clear it (the #773 kind
+        of one-poll flicker)."""
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        freezer.move_to("2026-10-09 12:00:30+00:00")
+        assert self._poll(coord, 10504668) is True
+        freezer.move_to("2026-10-09 12:01:00+00:00")
+        assert self._poll(coord, 0) is True
+        freezer.move_to("2026-10-09 12:01:30+00:00")
+        assert self._poll(coord, 10504728) is True
+
+    @pytest.mark.asyncio
+    async def test_failed_poll_starts_the_counter_afresh(self, freezer):
+        """After an outage the first good poll is a first reading again.
+
+        Comparing it against the pre-outage reading would report cooling
+        for whatever ran during the gap, though the unit may be idle now.
+        """
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        coord.hass.async_add_executor_job = AsyncMock(side_effect=OSError("down"))
+        with pytest.raises(UpdateFailed):
+            await coord._async_update_data()
+        freezer.move_to("2026-10-09 15:00:00+00:00")
+        assert self._poll(coord, 10514638) is False
+
+    def test_lower_reading_rebaselines_without_running(self, freezer):
+        """A genuine counter reset becomes the new baseline."""
+        coord = _make_coordinator()
+        freezer.move_to("2026-10-09 12:00:00+00:00")
+        self._poll(coord, 10504638)
+        freezer.move_to("2026-10-09 12:00:30+00:00")
+        assert self._poll(coord, 500) is False
+        freezer.move_to("2026-10-09 12:01:00+00:00")
+        assert self._poll(coord, 530) is True
+
+    @pytest.mark.asyncio
+    async def test_each_poll_sets_the_flag(self):
+        """_async_update_data runs the tracker on the data it publishes."""
+        coord = _make_coordinator()
+        coord.hass.async_add_executor_job = AsyncMock(return_value=None)
+        with patch.object(coord, "_update_cooling_counter") as tracker:
+            data = await coord._async_update_data()
+        tracker.assert_called_once_with(data)
