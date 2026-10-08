@@ -21,7 +21,9 @@ CONFIG_ENTRY_VERSION: Final = 10
 # built with probatio, which Home Assistant ships from 2026.9 and types its
 # flows and services with from 2026.10. (The sub-devices' `via_device_id`
 # already needed 2026.8.) Mirrors `homeassistant` in hacs.json (guarded by a
-# test); manifest.json requires probatio so this guard is still reached on 2026.8.
+# test). On an older core, setup and migration refuse existing entries
+# (manifest.json requires probatio so the module import still succeeds on
+# 2026.8) and the config/options flows abort before building a form.
 MIN_HA_VERSION: Final[tuple[int, int]] = (2026, 9)
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)

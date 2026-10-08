@@ -1133,3 +1133,88 @@ class TestAsyncStepReconfigure:
             pytest.raises(AbortFlow, match="unique_id_mismatch"),
         ):
             await flow.async_step_reconfigure({CONF_HOST: "5.6.7.8", CONF_PORT: 8889})
+
+
+# ===========================================================================
+# Home Assistant core older than MIN_HA_VERSION
+# ===========================================================================
+
+
+class TestUnsupportedCore:
+    """Flows abort with the version message on a core that is too old.
+
+    Home Assistant 2026.8 serializes forms with voluptuous_serialize, which
+    cannot convert the probatio schemas, so showing any form there ends in a
+    generic "Unknown error". Abort before a form is built instead.
+    """
+
+    @staticmethod
+    def _old_core():
+        return (
+            patch("custom_components.luxtronik2.config_flow.MAJOR_VERSION", 2026),
+            patch("custom_components.luxtronik2.config_flow.MINOR_VERSION", 8),
+        )
+
+    @staticmethod
+    def _assert_version_abort(flow):
+        flow.async_abort.assert_called_once()
+        kwargs = flow.async_abort.call_args[1]
+        assert kwargs["reason"] == "unsupported_ha_version"
+        assert kwargs["description_placeholders"] == {
+            "min_version": "2026.9",
+            "ha_version": "2026.8",
+        }
+
+    @pytest.mark.asyncio
+    async def test_user_step_aborts(self):
+        flow = LuxtronikFlowHandler()
+        flow.hass = MagicMock()
+        flow.async_abort = MagicMock(return_value={"type": "abort"})
+        flow.async_show_form = MagicMock()
+        major, minor = self._old_core()
+        with major, minor:
+            await flow.async_step_user()
+        self._assert_version_abort(flow)
+        flow.async_show_form.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_reconfigure_step_aborts(self):
+        flow = LuxtronikFlowHandler()
+        flow._get_reconfigure_entry = MagicMock()
+        flow.async_abort = MagicMock(return_value={"type": "abort"})
+        flow.async_show_form = MagicMock()
+        major, minor = self._old_core()
+        with major, minor:
+            await flow.async_step_reconfigure(None)
+        self._assert_version_abort(flow)
+        flow.async_show_form.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_options_flow_aborts(self):
+        flow = _make_options_flow()
+        flow.async_abort = MagicMock(return_value={"type": "abort"})
+        flow.async_step_user = AsyncMock()
+        major, minor = self._old_core()
+        with major, minor:
+            await flow.async_step_init()
+        self._assert_version_abort(flow)
+        flow.async_step_user.assert_not_awaited()
+
+    @pytest.mark.parametrize("language", ["en", "de", "nl", "cs", "pl"])
+    def test_abort_is_translated(self, language):
+        import json
+        from pathlib import Path
+
+        translations = json.loads(
+            (
+                Path(__file__).resolve().parents[1]
+                / "custom_components"
+                / "luxtronik2"
+                / "translations"
+                / f"{language}.json"
+            ).read_text("utf-8")
+        )
+        for section in ("config", "options"):
+            text = translations[section]["abort"]["unsupported_ha_version"]
+            assert "{min_version}" in text
+            assert "{ha_version}" in text
