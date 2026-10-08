@@ -67,7 +67,8 @@ def _check_ha_version() -> None:
     data store, #799) can land this release on an older core. There the
     `via_device_id` in the sub-device infos fails deep inside the device
     registry with a bare TypeError, and every sub-device entity goes
-    unavailable while the heat pump device sets up fine. Fail loud instead -
+    unavailable while the heat pump device sets up fine. On 2026.8 the
+    probatio schemas would be the first thing to break. Fail loud instead -
     and before migration, so the entry keeps the version the remedy release
     can still load (a `CONFIG_ENTRY_VERSION` bump is a one-way door).
     """
@@ -76,7 +77,8 @@ def _check_ha_version() -> None:
             "Luxtronik requires Home Assistant "
             f"{MIN_HA_VERSION[0]}.{MIN_HA_VERSION[1]} or newer; this core is "
             f"{MAJOR_VERSION}.{MINOR_VERSION}. Update Home Assistant, or install "
-            "release 2026.08.29, the last one supporting older cores"
+            "the last release supporting your core: 2026.10.06 for Home Assistant "
+            "2026.8, 2026.08.29 for 2026.7 and older"
         )
 
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
@@ -1722,13 +1723,14 @@ _REQUIRES_PATTERN = rf"{_MIN_MAJOR}\.{_MIN_MINOR} or newer"
 
 
 class TestHomeAssistantVersionGuard:
-    """Setup must fail loud on a core older than the one the devices need.
+    """Setup must fail loud on a core older than the integration needs.
 
     `via_device_id` in the sub-device infos arrived in Home Assistant 2026.8;
     an older core rejects it deep inside `async_get_or_create` with a bare
     TypeError, so the heat pump device sets up and every sub-device entity
-    goes unavailable (#799). A clear ConfigEntryError before connecting is
-    the reachable alternative.
+    goes unavailable (#799). The schemas are built with probatio, which
+    Home Assistant ships from 2026.9. A clear ConfigEntryError before
+    connecting is the reachable alternative.
     """
 
     @pytest.mark.asyncio
@@ -1778,6 +1780,52 @@ class TestHomeAssistantVersionGuard:
             ),
         ):
             assert await async_setup_entry(hass, entry) is True
+
+    def test_minimum_is_the_first_core_shipping_probatio(self):
+        """HA 2026.9 ships probatio, which the schemas are built with."""
+        assert MIN_HA_VERSION == (2026, 9)
+
+    @pytest.mark.asyncio
+    async def test_error_names_the_last_release_for_each_older_core(self):
+        """2026.8 keeps 2026.10.06; 2026.7 and older keep 2026.08.29."""
+        with (
+            patch("custom_components.luxtronik2.MAJOR_VERSION", 2026),
+            patch("custom_components.luxtronik2.MINOR_VERSION", 8),
+            pytest.raises(ConfigEntryError) as err,
+        ):
+            await async_setup_entry(MagicMock(), _mock_entry())
+        assert "2026.10.06" in str(err.value)
+        assert "2026.08.29" in str(err.value)
+
+    def test_manifest_requires_probatio(self):
+        """Keeps the guard reachable on a core that does not ship probatio.
+
+        The schemas import probatio at module level, before setup runs the
+        guard. Declared as a requirement, Home Assistant installs it on 2026.8
+        so the import succeeds and the user sees the guard's message instead
+        of a bare "No module named 'probatio'".
+        """
+        manifest = json.loads(
+            (
+                Path(__file__).resolve().parents[1]
+                / "custom_components"
+                / "luxtronik2"
+                / "manifest.json"
+            ).read_text("utf-8")
+        )
+        assert any(r.startswith("probatio") for r in manifest["requirements"])
+
+    def test_no_module_imports_voluptuous(self):
+        """Home Assistant types its schemas as probatio from 2026.10."""
+        package = (
+            Path(__file__).resolve().parents[1] / "custom_components" / "luxtronik2"
+        )
+        offenders = [
+            f.name
+            for f in package.glob("*.py")
+            if re.search(r"^\s*(import|from) voluptuous\b", f.read_text("utf-8"), re.M)
+        ]
+        assert offenders == []
 
     def test_hacs_json_minimum_matches_guard(self):
         """HACS gates downloads on hacs.json; the guard must agree with it."""
