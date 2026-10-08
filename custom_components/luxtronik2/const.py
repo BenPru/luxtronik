@@ -10,7 +10,8 @@ from typing import Final
 from homeassistant.const import ATTR_CONFIG_ENTRY_ID, ATTR_DEVICE_ID, Platform
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import StateType
-import probatio as vol
+
+from .schema_compat import vol
 
 # endregion Imports
 
@@ -21,9 +22,9 @@ CONFIG_ENTRY_VERSION: Final = 10
 # built with probatio, which Home Assistant ships from 2026.9 and types its
 # flows and services with from 2026.10. (The sub-devices' `via_device_id`
 # already needed 2026.8.) Mirrors `homeassistant` in hacs.json (guarded by a
-# test). On an older core, setup and migration refuse existing entries
-# (manifest.json requires probatio so the module import still succeeds on
-# 2026.8) and the config/options flows abort before building a form.
+# test). On an older core, setup and migration refuse existing entries and the
+# config/options flows abort before building a form; schema_compat keeps the
+# modules importable there so both can say so.
 MIN_HA_VERSION: Final[tuple[int, int]] = (2026, 9)
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)

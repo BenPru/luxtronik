@@ -2,7 +2,6 @@ from typing import Any
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.helpers import selector
-import probatio as vol
 
 from .const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
@@ -17,6 +16,7 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL_OPTION,
     UPDATE_INTERVAL_OPTIONS,
 )
+from .schema_compat import vol
 
 
 def build_user_data_schema(

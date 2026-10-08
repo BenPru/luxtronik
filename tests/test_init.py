@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 import re
+import sys
+from types import ModuleType
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
@@ -13,7 +16,6 @@ from homeassistant.exceptions import (
     ConfigEntryNotReady,
     ServiceValidationError,
 )
-from packaging.requirements import Requirement
 import pytest
 
 from conftest import make_coordinator_data
@@ -1794,33 +1796,38 @@ class TestHomeAssistantVersionGuard:
         assert "2026.10.06" in str(err.value)
         assert "2026.08.29" in str(err.value)
 
-    def test_manifest_requires_probatio_the_minimum_core_ships(self):
-        """Keeps the guard reachable on a core that does not ship probatio.
-
-        The schemas import probatio at module level, before setup runs the
-        guard. Declared as a requirement, Home Assistant installs it on 2026.8
-        so the import succeeds and the user sees the guard's message instead
-        of a bare "No module named 'probatio'". The floor must admit 0.11.4,
-        which Home Assistant 2026.9 pins: anything higher makes pip fight that
-        constraint, and setup fails with "Requirements not found" instead.
-        """
-        manifest = json.loads(
-            (
-                Path(__file__).resolve().parents[1]
-                / "custom_components"
-                / "luxtronik2"
-                / "manifest.json"
-            ).read_text("utf-8")
+    @staticmethod
+    def _load_schema_compat(probatio, voluptuous):
+        """Execute schema_compat.py on its own with the given library modules."""
+        path = (
+            Path(__file__).resolve().parents[1]
+            / "custom_components"
+            / "luxtronik2"
+            / "schema_compat.py"
         )
-        probatio = [
-            Requirement(r)
-            for r in manifest["requirements"]
-            if Requirement(r).name == "probatio"
-        ]
-        assert len(probatio) == 1
-        assert probatio[0].specifier.contains("0.11.4")
+        spec = importlib.util.spec_from_file_location("_schema_compat_probe", path)
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        with patch.dict(sys.modules, {"probatio": probatio, "voluptuous": voluptuous}):
+            spec.loader.exec_module(module)
+        return module
 
-    def test_no_module_imports_voluptuous(self):
+    def test_schemas_use_probatio_where_it_exists(self):
+        probatio, voluptuous = ModuleType("probatio"), ModuleType("voluptuous")
+        assert self._load_schema_compat(probatio, voluptuous).vol is probatio
+
+    def test_schemas_still_import_on_a_core_without_probatio(self):
+        """Keeps the version guard reachable on Home Assistant 2026.8.
+
+        Without the fallback the module import would fail with a bare
+        "No module named 'probatio'" before setup or a flow could explain.
+        probatio cannot go in the manifest instead: hassfest rejects listing a
+        dependency of Home Assistant itself.
+        """
+        voluptuous = ModuleType("voluptuous")
+        assert self._load_schema_compat(None, voluptuous).vol is voluptuous
+
+    def test_only_schema_compat_imports_voluptuous(self):
         """Home Assistant types its schemas as probatio from 2026.10."""
         package = (
             Path(__file__).resolve().parents[1] / "custom_components" / "luxtronik2"
@@ -1828,7 +1835,8 @@ class TestHomeAssistantVersionGuard:
         offenders = [
             f.name
             for f in package.rglob("*.py")
-            if re.search(r"^\s*(import|from) voluptuous\b", f.read_text("utf-8"), re.M)
+            if f.name != "schema_compat.py"
+            and re.search(r"^\s*(import|from) voluptuous\b", f.read_text("utf-8"), re.M)
         ]
         assert offenders == []
 

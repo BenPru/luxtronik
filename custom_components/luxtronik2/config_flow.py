@@ -19,7 +19,6 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.helpers import selector
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
-import probatio as vol
 
 from .const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
@@ -46,6 +45,7 @@ from .coordinator import (
     connect_and_get_coordinator,
 )
 from .lux_helper import discover
+from .schema_compat import vol
 from .schema_helper import build_options_schema, build_user_data_schema
 
 # endregion Imports
