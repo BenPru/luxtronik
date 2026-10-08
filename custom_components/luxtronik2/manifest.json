@@ -43,7 +43,8 @@
   ],
   "requirements": [
     "luxtronik==0.3.14",
-    "getmac~=0.9.5"
+    "getmac~=0.9.5",
+    "probatio>=0.11.4"
   ],
   "version": "2026.10.06"
 }

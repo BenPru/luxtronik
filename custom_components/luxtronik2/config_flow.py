@@ -13,7 +13,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.helpers import selector
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
-import voluptuous as vol
+import probatio as vol
 
 from .const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,

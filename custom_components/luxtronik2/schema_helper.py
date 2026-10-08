@@ -2,7 +2,7 @@ from typing import Any
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
 from homeassistant.helpers import selector
-import voluptuous as vol
+import probatio as vol
 
 from .const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
