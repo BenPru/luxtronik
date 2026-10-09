@@ -1416,7 +1416,8 @@
             "options_error": "Při načítání možností došlo k chybě.",
             "no_devices_found": "Na síti nebyla nalezena žádná zařízení.",
             "single_instance_allowed": "Již nakonfigurováno. Povolená je pouze jedna instance.",
-            "unknown": "Neznámá chyba."
+            "unknown": "Neznámá chyba.",
+            "unsupported_ha_version": "Tato verze integrace Luxtronik vyžaduje Home Assistant {min_version} nebo novější; používáte {ha_version}. Aktualizujte Home Assistant, nebo nainstalujte poslední vydání podporující vaši verzi: 2026.10.06 pro Home Assistant 2026.8, 2026.08.29 pro 2026.7 a starší."
         },
         "error": {
             "address": "Neplatná vzdálená adresa. Adresa musí být IP adresa nebo rozpoznatelný název hostitele.",
@@ -1489,6 +1490,9 @@
                     "rbe_calculated_room_target": "Cíl termostatu vytápění se stane teplotou místnosti. Home Assistant upravuje korekci topné křivky (Teplota +/-) tak, aby se tepelné čerpadlo chovalo, jako by byl kolečko RBE nastaven na tento cíl. Cíl se smí od kolečka RBE lišit nejvýše o 5 K dělené faktorem vlivu prostorové teploty. Vlastní útlumový program RBE je přepsán. Tepelné čerpadlo reguluje podle vlastního měření teploty místnosti v RBE: výše zvolený senzor vnitřní teploty se pouze zobrazuje na kartě a pro tuto funkci se nepoužívá."
                 }
             }
+        },
+        "abort": {
+            "unsupported_ha_version": "Tato verze integrace Luxtronik vyžaduje Home Assistant {min_version} nebo novější; používáte {ha_version}. Aktualizujte Home Assistant, nebo nainstalujte poslední vydání podporující vaši verzi: 2026.10.06 pro Home Assistant 2026.8, 2026.08.29 pro 2026.7 a starší."
         }
     },
     "exceptions": {

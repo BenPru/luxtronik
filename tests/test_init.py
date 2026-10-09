@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
+import re
+import sys
+from types import ModuleType
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, Platform as P
@@ -1722,13 +1726,14 @@ _REQUIRES_PATTERN = rf"{_MIN_MAJOR}\.{_MIN_MINOR} or newer"
 
 
 class TestHomeAssistantVersionGuard:
-    """Setup must fail loud on a core older than the one the devices need.
+    """Setup must fail loud on a core older than the integration needs.
 
     `via_device_id` in the sub-device infos arrived in Home Assistant 2026.8;
     an older core rejects it deep inside `async_get_or_create` with a bare
     TypeError, so the heat pump device sets up and every sub-device entity
-    goes unavailable (#799). A clear ConfigEntryError before connecting is
-    the reachable alternative.
+    goes unavailable (#799). The schemas are built with probatio, which
+    Home Assistant ships from 2026.9. A clear ConfigEntryError before
+    connecting is the reachable alternative.
     """
 
     @pytest.mark.asyncio
@@ -1778,6 +1783,62 @@ class TestHomeAssistantVersionGuard:
             ),
         ):
             assert await async_setup_entry(hass, entry) is True
+
+    @pytest.mark.asyncio
+    async def test_error_names_the_last_release_for_each_older_core(self):
+        """2026.8 keeps 2026.10.06; 2026.7 and older keep 2026.08.29."""
+        with (
+            patch("custom_components.luxtronik2.MAJOR_VERSION", 2026),
+            patch("custom_components.luxtronik2.MINOR_VERSION", 8),
+            pytest.raises(ConfigEntryError) as err,
+        ):
+            await async_setup_entry(MagicMock(), _mock_entry())
+        assert "2026.10.06" in str(err.value)
+        assert "2026.08.29" in str(err.value)
+
+    @staticmethod
+    def _load_schema_compat(probatio, voluptuous):
+        """Execute schema_compat.py on its own with the given library modules."""
+        path = (
+            Path(__file__).resolve().parents[1]
+            / "custom_components"
+            / "luxtronik2"
+            / "schema_compat.py"
+        )
+        spec = importlib.util.spec_from_file_location("_schema_compat_probe", path)
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        with patch.dict(sys.modules, {"probatio": probatio, "voluptuous": voluptuous}):
+            spec.loader.exec_module(module)
+        return module
+
+    def test_schemas_use_probatio_where_it_exists(self):
+        probatio, voluptuous = ModuleType("probatio"), ModuleType("voluptuous")
+        assert self._load_schema_compat(probatio, voluptuous).vol is probatio
+
+    def test_schemas_still_import_on_a_core_without_probatio(self):
+        """Keeps the version guard reachable on Home Assistant 2026.8.
+
+        Without the fallback the module import would fail with a bare
+        "No module named 'probatio'" before setup or a flow could explain.
+        probatio cannot go in the manifest instead: hassfest rejects listing a
+        dependency of Home Assistant itself.
+        """
+        voluptuous = ModuleType("voluptuous")
+        assert self._load_schema_compat(None, voluptuous).vol is voluptuous
+
+    def test_only_schema_compat_imports_voluptuous(self):
+        """Home Assistant types its schemas as probatio from 2026.10."""
+        package = (
+            Path(__file__).resolve().parents[1] / "custom_components" / "luxtronik2"
+        )
+        offenders = [
+            f.name
+            for f in package.rglob("*.py")
+            if f.name != "schema_compat.py"
+            and re.search(r"^\s*(import|from) voluptuous\b", f.read_text("utf-8"), re.M)
+        ]
+        assert offenders == []
 
     def test_hacs_json_minimum_matches_guard(self):
         """HACS gates downloads on hacs.json; the guard must agree with it."""

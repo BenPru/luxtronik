@@ -1416,7 +1416,8 @@
             "options_error": "Er is een fout opgetreden bij het laden van de opties.",
             "no_devices_found": "Geen apparaten gevonden op het netwerk",
             "single_instance_allowed": "Al geconfigureerd. Slechts één configuratie toegestaan.",
-            "unknown": "Onbekende fout"
+            "unknown": "Onbekende fout",
+            "unsupported_ha_version": "Deze versie van Luxtronik vereist Home Assistant {min_version} of nieuwer; je gebruikt {ha_version}. Werk Home Assistant bij, of installeer de laatste release die jouw versie ondersteunt: 2026.10.06 voor Home Assistant 2026.8, 2026.08.29 voor 2026.7 en ouder."
         },
         "error": {
             "address": "Ongeldig extern adres. Het adres moet een IP-adres of een oplosbare hostnaam zijn.",
@@ -1489,6 +1490,9 @@
                     "rbe_calculated_room_target": "Het doel van de verwarmingsthermostaat wordt een kamertemperatuur. Home Assistant past de stooklijncorrectie (Temperatuur +/-) zo aan dat de warmtepomp zich gedraagt alsof de RBE-knop op dat doel staat. Het doel mag hoogstens 5 K gedeeld door de ruimte-invloedsfactor van de RBE-knop afwijken. Het eigen verlagingsprogramma van de RBE wordt overschreven. De warmtepomp regelt op de eigen kamertemperatuur van de RBE: een hierboven gekozen binnentemperatuursensor wordt alleen op de kaart getoond en hiervoor niet gebruikt."
                 }
             }
+        },
+        "abort": {
+            "unsupported_ha_version": "Deze versie van Luxtronik vereist Home Assistant {min_version} of nieuwer; je gebruikt {ha_version}. Werk Home Assistant bij, of installeer de laatste release die jouw versie ondersteunt: 2026.10.06 voor Home Assistant 2026.8, 2026.08.29 voor 2026.7 en ouder."
         }
     },
     "exceptions": {
