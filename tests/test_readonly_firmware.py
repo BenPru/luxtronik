@@ -143,7 +143,9 @@ async def test_repair_issue_and_warning_when_blocked(
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
     assert (
-        ir.async_get(hass).async_get_issue(DOMAIN, f"readonly_firmware_{entry.entry_id}")
+        ir.async_get(hass).async_get_issue(
+            DOMAIN, f"readonly_firmware_{entry.entry_id}"
+        )
         is None
     )
 
@@ -154,7 +156,9 @@ async def test_writes_and_no_issue_on_safe_firmware(
     entry, client = await _setup(hass, monkeypatch, "V3.90.1")
 
     assert (
-        ir.async_get(hass).async_get_issue(DOMAIN, f"readonly_firmware_{entry.entry_id}")
+        ir.async_get(hass).async_get_issue(
+            DOMAIN, f"readonly_firmware_{entry.entry_id}"
+        )
         is None
     )
     await entry.runtime_data.async_write("ID_Soll_BWS_akt", 55.0)
