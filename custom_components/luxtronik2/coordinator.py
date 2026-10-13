@@ -142,6 +142,8 @@ def _write_confirmed(written: Any, confirmed: Any) -> bool:
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
+    _readonly_issue_raised = False
+
     def __init__(
         self,
         hass: HomeAssistant,
