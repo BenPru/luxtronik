@@ -5,7 +5,7 @@ pytest-cov
 ruff
 # Runtime dependencies from manifest.json (needed for test collection)
 luxtronik==0.3.14
-getmac~=0.9.5
+getmac~=0.9.6
 packaging>=26.3
 # Imported directly by tests/test_schema_helper.py; it used to arrive via
 # Home Assistant, which stopped resolving it on Python 3.14.
