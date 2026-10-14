@@ -1146,6 +1146,14 @@ class TestWriteParameterServiceTargetSelection:
         handler = hass.services.async_register.call_args[0][2]
         return hass, handler
 
+    @staticmethod
+    def _patch_device_lookup(result):
+        """Make HA's single-owner device lookup return `result`."""
+        return patch(
+            "custom_components.luxtronik2.dr.async_get_device_and_config_entry_for_domain",
+            return_value=result,
+        )
+
     @pytest.mark.asyncio
     async def test_write_multi_entry_with_config_entry_id_targets_correct_entry(self):
         """A config_entry_id target must select that exact entry, even when
@@ -1186,11 +1194,6 @@ class TestWriteParameterServiceTargetSelection:
             side_effect=lambda eid: {"entry_1": entry_1, "entry_2": entry_2}.get(eid)
         )
 
-        device = MagicMock()
-        device.config_entries = {"entry_2"}
-        device_registry = MagicMock()
-        device_registry.async_get = MagicMock(return_value=device)
-
         service = MagicMock()
         service.data = {
             ATTR_PARAMETER: "ID_Einst_BWS_akt",
@@ -1198,12 +1201,10 @@ class TestWriteParameterServiceTargetSelection:
             ATTR_DEVICE_ID: "device_xyz",
         }
 
-        with patch(
-            "custom_components.luxtronik2.dr.async_get", return_value=device_registry
-        ):
+        with self._patch_device_lookup((MagicMock(), entry_2)) as lookup:
             await handler(service)
 
-        device_registry.async_get.assert_called_once_with("device_xyz")
+        lookup.assert_called_once_with(hass, "device_xyz", domain=DOMAIN)
         entry_2.runtime_data.async_write.assert_awaited_once_with(
             "ID_Einst_BWS_akt", 42
         )
@@ -1267,9 +1268,6 @@ class TestWriteParameterServiceTargetSelection:
             side_effect=lambda eid: {"entry_1": entry_1}.get(eid)
         )
 
-        device_registry = MagicMock()
-        device_registry.async_get = MagicMock(return_value=None)
-
         service = MagicMock()
         service.data = {
             ATTR_PARAMETER: "ID_Einst_BWS_akt",
@@ -1278,10 +1276,7 @@ class TestWriteParameterServiceTargetSelection:
         }
 
         with (
-            patch(
-                "custom_components.luxtronik2.dr.async_get",
-                return_value=device_registry,
-            ),
+            self._patch_device_lookup((None, None)),
             pytest.raises(ServiceValidationError) as exc_info,
         ):
             await handler(service)
@@ -1300,22 +1295,6 @@ class TestWriteParameterServiceTargetSelection:
         entry_1 = _mock_loaded_config_entry("entry_1", hass)
         hass.config_entries.async_entries = MagicMock(return_value=[entry_1])
 
-        other_entry = MagicMock()
-        other_entry.entry_id = "other_entry"
-        other_entry.domain = "some_other_integration"
-
-        hass.config_entries.async_get_entry = MagicMock(
-            side_effect=lambda eid: {
-                "entry_1": entry_1,
-                "other_entry": other_entry,
-            }.get(eid)
-        )
-
-        device = MagicMock()
-        device.config_entries = {"other_entry"}
-        device_registry = MagicMock()
-        device_registry.async_get = MagicMock(return_value=device)
-
         service = MagicMock()
         service.data = {
             ATTR_PARAMETER: "ID_Einst_BWS_akt",
@@ -1323,11 +1302,10 @@ class TestWriteParameterServiceTargetSelection:
             ATTR_DEVICE_ID: "device_of_other_integration",
         }
 
+        # The helper reports a device it found but no luxtronik2 entry owns
+        # as (device, None) - not as an exception.
         with (
-            patch(
-                "custom_components.luxtronik2.dr.async_get",
-                return_value=device_registry,
-            ),
+            self._patch_device_lookup((MagicMock(), None)),
             pytest.raises(ServiceValidationError) as exc_info,
         ):
             await handler(service)
@@ -1412,11 +1390,6 @@ class TestWriteParameterServiceTargetSelection:
             side_effect=lambda eid: {"entry_1": entry_1, "entry_2": entry_2}.get(eid)
         )
 
-        device = MagicMock()
-        device.config_entries = {"entry_2"}
-        device_registry = MagicMock()
-        device_registry.async_get = MagicMock(return_value=device)
-
         service = MagicMock()
         service.data = {
             ATTR_PARAMETER: "ID_Einst_BWS_akt",
@@ -1425,9 +1398,7 @@ class TestWriteParameterServiceTargetSelection:
             ATTR_CONFIG_ENTRY_ID: "entry_1",
         }
 
-        with patch(
-            "custom_components.luxtronik2.dr.async_get", return_value=device_registry
-        ):
+        with self._patch_device_lookup((MagicMock(), entry_2)):
             await handler(service)
 
         entry_2.runtime_data.async_write.assert_awaited_once_with(

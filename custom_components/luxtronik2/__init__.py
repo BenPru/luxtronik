@@ -234,23 +234,19 @@ def _resolve_write_target(
     config_entry_id = service_data.get(ATTR_CONFIG_ENTRY_ID)
 
     if device_id:
-        device = dr.async_get(hass).async_get(device_id)
-        entry_id = next(
-            (
-                candidate_id
-                for candidate_id in (device.config_entries if device else ())
-                if (candidate := hass.config_entries.async_get_entry(candidate_id))
-                and candidate.domain == DOMAIN
-            ),
-            None,
+        # A device has a single owning config entry since HA 2026.8; the helper
+        # also maps a pre-migration composite device id (still held by older
+        # automations) to our split of it. An unknown device comes back as
+        # (None, None), another integration's device as (device, None).
+        _, target_entry = dr.async_get_device_and_config_entry_for_domain(
+            hass, device_id, domain=DOMAIN
         )
-        if entry_id is None:
+        if target_entry is None:
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
                 translation_key="invalid_write_target",
                 translation_placeholders={"target": f"device_id={device_id}"},
             )
-        target_entry = hass.config_entries.async_get_entry(entry_id)
     elif config_entry_id:
         target_entry = hass.config_entries.async_get_entry(config_entry_id)
         if target_entry is None or target_entry.domain != DOMAIN:
