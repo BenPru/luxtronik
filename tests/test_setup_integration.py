@@ -14,16 +14,25 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
+from unittest.mock import AsyncMock
 
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import CONF_HOST, CONF_PORT, UnitOfTemperature
+from homeassistant.const import (
+    ATTR_DEVICE_ID,
+    CONF_HOST,
+    CONF_PORT,
+    UnitOfTemperature,
+)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
+from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.luxtronik2.const import (
+    ATTR_PARAMETER,
+    ATTR_VALUE,
     CONF_HA_SENSOR_PREFIX,
     CONFIG_ENTRY_VERSION,
     DEFAULT_PORT,
@@ -296,3 +305,64 @@ async def test_migration_from_v1_reaches_current_version(
     # still absent, so a v1 entry keeps "luxtronik" through to the latest
     # version.
     assert entry.data[CONF_HA_SENSOR_PREFIX] == "luxtronik"
+
+
+async def test_write_service_device_id_resolves_through_device_registry(
+    hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A `write` targeted by device_id reaches the entry owning the device (#780).
+
+    Runs HA's real single-owner lookup, which the unit tests mock: a
+    sub-device (heating, domestic water, ...) parented by `via_device_id`
+    must resolve like the heat pump itself, and a device of another
+    integration must be refused rather than written through.
+    """
+    client = FakeLuxtronikClient(
+        host="192.168.1.100", port=DEFAULT_PORT, socket_timeout=10, max_data_length=1024
+    )
+    _patch_client(monkeypatch, client)
+
+    entry = _make_entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    write = AsyncMock()
+    monkeypatch.setattr(entry.runtime_data, "async_write", write)
+
+    dev_reg = dr.async_get(hass)
+    devices = dr.async_entries_for_config_entry(dev_reg, entry.entry_id)
+    heatpump = next(d for d in devices if d.via_device_id is None)
+    sub_device = next(d for d in devices if d.via_device_id == heatpump.id)
+
+    for device in (heatpump, sub_device):
+        await hass.services.async_call(
+            DOMAIN,
+            SERVICE_WRITE,
+            {
+                ATTR_PARAMETER: "ID_Einst_BWS_akt",
+                ATTR_VALUE: 42,
+                ATTR_DEVICE_ID: device.id,
+            },
+            blocking=True,
+        )
+    assert write.await_count == 2
+
+    other_entry = MockConfigEntry(domain="other_integration")
+    other_entry.add_to_hass(hass)
+    other_device = dev_reg.async_get_or_create(
+        config_entry_id=other_entry.entry_id, identifiers={("other_integration", "x")}
+    )
+    with pytest.raises(ServiceValidationError) as exc_info:
+        await hass.services.async_call(
+            DOMAIN,
+            SERVICE_WRITE,
+            {
+                ATTR_PARAMETER: "ID_Einst_BWS_akt",
+                ATTR_VALUE: 42,
+                ATTR_DEVICE_ID: other_device.id,
+            },
+            blocking=True,
+        )
+    assert exc_info.value.translation_key == "invalid_write_target"
+    assert write.await_count == 2
