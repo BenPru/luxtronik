@@ -10,7 +10,7 @@ luxtronik==0.3.14
 # rejects a manifest requirement that differs from that pin, so dependabot ignores
 # getmac and it moves only when Home Assistant moves it (#839).
 getmac==0.9.5
-probatio>=0.11.4
+probatio>=0.13.0
 packaging>=26.3
 # Imported directly by tests/test_download_portal_ssl.py to verify the pinned CA
 # bundle anchors in the public trust store; it arrives via Home Assistant today.
