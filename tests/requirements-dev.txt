@@ -5,7 +5,11 @@ pytest-cov
 ruff
 # Runtime dependencies from manifest.json (needed for test collection)
 luxtronik==0.3.14
-getmac~=0.9.6
+# Pinned exactly to the getmac Home Assistant's own integrations pin, which is the
+# version users run; ~= would let CI test a newer one users never get. Hassfest
+# rejects a manifest requirement that differs from that pin, so dependabot ignores
+# getmac and it moves only when Home Assistant moves it (#839).
+getmac==0.9.5
 probatio>=0.11.4
 packaging>=26.3
 # Imported directly by tests/test_download_portal_ssl.py to verify the pinned CA
