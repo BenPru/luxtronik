@@ -597,11 +597,28 @@ class TestNormalizeSensorValue:
         data = make_coordinator_data(
             calculations={
                 "ID_WEB_VD1out": False,  # C0044_COMPRESSOR -> False
+                "ID_WEB_VD2out": False,  # C0045_COMPRESSOR2 -> False
                 "ID_WEB_ZW1out": False,  # C0048_ADDITIONAL_HEAT_GENERATOR -> False
             }
         )
         result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
         assert result == LuxOperationMode.no_request
+
+    def test_heating_on_compressor_2_alone_stays_heating(self):
+        """A twin unit heating on compressor 2 alone is heating, not idle (#836).
+
+        The controller alternates its two compressors, so VD1 off with VD2 on
+        is a routine heating run on a twin, not a stopped heat pump.
+        """
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_VD1out": False,
+                "ID_WEB_VD2out": True,
+                "ID_WEB_ZW1out": False,
+            }
+        )
+        result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
+        assert result == LuxOperationMode.heating
 
     def test_dhw_hold_converts_no_request_to_domestic_water(self):
         """During the DHW->TDI transition the status must stay domestic_water."""
