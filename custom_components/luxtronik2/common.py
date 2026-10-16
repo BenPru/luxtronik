@@ -428,9 +428,13 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
         ):
             return LuxOperationMode.cooling
 
+    # A twin unit alternates its compressors, so compressor 2 running alone is
+    # a normal heating run (#836). VD2out reads False on single-compressor
+    # units, so checking it there changes nothing.
     if (
         value == LuxOperationMode.heating
         and not get_sensor_data(coordinator, LC.C0044_COMPRESSOR)
+        and not get_sensor_data(coordinator, LC.C0045_COMPRESSOR2)
         and not get_sensor_data(coordinator, LC.C0048_ADDITIONAL_HEAT_GENERATOR)
     ):
         return LuxOperationMode.no_request
