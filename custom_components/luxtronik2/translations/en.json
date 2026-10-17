@@ -1496,6 +1496,9 @@
         }
     },
     "exceptions": {
+        "readonly_firmware": {
+            "message": "Writing is blocked: Luxtronik firmware {firmware} crashes the controller on write commands, so the integration is read-only"
+        },
         "invalid_parameter_name": {
             "message": "Invalid parameter name: {parameter}"
         },
@@ -1522,6 +1525,10 @@
         }
     },
     "issues": {
+        "readonly_firmware": {
+            "title": "Luxtronik integration is read-only (faulty firmware)",
+            "description": "The heat pump reports firmware **{firmware}**. Firmware versions V1.90.x and V2.90.x have a critical bug: every write command on port 8889 crashes the whole Luxtronik controller.\n\nTo protect the heat pump, the integration is **read-only**: all switches, numbers, selects, climate, water heater, timer and service writes are blocked. Sensors keep working.\n\nUpdate or downgrade the heat pump firmware to a corrected version to re-enable control."
+        },
         "connection_failed": {
             "title": "Cannot connect to Luxtronik heat pump",
             "description": "The integration could not connect to the Luxtronik heat pump at **{host}:{port}**.\n\nError: `{error}`\n\nPlease check that the heat pump is powered on, the network connection is working, and the host/port are correct. You can update the connection settings via the **Reconfigure** option in the integration menu."

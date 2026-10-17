@@ -1496,6 +1496,9 @@
         }
     },
     "exceptions": {
+        "readonly_firmware": {
+            "message": "Schrijven geblokkeerd: Luxtronik-firmware {firmware} laat de regelaar crashen bij schrijfopdrachten, daarom is de integratie alleen-lezen"
+        },
         "invalid_parameter_name": {
             "message": "Ongeldige parameternaam: {parameter}"
         },
@@ -1522,6 +1525,10 @@
         }
     },
     "issues": {
+        "readonly_firmware": {
+            "title": "Luxtronik-integratie is alleen-lezen (foutieve firmware)",
+            "description": "De warmtepomp meldt firmware **{firmware}**. Firmwareversies V1.90.x en V2.90.x hebben een kritieke fout: elke schrijfopdracht op poort 8889 laat de hele Luxtronik-regeling crashen.\n\nOm de warmtepomp te beschermen is de integratie **alleen-lezen**: alle schrijfacties (schakelaars, getallen, selecties, klimaat, warm water, tijdschema's, services) zijn geblokkeerd. Sensoren blijven werken.\n\nWerk de firmware van de warmtepomp bij of downgrade deze naar een herstelde versie om de bediening weer in te schakelen."
+        },
         "connection_failed": {
             "title": "Kan geen verbinding maken met Luxtronik-warmtepomp",
             "description": "De integratie kon geen verbinding maken met de Luxtronik-warmtepomp op **{host}:{port}**.\n\nFout: `{error}`\n\nControleer of de warmtepomp is ingeschakeld, de netwerkverbinding werkt en de host/poort correct zijn. U kunt de verbindingsinstellingen bijwerken via de optie **Opnieuw configureren** in het integratiemenu."
