@@ -14,3 +14,6 @@ updates:
     # Home Assistant core pins getmac; hassfest rejects a manifest requirement
     # that differs from that pin, so the version follows HA, not upstream (#839).
     - dependency-name: "getmac"
+    # Home Assistant core pins probatio too; the test floor tracks the oldest
+    # supported core, so it moves when the minimum HA version moves (#841).
+    - dependency-name: "probatio"

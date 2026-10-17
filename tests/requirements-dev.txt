@@ -10,6 +10,10 @@ luxtronik==0.3.14
 # rejects a manifest requirement that differs from that pin, so dependabot ignores
 # getmac and it moves only when Home Assistant moves it (#839).
 getmac==0.9.5
+# The floor is the probatio the oldest supported Home Assistant pins (2026.9 ships
+# 0.11.4); a higher one would make that core uninstallable next to these
+# requirements. Raise it only together with the minimum HA version, so dependabot
+# ignores probatio (#841).
 probatio>=0.11.4
 packaging>=26.3
 # Imported directly by tests/test_download_portal_ssl.py to verify the pinned CA
