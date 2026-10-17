@@ -47,7 +47,7 @@ class _TimerCircuit:
     packs both halves into one register, see `_row_names_packed`); ``row``
     is the schedule slot within a day (0-based, up to `rows` per day) and
     ``column`` is 0 for the same-schedule block, 0/1 for weekday/weekend,
-    and 0-6 for Monday-Sunday.
+    and 0-6 for Sunday-Saturday.
     """
 
     #: Raw parameter name of the mode selector that picks which of the three
@@ -108,6 +108,28 @@ def _row_names_packed(
     return tuple((f"{prefix}_zeit_{block}_{row}_{2 * col}",) for row in range(rows))
 
 
+# The per-day ("TG") columns run Sunday (0) to Saturday (6), not Monday-first
+# (#842): corpus units with a weekend pattern hold it in columns 0 and 6, and
+# a WZS 81 H/K owner matched every column against the controller display.
+_FIRMWARE_DAY_ORDER = (
+    "SUNDAY",
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+)
+
+
+def _per_day_keys(circuit: str) -> tuple[tuple[SK, int], ...]:
+    """Pair a circuit's per-day entity keys with their firmware column."""
+    return tuple(
+        (SK[f"TIMER_{circuit}_SCHEDULE_{day}"], column)
+        for column, day in enumerate(_FIRMWARE_DAY_ORDER)
+    )
+
+
 # Numbers verified against a real diagnostics dump for parameters 162-667.
 _DHW_CIRCUIT = _TimerCircuit(
     mode_selector_name="ID_Einst_SUBW_akt2",
@@ -119,15 +141,7 @@ _DHW_CIRCUIT = _TimerCircuit(
     device_key=DeviceKey.domestic_water,
 )
 
-_DHW_WEEKDAYS: tuple[tuple[SK, int], ...] = (
-    (SK.TIMER_DHW_SCHEDULE_MONDAY, 0),
-    (SK.TIMER_DHW_SCHEDULE_TUESDAY, 1),
-    (SK.TIMER_DHW_SCHEDULE_WEDNESDAY, 2),
-    (SK.TIMER_DHW_SCHEDULE_THURSDAY, 3),
-    (SK.TIMER_DHW_SCHEDULE_FRIDAY, 4),
-    (SK.TIMER_DHW_SCHEDULE_SATURDAY, 5),
-    (SK.TIMER_DHW_SCHEDULE_SUNDAY, 6),
-)
+_DHW_WEEKDAYS = _per_day_keys("DHW")
 
 _HEATING_CIRCUIT = _TimerCircuit(
     mode_selector_name="ID_Einst_SuHkr_akt",
@@ -141,15 +155,7 @@ _HEATING_CIRCUIT = _TimerCircuit(
     device_key=DeviceKey.heating,
 )
 
-_HEATING_WEEKDAYS: tuple[tuple[SK, int], ...] = (
-    (SK.TIMER_HEATING_SCHEDULE_MONDAY, 0),
-    (SK.TIMER_HEATING_SCHEDULE_TUESDAY, 1),
-    (SK.TIMER_HEATING_SCHEDULE_WEDNESDAY, 2),
-    (SK.TIMER_HEATING_SCHEDULE_THURSDAY, 3),
-    (SK.TIMER_HEATING_SCHEDULE_FRIDAY, 4),
-    (SK.TIMER_HEATING_SCHEDULE_SATURDAY, 5),
-    (SK.TIMER_HEATING_SCHEDULE_SUNDAY, 6),
-)
+_HEATING_WEEKDAYS = _per_day_keys("HEATING")
 
 
 # Verified against the diagnostics dump and controller photos of a KHZ LWC 60
@@ -177,25 +183,9 @@ _VENTILATION_NIGHT_CIRCUIT = _TimerCircuit(
     device_key=DeviceKey.ventilation,
 )
 
-_VENTILATION_DAY_WEEKDAYS: tuple[tuple[SK, int], ...] = (
-    (SK.TIMER_VENTILATION_DAY_SCHEDULE_MONDAY, 0),
-    (SK.TIMER_VENTILATION_DAY_SCHEDULE_TUESDAY, 1),
-    (SK.TIMER_VENTILATION_DAY_SCHEDULE_WEDNESDAY, 2),
-    (SK.TIMER_VENTILATION_DAY_SCHEDULE_THURSDAY, 3),
-    (SK.TIMER_VENTILATION_DAY_SCHEDULE_FRIDAY, 4),
-    (SK.TIMER_VENTILATION_DAY_SCHEDULE_SATURDAY, 5),
-    (SK.TIMER_VENTILATION_DAY_SCHEDULE_SUNDAY, 6),
-)
+_VENTILATION_DAY_WEEKDAYS = _per_day_keys("VENTILATION_DAY")
 
-_VENTILATION_NIGHT_WEEKDAYS: tuple[tuple[SK, int], ...] = (
-    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_MONDAY, 0),
-    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_TUESDAY, 1),
-    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_WEDNESDAY, 2),
-    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_THURSDAY, 3),
-    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_FRIDAY, 4),
-    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_SATURDAY, 5),
-    (SK.TIMER_VENTILATION_NIGHT_SCHEDULE_SUNDAY, 6),
-)
+_VENTILATION_NIGHT_WEEKDAYS = _per_day_keys("VENTILATION_NIGHT")
 
 
 # Verified against the diagnostics corpus: selector 506 and windows 507-606
@@ -218,15 +208,7 @@ _CIRCULATION_CIRCUIT = _TimerCircuit(
     entity_active_formula="!= 1",
 )
 
-_CIRCULATION_WEEKDAYS: tuple[tuple[SK, int], ...] = (
-    (SK.TIMER_CIRCULATION_SCHEDULE_MONDAY, 0),
-    (SK.TIMER_CIRCULATION_SCHEDULE_TUESDAY, 1),
-    (SK.TIMER_CIRCULATION_SCHEDULE_WEDNESDAY, 2),
-    (SK.TIMER_CIRCULATION_SCHEDULE_THURSDAY, 3),
-    (SK.TIMER_CIRCULATION_SCHEDULE_FRIDAY, 4),
-    (SK.TIMER_CIRCULATION_SCHEDULE_SATURDAY, 5),
-    (SK.TIMER_CIRCULATION_SCHEDULE_SUNDAY, 6),
-)
+_CIRCULATION_WEEKDAYS = _per_day_keys("CIRCULATION")
 
 
 def _build_circuit_entities(

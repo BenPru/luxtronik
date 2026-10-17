@@ -114,6 +114,36 @@ class TestTimerScheduleTable:
         assert by_key[SK.TIMER_DHW_SCHEDULE_MONDAY] == "days"
         assert by_key[SK.TIMER_DHW_SCHEDULE_SUNDAY] == "days"
 
+    @pytest.mark.parametrize(
+        "circuit",
+        [
+            "DHW",
+            "HEATING",
+            "VENTILATION_DAY",
+            "VENTILATION_NIGHT",
+            "CIRCULATION",
+        ],
+    )
+    def test_per_day_columns_start_on_sunday(self, circuit):
+        """The firmware's per-day columns run Sunday (0) to Saturday (6) (#842).
+
+        Read off the corpus: units with a weekend pattern have it in columns
+        0 and 6, and the controller display shows column 0 as Sunday.
+        """
+        by_key = {d.key: d.row_names for d in TIMER_SCHEDULE_ENTITIES}
+        days = (
+            "SUNDAY",
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY",
+        )
+        for column, day in enumerate(days):
+            start_name = by_key[SK[f"TIMER_{circuit}_SCHEDULE_{day}"]][0][0]
+            assert start_name.endswith(f"_{2 * column}"), (day, start_name)
+
     def test_heating_selector_and_device(self):
         from custom_components.luxtronik2.const import DeviceKey
 
@@ -141,7 +171,7 @@ class TestTimerScheduleTable:
             "ID_Einst_SuHkr25_zeit_0_2",
             "ID_Einst_SuHkr25_zeit_0_3",
         )
-        assert by_key[SK.TIMER_HEATING_SCHEDULE_SUNDAY][2] == (
+        assert by_key[SK.TIMER_HEATING_SCHEDULE_SATURDAY][2] == (
             "ID_Einst_SuHkrTG_zeit_2_12",
             "ID_Einst_SuHkrTG_zeit_2_13",
         )
@@ -181,7 +211,7 @@ class TestTimerScheduleTable:
         assert by_key[SK.TIMER_VENTILATION_DAY_SCHEDULE_WEEKEND].row_names[0] == (
             "ID_Einst_SuLuf25_zeit_0_0_2",
         )
-        assert by_key[SK.TIMER_VENTILATION_NIGHT_SCHEDULE_SUNDAY].row_names[2] == (
+        assert by_key[SK.TIMER_VENTILATION_NIGHT_SCHEDULE_SATURDAY].row_names[2] == (
             "ID_Einst_SuLufTg_zeit_1_2_12",
         )
 
@@ -214,7 +244,7 @@ class TestTimerScheduleTable:
             "ID_Einst_SuZIP25_zeit_0_2",
             "ID_Einst_SuZIP25_zeit_0_3",
         )
-        assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_SUNDAY].row_names[4] == (
+        assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_SATURDAY].row_names[4] == (
             "ID_Einst_SuZIPTg_zeit_4_12",
             "ID_Einst_SuZIPTg_zeit_4_13",
         )
