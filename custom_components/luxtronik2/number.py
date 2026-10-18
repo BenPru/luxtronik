@@ -152,6 +152,8 @@ class LuxtronikNumberEntity(LuxtronikEntity[LuxtronikNumberDescription], NumberE
         super()._handle_coordinator_update()
 
     async def async_set_native_value(self, value: float) -> None:
+        # Up front: the debounced write has no caller left to surface it to.
+        self.coordinator.raise_if_write_blocked()
         if (
             self.entity_description.key == SensorKey.DHW_MANUAL_FREQUENCY
             and 0 < value < 20

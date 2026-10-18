@@ -930,15 +930,22 @@ class TestRbeCalculatedThermostat:
         assert rbe.coord.async_write.await_count == 2
 
     @pytest.mark.asyncio
-    async def test_read_only_firmware_skips_write_silently(self, caplog):
-        """#831: no write attempt, so no failed-write warning every backoff."""
-        rbe = _Rbe(_rbe_data(p=0.0, c=21.0, factor=100))
+    async def test_read_only_firmware_rejects_target_and_skips_sync(self, caplog):
+        """#831: a new target is refused, not shown and restored unapplied;
+        the poll-driven sync skips its write without a warning every backoff."""
+        from homeassistant.exceptions import HomeAssistantError
+
+        rbe = _Rbe(_rbe_data(p=1.0, c=21.0, factor=100))
+        rbe.update()  # T = 22
         rbe.coord.write_blocked = True
-        rbe.update()
-        await rbe.entity.async_set_temperature(temperature=22.0)
-        await rbe.entity._async_write_temperature()
-        await rbe.drain()
-        rbe.update(_rbe_data(p=0.0, c=20.0, factor=100))
+        rbe.coord.raise_if_write_blocked.side_effect = HomeAssistantError("read-only")
+        rbe.entity.async_write_ha_state.reset_mock()
+        with pytest.raises(HomeAssistantError):
+            await rbe.entity.async_set_temperature(temperature=24.0)
+        assert rbe.entity.target_temperature == 22.0
+        rbe.entity.async_write_ha_state.assert_not_called()
+
+        rbe.update(_rbe_data(p=1.0, c=20.0, factor=100))  # dial turned down
         await rbe.drain()
         rbe.coord.async_write.assert_not_awaited()
         assert "failed" not in caplog.text

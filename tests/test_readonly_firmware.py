@@ -121,24 +121,76 @@ async def test_write_service_is_blocked(
     assert client.write_calls == 0
 
 
-async def test_entity_service_write_is_blocked(
-    hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize(
+    ("domain", "service", "entity_id", "data"),
+    [
+        # Debounced: without the up-front check the write would fail later,
+        # with no caller left to show the error to.
+        (
+            "number",
+            "set_value",
+            "number.luxtronik2_dhw_target_temperature",
+            {"value": 55.0},
+        ),
+        (
+            "water_heater",
+            "set_temperature",
+            "water_heater.luxtronik2_domestic_water",
+            {"temperature": 55.0},
+        ),
+        (
+            "climate",
+            "set_temperature",
+            "climate.luxtronik2_heating",
+            None,
+        ),
+        # Set entity state before writing.
+        (
+            "climate",
+            "set_preset_mode",
+            "climate.luxtronik2_heating",
+            {"preset_mode": "away"},
+        ),
+        (
+            "select",
+            "select_option",
+            "select.luxtronik2_thermal_desinfection_day",
+            {"option": "friday"},
+        ),
+        ("select", "select_option", "select.luxtronik2_heating_mode", None),
+    ],
+)
+async def test_entity_setter_raises_and_keeps_state(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+    domain: str,
+    service: str,
+    entity_id: str,
+    data: dict | None,
 ) -> None:
-    """A number entity write is stopped as well, with no flush to the device."""
-    import asyncio
-
-    from custom_components.luxtronik2.const import SensorKey
-
+    """Each setter raises up front: no write, and no state the device never got."""
     _, client = await _setup(hass, monkeypatch, "V1.90.1")
-    entity_id = f"number.{DOMAIN}_{SensorKey.DHW_TARGET_TEMPERATURE}"
-    await hass.services.async_call(
-        "number", "set_value", {"entity_id": entity_id, "value": 55.0}, blocking=True
-    )
-    await asyncio.sleep(0.6)
+    before = hass.states.get(entity_id)
+    assert before is not None
+    # Values HA's own validation accepts, so the call reaches the entity.
+    if data is None and domain == "climate":
+        data = {"temperature": before.attributes["min_temp"]}
+    elif data is None:  # any option other than the current one
+        data = {
+            "option": next(o for o in before.attributes["options"] if o != before.state)
+        }
+
+    with pytest.raises(HomeAssistantError) as exc:
+        await hass.services.async_call(
+            domain, service, {"entity_id": entity_id, **data}, blocking=True
+        )
     await hass.async_block_till_done()
 
+    assert exc.value.translation_key == "readonly_firmware"
     assert client.write_calls == 0
-    assert client.parameters.get("ID_Soll_BWS_akt").value != 55.0
+    after = hass.states.get(entity_id)
+    assert after is not None
+    assert (after.state, after.attributes) == (before.state, before.attributes)
 
 
 async def test_repair_issue_and_warning_when_blocked(
@@ -206,6 +258,21 @@ async def test_issue_cleared_when_firmware_is_downgraded(
     client.calculations.set("ID_WEB_SoftStand", "V1.90.0")
     await coordinator.async_refresh()
     assert _issue(hass, entry) is not None
+
+
+async def test_issue_follows_a_blocked_to_blocked_update(
+    hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The repair text names the firmware actually running."""
+    entry, client = await _setup(hass, monkeypatch, "V1.90.0")
+
+    client.calculations.set("ID_WEB_SoftStand", "V1.90.1")
+    await entry.runtime_data.async_refresh()
+
+    issue = _issue(hass, entry)
+    assert issue is not None
+    assert issue.translation_placeholders is not None
+    assert issue.translation_placeholders["firmware"] == "V1.90.1"
 
 
 async def test_config_flow_coordinator_raises_no_issue(

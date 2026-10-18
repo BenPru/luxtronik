@@ -226,6 +226,8 @@ class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibl
         self._handle_coordinator_update(data)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
+        # Up front: the debounced write has no caller left to surface it to.
+        self.coordinator.raise_if_write_blocked()
         self._pending_temperature = kwargs.get(ATTR_TEMPERATURE)
         await self._debouncer_set_temp.async_call()
 

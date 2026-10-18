@@ -483,6 +483,7 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature with debounce."""
+        self.coordinator.raise_if_write_blocked()
         self._pending_temperature = kwargs[ATTR_TEMPERATURE]
         await self._debouncer_set_temp.async_call()
 
@@ -539,6 +540,9 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set new preset mode."""
+        # Before the preset bookkeeping below, which a failed write would
+        # otherwise leave behind.
+        self.coordinator.raise_if_write_blocked()
         self._attr_preset_mode = preset_mode
         if preset_mode in [PRESET_COMFORT]:
             lux_mode = LuxMode.automatic
@@ -743,6 +747,9 @@ class LuxtronikRbeCalculatedThermostat(LuxtronikThermostat):
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the room target; the P0001 write is debounced."""
+        # The target is shown and restored before the write runs; on
+        # read-only firmware it would never be applied.
+        self.coordinator.raise_if_write_blocked()
         self._attr_target_temperature = self._clamp(float(kwargs[ATTR_TEMPERATURE]))
         self.async_write_ha_state()
         await self._debouncer_set_temp.async_call()
