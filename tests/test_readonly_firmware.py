@@ -5,12 +5,18 @@ from __future__ import annotations
 import logging
 
 from homeassistant.config_entries import ConfigEntryState
+from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import issue_registry as ir
 import pytest
 
 from custom_components.luxtronik2.const import DOMAIN, SERVICE_WRITE
+from custom_components.luxtronik2.coordinator import (
+    READONLY_FIRMWARE_FORUM_URL,
+    READONLY_FIRMWARE_LEARN_MORE_URL,
+    connect_and_get_coordinator,
+)
 from tests.conftest import DEFAULT_CALCULATIONS, DEFAULT_PORT
 from tests.test_setup_integration import (
     FakeLuxtronikClient,
@@ -32,16 +38,26 @@ class RecordingClient(FakeLuxtronikClient):
         self.write_calls += 1
 
 
-async def _setup(hass: HomeAssistant, monkeypatch, firmware: str):
+def _issue(hass: HomeAssistant, entry) -> ir.IssueEntry | None:
+    return ir.async_get(hass).async_get_issue(
+        DOMAIN, f"readonly_firmware_{entry.entry_id}"
+    )
+
+
+def _client(firmware: str) -> RecordingClient:
     calculations = DEFAULT_CALCULATIONS.copy()
     calculations["ID_WEB_SoftStand"] = firmware
-    client = RecordingClient(
+    return RecordingClient(
         host="192.168.1.100",
         port=DEFAULT_PORT,
         socket_timeout=10,
         max_data_length=1024,
         calculations=calculations,
     )
+
+
+async def _setup(hass: HomeAssistant, monkeypatch, firmware: str):
+    client = _client(firmware)
     _patch_client(monkeypatch, client)
     entry = _make_entry()
     entry.add_to_hass(hass)
@@ -58,6 +74,7 @@ async def _setup(hass: HomeAssistant, monkeypatch, firmware: str):
         ("V1.90.3", True),
         ("V2.90.1", True),
         ("2.90", True),
+        ("V2.90.0-12815", True),
         ("V1.89.9", False),
         ("V1.91.0", False),
         ("V2.88.3", False),
@@ -137,7 +154,11 @@ async def test_repair_issue_and_warning_when_blocked(
     )
     assert issue is not None
     assert issue.severity is ir.IssueSeverity.WARNING
-    assert issue.translation_placeholders == {"firmware": "V1.90.1"}
+    assert issue.translation_placeholders == {
+        "firmware": "V1.90.1",
+        "forum_url": READONLY_FIRMWARE_FORUM_URL,
+    }
+    assert issue.learn_more_url == READONLY_FIRMWARE_LEARN_MORE_URL
     assert "read-only" in caplog.text
 
     assert await hass.config_entries.async_unload(entry.entry_id)
@@ -163,3 +184,56 @@ async def test_writes_and_no_issue_on_safe_firmware(
     )
     await entry.runtime_data.async_write("ID_Soll_BWS_akt", 55.0)
     assert client.write_calls == 1
+
+
+async def test_issue_cleared_when_firmware_is_downgraded(
+    hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The remedy for #831 happens while HA runs; writes and Repairs follow it."""
+    entry, client = await _setup(hass, monkeypatch, "V1.90.0")
+    coordinator = entry.runtime_data
+    assert _issue(hass, entry) is not None
+
+    client.calculations.set("ID_WEB_SoftStand", "V1.88.3")
+    await coordinator.async_refresh()
+
+    assert _issue(hass, entry) is None
+    assert coordinator.write_blocked is False
+    await coordinator.async_write("ID_Soll_BWS_akt", 55.0)
+    assert client.write_calls == 1
+
+    # Back on an affected release: blocked and reported again.
+    client.calculations.set("ID_WEB_SoftStand", "V1.90.0")
+    await coordinator.async_refresh()
+    assert _issue(hass, entry) is not None
+
+
+async def test_config_flow_coordinator_raises_no_issue(
+    hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The flow's entry-less coordinator is never shut down; it must not leave an issue."""
+    _patch_client(monkeypatch, _client("V2.90.0"))
+
+    coordinator = await connect_and_get_coordinator(
+        hass, {CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT}
+    )
+
+    assert coordinator.write_blocked is True
+    assert not [
+        issue_id for (domain, issue_id) in ir.async_get(hass).issues if domain == DOMAIN
+    ]
+
+
+async def test_invalid_firmware_is_warned_about_once(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """write_blocked reads the version every poll; the warning must not repeat."""
+    caplog.set_level(logging.WARNING)
+    entry, _ = await _setup(hass, monkeypatch, "garbage")
+
+    for _ in range(3):
+        await entry.runtime_data.async_refresh()
+
+    assert caplog.text.count("Invalid firmware version") == 1

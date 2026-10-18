@@ -113,6 +113,11 @@ WRITE_FOLLOWUP_DELAY = 4.0
 # Firmware series (major) whose V<n>.90.x releases crash the whole controller
 # on any write over port 8889 (issue #831); the integration goes read-only.
 READONLY_FIRMWARE_SERIES: Final[frozenset[int]] = frozenset({1, 2})
+# The investigation and confirmed downgrades, and the first public report.
+READONLY_FIRMWARE_LEARN_MORE_URL: Final = (
+    "https://github.com/BenPru/luxtronik/issues/761"
+)
+READONLY_FIRMWARE_FORUM_URL: Final = "https://forum.iobroker.net/post/1357814"
 
 # Values a temperature register reports when nothing is wired to it. 0.0 is
 # the absent-hardware reading; 5.0 and 75.0 are the controller's placeholders,
@@ -142,7 +147,10 @@ def _write_confirmed(written: Any, confirmed: Any) -> bool:
 class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     """Representation of a Luxtronik Coordinator."""
 
-    _readonly_issue_raised = False
+    # Class-level defaults, read by async_shutdown and firmware_package_version
+    # on coordinators that tests build with object.__new__ (skipping __init__).
+    _readonly_issue_id: str | None = None
+    _invalid_firmware_logged: str | None = None
 
     def __init__(
         self,
@@ -165,8 +173,11 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._cooling_counter_running = False
         # Latch for the ventilation module; see has_ventilation.
         self._ventilation_detected = False
-        # Whether the read-only repair issue was already raised.
-        self._readonly_issue_raised = False
+        # The raised read-only repair issue, if any; see _update_readonly_issue.
+        self._readonly_issue_id = None
+        # Last unparsable firmware string warned about; see
+        # firmware_package_version.
+        self._invalid_firmware_logged = None
         # User-supplied SG2 state; see _apply_evu2_manual.
         self._evu2_manual = False
         # Cancels the pending follow-up read; see _schedule_write_followup().
@@ -420,34 +431,52 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     @property
     def write_blocked(self) -> bool:
         """True on firmware V1.90.x / V2.90.x, where any write crashes the controller (#831)."""
-        rel = self.firmware_package_version.release
-        return len(rel) > 1 and rel[0] in READONLY_FIRMWARE_SERIES and rel[1] == 90
+        return (
+            self.firmware_series in READONLY_FIRMWARE_SERIES
+            and self.firmware_version_minor.major == 90
+        )
 
     def _update_readonly_issue(self) -> None:
-        """Warn once, in the log and as a repair issue, that writes are blocked."""
-        if self._readonly_issue_raised or not self.write_blocked:
-            return
-        self._readonly_issue_raised = True
-        LOGGER.warning(
-            "Firmware %s crashes the Luxtronik controller on write commands "
-            "(issue #831): the integration is read-only, all writes are blocked",
-            self.firmware_version,
-        )
-        ir.async_create_issue(
-            self.hass,
-            DOMAIN,
-            self._readonly_issue_id,
-            is_fixable=False,
-            is_persistent=False,
-            severity=ir.IssueSeverity.WARNING,
-            translation_key="readonly_firmware",
-            translation_placeholders={"firmware": self.firmware_version},
-        )
+        """Keep the read-only repair issue in step with `write_blocked`.
 
-    @property
-    def _readonly_issue_id(self) -> str:
-        entry_id = self.config_entry.entry_id if self.config_entry else "default"
-        return f"readonly_firmware_{entry_id}"
+        Raised once while blocked, and removed again when the block lifts -
+        a firmware downgrade, the remedy for #831, happens while HA runs.
+        The config flow's temporary coordinator has no entry and nothing
+        would ever remove its issue, so it raises none.
+        """
+        blocked = self.write_blocked
+        if blocked and self._readonly_issue_id is None and self.config_entry:
+            self._readonly_issue_id = f"readonly_firmware_{self.config_entry.entry_id}"
+            LOGGER.warning(
+                "Firmware %s crashes the Luxtronik controller on write commands "
+                "(issue #831): the integration is read-only, all writes are blocked",
+                self.firmware_version,
+            )
+            ir.async_create_issue(
+                self.hass,
+                DOMAIN,
+                self._readonly_issue_id,
+                is_fixable=False,
+                is_persistent=False,
+                learn_more_url=READONLY_FIRMWARE_LEARN_MORE_URL,
+                severity=ir.IssueSeverity.WARNING,
+                translation_key="readonly_firmware",
+                translation_placeholders={
+                    "firmware": self.firmware_version,
+                    "forum_url": READONLY_FIRMWARE_FORUM_URL,
+                },
+            )
+        elif not blocked and self._readonly_issue_id is not None:
+            LOGGER.info(
+                "Firmware %s accepts write commands again: writes are re-enabled",
+                self.firmware_version,
+            )
+            self._delete_readonly_issue()
+
+    def _delete_readonly_issue(self) -> None:
+        if self._readonly_issue_id is not None:
+            ir.async_delete_issue(self.hass, DOMAIN, self._readonly_issue_id)
+            self._readonly_issue_id = None
 
     async def async_write(self, parameter: str, value: Any) -> LuxtronikCoordinatorData:
         """Write a single parameter to the heat pump and confirm it stuck.
@@ -843,9 +872,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         try:
             return Version(cleaned_version)
         except InvalidVersion:
-            LOGGER.warning(
-                "Invalid firmware version '%s' (cleaned: '%s')", ver, cleaned_version
-            )
+            # write_blocked reads this on every poll; warn once per value.
+            if ver != self._invalid_firmware_logged:
+                self._invalid_firmware_logged = ver
+                LOGGER.warning(
+                    "Invalid firmware version '%s' (cleaned: '%s')",
+                    ver,
+                    cleaned_version,
+                )
             return Version("0")
 
     @property
@@ -1291,9 +1325,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     async def async_shutdown(self) -> None:
         """Make sure a coordinator is shut down as well as its connection."""
         self._cancel_write_followup()
-        if self._readonly_issue_raised:
-            ir.async_delete_issue(self.hass, DOMAIN, self._readonly_issue_id)
-            self._readonly_issue_raised = False
+        self._delete_readonly_issue()
         await super().async_shutdown()
         if hasattr(self, "client") and self.client is not None:
             await self.hass.async_add_executor_job(self.client.disconnect)

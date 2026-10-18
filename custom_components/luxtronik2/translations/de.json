@@ -1527,7 +1527,7 @@
     "issues": {
         "readonly_firmware": {
             "title": "Luxtronik-Integration ist schreibgeschützt (fehlerhafte Firmware)",
-            "description": "Die Wärmepumpe meldet die Firmware **{firmware}**. Die Firmware-Versionen V1.90.x und V2.90.x haben einen kritischen Fehler: Jeder Schreibbefehl auf Port 8889 bringt die gesamte Luxtronik-Steuerung zum Absturz.\n\nZum Schutz der Wärmepumpe ist die Integration **schreibgeschützt**: Alle Schreibzugriffe (Schalter, Zahlen, Auswahlfelder, Klima, Warmwasser, Zeitpläne, Dienste) sind gesperrt. Sensoren funktionieren weiter.\n\nAktualisieren Sie die Firmware der Wärmepumpe oder setzen Sie sie auf eine korrigierte Version zurück (Update oder Downgrade), um die Steuerung wieder zu aktivieren."
+            "description": "Die Wärmepumpe meldet die Firmware **{firmware}**. Die Firmware-Versionen V1.90.x und V2.90.x haben einen kritischen Fehler: Jeder Schreibbefehl auf Port 8889 bringt die gesamte Luxtronik-Steuerung zum Absturz ([Bericht]({forum_url})).\n\nZum Schutz der Wärmepumpe ist die Integration **schreibgeschützt**: Alle Schreibzugriffe (Schalter, Zahlen, Auswahlfelder, Klima, Warmwasser, Zeitpläne, Dienste) sind gesperrt. Sensoren funktionieren weiter.\n\nSolange kein Firmware-Release den Fehler behebt, ist die einzige bekannte Abhilfe ein Downgrade der Steuerung auf das vorherige Release derselben Serie (z. B. V2.89 bei V2.x, V1.88.3 bei V1.x). Verwenden Sie nur ein Firmware-Image Ihrer eigenen Serie. Die Steuerung wird automatisch wieder freigegeben, sobald die Wärmepumpe eine nicht betroffene Firmware meldet."
         },
         "connection_failed": {
             "title": "Verbindung zur Luxtronik-Wärmepumpe fehlgeschlagen",

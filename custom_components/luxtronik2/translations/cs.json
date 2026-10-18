@@ -1527,7 +1527,7 @@
     "issues": {
         "readonly_firmware": {
             "title": "Integrace Luxtronik je pouze pro čtení (vadný firmware)",
-            "description": "Tepelné čerpadlo hlásí firmware **{firmware}**. Verze firmwaru V1.90.x a V2.90.x mají kritickou chybu: každý příkaz zápisu na portu 8889 zhavaruje celé řízení Luxtronik.\n\nPro ochranu tepelného čerpadla je integrace **pouze pro čtení**: všechny zápisy (přepínače, čísla, výběry, klima, ohřev vody, časové plány, služby) jsou blokovány. Senzory fungují dál.\n\nAktualizujte nebo downgradujte firmware tepelného čerpadla na opravenou verzi, aby se ovládání znovu povolilo."
+            "description": "Tepelné čerpadlo hlásí firmware **{firmware}**. Verze firmwaru V1.90.x a V2.90.x mají kritickou chybu: každý příkaz zápisu na portu 8889 zhavaruje celé řízení Luxtronik ([hlášení]({forum_url})).\n\nPro ochranu tepelného čerpadla je integrace **pouze pro čtení**: všechny zápisy (přepínače, čísla, výběry, klima, ohřev vody, časové plány, služby) jsou blokovány. Senzory fungují dál.\n\nDokud chybu neopraví nové vydání firmwaru, jedinou známou nápravou je downgrade řídicí jednotky na předchozí vydání stejné řady (např. V2.89 u V2.x, V1.88.3 u V1.x). Používejte pouze obraz firmwaru vlastní řady. Ovládání se automaticky znovu povolí, jakmile tepelné čerpadlo nahlásí firmware, kterého se chyba netýká."
         },
         "connection_failed": {
             "title": "Nelze se připojit k tepelnému čerpadlu Luxtronik",

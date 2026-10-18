@@ -1527,7 +1527,7 @@
     "issues": {
         "readonly_firmware": {
             "title": "Luxtronik integration is read-only (faulty firmware)",
-            "description": "The heat pump reports firmware **{firmware}**. Firmware versions V1.90.x and V2.90.x have a critical bug: every write command on port 8889 crashes the whole Luxtronik controller.\n\nTo protect the heat pump, the integration is **read-only**: all switches, numbers, selects, climate, water heater, timer and service writes are blocked. Sensors keep working.\n\nUpdate or downgrade the heat pump firmware to a corrected version to re-enable control."
+            "description": "The heat pump reports firmware **{firmware}**. Firmware versions V1.90.x and V2.90.x have a critical bug: every write command on port 8889 crashes the whole Luxtronik controller ([report]({forum_url})).\n\nTo protect the heat pump, the integration is **read-only**: all switches, numbers, selects, climate, water heater, timer and service writes are blocked. Sensors keep working.\n\nUntil a firmware release fixes this, the only known remedy is downgrading the controller to the previous release of the same series (e.g. V2.89 on V2.x, V1.88.3 on V1.x). Only use a firmware image of your own series. Control is re-enabled automatically once the heat pump reports an unaffected firmware."
         },
         "connection_failed": {
             "title": "Cannot connect to Luxtronik heat pump",

@@ -672,7 +672,9 @@ class LuxtronikRbeCalculatedThermostat(LuxtronikThermostat):
         if _same(desired, round_correction(correction)):
             return
         inputs = (target, room_target, factor)
-        if self._write_backing_off(inputs):
+        # Read-only firmware (#831): the repair issue already says so; a
+        # failing write here would warn again every backoff period.
+        if self.coordinator.write_blocked or self._write_backing_off(inputs):
             return
         self._write_in_flight = True
         self._write_inputs = inputs

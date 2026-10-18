@@ -695,6 +695,7 @@ class _Rbe:
     def __init__(self, data):
         self.coord = _mock_coordinator(data)
         self.coord.room_thermostat_type = LuxRoomThermostatType.rbe
+        self.coord.write_blocked = False
         self.tasks: list[asyncio.Task] = []
         self.entity = LuxtronikRbeCalculatedThermostat(
             MagicMock(), _mock_entry(), self.coord, THERMOSTATS_RBE_CALCULATED[0]
@@ -927,6 +928,20 @@ class TestRbeCalculatedThermostat:
             await rbe.entity._async_write_temperature()
             await rbe.drain()
         assert rbe.coord.async_write.await_count == 2
+
+    @pytest.mark.asyncio
+    async def test_read_only_firmware_skips_write_silently(self, caplog):
+        """#831: no write attempt, so no failed-write warning every backoff."""
+        rbe = _Rbe(_rbe_data(p=0.0, c=21.0, factor=100))
+        rbe.coord.write_blocked = True
+        rbe.update()
+        await rbe.entity.async_set_temperature(temperature=22.0)
+        await rbe.entity._async_write_temperature()
+        await rbe.drain()
+        rbe.update(_rbe_data(p=0.0, c=20.0, factor=100))
+        await rbe.drain()
+        rbe.coord.async_write.assert_not_awaited()
+        assert "failed" not in caplog.text
 
     def test_attributes_explain_effective_target(self):
         rbe = _Rbe(_rbe_data(p=1.5, c=21.0, factor=170))
