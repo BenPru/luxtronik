@@ -1496,6 +1496,9 @@
         }
     },
     "exceptions": {
+        "readonly_firmware": {
+            "message": "Zápis je zablokován: firmware Luxtronik {firmware} při příkazech zápisu zhavaruje řídicí jednotku, proto je integrace pouze pro čtení"
+        },
         "invalid_parameter_name": {
             "message": "Neplatný název parametru: {parameter}"
         },
@@ -1522,6 +1525,10 @@
         }
     },
     "issues": {
+        "readonly_firmware": {
+            "title": "Integrace Luxtronik je pouze pro čtení (vadný firmware)",
+            "description": "Tepelné čerpadlo hlásí firmware **{firmware}**. Verze firmwaru V1.90.x a V2.90.x mají kritickou chybu: každý příkaz zápisu na portu 8889 zhavaruje celé řízení Luxtronik ([hlášení]({forum_url})).\n\nPro ochranu tepelného čerpadla je integrace **pouze pro čtení**: všechny zápisy (přepínače, čísla, výběry, klima, ohřev vody, časové plány, služby) jsou blokovány. Senzory fungují dál.\n\nDokud chybu neopraví nové vydání firmwaru, jedinou známou nápravou je downgrade řídicí jednotky na předchozí vydání stejné řady (např. V2.89 u V2.x, V1.88.3 u V1.x). Používejte pouze obraz firmwaru vlastní řady. Ovládání se automaticky znovu povolí, jakmile tepelné čerpadlo nahlásí firmware, kterého se chyba netýká."
+        },
         "connection_failed": {
             "title": "Nelze se připojit k tepelnému čerpadlu Luxtronik",
             "description": "Integrace se nemohla připojit k tepelnému čerpadlu Luxtronik na adrese **{host}:{port}**.\n\nChyba: `{error}`\n\nZkontrolujte prosím, že je tepelné čerpadlo zapnuté, síťové připojení funguje a host/port jsou správné. Nastavení připojení můžete aktualizovat pomocí volby **Překonfigurovat** v nabídce integrace."

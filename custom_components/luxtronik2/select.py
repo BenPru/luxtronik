@@ -186,6 +186,7 @@ class LuxtronikThermalDesinfectionDaySelector(  # type: ignore  # pyright: ignor
 
     async def async_select_option(self, option: str) -> None:
         """Handle selection of a new day."""
+        self.coordinator.raise_if_write_blocked()
         self._attr_current_option = option
         data = self.coordinator.data
         if data is None:
@@ -298,6 +299,7 @@ class LuxtronikModeSelector(
 
         LOGGER.debug("Setting %s to %r", self.entity_id, option)
 
+        self.coordinator.raise_if_write_blocked()
         self._attr_current_option = option
         raw_option = self._option_to_raw.get(option, option)
 

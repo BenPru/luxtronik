@@ -106,6 +106,7 @@ class LuxtronikDateEntity(LuxtronikEntity[LuxtronikDateEntityDescription], DateE
 
     async def async_set_value(self, value: date) -> None:
         """Handle user-set date from the UI."""
+        self.coordinator.raise_if_write_blocked()
         self._attr_native_value = value
         dt = datetime.combine(value, datetime.min.time())  # datetime object
         await self.coordinator.async_write(

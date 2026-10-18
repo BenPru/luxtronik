@@ -1496,6 +1496,9 @@
         }
     },
     "exceptions": {
+        "readonly_firmware": {
+            "message": "Zapis zablokowany: firmware Luxtronik {firmware} powoduje awarię sterownika przy poleceniach zapisu, dlatego integracja działa tylko w trybie odczytu"
+        },
         "invalid_parameter_name": {
             "message": "Nieprawidłowa nazwa parametru: {parameter}"
         },
@@ -1522,6 +1525,10 @@
         }
     },
     "issues": {
+        "readonly_firmware": {
+            "title": "Integracja Luxtronik jest tylko do odczytu (wadliwy firmware)",
+            "description": "Pompa ciepła zgłasza firmware **{firmware}**. Wersje firmware V1.90.x i V2.90.x mają krytyczny błąd: każde polecenie zapisu na porcie 8889 powoduje awarię całego sterownika Luxtronik ([zgłoszenie]({forum_url})).\n\nDla ochrony pompy ciepła integracja działa **tylko do odczytu**: wszystkie zapisy (przełączniki, liczby, listy wyboru, klimat, ciepła woda, harmonogramy, usługi) są zablokowane. Czujniki nadal działają.\n\nDopóki nowe wydanie firmware nie usunie błędu, jedynym znanym rozwiązaniem jest cofnięcie (downgrade) sterownika do poprzedniego wydania tej samej serii (np. V2.89 dla V2.x, V1.88.3 dla V1.x). Używaj wyłącznie obrazu firmware własnej serii. Sterowanie zostanie automatycznie przywrócone, gdy pompa ciepła zgłosi firmware, którego błąd nie dotyczy."
+        },
         "connection_failed": {
             "title": "Nie można połączyć się z pompą ciepła Luxtronik",
             "description": "Integracja nie mogła połączyć się z pompą ciepła Luxtronik pod adresem **{host}:{port}**.\n\nBłąd: `{error}`\n\nSprawdź, czy pompa ciepła jest włączona, połączenie sieciowe działa, a host/port są poprawne. Możesz zaktualizować ustawienia połączenia za pomocą opcji **Rekonfiguruj** w menu integracji."
