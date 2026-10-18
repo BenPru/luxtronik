@@ -1416,7 +1416,8 @@
             "options_error": "Beim Laden der Optionen ist ein Fehler aufgetreten.",
             "no_devices_found": "Keine Geräte im Netzwerk gefunden.",
             "single_instance_allowed": "Bereits konfiguriert. Nur eine Instanz erlaubt.",
-            "unknown": "Unbekannter Fehler."
+            "unknown": "Unbekannter Fehler.",
+            "unsupported_ha_version": "Diese Version von Luxtronik benötigt Home Assistant {min_version} oder neuer; installiert ist {ha_version}. Aktualisiere Home Assistant oder installiere die letzte Version, die deine unterstützt: 2026.10.06 für Home Assistant 2026.8, 2026.08.29 für 2026.7 und älter."
         },
         "error": {
             "address": "Ungültige Remote-Adresse. Die Adresse muss eine IP-Adresse oder ein auflösbarer Hostname sein.",
@@ -1489,6 +1490,9 @@
                     "rbe_calculated_room_target": "Der Sollwert des Heizungsthermostats wird zu einer Raumtemperatur. Home Assistant passt die Heizkurvenkorrektur (Temperatur +/-) so an, dass sich die Wärmepumpe verhält, als wäre das RBE-Rad auf diesen Wert eingestellt. Der Sollwert darf höchstens 5 K geteilt durch den Raumeinflussfaktor vom RBE-Rad abweichen. Das eigene Absenkprogramm des RBE wird übersteuert. Die Wärmepumpe regelt auf die eigene Raumtemperatur des RBE: ein oben gewählter Innentemperatursensor wird nur auf der Karte angezeigt und hierfür nicht verwendet."
                 }
             }
+        },
+        "abort": {
+            "unsupported_ha_version": "Diese Version von Luxtronik benötigt Home Assistant {min_version} oder neuer; installiert ist {ha_version}. Aktualisiere Home Assistant oder installiere die letzte Version, die deine unterstützt: 2026.10.06 für Home Assistant 2026.8, 2026.08.29 für 2026.7 und älter."
         }
     },
     "exceptions": {

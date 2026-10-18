@@ -10,17 +10,22 @@ from typing import Final
 from homeassistant.const import ATTR_CONFIG_ENTRY_ID, ATTR_DEVICE_ID, Platform
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import StateType
-import voluptuous as vol
+
+from .schema_compat import vol
 
 # endregion Imports
 
 # region Constants Main
 DOMAIN: Final = "luxtronik2"
 CONFIG_ENTRY_VERSION: Final = 10
-# Oldest Home Assistant core that can set up the integration - the sub-devices
-# are parented with `via_device_id`, which the device registry only accepts
-# from 2026.8. Mirrors `homeassistant` in hacs.json (guarded by a test).
-MIN_HA_VERSION: Final[tuple[int, int]] = (2026, 8)
+# Oldest Home Assistant core that can set up the integration - the schemas are
+# built with probatio, which Home Assistant ships from 2026.9 and types its
+# flows and services with from 2026.10. (The sub-devices' `via_device_id`
+# already needed 2026.8.) Mirrors `homeassistant` in hacs.json (guarded by a
+# test). On an older core, setup and migration refuse existing entries and the
+# config/options flows abort before building a form; schema_compat keeps the
+# modules importable there so both can say so.
+MIN_HA_VERSION: Final[tuple[int, int]] = (2026, 9)
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__package__)
 

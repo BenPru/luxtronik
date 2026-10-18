@@ -8,12 +8,17 @@ from typing import Any
 from homeassistant import config_entries
 from homeassistant.components import network
 from homeassistant.config_entries import ConfigFlowResult
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PORT,
+    CONF_TIMEOUT,
+    MAJOR_VERSION,
+    MINOR_VERSION,
+)
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.helpers import selector
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
-import voluptuous as vol
 
 from .const import (
     CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION,
@@ -30,6 +35,7 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL_OPTION,
     DOMAIN,
     LOGGER,
+    MIN_HA_VERSION,
     LuxRoomThermostatType,
 )
 from .coordinator import (
@@ -39,12 +45,35 @@ from .coordinator import (
     connect_and_get_coordinator,
 )
 from .lux_helper import discover
+from .schema_compat import vol
 from .schema_helper import build_options_schema, build_user_data_schema
 
 # endregion Imports
 
 SELECT_DEVICE_LABEL = "select_device_to_configure"
 MANUAL_ENTRY_VALUE = "__manual_entry__"
+
+
+def _unsupported_core_abort(
+    flow: config_entries.ConfigFlow | config_entries.OptionsFlow,
+) -> ConfigFlowResult | None:
+    """Abort a flow on a Home Assistant core older than `MIN_HA_VERSION`.
+
+    Home Assistant 2026.8 serializes forms with voluptuous_serialize, which
+    cannot convert the probatio schemas, so any form there ends in a generic
+    "Unknown error". Setup refuses the same cores with the same message.
+    DHCP discovery is left alone: it creates the entry without a form, and
+    setup then shows the message, where an aborted discovery would be silent.
+    """
+    if (MAJOR_VERSION, MINOR_VERSION) >= MIN_HA_VERSION:
+        return None
+    return flow.async_abort(
+        reason="unsupported_ha_version",
+        description_placeholders={
+            "min_version": f"{MIN_HA_VERSION[0]}.{MIN_HA_VERSION[1]}",
+            "ha_version": f"{MAJOR_VERSION}.{MINOR_VERSION}",
+        },
+    )
 
 
 class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -190,6 +219,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
+        if (abort := _unsupported_core_abort(self)) is not None:
+            return abort
         try:
             LOGGER.debug("Starting async_step_user")
 
@@ -438,6 +469,8 @@ class LuxtronikFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle reconfiguration of the integration."""
+        if (abort := _unsupported_core_abort(self)) is not None:
+            return abort
         reconfigure_entry = self._get_reconfigure_entry()
         errors: dict[str, str] = {}
 
@@ -568,6 +601,8 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Start the options flow."""
+        if (abort := _unsupported_core_abort(self)) is not None:
+            return abort
         return await self.async_step_user(user_input)
 
     async def async_step_user(

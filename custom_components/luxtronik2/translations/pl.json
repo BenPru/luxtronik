@@ -1416,7 +1416,8 @@
             "options_error": "Wystąpił błąd podczas ładowania opcji.",
             "no_devices_found": "Nie znaleziono żadnych urządzeń w sieci.",
             "single_instance_allowed": "Już skonfigurowano. Dozwolona jest tylko jedna instancja.",
-            "unknown": "Nieznany błąd."
+            "unknown": "Nieznany błąd.",
+            "unsupported_ha_version": "Ta wersja Luxtronik wymaga Home Assistant {min_version} lub nowszego; używasz {ha_version}. Zaktualizuj Home Assistant albo zainstaluj ostatnie wydanie obsługujące Twoją wersję: 2026.10.06 dla Home Assistant 2026.8, 2026.08.29 dla 2026.7 i starszych."
         },
         "error": {
             "address": "Nieprawidłowy adres zdalny. Adres musi być adresem IP lub rozpoznawalną nazwą hosta.",
@@ -1489,6 +1490,9 @@
                     "rbe_calculated_room_target": "Cel termostatu ogrzewania staje się temperaturą pomieszczenia. Home Assistant dostosowuje korektę krzywej grzewczej (Temperatura +/-) tak, aby pompa ciepła zachowywała się, jakby pokrętło RBE było ustawione na ten cel. Cel może odbiegać od pokrętła RBE najwyżej o 5 K podzielone przez współczynnik wpływu temperatury pomieszczenia. Własny program obniżenia RBE jest nadpisywany. Pompa ciepła reguluje według własnego pomiaru temperatury pomieszczenia w RBE: wybrany powyżej czujnik temperatury wewnętrznej jest tylko wyświetlany na karcie i nie jest do tego używany."
                 }
             }
+        },
+        "abort": {
+            "unsupported_ha_version": "Ta wersja Luxtronik wymaga Home Assistant {min_version} lub nowszego; używasz {ha_version}. Zaktualizuj Home Assistant albo zainstaluj ostatnie wydanie obsługujące Twoją wersję: 2026.10.06 dla Home Assistant 2026.8, 2026.08.29 dla 2026.7 i starszych."
         }
     },
     "exceptions": {

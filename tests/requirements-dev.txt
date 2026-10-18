@@ -5,11 +5,17 @@ pytest-cov
 ruff
 # Runtime dependencies from manifest.json (needed for test collection)
 luxtronik==0.3.14
-getmac~=0.9.5
+# Pinned exactly to the getmac Home Assistant's own integrations pin, which is the
+# version users run; ~= would let CI test a newer one users never get. Hassfest
+# rejects a manifest requirement that differs from that pin, so dependabot ignores
+# getmac and it moves only when Home Assistant moves it (#839).
+getmac==0.9.5
+# The floor is the probatio the oldest supported Home Assistant pins (2026.9 ships
+# 0.11.4); a higher one would make that core uninstallable next to these
+# requirements. Raise it only together with the minimum HA version, so dependabot
+# ignores probatio (#841).
+probatio>=0.11.4
 packaging>=26.3
-# Imported directly by tests/test_schema_helper.py; it used to arrive via
-# Home Assistant, which stopped resolving it on Python 3.14.
-voluptuous-serialize
 # Imported directly by tests/test_download_portal_ssl.py to verify the pinned CA
 # bundle anchors in the public trust store; it arrives via Home Assistant today.
 certifi

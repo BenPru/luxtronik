@@ -484,8 +484,9 @@ class LuxtronikCopSensorEntity(LuxtronikSensorEntity):
 
     Reads C0080_STATUS through the normal (non-raw) get_sensor_data path,
     same as base.py's SWITCH_GAP formatter - this applies
-    normalize_sensor_value()'s existing "heating but compressor not
-    actually running -> no_request" reclassification (common.py:223-228),
+    normalize_sensor_value()'s existing "heating but neither compressor
+    actually running -> no_request" reclassification
+    (common._derive_operation_mode),
     which is exactly the condition under which a COP reading would be
     meaningless anyway, so it's a useful extra gate, not just incidental.
 
