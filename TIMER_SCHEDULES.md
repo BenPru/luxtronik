@@ -30,6 +30,8 @@ Set the value to an empty string to clear all windows for that entity. How many 
 
 **A window counts as unused only when *both* halves are `00:00`.** That is why `00:00-00:00` has its own meaning per circuit (see the heating warning below), while `18:00-00:00` is a perfectly normal window.
 
+**A window whose end is earlier than its start crosses midnight, and it belongs to the day it starts on.** `15:30-12:30` on the *Monday* entity of a per-day schedule runs from Monday 15:30 until Tuesday 12:30. It does **not** mean "00:00-12:30 and 15:30-00:00 on Monday". This matters as soon as the days differ: to change what happens on Tuesday morning, edit Monday's window. On a *Whole week* schedule every day carries the same window, so the night simply continues into the next day. (Observed on a V3.92.3 controller in [#842](https://github.com/BenPru/luxtronik/issues/842): the display lists `15:30-12:30` under Monday, and hot water starts at 12:31 on Tuesdays.)
+
 So to cover everything outside 12:00–18:00 on a five-window circuit like DHW, the value is:
 
 ```
