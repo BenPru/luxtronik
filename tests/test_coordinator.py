@@ -3125,6 +3125,46 @@ class TestEvu2ManualRestore:
         coord._apply_evu2_manual(sg_on)
         assert sg_on.evu2_manual is True
 
+    @pytest.mark.parametrize("api", ["async_get_stored_state", "last_states"])
+    async def test_reads_either_restore_state_api(
+        self, hass: HomeAssistant, api: str
+    ) -> None:
+        """Home Assistant 2026.11 removed `last_states` for a getter (#846).
+
+        The installed release exercises only one of the two, so both are
+        faked here: each storage offers just the API of its release.
+        """
+        from homeassistant.core import State
+        from homeassistant.helpers import entity_registry as er
+        from homeassistant.helpers.restore_state import StoredState
+        from homeassistant.util import dt as dt_util
+
+        entry = er.async_get(hass).async_get_or_create(
+            "switch",
+            DOMAIN,
+            f"switch.{DOMAIN}_{SensorKey.EVU2_MANUAL}",
+            suggested_object_id=f"{DOMAIN}_{SensorKey.EVU2_MANUAL}",
+        )
+        entity_id = entry.entity_id
+        stored = StoredState(State(entity_id, "on"), None, dt_util.utcnow())
+        if api == "last_states":
+            storage = MagicMock(spec=["last_states"])
+            storage.last_states = {entity_id: stored}
+        else:
+            storage = MagicMock(spec=["async_get_stored_state"])
+            storage.async_get_stored_state = MagicMock(
+                side_effect={entity_id: stored}.get
+            )
+        coord = self._coord(hass)
+
+        with patch(
+            "custom_components.luxtronik2.coordinator.restore_state.async_get",
+            return_value=storage,
+        ):
+            coord.async_restore_evu2_manual()
+
+        assert coord.data.evu2_manual is True
+
 
 # ===========================================================================
 # Cooling counter (issue #826)

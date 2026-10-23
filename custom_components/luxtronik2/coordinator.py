@@ -358,7 +358,14 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             # it steer the status with no visible entity to change it, until
             # the restore cache expired and the status changed on its own.
             return
-        stored = restore_state.async_get(self.hass).last_states.get(entity_id)
+        storage = restore_state.async_get(self.hass)
+        # Home Assistant 2026.11 removed `last_states` and indexes stored
+        # states by entity registry id; the getter replaces it (#846).
+        get_stored_state = getattr(storage, "async_get_stored_state", None)
+        if get_stored_state is not None:
+            stored = get_stored_state(entity_id)
+        else:  # Home Assistant 2026.10 and older
+            stored = storage.last_states.get(entity_id)
         if stored is None or stored.state.state not in (STATE_ON, STATE_OFF):
             return
         self._evu2_manual = stored.state.state == STATE_ON
