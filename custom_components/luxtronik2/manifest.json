@@ -2,6 +2,7 @@
   "domain": "luxtronik2",
   "name": "Luxtronik",
   "after_dependencies": [],
+  "categories": ["climate"],
   "codeowners": [
     "@BenPru",
     "@rhammen",
@@ -36,7 +37,6 @@
   ],
   "documentation": "https://github.com/BenPru/luxtronik",
   "integration_type": "hub",
-  "categories": ["climate"],
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/BenPru/luxtronik/issues",
   "loggers": [
