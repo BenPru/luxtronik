@@ -2,7 +2,9 @@
   "domain": "luxtronik2",
   "name": "Luxtronik",
   "after_dependencies": [],
-  "categories": ["climate"],
+  "categories": [
+    "climate"
+  ],
   "codeowners": [
     "@BenPru",
     "@rhammen",
@@ -46,5 +48,5 @@
     "luxtronik==0.3.14",
     "getmac~=0.9.5"
   ],
-  "version": "2026.10.18"
+  "version": "2026.10.31"
 }
