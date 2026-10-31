@@ -909,6 +909,9 @@
             "dhw_temperature": {
                 "name": "Temperatura ciepłej wody"
             },
+            "dhw_target_temperature_controller": {
+                "name": "Temperatura docelowa ciepłej wody (sterownik)"
+            },
             "dhw_operation_hours": {
                 "name": "Godziny pracy ciepłej wody"
             },

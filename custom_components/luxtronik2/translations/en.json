@@ -918,6 +918,9 @@
             "dhw_temperature": {
                 "name": "Domestic hot water"
             },
+            "dhw_target_temperature_controller": {
+                "name": "Target (controller)"
+            },
             "dhw_operation_hours": {
                 "name": "Operation hours"
             },

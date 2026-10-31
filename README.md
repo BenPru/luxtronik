@@ -172,6 +172,7 @@ Basic entities:
 | **Mode Automatic** | Switch | on/off | Sets the operating mode to Off or last known state. |
 | **DHW Target Temperature** | Number | °C | Set the DHW target temperature. |
 | **DHW Current Temperature** | Sensor | °C | The current DHW temperature. |
+| **Target (controller)** | Sensor | °C | The DHW target the controller is actually heating to, including any Smart Grid / PV raise on top of the *DHW Target Temperature*. Firmware x.90.1 and newer only; on older firmware this register does not reliably reflect the target. See [DHW_TARGET_REGISTERS.md](DHW_TARGET_REGISTERS.md). |
 
 Advanced entities:
 | Name | Entity Type | Units | Description |

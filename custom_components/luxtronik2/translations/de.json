@@ -915,6 +915,9 @@
             "dhw_temperature": {
                 "name": "Brauchwasser"
             },
+            "dhw_target_temperature_controller": {
+                "name": "Soll (Regler)"
+            },
             "dhw_operation_hours": {
                 "name": "Betriebsstunden"
             },
