@@ -17,6 +17,7 @@ from homeassistant.const import (
     UnitOfTime,
     UnitOfVolumeFlowRate,
 )
+from packaging.version import Version
 
 from .const import (
     SECOND_TO_HOUR_FACTOR,
@@ -855,6 +856,21 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+    ),
+    # The controller's own "Warmwasser-Soll": the target it heats to, including
+    # any Smart Grid / PV raise on top of the setpoint (#850). From minor 90.1
+    # it reads min(P0002, P0105) plus that raise. Below 90.1 it mirrors P0002,
+    # a register the compressor demonstrably ignores on V1.90.0 (#785), so the
+    # sensor would mislead there. See DHW_TARGET_REGISTERS.md.
+    descr(
+        key=SensorKey.DHW_TARGET_TEMPERATURE_CONTROLLER,
+        luxtronik_key=LC.C0018_DHW_TARGET_TEMPERATURE_CONTROLLER,
+        device_key=DeviceKey.domestic_water,
+        entity_category=None,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        min_firmware_version_minor=Version("90.1"),
     ),
     descr(
         key=SensorKey.DHW_OPERATION_HOURS,

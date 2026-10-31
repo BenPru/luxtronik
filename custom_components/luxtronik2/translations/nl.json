@@ -909,6 +909,9 @@
             "dhw_temperature": {
                 "name": "Warm water"
             },
+            "dhw_target_temperature_controller": {
+                "name": "Doeltemperatuur (regelaar)"
+            },
             "dhw_operation_hours": {
                 "name": "Werkuren"
             },

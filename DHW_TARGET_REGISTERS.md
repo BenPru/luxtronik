@@ -17,7 +17,7 @@ still the reasoning that limits what the measurement proves.
 |---|---|---|---|
 | **P0002** | `ID_Einst_BWS_akt` | "Deckung WP" | the temperature reachable by the compressor alone. The controller **lowers this by itself** when the setpoint cannot be reached (documented in the AIT manual, and observed in [#793](#793-how-deckung-wp-moves-2026-09-15)), so it is not a pure user setting. |
 | **P0105** | `ID_Soll_BWS_akt` | "Wunschwert" | the desired value, shown as the primary figure on the controller display. |
-| **C0018** | `ID_WEB_Einst_BWS_akt` | "Warmwasser-Soll" | read-only; P0002 plus any Smart Grid offset below minor ~90.1, `min(P0002, P0105)` plus offset from there. It was long read as "the effective target", but the [V1.90.0 measurement](#the-v190-measurement-2026-09-13) showed a pump obeying P0105 while C0018 tracked P0002 — so below 90.1 it mirrors a register, not the compressor's behaviour. |
+| **C0018** | `ID_WEB_Einst_BWS_akt` | "Warmwasser-Soll" | read-only; `min(P0002, P0105)` plus any Smart Grid offset from minor ~90.1. Below that it usually reads P0002 plus offset, but not always (see the 1CA15E row below). It was long read as "the effective target", but the [V1.90.0 measurement](#the-v190-measurement-2026-09-13) showed a pump obeying P0105 while C0018 tracked P0002 — so below 90.1 it is not reliable as a statement of what the compressor aims at. Exposed as a sensor from 90.1 only; see [The controller target sensor](#the-controller-target-sensor-850-2026-10-31). |
 
 C0018 is the useful one when analysing a dump for the Smart Grid offset and for
 spotting the Event 2 relationship change. It does **not** tell you which
@@ -63,18 +63,23 @@ worked and nobody complained.
 From the local `diagnostics/` corpus. Dumps where `P0002 == P0105` carry no
 information and are omitted; every divergent case is listed.
 
-### Below minor 90.1 — C0018 follows P0002
+### Below minor 90.1 — C0018 mostly follows P0002
 
 | firmware | P0002 | P0105 | C0018 | note |
 |---|---|---|---|---|
 | V1.88.3 | 43.0 | 46.0 | 43.0 | |
 | V1.90.0 | 49.0 | 48.0 | 49.0 | `min()` would give 48.0 |
 | V1.90.0 | 49.0 | 48.0 | 54.0 | Smart Grid +5 K on top of P0002 |
+| V1.90.0 | 50.0 | 54.0 | 54.0 | `unknown-entry-1CA15E`, the #785 unit: **not** P0002 — either P0105, or P0002 + 4 K; one snapshot cannot tell |
+| V1.90.0 | 50.0 | 37.5 | 50.0 | |
+| V1.77 | 59.5 | 61.0 | 59.5 | |
+| V1.73 | 44.0 | 46.0 | 44.0 | |
+| V3.89.5 | 48.0 | 46.0 | 48.0 | `min()` would give 46.0 |
 | V3.88.0 | 40.0 | 38.0 | 40.0 | `min()` would give 38.0 |
 | V3.88.0 | 48.5 | 47.5 | 48.5 | `min()` would give 47.5 |
 
-Three of these discriminate between "follows P0002" and "follows `min()`", and
-all three say P0002 — for **C0018**. The second V1.90.0 row belongs to a unit
+Most rows say P0002 — for **C0018** — but the 1CA15E row does not, so "mirrors
+P0002" is a tendency below 90.1, not a rule. The second V1.90.0 row belongs to a unit
 type that, in [#785](https://github.com/BenPru/luxtronik/issues/785), cut in
 and out on P0105, so these rows say nothing about what the compressor aims at.
 
@@ -291,9 +296,36 @@ integration removes the observer, not the effect. He did not attach his dump
 (local network data survived redaction), so V1.81 is still absent from the
 corpus.
 
+## The controller target sensor (#850, 2026-10-31)
+
+[#850](https://github.com/BenPru/luxtronik/issues/850) (LP16V, V3.92.3) asked
+for C0018 as a sensor: P0105 sat at 48, P0002 at the 75.0 sentinel, and C0018
+moved 48 → 50 → 55 as PV surplus raised the target. The sensor
+`sensor.<prefix>_dhw_target_temperature_controller` exists from minor **90.1**
+only (`min_firmware_version_minor`), for these reasons:
+
+- **At and above 90.1** every divergent dump is V3.92.x and fits
+  `min(P0002, P0105)` plus offset. One of them also carries behaviour: on
+  `260126_0477` (V3.92.1, 2026-06-10) C0018 was raised to 59.5 with P0105 at
+  53, and across three dumps the tank climbed 44.8 → 52.6 → 57.3 °C — past
+  P0105, towards C0018.
+- **Below 90.1** C0018 mostly mirrors P0002, which a V1.90.0 compressor was
+  measured to ignore, and the 1CA15E row shows it does not even do that
+  consistently. A sensor there would mislead.
+- **The 90.1 boundary itself is untested by the corpus**: every V3.90.0/90.1
+  dump has P0002 = P0105. It rests on the 3.90.1 report in #280 and matches
+  Event 2 above. A V3.90.x or V3.91.x dump with the two registers apart would
+  confirm or move it.
+- **Series 4** (V4.81.3) is excluded by the minor comparison; nothing is known
+  about C0018 there.
+
+A firmware gate is the right lever here for the same reason as for P0002/P0105:
+the register exists everywhere, only its meaning changes.
+
 ## Related
 
 - [#280](https://github.com/BenPru/luxtronik/issues/280) — the original thread; contains the FW 3.79, 3.90.0 and 2.88.3 observations, and the Smart Grid explanation of C0018.
 - [#428](https://github.com/BenPru/luxtronik/issues/428) — V3.92.0, P0002 showing "Deckung WP" instead of the setpoint.
 - [#793](https://github.com/BenPru/luxtronik/issues/793) — V1.81, P0002 "decreasing by itself"; the Deckung-WP mechanics above.
+- [#850](https://github.com/BenPru/luxtronik/issues/850) — V3.92.3, C0018 requested as a sensor; the 90.1 gate above.
 - [#517](https://github.com/BenPru/luxtronik/issues/517) — unrelated to the thresholds: the `firmware_version_minor` crash on two-part versions introduced alongside `fecdf38`, since fixed.

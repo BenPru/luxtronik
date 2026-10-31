@@ -918,6 +918,9 @@
             "dhw_temperature": {
                 "name": "Teplota TUV"
             },
+            "dhw_target_temperature_controller": {
+                "name": "Požadovaná teplota TUV (regulátor)"
+            },
             "dhw_operation_hours": {
                 "name": "Hodiny provozu TUV"
             },

@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_TIMEOUT,
     PERCENTAGE,
     UnitOfElectricPotential,
+    UnitOfTemperature,
     UnitOfVolumeFlowRate,
 )
 from homeassistant.helpers.entity import EntityCategory
@@ -39,6 +40,7 @@ from custom_components.luxtronik2.const import (
     LuxVisibility,
     SensorKey,
 )
+from custom_components.luxtronik2.coordinator import LuxtronikCoordinator
 from custom_components.luxtronik2.lux_overrides import parameters_to_add_update
 from custom_components.luxtronik2.model import (
     LuxtronikBinarySensorEntityDescription,
@@ -1416,3 +1418,58 @@ class TestRoomThermostatTypeSensor:
             entity._handle_coordinator_update()
             entity._handle_coordinator_update()
         assert mock_logger.warning.call_count == 1
+
+
+class TestDhwTargetControllerSensor:
+    """C0018 `ID_WEB_Einst_BWS_akt` as the controller's own DHW target (#850).
+
+    From minor 90.1 the register reads min(P0002, P0105) plus any Smart Grid /
+    PV raise: twelve of thirteen divergent corpus dumps fit exactly, the
+    thirteenth carries an offset, and on that unit the tank climbed past
+    P0105 towards C0018. Below 90.1 it follows P0002 (one #785 dump fits
+    neither), which a V1.90.0 compressor was measured to ignore, so the
+    entity must not exist there. See DHW_TARGET_REGISTERS.md.
+    """
+
+    @staticmethod
+    def _description() -> LuxtronikSensorDescription:
+        return next(
+            d for d in SENSORS if d.key == SensorKey.DHW_TARGET_TEMPERATURE_CONTROLLER
+        )
+
+    @staticmethod
+    def _coord_on_firmware(version: str) -> LuxtronikCoordinator:
+        coord = object.__new__(LuxtronikCoordinator)
+        coord.data = make_coordinator_data(calculations={"ID_WEB_SoftStand": version})
+        return coord
+
+    def test_reads_calculation_18_on_the_dhw_device(self):
+        description = self._description()
+        assert description.luxtronik_key == LC.C0018_DHW_TARGET_TEMPERATURE_CONTROLLER
+        assert description.device_key == DeviceKey.domestic_water
+        assert description.device_class == SensorDeviceClass.TEMPERATURE
+        assert description.native_unit_of_measurement == UnitOfTemperature.CELSIUS
+        assert description.state_class == SensorStateClass.MEASUREMENT
+
+    @pytest.mark.parametrize(
+        ("firmware", "exists"),
+        [
+            ("V1.73", False),
+            ("V1.88.3", False),
+            ("V1.90.0", False),  # the #785 unit: compressor obeys P0105
+            ("V2.90.0", False),
+            ("V3.88.0", False),
+            ("V3.90.0", False),
+            ("V3.90.1", True),
+            ("V3.92.1", True),
+            ("V3.92.3", True),  # the #850 reporter
+            ("V4.81.3", False),  # series 4, minor 81: behaviour unknown
+        ],
+    )
+    def test_exists_only_from_minor_90_1(self, firmware, exists):
+        coord = self._coord_on_firmware(firmware)
+        assert coord._is_version_not_compatible(self._description()) is not exists
+
+    def test_value_is_celsius_tenths(self):
+        """55.0 C in the #850 reporter's dump."""
+        _assert_raw_converts_to(SensorKey.DHW_TARGET_TEMPERATURE_CONTROLLER, 550, 55.0)
