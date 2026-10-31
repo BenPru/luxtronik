@@ -17,7 +17,7 @@ still the reasoning that limits what the measurement proves.
 |---|---|---|---|
 | **P0002** | `ID_Einst_BWS_akt` | "Deckung WP" | the temperature reachable by the compressor alone. The controller **lowers this by itself** when the setpoint cannot be reached (documented in the AIT manual, and observed in [#793](#793-how-deckung-wp-moves-2026-09-15)), so it is not a pure user setting. |
 | **P0105** | `ID_Soll_BWS_akt` | "Wunschwert" | the desired value, shown as the primary figure on the controller display. |
-| **C0018** | `ID_WEB_Einst_BWS_akt` | "Warmwasser-Soll" | read-only; `min(P0002, P0105)` plus any Smart Grid offset from minor ~90.1. Below that it usually reads P0002 plus offset, but not always (see the 1CA15E row below). It was long read as "the effective target", but the [V1.90.0 measurement](#the-v190-measurement-2026-09-13) showed a pump obeying P0105 while C0018 tracked P0002 — so below 90.1 it is not reliable as a statement of what the compressor aims at. Exposed as a sensor from 90.1 only; see [The controller target sensor](#the-controller-target-sensor-850-2026-10-31). |
+| **C0018** | `ID_WEB_Einst_BWS_akt` | "Warmwasser-Soll" | read-only; `min(P0002, P0105)` plus any Smart Grid offset from minor ~90.1. Below that it usually reads P0002 plus offset, but not always (see the 1CA15E row below). It was long read as "the effective target", but the [V1.90.0 measurement](#the-v190-measurement-2026-09-13) showed a pump obeying P0105 while C0018 tracked P0002 — so below 90.1 it is not reliable as a statement of what the compressor aims at. A DHW target written over the Smart Home Interface (Modbus TCP) shows up only here, and is not capped by P0105; see [Targets written over the Smart Home Interface](#targets-written-over-the-smart-home-interface). Exposed as a sensor from 90.1 only; see [The controller target sensor](#the-controller-target-sensor-850-2026-10-31). |
 
 C0018 is the useful one when analysing a dump for the Smart Grid offset and for
 spotting the Event 2 relationship change. It does **not** tell you which
@@ -102,10 +102,14 @@ and out on P0105, so these rows say nothing about what the compressor aims at.
 | V3.92.3 | 75.0 | 58.0 | 58.0 |
 
 Twelve of thirteen fit `min(P0002, P0105)` exactly. The one exception
-(`75.0 / 53.0 / 59.5`) carries a Smart Grid offset.
+(`75.0 / 53.0 / 59.5`) carries a raise. Read alone, a dump cannot tell a
+Smart Grid offset from a target written over the
+[Smart Home Interface](#targets-written-over-the-smart-home-interface).
 
 Note the two V3.92.1 rows where P0105 is the *higher* value: the effective
-target stays at P0002. P0105 acts as a ceiling, not as the setpoint.
+target stays at P0002. P0105 acts as a ceiling, not as the setpoint. That
+holds between these two registers only: a target written over the Smart Home
+Interface is not capped by P0105.
 
 ## Why the two platforms disagreed (May 2025 – Sep 2026)
 
@@ -326,10 +330,36 @@ only (`min_firmware_version_minor`), for these reasons:
 A firmware gate is the right lever here for the same reason as for P0002/P0105:
 the register exists everywhere, only its meaning changes.
 
+### Targets written over the Smart Home Interface
+
+The #850 raise turned out not to be Smart Grid at all. The reporter's PV
+manager, Solar Manager, writes the DHW target over the controller's Smart Home
+Interface (Modbus TCP). P1030 `ID_Einst_SmartGrid` was off and EVU/EVU2 never
+moved. His dump (`unknown-entry-T61YDK/2026-10-31`) read P0105 48, C0018 50.
+That looked like P0105 + P1122 `SMART_GRID_DHW_INCREASE` (2.0). The 55 °C
+phase also matched P0973 `ID_Einst_BW_max` (55.0). Both matches were
+coincidence. He then changed Solar Manager's "normal" value from 50 to 51
+during a normal phase. C0018 went to 51.0 within seconds, and a diff of all
+parameters between the two dumps showed no change at all: P0105, P1122,
+P0973 and P1030 were all the same.
+
+What follows from this:
+
+- A target written over the Smart Home Interface shows up **only in C0018**.
+  No parameter on the 8889 interface mirrors it, so P0105, the `number` entity
+  and the `water_heater` card all keep showing the configured setpoint.
+- It is **not capped by P0105**: C0018 read 51 with P0105 at 48. So
+  `min(P0002, P0105)` plus offset describes C0018 only when nothing writes over
+  the Smart Home Interface.
+- The `smart_grid_status` sensor reads the EVU/EVU2 inputs, so it cannot see
+  this either.
+- A raised C0018 in a dump is therefore not proof of Smart Grid. Other PV
+  managers and energy managers can write over the same interface.
+
 ## Related
 
 - [#280](https://github.com/BenPru/luxtronik/issues/280) — the original thread; contains the FW 3.79, 3.90.0 and 2.88.3 observations, and the Smart Grid explanation of C0018.
 - [#428](https://github.com/BenPru/luxtronik/issues/428) — V3.92.0, P0002 showing "Deckung WP" instead of the setpoint.
 - [#793](https://github.com/BenPru/luxtronik/issues/793) — V1.81, P0002 "decreasing by itself"; the Deckung-WP mechanics above.
-- [#850](https://github.com/BenPru/luxtronik/issues/850) — V3.92.3, C0018 requested as a sensor; the 90.1 gate above.
+- [#850](https://github.com/BenPru/luxtronik/issues/850) — V3.92.3, C0018 requested as a sensor; the 90.1 gate and the Smart Home Interface finding above.
 - [#517](https://github.com/BenPru/luxtronik/issues/517) — unrelated to the thresholds: the `firmware_version_minor` crash on two-part versions introduced alongside `fecdf38`, since fixed.
