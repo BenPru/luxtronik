@@ -1424,9 +1424,9 @@ class TestDhwTargetControllerSensor:
     """C0018 `ID_WEB_Einst_BWS_akt` as the controller's own DHW target (#850).
 
     From minor 90.1 the register reads min(P0002, P0105) plus any Smart Grid /
-    PV raise: twelve of thirteen divergent corpus dumps fit exactly, the
-    thirteenth carries an offset, and on that unit the tank climbed past
-    P0105 towards C0018. Below 90.1 it follows P0002 (one #785 dump fits
+    PV raise: twelve of thirteen divergent value combinations in the corpus
+    fit exactly, the thirteenth carries an offset, and on that unit the tank
+    climbed past P0105 towards C0018. Below 90.1 it follows P0002 (one #785 dump fits
     neither), which a V1.90.0 compressor was measured to ignore, so the
     entity must not exist there. See DHW_TARGET_REGISTERS.md.
     """
@@ -1460,6 +1460,8 @@ class TestDhwTargetControllerSensor:
             ("V2.90.0", False),
             ("V3.88.0", False),
             ("V3.90.0", False),
+            ("V1.90.1", True),  # series-agnostic minor rule; no such dump yet
+            ("V2.90.1", True),
             ("V3.90.1", True),
             ("V3.92.1", True),
             ("V3.92.3", True),  # the #850 reporter

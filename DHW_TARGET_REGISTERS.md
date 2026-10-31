@@ -74,13 +74,13 @@ information and are omitted; every divergent case is listed.
 | V1.90.0 | 50.0 | 37.5 | 50.0 | |
 | V1.77 | 59.5 | 61.0 | 59.5 | |
 | V1.73 | 44.0 | 46.0 | 44.0 | |
-| V3.89.5 | 48.0 | 46.0 | 48.0 | `min()` would give 46.0 |
+| V1.73 | 48.0 | 46.0 | 48.0 | `241125_0195/2026-02-04`, the two-pump mixture: its `devices` block says V3.89.5, but registers below index 1021 (these three included) are the V1.73 unit's own — see `diagnostics/INDEX.md` |
 | V3.88.0 | 40.0 | 38.0 | 40.0 | `min()` would give 38.0 |
 | V3.88.0 | 48.5 | 47.5 | 48.5 | `min()` would give 47.5 |
 
 Most rows say P0002 — for **C0018** — but the 1CA15E row does not, so "mirrors
-P0002" is a tendency below 90.1, not a rule. The second V1.90.0 row belongs to a unit
-type that, in [#785](https://github.com/BenPru/luxtronik/issues/785), cut in
+P0002" is a tendency below 90.1, not a rule. The `211129_09` Smart Grid row
+(49 / 48 / 54) belongs to a unit type that, in [#785](https://github.com/BenPru/luxtronik/issues/785), cut in
 and out on P0105, so these rows say nothing about what the compressor aims at.
 
 ### At and above minor 90.1 — C0018 follows min(P0002, P0105)
@@ -308,7 +308,8 @@ only (`min_firmware_version_minor`), for these reasons:
   `min(P0002, P0105)` plus offset. One of them also carries behaviour: on
   `260126_0477` (V3.92.1, 2026-06-10) C0018 was raised to 59.5 with P0105 at
   53, and across three dumps the tank climbed 44.8 → 52.6 → 57.3 °C — past
-  P0105, towards C0018.
+  P0105, towards C0018. The offset also shows with the registers equal:
+  `unknown-entry-GSZ1XT/2026-06-23` (V3.92.3) reads 47.5 / 47.5 / 51.5.
 - **Below 90.1** C0018 mostly mirrors P0002, which a V1.90.0 compressor was
   measured to ignore, and the 1CA15E row shows it does not even do that
   consistently. A sensor there would mislead.
@@ -316,6 +317,9 @@ only (`min_firmware_version_minor`), for these reasons:
   dump has P0002 = P0105. It rests on the 3.90.1 report in #280 and matches
   Event 2 above. A V3.90.x or V3.91.x dump with the two registers apart would
   confirm or move it.
+- **Series 1 and 2 at 90.1 or later** get the sensor too, by the series-agnostic
+  minor rule. The corpus has no such dump yet; if a V1.90.1+ or V2.90.1+ unit
+  shows C0018 still mirroring P0002, the gate needs a series condition.
 - **Series 4** (V4.81.3) is excluded by the minor comparison; nothing is known
   about C0018 there.
 
