@@ -37,7 +37,6 @@ from .const import (
     SensorKey,
 )
 from .coordinator import LuxtronikCoordinator
-from .download_portal_ssl import async_get_download_portal_ssl_context
 from .lux_helper import get_firmware_download_id, get_manufacturer_firmware_url_by_model
 from .model import LuxtronikUpdateEntityDescription
 
@@ -218,15 +217,9 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
         version_parsed = False
         try:
             session = async_get_clientsession(self.hass)
-            # The download portal serves an incomplete certificate chain, so the
-            # request needs our pinned CA bundle. See download_portal_ssl.py.
-            ssl_context = await async_get_download_portal_ssl_context(self.hass)
-            # True is aiohttp's default: verify against the default context.
-            portal_ssl = ssl_context if ssl_context is not None else True
             async with session.get(
                 f"{DOWNLOAD_PORTAL_URL}{download_id}",
                 timeout=ClientTimeout(total=30),
-                ssl=portal_ssl,
             ) as response:
                 self._raise_for_portal_status(response)
 
@@ -248,7 +241,6 @@ class LuxtronikUpdateEntity(  # type: ignore  # pyright: ignore[reportIncompatib
             async with session.get(
                 f"{CHANGELOG_URL}{download_id}",
                 timeout=ClientTimeout(total=30),
-                ssl=portal_ssl,
             ) as response:
                 self._raise_for_portal_status(response)
 
