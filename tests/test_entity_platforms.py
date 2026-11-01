@@ -1487,7 +1487,7 @@ class TestLuxtronikWaterHeater:
         entity._pending_temperature = 55.0
         await entity._async_write_temperature()
         coord.async_write.assert_called_once()
-        assert entity._attr_target_temperature == 50.0
+        assert entity.native_target_temperature == 50.0
         entity.async_write_ha_state.assert_called()
 
     @pytest.mark.asyncio
@@ -1733,7 +1733,7 @@ class TestLuxtronikThermostat:
         entity._pending_temperature = 25.0
         await entity._async_write_temperature()
         coord.async_write.assert_called_once()
-        assert entity._attr_target_temperature == 21.0
+        assert entity.native_target_temperature == 21.0
         entity.async_write_ha_state.assert_called()
 
     @pytest.mark.asyncio

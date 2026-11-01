@@ -469,7 +469,7 @@ class TestAsyncAddedToHass:
         entity.async_get_last_state = AsyncMock(return_value=last_state)
 
         extra_data = MagicMock()
-        extra_data.as_dict.return_value = {"_attr_target_temperature": 22.0}
+        extra_data.as_dict.return_value = {"_restored_value": 22.0}
         entity.async_get_last_extra_data = AsyncMock(return_value=extra_data)
         entity.async_on_remove = MagicMock()
         entity.entity_id = "sensor.test_entity"
@@ -478,7 +478,26 @@ class TestAsyncAddedToHass:
         with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
             await LuxtronikEntity.async_added_to_hass(entity)
 
-        assert entity._attr_target_temperature == 22.0
+        assert entity._restored_value == 22.0
+
+    @pytest.mark.asyncio
+    async def test_restore_renames_map_stored_keys(self):
+        entity = _make_sensor_entity()
+        entity._restore_renames = {"_stored_key": "_entity_attr"}
+        entity.async_get_last_state = AsyncMock(return_value=None)
+        extra_data = MagicMock()
+        extra_data.as_dict.return_value = {"_stored_key": 1.5, "_kept": 2}
+        entity.async_get_last_extra_data = AsyncMock(return_value=extra_data)
+        entity.async_on_remove = MagicMock()
+        entity.entity_id = "sensor.test_entity"
+        entity.platform = MagicMock()
+
+        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+            await LuxtronikEntity.async_added_to_hass(entity)
+
+        assert entity._entity_attr == 1.5
+        assert entity._kept == 2
+        assert not hasattr(entity, "_stored_key")
 
     @pytest.mark.asyncio
     async def test_exception_is_caught(self):
