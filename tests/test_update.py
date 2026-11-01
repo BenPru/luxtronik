@@ -491,78 +491,12 @@ class TestReleaseNotes:
 
 
 # ===========================================================================
-# Download portal TLS workaround (issue #783)
+# Download portal error handling
 # ===========================================================================
 
 
-class TestDownloadPortalSslWorkaround:
-    """www.heatpump24.com serves an incomplete certificate chain."""
-
-    @pytest.mark.asyncio
-    async def test_pinned_ssl_context_is_passed_to_portal_requests(self):
-        entity = _make_update_entity()
-        entity._attr_state = "V3.90.1"
-        sentinel_context = object()
-
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.headers = {"Content-Disposition": "filename=wpVXXXX_V3.91.0.zip"}
-        mock_response.text = AsyncMock(return_value="Bug fixes")
-        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_response.__aexit__ = AsyncMock(return_value=False)
-
-        mock_session = MagicMock()
-        mock_session.get = MagicMock(return_value=mock_response)
-
-        with (
-            patch(
-                "custom_components.luxtronik2.update.async_get_clientsession",
-                return_value=mock_session,
-            ),
-            patch(
-                "custom_components.luxtronik2.update."
-                "async_get_download_portal_ssl_context",
-                new=AsyncMock(return_value=sentinel_context),
-            ),
-        ):
-            await entity._request_available_firmware_version()
-
-        assert mock_session.get.call_count == 2
-        for call in mock_session.get.call_args_list:
-            assert call.kwargs["ssl"] is sentinel_context
-
-    @pytest.mark.asyncio
-    async def test_falls_back_to_default_context_when_pin_unavailable(self):
-        """A context that cannot be built must not break the request."""
-        entity = _make_update_entity()
-        entity._attr_state = "V3.90.1"
-
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.headers = {"Content-Disposition": "filename=wpVXXXX_V3.91.0.zip"}
-        mock_response.text = AsyncMock(return_value="Bug fixes")
-        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_response.__aexit__ = AsyncMock(return_value=False)
-
-        mock_session = MagicMock()
-        mock_session.get = MagicMock(return_value=mock_response)
-
-        with (
-            patch(
-                "custom_components.luxtronik2.update.async_get_clientsession",
-                return_value=mock_session,
-            ),
-            patch(
-                "custom_components.luxtronik2.update."
-                "async_get_download_portal_ssl_context",
-                new=AsyncMock(return_value=None),
-            ),
-        ):
-            await entity._request_available_firmware_version()
-
-        for call in mock_session.get.call_args_list:
-            assert call.kwargs["ssl"] is True
-        assert entity._LuxtronikUpdateEntity__firmware_version_available == "V3.91.0"
+class TestDownloadPortalErrors:
+    """Which portal failures reach the log at warning level."""
 
     @pytest.mark.asyncio
     async def test_certificate_error_does_not_log_a_warning(self, caplog):
@@ -584,11 +518,6 @@ class TestDownloadPortalSslWorkaround:
             patch(
                 "custom_components.luxtronik2.update.async_get_clientsession",
                 return_value=mock_session,
-            ),
-            patch(
-                "custom_components.luxtronik2.update."
-                "async_get_download_portal_ssl_context",
-                new=AsyncMock(return_value=None),
             ),
             caplog.at_level(logging.DEBUG),
         ):
@@ -618,11 +547,6 @@ class TestDownloadPortalSslWorkaround:
             patch(
                 "custom_components.luxtronik2.update.async_get_clientsession",
                 return_value=mock_session,
-            ),
-            patch(
-                "custom_components.luxtronik2.update."
-                "async_get_download_portal_ssl_context",
-                new=AsyncMock(return_value=None),
             ),
             caplog.at_level(logging.DEBUG),
         ):
@@ -656,11 +580,6 @@ class TestDownloadPortalSslWorkaround:
                 "custom_components.luxtronik2.update.async_get_clientsession",
                 return_value=mock_session,
             ),
-            patch(
-                "custom_components.luxtronik2.update."
-                "async_get_download_portal_ssl_context",
-                new=AsyncMock(return_value=None),
-            ),
             caplog.at_level(logging.DEBUG),
         ):
             await entity._request_available_firmware_version()
@@ -691,11 +610,6 @@ class TestDownloadPortalSslWorkaround:
             patch(
                 "custom_components.luxtronik2.update.async_get_clientsession",
                 return_value=mock_session,
-            ),
-            patch(
-                "custom_components.luxtronik2.update."
-                "async_get_download_portal_ssl_context",
-                new=AsyncMock(return_value=None),
             ),
             caplog.at_level(logging.DEBUG),
         ):
