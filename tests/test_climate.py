@@ -11,14 +11,16 @@ from homeassistant.components.climate import (
     PRESET_BOOST,
     PRESET_COMFORT,
     PRESET_NONE,
+    ClimateEntity,
     ClimateEntityFeature,
     HVACAction,
     HVACMode,
 )
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TIMEOUT, UnitOfTemperature
 import pytest
 
 from conftest import make_coordinator_data
+from custom_components.luxtronik2.base import LuxtronikEntity
 from custom_components.luxtronik2.climate import (
     HVAC_ACTION_MAPPING_COOL,
     HVAC_ACTION_MAPPING_HEAT,
@@ -367,7 +369,7 @@ class TestClimateTemperatureKeyBranches:
             calculations={"ID_WEB_WP_BZ_akt": LuxOperationMode.heating},
         )
         thermostat._handle_coordinator_update(data)
-        assert thermostat._attr_current_temperature is None
+        assert thermostat.native_current_temperature is None
 
     def test_key_empty_sets_current_temp_none(self):
         coord = _mock_coordinator()
@@ -385,7 +387,7 @@ class TestClimateTemperatureKeyBranches:
             calculations={"ID_WEB_WP_BZ_akt": LuxOperationMode.heating},
         )
         thermostat._handle_coordinator_update(data)
-        assert thermostat._attr_current_temperature is None
+        assert thermostat.native_current_temperature is None
 
     def test_key_sensor_reads_from_hass_states(self):
         coord = _mock_coordinator()
@@ -407,7 +409,7 @@ class TestClimateTemperatureKeyBranches:
         )
         thermostat._handle_coordinator_update(data)
         thermostat.hass.states.get.assert_called_with("sensor.living_room_temp")
-        assert thermostat._attr_current_temperature == 21.5
+        assert thermostat.native_current_temperature == 21.5
 
 
 # ===========================================================================
@@ -738,7 +740,7 @@ class TestRbeCalculatedThermostat:
     @pytest.mark.asyncio
     async def test_restored_offset_from_off_mode_is_not_used_as_room_target(self):
         rbe = _Rbe(_rbe_data(p=1.0, c=21.0, factor=100))
-        rbe.entity._attr_target_temperature = 1.0  # P0001 stored by off mode
+        rbe.entity._target_temperature = 1.0  # P0001 stored by off mode
         rbe.entity._last_written_correction = None
         rbe.update()
         await rbe.drain()
@@ -817,7 +819,7 @@ class TestRbeCalculatedThermostat:
     @pytest.mark.asyncio
     async def test_restored_consistent_target_does_not_write(self):
         rbe = _Rbe(_rbe_data(p=1.5, c=21.0, factor=170))
-        rbe.entity._attr_target_temperature = 22.0
+        rbe.entity._target_temperature = 22.0
         rbe.entity._last_written_correction = 1.5
         rbe.update()
         await rbe.drain()
@@ -827,7 +829,7 @@ class TestRbeCalculatedThermostat:
     @pytest.mark.asyncio
     async def test_restored_target_with_changed_correction_adopts_it(self):
         rbe = _Rbe(_rbe_data(p=-1.0, c=21.0, factor=100))
-        rbe.entity._attr_target_temperature = 22.0
+        rbe.entity._target_temperature = 22.0
         rbe.entity._last_written_correction = 1.0  # P0001 changed while HA was down
         rbe.update()
         await rbe.drain()
@@ -839,7 +841,7 @@ class TestRbeCalculatedThermostat:
         rbe = _Rbe(_rbe_data(p=0.0, c=21.0, factor=200))
         rbe.update()
         assert (rbe.entity.min_temp, rbe.entity.max_temp) == (18.5, 23.5)
-        rbe.entity._attr_target_temperature = 23.5
+        rbe.entity._target_temperature = 23.5
         rbe.entity._last_written_correction = 0.0
         rbe.update(_rbe_data(p=0.0, c=19.0, factor=200))
         await rbe.drain()
@@ -952,7 +954,7 @@ class TestRbeCalculatedThermostat:
 
     def test_attributes_explain_effective_target(self):
         rbe = _Rbe(_rbe_data(p=1.5, c=21.0, factor=170))
-        rbe.entity._attr_target_temperature = 22.0
+        rbe.entity._target_temperature = 22.0
         rbe.entity._last_written_correction = 1.5
         rbe.update()
         attrs = rbe.entity._attr_extra_state_attributes
@@ -1033,3 +1035,99 @@ class TestRbeCalculatedThermostat:
         stored = rbe.entity.extra_restore_state_data.as_dict()
         assert stored["_last_written_correction"] == 1.0
         assert stored["_attr_target_temperature"] == 22.0
+
+
+# ===========================================================================
+# Temperature API names: native_* (HA 2026.11+) and the old ones (#853 follow-up)
+# ===========================================================================
+
+_HAS_NATIVE_TEMPERATURE_API = hasattr(ClimateEntity, "native_target_temperature")
+
+
+class TestTemperatureApiNames:
+    """Both names serve one value: 2026.11 reads native_*, 2026.9 the old ones."""
+
+    def _thermostat(self) -> LuxtronikThermostat:
+        thermostat = LuxtronikThermostat(
+            MagicMock(), _mock_entry(), _mock_coordinator(), THERMOSTATS[0]
+        )
+        _patch_entity(thermostat)
+        thermostat._handle_coordinator_update(
+            make_coordinator_data(
+                parameters={
+                    "ID_Ba_Hz_akt": LuxMode.automatic,
+                    "HEATING_TARGET_TEMP_ROOM_THERMOSTAT": 21.5,
+                },
+                calculations={
+                    "ID_WEB_WP_BZ_akt": LuxOperationMode.heating,
+                    "ID_WEB_RBE_RT_Ist": 20.5,
+                },
+            )
+        )
+        return thermostat
+
+    def test_thermostat_serves_both_names(self):
+        thermostat = self._thermostat()
+        assert thermostat.native_target_temperature == 21.5
+        assert thermostat.target_temperature == 21.5
+        assert thermostat.native_current_temperature == 20.5
+        assert thermostat.current_temperature == 20.5
+        assert thermostat.native_temperature_unit == UnitOfTemperature.CELSIUS
+        assert thermostat.temperature_unit == UnitOfTemperature.CELSIUS
+
+    def test_rbe_hides_the_target_under_both_names(self):
+        rbe = _Rbe(_rbe_data(p=1.0, c=21.0, factor=100))
+        rbe.update()
+        assert rbe.entity.native_target_temperature == 22.0
+        assert rbe.entity.target_temperature == 22.0
+        rbe.update(_rbe_data(p=1.0, c=0.0, factor=100))  # no RBE reading
+        assert rbe.entity.native_target_temperature is None
+        assert rbe.entity.target_temperature is None
+
+    @pytest.mark.asyncio
+    async def test_restores_a_target_stored_under_the_old_key(self):
+        """The store keeps the _attr_target_temperature key in both directions.
+
+        The RBE room target exists only in HA, so dropping it would lose it,
+        and a rolled-back release would write P0001 for the 21.0 default.
+        """
+        rbe = _Rbe(_rbe_data())
+        rbe.coord.data = None
+        rbe.entity.async_get_last_state = AsyncMock(return_value=None)
+        extra_data = MagicMock()
+        extra_data.as_dict.return_value = {
+            "_attr_target_temperature": 22.5,
+            "_last_written_correction": 1.5,
+        }
+        rbe.entity.async_get_last_extra_data = AsyncMock(return_value=extra_data)
+        rbe.entity.async_on_remove = MagicMock()
+
+        with patch("custom_components.luxtronik2.base.async_dispatcher_connect"):
+            await LuxtronikEntity.async_added_to_hass(rbe.entity)
+
+        assert rbe.entity._target_temperature == 22.5
+        assert rbe.entity._last_written_correction == 1.5
+
+    @pytest.mark.skipif(
+        not _HAS_NATIVE_TEMPERATURE_API,
+        reason="Home Assistant before 2026.11 has no native_* temperature API",
+    )
+    @pytest.mark.asyncio
+    async def test_no_deprecated_member_is_used(self, caplog):
+        from custom_components.luxtronik2.water_heater import LuxtronikWaterHeater
+
+        # Subclassing reruns HA's check for classes providing the old names.
+        for cls in (
+            LuxtronikThermostat,
+            LuxtronikRbeCalculatedThermostat,
+            LuxtronikWaterHeater,
+        ):
+            type(f"Probe{cls.__name__}", (cls,), {})
+        thermostat = self._thermostat()
+        assert thermostat.native_target_temperature == 21.5
+        rbe = _Rbe(_rbe_data(p=1.0, c=21.0, factor=100))
+        rbe.update()
+        await rbe.entity.async_set_temperature(temperature=22.5)
+        assert rbe.entity.native_target_temperature == 22.5
+
+        assert not any("deprecated" in r.getMessage() for r in caplog.records)

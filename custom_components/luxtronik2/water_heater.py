@@ -23,7 +23,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from packaging.version import Version
 
 from . import LuxtronikConfigEntry
-from .base import LuxtronikEntity
+from .base import LuxtronikEntity, LuxtronikTemperatureEntity
 from .common import get_sensor_data, key_exists
 from .const import (
     CONF_HA_SENSOR_PREFIX,
@@ -126,7 +126,9 @@ async def async_setup_entry(
 
 
 class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
-    LuxtronikEntity[LuxtronikWaterHeaterDescription], WaterHeaterEntity
+    LuxtronikEntity[LuxtronikWaterHeaterDescription],
+    LuxtronikTemperatureEntity,
+    WaterHeaterEntity,
 ):
     """Representation of an Luxtronik water heater."""
 
@@ -154,7 +156,7 @@ class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibl
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
 
-        self._attr_temperature_unit = description.temperature_unit
+        self._temperature_unit = description.temperature_unit
         self._attr_operation_list = description.operation_list
         self._attr_supported_features = description.supported_features
 
@@ -211,10 +213,10 @@ class LuxtronikWaterHeater(  # type: ignore  # pyright: ignore[reportIncompatibl
         if not self._attr_is_away_mode_on:
             self._last_operation_mode_before_away = None
 
-        self._attr_current_temperature = get_sensor_data(
+        self._current_temperature = get_sensor_data(
             data, descr.luxtronik_key_current_temperature.value
         )
-        self._attr_target_temperature = get_sensor_data(
+        self._target_temperature = get_sensor_data(
             data, descr.luxtronik_key_target_temperature.value
         )
 

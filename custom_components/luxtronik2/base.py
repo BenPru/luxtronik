@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, ClassVar
 
 from homeassistant.const import (
     STATE_UNAVAILABLE,
@@ -51,6 +51,8 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
 
     entity_description: DescriptionT
     _attr_state: Any = None  # Any: values come from luxtronik library (untyped)
+    # Extra restore data keys renamed since they were stored: old -> new.
+    _restore_renames: ClassVar[dict[str, str]] = {}
 
     _entity_component_unrecorded_attributes = frozenset(
         {
@@ -155,8 +157,8 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
             last_extra_data = await self.async_get_last_extra_data()
             if last_extra_data is not None:
                 data: dict[str, Any] = last_extra_data.as_dict()
-                for attr in data:
-                    setattr(self, attr, data.get(attr))
+                for attr, value in data.items():
+                    setattr(self, self._restore_renames.get(attr, attr), value)
 
             data_updated = f"{self.entity_id}_data_updated"
             self.async_on_remove(
@@ -279,3 +281,45 @@ class LuxtronikEntity[DescriptionT: LuxtronikEntityDescription](  # type: ignore
 
     def _get_value(self, key: LC | LP) -> Any:
         return get_sensor_data(self.coordinator.data, key)
+
+
+class LuxtronikTemperatureEntity:
+    """Serve climate / water heater temperatures under both API names.
+
+    Home Assistant 2026.11 renamed temperature_unit, current_temperature and
+    target_temperature to native_*, and reports the old names (they stop
+    working in 2027.11). The 2026.9 minimum this integration supports reads
+    only the old names. A class providing both is served the native one by
+    2026.11, which then reports nothing. Mix in before the HA entity class,
+    and override only the native_* names in subclasses: one providing just an
+    old name is reported again. Drop the old names once the minimum Home
+    Assistant is 2026.11.
+    """
+
+    _temperature_unit: str = UnitOfTemperature.CELSIUS
+    _current_temperature: float | None = None
+    _target_temperature: float | None = None
+
+    @property
+    def native_temperature_unit(self) -> str:
+        return self._temperature_unit
+
+    @property
+    def native_current_temperature(self) -> float | None:
+        return self._current_temperature
+
+    @property
+    def native_target_temperature(self) -> float | None:
+        return self._target_temperature
+
+    @property
+    def temperature_unit(self) -> str:
+        return self.native_temperature_unit
+
+    @property
+    def current_temperature(self) -> float | None:
+        return self.native_current_temperature
+
+    @property
+    def target_temperature(self) -> float | None:
+        return self.native_target_temperature

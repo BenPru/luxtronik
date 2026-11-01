@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, replace
 import math
 from time import monotonic
-from typing import Any
+from typing import Any, ClassVar, override
 
 from homeassistant.components.climate import (
     ENTITY_ID_FORMAT,
@@ -34,7 +34,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData
 
 from . import LuxtronikConfigEntry
-from .base import LuxtronikEntity
+from .base import LuxtronikEntity, LuxtronikTemperatureEntity
 from .common import get_sensor_data, key_exists, state_as_number_or_none
 from .const import (
     CONF_HA_SENSOR_INDOOR_TEMPERATURE,
@@ -305,6 +305,8 @@ async def async_setup_entry(
 class LuxtronikClimateExtraStoredData(ExtraStoredData):
     """Object to hold extra stored data."""
 
+    # Keeps its pre-2026.11 key, so a release rolled back to still finds the
+    # room target; LuxtronikThermostat._restore_renames maps it on restore.
     _attr_target_temperature: float | None = None
     _attr_hvac_mode: HVACMode | str | None = None
     _attr_preset_mode: str | None = None
@@ -321,17 +323,22 @@ class LuxtronikClimateExtraStoredData(ExtraStoredData):
         return asdict(self)
 
 
-class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+class LuxtronikThermostat(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikEntity[LuxtronikClimateDescription],
+    LuxtronikTemperatureEntity,
+    ClimateEntity,
+):
     """The thermostat class for Luxtronik thermostats."""
 
     # region Attributes
 
     _last_hvac_mode_before_preset: str | None = None
+    _restore_renames: ClassVar[dict[str, str]] = {
+        "_attr_target_temperature": "_target_temperature"
+    }
 
     _attr_precision = PRECISION_TENTHS
-    _attr_target_temperature = 21.0
-    _attr_target_temperature_high = 28.0
-    _attr_target_temperature_low = 18.0
+    _target_temperature = 21.0
     _attr_target_temperature_step = 0.5
 
     _attr_hvac_mode: HVACMode | str | None = None
@@ -406,7 +413,7 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key.value}")  # pyright: ignore[reportAttributeAccessIssue]
         self._attr_unique_id = self.entity_id
 
-        self._attr_temperature_unit = description.temperature_unit
+        self._temperature_unit = description.temperature_unit
         self._attr_hvac_modes = description.hvac_modes
         self._attr_preset_modes = description.preset_modes
         min_temp = getattr(description, "min_temp", None)
@@ -465,19 +472,19 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
 
         key = self.entity_description.luxtronik_key_current_temperature
         if key is None or key == "" or key == LuxCalculation.UNSET:
-            self._attr_current_temperature = None
+            self._current_temperature = None
         elif key.startswith("sensor."):
             temp = self.hass.states.get(key)
-            self._attr_current_temperature = (
+            self._current_temperature = (
                 state_as_number_or_none(temp, 0.0) if temp is not None else None
             )
         else:
-            self._attr_current_temperature = get_sensor_data(data, key)
+            self._current_temperature = get_sensor_data(data, key)
 
         key_tar = self.entity_description.luxtronik_key_target_temperature
 
         if key_tar != LuxParameter.UNSET:
-            self._attr_target_temperature = get_sensor_data(data, key_tar)
+            self._target_temperature = get_sensor_data(data, key_tar)
 
         super()._handle_coordinator_update()
 
@@ -572,7 +579,7 @@ class LuxtronikThermostat(LuxtronikEntity[LuxtronikClimateDescription], ClimateE
     def extra_restore_state_data(self) -> LuxtronikClimateExtraStoredData:
         """Return luxtronik climate specific state data to be restored."""
         return LuxtronikClimateExtraStoredData(
-            self._attr_target_temperature,
+            self._target_temperature,
             self._attr_hvac_mode,
             self._attr_preset_mode,
             self._last_hvac_mode_before_preset,
@@ -655,21 +662,21 @@ class LuxtronikRbeCalculatedThermostat(LuxtronikThermostat):
             # The refresh triggered by our own write; the write task finishes it.
             return
 
-        target = self._attr_target_temperature
+        target = self._target_temperature
         if (
             target is None
             or self._last_written_correction is None
             or not _same(correction, self._last_written_correction)
         ):
             # First run (D6) or P0001 changed elsewhere (D5): adopt, write nothing.
-            self._attr_target_temperature = self._clamp(
+            self._target_temperature = self._clamp(
                 rbe_target_for_correction(correction, room_target, factor)
             )
             self._last_written_correction = correction
             return
 
         target = self._clamp(target)
-        self._attr_target_temperature = target
+        self._target_temperature = target
         desired = rbe_correction_for_target(target, room_target, factor)
         # Against the rounded P0001: an off-grid value set elsewhere (0.3) was
         # adopted above and must not be "corrected" to 0.5 on the next poll.
@@ -705,11 +712,12 @@ class LuxtronikRbeCalculatedThermostat(LuxtronikThermostat):
             )
 
     @property
-    def target_temperature(self) -> float | None:  # pyright: ignore[reportIncompatibleVariableOverride]
+    @override
+    def native_target_temperature(self) -> float | None:
         """The room target, hidden while it cannot be applied."""
         if self._room_target_unavailable:
             return None
-        return self._attr_target_temperature
+        return self._target_temperature
 
     def _clamp(self, target: float) -> float:
         if self._bounds is None:
@@ -733,7 +741,7 @@ class LuxtronikRbeCalculatedThermostat(LuxtronikThermostat):
                 "Writing heating curve correction %s for room target %s failed; "
                 "retrying when the target changes or in %d minutes: %s",
                 correction,
-                self._attr_target_temperature,
+                self._target_temperature,
                 RBE_WRITE_RETRY_BACKOFF // 60,
                 err,
             )
@@ -750,7 +758,7 @@ class LuxtronikRbeCalculatedThermostat(LuxtronikThermostat):
         # The target is shown and restored before the write runs; on
         # read-only firmware it would never be applied.
         self.coordinator.raise_if_write_blocked()
-        self._attr_target_temperature = self._clamp(float(kwargs[ATTR_TEMPERATURE]))
+        self._target_temperature = self._clamp(float(kwargs[ATTR_TEMPERATURE]))
         self.async_write_ha_state()
         await self._debouncer_set_temp.async_call()
 
@@ -761,7 +769,7 @@ class LuxtronikRbeCalculatedThermostat(LuxtronikThermostat):
     @property
     def extra_restore_state_data(self) -> LuxtronikClimateExtraStoredData:
         return LuxtronikClimateExtraStoredData(
-            self._attr_target_temperature,
+            self._target_temperature,
             self._attr_hvac_mode,
             self._attr_preset_mode,
             self._last_hvac_mode_before_preset,
