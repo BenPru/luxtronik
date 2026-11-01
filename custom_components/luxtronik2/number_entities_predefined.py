@@ -80,7 +80,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     LuxtronikNumberDescription(
         key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
         luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
-        device_class=NumberDeviceClass.SPEED,
         native_unit_of_measurement=PERCENTAGE,
         native_min_value=0,
         native_max_value=100,
@@ -107,7 +106,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     LuxtronikNumberDescription(
         key=SensorKey.EFFICIENCY_PUMP_MINIMAL_PERCENTAGE,
         luxtronik_key=LP.P0868_EFFICIENCY_PUMP_MINIMAL,
-        device_class=NumberDeviceClass.SPEED,
         native_unit_of_measurement=PERCENTAGE,
         native_min_value=0,
         native_max_value=100,
@@ -429,7 +427,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         key=SensorKey.HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
         luxtronik_key=LP.P1032_HEATING_MAXIMUM_CIRCULATION_PUMP_SPEED,
         device_key=DeviceKey.heating,
-        device_class=NumberDeviceClass.SPEED,
         native_unit_of_measurement=PERCENTAGE,
         native_min_value=0,
         native_max_value=100,

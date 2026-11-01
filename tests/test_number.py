@@ -6,6 +6,7 @@ from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.components.number import NumberDeviceClass, NumberMode
+from homeassistant.components.number.const import DEVICE_CLASS_UNITS
 from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
@@ -628,7 +629,6 @@ class TestEfficiencyPump:
             key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
             luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
             translation_key_name=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
-            device_class=NumberDeviceClass.SPEED,
             native_unit_of_measurement=PERCENTAGE,
             native_min_value=0,
             native_max_value=100,
@@ -691,6 +691,23 @@ def _coord_on_firmware(version: str) -> LuxtronikCoordinator:
     """Build a real coordinator reporting `version` as its firmware."""
     return _make_coordinator_direct(
         make_coordinator_data(calculations={"ID_WEB_SoftStand": version})
+    )
+
+
+@pytest.mark.parametrize(
+    "description",
+    [d for d in NUMBER_SENSORS if d.device_class in DEVICE_CLASS_UNITS],
+    ids=lambda d: d.key,
+)
+def test_unit_is_valid_for_device_class(description: LuxtronikNumberDescription):
+    """HA rejects a unit its device class does not list from 2027.5 on.
+
+    A pump speed in % has no number device class (SPEED is km/h, m/s, ...),
+    so such a description must leave device_class unset.
+    """
+    assert (
+        description.native_unit_of_measurement
+        in DEVICE_CLASS_UNITS[description.device_class]
     )
 
 
