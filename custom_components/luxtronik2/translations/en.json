@@ -1076,6 +1076,33 @@
             },
             "ventilation_stage_intensive": {
                 "name": "Intensive stage"
+            },
+            "estimated_heating_power": {
+                "name": "Estimated electrical power (heating)"
+            },
+            "estimated_heating_energy": {
+                "name": "Estimated electrical energy (heating)"
+            },
+            "estimated_heating_thermal_energy": {
+                "name": "Estimated thermal energy output (heating)"
+            },
+            "estimated_dhw_power": {
+                "name": "Estimated electrical power (DHW)"
+            },
+            "estimated_dhw_energy": {
+                "name": "Estimated electrical energy (DHW)"
+            },
+            "estimated_dhw_thermal_energy": {
+                "name": "Estimated thermal energy output (DHW)"
+            },
+            "estimated_total_power": {
+                "name": "Estimated electrical power (total)"
+            },
+            "estimated_total_energy": {
+                "name": "Estimated electrical energy (total)"
+            },
+            "estimated_total_thermal_energy": {
+                "name": "Estimated thermal energy output (total)"
             }
         },
         "date": {
@@ -1484,18 +1511,27 @@
                     "ha_sensor_indoor_temperature": "Sensor ID for the indoor temperature",
                     "ha_sensor_current_power_consumption": "Sensor ID for the current power consumption",
                     "update_interval": "Update interval",
-                    "rbe_calculated_room_target": "Set the room target in Home Assistant (RBE)"
+                    "rbe_calculated_room_target": "Set the room target in Home Assistant (RBE)",
+                    "estimated_energy": "Enable estimated energy monitoring",
+                    "rated_electrical_power": "Rated electrical power per compressor (kW)",
+                    "rated_thermal_power": "Rated thermal output (kW, optional)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "A thermostat for heating control is created in Home Assistant. The actual temperature for this is set by a Home Assistant sensor.\nIf Luxtronik is connected to a hardware room thermostat, then this field should be left empty.",
                     "ha_sensor_current_power_consumption": "If the heat pump's built-in current power consumption reading is inaccurate, an external Home Assistant power sensor (e.g. a smart plug) can be used instead for the Heating/DHW COP calculations. This does not change what the Current power consumption sensor itself displays.\nLeave empty to use the heat pump's built-in reading.",
                     "update_interval": "How often to poll the heat pump for new data.",
-                    "rbe_calculated_room_target": "The Heating thermostat's target becomes a room temperature. Home Assistant adjusts the heating curve correction (Temperature +/-) so the heat pump behaves as if the RBE dial were set to that target. The target can be at most 5 K divided by the room temperature impact factor away from the RBE dial. The RBE's own setback schedule is overridden. The heat pump regulates on the RBE's own room reading: an indoor temperature sensor selected above is only displayed on the card and is not used for this."
+                    "rbe_calculated_room_target": "The Heating thermostat's target becomes a room temperature. Home Assistant adjusts the heating curve correction (Temperature +/-) so the heat pump behaves as if the RBE dial were set to that target. The target can be at most 5 K divided by the room temperature impact factor away from the RBE dial. The RBE's own setback schedule is overridden. The heat pump regulates on the RBE's own room reading: an indoor temperature sensor selected above is only displayed on the card and is not used for this.",
+                    "estimated_energy": "Fixed-rating estimates, excluding pumps, standby and auxiliary heaters. Existing measured sensors are unchanged.",
+                    "rated_electrical_power": "Required when enabled. Enter the electrical rating in kW for one compressor; two-compressor totals assume equal ratings.",
+                    "rated_thermal_power": "Optional output rating in kW for the whole heat pump. Enables separate estimated thermal energy sensors."
                 }
             }
         },
         "abort": {
             "unsupported_ha_version": "This version of Luxtronik requires Home Assistant {min_version} or newer; you run {ha_version}. Update Home Assistant, or install the last release supporting your version: 2026.10.06 for Home Assistant 2026.8, 2026.08.29 for 2026.7 and older."
+        },
+        "error": {
+            "invalid_rated_power": "Enter a finite rated power greater than zero."
         }
     },
     "exceptions": {

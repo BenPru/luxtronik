@@ -44,6 +44,12 @@ from .coordinator import (
     LuxtronikSerialNumberError,
     connect_and_get_coordinator,
 )
+from .estimated_energy import (
+    CONF_ESTIMATED_ENERGY,
+    CONF_RATED_ELECTRICAL_POWER,
+    CONF_RATED_THERMAL_POWER,
+    positive_power,
+)
 from .lux_helper import discover
 from .schema_compat import vol
 from .schema_helper import build_options_schema, build_user_data_schema
@@ -612,6 +618,44 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
         try:
             if user_input is not None:
                 new_options = dict(self.config_entry.options)
+                enabled = bool(user_input.get(CONF_ESTIMATED_ENERGY, False))
+                electrical = positive_power(user_input.get(CONF_RATED_ELECTRICAL_POWER))
+                thermal_input = user_input.get(CONF_RATED_THERMAL_POWER)
+                thermal = positive_power(thermal_input)
+                errors = {}
+                if electrical is None and (
+                    enabled or user_input.get(CONF_RATED_ELECTRICAL_POWER) is not None
+                ):
+                    errors[CONF_RATED_ELECTRICAL_POWER] = "invalid_rated_power"
+                if thermal_input is not None and thermal is None:
+                    errors[CONF_RATED_THERMAL_POWER] = "invalid_rated_power"
+                if errors:
+                    return self.async_show_form(
+                        step_id="user",
+                        data_schema=build_options_schema(
+                            current_estimated_energy=enabled,
+                            current_rated_electrical_power=electrical,
+                            current_rated_thermal_power=thermal,
+                            current_indoor_temp=user_input.get(
+                                CONF_HA_SENSOR_INDOOR_TEMPERATURE
+                            ),
+                            current_power_consumption_sensor=user_input.get(
+                                CONF_HA_SENSOR_CURRENT_POWER_CONSUMPTION
+                            ),
+                            current_interval=user_input.get(CONF_UPDATE_INTERVAL),
+                            show_rbe_calculated_room_target=self._rbe_calculated_room_target_available(),
+                            current_rbe_calculated_room_target=bool(
+                                user_input.get(CONF_RBE_CALCULATED_ROOM_TARGET, False)
+                            ),
+                        ),
+                        errors=errors,
+                        description_placeholders={"name": self.config_entry.title},
+                    )
+                # Preserve stored ratings when an older client omits these fields.
+                if CONF_ESTIMATED_ENERGY in user_input:
+                    new_options[CONF_ESTIMATED_ENERGY] = enabled
+                    new_options[CONF_RATED_ELECTRICAL_POWER] = electrical
+                    new_options[CONF_RATED_THERMAL_POWER] = thermal
                 value = user_input.get(CONF_HA_SENSOR_INDOOR_TEMPERATURE)
                 if value:
                     new_options[CONF_HA_SENSOR_INDOOR_TEMPERATURE] = value
@@ -655,6 +699,15 @@ class LuxtronikOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_show_form(
                 step_id="user",
                 data_schema=build_options_schema(
+                    current_estimated_energy=bool(
+                        self._get_value(CONF_ESTIMATED_ENERGY, False)
+                    ),
+                    current_rated_electrical_power=self._get_value(
+                        CONF_RATED_ELECTRICAL_POWER
+                    ),
+                    current_rated_thermal_power=self._get_value(
+                        CONF_RATED_THERMAL_POWER
+                    ),
                     current_indoor_temp=current_indoor_temp,
                     current_power_consumption_sensor=current_power_consumption_sensor,
                     current_interval=current_interval,

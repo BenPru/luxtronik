@@ -39,6 +39,7 @@ from .const import (
     SensorKey,
 )
 from .coordinator import LuxtronikCoordinator, LuxtronikCoordinatorData
+from .estimated_energy import async_setup_estimates
 from .evu_helper import LuxtronikEVUTracker
 from .model import (
     LuxtronikCopSensorDescription,
@@ -73,6 +74,8 @@ async def async_setup_entry(
     # Ensure coordinator has valid data before adding entities
     if not coordinator.last_update_success:
         return
+
+    async_add_entities(await async_setup_estimates(hass, entry, coordinator))
 
     unavailable_keys = [
         i.luxtronik_key

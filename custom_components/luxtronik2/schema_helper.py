@@ -16,6 +16,11 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL_OPTION,
     UPDATE_INTERVAL_OPTIONS,
 )
+from .estimated_energy import (
+    CONF_ESTIMATED_ENERGY,
+    CONF_RATED_ELECTRICAL_POWER,
+    CONF_RATED_THERMAL_POWER,
+)
 from .schema_compat import vol
 
 
@@ -43,11 +48,41 @@ def build_options_schema(
     current_interval: str | None = None,
     show_rbe_calculated_room_target: bool = False,
     current_rbe_calculated_room_target: bool = False,
+    current_estimated_energy: bool = False,
+    current_rated_electrical_power: float | None = None,
+    current_rated_thermal_power: float | None = None,
 ) -> vol.Schema:
     interval_options = [
         selector.SelectOptionDict(value=k, label=k) for k in UPDATE_INTERVAL_OPTIONS
     ]
     fields: dict[Any, Any] = {
+        vol.Optional(
+            CONF_ESTIMATED_ENERGY, default=current_estimated_energy
+        ): selector.BooleanSelector(),
+        vol.Optional(
+            CONF_RATED_ELECTRICAL_POWER,
+            description={"suggested_value": current_rated_electrical_power},
+        ): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0.001,
+                max=1000,
+                step="any",
+                unit_of_measurement="kW",
+                mode=selector.NumberSelectorMode.BOX,
+            )
+        ),
+        vol.Optional(
+            CONF_RATED_THERMAL_POWER,
+            description={"suggested_value": current_rated_thermal_power},
+        ): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0.001,
+                max=1000,
+                step="any",
+                unit_of_measurement="kW",
+                mode=selector.NumberSelectorMode.BOX,
+            )
+        ),
         vol.Optional(
             CONF_HA_SENSOR_INDOOR_TEMPERATURE,
             description={"suggested_value": current_indoor_temp},

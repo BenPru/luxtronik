@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from datetime import datetime, timedelta
 import operator
 import re
@@ -152,6 +152,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     _readonly_issue_id: str | None = None
     _readonly_issue_firmware: str | None = None
     _invalid_firmware_logged: str | None = None
+    estimated_energy_save: Callable[[], Awaitable[None]] | None = None
 
     def __init__(
         self,
@@ -1350,6 +1351,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._cancel_write_followup()
         self._delete_readonly_issue()
         await super().async_shutdown()
+        if self.estimated_energy_save is not None:
+            await self.estimated_energy_save()
+            self.estimated_energy_save = None
         if hasattr(self, "client") and self.client is not None:
             await self.hass.async_add_executor_job(self.client.disconnect)
             del self.client

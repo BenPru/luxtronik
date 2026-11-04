@@ -117,7 +117,10 @@ class TestBuildOptionsSchema:
         """
         schema = build_options_schema()
         result = cast(dict[str, Any], schema({}))
-        assert result == {CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL_OPTION}
+        assert result == {
+            CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL_OPTION,
+            "estimated_energy": False,
+        }
 
     def test_one_entity_sensor_set_does_not_require_the_other(self):
         """Picking only one of the two sensors must not fail on the other."""

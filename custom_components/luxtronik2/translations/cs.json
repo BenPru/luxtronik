@@ -1076,6 +1076,33 @@
             },
             "ventilation_stage_intensive": {
                 "name": "Intenzivní stupeň"
+            },
+            "estimated_heating_power": {
+                "name": "Odhad elektrického příkonu (vytápění)"
+            },
+            "estimated_heating_energy": {
+                "name": "Odhad elektrické energie (vytápění)"
+            },
+            "estimated_heating_thermal_energy": {
+                "name": "Odhad dodané tepelné energie (vytápění)"
+            },
+            "estimated_dhw_power": {
+                "name": "Odhad elektrického příkonu (teplá voda)"
+            },
+            "estimated_dhw_energy": {
+                "name": "Odhad elektrické energie (teplá voda)"
+            },
+            "estimated_dhw_thermal_energy": {
+                "name": "Odhad dodané tepelné energie (teplá voda)"
+            },
+            "estimated_total_power": {
+                "name": "Odhad elektrického příkonu (celkem)"
+            },
+            "estimated_total_energy": {
+                "name": "Odhad elektrické energie (celkem)"
+            },
+            "estimated_total_thermal_energy": {
+                "name": "Odhad dodané tepelné energie (celkem)"
             }
         },
         "date": {
@@ -1484,18 +1511,27 @@
                     "ha_sensor_indoor_temperature": "ID senzoru vnitřní teploty",
                     "ha_sensor_current_power_consumption": "ID senzoru aktuální spotřeby energie",
                     "update_interval": "Interval aktualizace",
-                    "rbe_calculated_room_target": "Nastavit cílovou teplotu místnosti v Home Assistant (RBE)"
+                    "rbe_calculated_room_target": "Nastavit cílovou teplotu místnosti v Home Assistant (RBE)",
+                    "estimated_energy": "Povolit odhad spotřeby energie",
+                    "rated_electrical_power": "Jmenovitý elektrický příkon kompresoru (kW)",
+                    "rated_thermal_power": "Jmenovitý tepelný výkon (kW, volitelný)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Termostat pro řízení vytápění je vytvořen v Home Assistant. Skutečná teplota je nastavena senzorem Home Assistant.\nPokud je Luxtronik připojen k hardwarovému pokojovému termostatu, ponechte toto pole prázdné.",
                     "ha_sensor_current_power_consumption": "Pokud je vestavěné měření aktuální spotřeby energie tepelného čerpadla nepřesné, lze pro výpočty COP (vytápění/TUV) místo toho použít externí senzor výkonu Home Assistant (např. chytrou zásuvku). Toto nezmění hodnotu zobrazovanou samotným senzorem aktuální spotřeby energie.\nPonechte prázdné pro použití vestavěného měření tepelného čerpadla.",
                     "update_interval": "Jak často se má tepelné čerpadlo dotazovat na nová data.",
-                    "rbe_calculated_room_target": "Cíl termostatu vytápění se stane teplotou místnosti. Home Assistant upravuje korekci topné křivky (Teplota +/-) tak, aby se tepelné čerpadlo chovalo, jako by byl kolečko RBE nastaven na tento cíl. Cíl se smí od kolečka RBE lišit nejvýše o 5 K dělené faktorem vlivu prostorové teploty. Vlastní útlumový program RBE je přepsán. Tepelné čerpadlo reguluje podle vlastního měření teploty místnosti v RBE: výše zvolený senzor vnitřní teploty se pouze zobrazuje na kartě a pro tuto funkci se nepoužívá."
+                    "rbe_calculated_room_target": "Cíl termostatu vytápění se stane teplotou místnosti. Home Assistant upravuje korekci topné křivky (Teplota +/-) tak, aby se tepelné čerpadlo chovalo, jako by byl kolečko RBE nastaven na tento cíl. Cíl se smí od kolečka RBE lišit nejvýše o 5 K dělené faktorem vlivu prostorové teploty. Vlastní útlumový program RBE je přepsán. Tepelné čerpadlo reguluje podle vlastního měření teploty místnosti v RBE: výše zvolený senzor vnitřní teploty se pouze zobrazuje na kartě a pro tuto funkci se nepoužívá.",
+                    "estimated_energy": "Odhady podle jmenovitého výkonu, bez čerpadel, pohotovostní spotřeby a přídavného ohřevu. Měřené senzory zůstávají beze změny.",
+                    "rated_electrical_power": "Povinné při zapnutí. Elektrický příkon jednoho kompresoru v kW; součet pro dva kompresory předpokládá stejný příkon.",
+                    "rated_thermal_power": "Volitelný tepelný výkon celého tepelného čerpadla v kW. Zapne samostatné senzory odhadované tepelné energie."
                 }
             }
         },
         "abort": {
             "unsupported_ha_version": "Tato verze integrace Luxtronik vyžaduje Home Assistant {min_version} nebo novější; používáte {ha_version}. Aktualizujte Home Assistant, nebo nainstalujte poslední vydání podporující vaši verzi: 2026.10.06 pro Home Assistant 2026.8, 2026.08.29 pro 2026.7 a starší."
+        },
+        "error": {
+            "invalid_rated_power": "Zadejte konečný jmenovitý výkon větší než nula."
         }
     },
     "exceptions": {

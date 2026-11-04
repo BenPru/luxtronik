@@ -664,6 +664,55 @@ def _make_options_flow(entry=None):
 
 
 class TestOptionsFlow:
+    @pytest.mark.parametrize("electrical", [None, 0, -1, float("nan"), float("inf")])
+    async def test_estimates_require_positive_electrical_rating(self, electrical):
+        flow = _make_options_flow()
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        await flow.async_step_user(
+            {
+                "estimated_energy": True,
+                "rated_electrical_power": electrical,
+            }
+        )
+        assert flow.async_show_form.call_args.kwargs["errors"] == {
+            "rated_electrical_power": "invalid_rated_power",
+        }
+
+    async def test_estimates_save_manual_ratings_and_can_disable(self):
+        flow = _make_options_flow()
+        flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+        await flow.async_step_user(
+            {
+                "estimated_energy": True,
+                "rated_electrical_power": 2,
+                "rated_thermal_power": 8,
+            }
+        )
+        saved = flow.async_create_entry.call_args.kwargs["data"]
+        assert saved["estimated_energy"] is True
+        assert saved["rated_electrical_power"] == 2
+        assert saved["rated_thermal_power"] == 8
+        flow.config_entry.options = saved
+        await flow.async_step_user({"estimated_energy": False})
+        assert (
+            flow.async_create_entry.call_args.kwargs["data"]["estimated_energy"]
+            is False
+        )
+
+    async def test_invalid_optional_thermal_rating_is_rejected(self):
+        flow = _make_options_flow()
+        flow.async_show_form = MagicMock(return_value={"type": "form"})
+        await flow.async_step_user(
+            {
+                "estimated_energy": True,
+                "rated_electrical_power": 2,
+                "rated_thermal_power": -1,
+            }
+        )
+        assert flow.async_show_form.call_args.kwargs["errors"] == {
+            "rated_thermal_power": "invalid_rated_power",
+        }
+
     @pytest.mark.asyncio
     async def test_init_delegates_to_user(self):
         flow = _make_options_flow()

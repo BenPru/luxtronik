@@ -1407,11 +1407,14 @@ class TestCoordinatorAsync:
     async def test_async_shutdown(self):
         coord = _make_coordinator()
         coord.client = MagicMock()
+        save_estimates = coord.estimated_energy_save = AsyncMock()
         # Patch parent shutdown
         with patch.object(
             LuxtronikCoordinator.__bases__[0], "async_shutdown", new_callable=AsyncMock
         ):
             await coord.async_shutdown()
+            save_estimates.assert_awaited_once()
+            assert coord.estimated_energy_save is None
             # client should be deleted
             assert not hasattr(coord, "client") or coord.client is None
 

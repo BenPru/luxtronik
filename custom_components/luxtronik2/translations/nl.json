@@ -1076,6 +1076,33 @@
             },
             "ventilation_stage_intensive": {
                 "name": "Stand intensief"
+            },
+            "estimated_heating_power": {
+                "name": "Geschat elektrisch vermogen (verwarming)"
+            },
+            "estimated_heating_energy": {
+                "name": "Geschatte elektrische energie (verwarming)"
+            },
+            "estimated_heating_thermal_energy": {
+                "name": "Geschatte thermische energieproductie (verwarming)"
+            },
+            "estimated_dhw_power": {
+                "name": "Geschat elektrisch vermogen (warm water)"
+            },
+            "estimated_dhw_energy": {
+                "name": "Geschatte elektrische energie (warm water)"
+            },
+            "estimated_dhw_thermal_energy": {
+                "name": "Geschatte thermische energieproductie (warm water)"
+            },
+            "estimated_total_power": {
+                "name": "Geschat elektrisch vermogen (totaal)"
+            },
+            "estimated_total_energy": {
+                "name": "Geschatte elektrische energie (totaal)"
+            },
+            "estimated_total_thermal_energy": {
+                "name": "Geschatte thermische energieproductie (totaal)"
             }
         },
         "date": {
@@ -1484,18 +1511,27 @@
                     "ha_sensor_indoor_temperature": "Sensor-ID voor de binnentemperatuur",
                     "ha_sensor_current_power_consumption": "Sensor-ID voor het huidige stroomverbruik",
                     "update_interval": "Update-interval",
-                    "rbe_calculated_room_target": "Kamerdoeltemperatuur instellen in Home Assistant (RBE)"
+                    "rbe_calculated_room_target": "Kamerdoeltemperatuur instellen in Home Assistant (RBE)",
+                    "estimated_energy": "Geschatte energiebewaking inschakelen",
+                    "rated_electrical_power": "Nominaal elektrisch vermogen per compressor (kW)",
+                    "rated_thermal_power": "Nominaal thermisch vermogen (kW, optioneel)"
                 },
                 "data_description": {
                     "ha_sensor_indoor_temperature": "Een thermostaat voor verwarmingsregeling wordt aangemaakt in Home Assistant. De werkelijke temperatuur wordt ingesteld door een Home Assistant-sensor.\nAls Luxtronik is verbonden met een hardware kamerthermostaat, laat dit veld dan leeg.",
                     "ha_sensor_current_power_consumption": "Als de ingebouwde meting van het huidige stroomverbruik van de warmtepomp onnauwkeurig is, kan in plaats daarvan een externe Home Assistant-stroomsensor (bijvoorbeeld een slimme stekker) worden gebruikt voor de COP-berekeningen (verwarming/warm water). Dit verandert niet wat de sensor voor het huidige stroomverbruik zelf weergeeft.\nLaat leeg om de ingebouwde meting van de warmtepomp te gebruiken.",
                     "update_interval": "Hoe vaak de warmtepomp wordt bevraagd voor nieuwe gegevens.",
-                    "rbe_calculated_room_target": "Het doel van de verwarmingsthermostaat wordt een kamertemperatuur. Home Assistant past de stooklijncorrectie (Temperatuur +/-) zo aan dat de warmtepomp zich gedraagt alsof de RBE-knop op dat doel staat. Het doel mag hoogstens 5 K gedeeld door de ruimte-invloedsfactor van de RBE-knop afwijken. Het eigen verlagingsprogramma van de RBE wordt overschreven. De warmtepomp regelt op de eigen kamertemperatuur van de RBE: een hierboven gekozen binnentemperatuursensor wordt alleen op de kaart getoond en hiervoor niet gebruikt."
+                    "rbe_calculated_room_target": "Het doel van de verwarmingsthermostaat wordt een kamertemperatuur. Home Assistant past de stooklijncorrectie (Temperatuur +/-) zo aan dat de warmtepomp zich gedraagt alsof de RBE-knop op dat doel staat. Het doel mag hoogstens 5 K gedeeld door de ruimte-invloedsfactor van de RBE-knop afwijken. Het eigen verlagingsprogramma van de RBE wordt overschreven. De warmtepomp regelt op de eigen kamertemperatuur van de RBE: een hierboven gekozen binnentemperatuursensor wordt alleen op de kaart getoond en hiervoor niet gebruikt.",
+                    "estimated_energy": "Schattingen op basis van nominaal vermogen, exclusief pompen, stand-by en bijverwarming. Bestaande gemeten sensoren blijven ongewijzigd.",
+                    "rated_electrical_power": "Verplicht indien ingeschakeld. Voer het elektrisch vermogen van één compressor in kW in; totalen voor twee compressoren veronderstellen gelijke vermogens.",
+                    "rated_thermal_power": "Optioneel thermisch vermogen in kW van de gehele warmtepomp. Schakelt afzonderlijke geschatte thermische energiesensoren in."
                 }
             }
         },
         "abort": {
             "unsupported_ha_version": "Deze versie van Luxtronik vereist Home Assistant {min_version} of nieuwer; je gebruikt {ha_version}. Werk Home Assistant bij, of installeer de laatste release die jouw versie ondersteunt: 2026.10.06 voor Home Assistant 2026.8, 2026.08.29 voor 2026.7 en ouder."
+        },
+        "error": {
+            "invalid_rated_power": "Voer een eindig nominaal vermogen groter dan nul in."
         }
     },
     "exceptions": {
