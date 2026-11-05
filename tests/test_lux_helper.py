@@ -907,6 +907,25 @@ def _calculations_response(
     ]
 
 
+def _parameters_response() -> list[bytes]:
+    """Socket reads for one 3003 reply."""
+    return [
+        struct.pack(">i", 3003),
+        struct.pack(">i", 2),
+        struct.pack(">i", 0),
+        struct.pack(">i", 5),
+    ]
+
+
+def _visibilities_response(first: int) -> list[bytes]:
+    """Socket reads for one 3005 reply, whose items are single bytes."""
+    return [
+        struct.pack(">i", 3005),
+        struct.pack(">i", 1),
+        struct.pack(">b", first),
+    ]
+
+
 def _read_calculations(client: Luxtronik, retries: int) -> None:
     client._read_data(3004, 4, client.calculations, "calculations", retries=retries)
 
@@ -962,11 +981,98 @@ class TestZeroedCalculationsBlock:
 
     @staticmethod
     def _discard_message(caplog) -> str:
-        messages = [
-            r.getMessage() for r in caplog.records if "Discarding" in r.getMessage()
-        ]
-        assert len(messages) == 1
-        return messages[0]
+        """The one warning, in the form a user's automation may match on."""
+        records = [r for r in caplog.records if "Discarding" in r.getMessage()]
+        assert len(records) == 1
+        assert records[0].name == "custom_components.luxtronik2"
+        assert records[0].levelname == "WARNING"
+        message = records[0].getMessage()
+        assert message.startswith("Discarding zeroed calculations block")
+        return message
+
+    def test_zeroed_block_warns_once_per_read_however_many_retries_fail(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        client = self._client(
+            mock_socket_class,
+            _calculations_response(0, 0, 0),
+            _calculations_response(0, 0, 0),
+            _calculations_response(0, 0, 0),
+        )
+
+        with caplog.at_level(logging.WARNING):
+            _read_calculations(client, retries=2)
+
+        self._discard_message(caplog)
+
+    def test_poll_after_a_good_one_reports_it_and_reads_on(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        client = self._client(
+            mock_socket_class,
+            _parameters_response(),
+            _calculations_response(stat=3),
+            _visibilities_response(0),
+            _parameters_response(),
+            _calculations_response(0, 0, 0, stat=7),
+            _calculations_response(stat=3),
+            _visibilities_response(1),
+        )
+
+        client._read()
+        with caplog.at_level(logging.WARNING):
+            client._read()
+
+        assert "last good stat=3" in self._discard_message(caplog)
+        assert client.visibilities.get(0).value == 1
+
+    def test_failed_retries_after_a_good_poll_keep_the_poll_successful(
+        self, mock_socket_class, mock_sleep
+    ):
+        client = self._client(
+            mock_socket_class,
+            _parameters_response(),
+            _calculations_response(),
+            _visibilities_response(0),
+            _parameters_response(),
+            *[_calculations_response(0, 0, 0)] * 5,
+            _visibilities_response(0),
+        )
+
+        client._read()
+        client._read()
+
+        assert client.calculations.get(10).value == 22.5
+
+    @pytest.mark.parametrize(
+        "failed_attempt",
+        [
+            pytest.param(_calculations_response(0, 0, 0), id="zeroed"),
+            pytest.param([TimeoutError("no reply")], id="timeout"),
+        ],
+    )
+    def test_first_poll_without_calculations_fails(
+        self, mock_socket_class, mock_sleep, failed_attempt
+    ):
+        """No last good values exist, and setup must not build entities on none.
+
+        DHW and firmware-gated entities are only added once, so an empty first
+        poll would leave them missing until the next reload.
+        """
+        client = self._client(
+            mock_socket_class,
+            _parameters_response(),
+            *[failed_attempt] * 5,
+            _parameters_response(),
+            _calculations_response(),
+            _visibilities_response(0),
+        )
+
+        with pytest.raises(OSError, match="calculations"):
+            client._read()
+        client._read()
+
+        assert client.calculations.get(10).value == 22.5
 
     def test_zeroed_block_reports_what_the_controller_sent(
         self, mock_socket_class, mock_sleep, caplog
@@ -991,7 +1097,7 @@ class TestZeroedCalculationsBlock:
         assert "stat=7" in message
         assert "last good stat=3" in message
         assert "2 of 270 non-zero: 81=86, 82=51" in message
-        assert "no write since start" in message
+        assert "no write by this client yet" in message
 
     def test_zeroed_block_lists_at_most_20_non_zero_registers(
         self, mock_socket_class, mock_sleep, caplog
@@ -1032,7 +1138,7 @@ class TestZeroedCalculationsBlock:
             client._write()
             _read_calculations(client, retries=1)
 
-        assert "41 s since last write" in self._discard_message(caplog)
+        assert "41 s since this client's last write" in self._discard_message(caplog)
 
     def test_a_write_that_was_never_acknowledged_still_counts(
         self, mock_socket_class, mock_sleep, caplog
@@ -1057,7 +1163,7 @@ class TestZeroedCalculationsBlock:
                 client._write()
             _read_calculations(client, retries=1)
 
-        assert "41 s since last write" in self._discard_message(caplog)
+        assert "41 s since this client's last write" in self._discard_message(caplog)
 
     @pytest.mark.parametrize(
         ("flow_in", "outdoor", "operation_seconds"),
@@ -1535,6 +1641,7 @@ class TestLuxtronikReadData:
 
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
         client._socket = mock_sock
+        client._last_good_stat = 0  # the mock parses nothing itself
 
         with patch.object(client, "_read_data") as mock_read_data:
             client._read()

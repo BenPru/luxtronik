@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 import socket
 import struct
 import threading
@@ -61,8 +62,9 @@ LUXTRONIK_WRITE_ACK_TIMEOUT = 5.0
 # checked at 0 on 2025-10-05, 2026-07-28 and 2026-10-07, with the parameters
 # checked unaffected. No failure path in _read_data can produce that, as they all
 # keep the previous values, so the zeros must have come from the controller: by
-# elimination, not from a capture. Each of these can read 0 on a live unit, but
-# none of the 88 diagnostics dumps has all three at 0 at once.
+# elimination, not from a capture, and only 2026-10-07 ran this exact read path.
+# Each of these can read 0 on a live unit, but none of the 88 diagnostics dumps
+# has all three at 0 at once.
 LUXTRONIK_ZEROED_CALCULATIONS_PROBES = (10, 15, 63)
 # Keeps the warning readable if a block is zeroed only where the probes are.
 LUXTRONIK_ZEROED_CALCULATIONS_LOGGED_VALUES = 20
@@ -361,6 +363,11 @@ class Luxtronik:
             self.calculations,
             "calculations",
         )
+        # With no last good values to keep, a success here would have setup
+        # build its entities as if the unit had none of these registers, and
+        # most platforms add entities only once. A failed poll retries instead.
+        if self._last_good_stat is None:
+            raise OSError("No calculations read from the heat pump yet")
         self._read_data(
             LUXTRONIK_VISIBILITIES_READ,
             LUXTRONIK_SOCKET_READ_SIZE_CHAR,
@@ -490,14 +497,16 @@ class Luxtronik:
             ">i", self._read_exact(LUXTRONIK_SOCKET_READ_SIZE_INTEGER)
         )[0]
 
-    def _describe_last_write(self) -> str:
-        if self._last_write_at is None:
-            return "no write since start"
-        return f"{time.monotonic() - self._last_write_at:.0f} s since last write"
-
     def _read_char(self) -> int:
         """Read one signed byte."""
         return struct.unpack(">b", self._read_exact(LUXTRONIK_SOCKET_READ_SIZE_CHAR))[0]
+
+    def _describe_last_write(self) -> str:
+        """Only this client's writes: not the app's, the display's or Modbus."""
+        if self._last_write_at is None:
+            return "no write by this client yet"
+        elapsed = time.monotonic() - self._last_write_at
+        return f"{elapsed:.0f} s since this client's last write"
 
     def _read_data(  # pragma: no cover
         self, command: int, item_size: int, parser, label: str, retries: int = 4
@@ -572,11 +581,14 @@ class Luxtronik:
                 # counter would gain its whole value in the statistics on the
                 # next good read. A warning because a retry that succeeds leaves
                 # no other trace, and the cause is unknown. With the zeros gone
-                # from the statistics, this is all that remains of an event.
+                # from the statistics, this is all that remains of an event, and
+                # users may match on its start. Later attempts are debug: the
+                # error below already reports that they all failed.
                 if command == LUXTRONIK_CALCULATIONS_READ and _is_zeroed_calculations(
                     data
                 ):
-                    LOGGER.warning(
+                    LOGGER.log(
+                        logging.DEBUG if attempt else logging.WARNING,
                         "Discarding zeroed %s block (cmd=%s, stat=%s, "
                         "last good stat=%s, %s; %s)",
                         label,
