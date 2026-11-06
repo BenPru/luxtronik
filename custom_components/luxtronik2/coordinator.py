@@ -365,7 +365,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if get_stored_state is not None:
             stored = get_stored_state(entity_id)
         else:  # Home Assistant 2026.10 and older
-            stored = storage.last_states.get(entity_id)
+            stored = storage.last_states.get(entity_id)  # pyright: ignore[reportAttributeAccessIssue]
         if stored is None or stored.state.state not in (STATE_ON, STATE_OFF):
             return
         self._evu2_manual = stored.state.state == STATE_ON
