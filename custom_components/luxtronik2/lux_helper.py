@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 import socket
 import struct
 import threading
@@ -55,6 +56,18 @@ LUXTRONIK_VISIBILITIES_READ = 3005
 # Home Assistant's startup. 5 s leaves three orders of magnitude of headroom
 # over the measurement while capping the damage from a silent controller.
 LUXTRONIK_WRITE_ACK_TIMEOUT = 5.0
+
+# Flow temperature, outdoor temperature and lifetime operating seconds. The
+# statistics of an MSW4-16 / V3.92.1 show these and every other measurement
+# checked at 0 on 2025-10-05, 2026-07-28 and 2026-10-07, with the parameters
+# checked unaffected. No failure path in _read_data can produce that, as they all
+# keep the previous values, so the zeros must have come from the controller: by
+# elimination, not from a capture, and only 2026-10-07 ran this exact read path.
+# Each of these can read 0 on a live unit, but none of the 88 diagnostics dumps
+# has all three at 0 at once.
+LUXTRONIK_ZEROED_CALCULATIONS_PROBES = (10, 15, 63)
+# Keeps the warning readable if a block is zeroed only where the probes are.
+LUXTRONIK_ZEROED_CALCULATIONS_LOGGED_VALUES = 20
 
 
 def discover(
@@ -175,6 +188,19 @@ def get_manufacturer_firmware_url_by_model(model: str, default_id: int) -> str:
     return f"https://www.heatpump24.com/DownloadArea.php?layout={layout_id}"
 
 
+def _is_zeroed_calculations(data: list[int]) -> bool:
+    """Is this calculations block a glitch rather than a measurement?"""
+    probes = LUXTRONIK_ZEROED_CALCULATIONS_PROBES
+    return len(data) > max(probes) and not any(data[index] for index in probes)
+
+
+def _describe_non_zero(data: list[int]) -> str:
+    """Name the registers that a zeroed block did not zero, up to the cap."""
+    non_zero = [f"{index}={value}" for index, value in enumerate(data) if value]
+    listed = ", ".join(non_zero[:LUXTRONIK_ZEROED_CALCULATIONS_LOGGED_VALUES])
+    return f"{len(non_zero)} of {len(data)} non-zero: {listed or 'none'}"
+
+
 def _is_socket_closed(sock: socket.socket) -> bool:
     try:
         if sock.fileno() < 0:
@@ -243,6 +269,9 @@ class Luxtronik:
         self._socket_timeout = socket_timeout
         self._max_data_length = max_data_length
         self._short_reads = 0
+        # For the zeroed block warning; see _read_data.
+        self._last_good_stat: int | None = None
+        self._last_write_at: float | None = None
         self.calculations = Calculations()
         self.parameters = Parameters(safe=safe)
         self.visibilities = Visibilities()
@@ -334,6 +363,11 @@ class Luxtronik:
             self.calculations,
             "calculations",
         )
+        # With no last good values to keep, a success here would have setup
+        # build its entities as if the unit had none of these registers, and
+        # most platforms add entities only once. A failed poll retries instead.
+        if self._last_good_stat is None:
+            raise OSError("No calculations read from the heat pump yet")
         self._read_data(
             LUXTRONIK_VISIBILITIES_READ,
             LUXTRONIK_SOCKET_READ_SIZE_CHAR,
@@ -372,6 +406,7 @@ class Luxtronik:
                 continue
             data = struct.pack(">iii", LUXTRONIK_PARAMETERS_WRITE, index, value)
             sock.sendall(data)
+            self._last_write_at = time.monotonic()
             # The controller acknowledges a 3002 write with two ints: the
             # echoed command (3002) and the echoed *parameter index* - NOT the
             # value it stored. Verified on an Alpha Innotec MSW4-16: writing
@@ -466,6 +501,13 @@ class Luxtronik:
         """Read one signed byte."""
         return struct.unpack(">b", self._read_exact(LUXTRONIK_SOCKET_READ_SIZE_CHAR))[0]
 
+    def _describe_last_write(self) -> str:
+        """Only this client's writes: not the app's, the display's or Modbus."""
+        if self._last_write_at is None:
+            return "no write by this client yet"
+        elapsed = time.monotonic() - self._last_write_at
+        return f"{elapsed:.0f} s since this client's last write"
+
     def _read_data(  # pragma: no cover
         self, command: int, item_size: int, parser, label: str, retries: int = 4
     ) -> None:
@@ -492,6 +534,7 @@ class Luxtronik:
                 LOGGER.debug("Command %s (%s)", cmd, label)
 
                 # Optional status field for calculations
+                stat = None
                 if command == LUXTRONIK_CALCULATIONS_READ:
                     stat = self._read_int()
                     LOGGER.debug("Stat %s", stat)
@@ -533,6 +576,30 @@ class Luxtronik:
                         f"Incomplete {label} block: got {len(data)} of {length} items"
                     )
 
+                # Never parsed, so the last good values stay in place if every
+                # retry fails too: a 0 would reach all sensors, and each lifetime
+                # counter would gain its whole value in the statistics on the
+                # next good read. A warning because a retry that succeeds leaves
+                # no other trace, and the cause is unknown. With the zeros gone
+                # from the statistics, this is all that remains of an event, and
+                # users may match on its start. Later attempts are debug: the
+                # error below already reports that they all failed.
+                if command == LUXTRONIK_CALCULATIONS_READ and _is_zeroed_calculations(
+                    data
+                ):
+                    LOGGER.log(
+                        logging.DEBUG if attempt else logging.WARNING,
+                        "Discarding zeroed %s block (cmd=%s, stat=%s, "
+                        "last good stat=%s, %s; %s)",
+                        label,
+                        cmd,
+                        stat,
+                        self._last_good_stat,
+                        _describe_non_zero(data),
+                        self._describe_last_write(),
+                    )
+                    raise OSError(f"Zeroed {label} block")
+
                 LOGGER.debug(
                     "Read %d %s items (%d fragmented)",
                     length,
@@ -540,6 +607,8 @@ class Luxtronik:
                     self._short_reads,
                 )
                 parser.parse(data)
+                if command == LUXTRONIK_CALCULATIONS_READ:
+                    self._last_good_stat = stat
                 return  # Success, exit after first successful attempt
 
             except (TimeoutError, ConnectionResetError, OSError) as err:

@@ -891,6 +891,325 @@ def _fragmented_recv(payload: bytes, chunk_sizes: list[int]):
     return recv
 
 
+def _calculations_response(
+    flow_in: int = 225, outdoor: int = 133, operation_seconds: int = 91300187, stat=0
+) -> list[bytes]:
+    """Socket reads for one 3004 reply, in the controller's raw register units."""
+    values = [0] * 270
+    values[10] = flow_in
+    values[15] = outdoor
+    values[63] = operation_seconds
+    return [
+        struct.pack(">i", 3004),
+        struct.pack(">i", stat),
+        struct.pack(">i", len(values)),
+        *(struct.pack(">i", value) for value in values),
+    ]
+
+
+def _parameters_response() -> list[bytes]:
+    """Socket reads for one 3003 reply."""
+    return [
+        struct.pack(">i", 3003),
+        struct.pack(">i", 2),
+        struct.pack(">i", 0),
+        struct.pack(">i", 5),
+    ]
+
+
+def _visibilities_response(first: int) -> list[bytes]:
+    """Socket reads for one 3005 reply, whose items are single bytes."""
+    return [
+        struct.pack(">i", 3005),
+        struct.pack(">i", 1),
+        struct.pack(">b", first),
+    ]
+
+
+def _read_calculations(client: Luxtronik, retries: int) -> None:
+    client._read_data(3004, 4, client.calculations, "calculations", retries=retries)
+
+
+@patch("custom_components.luxtronik2.lux_helper.time.sleep")
+@patch("custom_components.luxtronik2.lux_helper.socket.socket")
+class TestZeroedCalculationsBlock:
+    """A glitch read returns the calculations with the measurements at 0.
+
+    Seen in the statistics of an MSW4-16 / V3.92.1 on 2025-10-05, 2026-07-28
+    and 2026-10-07: temperatures, flow rates, targets and lifetime counters at
+    0. Every total-increasing counter then gained its whole lifetime.
+    """
+
+    @staticmethod
+    def _client(mock_socket_class, *responses: list[bytes]) -> Luxtronik:
+        mock_sock = MagicMock()
+        mock_sock.fileno.return_value = -1
+        mock_sock.recv.side_effect = [item for reply in responses for item in reply]
+        mock_socket_class.return_value = mock_sock
+        client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
+        client._socket = mock_sock
+        return client
+
+    def test_retry_replaces_a_zeroed_block(self, mock_socket_class, mock_sleep):
+        client = self._client(
+            mock_socket_class,
+            _calculations_response(0, 0, 0),
+            _calculations_response(),
+        )
+
+        _read_calculations(client, retries=1)
+
+        assert client.calculations.get(10).value == 22.5
+        assert client.calculations.get(15).value == 13.3
+        assert client.calculations.get(63).value == 91300187
+
+    def test_persistent_zeroed_block_keeps_the_last_good_values(
+        self, mock_socket_class, mock_sleep
+    ):
+        client = self._client(
+            mock_socket_class,
+            _calculations_response(),
+            _calculations_response(0, 0, 0),
+            _calculations_response(0, 0, 0),
+        )
+
+        _read_calculations(client, retries=0)
+        _read_calculations(client, retries=1)
+
+        assert client.calculations.get(10).value == 22.5
+        assert client.calculations.get(63).value == 91300187
+
+    @staticmethod
+    def _discard_message(caplog) -> str:
+        """The one warning, in the form a user's automation may match on."""
+        records = [r for r in caplog.records if "Discarding" in r.getMessage()]
+        assert len(records) == 1
+        assert records[0].name == "custom_components.luxtronik2"
+        assert records[0].levelname == "WARNING"
+        message = records[0].getMessage()
+        assert message.startswith("Discarding zeroed calculations block")
+        return message
+
+    def test_zeroed_block_warns_once_per_read_however_many_retries_fail(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        client = self._client(
+            mock_socket_class,
+            _calculations_response(0, 0, 0),
+            _calculations_response(0, 0, 0),
+            _calculations_response(0, 0, 0),
+        )
+
+        with caplog.at_level(logging.WARNING):
+            _read_calculations(client, retries=2)
+
+        self._discard_message(caplog)
+
+    def test_poll_after_a_good_one_reports_it_and_reads_on(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        client = self._client(
+            mock_socket_class,
+            _parameters_response(),
+            _calculations_response(stat=3),
+            _visibilities_response(0),
+            _parameters_response(),
+            _calculations_response(0, 0, 0, stat=7),
+            _calculations_response(stat=3),
+            _visibilities_response(1),
+        )
+
+        client._read()
+        with caplog.at_level(logging.WARNING):
+            client._read()
+
+        assert "last good stat=3" in self._discard_message(caplog)
+        assert client.visibilities.get(0).value == 1
+
+    def test_failed_retries_after_a_good_poll_keep_the_poll_successful(
+        self, mock_socket_class, mock_sleep
+    ):
+        client = self._client(
+            mock_socket_class,
+            _parameters_response(),
+            _calculations_response(),
+            _visibilities_response(0),
+            _parameters_response(),
+            *[_calculations_response(0, 0, 0)] * 5,
+            _visibilities_response(0),
+        )
+
+        client._read()
+        client._read()
+
+        assert client.calculations.get(10).value == 22.5
+
+    @pytest.mark.parametrize(
+        "failed_attempt",
+        [
+            pytest.param(_calculations_response(0, 0, 0), id="zeroed"),
+            pytest.param([TimeoutError("no reply")], id="timeout"),
+        ],
+    )
+    def test_first_poll_without_calculations_fails(
+        self, mock_socket_class, mock_sleep, failed_attempt
+    ):
+        """No last good values exist, and setup must not build entities on none.
+
+        DHW and firmware-gated entities are only added once, so an empty first
+        poll would leave them missing until the next reload.
+        """
+        client = self._client(
+            mock_socket_class,
+            _parameters_response(),
+            *[failed_attempt] * 5,
+            _parameters_response(),
+            _calculations_response(),
+            _visibilities_response(0),
+        )
+
+        with pytest.raises(OSError, match="calculations"):
+            client._read()
+        client._read()
+
+        assert client.calculations.get(10).value == 22.5
+
+    def test_zeroed_block_reports_what_the_controller_sent(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        """With the zeros discarded, this warning is the only trace of an event."""
+        partly_zeroed = _calculations_response(0, 0, 0, stat=7)
+        partly_zeroed[3 + 81] = struct.pack(">i", 86)  # the firmware's "V"
+        partly_zeroed[3 + 82] = struct.pack(">i", 51)
+        client = self._client(
+            mock_socket_class,
+            _calculations_response(stat=3),
+            partly_zeroed,
+            _calculations_response(stat=3),
+        )
+
+        _read_calculations(client, retries=0)
+        with caplog.at_level(logging.WARNING):
+            _read_calculations(client, retries=1)
+
+        message = self._discard_message(caplog)
+        assert "cmd=3004" in message
+        assert "stat=7" in message
+        assert "last good stat=3" in message
+        assert "2 of 270 non-zero: 81=86, 82=51" in message
+        assert "no write by this client yet" in message
+
+    def test_zeroed_block_lists_at_most_20_non_zero_registers(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        mostly_intact = _calculations_response(0, 0, 0)
+        for index in range(100, 130):
+            mostly_intact[3 + index] = struct.pack(">i", 1)
+        client = self._client(
+            mock_socket_class, mostly_intact, _calculations_response()
+        )
+
+        with caplog.at_level(logging.WARNING):
+            _read_calculations(client, retries=1)
+
+        message = self._discard_message(caplog)
+        assert "30 of 270 non-zero" in message
+        assert "119=1" in message
+        assert "120=1" not in message
+
+    def test_zeroed_block_reports_the_time_since_the_last_write(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        client = self._client(
+            mock_socket_class,
+            [struct.pack(">i", 3002), struct.pack(">i", 1)],
+            _calculations_response(0, 0, 0),
+            _calculations_response(),
+        )
+        client.parameters.queue = {1: 5}
+
+        with (
+            patch(
+                "custom_components.luxtronik2.lux_helper.time.monotonic",
+                side_effect=[1000.0, 1041.0],
+            ),
+            caplog.at_level(logging.WARNING),
+        ):
+            client._write()
+            _read_calculations(client, retries=1)
+
+        assert "41 s since this client's last write" in self._discard_message(caplog)
+
+    def test_a_write_that_was_never_acknowledged_still_counts(
+        self, mock_socket_class, mock_sleep, caplog
+    ):
+        """A controller that reboots on a write (#761) never acks it."""
+        client = self._client(
+            mock_socket_class,
+            [TimeoutError("no ack")],
+            _calculations_response(0, 0, 0),
+            _calculations_response(),
+        )
+        client.parameters.queue = {1: 5}
+
+        with (
+            patch(
+                "custom_components.luxtronik2.lux_helper.time.monotonic",
+                side_effect=[1000.0, 1041.0],
+            ),
+            caplog.at_level(logging.WARNING),
+        ):
+            with pytest.raises(TimeoutError):
+                client._write()
+            _read_calculations(client, retries=1)
+
+        assert "41 s since this client's last write" in self._discard_message(caplog)
+
+    @pytest.mark.parametrize(
+        ("flow_in", "outdoor", "operation_seconds"),
+        [
+            pytest.param(0, 0, 91300187, id="both-temperatures-exactly-0"),
+            pytest.param(0, 133, 0, id="new-pump-flow-exactly-0"),
+            pytest.param(225, 0, 0, id="new-pump-outdoor-exactly-0"),
+            pytest.param(225, 133, 0, id="new-pump"),
+        ],
+    )
+    def test_live_readings_of_0_are_accepted_without_a_retry(
+        self, mock_socket_class, mock_sleep, flow_in, outdoor, operation_seconds
+    ):
+        client = self._client(
+            mock_socket_class,
+            _calculations_response(flow_in, outdoor, operation_seconds),
+        )
+
+        _read_calculations(client, retries=1)
+
+        assert client.calculations.get(10).value == flow_in / 10
+        assert client.calculations.get(15).value == outdoor / 10
+        assert client.calculations.get(63).value == operation_seconds
+        mock_sleep.assert_not_called()
+
+    def test_parameters_with_0_at_the_same_indices_are_accepted(
+        self, mock_socket_class, mock_sleep
+    ):
+        """The check reads calculation indices, which mean nothing here."""
+        values = [0] * 270
+        values[1] = 5
+        client = self._client(
+            mock_socket_class,
+            [
+                struct.pack(">i", 3003),
+                struct.pack(">i", len(values)),
+                *(struct.pack(">i", value) for value in values),
+            ],
+        )
+
+        client._read_data(3003, 4, client.parameters, "parameters", retries=1)
+
+        assert client.parameters.get(1).value == 0.5
+        mock_sleep.assert_not_called()
+
+
 class TestLuxtronikReadData:
     @patch("custom_components.luxtronik2.lux_helper.socket.socket")
     def test_read_data_oversized_length(self, mock_socket_class):
@@ -1322,6 +1641,7 @@ class TestLuxtronikReadData:
 
         client = Luxtronik("192.168.1.100", DEFAULT_PORT, 10.0, DEFAULT_MAX_DATA_LENGTH)
         client._socket = mock_sock
+        client._last_good_stat = 0  # the mock parses nothing itself
 
         with patch.object(client, "_read_data") as mock_read_data:
             client._read()
