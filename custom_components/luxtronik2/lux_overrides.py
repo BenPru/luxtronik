@@ -438,6 +438,12 @@ calculations_to_add_update = {
     # Circulation_Pump only as an alias of HUP_PWM for 241, so HUP_PWM is
     # the name to carry. The datatypes stay the ones 0.3.14 ships - this is
     # a rename, and the descriptions keep supplying their own scaling.
+    # 236-238 are the compressor speed target/minimum/maximum. Upstream types
+    # them all as Hz, but 236 follows 231 into rpm on air-source inverters
+    # while 237/238 stay in rps (#863) - so no datatype is claimed here.
+    236: Unknown("ID_WEB_Freq_VD_Soll", False),
+    237: Unknown("ID_WEB_Freq_VD_Min", False),
+    238: Unknown("ID_WEB_Freq_VD_Max", False),
     239: Unknown("VBO_Temp_Spread_Soll", False),
     240: Unknown("VBO_Temp_Spread_Ist", False),
     241: Percent2("HUP_PWM", False),

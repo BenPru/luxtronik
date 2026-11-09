@@ -1041,8 +1041,8 @@ class TestHeatingCircuitControlMode:
 
 
 class TestCalculationNamesFollowUpstreamMain:
-    """The pinned 0.3.14 leaves calculations 239/240/242/243 unnamed and
-    calls 241 Circulation_Pump. Upstream main has since named all five, and
+    """The pinned 0.3.14 leaves calculations 236-240/242/243 unnamed and
+    calls 241 Circulation_Pump. Upstream main has since named all eight, and
     lists Circulation_Pump only as an alias of HUP_PWM. Renaming them here
     keeps const.py readable and makes the eventual library bump a no-op for
     these registers - two diagnostics dumps in the corpus already came from
@@ -1053,6 +1053,9 @@ class TestCalculationNamesFollowUpstreamMain:
     """
 
     RENAMED = {
+        236: "ID_WEB_Freq_VD_Soll",
+        237: "ID_WEB_Freq_VD_Min",
+        238: "ID_WEB_Freq_VD_Max",
         239: "VBO_Temp_Spread_Soll",
         240: "VBO_Temp_Spread_Ist",
         241: "HUP_PWM",
@@ -1069,7 +1072,7 @@ class TestCalculationNamesFollowUpstreamMain:
         """Percent2 and Unknown are both pass-throughs - a value read before
         the rename reads the same after it."""
         lux_overrides.update_Luxtronik_Parameters()
-        for index in (239, 240, 242, 243):
+        for index in (236, 237, 238, 239, 240, 242, 243):
             assert isinstance(Calculations.calculations[index], Unknown)
         assert isinstance(Calculations.calculations[241], Percent2)
         assert Calculations.calculations[241].from_heatpump(46) == 46
@@ -1081,6 +1084,7 @@ class TestCalculationNamesFollowUpstreamMain:
         lux_overrides.update_Luxtronik_Parameters()
         calculations = Calculations()
         for key in (
+            LC.C0238_COMPRESSOR_FREQUENCY_MAX,
             LC.C0239_PUMP_FLOW_DELTA_TARGET,
             LC.C0240_PUMP_FLOW_DELTA,
             LC.C0241_CIRCULATION_PUMP_PWM,

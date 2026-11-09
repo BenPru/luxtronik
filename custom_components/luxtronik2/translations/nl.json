@@ -901,7 +901,7 @@
                 "name": "Uitgang warmtebron"
             },
             "pump_frequency": {
-                "name": "Pomp frequentie"
+                "name": "Compressorfrequentie"
             },
             "domestic_water": {
                 "name": "Warm water"

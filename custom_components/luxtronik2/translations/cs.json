@@ -910,7 +910,7 @@
                 "name": "Teplota výstupu tepla"
             },
             "pump_frequency": {
-                "name": "Frekvence čerpadla"
+                "name": "Frekvence kompresoru"
             },
             "domestic_water": {
                 "name": "TUV"
