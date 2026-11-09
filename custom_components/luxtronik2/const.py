@@ -786,6 +786,7 @@ class LuxCalculation(StrEnum):
     C0238_COMPRESSOR_FREQUENCY_MAX = "calculations.ID_WEB_Freq_VD_Max"
     # Upstream main's name, applied by lux_overrides. In rps (Hz) on both
     # kinds of inverter, and 0 on every fixed-speed unit in the corpus.
+
     # 239-243 carry upstream main's names, applied by lux_overrides: the
     # pinned 0.3.14 still ships 239/240/242/243 as Unknown_Calculation_* and
     # 241 as Circulation_Pump (an alias of HUP_PWM upstream).
