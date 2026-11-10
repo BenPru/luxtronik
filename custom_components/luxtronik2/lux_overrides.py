@@ -428,6 +428,34 @@ parameters_to_add_update = {
     # of this same guess rather than independent confirmation (see #680). Left
     # unregistered until 1178's real purpose is confirmed.
     1179: Power("THERMAL_POWER_LIMIT_COOLING", True),
+    # Named from a reverse-engineering of firmware V3.92.3 (Bankaifan/
+    # ha-luxtronik-shi, docs/firmware-3.92.3-shi-full-analysis.md §3.1, §5),
+    # where the firmware's t1 IDs are proven to be these parameter indices.
+    # Upstream main still lists all of them as Unknown_Parameter_*.
+    #
+    # 1161 is the "Enable SHI" menu setting (options ModbusTCP / myUplink /
+    # both); while it is 0 the controller ignores Smart Home Interface
+    # setpoints. The corpus has 0, 1 and 2, but nothing ties those codes to
+    # the options, so this is a rename only - no selection datatype.
+    1161: Unknown("SHI_ENABLE", False),
+    # The controller's "Offsets" menu: decrease/increase pairs that the SHI
+    # "level" modes pick between, -20..+20 K in 0.5 K steps, stored in tenths.
+    # The corpus pins order and scaling: every unit that returns the block
+    # reads -20 on each odd (decrease) and +20 on each even (increase) index,
+    # the -2.0/+2.0 K factory default; older firmware reads 0 throughout.
+    # Read-only until an entity exposes them.
+    1187: Kelvin("OFFSET_HEATING_GENERAL_DECREASE", False),
+    1188: Kelvin("OFFSET_HEATING_GENERAL_INCREASE", False),
+    1189: Kelvin("OFFSET_HEATING_DECREASE", False),
+    1190: Kelvin("OFFSET_HEATING_INCREASE", False),
+    1191: Kelvin("OFFSET_MK1_DECREASE", False),
+    1192: Kelvin("OFFSET_MK1_INCREASE", False),
+    1193: Kelvin("OFFSET_MK2_DECREASE", False),
+    1194: Kelvin("OFFSET_MK2_INCREASE", False),
+    1195: Kelvin("OFFSET_MK3_DECREASE", False),
+    1196: Kelvin("OFFSET_MK3_INCREASE", False),
+    1197: Kelvin("OFFSET_DHW_DECREASE", False),
+    1198: Kelvin("OFFSET_DHW_INCREASE", False),
     # Add more as needed
 }
 

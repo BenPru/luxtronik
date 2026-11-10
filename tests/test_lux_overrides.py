@@ -592,6 +592,63 @@ class TestSmartGridTemperatureOffsets:
         assert Parameters.parameters[1122].to_heatpump(10.0) == 100
 
 
+class TestOffsetMenuAndShiParameters:
+    """Parameters 1161 and 1187-1198, named from the V3.92.3 firmware analysis.
+
+    Source: Bankaifan/ha-luxtronik-shi, docs/firmware-3.92.3-shi-full-analysis.md
+    §3.1 - firmware t1 IDs are python-luxtronik parameter indices; 1161 is the
+    "Enable SHI" menu setting and 0x4a3-0x4ae the decrease/increase pairs of
+    the controller's "Offsets" menu (-20..+20 K in 0.1 K, step 0.5 K).
+    The corpus corroborates order and scaling: every unit that returns the
+    block reads -20 on each odd (decrease) and +20 on each even (increase)
+    index, the -2.0/+2.0 K factory default.
+    """
+
+    OFFSETS = (
+        (1187, "OFFSET_HEATING_GENERAL_DECREASE"),
+        (1188, "OFFSET_HEATING_GENERAL_INCREASE"),
+        (1189, "OFFSET_HEATING_DECREASE"),
+        (1190, "OFFSET_HEATING_INCREASE"),
+        (1191, "OFFSET_MK1_DECREASE"),
+        (1192, "OFFSET_MK1_INCREASE"),
+        (1193, "OFFSET_MK2_DECREASE"),
+        (1194, "OFFSET_MK2_INCREASE"),
+        (1195, "OFFSET_MK3_DECREASE"),
+        (1196, "OFFSET_MK3_INCREASE"),
+        (1197, "OFFSET_DHW_DECREASE"),
+        (1198, "OFFSET_DHW_INCREASE"),
+    )
+
+    def test_offsets_are_named_read_only_kelvin(self):
+        lux_overrides.update_Luxtronik_Parameters()
+
+        for index, name in self.OFFSETS:
+            parameter = Parameters.parameters[index]
+            assert parameter.name == name
+            assert isinstance(parameter, Kelvin)
+            assert parameter.writeable is False
+
+    def test_offsets_scale_the_factory_defaults(self):
+        lux_overrides.update_Luxtronik_Parameters()
+
+        assert Parameters.parameters[1187].from_heatpump(-20) == -2.0
+        assert Parameters.parameters[1198].from_heatpump(20) == 2.0
+        assert Parameters.parameters[1189].from_heatpump(-200) == -20.0
+
+    def test_enable_shi_is_renamed_only(self):
+        """The raw codes 0/1/2 seen in the corpus are not mapped to the
+        firmware's ModbusTCP/myUplink/both options by any evidence, so no
+        selection datatype is claimed."""
+        from luxtronik.datatypes import Unknown
+
+        lux_overrides.update_Luxtronik_Parameters()
+        parameter = Parameters.parameters[1161]
+
+        assert parameter.name == "SHI_ENABLE"
+        assert type(parameter) is Unknown
+        assert parameter.writeable is False
+
+
 class TestUpstreamMaxDefinedIndex:
     def test_pins_the_installed_library_range(self):
         """The absence rule only fires above this index, so an upstream bump must
@@ -622,7 +679,7 @@ class TestUpstreamMaxDefinedIndex:
         assert key_exists(data, f"parameters.{short.parameters[1125].name}") is True
 
     def test_every_override_only_parameter_sits_above_the_range(self):
-        """The 15 indices that exist only because of lux_overrides are exactly the
+        """The 28 indices that exist only because of lux_overrides are exactly the
         ones the absence rule must be able to reach."""
         upstream_max = lux_overrides.UPSTREAM_MAX_DEFINED_INDEX[CONF_PARAMETERS]
         override_only = {
@@ -642,10 +699,12 @@ class TestUpstreamMaxDefinedIndex:
             1148,
             1158,
             1159,
+            1161,
             1175,
             1176,
             1177,
             1179,
+            *range(1187, 1199),
         }
 
 
