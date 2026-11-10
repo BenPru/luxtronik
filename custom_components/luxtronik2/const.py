@@ -152,6 +152,10 @@ WRITABLE_PARAMETER_PREFIXES: Final = (
     "DHW_ENERGY_INPUT",
     "COOLING_ENERGY_INPUT",
     "COOLING_HEAT_AMOUNT",
+    # 1161 and the 1187-1198 "Offsets" menu: writable before as
+    # Unknown_Parameter_*, so the rename keeps them reachable.
+    "SHI_ENABLE",
+    "OFFSET_",
     "POOL_ENERGY_INPUT",
     "SECOND_HEAT_GENERATOR_AMOUNT_COUNTER",
     "POWER_LIMIT_SWITCH",

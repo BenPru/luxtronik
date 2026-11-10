@@ -428,6 +428,43 @@ parameters_to_add_update = {
     # of this same guess rather than independent confirmation (see #680). Left
     # unregistered until 1178's real purpose is confirmed.
     1179: Power("THERMAL_POWER_LIMIT_COOLING", True),
+    # Named from a reverse-engineering of firmware V3.92.3 (Bankaifan/
+    # ha-luxtronik-shi, docs/firmware-3.92.3-shi-full-analysis.md §3.1, §5),
+    # where the firmware's t1 IDs are proven to be these parameter indices.
+    # Upstream main still lists all of them as Unknown_Parameter_*.
+    #
+    # 1161 is the "Enable SHI" menu setting (options ModbusTCP / myUplink /
+    # both); while it is 0 the controller ignores Smart Home Interface
+    # setpoints. The corpus has 0, 1 and 2, but nothing ties those codes to
+    # the options, so this is a rename only - no selection datatype.
+    #
+    # All 13 stay writable through the write_parameter service, as they were
+    # under their auto-created Unknown_Parameter_* names; WRITABLE_PARAMETER_
+    # PREFIXES carries the new names. Writes now go through the datatype, so
+    # the offsets take K (-2.0), not raw tenths (-20).
+    1161: Unknown("SHI_ENABLE", True),
+    # The controller's "Offsets" menu: decrease/increase pairs that the SHI
+    # "level" modes pick between, -20..+20 K in 0.5 K steps, stored in tenths.
+    # "Hz. allg." (HEATING_GENERAL) is the pair the overall SHI level uses,
+    # which acts on the heating circuit and all mixing circuits together;
+    # "Heizung" (HEATING) is the heating circuit's own pair.
+    # The corpus corroborates the within-pair order and the tenths scaling:
+    # every unit that returns the block reads -20 on each odd (decrease) and
+    # +20 on each even (increase) index, the -2.0/+2.0 K factory default;
+    # older firmware reads 0 throughout. Which pair belongs to which circuit
+    # rests on the firmware analysis alone - every unit is at the default.
+    1187: Kelvin("OFFSET_HEATING_GENERAL_DECREASE", True),
+    1188: Kelvin("OFFSET_HEATING_GENERAL_INCREASE", True),
+    1189: Kelvin("OFFSET_HEATING_DECREASE", True),
+    1190: Kelvin("OFFSET_HEATING_INCREASE", True),
+    1191: Kelvin("OFFSET_MK1_DECREASE", True),
+    1192: Kelvin("OFFSET_MK1_INCREASE", True),
+    1193: Kelvin("OFFSET_MK2_DECREASE", True),
+    1194: Kelvin("OFFSET_MK2_INCREASE", True),
+    1195: Kelvin("OFFSET_MK3_DECREASE", True),
+    1196: Kelvin("OFFSET_MK3_INCREASE", True),
+    1197: Kelvin("OFFSET_DHW_DECREASE", True),
+    1198: Kelvin("OFFSET_DHW_INCREASE", True),
     # Add more as needed
 }
 
