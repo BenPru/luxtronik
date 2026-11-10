@@ -599,9 +599,13 @@ class TestOffsetMenuAndShiParameters:
     §3.1 - firmware t1 IDs are python-luxtronik parameter indices; 1161 is the
     "Enable SHI" menu setting and 0x4a3-0x4ae the decrease/increase pairs of
     the controller's "Offsets" menu (-20..+20 K in 0.1 K, step 0.5 K).
-    The corpus corroborates order and scaling: every unit that returns the
-    block reads -20 on each odd (decrease) and +20 on each even (increase)
-    index, the -2.0/+2.0 K factory default.
+    The corpus corroborates the within-pair order and the tenths scaling:
+    every unit that returns the block reads -20 on each odd (decrease) and
+    +20 on each even (increase) index, the -2.0/+2.0 K factory default. The
+    per-circuit assignment rests on the firmware analysis alone.
+
+    All 13 were writable through write_parameter under their auto-created
+    Unknown_Parameter_* names, so the rename keeps them writable.
     """
 
     OFFSETS = (
@@ -619,14 +623,20 @@ class TestOffsetMenuAndShiParameters:
         (1198, "OFFSET_DHW_INCREASE"),
     )
 
-    def test_offsets_are_named_read_only_kelvin(self):
+    def test_offsets_are_named_kelvin(self):
         lux_overrides.update_Luxtronik_Parameters()
 
         for index, name in self.OFFSETS:
             parameter = Parameters.parameters[index]
             assert parameter.name == name
             assert isinstance(parameter, Kelvin)
-            assert parameter.writeable is False
+
+    def test_write_service_accepts_the_new_names(self):
+        """The client runs with safe=False, so the prefix whitelist - not the
+        datatype's writeable flag - is what decides whether write_parameter
+        reaches these registers."""
+        for name in ("SHI_ENABLE", *(name for _, name in self.OFFSETS)):
+            assert name.startswith(WRITABLE_PARAMETER_PREFIXES), name
 
     def test_offsets_scale_the_factory_defaults(self):
         lux_overrides.update_Luxtronik_Parameters()
@@ -639,14 +649,11 @@ class TestOffsetMenuAndShiParameters:
         """The raw codes 0/1/2 seen in the corpus are not mapped to the
         firmware's ModbusTCP/myUplink/both options by any evidence, so no
         selection datatype is claimed."""
-        from luxtronik.datatypes import Unknown
-
         lux_overrides.update_Luxtronik_Parameters()
         parameter = Parameters.parameters[1161]
 
         assert parameter.name == "SHI_ENABLE"
         assert type(parameter) is Unknown
-        assert parameter.writeable is False
 
 
 class TestUpstreamMaxDefinedIndex:
