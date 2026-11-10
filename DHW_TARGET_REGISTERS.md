@@ -5,23 +5,34 @@ the `number` and `water_heater` platforms gated them on different firmware
 versions for eight months, and what to ask for when the next report about a
 wrong DHW setpoint arrives.
 
-**Status (2026-09-13):** both platforms now switch from P0002 to P0105 at
-minor **88.3**. The `number` gate was moved down from 90.1 on the strength of
-one behavioural measurement — see [The V1.90.0 measurement](#the-v190-measurement-2026-09-13).
-The history below is kept because the reasoning that held the gates apart is
-still the reasoning that limits what the measurement proves.
+**Status (2026-11-10):** both platforms switch from P0002 to P0105 at minor
+**88.3**, and that stays. What changed is the *reason*. A disassembly of the
+controller firmware ([Firmware evidence](#firmware-evidence-2026-11-10))
+shows that the compressor works towards **P0002** on every series 1/2 build
+analysed (88.3 and the latest V1/V2/F1 90.0) and on series 3 from 3.87.1 to
+3.89.3. P0002 is an adaptive value that the controller steers towards P0105 by
+itself. On series 3 the DHW target starts from P0105 instead, as
+`min(P0105, P0002)`, somewhere in (3.89.3, 3.92.0]; Event 2 suggests ~90.1. Writing P0105 is still the right action from 88.3 on:
+on a V1.88.3 unit a remote P0105 write set P0002 to the same value
+immediately, and P0105 is the ceiling P0002 climbs back to. The V1.90.0 run
+that moved the `number` gate to 88.3 does **not** show the compressor
+obeying P0105. It shows the 90.0 write defect, see
+[the reinterpretation](#reinterpretation-2026-11-10). The history below is kept,
+but read it with that correction in mind.
 
 ## The two registers
 
 | | parameter | controller label | meaning |
 |---|---|---|---|
-| **P0002** | `ID_Einst_BWS_akt` | "Deckung WP" | the temperature reachable by the compressor alone. The controller **lowers this by itself** when the setpoint cannot be reached (documented in the AIT manual, and observed in [#793](#793-how-deckung-wp-moves-2026-09-15)), so it is not a pure user setting. |
-| **P0105** | `ID_Soll_BWS_akt` | "Wunschwert" | the desired value, shown as the primary figure on the controller display. |
-| **C0018** | `ID_WEB_Einst_BWS_akt` | "Warmwasser-Soll" | read-only; `min(P0002, P0105)` plus any Smart Grid offset from minor ~90.1. Below that it usually reads P0002 plus offset, but not always (see the 1CA15E row below). It was long read as "the effective target", but the [V1.90.0 measurement](#the-v190-measurement-2026-09-13) showed a pump obeying P0105 while C0018 tracked P0002 — so below 90.1 it is not reliable as a statement of what the compressor aims at. A DHW target written over the Smart Home Interface (Modbus TCP) shows up only here, and is not capped by P0105; see [Targets written over the Smart Home Interface](#targets-written-over-the-smart-home-interface). Exposed as a sensor from 90.1 only; see [The controller target sensor](#the-controller-target-sensor-850-2026-10-31). |
+| **P0002** | `ID_Einst_BWS_akt` | "Deckung WP" | the temperature reachable by the compressor alone, and **the value the DHW control works towards** below the series 3 switch ([firmware](#firmware-evidence-2026-11-10)). The controller manages it by itself: after an operating-limit stop it is set to the tank temperature reached, after a run that falls short it drops 1 K, after a run that reaches it it rises 0.5 K, capped at P0105 (manual, [#793](#793-how-deckung-wp-moves-2026-09-15), and the firmware's raise logic). So it is not a pure user setting. |
+| **P0105** | `ID_Soll_BWS_akt` | "Wunschwert" | the desired value, shown as the primary figure on the controller display. Below the series 3 switch it is the ceiling P0002 is steered towards, and the target of "Warmwasser-Nachheizung" (P0994) when that is on. After the switch the DHW target itself starts from it. |
+| **C0018** | `ID_WEB_Einst_BWS_akt` | "Warmwasser-Soll" | read-only. Before the series 3 switch (see Event 2) the firmware fills it from the same function the compressor start uses: the **applied** P0002, plus P1122 `SMART_GRID_DHW_INCREASE` in Smart Grid state 3 (state 3 or 4 on 90.0). After the switch (seen on 3.92.x, reported from 3.90.1) it reads `min(P0002, P0105)` plus offset. "Applied" matters: on a unit whose writes do not take effect (V1.90.0/V2.90.0, see [#761](https://github.com/BenPru/luxtronik/issues/761) and the [reinterpretation](#reinterpretation-2026-11-10)), the P0002 parameter reads back the written value while C0018 keeps the value the control actually uses. A DHW target written over the Smart Home Interface (Modbus TCP) shows up only here, and is not capped by P0105; see [Targets written over the Smart Home Interface](#targets-written-over-the-smart-home-interface). Exposed as a sensor from 90.1 only; see [The controller target sensor](#the-controller-target-sensor-850-2026-10-31). |
 
 C0018 is the useful one when analysing a dump for the Smart Grid offset and for
-spotting the Event 2 relationship change. It does **not** tell you which
-register the compressor obeys — only a heating cycle does.
+spotting the Event 2 relationship change. Below the series 3 switch it is also the best
+single-snapshot answer to "what is the compressor aiming at", but only on a
+unit whose writes are applied. On 90.0 units a P0002 that differs from C0018 is a
+write that never took effect, not a second target.
 
 ## Two separate firmware events, often conflated
 
@@ -39,18 +50,35 @@ Somewhere in the interval `(minor 79, minor 88.3]`:
   ([#280](https://github.com/BenPru/luxtronik/issues/280#issuecomment-3690032168))
 - **FW 3.90.0** — writing P0105 changed P0002 identically and the pump heated to
   it. ([#280](https://github.com/BenPru/luxtronik/issues/280#issuecomment-2428257354))
+- **FW V1.88.3** — writing P0105 = 60 mid-run set P0002 and C0018 to 60 at
+  once. During the run P0002 dropped back to 53, and the run stopped with the
+  tank at 54.2 °C on a hot-gas peak of 100.5 °C. That is consistent with the
+  Deckung WP rule, though the thread does not tie the drop to that one stop.
+  ([#785](https://github.com/BenPru/luxtronik/issues/785), 2026-09-27 and
+  2026-10-02)
+
+Where in the firmware the propagation happens is not pinned down. In the
+3.89.3 code the parameter-apply switch has a case for P0002 and none for
+P0105, so the copy must happen elsewhere (candidates: the DHW coverage object,
+or the GDI layer's `adjustDHWTargetTemperature`). That is a refinement. The
+behaviour is observed on both series 1 and 3.
 
 ### Event 2 — C0018 starts following min(P0002, P0105)
 
 At roughly minor 90.1. Below it **C0018** mirrors P0002 and P0105 does not
-show up in it; at and above it C0018 follows `min(P0002, P0105)`. Note the
-wording: this describes the read-only mirror, not the compressor — the
-[V1.90.0 measurement](#the-v190-measurement-2026-09-13) showed a unit below
-90.1 whose compressor obeyed P0105 while C0018 still read P0002. This is why a P0002 stuck at the 75.0 sentinel stops
+show up in it; at and above it C0018 follows `min(P0002, P0105)`. The firmware
+shows this is not just the mirror changing: on series 3 the DHW target itself
+moved from P0002 to a P0105-based value capped by P0002, somewhere between
+3.89.3 and 3.92.x ([firmware](#firmware-evidence-2026-11-10)). Series 1 and 2
+never made this change. This is why a P0002 stuck at the 75.0 sentinel stops
 mattering there, and it is the event [#280](https://github.com/BenPru/luxtronik/issues/280)
 and [#428](https://github.com/BenPru/luxtronik/issues/428) actually reported.
 
 Put plainly:
+
+*(2026-11-10: the quote below rests on the old reading. Below the series 3
+switch P0002 is the control value; writing P0105 is right because it seeds
+P0002, see [Reinterpretation](#reinterpretation-2026-11-10).)*
 
 > **Event 1 is where using P0002 became the wrong choice.
 > Event 2 is where that wrong choice started to hurt.**
@@ -63,14 +91,14 @@ worked and nobody complained.
 From the local `diagnostics/` corpus. Dumps where `P0002 == P0105` carry no
 information and are omitted; every divergent case is listed.
 
-### Below minor 90.1 — C0018 mostly follows P0002
+### Below minor 90.1 — C0018 = applied P0002 + Smart Grid offset
 
 | firmware | P0002 | P0105 | C0018 | note |
 |---|---|---|---|---|
 | V1.88.3 | 43.0 | 46.0 | 43.0 | |
 | V1.90.0 | 49.0 | 48.0 | 49.0 | `min()` would give 48.0 |
 | V1.90.0 | 49.0 | 48.0 | 54.0 | Smart Grid +5 K on top of P0002 |
-| V1.90.0 | 50.0 | 54.0 | 54.0 | `unknown-entry-1CA15E`, the #785 unit: **not** P0002 — either P0105, or P0002 + 4 K; one snapshot cannot tell |
+| V1.90.0 | 50.0 | 54.0 | 54.0 | `unknown-entry-1CA15E`, the #785 unit. P0002 = 50 was a remote write on firmware that stores writes without applying them; C0018 = 54 is consistent with the control still using the last panel value. Smart Grid was off and P1122 = 2.0 K, so "+4 K" is ruled out |
 | V1.90.0 | 50.0 | 37.5 | 50.0 | |
 | V1.77 | 59.5 | 61.0 | 59.5 | |
 | V1.73 | 44.0 | 46.0 | 44.0 | |
@@ -78,10 +106,13 @@ information and are omitted; every divergent case is listed.
 | V3.88.0 | 40.0 | 38.0 | 40.0 | `min()` would give 38.0 |
 | V3.88.0 | 48.5 | 47.5 | 48.5 | `min()` would give 47.5 |
 
-Most rows say P0002 — for **C0018** — but the 1CA15E row does not, so "mirrors
-P0002" is a tendency below 90.1, not a rule. The `211129_09` Smart Grid row
-(49 / 48 / 54) belongs to a unit type that, in [#785](https://github.com/BenPru/luxtronik/issues/785), cut in
-and out on P0105, so these rows say nothing about what the compressor aims at.
+Every row fits "C0018 = applied P0002 + Smart Grid offset". The 1CA15E row is
+no exception once the 90.0 write defect is taken into account (see the note).
+The `211129_09` Smart Grid row (49 / 48 / 54) is P0002 + P1122, and that unit
+has P1122 = 5.0 K. Across its seven dumps (V1.90.0, P1030 = 3) C0018 reads
+exactly P0002 or P0002 + 5.0 (48 / 53, 49 / 54), depending on the Smart Grid
+state at the moment of the dump. That is the firmware formula verbatim. Below
+3.92 these rows therefore do say what the compressor aims at: the C0018 value.
 
 ### At and above minor 90.1 — C0018 follows min(P0002, P0105)
 
@@ -169,7 +200,9 @@ both events:
 
 - **Writing** P0105 appears correct from Event 1 onward — which supports
   `water_heater`'s 88.3.
-- **Reading** P0105 looked wrong until Event 2 — the corpus shows a V1.88.3 unit
+- *(2026-11-10: the firmware revives the case for C0018 as the effective
+  target below the switch, see [Firmware evidence](#firmware-evidence-2026-11-10).)*
+  **Reading** P0105 looked wrong until Event 2 — the corpus shows a V1.88.3 unit
   with P0105 = 46 while C0018 read 43 — which supported `number`'s 90.1 for as
   long as C0018 was taken to be the effective target.
 
@@ -187,7 +220,10 @@ Two dead ends worth not re-deriving:
 - **C0018 alone does not settle which register is authoritative.** It is the
   P0002-lineage mirror below Event 2, so "C0018 equals P0002" is nearly
   circular there. It only becomes informative because the *relationship*
-  changes at Event 2.
+  changes at Event 2. *(2026-11-10: the firmware settles the authority question
+  directly. Below the series 3 switch, C0018 comes from the same function the compressor start
+  uses, so on a unit whose writes are applied it is the effective target. See
+  [Firmware evidence](#firmware-evidence-2026-11-10).)*
 
 ## The V1.90.0 measurement (2026-09-13)
 
@@ -202,6 +238,11 @@ the `number` entity while **P0105 stayed 54**, then drew hot water:
 | 15:03 | 49.3 | 58 | 54 | idle (already below the 52 cut-in P0002 would imply) |
 | 15:07 | ~48 | 58 | 54 | **starts** |
 | 15:25 | 52.9 | 58 | 54 | **stops** |
+
+*Everything from here to the Reinterpretation heading is the reading of
+2026-09-13, superseded on 2026-11-10; see
+[Reinterpretation](#reinterpretation-2026-11-10) below. It is kept because the
+gate change was made on it.*
 
 Cut-in at 48 and cut-out at ~54 is P0105 with a 6 K hysteresis, and nobody
 touched the panel. So on this unit **P0002 does not participate in the DHW
@@ -238,23 +279,121 @@ What the measurement does **not** settle, and what is still open:
   such a unit; `water_heater` has carried this exposure since January 2026
   without a report.
 
+### Reinterpretation (2026-11-10)
+
+The run above is explained by the V1.90.0 write defect, not by P0105
+governing. On the controller's 8889 interface a write has two steps
+([firmware](#firmware-evidence-2026-11-10)): `storeParameter` stores the value
+(which is what every poll reads back), and the main loop later *applies* it. For
+P0002, applying copies the value into the variable the DHW control uses. On this
+unit the second step did not happen until a panel confirm, the "value accepted,
+never acted on" symptom that the reporter later fixed by downgrading to V1.88.3.
+
+- **13 Sep run:** P0002 read back 58, but the control still had the last panel
+  value, 54. Cut-in at 48 is 54 − 6 K hysteresis, and the stop near 54 is the
+  same 54. P0105 being 54 too was a coincidence, so the run says nothing about
+  P0105.
+- **3 Sep dump** (P0002 50, P0105 54, C0018 54): the same thing. C0018 is the
+  applied value.
+- **22 Sep run** (P0105 written 58, P0002 55): after a panel press the pump
+  ran with C0018 = P0002 = 55, and P0105 = 58 had no visible effect. The stop
+  point was not reported.
+- **27 Sep run on V1.88.3**, writes working: a P0105 write set P0002 and C0018
+  at once (see [Event 1](#event-1--writing-p0105-starts-propagating-to-p0002)).
+
+What this does to the open points above:
+
+- *P0105 alone or `min()`?* Neither, on series 1/2 and V3 up to 3.89. The
+  control works on P0002. A P0105 write seeds P0002 with the same value, and
+  P0105 is the ceiling the adaptive P0002 climbs back to. Writing P0105 alone is
+  therefore enough. Writing both would only matter if seeding failed, which no
+  report shows on a unit with working writes.
+- *Which register to display?* P0105 remains the right user-facing value: it is
+  what the user set and what P0002 converges to. A lower P0002 is the controller
+  saying the heat pump cannot currently reach it.
+- *Units in `[88.3, 90.0]` that obey P0002:* that is every build analysed below
+  the series 3 switch. It
+  is harmless as long as the P0105 write seeds P0002, which is observed on
+  V1.88.3 and V3.90.0. Whether it also holds on V3.88.x/3.89.x is not observed
+  directly.
+
+## Firmware evidence (2026-11-10)
+
+The controller application (`appl`, `bin/Controller` on 3.92) was extracted
+from firmware images and disassembled. The latest image per series is public
+on the portal the update entity already queries:
+`https://www.heatpump24.com/software/fetchSoftware.php?softwareID=N`, with N =
+0 V1, 1 V2, 2 V3, 3 V4, 4 F1. Older images came from a maintainer's own
+downloads. Several builds were shipped unstripped, so their function names are
+real. Stripped builds were matched against them by code signature and by the
+order in which functions load their variables.
+
+**The effective DHW target** is a function named
+`effectiveDHWTargetTemperature()` in the named builds. Its callers include
+the compressor start conditions (`getcondtionForSignalVD`,
+`evalConditionsForTwoAvailableCompressors`), the DHW handler, the display and
+the value export, which is very likely where C0018 comes from.
+
+| build | names | effective DHW target |
+|---|---|---|
+| F1.88.3, V2.88.3 | yes | P0002 + P1122 if Smart Grid on and state 3 |
+| V3.87.1, 3.88.0, 3.89.3 | yes | P0002 + P1122 if Smart Grid on and state 3 |
+| V1.90.0, V2.90.0, F1.90.0 | stripped | P0002 + P1122 if Smart Grid state 3 or 4 |
+| V3.92.3 | stripped (variables exported) | starts from P0105, may be replaced by an external energy manager value (`Einst_RFVEinb_akt` 6 with `Einst_SmartWW`), + P1122 in state 3 or 4. The DHW control then caps it by P0002 and P0973 (per the SHI analysis below), giving `min(P0105, P0002)` |
+| V3.84.3 | yes | function not present (older structure, not analysed) |
+| V4.81.3 | yes | separate code line, no such function, not analysed |
+
+So the switch to a P0105-based target happened on series 3 somewhere in
+(3.89.3, 3.92.0]. That matches Event 2: ~90.1 rests on a 3.90.1 report in
+#280, and the corpus shows it on 3.92.x dumps only. No 3.90.x or 3.91.x image
+was analysed. Series 1 and 2 never switched: their newest release is 90.0.
+"The series 3 switch" in this document means this boundary.
+
+**Deckung WP in code** (V2.88.3 DHW handler, same shape in 90.0): during a run
+a flag is set once the tank reaches P0002 − hysteresis. After the run, if the
+flag is set, the tank is still there, P0105 − 0.5 K ≥ P0002 and
+Warmwasser-Nachheizung is off, then P0002 rises by 0.5 K and the flag clears.
+The 1 K lowering and the limit-stop reset were not read in detail. They are
+presumably in the coverage routine (`DhwCoverage::set` on series 1/2,
+`CHotWaterCoverage` with `lowerValue`/`RiseValue` on series 3), which also
+calls `SetParameter(1123, 0)`. With
+Nachheizung (P0994) on, the handler sets the DHW control value to P0105 during a
+request, so the heater finishes the cycle at the Wunschwert.
+
+**The write path** (port 8889, all builds): commands 3002 / 3003 / 3004 / 3005
+are write / read parameters / read calculations / read visibilities. A write calls
+`storeParameter`, which queues the value for the main loop. If it refuses the
+write, **the echoed index in the reply is −1**, so a rejected write is
+detectable from the acknowledgement. On 3.89.3 `storeParameter` also refuses
+indices above 1153.
+
+Method and caveats: pyelftools and capstone, scripts kept outside the
+repository. Results from named builds are read directly. The 90.0 and 3.92.3
+results rest on signature matches that were checked against the named builds
+(the signature hits exactly the named function there). The P0002 address in the
+90.0 builds rests on load-order alignment of two independent functions against
+V2.88.3. V3.92.3's DHW control was described by an independent analysis of the
+same binary, [Bankaifan/ha-luxtronik-shi](https://github.com/Bankaifan/ha-luxtronik-shi/blob/main/docs/firmware-3.92.3-shi-full-analysis.md)
+(§3.2).
+
 ## What to ask the next reporter
 
-The corpus is static snapshots, so it cannot show write propagation. One
-measurement closes the remaining gap — it is Test B from the
-[V1.90.0 measurement](#the-v190-measurement-2026-09-13), with P0002 left
-*below* the value written to P0105 so that `min()` and "P0105 alone" predict
-different outcomes. Ask for, on a unit in `[88.3, 90.0]`:
+*Updated 2026-11-10.* The "P0105 alone or `min()`" test is no longer needed
+for series 1/2 (see [Reinterpretation](#reinterpretation-2026-11-10)). Two
+things are still worth checking when the chance comes:
 
-1. The firmware version and a diagnostics dump.
-2. Write P0105 via the `luxtronik2.write` action to a clearly different value.
-3. After the next DHW cycle: what temperature did the water actually reach,
-   and what do P0002, P0105 and C0018 read now?
-
-If the water reaches the P0105 value, Event 1 has happened on that firmware.
-If it reaches P0002 instead, it has not — which is exactly the false positive
-that makes "P0105 sets the right value" untrustworthy on its own, since the
-displayed figure changes either way.
+- **On 90.0 (V1/V2/F1), first rule out the write defect.** If a written value
+  reads back but C0018 and the panel keep the old value, the write was stored
+  but not applied ([#761](https://github.com/BenPru/luxtronik/issues/761),
+  [#785](https://github.com/BenPru/luxtronik/issues/785)). No register question
+  can be answered on such a unit. The known remedy is a downgrade to the
+  pre-.90 release of the same series.
+- **On V3.88.x or 3.89.x, does a P0105 write seed P0002?** This is observed on
+  V1.88.3 and V3.90.0, not yet on 3.88/3.89. Ask for the firmware version and a
+  dump, a P0105 write via `luxtronik2.write` to a clearly different value, and
+  P0002 / P0105 / C0018 right after the write. If P0002 and C0018 follow, the
+  88.3 gate is right there too. If they do not, the entity would have to write
+  P0002 as well on those versions.
 
 Also worth knowing: the corpus contains **no V1.x or V2.x dump at minor ≥ 90.1**
 at all. If a report arrives from one, it is the first of its kind — capture it.
@@ -314,9 +453,13 @@ only (`min_firmware_version_minor`), for these reasons:
   53, and across three dumps the tank climbed 44.8 → 52.6 → 57.3 °C — past
   P0105, towards C0018. The offset also shows with the registers equal:
   `unknown-entry-GSZ1XT/2026-06-23` (V3.92.3) reads 47.5 / 47.5 / 51.5.
-- **Below 90.1** C0018 mostly mirrors P0002, which a V1.90.0 compressor was
-  measured to ignore, and the 1CA15E row shows it does not even do that
-  consistently. A sensor there would mislead.
+- **Below 90.1** C0018 is the applied P0002 plus the Smart Grid offset. That
+  is a meaningful value (the firmware uses it for the compressor start), but it
+  differs from what the `number`/`water_heater` entities show (P0105) whenever
+  Deckung WP has dropped. *Originally this bullet said a V1.90.0 compressor was
+  measured to ignore P0002. That reading was withdrawn on 2026-11-10 (see
+  [Reinterpretation](#reinterpretation-2026-11-10)).* Whether to extend the
+  sensor below 90.1 is now a product question, not an evidence question.
 - **The 90.1 boundary itself is untested by the corpus**: every V3.90.0/90.1
   dump has P0002 = P0105. It rests on the 3.90.1 report in #280 and matches
   Event 2 above. A V3.90.x or V3.91.x dump with the two registers apart would
@@ -362,4 +505,6 @@ What follows from this:
 - [#428](https://github.com/BenPru/luxtronik/issues/428) — V3.92.0, P0002 showing "Deckung WP" instead of the setpoint.
 - [#793](https://github.com/BenPru/luxtronik/issues/793) — V1.81, P0002 "decreasing by itself"; the Deckung-WP mechanics above.
 - [#850](https://github.com/BenPru/luxtronik/issues/850) — V3.92.3, C0018 requested as a sensor; the 90.1 gate and the Smart Home Interface finding above.
+- [#785](https://github.com/BenPru/luxtronik/issues/785) — V1.90.0 WZS: the measurement that moved the `number` gate, its reinterpretation as the 90.0 write defect, and the V1.88.3 propagation and Deckung WP runs.
+- [Bankaifan/ha-luxtronik-shi firmware analysis](https://github.com/Bankaifan/ha-luxtronik-shi/blob/main/docs/firmware-3.92.3-shi-full-analysis.md) — independent disassembly of V3.92.3, used for the 3.92 DHW control.
 - [#517](https://github.com/BenPru/luxtronik/issues/517) — unrelated to the thresholds: the `firmware_version_minor` crash on two-part versions introduced alongside `fecdf38`, since fixed.

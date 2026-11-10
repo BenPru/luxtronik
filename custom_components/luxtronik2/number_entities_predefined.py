@@ -532,11 +532,11 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         max_firmware_version_minor=Version("88.2"),
     ),
-    # Since minor 88.3 the controller targets P0105 (issue #280 reported it
-    # on 3.90.1; issue #785 measured a V1.90.0 unit cutting in and out on
-    # P0105 while P0002 held a different value). Same cutover as the water
-    # heater card, so both controls show and write the same register - see
-    # DHW_TARGET_REGISTERS.md.
+    # Since minor 88.3 a remote P0105 write seeds P0002 (the value the DHW
+    # control works on below the series 3 switch) and sets the ceiling P0002
+    # adapts back to; from the switch the target itself starts from P0105.
+    # Same cutover as the water heater card, so both controls show and write
+    # the same register - see DHW_TARGET_REGISTERS.md.
     LuxtronikNumberDescription(
         key=SensorKey.DHW_TARGET_TEMPERATURE,
         luxtronik_key=LP.P0105_DHW_TARGET_TEMPERATURE,
