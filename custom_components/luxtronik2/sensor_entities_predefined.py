@@ -859,9 +859,10 @@ SENSORS: list[descr] = [
     ),
     # The controller's own "Warmwasser-Soll": the target it heats to, including
     # any Smart Grid / PV raise on top of the setpoint (#850). From minor 90.1
-    # it reads min(P0002, P0105) plus that raise. Below 90.1 it mirrors P0002,
-    # a register the compressor demonstrably ignores on V1.90.0 (#785), so the
-    # sensor would mislead there. See DHW_TARGET_REGISTERS.md.
+    # it reads min(P0002, P0105) plus that raise. Below 90.1 it is the applied
+    # P0002 plus that raise - the effective target too, but it differs from
+    # the P0105 the DHW entities show whenever Deckung WP has dropped, so the
+    # sensor stays gated at 90.1 for now. See DHW_TARGET_REGISTERS.md.
     descr(
         key=SensorKey.DHW_TARGET_TEMPERATURE_CONTROLLER,
         luxtronik_key=LC.C0018_DHW_TARGET_TEMPERATURE_CONTROLLER,
