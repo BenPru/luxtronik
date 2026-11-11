@@ -1475,3 +1475,68 @@ class TestDhwTargetControllerSensor:
     def test_value_is_celsius_tenths(self):
         """55.0 C in the #850 reporter's dump."""
         _assert_raw_converts_to(SensorKey.DHW_TARGET_TEMPERATURE_CONTROLLER, 550, 55.0)
+
+
+# ===========================================================================
+# Compressor frequency: rpm on air inverters, Hz on MSW brine units (#863)
+# ===========================================================================
+
+
+def _compressor_frequency_description() -> LuxtronikSensorDescription:
+    return next(d for d in SENSORS if d.key == SensorKey.PUMP_FREQUENCY)
+
+
+class TestCompressorFrequency:
+    """C0231 holds the compressor speed in rpm on air-source inverters (LW
+    SEC 2, LP16V, ...) and in Hz on Alpha Innotec MSW brine inverters. The
+    controller's own min/max registers (C0237/C0238) are in rps on both:
+    on the rpm units the minimum x 60 is exactly the target speed in C0236
+    (22 x 60 = 1320 on an LP16V, 23 x 60 = 1380 on a type-None V3.88 unit).
+    The two ranges never meet - Hz stays at or below ~120, rpm starts at
+    ~1300 - so the sensor normalises every reading to Hz (#863).
+    """
+
+    @staticmethod
+    def _value(raw):
+        data = make_coordinator_data(calculations={"ID_WEB_Freq_VD": raw})
+        entity = _make_sensor(_compressor_frequency_description(), data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_rpm_reading_is_converted_to_hz(self):
+        """LP16V (#850 dump): 1301 rpm, running near its 22 rps minimum."""
+        assert self._value(1301) == 21.7
+
+    def test_rpm_reading_at_maximum(self):
+        """LW SEC 2: 2794 rpm."""
+        assert self._value(2794) == 46.6
+
+    def test_hz_reading_is_unchanged(self):
+        """MSW4-16 / MSW2-9S read 20-40 directly in Hz."""
+        assert self._value(35) == 35.0
+        assert self._value(120) == 120.0
+
+    def test_stopped_compressor_reads_zero(self):
+        assert self._value(0) == 0.0
+
+    def test_missing_register_reads_none(self):
+        assert self._value(None) is None
+
+    def test_description_stays_a_frequency_in_hz(self):
+        """Converting rather than switching units keeps one unit per entity,
+        so long-term statistics are not split."""
+        description = _compressor_frequency_description()
+        assert description.device_class == SensorDeviceClass.FREQUENCY
+        assert description.native_unit_of_measurement == "Hz"
+        assert description.rpm_above is not None
+        assert 120 < description.rpm_above < 1300
+
+    def test_exists_and_is_enabled_on_inverters_only(self):
+        """C0238 (maximum compressor frequency) is 0 on every fixed-speed unit
+        in the corpus and stays set while an inverter is idle, so it gates
+        existence; where the entity exists it is enabled by default."""
+        description = _compressor_frequency_description()
+        assert description.entity_registry_enabled_default is None
+        assert description.visibility == LuxVisibility.UNSET
+        assert description.entity_active_key == LC.C0238_COMPRESSOR_FREQUENCY_MAX
+        assert description.entity_active_formula == "> 0"

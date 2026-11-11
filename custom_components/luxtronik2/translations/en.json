@@ -910,7 +910,7 @@
                 "name": "Heat source output"
             },
             "pump_frequency": {
-                "name": "Pump frequency"
+                "name": "Compressor frequency"
             },
             "domestic_water": {
                 "name": "Domestic hot water"

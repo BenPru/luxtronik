@@ -743,6 +743,23 @@ class TestEntityVisible:
 
 
 class TestEntityActive:
+    @pytest.mark.parametrize(
+        ("calculations", "active"),
+        [
+            ({"ID_WEB_Freq_VD": 1301, "ID_WEB_Freq_VD_Max": 55}, True),
+            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 118}, True),
+            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, False),
+            ({"ID_WEB_Freq_VD_Max": 105}, False),
+        ],
+    )
+    def test_compressor_frequency_exists_on_inverters_only(self, calculations, active):
+        """The compressor frequency sensor exists when the controller reports
+        a maximum compressor frequency - idle inverters included - and its own
+        register is returned (#863)."""
+        description = next(d for d in SENSORS if d.key == SensorKey.PUMP_FREQUENCY)
+        coord = _make_coordinator(calculations=calculations)
+        assert coord.entity_active(description) is active
+
     def test_version_incompatible(self):
         coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "V3.90.1"})
         desc = LuxtronikEntityDescription(

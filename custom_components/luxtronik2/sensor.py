@@ -262,6 +262,9 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         elif isinstance(value, float | int):
             factor = self._value_factor
             precision = self.entity_description.native_precision
+            rpm_above = self.entity_description.rpm_above
+            if rpm_above is not None and value > rpm_above:
+                value = value / 60
             value = float(value) * factor
             if precision is not None:
                 value = round(value, precision)
