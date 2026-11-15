@@ -22,7 +22,7 @@ from functools import partial
 from homeassistant.const import EntityCategory
 
 from .const import DeviceKey, LuxParameter, SensorKey as SK
-from .model import LuxtronikTimerScheduleTextDescription
+from .model import EntityActiveCondition, LuxtronikTimerScheduleTextDescription
 
 
 @dataclass(frozen=True)
@@ -70,13 +70,12 @@ class _TimerCircuit:
     name_builder: Callable[[str, int, int], tuple[tuple[str] | tuple[str, str], ...]]
     device_key: DeviceKey
     #: A declarative existence gate for the whole circuit, see
-    #: `LuxtronikEntityDescription.entity_active_key`. A gated circuit also
+    #: `LuxtronikEntityDescription.entity_active`. A gated circuit also
     #: names its mode selector as `selector_key`: `entity_active` requires the
     #: entity's own register to be returned (#738), and a schedule block has
     #: no single register of its own.
     selector_key: LuxParameter = LuxParameter.UNSET
-    entity_active_key: LuxParameter | None = None
-    entity_active_formula: str | None = None
+    entity_active: tuple[EntityActiveCondition, ...] = ()
 
 
 def _row_names_row_slot(
@@ -204,8 +203,7 @@ _CIRCULATION_CIRCUIT = _TimerCircuit(
     name_builder=_row_names_row_slot,
     device_key=DeviceKey.domestic_water,
     selector_key=LuxParameter.P0506_TIMER_PROGRAM_CIRCULATION,
-    entity_active_key=LuxParameter.P0085_DHW_CHARGING_PUMP,
-    entity_active_formula="!= 1",
+    entity_active=((LuxParameter.P0085_DHW_CHARGING_PUMP, "!= 1"),),
 )
 
 _CIRCULATION_WEEKDAYS = _per_day_keys("CIRCULATION")
@@ -226,8 +224,7 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             luxtronik_key=circuit.selector_key,
-            entity_active_key=circuit.entity_active_key,
-            entity_active_formula=circuit.entity_active_formula,
+            entity_active=circuit.entity_active,
             active_mode="week",
             row_names=circuit.name_builder(
                 circuit.same_schedule_prefix, circuit.rows, 0
@@ -239,8 +236,7 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             luxtronik_key=circuit.selector_key,
-            entity_active_key=circuit.entity_active_key,
-            entity_active_formula=circuit.entity_active_formula,
+            entity_active=circuit.entity_active,
             active_mode="5+2",
             row_names=circuit.name_builder(
                 circuit.weekday_weekend_prefix, circuit.rows, 0
@@ -252,8 +248,7 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             luxtronik_key=circuit.selector_key,
-            entity_active_key=circuit.entity_active_key,
-            entity_active_formula=circuit.entity_active_formula,
+            entity_active=circuit.entity_active,
             active_mode="5+2",
             row_names=circuit.name_builder(
                 circuit.weekday_weekend_prefix, circuit.rows, 1
@@ -267,8 +262,7 @@ def _build_circuit_entities(
             entity_category=EntityCategory.CONFIG,
             mode_selector_name=circuit.mode_selector_name,
             luxtronik_key=circuit.selector_key,
-            entity_active_key=circuit.entity_active_key,
-            entity_active_formula=circuit.entity_active_formula,
+            entity_active=circuit.entity_active,
             active_mode="days",
             row_names=circuit.name_builder(
                 circuit.per_day_prefix, circuit.rows, day_index

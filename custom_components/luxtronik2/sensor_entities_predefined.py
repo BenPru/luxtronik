@@ -391,7 +391,7 @@ SENSORS: list[descr] = [
         device_class=SensorDeviceClass.ENERGY,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        entity_active_formula="!= 0.0",
+        entity_active=((LP.P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER, "!= 0.0"),),
         visibility=LV.V0324_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER,
         # Register unit differs by controller generation - see
         # AUX_HEATER_ENERGY_FACTOR_BY_SERIES for the measurements behind each.
@@ -405,7 +405,7 @@ SENSORS: list[descr] = [
         device_class=SensorDeviceClass.ENERGY,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        entity_active_formula="!= 0.0",
+        entity_active=((LP.P1140_SECOND_HEAT_GENERATOR_AMOUNT_COUNTER, "!= 0.0"),),
         # Shares 1059's scale, by analogy rather than by measurement: it is
         # the same physical element on the same controller. Giving it its own
         # scale would make a unit's total jump at the handover between the
@@ -417,7 +417,7 @@ SENSORS: list[descr] = [
         # while the handover itself was watched happening on one MSW4-16
         # during V3.92.1 (0 -> 330 -> 841). So the register starting to count
         # looks like series-3 firmware behaviour rather than something the
-        # older lines have yet to do, and `entity_active_formula` keeps the
+        # older lines have yet to do, and `entity_active` keeps the
         # entity from existing at all while it reads 0 - a wrong series-1 or
         # series-2 factor here cannot reach a user unless a generation that
         # has never counted starts to.
@@ -488,7 +488,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_active_formula="!= 5.0",
+        entity_active=((LC.C0160_VENTILATION_EXHAUST_AIR_TEMPERATURE, "!= 5.0"),),
     ),
     # VZU/VAB are analog fan outputs, so they carry the modulation level a
     # binary sensor would discard. Same per-mille encoding as the analog
@@ -588,8 +588,7 @@ SENSORS: list[descr] = [
         # Inverters only: C0238 (maximum compressor frequency) is 0 on every
         # fixed-speed unit in the corpus, where C0231 never leaves 0 either,
         # and stays set while an inverter is idle.
-        entity_active_key=LC.C0238_COMPRESSOR_FREQUENCY_MAX,
-        entity_active_formula="> 0",
+        entity_active=((LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),),
     ),
     descr(
         key=SensorKey.PUMP_FLOW_DELTA_TARGET,
@@ -652,7 +651,7 @@ SENSORS: list[descr] = [
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         entity_registry_enabled_default=False,
-        entity_active_formula="!= -50.0",
+        entity_active=((LC.C0020_HEAT_SOURCE_OUTPUT_TEMPERATURE, "!= -50.0"),),
         visibility=LV.V0291_OVERHEATING_TEMPERATURE,
     ),
     descr(
@@ -680,13 +679,12 @@ SENSORS: list[descr] = [
         luxtronik_key=LP.P1119_LAST_DEFROST_TIMESTAMP,
         device_class=SensorDeviceClass.TIMESTAMP,
         icon="mdi:snowflake-melt",
-        # The gate is the None check inside the entity_active_formula
-        # branch of `entity_active`: the datatype decodes a raw 0 (never
-        # defrosted, brine unit, pre-V3 firmware) to None, the same as a
+        # The gate is the None check in `entity_active`: the datatype decodes a raw
+        # 0 (never defrosted, brine unit, pre-V3 firmware) to None, the same as a
         # register the controller did not return. The formula's only job is
         # to route through that branch - the comparison itself never runs
         # numerically on a datetime and is always True there.
-        entity_active_formula="!= 0",
+        entity_active=((LP.P1119_LAST_DEFROST_TIMESTAMP, "!= 0"),),
     ),
     # endregion Main heatpump
     # region Heating
@@ -841,8 +839,7 @@ SENSORS: list[descr] = [
         # reads 1 on all 29 corpus units, including the 24 with P0033 = 0
         # whose C0227/C0228 then sit at 0.0 forever. The RFV types (1-3) are
         # analogue dials that may read 0.0 too; no RFV unit to confirm it.
-        entity_active_key=LP.P0033_ROOM_THERMOSTAT_TYPE,
-        entity_active_formula="!= 0",
+        entity_active=((LP.P0033_ROOM_THERMOSTAT_TYPE, "!= 0"),),
     ),
     descr(
         key=SensorKey.ROOM_THERMOSTAT_TEMPERATURE_TARGET,
@@ -851,8 +848,7 @@ SENSORS: list[descr] = [
         entity_category=None,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_active_key=LP.P0033_ROOM_THERMOSTAT_TYPE,
-        entity_active_formula="!= 0",
+        entity_active=((LP.P0033_ROOM_THERMOSTAT_TYPE, "!= 0"),),
     ),
     # endregion Heating
     # region Domestic water
@@ -969,7 +965,7 @@ SENSORS: list[descr] = [
         #
         # Gated for the same reason as 1135 below - the two move together, and
         # on most cooling units neither one does.
-        entity_active_formula="!= 0.0",
+        entity_active=((LP.P1139_COOLING_ENERGY_INPUT, "!= 0.0"),),
     ),
     descr(
         key=SensorKey.COOLING_HEAT_AMOUNT,
@@ -1006,7 +1002,7 @@ SENSORS: list[descr] = [
         # before the entities appear, since entity_active is evaluated at
         # setup. That is the same trade the pool counters make, and it buys
         # the majority case.
-        entity_active_formula="!= 0.0",
+        entity_active=((LP.P1135_COOLING_HEAT_AMOUNT, "!= 0.0"),),
     ),
     # endregion Cooling
     # region Pool
@@ -1027,7 +1023,7 @@ SENSORS: list[descr] = [
         # 0.1 kWh, like its siblings 151 and 152 - the library's Energy
         # datatype is the whole conversion. Confirmed on the #752 unit, whose
         # controller page read 4364.1 kWh at the moment of the dump.
-        entity_active_formula="!= 0.0",
+        entity_active=((LC.C0153_POOL_HEAT_AMOUNT, "!= 0.0"),),
     ),
     # Compressor 2 of a twin (master/slave) unit. Calculations 151-154 above
     # count compressor 1 only - on the #782 LD7 they equal 854/878/852 / 100
@@ -1044,8 +1040,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        entity_active_key=LP.P1010_IS_TWIN,
-        entity_active_formula="!= 0",
+        entity_active=((LP.P1010_IS_TWIN, "!= 0"),),
     ),
     descr(
         key=SensorKey.DHW_HEAT_AMOUNT_COMPRESSOR_2,
@@ -1056,8 +1051,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        entity_active_key=LP.P1010_IS_TWIN,
-        entity_active_formula="!= 0",
+        entity_active=((LP.P1010_IS_TWIN, "!= 0"),),
     ),
     descr(
         key=SensorKey.POOL_HEAT_AMOUNT_COMPRESSOR_2,
@@ -1071,7 +1065,7 @@ SENSORS: list[descr] = [
         # Its own register, like 153: a twin without a pool reads 0 here, and
         # so does every single unit, so this one gate covers both. Unmeasured -
         # the only twin seen has no pool - but it is the same family as 1015.
-        entity_active_formula="!= 0.0",
+        entity_active=((LP.P1017_POOL_HEAT_AMOUNT_2, "!= 0.0"),),
     ),
     descr(
         key=SensorKey.HEAT_AMOUNT_COUNTER_COMPRESSOR_2,
@@ -1081,8 +1075,7 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         native_precision=2,
-        entity_active_key=LP.P1010_IS_TWIN,
-        entity_active_formula="!= 0",
+        entity_active=((LP.P1010_IS_TWIN, "!= 0"),),
     ),
     descr(
         key=SensorKey.POOL_ENERGY_INPUT,
@@ -1104,7 +1097,7 @@ SENSORS: list[descr] = [
         # sensor from exactly the installations that have one. A machine
         # without a pool reads 0.0 here, which is also why the register went
         # unidentified for so long.
-        entity_active_formula="!= 0.0",
+        entity_active=((LP.P1138_POOL_ENERGY_INPUT, "!= 0.0"),),
     ),
     # endregion Pool
 ]

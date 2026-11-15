@@ -43,6 +43,9 @@ from .const import (
 
 # endregion Imports
 
+type EntityActiveCondition = tuple[LuxParameter | LuxCalculation | LuxVisibility, str]
+"""One `entity_active` condition: a register and the formula it must meet."""
+
 
 @dataclass
 class LuxtronikCoordinatorData:
@@ -90,15 +93,15 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     translation_key_name: str | None = None
     visibility: LuxVisibility | LuxParameter = LuxVisibility.UNSET
     visibility_formula: str | None = None
-    entity_active_formula: str | None = None
-    # The register `entity_active_formula` judges; None means the entity's own
-    # `luxtronik_key`. Ignored without a formula. Unlike a plain `visibility`
-    # flag, which only decides whether an entity starts enabled, this decides
-    # whether it exists at all - so a niche feature can keep its entities off
+    # Whether the entity exists at all: (register, formula) conditions that
+    # must all hold, e.g. ((LP.P1010_IS_TWIN, "!= 0"),). The register is named
+    # even when it is the entity's own `luxtronik_key`. Unlike a plain
+    # `visibility` flag, which only decides whether an entity starts enabled,
+    # this decides existence - so a niche feature can keep its entities off
     # every other install by declaring its gate here, without a special case
     # in the coordinator. A register the controller does not return fails the
-    # gate. #815
-    entity_active_key: LuxParameter | LuxCalculation | LuxVisibility | None = None
+    # gate, and so does the entity's own register (#738, #815).
+    entity_active: tuple[EntityActiveCondition, ...] = ()
     # All four are compared against a Version with `<` / `>`, so they must be
     # Version instances - a bare int or an Enum member raises TypeError at
     # entity setup, because Version.__lt__ returns NotImplemented and neither
@@ -226,7 +229,6 @@ class LuxtronikNumberDescription(
     mode: NumberMode = NumberMode.AUTO
     min_value_luxtronik_key: LuxParameter | None = None
     max_value_luxtronik_key: LuxParameter | None = None
-    entity_active_formula: str | None = None
 
 
 class LuxtronikBinarySensorEntityDescription(
@@ -349,8 +351,8 @@ class LuxtronikTimerScheduleTextDescription(
     Reads/writes multiple raw Luxtronik parameters (one row per window) as a
     delimited "start-end/start-end/..." string, so ``luxtronik_key`` is not
     read for state. It stays at its ``LuxParameter.UNSET`` default, except on
-    a circuit gated through ``entity_active_key``, which names its mode
-    selector there for `entity_active`'s own-register check (#738, #310).
+    a circuit gated through ``entity_active``, which names its mode selector
+    there for `entity_active`'s own-register check (#738, #310).
 
     Each ``row_names`` entry is one window of the block, in one of two
     register layouts:

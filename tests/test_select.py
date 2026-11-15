@@ -328,8 +328,9 @@ class TestTimerProgramSelects:
         assert description.luxtronik_key == LuxParameter.P0506_TIMER_PROGRAM_CIRCULATION
         assert description.device_key is DeviceKey.domestic_water
         assert description.options == ["week", "weekday_weekend", "daily"]
-        assert description.entity_active_key == LuxParameter.P0085_DHW_CHARGING_PUMP
-        assert description.entity_active_formula == "!= 1"
+        assert description.entity_active == (
+            (LuxParameter.P0085_DHW_CHARGING_PUMP, "!= 1"),
+        )
 
     def test_parameter_strings_match_the_schedule_selectors(self):
         """The select and the schedule entities must drive the same register.

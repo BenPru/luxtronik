@@ -75,7 +75,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0239_EFFICIENCY_PUMP_NOMINAL,
-        entity_active_formula="> 100",
+        entity_active=((LP.P0867_EFFICIENCY_PUMP_NOMINAL, "> 100"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
@@ -87,7 +87,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0239_EFFICIENCY_PUMP_NOMINAL,
-        entity_active_formula="<= 100",
+        entity_active=((LP.P0867_EFFICIENCY_PUMP_NOMINAL, "<= 100"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.EFFICIENCY_PUMP_MINIMAL_VOLTAGE,
@@ -101,7 +101,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0240_EFFICIENCY_PUMP_MINIMAL,
-        entity_active_formula="> 100",
+        entity_active=((LP.P0868_EFFICIENCY_PUMP_MINIMAL, "> 100"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.EFFICIENCY_PUMP_MINIMAL_PERCENTAGE,
@@ -113,7 +113,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0240_EFFICIENCY_PUMP_MINIMAL,
-        entity_active_formula="<= 100",
+        entity_active=((LP.P0868_EFFICIENCY_PUMP_MINIMAL, "<= 100"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEAT_SOURCE_INPUT_TEMPERATURE_MIN,
@@ -462,8 +462,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
         # Only with a room thermostat fitted - see the room-thermostat sensors.
-        entity_active_key=LP.P0033_ROOM_THERMOSTAT_TYPE,
-        entity_active_formula="!= 0",
+        entity_active=((LP.P0033_ROOM_THERMOSTAT_TYPE, "!= 0"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.PUMP_VENT_TIMER_H,
@@ -501,8 +500,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         # pumps in the corpus are. P1030 decodes to a mode name, and an
         # undocumented code passes through as an int, which counts as on -
         # the same answer smart_grid_enabled gives. #765
-        entity_active_key=LP.P1030_SMART_GRID_SWITCH,
-        entity_active_formula="!= off",
+        entity_active=((LP.P1030_SMART_GRID_SWITCH, "!= off"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.SMART_GRID_HEATING_INCREASE,
@@ -515,8 +513,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        entity_active_key=LP.P1030_SMART_GRID_SWITCH,
-        entity_active_formula="!= off",
+        entity_active=((LP.P1030_SMART_GRID_SWITCH, "!= off"),),
     ),
     # endregion Heating
     # region Domestic water
@@ -626,8 +623,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        entity_active_key=LP.P1030_SMART_GRID_SWITCH,
-        entity_active_formula="!= off",
+        entity_active=((LP.P1030_SMART_GRID_SWITCH, "!= off"),),
     ),
     # region Solar
     LuxtronikNumberDescription(
@@ -700,8 +696,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=1,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        entity_active_key=LP.P0085_DHW_CHARGING_PUMP,
-        entity_active_formula="!= 1",
+        entity_active=((LP.P0085_DHW_CHARGING_PUMP, "!= 1"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.CIRCULATION_OFF_TIME,
@@ -714,8 +709,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=1,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        entity_active_key=LP.P0085_DHW_CHARGING_PUMP,
-        entity_active_formula="!= 1",
+        entity_active=((LP.P0085_DHW_CHARGING_PUMP, "!= 1"),),
     ),
     # endregion Circulation pump
     # endregion Domestic water
@@ -788,8 +782,9 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         # heating_cooling). The names are listed too so the gate keeps
         # working if the type register ever gets a selection datatype;
         # a codes-only list would then fail silently (#773).
-        entity_active_key=LP.P0042_MIXING_CIRCUIT1_TYPE,
-        entity_active_formula="in 3,4,cooling,heating_cooling",
+        entity_active=(
+            (LP.P0042_MIXING_CIRCUIT1_TYPE, "in 3,4,cooling,heating_cooling"),
+        ),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK2,
@@ -802,8 +797,9 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=30.0,
         native_step=0.5,
         mode=NumberMode.BOX,
-        entity_active_key=LP.P0130_MIXING_CIRCUIT2_TYPE,
-        entity_active_formula="in 3,4,cooling,heating_cooling",
+        entity_active=(
+            (LP.P0130_MIXING_CIRCUIT2_TYPE, "in 3,4,cooling,heating_cooling"),
+        ),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_TARGET_TEMPERATURE_MK3,
@@ -816,8 +812,9 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_max_value=30.0,
         native_step=0.5,
         mode=NumberMode.BOX,
-        entity_active_key=LP.P0780_MIXING_CIRCUIT3_TYPE,
-        entity_active_formula="in 3,4,cooling,heating_cooling",
+        entity_active=(
+            (LP.P0780_MIXING_CIRCUIT3_TYPE, "in 3,4,cooling,heating_cooling"),
+        ),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.COOLING_MIN_FLOW_OUT_TEMPERATURE,

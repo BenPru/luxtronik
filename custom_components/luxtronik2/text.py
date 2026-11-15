@@ -96,7 +96,7 @@ def _active_schedule_descriptions(
         # The device gate comes first: a unit without a ventilation module
         # reports a selector that never decodes, which is no reason to freeze
         # a circuit that has no entities. `entity_active` itself comes last -
-        # a circuit gated through `entity_active_key` names its selector as
+        # a circuit gated through `entity_active` names its selector as
         # its own register, so it would read an undecodable selector as "not
         # active" and tear the blocks down instead of freezing them (#310).
         if not coordinator.device_key_active(description.device_key):

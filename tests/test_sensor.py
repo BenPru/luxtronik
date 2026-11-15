@@ -824,7 +824,7 @@ class TestLastDefrostSensor:
         assert description.device_class is SensorDeviceClass.TIMESTAMP
         assert description.state_class is None
         assert description.entity_category is None
-        assert description.entity_active_formula == "!= 0"
+        assert description.entity_active == ((description.luxtronik_key, "!= 0"),)
 
     def test_state_is_the_aware_datetime_from_the_register(self):
         lux_overrides.update_Luxtronik_Parameters()
@@ -1048,7 +1048,7 @@ class TestEnergyInputScaling:
         """
         for key in (SensorKey.COOLING_HEAT_AMOUNT, SensorKey.COOLING_ENERGY_INPUT):
             description = next(d for d in SENSORS if d.key == key)
-            assert description.entity_active_formula == "!= 0.0"
+            assert description.entity_active == ((description.luxtronik_key, "!= 0.0"),)
 
     def test_implied_cooling_power_is_physical(self):
         """1135's scale is measured against a controller display on one unit
@@ -1273,8 +1273,7 @@ class TestCompressor2HeatAmounts:
             SensorKey.HEAT_AMOUNT_COUNTER_COMPRESSOR_2,
         ):
             description = next(d for d in SENSORS if d.key == key)
-            assert description.entity_active_key == LP.P1010_IS_TWIN, key
-            assert description.entity_active_formula == "!= 0", key
+            assert description.entity_active == ((LP.P1010_IS_TWIN, "!= 0"),), key
 
     def test_twin_flag_decodes_from_the_wire(self):
         """The gate tests inject True/False; this pins that the raw 0/1 the
@@ -1301,8 +1300,7 @@ class TestCompressor2HeatAmounts:
         description = next(
             d for d in SENSORS if d.key == SensorKey.POOL_HEAT_AMOUNT_COMPRESSOR_2
         )
-        assert description.entity_active_key is None
-        assert description.entity_active_formula == "!= 0.0"
+        assert description.entity_active == ((description.luxtronik_key, "!= 0.0"),)
 
 
 class TestPumpPwmSensors:
@@ -1392,7 +1390,7 @@ class TestRoomThermostatTypeSensor:
         # This entity exists to explain why the P0033-gated ones are
         # missing, so it must not share their gate.
         assert description.visibility == LuxVisibility.UNSET
-        assert description.entity_active_key is None
+        assert description.entity_active == ()
 
     @pytest.mark.parametrize("thermostat_type", list(LuxRoomThermostatType))
     def test_reports_the_derived_type_name(self, thermostat_type):
@@ -1538,5 +1536,6 @@ class TestCompressorFrequency:
         description = _compressor_frequency_description()
         assert description.entity_registry_enabled_default is None
         assert description.visibility == LuxVisibility.UNSET
-        assert description.entity_active_key == LC.C0238_COMPRESSOR_FREQUENCY_MAX
-        assert description.entity_active_formula == "> 0"
+        assert description.entity_active == (
+            (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
+        )

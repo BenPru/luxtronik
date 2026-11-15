@@ -802,7 +802,7 @@ class TestEntityActive:
         )
         assert coord.entity_active(desc) is False
 
-    def test_entity_active_formula_match(self):
+    def test_entity_active_condition_match(self):
         coord = _make_coordinator(
             calculations={
                 "ID_WEB_SoftStand": "V3.90.1",
@@ -813,11 +813,11 @@ class TestEntityActive:
         desc = LuxtronikEntityDescription(
             key="test",
             luxtronik_key=LP.P0003_MODE_HEATING,
-            entity_active_formula="== Off",
+            entity_active=((LP.P0003_MODE_HEATING, "== Off"),),
         )
         assert coord.entity_active(desc) is True
 
-    def test_entity_active_formula_no_match(self):
+    def test_entity_active_condition_no_match(self):
         coord = _make_coordinator(
             calculations={
                 "ID_WEB_SoftStand": "V3.90.1",
@@ -828,7 +828,7 @@ class TestEntityActive:
         desc = LuxtronikEntityDescription(
             key="test",
             luxtronik_key=LP.P0003_MODE_HEATING,
-            entity_active_formula="== Off",
+            entity_active=((LP.P0003_MODE_HEATING, "== Off"),),
         )
         assert coord.entity_active(desc) is False
 
@@ -841,7 +841,7 @@ class TestEntityActive:
         from datetime import UTC, datetime
 
         description = next(d for d in SENSORS if d.key == SensorKey.LAST_DEFROST)
-        assert description.entity_active_formula is not None
+        assert description.entity_active
 
         never = _make_coordinator(parameters={"LAST_DEFROST_TIMESTAMP": None})
         assert never.entity_active(description) is False
@@ -919,12 +919,11 @@ class TestEntityActive:
             key="test",
             luxtronik_key=LP.P1015_HEAT_AMOUNT_HEATING_2,
             device_key=DeviceKey.heating,
-            entity_active_key=LP.P1010_IS_TWIN,
-            entity_active_formula="!= 0",
+            entity_active=((LP.P1010_IS_TWIN, "!= 0"),),
         )
 
-    def test_entity_active_key_reads_another_register(self):
-        """The formula judges `entity_active_key` rather than the entity's own
+    def test_entity_active_reads_another_register(self):
+        """The formula may judge another register than the entity's own
         register, so a description can declare "exists only if some other
         register says so" without a gate of its own in this class. Here the
         own register counts, but P1010 says single unit - the entity must not
@@ -955,7 +954,7 @@ class TestEntityActive:
         )
         assert coord.entity_active(self._twin_description()) is True
 
-    def test_entity_active_key_ignores_own_register_value(self):
+    def test_entity_active_ignores_own_register_value(self):
         """A twin whose compressor-2 counter still reads 0 (fresh install, no
         DHW cycle yet) must still get the entity: the gate is P1010, not the
         counter moving.
@@ -973,6 +972,64 @@ class TestEntityActive:
             parameters={"ID_Waermemenge_Hz_2": 0.0},
         )
         assert coord.entity_active(self._twin_description()) is False
+
+    @staticmethod
+    def _two_condition_description() -> LuxtronikEntityDescription:
+        return LuxtronikEntityDescription(
+            key="test",
+            luxtronik_key=LP.P1015_HEAT_AMOUNT_HEATING_2,
+            entity_active=(
+                (LP.P1010_IS_TWIN, "!= 0"),
+                (LP.P0033_ROOM_THERMOSTAT_TYPE, "!= 0"),
+            ),
+        )
+
+    @pytest.mark.parametrize(
+        ("twin", "thermostat", "active"),
+        [(True, 4, True), (True, 0, False), (False, 4, False), (False, 0, False)],
+    )
+    def test_entity_active_conditions_must_all_hold(self, twin, thermostat, active):
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={
+                "ID_Einst_isTwin": twin,
+                "ID_Einst_RFVEinb_akt": thermostat,
+                "ID_Waermemenge_Hz_2": 5.0,
+            },
+        )
+        assert coord.entity_active(self._two_condition_description()) is active
+
+    @pytest.mark.parametrize(("twin", "active"), [(True, True), (False, False)])
+    def test_unparsable_condition_does_not_decide(self, twin, active):
+        """An unparsable formula only logs a warning, as with a single
+        condition: the others still decide. The guard tests keep such a
+        formula out of the predefined descriptions."""
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={
+                "ID_Einst_isTwin": twin,
+                "ID_Einst_RFVEinb_akt": 4,
+                "ID_Waermemenge_Hz_2": 5.0,
+            },
+        )
+        description = LuxtronikEntityDescription(
+            key="test",
+            luxtronik_key=LP.P1015_HEAT_AMOUNT_HEATING_2,
+            entity_active=(
+                (LP.P1010_IS_TWIN, "!= 0"),
+                (LP.P0033_ROOM_THERMOSTAT_TYPE, "bogus"),
+            ),
+        )
+        assert coord.entity_active(description) is active
+
+    def test_entity_active_condition_on_absent_register_fails(self):
+        """Any register a gate names that the controller did not return fails
+        the gate, not only the first one (#738)."""
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={"ID_Einst_isTwin": True, "ID_Waermemenge_Hz_2": 5.0},
+        )
+        assert coord.entity_active(self._two_condition_description()) is False
 
     @staticmethod
     def _circulation_descriptions() -> list[LuxtronikEntityDescription]:
@@ -1068,7 +1125,7 @@ class TestEntityActive:
         desc.device_key = DeviceKey.heating
         assert coord.entity_active(desc) is False
 
-    def test_entity_active_formula_value_matches(self):
+    def test_entity_active_condition_value_matches(self):
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)
         coord.device_key_active = MagicMock(return_value=True)
@@ -1076,11 +1133,11 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.entity_active_formula = "== 42"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        desc.entity_active = ((LP.P0001_HEATING_TARGET_CORRECTION, "== 42"),)
         assert coord.entity_active(desc) is True
 
-    def test_entity_active_formula_value_no_match(self):
+    def test_entity_active_condition_value_no_match(self):
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)
         coord.device_key_active = MagicMock(return_value=True)
@@ -1088,11 +1145,11 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.entity_active_formula = "== 42"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        desc.entity_active = ((LP.P0001_HEATING_TARGET_CORRECTION, "== 42"),)
         assert coord.entity_active(desc) is False
 
-    def test_entity_active_formula_absent_register(self):
+    def test_entity_active_condition_absent_register(self):
         """A register the controller does not expose must not get an entity."""
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)
@@ -1101,11 +1158,11 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.entity_active_formula = "!= 0.0"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        desc.entity_active = ((LP.P0001_HEATING_TARGET_CORRECTION, "!= 0.0"),)
         assert coord.entity_active(desc) is False
 
-    def test_entity_active_formula_zero_is_not_absent(self):
+    def test_entity_active_condition_zero_is_not_absent(self):
         """A register reading 0.0 is present - the formula decides, not the None check.
 
         A formula that 0.0 satisfies is the only way to tell the two apart: an
@@ -1119,11 +1176,11 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.entity_active_formula = "== 0.0"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        desc.entity_active = ((LP.P0001_HEATING_TARGET_CORRECTION, "== 0.0"),)
         assert coord.entity_active(desc) is True
 
-    def test_entity_active_formula_nonzero_creates_entity(self):
+    def test_entity_active_condition_nonzero_creates_entity(self):
         """A register with a real reading passes the formula and gets an entity."""
         coord = _make_coordinator_direct()
         coord._is_version_not_compatible = MagicMock(return_value=False)
@@ -1132,8 +1189,8 @@ class TestEntityActive:
         desc = MagicMock(spec=LuxtronikEntityDescription)
         desc.visibility = LV.V0024_FLOW_OUT_TEMPERATURE_EXTERNAL
         desc.device_key = DeviceKey.heatpump
-        desc.entity_active_formula = "!= 0.0"
         desc.luxtronik_key = LP.P0001_HEATING_TARGET_CORRECTION
+        desc.entity_active = ((LP.P0001_HEATING_TARGET_CORRECTION, "!= 0.0"),)
         assert coord.entity_active(desc) is True
 
 
@@ -1173,7 +1230,7 @@ def _sensor(key: SensorKey):
 
 class TestDeclaredActiveGates:
     """Gates declared on the predefined descriptions through
-    `entity_active_key`, exercised on the real descriptions so a test fails
+    `entity_active`, exercised on the real descriptions so a test fails
     if the declaration is dropped, not only if the coordinator breaks.
     """
 
@@ -1259,7 +1316,7 @@ class TestDeclaredActiveGates:
             (SensorKey.COOLING_TARGET_TEMPERATURE_MK2, LP.P0130_MIXING_CIRCUIT2_TYPE),
             (SensorKey.COOLING_TARGET_TEMPERATURE_MK3, LP.P0780_MIXING_CIRCUIT3_TYPE),
         ):
-            assert _number(key).entity_active_key == type_register, key
+            assert [c[0] for c in _number(key).entity_active] == [type_register], key
 
     # endregion Mixing-circuit cooling targets
     # region Smart Grid offsets - P1030
