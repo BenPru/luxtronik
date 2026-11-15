@@ -44,14 +44,17 @@ from .model import (
     LuxtronikCopSensorDescription,
     LuxtronikEntityAttributeDescription,
     LuxtronikIndexSensorDescription,
+    LuxtronikScopSensorDescription,
     LuxtronikSensorDescription,
     LuxtronikSumSensorDescription,
 )
+from .scop import ScopTracker
 from .sensor_entities_predefined import (
     SENSORS,
     SENSORS_COP,
     SENSORS_INDEX,
     SENSORS_ROOM_THERMOSTAT_TYPE,
+    SENSORS_SCOP,
     SENSORS_STATUS,
     SENSORS_SUM,
 )
@@ -180,6 +183,21 @@ async def async_setup_entry(
             )
         ]
     )
+
+    # SCOP reads the recorder's long-term statistics; without a recorder
+    # there is no history to compute it from.
+    if "recorder" in hass.config.components:
+        tracker = ScopTracker(hass, entry)
+        scop_entities = [
+            LuxtronikScopSensorEntity(
+                hass, entry, coordinator, description, description.device_key, tracker
+            )
+            for description in SENSORS_SCOP
+            if coordinator.entity_active(description)
+        ]
+        if scop_entities:
+            async_add_entities(scop_entities)
+            tracker.async_start()
 
 
 class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorEntity):  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -554,6 +572,70 @@ class LuxtronikCopSensorEntity(LuxtronikSensorEntity):
             self._attr_available = True
             self._attr_native_value = round(numerator / denominator, 2)
 
+        self.async_write_ha_state()
+
+
+class LuxtronikScopSensorEntity(LuxtronikSensorEntity):
+    """Heat over electricity across a rolling window (1 year = SCOP).
+
+    The value comes from the config entry's ScopTracker, which reads the
+    energy counters' hourly long-term statistics once an hour - the
+    coordinator poll carries nothing for it, so a poll only re-writes the
+    state. The attributes say how much history the figure actually rests
+    on, because a young install's "1 year" covers far less.
+    """
+
+    entity_description: LuxtronikScopSensorDescription  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        coordinator: LuxtronikCoordinator,
+        description: LuxtronikScopSensorDescription,
+        device_info_ident: DeviceKey,
+        tracker: ScopTracker,
+    ) -> None:
+        """Init Luxtronik SCOP Sensor."""
+        super().__init__(hass, entry, coordinator, description, device_info_ident)
+        self._tracker = tracker
+        self._attr_native_value = None
+
+    async def async_added_to_hass(self) -> None:
+        """Follow the tracker's refreshes."""
+        await super().async_added_to_hass()
+        self.async_on_remove(self._tracker.async_add_listener(self._handle_scop_update))
+        self._handle_scop_update()
+
+    @callback
+    def _handle_coordinator_update(
+        self, data: LuxtronikCoordinatorData | None = None
+    ) -> None:
+        """The poll carries no SCOP data; keep the last tracker value."""
+        self.async_write_ha_state()
+
+    @callback
+    def _handle_scop_update(self) -> None:
+        """Take this entity's circuit and window from the tracker."""
+        descr = self.entity_description
+        result = self._tracker.results.get((descr.circuit, descr.window_days))
+        if result is None:
+            self._attr_native_value = None
+        else:
+            self._attr_native_value = result.value
+            self._attr_extra_state_attributes.update(
+                {
+                    SA.COVERAGE_DAYS: round(result.coverage_days, 1),
+                    SA.HEAT_KWH: round(result.heat_kwh, 1),
+                    SA.ELECTRICITY_KWH: round(result.electricity_kwh, 1),
+                    SA.ELECTRICITY_SOURCE: result.electricity_source,
+                    SA.WINDOW_START: (
+                        None
+                        if result.window_start is None
+                        else result.window_start.isoformat()
+                    ),
+                }
+            )
         self.async_write_ha_state()
 
 

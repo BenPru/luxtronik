@@ -209,6 +209,14 @@ FIRMWARE_UPDATE_MANUAL_DE = (
 LANG_DE: Final = "de"
 
 
+class ScopCircuit(StrEnum):
+    """Which part of the heat pump a SCOP figure covers."""
+
+    heating = "heating"
+    domestic_water = "domestic_water"
+    total = "total"
+
+
 class LuxOperationMode(StrEnum):
     """Lux Operation modes heating, hot water etc."""
 
@@ -972,6 +980,12 @@ class SensorKey(StrEnum):
     HEAT_AMOUNT_COUNTER_COMPRESSOR_2 = "heat_amount_counter_compressor_2"
     COP_HEATING = "cop_heating"
     COP_DHW = "cop_dhw"
+    SCOP_HEATING = "scop_heating"
+    SCOP_DHW = "scop_dhw"
+    SCOP = "scop"
+    COP_30D_HEATING = "cop_30d_heating"
+    COP_30D_DHW = "cop_30d_dhw"
+    COP_30D = "cop_30d"
     DHW_TEMPERATURE = "dhw_temperature"
     DHW_TARGET_TEMPERATURE_CONTROLLER = "dhw_target_temperature_controller"
     SOLAR_COLLECTOR_TEMPERATURE = "solar_collector_temperature"
@@ -1215,6 +1229,11 @@ class SensorAttrKey(StrEnum):
     CAUSE = "cause"
     REMEDY = "remedy"
     MAX_ALLOWED = "max_allowed"
+    COVERAGE_DAYS = "coverage_days"
+    HEAT_KWH = "heat_kwh"
+    ELECTRICITY_KWH = "electricity_kwh"
+    ELECTRICITY_SOURCE = "electricity_source"
+    WINDOW_START = "window_start"
 
     TIMER_HEATPUMP_ON = "WP Seit (ID_WEB_Time_WPein_akt)"
     TIMER_ADD_HEAT_GENERATOR_ON = "ZWE1 seit (ID_WEB_Time_ZWE1_akt)"

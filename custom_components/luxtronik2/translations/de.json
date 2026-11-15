@@ -1076,6 +1076,24 @@
             },
             "ventilation_stage_intensive": {
                 "name": "Stufe Intensivlüftung"
+            },
+            "scop_heating": {
+                "name": "JAZ"
+            },
+            "scop_dhw": {
+                "name": "JAZ"
+            },
+            "scop": {
+                "name": "JAZ"
+            },
+            "cop_30d_heating": {
+                "name": "Arbeitszahl 30 Tage"
+            },
+            "cop_30d_dhw": {
+                "name": "Arbeitszahl 30 Tage"
+            },
+            "cop_30d": {
+                "name": "Arbeitszahl 30 Tage"
             }
         },
         "date": {
