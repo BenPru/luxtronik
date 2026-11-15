@@ -112,8 +112,7 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         entity_category=EntityCategory.CONFIG,
         options=timer_program_options,
         raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
-        entity_active_key=LuxParameter.P0085_DHW_CHARGING_PUMP,
-        entity_active_formula="!= 1",
+        entity_active=((LuxParameter.P0085_DHW_CHARGING_PUMP, "!= 1"),),
     ),
     LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_SELECTOR,

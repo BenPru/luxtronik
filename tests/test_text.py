@@ -265,11 +265,10 @@ class TestTimerScheduleTable:
                 assert d.luxtronik_key.value == f"parameters.{d.mode_selector_name}"
             if d.mode_selector_name == "ID_Einst_SuZIP_akt":
                 assert d.luxtronik_key == LP.P0506_TIMER_PROGRAM_CIRCULATION
-                assert d.entity_active_key == LP.P0085_DHW_CHARGING_PUMP
-                assert d.entity_active_formula == "!= 1"
+                assert d.entity_active == ((LP.P0085_DHW_CHARGING_PUMP, "!= 1"),)
             else:
                 assert d.luxtronik_key == LP.UNSET, d.key
-                assert d.entity_active_key is None, d.key
+                assert d.entity_active == (), d.key
 
     def test_every_row_is_a_pair_or_a_packed_register(self):
         for d in TIMER_SCHEDULE_ENTITIES:

@@ -1043,7 +1043,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         method only drives `entity_registry_enabled_default`, while
         `entity_active` is what decides whether an entity exists at all - a
         register that decides existence is declared on the description
-        through `entity_active_key` rather than handled here.
+        through `entity_active` rather than handled here.
 
         Returns None for the gates that are ordinary numeric flags.
         """
@@ -1114,7 +1114,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """Does the entity exist at all on this heat pump?
 
         Register-based gates are declared on the description through
-        `entity_active_key` / `entity_active_formula`, not special-cased here.
+        `entity_active`, not special-cased here.
         What remains here cannot be declared: firmware compatibility, the
         device gates, and solar, which is a heuristic over several registers.
         """
@@ -1128,31 +1128,26 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             return self._detect_solar_present()
         if not self.device_key_active(description.device_key):
             return False
-        if description.entity_active_formula is not None:
-            if (
-                description.entity_active_key is not None
-                and self.get_value(description.luxtronik_key) is None
-            ):
-                # The gate says yes, but the controller never sent the
-                # entity's own register, so it would sit on unknown forever
-                # (#738). `key_exists` cannot stand in for this: its
-                # `_register_returned` only infers absence above
-                # UPSTREAM_MAX_DEFINED_INDEX (1125) - one corpus unit returns
-                # P1030 but ends its parameter block before 1120.
-                return False
-            active_value = self.get_value(
-                description.entity_active_key or description.luxtronik_key
-            )
-            if active_value is None:
+        if not description.entity_active:
+            return True
+        if self.get_value(description.luxtronik_key) is None:
+            # The gate may say yes, but the controller never sent the
+            # entity's own register, so it would sit on unknown forever
+            # (#738). `key_exists` cannot stand in for this: its
+            # `_register_returned` only infers absence above
+            # UPSTREAM_MAX_DEFINED_INDEX (1125) - one corpus unit returns
+            # P1030 but ends its parameter block before 1120.
+            return False
+        for key, formula in description.entity_active:
+            value = self.get_value(key)
+            if value is None:
                 # The controller did not return this register, so the formula
                 # has nothing to decide on. Creating the entity anyway leaves
                 # it permanently unavailable (#738).
                 return False
-            formula_result = self._evaluate_visibility_formula(
-                active_value, description.entity_active_formula
-            )
-            if formula_result is not None:
-                return formula_result
+            # An unparsable formula (None) does not decide; the others do.
+            if self._evaluate_visibility_formula(value, formula) is False:
+                return False
         return True
 
     def device_key_active(self, device_key: DeviceKey) -> bool:

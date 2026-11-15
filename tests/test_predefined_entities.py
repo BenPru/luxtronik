@@ -18,6 +18,7 @@ from custom_components.luxtronik2.binary_sensor_entities_predefined import (
 )
 from custom_components.luxtronik2.const import (
     DeviceKey,
+    LuxCalculation,
     LuxParameter,
     LuxVisibility,
     SensorKey,
@@ -214,7 +215,7 @@ class TestVisibilityGates:
 
     def test_no_description_gates_on_a_parameter_through_visibility(self):
         """A parameter that decides whether an entity should exist belongs in
-        `entity_active_key`, which decides existence and is declared on the
+        `entity_active`, which decides existence and is declared on the
         description. As a `visibility` it only decides enabled-by-default,
         and a mode-valued one needed its own rule in the coordinator (#773,
         #815). Visibility flags stay in `visibility`.
@@ -235,11 +236,7 @@ class TestVisibilityGates:
         whole platform: that is how #773 lost every number entity, not just
         the three gated ones.
         """
-        gated = [
-            descr
-            for descr in _all_descriptions()
-            if descr.entity_active_key is not None
-        ]
+        gated = [descr for descr in _all_descriptions() if descr.entity_active]
         # Guard the guard: nothing gated means nothing was checked.
         assert gated
 
@@ -255,36 +252,35 @@ class TestVisibilityGates:
             for descr in gated:
                 assert isinstance(coord.entity_active(descr), bool), descr.key
 
-    def test_every_entity_active_key_has_a_formula(self):
-        """`entity_active_key` names the register `entity_active_formula`
-        judges, and `entity_active` only reads it when there is a formula. A
-        key copied without its formula would leave the entity ungated with
-        nothing to say so - on every install, which is exactly what the field
-        exists to prevent (#815).
+    def test_every_entity_active_condition_is_a_register_and_a_formula(self):
+        """Each condition is a (register, formula) pair. A bare pair written
+        without its enclosing tuple - `entity_active=(LP.X, "!= 0")` - would
+        be read as two broken conditions instead of one (#815).
         """
-        keyed = [
-            descr
-            for descr in _all_descriptions()
-            if descr.entity_active_key is not None
-        ]
-        # Guard the guard: nothing keyed means nothing was checked.
-        assert keyed
         offenders = [
-            (type(descr).__name__, descr.key)
-            for descr in keyed
-            if descr.entity_active_formula is None
+            (type(descr).__name__, descr.key, condition)
+            for descr in _all_descriptions()
+            for condition in descr.entity_active
+            if not (
+                isinstance(condition, tuple)
+                and len(condition) == 2
+                and isinstance(
+                    condition[0], LuxParameter | LuxCalculation | LuxVisibility
+                )
+                and condition[0] != LuxParameter.UNSET
+                and isinstance(condition[1], str)
+            )
         ]
         assert offenders == []
 
-    def test_every_entity_active_key_guards_a_register_of_its_own(self):
+    def test_every_gated_description_has_a_register_of_its_own(self):
         """A declared gate also requires the entity's own register to be
-        returned, so a keyed description without one could never exist.
+        returned, so a gated description without one could never exist.
         """
         offenders = [
             (type(descr).__name__, descr.key)
             for descr in _all_descriptions()
-            if descr.entity_active_key is not None
-            and descr.luxtronik_key == LuxParameter.UNSET
+            if descr.entity_active and descr.luxtronik_key == LuxParameter.UNSET
         ]
         assert offenders == []
 
@@ -295,16 +291,14 @@ class TestVisibilityGates:
         """
         offenders = []
         for descr in _all_descriptions():
-            formula = descr.entity_active_formula
-            if formula is None:
-                continue
-            parts = formula.split()
-            if (
-                len(parts) != 2
-                or parts[0] not in {"==", "!=", "<", "<=", ">", ">=", "in"}
-                or (parts[0] == "in" and "" in parts[1].split(","))
-            ):
-                offenders.append((type(descr).__name__, descr.key, formula))
+            for _register, formula in descr.entity_active:
+                parts = formula.split()
+                if (
+                    len(parts) != 2
+                    or parts[0] not in {"==", "!=", "<", "<=", ">", ">=", "in"}
+                    or (parts[0] == "in" and "" in parts[1].split(","))
+                ):
+                    offenders.append((type(descr).__name__, descr.key, formula))
         assert offenders == []
 
     def test_numeric_gates_read_numeric_registers(self):
@@ -313,27 +307,30 @@ class TestVisibilityGates:
         comes back on every install with nothing in the log (#773, #777).
         P0033 is the likely next one - `LuxRoomThermostatType` already
         exists. If a register here gains a selection datatype, rewrite its
-        gate as an `in` list of codes and names, as the MK gates do.
+        gate as an `in` list of codes and names, as the MK gates do. Own-register
+        numeric gates (P1059, P1119, P0867, ...) are checked too.
         """
         lux_overrides.update_Luxtronik_Parameters()
         parameters = Parameters()
-        checked = []
+        checked: set[LuxParameter] = set()
         for descr in _all_descriptions():
-            key = descr.entity_active_key
-            formula = descr.entity_active_formula
-            if not isinstance(key, LuxParameter) or formula is None:
-                continue
-            threshold = formula.split()[1]
-            try:
-                float(threshold)
-            except ValueError:
-                continue
-            datatype = parameters.get(key.rsplit(".", 1)[1])
-            decoded = datatype.from_heatpump(0)
-            assert not isinstance(decoded, str), (descr.key, key, decoded)
-            checked.append(descr.key)
+            for key, formula in descr.entity_active:
+                if not isinstance(key, LuxParameter):
+                    continue
+                threshold = formula.split()[1]
+                try:
+                    float(threshold)
+                except ValueError:
+                    continue
+                datatype = parameters.get(key.rsplit(".", 1)[1])
+                decoded = datatype.from_heatpump(0)
+                assert not isinstance(decoded, str), (descr.key, key, decoded)
+                checked.add(key)
         # Guard the guard: the P0033 and P1010 gates must be among them.
-        assert len(checked) >= 2
+        assert {
+            LuxParameter.P0033_ROOM_THERMOSTAT_TYPE,
+            LuxParameter.P1010_IS_TWIN,
+        } <= checked
 
     def test_no_description_pairs_a_special_gate_with_a_formula(self):
         """`_special_visibility` answers before `visibility_formula` is read.
