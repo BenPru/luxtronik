@@ -909,6 +909,9 @@
             "pump_frequency": {
                 "name": "Verdichterfrequenz"
             },
+            "compressor_speed": {
+                "name": "Verdichterdrehzahl"
+            },
             "domestic_water": {
                 "name": "Brauchwasser"
             },

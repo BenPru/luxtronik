@@ -903,6 +903,9 @@
             "pump_frequency": {
                 "name": "Compressorfrequentie"
             },
+            "compressor_speed": {
+                "name": "Compressortoerental"
+            },
             "domestic_water": {
                 "name": "Warm water"
             },

@@ -591,6 +591,11 @@ class LuxParameter(StrEnum):
     P0963_VENTILATION_STAGE_INTENSIVE = "parameters.ID_Einst_Luf_Intensivlueftung_akt"
     P0966_COOLING_TARGET_TEMPERATURE_MK3 = "parameters.ID_Sollwert_KuCft3_akt"
     P0973_MAX_DHW_TEMPERATURE = "parameters.ID_Einst_BW_max"
+    # Heat-source medium: 2 on every air inverter in the corpus, 0 on every
+    # brine one. Not a general air/brine flag - fixed-speed brine units on
+    # series 1 (SWC, WZS) read 2 as well (#863). Its gates compare raw codes:
+    # give it a selection datatype and they must become `in` code,name lists.
+    P0975_HEAT_SOURCE_MEDIUM = "parameters.ID_Einst_Medium_Waermequelle"
     P0979_HEATING_MIN_FLOW_OUT_TEMPERATURE = (
         "parameters.ID_Einst_Minimale_Ruecklaufsolltemperatur"
     )
@@ -936,6 +941,7 @@ class SensorKey(StrEnum):
     CURRENT_HEAT_OUTPUT = "current_heat_output"
     CURRENT_POWER_CONSUMPTION = "current_power_consumption"
     PUMP_FREQUENCY = "pump_frequency"
+    COMPRESSOR_SPEED = "compressor_speed"
     PUMP_FLOW_DELTA_TARGET = "pump_flow_delta_target"
     PUMP_FLOW_DELTA = "pump_flow_delta"
     CIRCULATION_PUMP_DELTA_TARGET = "circulation_pump_delta_target"

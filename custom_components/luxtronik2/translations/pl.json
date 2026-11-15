@@ -903,6 +903,9 @@
             "pump_frequency": {
                 "name": "Częstotliwość sprężarki"
             },
+            "compressor_speed": {
+                "name": "Prędkość obrotowa sprężarki"
+            },
             "domestic_water": {
                 "name": "Ciepła woda"
             },
