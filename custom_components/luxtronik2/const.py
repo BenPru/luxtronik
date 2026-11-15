@@ -785,6 +785,12 @@ class LuxCalculation(StrEnum):
     C0227_ROOM_THERMOSTAT_TEMPERATURE = "calculations.ID_WEB_RBE_RT_Ist"
     C0228_ROOM_THERMOSTAT_TEMPERATURE_TARGET = "calculations.ID_WEB_RBE_RT_Soll"
     C0231_PUMP_FREQUENCY = "calculations.ID_WEB_Freq_VD"
+    # The compressor speed, despite the name. rpm on air-source inverters,
+    # Hz on MSW brine inverters - the sensor normalises it to Hz (#863).
+    C0238_COMPRESSOR_FREQUENCY_MAX = "calculations.ID_WEB_Freq_VD_Max"
+    # Upstream main's name, applied by lux_overrides. In rps (Hz) on both
+    # kinds of inverter, and 0 on every fixed-speed unit in the corpus.
+
     # 239-243 carry upstream main's names, applied by lux_overrides: the
     # pinned 0.3.14 still ships 239/240/242/243 as Unknown_Calculation_* and
     # 241 as Circulation_Pump (an alias of HUP_PWM upstream).

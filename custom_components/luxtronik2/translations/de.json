@@ -907,7 +907,7 @@
                 "name": "Wärmequelle Ausgang"
             },
             "pump_frequency": {
-                "name": "Pumpenfrequenz"
+                "name": "Verdichterfrequenz"
             },
             "domestic_water": {
                 "name": "Brauchwasser"

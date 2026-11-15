@@ -20,7 +20,7 @@ The **DHW Manual Frequency** Number entity (Config category, enabled by default,
 Because a modulating compressor draws roughly proportionally less power at a lower frequency, this can be used for solar self-consumption: setting a **lower** frequency than the heat pump would have chosen on its own draws less instantaneous power, but takes correspondingly **longer** to reach the DHW target temperature. That lets a DHW charge track a modest, steady solar surplus for a longer stretch of time instead of the heat pump defaulting to a short, higher-power burst that could exceed what your panels are producing and pull the difference from the grid.
 
 Two things worth knowing before relying on this:
-- **The actual frequency can land about 1 Hz below whatever you set.** This was confirmed empirically and discussed at length in [GitHub issue #674](https://github.com/BenPru/luxtronik/issues/674) — if you need to verify the real value, compare against the **Pump Frequency** sensor during a DHW run rather than trusting the setpoint alone.
+- **The actual frequency can land about 1 Hz below whatever you set.** This was confirmed empirically and discussed at length in [GitHub issue #674](https://github.com/BenPru/luxtronik/issues/674) — if you need to verify the real value, compare against the **Compressor frequency** sensor (formerly "Pump frequency") during a DHW run rather than trusting the setpoint alone.
 - **Remember to set it back to `0` (Automatic)** once you no longer have a surplus to chase — leaving a low fixed frequency in place on a cloudy day will make DHW heating take unnecessarily long, or fail to comfortably keep up with demand.
 
 ## Heating Circuit Control Mode (Bypassing the Heating Curve)

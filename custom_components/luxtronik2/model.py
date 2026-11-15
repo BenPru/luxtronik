@@ -152,6 +152,14 @@ class LuxtronikSensorDescription(  # type: ignore  # pyright: ignore[reportIncom
     library overrides are applied once per process, while one process can
     serve two config entries whose heat pumps are different generations.
     """
+    rpm_above: float | None = None
+    """Read a value above this as rpm and convert it to Hz (rps).
+
+    The compressor speed register is rpm on air-source inverters and Hz on
+    MSW brine inverters (#863). The two ranges never meet - Hz stays at or
+    below ~120, rpm starts at ~1300 - so the reading itself says which it is.
+    Applied before `factor`.
+    """
 
 
 class LuxtronikIndexSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]

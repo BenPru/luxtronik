@@ -581,7 +581,15 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.FREQUENCY,
         native_unit_of_measurement=UnitOfFrequency.HERTZ,
-        entity_registry_enabled_default=False,
+        # The compressor speed: rpm on air-source inverters, Hz on MSW brine
+        # inverters. Normalised to Hz so the entity keeps one unit (#863).
+        rpm_above=300,
+        native_precision=1,
+        # Inverters only: C0238 (maximum compressor frequency) is 0 on every
+        # fixed-speed unit in the corpus, where C0231 never leaves 0 either,
+        # and stays set while an inverter is idle.
+        entity_active_key=LC.C0238_COMPRESSOR_FREQUENCY_MAX,
+        entity_active_formula="> 0",
     ),
     descr(
         key=SensorKey.PUMP_FLOW_DELTA_TARGET,
