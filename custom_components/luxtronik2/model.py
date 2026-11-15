@@ -37,6 +37,7 @@ from .const import (
     LuxOperationMode,
     LuxParameter,
     LuxVisibility,
+    ScopCircuit,
     SensorAttrFormat,
     SensorAttrKey,
 )
@@ -192,6 +193,23 @@ class LuxtronikCopSensorDescription(  # type: ignore  # pyright: ignore[reportIn
     numerator_key: LuxCalculation = LuxCalculation.UNSET
     denominator_key: LuxCalculation = LuxCalculation.UNSET
     required_status: LuxOperationMode | None = None
+
+
+class LuxtronikScopSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]
+    LuxtronikSensorDescription,
+    SensorEntityDescription,
+    frozen_or_thawed=True,
+):
+    """Class describing Luxtronik windowed SCOP sensor entities.
+
+    The value is heat over electricity for `circuit` across the last
+    `window_days`, computed by scop.ScopTracker from long-term statistics -
+    not from the poll. luxtronik_key names the electricity counter the
+    ratio rests on, so a declared entity_active gate has its own register.
+    """
+
+    circuit: ScopCircuit = ScopCircuit.total
+    window_days: int = 365
 
 
 class LuxtronikSumSensorDescription(  # type: ignore  # pyright: ignore[reportIncompatibleVariableOverride]

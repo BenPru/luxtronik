@@ -1076,6 +1076,24 @@
             },
             "ventilation_stage_intensive": {
                 "name": "Intenzivní stupeň"
+            },
+            "scop_heating": {
+                "name": "SCOP"
+            },
+            "scop_dhw": {
+                "name": "SCOP"
+            },
+            "scop": {
+                "name": "SCOP"
+            },
+            "cop_30d_heating": {
+                "name": "COP 30 dní"
+            },
+            "cop_30d_dhw": {
+                "name": "COP 30 dní"
+            },
+            "cop_30d": {
+                "name": "COP 30 dní"
             }
         },
         "date": {

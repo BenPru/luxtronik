@@ -31,6 +31,7 @@ from .const import (
     LuxStatus3Option,
     LuxSwitchoffReason,
     LuxVisibility as LV,
+    ScopCircuit,
     SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
@@ -40,6 +41,7 @@ from .model import (
     LuxtronikCopSensorDescription as cop_descr,
     LuxtronikEntityAttributeDescription as attr,
     LuxtronikIndexSensorDescription as descr_index,
+    LuxtronikScopSensorDescription as scop_descr,
     LuxtronikSensorDescription as descr,
     LuxtronikSumSensorDescription as sum_descr,
 )
@@ -1124,6 +1126,85 @@ SENSORS_COP: list[cop_descr] = [
     ),
 ]
 # endregion COP
+
+# region SCOP (windowed, from long-term statistics)
+# C0151/C0152 count compressor 1 only on twin units (#815), and whether
+# P1136/P1137 cover both compressors is unknown, so twin units get none.
+# A zero electricity counter means series 1 (P1136/P1137 always 0) or a
+# circuit that never ran since the firmware started counting.
+_SCOP_HEATING_GATE = (
+    (LP.P1010_IS_TWIN, "== 0"),
+    (LP.P1136_HEAT_ENERGY_INPUT, "!= 0.0"),
+)
+_SCOP_DHW_GATE = ((LP.P1010_IS_TWIN, "== 0"), (LP.P1137_DHW_ENERGY_INPUT, "!= 0.0"))
+_SCOP_TOTAL_GATE = (
+    (LP.P1010_IS_TWIN, "== 0"),
+    (LP.P1136_HEAT_ENERGY_INPUT, "!= 0.0"),
+    (LP.P1137_DHW_ENERGY_INPUT, "!= 0.0"),
+)
+SENSORS_SCOP: list[scop_descr] = [
+    scop_descr(
+        key=key,
+        luxtronik_key=luxtronik_key,
+        device_key=device_key,
+        circuit=circuit,
+        window_days=window_days,
+        entity_active=gate,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:chart-line",
+    )
+    for key, window_days, circuit, device_key, luxtronik_key, gate in (
+        (
+            SensorKey.SCOP_HEATING,
+            365,
+            ScopCircuit.heating,
+            DeviceKey.heating,
+            LP.P1136_HEAT_ENERGY_INPUT,
+            _SCOP_HEATING_GATE,
+        ),
+        (
+            SensorKey.COP_30D_HEATING,
+            30,
+            ScopCircuit.heating,
+            DeviceKey.heating,
+            LP.P1136_HEAT_ENERGY_INPUT,
+            _SCOP_HEATING_GATE,
+        ),
+        (
+            SensorKey.SCOP_DHW,
+            365,
+            ScopCircuit.domestic_water,
+            DeviceKey.domestic_water,
+            LP.P1137_DHW_ENERGY_INPUT,
+            _SCOP_DHW_GATE,
+        ),
+        (
+            SensorKey.COP_30D_DHW,
+            30,
+            ScopCircuit.domestic_water,
+            DeviceKey.domestic_water,
+            LP.P1137_DHW_ENERGY_INPUT,
+            _SCOP_DHW_GATE,
+        ),
+        (
+            SensorKey.SCOP,
+            365,
+            ScopCircuit.total,
+            DeviceKey.heatpump,
+            LP.P1136_HEAT_ENERGY_INPUT,
+            _SCOP_TOTAL_GATE,
+        ),
+        (
+            SensorKey.COP_30D,
+            30,
+            ScopCircuit.total,
+            DeviceKey.heatpump,
+            LP.P1136_HEAT_ENERGY_INPUT,
+            _SCOP_TOTAL_GATE,
+        ),
+    )
+]
+# endregion SCOP
 
 # region Totals
 SENSORS_SUM: list[sum_descr] = [

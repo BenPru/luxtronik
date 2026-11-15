@@ -78,6 +78,24 @@ By default the power consumption figure (the denominator) comes from the heat pu
 - It does not change what the regular "Current Power Consumption" sensor displays — only the COP calculation's denominator.
 - It does not affect the heat output (numerator) side of the calculation, which always comes from the heat pump itself.
 
+### SCOP and 30-day COP
+
+Averaging the instantaneous COP over time does **not** give you a seasonal COP: the heat pump draws the most power exactly when its COP is lowest (cold days, high flow temperature), so a plain average comes out too high. A true SCOP is total heat delivered divided by total electricity consumed. The integration provides that as six sensors:
+
+| Sensor | Device | Window |
+|---|---|---|
+| **SCOP** | Heating, Domestic water, Heat pump (both together) | rolling last 365 days |
+| **COP 30 days** | Heating, Domestic water, Heat pump (both together) | rolling last 30 days |
+
+They are computed from Home Assistant's long-term statistics of the heat pump's own energy counters (*Heat amount heating* / *DHW heat amount* for heat, *Heat energy input* / *DHW energy input* for electricity), refreshed once an hour. After a Home Assistant restart they show `unknown` for about a minute: the first refresh waits until the startup rush on the database is over. Things to know:
+
+- **They need the recorder** and the counter sensors enabled and recorded, which is the default. Renaming those entities is fine. On a heating-only unit the heating pair is enough.
+- **They need history.** A value appears once there are 7 days (30-day sensor) or 30 days (SCOP) of usable data. Until then the sensor shows `unknown`. The `coverage_days` attribute always shows how many days the figure actually rests on, so on a young installation "SCOP" may cover fewer than 365 days.
+- **They start when the electricity counters start.** On most controllers the energy input counters only began counting at a firmware update, years after the heat counters, so dividing the lifetime totals is meaningless. These sensors only use the period in which both counters run.
+- **Counter glitches are skipped.** An hour in which a counter drops to zero and recovers would otherwise book its whole lifetime value as consumed in that hour; such hours are left out for all counters.
+- **External power sensor:** if you configured one (see above), its energy is used as the electricity figure. A power sensor (W/kW) and an energy meter (kWh) both work, as long as it has long-term statistics (a `state_class`). It measures the whole unit, so its energy is split over heating and DHW in proportion to the heat pump's own electricity counters for the same window; pool and cooling consumption are kept out of the split. The `electricity_source` attribute shows `external` or `controller`. Without long-term statistics on that sensor, the heat pump's own counters are used and a warning is logged once.
+- **Not available** on series 1 controllers (they have no electricity counters), on twin-compressor units (the heat counters cover only one compressor), and for cooling (there is no heat counter for cooling).
+
 ## EVU / Grid-Lock Status
 
 Many installations (mainly in Germany/Austria) let the electricity utility (EVU, *Energieversorgungsunternehmen*) force the compressor into a lockout for a period, in exchange for a cheaper tariff. When this happens, the **Status** sensor's text briefly shows a cryptic-looking suffix, e.g. `EVU until 42 min` while a lockout is active, or `EVU in 15 min` when one is about to start within the next 30 minutes. This is expected behavior, not a fault.
