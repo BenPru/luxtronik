@@ -912,6 +912,9 @@
             "pump_frequency": {
                 "name": "Frekvence kompresoru"
             },
+            "compressor_speed": {
+                "name": "Otáčky kompresoru"
+            },
             "domestic_water": {
                 "name": "TUV"
             },
