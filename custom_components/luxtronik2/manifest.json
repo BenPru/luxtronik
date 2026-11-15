@@ -1,7 +1,9 @@
 {
   "domain": "luxtronik2",
   "name": "Luxtronik",
-  "after_dependencies": [],
+  "after_dependencies": [
+    "recorder"
+  ],
   "categories": [
     "climate"
   ],
