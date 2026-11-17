@@ -720,6 +720,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         2026.11 a `DeviceInfo` is a dataclass whose dict-style access is a
         compatibility layer due for removal, while 2026.9/2026.10 (still
         supported) only have dict access.
+
+        It is recomputed from the live serial registers, not read back from
+        `device_infos`, so it only matches them within the setup step that
+        built them; a later caller could see a different (e.g. zeroed) serial.
         """
         return {(DOMAIN, f"{self.unique_id}_{key.value}".lower())}
 
