@@ -165,7 +165,7 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         self._lock = asyncio.Lock()
         self.client = client
         self._config = config
-        self.device_infos = dict[str, DeviceInfo]()
+        self.device_infos = dict[DeviceKey, DeviceInfo]()
         # Deadline for the DHW transition hold; see _update_dhw_transition_hold().
         self._dhw_hold_until: datetime | None = None
         # Last valid cooling counter reading; see _update_cooling_counter().
@@ -709,10 +709,19 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             self._create_device_infos(self.hass, self._config)
         device_info = self.device_infos.get(key)
         if device_info is None:
-            return DeviceInfo(
-                identifiers={(DOMAIN, f"{self.unique_id}_{key.value}".lower())}
-            )
+            return DeviceInfo(identifiers=self.device_identifiers(key))
         return device_info
+
+    def device_identifiers(self, key: DeviceKey) -> set[tuple[str, str]]:
+        """Return the device registry identifiers of one of our devices.
+
+        Callers that only need to find a device in the registry use this
+        rather than reading `identifiers` back out of `device_infos`: from HA
+        2026.11 a `DeviceInfo` is a dataclass whose dict-style access is a
+        compatibility layer due for removal, while 2026.9/2026.10 (still
+        supported) only have dict access.
+        """
+        return {(DOMAIN, f"{self.unique_id}_{key.value}".lower())}
 
     def _create_device_infos(
         self,
@@ -766,14 +775,17 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         """
         if self.config_entry is None:
             return None
-        # Only main-device keys may be splatted here: `async_get_or_create`
-        # rejects unexpected keyword arguments, and `DeviceInfo` has grown
-        # child-device keys that `entity_platform` strips before its own call.
-        return (
-            dr.async_get(hass)
-            .async_get_or_create(config_entry_id=self.config_entry.entry_id, **heatpump)
-            .id
-        )
+        registry = dr.async_get(hass)
+        entry_id = self.config_entry.entry_id
+        # HA 2026.11 made `DeviceInfo` a dataclass and added a method that
+        # takes it whole; unpacking it with `**` goes through the dict
+        # compatibility layer that is due for removal. Older releases (still
+        # supported) only have `async_get_or_create`, where `DeviceInfo` is a
+        # plain TypedDict and unpacking is the only way.
+        from_info = getattr(registry, "async_get_or_create_from_info", None)
+        if from_info is not None:
+            return from_info(config_entry_id=entry_id, device_info=heatpump).id
+        return registry.async_get_or_create(config_entry_id=entry_id, **heatpump).id
 
     def _build_device_info(
         self,
@@ -781,22 +793,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         host: str,
         via_device_id: str | None = None,
     ) -> DeviceInfo:
-        device_info = DeviceInfo(
-            identifiers={
-                (
-                    DOMAIN,
-                    f"{self.unique_id}_{key.value}".lower(),
-                )
-            },
-            entry_type=None,
-            name=str(key.value),
-            translation_key=key.value,
-            configuration_url=f"http://{host}/",
-            sw_version=self.firmware_version,
-            model=self.model,
-            hw_version=None,
-            manufacturer=self.manufacturer,
-        )
+        # The optional fields are collected first and the `DeviceInfo` built in
+        # one call: setting a field afterwards needs `info["x"] = ...` on HA
+        # 2026.9/2026.10 (TypedDict) but `info.x = ...` from 2026.11
+        # (dataclass, where item assignment is a compatibility layer due for
+        # removal). Keyword construction is the one form both accept.
+        optional: dict[str, Any] = {}
         if key is DeviceKey.heatpump:  # the root device
             # Only the physical unit carries the serial: heating, domestic
             # water and cooling are logical sub-devices of the same heat pump
@@ -807,10 +809,21 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
             # Rendered as `unique_id` rather than `serial_number` so it matches
             # the string `config_flow` prints when a second config entry
             # collides on this serial.
-            device_info["serial_number"] = self.unique_id
+            optional["serial_number"] = self.unique_id
         if via_device_id is not None:
-            device_info["via_device_id"] = via_device_id
-        return device_info
+            optional["via_device_id"] = via_device_id
+        return DeviceInfo(
+            identifiers=self.device_identifiers(key),
+            entry_type=None,
+            name=str(key.value),
+            translation_key=key.value,
+            configuration_url=f"http://{host}/",
+            sw_version=self.firmware_version,
+            model=self.model,
+            hw_version=None,
+            manufacturer=self.manufacturer,
+            **optional,
+        )
 
     def _is_version_not_compatible(
         self, description: LuxtronikEntityDescription

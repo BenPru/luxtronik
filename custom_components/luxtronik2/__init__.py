@@ -716,8 +716,9 @@ async def _async_remove_undetected_solar_entities(
     if coordinator.has_domestic_water:
         return
     dev_reg = dr.async_get(hass)
-    dhw_info = coordinator.device_infos[DeviceKey.domestic_water]
-    device = dev_reg.async_get_device(identifiers=dhw_info.get("identifiers", set()))
+    device = dev_reg.async_get_device(
+        identifiers=coordinator.device_identifiers(DeviceKey.domestic_water)
+    )
     if device is None:
         return
     if not async_entries_for_device(ent_reg, device.id, include_disabled_entities=True):
@@ -821,9 +822,9 @@ async def _async_delete_legacy_devices(
     devices: list[dr.DeviceEntry] = dr.async_entries_for_config_entry(
         dr_instance, config_entry.entry_id
     )
-    identifiers_list = []
-    for device_info in coordinator.device_infos.values():
-        identifiers_list.append(device_info.get("identifiers", set()))
+    identifiers_list = [
+        coordinator.device_identifiers(key) for key in coordinator.device_infos
+    ]
     for device_entry in devices:
         if not _identifiers_exists(identifiers_list, device_entry.identifiers):
             dr_instance.async_remove_device(device_entry.id)

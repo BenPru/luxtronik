@@ -2814,6 +2814,30 @@ class TestCoordinatorSubDeviceParenting:
         assert heating["via_device_id"] == existing.id
         assert len(dr.async_entries_for_config_entry(registry, entry.entry_id)) == 1
 
+    async def test_heatpump_registers_through_from_info_when_available(
+        self, hass: HomeAssistant
+    ) -> None:
+        """HA 2026.11+: the `DeviceInfo` is handed over whole, not unpacked.
+
+        `**device_info` only works there through a dict compatibility layer
+        due for removal. The installed HA may predate the method, so it is
+        provided on the registry instance here.
+        """
+        coord, entry = self._coordinator_with_entry(hass)
+        registry = dr.async_get(hass)
+        from_info = MagicMock(return_value=MagicMock(id="heatpump-device-id"))
+        registry.async_get_or_create_from_info = from_info  # pyright: ignore[reportAttributeAccessIssue]
+
+        with patch.object(registry, "async_get_or_create") as unpacked:
+            heating = coord.get_device(DeviceKey.heating)
+
+        unpacked.assert_not_called()
+        from_info.assert_called_once_with(
+            config_entry_id=entry.entry_id,
+            device_info=coord.device_infos[DeviceKey.heatpump],
+        )
+        assert heating["via_device_id"] == "heatpump-device-id"
+
     async def test_sub_devices_survive_without_a_config_entry(
         self, hass: HomeAssistant
     ) -> None:
