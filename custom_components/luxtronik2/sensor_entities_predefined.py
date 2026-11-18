@@ -7,6 +7,7 @@ from types import MappingProxyType
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import (
     PERCENTAGE,
+    REVOLUTIONS_PER_MINUTE,
     EntityCategory,
     UnitOfElectricPotential,
     UnitOfEnergy,
@@ -583,14 +584,35 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.FREQUENCY,
         native_unit_of_measurement=UnitOfFrequency.HERTZ,
-        # The compressor speed: rpm on air-source inverters, Hz on MSW brine
-        # inverters. Normalised to Hz so the entity keeps one unit (#863).
+        # The compressor speed: Hz on MSW brine inverters, rpm on air-source
+        # ones, which get the rpm sensor below instead. A reading in rpm is
+        # still converted, so an inverter of unknown kind keeps one unit (#863).
         rpm_above=300,
         native_precision=1,
-        # Inverters only: C0238 (maximum compressor frequency) is 0 on every
-        # fixed-speed unit in the corpus, where C0231 never leaves 0 either,
-        # and stays set while an inverter is idle.
-        entity_active=((LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),),
+        # Inverters that are not air-source: C0238 (maximum compressor
+        # frequency) is 0 on every fixed-speed unit in the corpus and stays
+        # set while an inverter is idle; P0975 reads 0 on every brine
+        # inverter, 2 on every air one. `!= 2` rather than `== 0`, so an
+        # unseen P0975 value still gets this sensor.
+        entity_active=(
+            (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "!= 2"),
+        ),
+    ),
+    descr(
+        key=SensorKey.COMPRESSOR_SPEED,
+        luxtronik_key=LC.C0231_PUMP_FREQUENCY,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
+        # The same register as read on air-source inverters: rpm, as their
+        # display shows it (#863). No conversion - the gate decides the unit,
+        # and a low reading on a start ramp must not be taken for Hz.
+        native_precision=0,
+        # Air inverters only - the counterpart of the frequency gate above.
+        entity_active=(
+            (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        ),
     ),
     descr(
         key=SensorKey.PUMP_FLOW_DELTA_TARGET,

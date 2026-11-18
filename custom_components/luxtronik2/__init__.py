@@ -52,6 +52,7 @@ from .const import (
     SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
+from .model import LuxtronikSensorDescription
 from .number_entities_predefined import NUMBER_SENSORS
 from .sensor_entities_predefined import SENSORS
 
@@ -130,6 +131,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     await _async_remove_legacy_smart_grid_switch(hass, entry)
     await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
     await _async_remove_undetected_solar_entities(hass, entry, coordinator)
+    await _async_remove_replaced_compressor_frequency(hass, entry, coordinator)
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
@@ -660,6 +662,42 @@ async def _async_remove_withdrawn_ventilation_schedule_entities(
                 "TIMER_SCHEDULES.md for why it is gone",
                 entity_id,
             )
+
+
+async def _async_remove_replaced_compressor_frequency(
+    hass: HomeAssistant, config_entry: ConfigEntry, coordinator: LuxtronikCoordinator
+) -> None:
+    """Drop the Hz compressor sensor where the rpm one replaces it (#863).
+
+    2026.11.15 created "Compressor frequency" (Hz), enabled by default, on
+    every inverter. Air inverters now get "Compressor speed" (rpm) instead, so
+    their Hz entity would linger as "no longer provided". Gated on live
+    detection like the solar cleanup below.
+
+    Removing is destructive (it drops the user's name, area and labels), so it
+    only happens when the live gates say the rpm sensor is created and the Hz
+    one is not. A unit whose gate registers are missing keeps everything.
+    """
+
+    def description(key: SK) -> LuxtronikSensorDescription:
+        return next(d for d in SENSORS if d.key == key)
+
+    if not coordinator.entity_active(
+        description(SK.COMPRESSOR_SPEED)
+    ) or coordinator.entity_active(description(SK.PUMP_FREQUENCY)):
+        return
+    unique_id = (
+        f"{P.SENSOR}.{config_entry.data[CONF_HA_SENSOR_PREFIX]}_{SK.PUMP_FREQUENCY}"
+    )
+    ent_reg = async_get(hass)
+    entity_id = ent_reg.async_get_entity_id(P.SENSOR, DOMAIN, unique_id)
+    if entity_id is not None:
+        ent_reg.async_remove(entity_id)
+        LOGGER.info(
+            "Removed %s - an air inverter reports its compressor speed in rpm, "
+            "see the new Compressor speed sensor",
+            entity_id,
+        )
 
 
 _SOLAR_VISIBILITIES = (

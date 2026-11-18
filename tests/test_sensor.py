@@ -1529,13 +1529,65 @@ class TestCompressorFrequency:
         assert description.rpm_above is not None
         assert 120 < description.rpm_above < 1300
 
-    def test_exists_and_is_enabled_on_inverters_only(self):
+    def test_exists_and_is_enabled_on_non_air_inverters(self):
         """C0238 (maximum compressor frequency) is 0 on every fixed-speed unit
-        in the corpus and stays set while an inverter is idle, so it gates
-        existence; where the entity exists it is enabled by default."""
+        in the corpus and stays set while an inverter is idle; P0975 reads 0
+        on every brine inverter and 2 on every air one, which gets the rpm
+        sensor instead. Where the entity exists it is enabled."""
         description = _compressor_frequency_description()
         assert description.entity_registry_enabled_default is None
         assert description.visibility == LuxVisibility.UNSET
         assert description.entity_active == (
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "!= 2"),
+        )
+
+
+def _compressor_speed_description() -> LuxtronikSensorDescription:
+    return next(d for d in SENSORS if d.key == SensorKey.COMPRESSOR_SPEED)
+
+
+class TestCompressorSpeed:
+    """The same C0231 register as air-source inverters report it: rpm, the
+    unit their own display shows ("Freq. aktuell 1382 RPM", #863). The gate
+    decides the unit, so the reading is passed through unconverted."""
+
+    @staticmethod
+    def _value(raw):
+        data = make_coordinator_data(calculations={"ID_WEB_Freq_VD": raw})
+        entity = _make_sensor(_compressor_speed_description(), data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_rpm_reading_is_unchanged(self):
+        """LD9V (#863 dump): 1383 rpm at its 23 rps minimum."""
+        assert self._value(1383) == 1383.0
+
+    def test_low_reading_on_a_start_ramp_is_not_taken_for_hz(self):
+        """A transient 150 rpm must not show as a 9000 rpm spike."""
+        assert self._value(150) == 150.0
+
+    def test_stopped_compressor_reads_zero(self):
+        assert self._value(0) == 0.0
+
+    def test_missing_register_reads_none(self):
+        assert self._value(None) is None
+
+    def test_description_reads_the_frequency_register_in_rpm(self):
+        description = _compressor_speed_description()
+        frequency = _compressor_frequency_description()
+        assert description.luxtronik_key == frequency.luxtronik_key
+        assert description.rpm_above is None
+        assert description.device_class is None
+        assert description.native_unit_of_measurement == "rpm"
+        assert description.native_precision == 0
+
+    def test_exists_and_is_enabled_on_air_inverters_only(self):
+        """P0975 reads 2 on every air inverter. A pump gets either this sensor
+        or the frequency one, never both, so it is enabled by default."""
+        description = _compressor_speed_description()
+        assert description.entity_registry_enabled_default is None
+        assert description.entity_active == (
+            (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         )

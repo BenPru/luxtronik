@@ -744,21 +744,39 @@ class TestEntityVisible:
 
 class TestEntityActive:
     @pytest.mark.parametrize(
-        ("calculations", "active"),
+        ("calculations", "medium", "frequency", "speed"),
         [
-            ({"ID_WEB_Freq_VD": 1301, "ID_WEB_Freq_VD_Max": 55}, True),
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 118}, True),
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, False),
-            ({"ID_WEB_Freq_VD_Max": 105}, False),
+            # LP16V (#850): air inverter, running.
+            ({"ID_WEB_Freq_VD": 1301, "ID_WEB_Freq_VD_Max": 55}, 2, False, True),
+            # MSW2-9S: brine inverter, idle - the gate must not need a reading.
+            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 118}, 0, True, False),
+            # Fixed-speed air (LD5) and brine (MSW 30) units: neither.
+            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, False),
+            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 0, False, False),
+            # A heat-source medium no corpus inverter reports: still one sensor,
+            # the Hz one, whose rpm conversion covers either unit.
+            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 1, True, False),
+            # The speed register itself is not returned: neither.
+            ({"ID_WEB_Freq_VD_Max": 105}, 2, False, False),
         ],
     )
-    def test_compressor_frequency_exists_on_inverters_only(self, calculations, active):
-        """The compressor frequency sensor exists when the controller reports
-        a maximum compressor frequency - idle inverters included - and its own
-        register is returned (#863)."""
-        description = next(d for d in SENSORS if d.key == SensorKey.PUMP_FREQUENCY)
-        coord = _make_coordinator(calculations=calculations)
-        assert coord.entity_active(description) is active
+    def test_compressor_sensors_split_by_heat_source(
+        self, calculations, medium, frequency, speed
+    ):
+        """Inverters only (C0238 > 0). C0231 reads Hz on brine inverters and
+        rpm on air ones, and P0975 (heat-source medium) reads 0 on every brine
+        inverter and 2 on every air inverter in the corpus, so each pump gets
+        the sensor in its controller's own unit (#863)."""
+        coord = _make_coordinator(
+            calculations=calculations,
+            parameters={"ID_Einst_Medium_Waermequelle": medium},
+        )
+        for key, active in (
+            (SensorKey.PUMP_FREQUENCY, frequency),
+            (SensorKey.COMPRESSOR_SPEED, speed),
+        ):
+            description = next(d for d in SENSORS if d.key == key)
+            assert coord.entity_active(description) is active, key
 
     def test_version_incompatible(self):
         coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "V3.90.1"})
