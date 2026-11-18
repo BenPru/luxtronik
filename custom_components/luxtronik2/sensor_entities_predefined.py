@@ -614,6 +614,25 @@ SENSORS: list[descr] = [
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         ),
     ),
+    # The heat-source fan of an air unit, in rpm as the library types the
+    # register (#874). Non-zero in the corpus only on air inverters: 600 on
+    # LW SEC 2, 260 on LP16V, 199 on LP11V - plausible rpm - and 59 heating /
+    # 5 idle on the LD9V family (C0237/C0238 = 23/105); 0 on every brine and
+    # fixed-speed unit, hence the compressor-speed gate. The LD9V scale is
+    # implausible for rpm and unconfirmed against a display, so the sensor
+    # starts disabled; confirm that family before enabling it by default.
+    descr(
+        key=SensorKey.FAN_SPEED,
+        luxtronik_key=LC.C0184_FAN_SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
+        native_precision=0,
+        entity_registry_enabled_default=False,
+        entity_active=(
+            (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        ),
+    ),
     descr(
         key=SensorKey.PUMP_FLOW_DELTA_TARGET,
         luxtronik_key=LC.C0239_PUMP_FLOW_DELTA_TARGET,

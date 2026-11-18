@@ -915,6 +915,9 @@
             "compressor_speed": {
                 "name": "Otáčky kompresoru"
             },
+            "fan_speed": {
+                "name": "Otáčky ventilátoru"
+            },
             "domestic_water": {
                 "name": "TUV"
             },
