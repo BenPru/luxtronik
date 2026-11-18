@@ -756,8 +756,6 @@ class TestEntityActive:
             # A heat-source medium no corpus inverter reports: still one sensor,
             # the Hz one, whose rpm conversion covers either unit.
             ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 1, True, False),
-            # The speed register itself is not returned: neither.
-            ({"ID_WEB_Freq_VD_Max": 105}, 2, False, False),
         ],
     )
     def test_compressor_sensors_split_by_heat_source(
@@ -983,14 +981,6 @@ class TestEntityActive:
         )
         assert coord.entity_active(self._twin_description()) is True
 
-    def test_compressor_2_counters_inactive_when_p1010_is_absent(self):
-        """A controller that never returns P1010 is not a twin: fall closed."""
-        coord = _make_coordinator(
-            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
-            parameters={"ID_Waermemenge_Hz_2": 0.0},
-        )
-        assert coord.entity_active(self._twin_description()) is False
-
     @staticmethod
     def _two_condition_description() -> LuxtronikEntityDescription:
         return LuxtronikEntityDescription(
@@ -1048,6 +1038,21 @@ class TestEntityActive:
             parameters={"ID_Einst_isTwin": True, "ID_Waermemenge_Hz_2": 5.0},
         )
         assert coord.entity_active(self._two_condition_description()) is False
+
+    def test_entity_active_gate_needs_the_own_register(self):
+        """A passing gate does not create an entity whose own register the
+        controller did not return (#738). The twin description stands in for
+        any declared gate. The real case is diagnostics/200927_014f: it
+        returns P1030 but its parameter block stops before 1120, so with Smart
+        Grid on it would get three permanently unknown, unwritable offset
+        entities. This is the only test that tells this rule apart from the
+        gate-register one, so it is not a duplicate.
+        """
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Zaehler_BetrZeitHz": 100},
+            parameters={"ID_Einst_isTwin": True},
+        )
+        assert coord.entity_active(self._twin_description()) is False
 
     @staticmethod
     def _circulation_descriptions() -> list[LuxtronikEntityDescription]:
@@ -1242,10 +1247,6 @@ def _number(key: SensorKey):
     return next(d for d in NUMBER_SENSORS if d.key == key)
 
 
-def _sensor(key: SensorKey):
-    return next(d for d in SENSORS if d.key == key)
-
-
 class TestDeclaredActiveGates:
     """Gates declared on the predefined descriptions through
     `entity_active`, exercised on the real descriptions so a test fails
@@ -1263,13 +1264,13 @@ class TestDeclaredActiveGates:
     )
 
     @staticmethod
-    def _room_thermostat_coord(p0033: Any = None) -> LuxtronikCoordinator:
-        parameters: dict[str, Any] = {"ID_RBE_Einflussfaktor_RT_akt": 100}
-        if p0033 is not None:
-            parameters["ID_Einst_RFVEinb_akt"] = p0033
+    def _room_thermostat_coord(p0033: Any) -> LuxtronikCoordinator:
         return _make_coordinator(
             visibilities={"ID_Visi_SysEin_Raumstation": 1},
-            parameters=parameters,
+            parameters={
+                "ID_RBE_Einflussfaktor_RT_akt": 100,
+                "ID_Einst_RFVEinb_akt": p0033,
+            },
             calculations={"ID_WEB_RBE_RT_Ist": 21.0, "ID_WEB_RBE_RT_Soll": 21.5},
         )
 
@@ -1289,12 +1290,6 @@ class TestDeclaredActiveGates:
     def test_room_thermostat_unknown_type_counts_as_present(self):
         """A code the enum does not know is still a fitted thermostat."""
         assert self._room_thermostat_active(99) == [True, True, True]
-
-    def test_room_thermostat_entities_not_created_without_p0033(self):
-        """A controller that never returns P0033 cannot report a thermostat,
-        so the gate falls closed - the #738 rule every declared gate follows.
-        """
-        assert self._room_thermostat_active(None) == [False, False, False]
 
     # endregion Room thermostat
     # region Mixing-circuit cooling targets
@@ -1346,25 +1341,19 @@ class TestDeclaredActiveGates:
     )
 
     @staticmethod
-    def _smart_grid_coord(
-        smart_grid: Any = None, *, offsets: bool = True, dhw: bool = True
-    ) -> LuxtronikCoordinator:
-        parameters: dict[str, Any] = {}
-        if smart_grid is not None:
-            parameters["ID_Einst_SmartGrid"] = smart_grid
-        if offsets:
-            parameters |= {
-                "SMART_GRID_HEATING_REDUCTION": -2.0,
-                "SMART_GRID_HEATING_INCREASE": 2.0,
-                "SMART_GRID_DHW_INCREASE": 2.0,
-            }
+    def _smart_grid_coord(smart_grid: Any, *, dhw: bool = True) -> LuxtronikCoordinator:
         return _make_coordinator(
             calculations={
                 "ID_WEB_SoftStand": "V3.90.1",
                 "ID_WEB_Zaehler_BetrZeitHz": 100,
                 "ID_WEB_Zaehler_BetrZeitBW": 100 if dhw else 0,
             },
-            parameters=parameters,
+            parameters={
+                "ID_Einst_SmartGrid": smart_grid,
+                "SMART_GRID_HEATING_REDUCTION": -2.0,
+                "SMART_GRID_HEATING_INCREASE": 2.0,
+                "SMART_GRID_DHW_INCREASE": 2.0,
+            },
         )
 
     def _smart_grid_active(self, coord: LuxtronikCoordinator) -> list[bool]:
@@ -1390,32 +1379,12 @@ class TestDeclaredActiveGates:
         coord = self._smart_grid_coord(5)
         assert self._smart_grid_active(coord) == [True, True, True]
 
-    def test_smart_grid_offsets_not_created_when_p1030_is_absent(self):
-        coord = self._smart_grid_coord(None)
-        assert self._smart_grid_active(coord) == [False, False, False]
-
-    def test_smart_grid_offsets_need_their_own_register(self):
-        """The controller in diagnostics/200927_014f returns P1030 but stops
-        its parameter block before 1120. With Smart Grid on it would get three
-        permanently unknown, unwritable entities - the failure #738 fixed.
-        """
-        coord = self._smart_grid_coord("plus_minus", offsets=False)
-        assert self._smart_grid_active(coord) == [False, False, False]
-
     def test_smart_grid_dhw_offset_needs_a_dhw_circuit(self):
         """The declared gate must not overrule the device gate."""
         coord = self._smart_grid_coord("plus_minus", dhw=False)
         assert self._smart_grid_active(coord) == [True, True, False]
 
     # endregion Smart Grid offsets
-
-    def test_twin_counter_needs_its_own_register(self):
-        """A twin whose parameter block ends before 1015 gets no entity."""
-        coord = _make_coordinator(parameters={"ID_Einst_isTwin": True})
-        assert (
-            coord.entity_active(_sensor(SensorKey.HEAT_AMOUNT_HEATING_COMPRESSOR_2))
-            is False
-        )
 
 
 class TestCoordinatorGetValue:
