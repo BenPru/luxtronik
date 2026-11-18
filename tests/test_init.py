@@ -48,6 +48,7 @@ from custom_components.luxtronik2.const import (
     PLATFORMS,
     SERVICE_WRITE,
     WRITABLE_PARAMETER_PREFIXES,
+    DeviceKey,
     SensorKey as SK,
 )
 
@@ -166,9 +167,8 @@ class TestAsyncDeleteLegacyDevices:
         device_registry.async_remove_device = MagicMock()
 
         coordinator = MagicMock()
-        coordinator.device_infos = {
-            "heatpump": {"identifiers": {(DOMAIN, "current")}},
-        }
+        coordinator.device_infos = {DeviceKey.heatpump: MagicMock()}
+        coordinator.device_identifiers.return_value = {(DOMAIN, "current")}
 
         with (
             patch(
@@ -198,9 +198,8 @@ class TestAsyncDeleteLegacyDevices:
         device_registry.async_remove_device = MagicMock()
 
         coordinator = MagicMock()
-        coordinator.device_infos = {
-            "heatpump": {"identifiers": {(DOMAIN, "current")}},
-        }
+        coordinator.device_infos = {DeviceKey.heatpump: MagicMock()}
+        coordinator.device_identifiers.return_value = {(DOMAIN, "current")}
 
         with (
             patch(
@@ -1555,9 +1554,9 @@ class TestRemoveUndetectedSolarEntities:
         coord = MagicMock()
         coord.has_solar = has_solar
         coord.has_domestic_water = has_domestic_water
-        coord.device_infos = {
-            "domestic_water": {"identifiers": {(DOMAIN, "dhw")}},
-        }
+        coord.device_identifiers.side_effect = lambda key: (
+            {(DOMAIN, "dhw")} if key is DeviceKey.domestic_water else set()
+        )
         return coord
 
     @staticmethod
