@@ -28,12 +28,12 @@
     <polygon points="233,119.2 244,128 233,136.8" fill="#FF7A1A"/>
     <line x1="195.0" y1="156" x2="235" y2="156" stroke="#FF7A1A" stroke-width="8" stroke-linecap="round"/>
     <polygon points="233,147.2 244,156 233,164.8" fill="#FF7A1A"/>
-    <circle cx="128" cy="52" r="30" fill="#1F2A33"/>
+    <circle cx="128" cy="52" r="30" fill="#1F2A33" stroke="#F5F7F8" stroke-width="4" stroke-linejoin="round"/>
     <g stroke="#F5F7F8" stroke-width="7" stroke-linecap="round">
       <line x1="114.6" y1="30.6" x2="152.9" y2="48.1"/>
       <line x1="114.6" y1="73.4" x2="152.9" y2="55.9"/>
     </g>
-    <polygon points="105.5,189 128,204 105.5,219" fill="#1F2A33"/>
-    <polygon points="150.5,189 128,204 150.5,219" fill="#1F2A33"/>
+    <polygon points="105.5,189 128,204 105.5,219" fill="#1F2A33" stroke="#F5F7F8" stroke-width="4" stroke-linejoin="round"/>
+    <polygon points="150.5,189 128,204 150.5,219" fill="#1F2A33" stroke="#F5F7F8" stroke-width="4" stroke-linejoin="round"/>
   </g>
 </svg>
