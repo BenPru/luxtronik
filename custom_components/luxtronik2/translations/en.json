@@ -915,6 +915,9 @@
             "compressor_speed": {
                 "name": "Compressor speed"
             },
+            "fan_speed": {
+                "name": "Fan speed"
+            },
             "domestic_water": {
                 "name": "Domestic hot water"
             },

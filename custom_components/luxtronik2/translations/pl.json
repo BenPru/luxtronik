@@ -906,6 +906,9 @@
             "compressor_speed": {
                 "name": "Prędkość obrotowa sprężarki"
             },
+            "fan_speed": {
+                "name": "Prędkość obrotowa wentylatora"
+            },
             "domestic_water": {
                 "name": "Ciepła woda"
             },

@@ -906,6 +906,9 @@
             "compressor_speed": {
                 "name": "Compressortoerental"
             },
+            "fan_speed": {
+                "name": "Ventilatortoerental"
+            },
             "domestic_water": {
                 "name": "Warm water"
             },

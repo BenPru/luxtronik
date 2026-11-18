@@ -912,6 +912,9 @@
             "compressor_speed": {
                 "name": "Verdichterdrehzahl"
             },
+            "fan_speed": {
+                "name": "Ventilatordrehzahl"
+            },
             "domestic_water": {
                 "name": "Brauchwasser"
             },

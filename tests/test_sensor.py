@@ -1591,3 +1591,33 @@ class TestCompressorSpeed:
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         )
+
+
+def _fan_speed_description() -> LuxtronikSensorDescription:
+    return next(d for d in SENSORS if d.key == SensorKey.FAN_SPEED)
+
+
+class TestFanSpeed:
+    """C0184 ID_WEB_HZIO_VEN, the heat-source fan of an air unit in rpm, as
+    the library types it (#874). A plain pass-through, so only the
+    declaration is tested; reading values is covered generically."""
+
+    def test_description_is_rpm_without_conversion(self):
+        description = _fan_speed_description()
+        assert description.luxtronik_key == LC.C0184_FAN_SPEED
+        assert description.state_class == SensorStateClass.MEASUREMENT
+        assert description.rpm_above is None
+        assert description.device_class is None
+        assert description.native_unit_of_measurement == "rpm"
+        assert description.native_precision == 0
+
+    def test_exists_on_air_inverters_only_and_starts_disabled(self):
+        """Non-zero in the corpus only where the rpm compressor sensor
+        exists. Disabled by default until the low LD9V reading is confirmed
+        against a controller display."""
+        description = _fan_speed_description()
+        assert description.entity_registry_enabled_default is False
+        assert description.entity_active == (
+            (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        )
