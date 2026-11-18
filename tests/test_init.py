@@ -1696,6 +1696,80 @@ _MIN_MAJOR, _MIN_MINOR = MIN_HA_VERSION
 _REQUIRES_PATTERN = rf"{_MIN_MAJOR}\.{_MIN_MINOR} or newer"
 
 
+class TestRemoveReplacedCompressorFrequency:
+    """2026.11.15 created the Hz compressor sensor on every inverter; air
+    inverters now get the rpm one instead, so their Hz entity is removed rather
+    than left as "no longer provided" (#863). Runs on real gates, so the
+    removal can only happen where the rpm replacement is created."""
+
+    _UNIQUE_ID = "sensor.luxtronik2_pump_frequency"
+
+    @pytest.mark.parametrize(
+        ("max_frequency", "medium", "removed"),
+        [
+            # Air inverter (LD9V, #863): the rpm sensor replaces it.
+            (105, 2, True),
+            # Brine inverter: keeps its Hz sensor.
+            (118, 0, False),
+            # Fixed-speed unit: no replacement, so nothing is touched.
+            (0, 2, False),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_removes_only_where_the_rpm_sensor_replaces_it(
+        self, max_frequency, medium, removed
+    ):
+        from custom_components.luxtronik2 import (
+            _async_remove_replaced_compressor_frequency,
+        )
+        from tests.test_coordinator import _make_coordinator
+
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": max_frequency},
+            parameters={"ID_Einst_Medium_Waermequelle": medium},
+        )
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.side_effect = lambda _p, _d, uid: (
+            "sensor.heat_pump_compressor_frequency" if uid == self._UNIQUE_ID else None
+        )
+
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_replaced_compressor_frequency(
+                MagicMock(), _mock_entry(), coord
+            )
+
+        if removed:
+            ent_reg.async_get_entity_id.assert_called_once_with(
+                "sensor", DOMAIN, self._UNIQUE_ID
+            )
+            ent_reg.async_remove.assert_called_once_with(
+                "sensor.heat_pump_compressor_frequency"
+            )
+        else:
+            ent_reg.async_remove.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_nothing_to_remove_when_never_registered(self):
+        from custom_components.luxtronik2 import (
+            _async_remove_replaced_compressor_frequency,
+        )
+        from tests.test_coordinator import _make_coordinator
+
+        coord = _make_coordinator(
+            calculations={"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105},
+            parameters={"ID_Einst_Medium_Waermequelle": 2},
+        )
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.return_value = None
+
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_replaced_compressor_frequency(
+                MagicMock(), _mock_entry(), coord
+            )
+
+        ent_reg.async_remove.assert_not_called()
+
+
 class TestHomeAssistantVersionGuard:
     """Setup must fail loud on a core older than the integration needs.
 
