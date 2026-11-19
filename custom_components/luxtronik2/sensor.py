@@ -245,6 +245,13 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         self._sensor_prefix = prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
+        # round(x, 0) still yields a float, which HA shows as "311.0" unless
+        # it is told how many decimals to display (#874).
+        if (
+            description.suggested_display_precision is None
+            and description.native_precision is not None
+        ):
+            self._attr_suggested_display_precision = description.native_precision
 
     @property
     def _value_factor(self) -> float:
