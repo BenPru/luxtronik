@@ -162,6 +162,37 @@ class TestSensorHandleCoordinatorUpdate:
         assert entity._attr_native_value == 42
 
 
+class TestSensorDisplayPrecision:
+    """native_precision also sets how HA displays the state.
+
+    round(x, 0) still returns a float, so without a display precision
+    an rpm reading showed as "311.0 rpm" (#874).
+    """
+
+    @staticmethod
+    def _description(**kwargs) -> LuxtronikSensorDescription:
+        return LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            **kwargs,
+        )
+
+    def test_native_precision_sets_display_precision(self):
+        entity = _make_sensor(self._description(native_precision=0))
+        assert entity.suggested_display_precision == 0
+
+    def test_explicit_display_precision_wins(self):
+        entity = _make_sensor(
+            self._description(native_precision=2, suggested_display_precision=1)
+        )
+        assert entity.suggested_display_precision == 1
+
+    def test_no_precision_leaves_display_unset(self):
+        entity = _make_sensor(self._description())
+        assert entity.suggested_display_precision is None
+
+
 # ===========================================================================
 # LuxtronikStatusSensorEntity._handle_coordinator_update
 # ===========================================================================

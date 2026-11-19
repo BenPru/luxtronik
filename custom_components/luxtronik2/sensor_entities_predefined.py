@@ -1155,6 +1155,7 @@ SENSORS_COP: list[cop_descr] = [
         denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
         required_status=LuxOperationMode.heating,
         icon="mdi:speedometer",
+        suggested_display_precision=2,
     ),
     cop_descr(
         key=SensorKey.COP_DHW,
@@ -1164,6 +1165,7 @@ SENSORS_COP: list[cop_descr] = [
         denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
         required_status=LuxOperationMode.domestic_water,
         icon="mdi:speedometer",
+        suggested_display_precision=2,
     ),
 ]
 # endregion COP
@@ -1193,6 +1195,7 @@ SENSORS_SCOP: list[scop_descr] = [
         entity_active=gate,
         state_class=SensorStateClass.MEASUREMENT,
         icon="mdi:chart-line",
+        suggested_display_precision=2,
     )
     for key, window_days, circuit, device_key, luxtronik_key, gate in (
         (
