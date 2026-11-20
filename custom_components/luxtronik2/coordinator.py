@@ -988,7 +988,9 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     }
 
     def _evaluate_visibility_formula(self, value: Any, formula: str) -> bool | None:
-        parts = formula.strip().split()
+        # Split off the operator only: a decoded name may hold spaces
+        # ("LW SEC 2", "LD7 (230 V)").
+        parts = formula.strip().split(maxsplit=1)
         if len(parts) != 2:
             LOGGER.warning("Invalid visibility formula: %s", formula)
             return None
@@ -996,9 +998,10 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
         if op_str in ("in", "not_in"):
             # `in a,b,c` - equal to any item, each compared exactly as `==`
             # would, so a raw code and its decoded name can share one list.
-            # `not_in a,b,c` is its negation.
+            # Items are separated by commas only. `not_in a,b,c` is the
+            # negation.
             found = any(
-                self._evaluate_visibility_formula(value, f"== {item}")
+                self._evaluate_visibility_formula(value, f"== {item.strip()}")
                 for item in threshold_str.split(",")
             )
             return found if op_str == "in" else not found

@@ -157,6 +157,7 @@ SENSORS_INDEX: list[descr_index] = [
 ]
 
 # C0184 (fan) by model code (C0078), each raw code next to its decoded name.
+# Items are separated by commas only - names may hold spaces ("LW SEC 2").
 # rpm confirmed on the LP11V (#874), taken for the LP*V family.
 _FAN_RPM_MODELS = "87,88,89,90,LP5V,LP8V,LP11V,LP16V"
 # The fan's control signal in 0.1 V, as the controller display shows it.
@@ -632,7 +633,7 @@ SENSORS: list[descr] = [
     # - any other air inverter: rpm as the library says, unconfirmed (LW SEC 2
     #   reads 600), so disabled by default. It shares the `fan_speed` key with
     #   the confirmed one - the gates exclude each other - so confirming a model
-    #   only moves its code into _FAN_RPM_MODELS and keeps the entity ID.
+    #   only adds its code and name to _FAN_RPM_MODELS and keeps the entity ID.
     # The unknown-code case (C0078 None) gets none of the three.
     descr(
         key=SensorKey.FAN_SPEED,

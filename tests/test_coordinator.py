@@ -794,7 +794,7 @@ class TestEntityActive:
         [
             # LP11V (#874): rpm confirmed against its display.
             ("LP11V", 91, 2, "rpm"),
-            # The raw code, as an unpatched code table would report it.
+            # A raw code matches too; the gates list code and name.
             (89, 91, 2, "rpm"),
             # LD9V (#863/#874): the fan's control signal in volts.
             ("LD9V", 105, 2, "volt"),
@@ -1311,6 +1311,18 @@ class TestFormulaInOperator:
         coord = _make_coordinator_direct()
         assert coord._evaluate_visibility_formula(2, "in 3,4,cooling") is False
         assert coord._evaluate_visibility_formula("load", "in 3,4,cooling") is False
+
+    def test_items_may_hold_spaces(self):
+        """Model names such as "LW SEC 2" hold spaces; only commas separate
+        items, and the space after a comma is ignored."""
+        coord = _make_coordinator_direct()
+        assert coord._evaluate_visibility_formula("LW SEC 2", "in 85,LW SEC 2") is True
+        assert coord._evaluate_visibility_formula("LW SEC", "in 85,LW SEC 2") is False
+        assert coord._evaluate_visibility_formula(4, "in 3, 4") is True
+        assert (
+            coord._evaluate_visibility_formula("LW SEC 2", "not_in LP11V, LW SEC 2")
+            is False
+        )
 
     def test_not_in_is_the_negation(self):
         coord = _make_coordinator_direct()
