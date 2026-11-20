@@ -918,6 +918,9 @@
             "fan_speed": {
                 "name": "Fan speed"
             },
+            "fan_control_signal": {
+                "name": "Fan control signal"
+            },
             "domestic_water": {
                 "name": "Domestic hot water"
             },

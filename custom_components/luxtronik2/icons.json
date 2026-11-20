@@ -63,6 +63,7 @@
       "pump_frequency": { "default": "mdi:sine-wave" },
       "compressor_speed": { "default": "mdi:speedometer" },
       "fan_speed": { "default": "mdi:fan" },
+      "fan_control_signal": { "default": "mdi:fan" },
       "pump_flow_delta_target": { "default": "mdi:delta" },
       "pump_flow_delta": { "default": "mdi:delta" },
       "circulation_pump_delta_target": { "default": "mdi:delta" },

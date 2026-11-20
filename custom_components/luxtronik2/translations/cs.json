@@ -918,6 +918,9 @@
             "fan_speed": {
                 "name": "Otáčky ventilátoru"
             },
+            "fan_control_signal": {
+                "name": "Řídicí signál ventilátoru"
+            },
             "domestic_water": {
                 "name": "TUV"
             },

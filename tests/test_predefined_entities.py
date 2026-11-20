@@ -116,6 +116,15 @@ class TestSensorPredefined:
             assert s.key is not None
             assert s.luxtronik_key is not None
 
+    def test_unique_keys(self):
+        """A key is the entity's unique_id. Only fan_speed is shared: its two
+        descriptions differ in enabled-by-default and their gates exclude each
+        other (test_every_model_gets_at_most_one_fan_sensor)."""
+        keys = [s.key for s in SENSORS]
+        shared = {key for key in keys if keys.count(key) > 1}
+        assert shared == {SensorKey.FAN_SPEED}
+        assert keys.count(SensorKey.FAN_SPEED) == 2
+
 
 class TestNumberPredefined:
     def test_has_entries(self):
@@ -295,8 +304,9 @@ class TestVisibilityGates:
                 parts = formula.split()
                 if (
                     len(parts) != 2
-                    or parts[0] not in {"==", "!=", "<", "<=", ">", ">=", "in"}
-                    or (parts[0] == "in" and "" in parts[1].split(","))
+                    or parts[0]
+                    not in {"==", "!=", "<", "<=", ">", ">=", "in", "not_in"}
+                    or (parts[0] in {"in", "not_in"} and "" in parts[1].split(","))
                 ):
                     offenders.append((type(descr).__name__, descr.key, formula))
         assert offenders == []

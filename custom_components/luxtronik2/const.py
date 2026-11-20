@@ -952,6 +952,7 @@ class SensorKey(StrEnum):
     PUMP_FREQUENCY = "pump_frequency"
     COMPRESSOR_SPEED = "compressor_speed"
     FAN_SPEED = "fan_speed"
+    FAN_CONTROL_SIGNAL = "fan_control_signal"
     PUMP_FLOW_DELTA_TARGET = "pump_flow_delta_target"
     PUMP_FLOW_DELTA = "pump_flow_delta"
     CIRCULATION_PUMP_DELTA_TARGET = "circulation_pump_delta_target"

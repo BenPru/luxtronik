@@ -156,6 +156,13 @@ SENSORS_INDEX: list[descr_index] = [
     ),
 ]
 
+# C0184 (fan) by model code (C0078), each raw code next to its decoded name.
+# rpm confirmed on the LP11V (#874), taken for the LP*V family.
+_FAN_RPM_MODELS = "87,88,89,90,LP5V,LP8V,LP11V,LP16V"
+# The fan's control signal in 0.1 V, as the controller display shows it.
+_FAN_VOLT_MODELS = "77,LD9V"
+
+
 SENSORS: list[descr] = [
     # region Main heatpump
     descr(
@@ -614,13 +621,27 @@ SENSORS: list[descr] = [
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         ),
     ),
-    # The heat-source fan of an air unit, in rpm as the library types the
-    # register (#874). Non-zero in the corpus only on air inverters: 600 on
-    # LW SEC 2, 260 on LP16V, 199 on LP11V - plausible rpm - and 59 heating /
-    # 5 idle on the LD9V family (C0237/C0238 = 23/105); 0 on every brine and
-    # fixed-speed unit, hence the compressor-speed gate. The LD9V scale is
-    # implausible for rpm and unconfirmed against a display, so the sensor
-    # starts disabled; confirm that family before enabling it by default.
+    # The heat-source fan of an air unit (#874), C0184. Non-zero in the corpus
+    # only on air inverters, 0 on every brine and fixed-speed unit, hence the
+    # compressor-speed gate. The library types it rpm, but what it holds
+    # depends on the fan, so it is split by model (C0078):
+    # - rpm, confirmed against the display on an LP11V (311 vs 310 rpm) and
+    #   taken for its LP*V siblings: enabled by default.
+    # - LD9V: the fan's 2-10 V control signal in 0.1 V, as its display shows
+    #   it (59 = 5.9 V running, 5 = 0.5 V idle or defrosting): own sensor.
+    # - any other air inverter: rpm as the library says, unconfirmed (LW SEC 2
+    #   reads 600), so disabled by default. It shares the `fan_speed` key with
+    #   the confirmed one - the gates exclude each other - so confirming a model
+    #   only moves its code into _FAN_RPM_MODELS and keeps the entity ID.
+    # The unknown-code case (C0078 None) gets none of the three.
+    descr(
+        key=SensorKey.FAN_SPEED,
+        luxtronik_key=LC.C0184_FAN_SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
+        native_precision=0,
+        entity_active=((LC.C0078_MODEL_CODE, f"in {_FAN_RPM_MODELS}"),),
+    ),
     descr(
         key=SensorKey.FAN_SPEED,
         luxtronik_key=LC.C0184_FAN_SPEED,
@@ -631,7 +652,19 @@ SENSORS: list[descr] = [
         entity_active=(
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+            (LC.C0078_MODEL_CODE, f"not_in {_FAN_RPM_MODELS},{_FAN_VOLT_MODELS}"),
         ),
+    ),
+    descr(
+        key=SensorKey.FAN_CONTROL_SIGNAL,
+        luxtronik_key=LC.C0184_FAN_SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        factor=0.1,
+        native_precision=1,
+        entity_registry_enabled_default=False,
+        entity_active=((LC.C0078_MODEL_CODE, f"in {_FAN_VOLT_MODELS}"),),
     ),
     descr(
         key=SensorKey.PUMP_FLOW_DELTA_TARGET,
