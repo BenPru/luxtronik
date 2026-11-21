@@ -45,7 +45,31 @@ class TestUpdateLuxtronikHeatpumpCodes:
         assert HeatpumpCode.codes[89] == "LP11V"
         # alpha innotec Hybrox 16, read off the controller display (#819)
         assert HeatpumpCode.codes[90] == "LP16V"
-        assert len(HeatpumpCode.codes) == 91
+        assert len(HeatpumpCode.codes) == 103
+
+    def test_codes_from_the_firmware_type_table(self):
+        """Codes 91-102 as the V3.92.3 firmware's heat pump type table names
+        them (#881). That table also holds every code confirmed on a real
+        unit (77 LD9V, 85 LW SEC 2, 87-90 LP5V-LP16V) at the same position."""
+        from custom_components.luxtronik2.lux_overrides import (
+            update_Luxtronik_HeatpumpCodes,
+        )
+
+        update_Luxtronik_HeatpumpCodes()
+        assert {code: HeatpumpCode.codes[code] for code in range(91, 103)} == {
+            91: "LP21V",
+            92: "LP24V",
+            93: "LP31V",
+            94: "LPI4V",
+            95: "LPI7V",
+            96: "LPI10V",
+            97: "SP4V",
+            98: "SP6V",
+            99: "SP12V",
+            100: "SP16V",
+            101: "LP5V_SE",
+            102: "LP8V_SE",
+        }
 
 
 class TestUpdateLuxtronikParameters:
