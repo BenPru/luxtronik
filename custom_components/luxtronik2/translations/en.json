@@ -795,7 +795,8 @@
                 "state": {
                     "since": "since",
                     "in": "in",
-                    "unknown": "unknown"
+                    "unknown": "unknown",
+                    "fault": "fault"
                 }
             },
             "status_line_3": {
@@ -816,7 +817,11 @@
                     "info_bake_out_program": "info bake out program",
                     "heating_external_energy_source": "heating external energy source",
                     "domestic_water_external_energy_source": "Domestic water external energy source",
-                    "second_heat_generator_1_active": "second heat generator 1 active"
+                    "second_heat_generator_1_active": "second heat generator 1 active",
+                    "fault": "Fault",
+                    "compressor_heater": "Compressor heater",
+                    "domestic_water_post_heating": "Domestic water post-heating",
+                    "pressure_compensation": "Pressure compensation"
                 }
             },
             "heat_source_output": {

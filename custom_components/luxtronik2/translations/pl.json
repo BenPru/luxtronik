@@ -795,7 +795,8 @@
                 "state": {
                     "since": "od",
                     "in": "w",
-                    "unknown": "nieznany"
+                    "unknown": "nieznany",
+                    "fault": "awaria"
                 }
             },
             "status_line_3": {
@@ -816,7 +817,11 @@
                     "info_bake_out_program": "Informacje o programie pieczenia",
                     "heating_external_energy_source": "ogrzewanie z zewnętrznego źródła energii",
                     "domestic_water_external_energy_source": "Zewnętrzne źródło energii ciepłej wody",
-                    "second_heat_generator_1_active": "drugi generator ciepła 1 aktywny"
+                    "second_heat_generator_1_active": "drugi generator ciepła 1 aktywny",
+                    "fault": "Awaria",
+                    "compressor_heater": "Grzałka sprężarki",
+                    "domestic_water_post_heating": "Dogrzewanie c.w.u.",
+                    "pressure_compensation": "Wyrównanie ciśnień"
                 }
             },
             "heat_source_output": {

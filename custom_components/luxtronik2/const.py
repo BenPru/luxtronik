@@ -276,8 +276,10 @@ class LuxStatus1Option(StrEnum):
     heatpump_shutdown = "heatpump_shutdown"
     errorcode_slot_zero = "errorcode_slot_0"
     defrost = "defrost"
-    waiting_on_lin_connection = "witing_on_lin_connection"
+    waiting_on_lin_connection = "waiting_on_lin_connection"
     compressor_heating_up = "compressor_heating_up"
+    # No longer decoded since the firmware's own table replaced the library's
+    # (raw 7 is "compressor heating up"); kept so recorded history stays valid.
     pump_forerun = "pump_forerun"
     compressor_heater = "compressor_heater"
 
@@ -303,6 +305,11 @@ class LuxStatus3Option(StrEnum):
     domestic_water_external_energy_source = "domestic_water_external_energy_source"
     flow_monitoring = "flow_monitoring"
     second_heat_generator_1_active = "second_heat_generator_1_active"
+    # Codes 15 and 18-20, which the library does not know (firmware V3.89.3).
+    fault = "fault"
+    compressor_heater = "compressor_heater"
+    domestic_water_post_heating = "domestic_water_post_heating"
+    pressure_compensation = "pressure_compensation"
 
 
 class LuxMkTypes(Enum):

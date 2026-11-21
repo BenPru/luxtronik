@@ -795,7 +795,8 @@
                 "state": {
                     "since": "seit",
                     "in": "in",
-                    "unknown": "Unbekannt"
+                    "unknown": "Unbekannt",
+                    "fault": "Störung"
                 }
             },
             "status_line_3": {
@@ -816,7 +817,11 @@
                     "info_bake_out_program": "Information aus Aufheizprogramm",
                     "heating_external_energy_source": "heizen aus externer Energiequelle",
                     "domestic_water_external_energy_source": "Brauchwasser aus externer Energiequelle",
-                    "second_heat_generator_1_active": "zweiter Wärmeerzeuger 1 aktiv"
+                    "second_heat_generator_1_active": "zweiter Wärmeerzeuger 1 aktiv",
+                    "fault": "Störung",
+                    "compressor_heater": "Verdichter-Heizung",
+                    "domestic_water_post_heating": "Warmwasser-Nachheizung",
+                    "pressure_compensation": "Druckausgleich"
                 }
             },
             "heat_source_output": {

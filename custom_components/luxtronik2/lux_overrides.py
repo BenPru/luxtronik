@@ -10,6 +10,9 @@ from luxtronik.datatypes import (
     Energy,
     HeatpumpCode,
     Kelvin,
+    MainMenuStatusLine1,
+    MainMenuStatusLine2,
+    MainMenuStatusLine3,
     MixedCircuitMode,
     Percent,
     Percent2,
@@ -822,6 +825,69 @@ def update_Luxtronik_SwitchoffCodes():
         # history reported 27 (confirmed against a run that stopped at 66.0
         # degrees flow and resumed two minutes later).
         27: "maximum flow temperature",
+    }
+
+
+def update_Luxtronik_StatusLineCodes():
+    """Name the main-menu status lines (C0117-C0119) as the firmware does.
+
+    Read from the controller's own display code in firmware V3.89.3, the newest
+    unstripped build: `MainDisplay::writeStatusToGUI` hands the three bytes of
+    its `HeatpumpStatus` straight to `writeFirstMainScreenLine`,
+    `writeSecondMainScreenLine` and `writeStatusLine`, each a switch from code
+    to display text - the same values the controller exports here.
+
+    The pinned library's line 1 table is shifted by one from code 3 on, so a
+    heat pump in a fault (4) read "defrost", a defrost (5) read "witing on LIN
+    connection" and a compressor heating up (7) read "pump forerun". A V1.77
+    dump in the corpus confirms code 4: five high-pressure faults in a row, the
+    compressor off, line 1 4 and lines 2 and 3 on their (then unknown) fault
+    codes. Lines 2 and 3 also gain the codes the library lacks.
+    """
+    MainMenuStatusLine1.codes = {
+        0: "heatpump running",
+        1: "heatpump idle",
+        2: "heatpump coming",
+        # Not set by the firmware; the display falls back to "heat pump stops".
+        3: "heatpump shutdown",
+        # The display shows the error text instead of a status.
+        4: "errorcode slot 0",
+        5: "defrost",
+        # "Warte auf Initialisierung" - detecting external (LIN) components.
+        6: "waiting on LIN connection",
+        7: "compressor heating up",
+        8: "heatpump shutdown",
+    }
+    MainMenuStatusLine2.codes = {
+        0: "since",
+        1: "in",
+        # Second line of the error text.
+        2: "fault",
+    }
+    MainMenuStatusLine3.codes = {
+        0: "heating",
+        1: "no request",
+        2: "grid switch on delay",
+        3: "cycle lock",
+        4: "lock time",
+        5: "domestic water",
+        6: "info bake out program",
+        7: "defrost",
+        8: "pump forerun",
+        9: "thermal desinfection",
+        10: "cooling",
+        # 11 shows nothing.
+        # 12 shows "Photovoltaik" or "Schwimmbad", depending on a setting.
+        12: "swimming pool/solar",
+        13: "heating external energy source",
+        14: "domestic water external energy source",
+        # Third line of the error text.
+        15: "fault",
+        16: "flow monitoring",
+        17: "second heat generator 1 active",
+        18: "compressor heater",
+        19: "domestic water post heating",
+        20: "pressure compensation",
     }
 
 

@@ -473,18 +473,6 @@ class TestNormalizeSensorValue:
         )
         assert result == LuxStatus1Option.heatpump_shutdown
 
-    def test_status_line1_pump_forerun_compressor_heater_workaround(self):
-        """If pump_forerun and compressor heater is active, returns compressor_heater."""
-        data = make_coordinator_data(
-            calculations={
-                "ID_WEB_LIN_VDH_out": True,  # C0182_COMPRESSOR_HEATER
-            }
-        )
-        result = normalize_sensor_value(
-            LuxStatus1Option.pump_forerun, data, LC.C0117_STATUS_LINE_1
-        )
-        assert result == LuxStatus1Option.compressor_heater
-
     def test_status_no_request_passive_cooling(self):
         """If no_request + status_line3 shows cooling → returns cooling."""
         data = make_coordinator_data(
@@ -566,12 +554,35 @@ class TestNormalizeSensorValue:
         result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
         assert result == LuxOperationMode.domestic_water
 
-    def test_pump_forerun_status_line1_with_no_request_line3_maps_to_no_request(self):
-        """If pump forerun and no_request line3 while no add circ pump, C0080_STATUS becomes no_request."""
+    def test_compressor_heating_up_with_no_request_line3_maps_to_no_request(self):
+        """Line 1 code 7 (compressor heating up, which the library called pump
+        forerun) with no_request on line 3 and no add circ pump is no_request."""
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.pump_forerun,
+                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.compressor_heating_up,
                 "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
+                "ID_WEB_ZUPout": False,
+            }
+        )
+        result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
+        assert result == LuxOperationMode.no_request
+
+    @pytest.mark.parametrize(
+        "line3",
+        [
+            LuxStatus3Option.fault,
+            LuxStatus3Option.compressor_heater,
+            LuxStatus3Option.domestic_water_post_heating,
+            LuxStatus3Option.pressure_compensation,
+        ],
+    )
+    def test_line3_codes_the_library_lacked_still_count_as_idle(self, line3):
+        """Line 3 codes 15 and 18-20 decoded to None before the firmware table
+        named them, and None counts as idle; naming them changes nothing."""
+        data = make_coordinator_data(
+            calculations={
+                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.heatpump_idle,
+                "ID_WEB_HauptMenuStatus_Zeile3": line3,
                 "ID_WEB_ZUPout": False,
             }
         )

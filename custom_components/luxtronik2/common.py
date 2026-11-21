@@ -381,7 +381,8 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
     add_circ_pump = get_sensor_data(coordinator, LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
     s1_workaround: list[str] = [
         LuxStatus1Option.heatpump_idle,
-        LuxStatus1Option.pump_forerun,
+        # Raw 7, which the library called "pump forerun".
+        LuxStatus1Option.compressor_heating_up,
         LuxStatus1Option.heatpump_coming,
     ]
     s3_workaround: list[str | None] = [
@@ -390,6 +391,12 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
         LuxStatus3Option.none,
         LuxStatus3Option.grid_switch_on_delay,
         None,
+        # Codes 15 and 18-20 decoded to None until the firmware table named
+        # them; listed so naming them does not change the derived mode.
+        LuxStatus3Option.fault,
+        LuxStatus3Option.compressor_heater,
+        LuxStatus3Option.domestic_water_post_heating,
+        LuxStatus3Option.pressure_compensation,
     ]
     if (
         status_line1 in s1_workaround
@@ -477,14 +484,6 @@ def normalize_sensor_value(
     ):
         return LuxStatus1Option.heatpump_shutdown
     # endregion Workaround Luxtronik Bug: Line 1 shows 'heatpump coming' on shutdown!
-    # region Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
-    if (
-        sensor_id == LC.C0117_STATUS_LINE_1
-        and value == LuxStatus1Option.pump_forerun
-        and bool(get_sensor_data(coordinator, LC.C0182_COMPRESSOR_HEATER))
-    ):
-        return LuxStatus1Option.compressor_heater
-    # endregion Workaround Luxtronik Bug: Line 1 shows 'pump forerun' on CompressorHeater!
 
     if sensor_id == LC.C0080_STATUS:
         mode = _derive_operation_mode(value, coordinator)

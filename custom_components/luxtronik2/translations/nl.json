@@ -795,7 +795,8 @@
                 "state": {
                     "since": "Sinds",
                     "in": "In",
-                    "unknown": "Onbekend"
+                    "unknown": "Onbekend",
+                    "fault": "Storing"
                 }
             },
             "status_line_3": {
@@ -816,7 +817,11 @@
                     "info_bake_out_program": "Informatie uit opwarmprogramma",
                     "heating_external_energy_source": "Verwarming uit een externe energiebron",
                     "domestic_water_external_energy_source": "Huishoudelijk water uit externe energiebron",
-                    "second_heat_generator_1_active": "tweede warmteopwekker 1 actief"
+                    "second_heat_generator_1_active": "tweede warmteopwekker 1 actief",
+                    "fault": "Storing",
+                    "compressor_heater": "Compressorverwarmer",
+                    "domestic_water_post_heating": "Warm water naverwarming",
+                    "pressure_compensation": "Drukvereffening"
                 }
             },
             "heat_source_output": {

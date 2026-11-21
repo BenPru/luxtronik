@@ -77,6 +77,7 @@ from .lux_overrides import (
     record_parsed_block_lengths,
     update_Luxtronik_HeatpumpCodes,
     update_Luxtronik_Parameters,
+    update_Luxtronik_StatusLineCodes,
     update_Luxtronik_SwitchoffCodes,
     warn_on_unknown_selection_codes,
 )
@@ -1405,6 +1406,7 @@ async def connect_and_get_coordinator(
     if not _OVERRIDES_APPLIED:
         update_Luxtronik_HeatpumpCodes()
         update_Luxtronik_SwitchoffCodes()
+        update_Luxtronik_StatusLineCodes()
         update_Luxtronik_Parameters()
         isolate_instance_data()
         record_parsed_block_lengths()
@@ -1412,7 +1414,8 @@ async def connect_and_get_coordinator(
         warn_on_unknown_selection_codes()
         _OVERRIDES_APPLIED = True
         LOGGER.info(
-            "Library overrides applied (HeatpumpCodes, SwitchoffCodes, Parameters, "
+            "Library overrides applied (HeatpumpCodes, SwitchoffCodes, StatusLineCodes, "
+            "Parameters, "
             "instance data isolation, parsed block length recording, unknown "
             "visibility naming, unknown selection code warning)."
         )
