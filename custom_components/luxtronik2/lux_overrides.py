@@ -919,4 +919,18 @@ def update_Luxtronik_HeatpumpCodes():
         88: "LP8V",
         89: "LP11V",
         90: "LP16V",
+        # 91-102 from the heat pump type table in firmware V3.92.3, spelled as
+        # it spells them; no unit with these codes has been seen yet (#881).
+        91: "LP21V",
+        92: "LP24V",
+        93: "LP31V",
+        94: "LPI4V",
+        95: "LPI7V",
+        96: "LPI10V",
+        97: "SP4V",
+        98: "SP6V",
+        99: "SP12V",
+        100: "SP16V",
+        101: "LP5V_SE",
+        102: "LP8V_SE",
     }
