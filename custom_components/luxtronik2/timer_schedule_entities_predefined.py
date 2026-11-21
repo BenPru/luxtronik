@@ -1,7 +1,7 @@
 """Predefined timer-program schedule text entities.
 
 Covers the DHW (Bw), heating (Hkr), ventilation (Luf) and circulation pump
-(ZIP) circuits. The remaining timer-program circuits (Mk1/Mk2/Mk3/Swb) follow
+(ZIP) circuits, plus the inverter silent mode (see `_SILENT_MODE_ENTITIES`). The remaining timer-program circuits (Mk1/Mk2/Mk3/Swb) follow
 the DHW and heating pattern and need one `_TimerCircuit` instance plus translations
 each; see the "lux-timer-program-parameter-layout" memory for their
 selector/prefix values.
@@ -21,7 +21,13 @@ from functools import partial
 
 from homeassistant.const import EntityCategory
 
-from .const import DeviceKey, LuxParameter, SensorKey as SK
+from .const import (
+    AIR_INVERTER_MODELS,
+    DeviceKey,
+    LuxCalculation,
+    LuxParameter,
+    SensorKey as SK,
+)
 from .model import EntityActiveCondition, LuxtronikTimerScheduleTextDescription
 
 
@@ -209,6 +215,64 @@ _CIRCULATION_CIRCUIT = _TimerCircuit(
 _CIRCULATION_WEEKDAYS = _per_day_keys("CIRCULATION")
 
 
+# Inverter silent mode (#882, 1092 selector, 1093-1113 windows): a single
+# block of 21 packed `TimeOfDay2` registers, seven days of three windows,
+# day by day. No program shape has a block of its own - the controller keeps
+# "week" as a copy in every day: a Hybrox 5 (LP5V) and pump 340716_0104
+# (V3.92.1) with one 20:00-07:00 window held it in slots 0, 3, ..., 18, and
+# an LP16V (V3.92.3) held 22:30-05:30 as 00:00-05:30 / 22:30-00:00 in rows 0
+# and 1 of every day. So each shape reads one day and writes every day it
+# covers, and the controller runs on the current day's block whatever the
+# program. The days are taken to run Sunday-first like every other
+# circuit's per-day columns (#842); unconfirmed for this block until a dump
+# in "5+2" with distinct weekend windows shows them in days 0 and 6.
+_SILENT_MODE_ROWS = 3
+_SILENT_MODE_WEEKDAYS = (1, 2, 3, 4, 5)
+_SILENT_MODE_WEEKEND = (6, 0)
+
+
+def _silent_mode_day(day: int) -> tuple[tuple[str], ...]:
+    """Return the three packed window registers of one silent-mode day."""
+    return tuple(
+        (f"ID_Einst_SilenceTimer_{day * _SILENT_MODE_ROWS + row}",)
+        for row in range(_SILENT_MODE_ROWS)
+    )
+
+
+def _silent_mode_schedule(
+    key: SK, active_mode: str, days: tuple[int, ...]
+) -> LuxtronikTimerScheduleTextDescription:
+    """Build a silent-mode schedule entity that reads ``days[0]`` and writes all."""
+    return LuxtronikTimerScheduleTextDescription(
+        key=key,
+        device_key=DeviceKey.heatpump,
+        entity_category=EntityCategory.CONFIG,
+        mode_selector_name="ID_Einst_SuSilence",
+        # The selector stands in as the entity's own register (#738).
+        luxtronik_key=LuxParameter.P1092_TIMER_PROGRAM_SILENT_MODE,
+        entity_active=((LuxCalculation.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),),
+        active_mode=active_mode,
+        row_names=_silent_mode_day(days[0]),
+        mirror_row_names=tuple(_silent_mode_day(day) for day in days[1:]),
+    )
+
+
+_SILENT_MODE_ENTITIES = [
+    _silent_mode_schedule(
+        SK.TIMER_SILENT_MODE_SCHEDULE_WEEK, "week", (0, 1, 2, 3, 4, 5, 6)
+    ),
+    _silent_mode_schedule(
+        SK.TIMER_SILENT_MODE_SCHEDULE_WEEKDAY, "5+2", _SILENT_MODE_WEEKDAYS
+    ),
+    _silent_mode_schedule(
+        SK.TIMER_SILENT_MODE_SCHEDULE_WEEKEND, "5+2", _SILENT_MODE_WEEKEND
+    ),
+] + [
+    _silent_mode_schedule(key, "days", (column,))
+    for key, column in _per_day_keys("SILENT_MODE")
+]
+
+
 def _build_circuit_entities(
     circuit: _TimerCircuit,
     week_key: SK,
@@ -309,4 +373,5 @@ TIMER_SCHEDULE_ENTITIES: list[LuxtronikTimerScheduleTextDescription] = (
         weekend_key=SK.TIMER_CIRCULATION_SCHEDULE_WEEKEND,
         day_keys=_CIRCULATION_WEEKDAYS,
     )
+    + _SILENT_MODE_ENTITIES
 )

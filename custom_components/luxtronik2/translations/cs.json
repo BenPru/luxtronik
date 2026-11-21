@@ -75,6 +75,9 @@
             "thermal_power_limitation_switch": {
                 "name": "Max. tepelný výkon"
             },
+            "silent_mode": {
+                "name": "Tichý režim"
+            },
             "pump_heat_control": {
                 "name": "Ovládání čerpadla pro ohřev"
             },
@@ -929,6 +932,14 @@
             "last_defrost": {
                 "name": "Poslední odmrazování"
             },
+            "defrost_demand": {
+                "name": "Potřeba odmrazování",
+                "state_attributes": {
+                    "remaining_time": {
+                        "name": "Zbývající čas"
+                    }
+                }
+            },
             "additional_heat_generator_energy_p1059": {
                 "name": "Množství tepla dodatečného zdroje (firmware před x.88)"
             },
@@ -1301,6 +1312,36 @@
             },
             "timer_circulation_schedule_sunday": {
                 "name": "Časy chodu cirkulace TUV (neděle)"
+            },
+            "timer_silent_mode_schedule_week": {
+                "name": "Časy tichého režimu (týden)"
+            },
+            "timer_silent_mode_schedule_weekday": {
+                "name": "Časy tichého režimu (pracovní dny)"
+            },
+            "timer_silent_mode_schedule_weekend": {
+                "name": "Časy tichého režimu (víkend)"
+            },
+            "timer_silent_mode_schedule_monday": {
+                "name": "Časy tichého režimu (pondělí)"
+            },
+            "timer_silent_mode_schedule_tuesday": {
+                "name": "Časy tichého režimu (úterý)"
+            },
+            "timer_silent_mode_schedule_wednesday": {
+                "name": "Časy tichého režimu (středa)"
+            },
+            "timer_silent_mode_schedule_thursday": {
+                "name": "Časy tichého režimu (čtvrtek)"
+            },
+            "timer_silent_mode_schedule_friday": {
+                "name": "Časy tichého režimu (pátek)"
+            },
+            "timer_silent_mode_schedule_saturday": {
+                "name": "Časy tichého režimu (sobota)"
+            },
+            "timer_silent_mode_schedule_sunday": {
+                "name": "Časy tichého režimu (neděle)"
             }
         },
         "select": {
@@ -1352,6 +1393,14 @@
             },
             "timer_circulation_program": {
                 "name": "Časový program cirkulace TUV",
+                "state": {
+                    "week": "Celý týden",
+                    "weekday_weekend": "Pracovní dny + víkend",
+                    "daily": "Jednotlivé dny"
+                }
+            },
+            "timer_silent_mode_program": {
+                "name": "Časový program tichého režimu",
                 "state": {
                     "week": "Celý týden",
                     "weekday_weekend": "Pracovní dny + víkend",

@@ -3,7 +3,9 @@
 from homeassistant.const import EntityCategory
 
 from .const import (
+    AIR_INVERTER_MODELS,
     DeviceKey,
+    LuxCalculation as LC,
     LuxMode,
     LuxParameter as LP,
     LuxVisibility as LV,
@@ -44,6 +46,17 @@ SWITCHES: list[LuxtronikSwitchDescription] = [
         luxtronik_key=LP.P1175_THERMAL_POWER_LIMIT_SWITCH,
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
+    ),
+    # Inverter silent mode (#882). Every unit with a long enough block
+    # returns P1087 (off on brine and fixed-speed units too), so the model
+    # decides. OnOffMode decodes the register to "on"/"off".
+    LuxtronikSwitchDescription(
+        key=SensorKey.SILENT_MODE,
+        luxtronik_key=LP.P1087_SILENT_MODE,
+        entity_category=EntityCategory.CONFIG,
+        on_state="on",
+        off_state="off",
+        entity_active=((LC.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),),
     ),
     # endregion Main heatpump
     # region Heating

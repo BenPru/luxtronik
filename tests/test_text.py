@@ -87,8 +87,9 @@ class TestTimerScheduleTable:
         problems = []
         for description in TIMER_SCHEDULE_ENTITIES:
             names = [description.mode_selector_name]
-            for row in description.row_names:
-                names.extend(row)
+            for block in (description.row_names, *description.mirror_row_names):
+                for row in block:
+                    names.extend(row)
             for name in names:
                 if name not in known_names:
                     problems.append(f"{description.key}: {name!r} not in Parameters")
@@ -96,8 +97,9 @@ class TestTimerScheduleTable:
         assert not problems, "\n".join(problems)
 
     def test_entity_count(self):
-        # 10 each: DHW, heating, ventilation day, ventilation night, circulation
-        assert len(TIMER_SCHEDULE_ENTITIES) == 50
+        # 10 each: DHW, heating, ventilation day, ventilation night,
+        # circulation and silent mode
+        assert len(TIMER_SCHEDULE_ENTITIES) == 60
 
     def test_row_counts_per_circuit(self):
         """DHW has 5 slots per day, the heating circuit only 3."""
@@ -251,11 +253,12 @@ class TestTimerScheduleTable:
         assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_WEEKDAY].active_mode == "5+2"
         assert by_key[SK.TIMER_CIRCULATION_SCHEDULE_MONDAY].active_mode == "days"
 
-    def test_only_circulation_is_gated_on_the_zip_output(self):
+    def test_only_circulation_and_silent_mode_are_gated(self):
         """The controller shows its circulation menu only while "Warmwasser 2"
         (P0085) is ZIP; on BLP the output is a DHW charging pump and the
-        circulation times mean nothing. The selector stands in as the
-        entity's own register for the #738 presence check.
+        circulation times mean nothing. Silent mode is gated on the air
+        inverter models (#882). The selector stands in as the entity's own
+        register for the #738 presence check.
         """
         from custom_components.luxtronik2.const import LuxParameter as LP
 
@@ -263,6 +266,8 @@ class TestTimerScheduleTable:
             if d.luxtronik_key != LP.UNSET:
                 # `selector_key` and `mode_selector_name` name one register.
                 assert d.luxtronik_key.value == f"parameters.{d.mode_selector_name}"
+            if d.mode_selector_name == "ID_Einst_SuSilence":
+                continue  # declaration tested in test_predefined_entities
             if d.mode_selector_name == "ID_Einst_SuZIP_akt":
                 assert d.luxtronik_key == LP.P0506_TIMER_PROGRAM_CIRCULATION
                 assert d.entity_active == ((LP.P0085_DHW_CHARGING_PUMP, "!= 1"),)
@@ -272,7 +277,8 @@ class TestTimerScheduleTable:
 
     def test_every_row_is_a_pair_or_a_packed_register(self):
         for d in TIMER_SCHEDULE_ENTITIES:
-            assert all(len(row) in (1, 2) for row in d.row_names), d.key
+            for block in (d.row_names, *d.mirror_row_names):
+                assert all(len(row) in (1, 2) for row in block), d.key
 
 
 # ===========================================================================
@@ -1643,3 +1649,108 @@ class TestTimerScheduleSyncAgainstRealHass:
         assert weekday_entry is not None
         assert weekday_entry.hidden_by is None
         assert weekday_entry.disabled_by is RegistryEntryDisabler.INTEGRATION
+
+
+class TestSilentModeSchedules:
+    """Silent mode keeps every program shape in one block of seven days (#882).
+
+    1093-1113 are seven days of three packed windows, day by day. Three units
+    show "week" stored as a copy in every day: a Hybrox 5 (LP5V) with one
+    20:00-07:00 window in slots 0, 3, ..., 18, pump 340716_0104 (V3.92.1)
+    with the same window, and an LP16V (V3.92.3) with 22:30-05:30 split into
+    00:00-05:30 and 22:30-00:00 in rows 0 and 1 of every day. So a shape
+    reads one day and writes every day it covers. The days are taken to run
+    Sunday-first like every other circuit's per-day columns (#842).
+    """
+
+    _DAYS = (
+        "SUNDAY",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+    )
+
+    _LP16V = {
+        f"ID_Einst_SilenceTimer_{index}": ("00:00-05:30", "22:30-00:00", "00:00-00:00")[
+            index % 3
+        ]
+        for index in range(21)
+    }
+
+    @staticmethod
+    def _block(day):
+        return tuple((f"ID_Einst_SilenceTimer_{day * 3 + row}",) for row in range(3))
+
+    def _make(self, parameters, key=SK.TIMER_SILENT_MODE_SCHEDULE_WEEK):
+        from custom_components.luxtronik2.text import LuxtronikTimerScheduleText
+
+        description = next(d for d in TIMER_SCHEDULE_ENTITIES if d.key == key)
+        data = make_coordinator_data(parameters=parameters)
+        coord = _mock_coordinator(data)
+        coord.async_write_many = AsyncMock(return_value=data)
+        with patch("homeassistant.helpers.frame.report_usage"):
+            entity = LuxtronikTimerScheduleText(
+                _mock_entry(), coord, description, description.device_key
+            )
+        _patch_entity_hass(entity)
+        return entity, coord, description
+
+    def test_each_shape_reads_one_day_and_writes_the_days_it_covers(self):
+        # key: (program, day read, further days written), Sunday = 0
+        expected = {
+            SK.TIMER_SILENT_MODE_SCHEDULE_WEEK: ("week", 0, (1, 2, 3, 4, 5, 6)),
+            SK.TIMER_SILENT_MODE_SCHEDULE_WEEKDAY: ("5+2", 1, (2, 3, 4, 5)),
+            SK.TIMER_SILENT_MODE_SCHEDULE_WEEKEND: ("5+2", 6, (0,)),
+        }
+        for column, day in enumerate(self._DAYS):
+            expected[SK[f"TIMER_SILENT_MODE_SCHEDULE_{day}"]] = ("days", column, ())
+        by_key = {d.key: d for d in TIMER_SCHEDULE_ENTITIES}
+        for key, (program, read, mirrors) in expected.items():
+            description = by_key[key]
+            assert description.active_mode == program, key
+            assert description.row_names == self._block(read), key
+            assert description.mirror_row_names == tuple(
+                self._block(day) for day in mirrors
+            ), key
+
+    @pytest.mark.asyncio
+    async def test_writing_the_weekend_writes_saturday_and_sunday(self):
+        entity, coord, _ = self._make(
+            self._LP16V, SK.TIMER_SILENT_MODE_SCHEDULE_WEEKEND
+        )
+        await entity.async_set_value("00:00-08:00/22:30-00:00")
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert pairs == [
+            ("ID_Einst_SilenceTimer_18", "00:00-08:00"),
+            ("ID_Einst_SilenceTimer_0", "00:00-08:00"),
+        ]
+
+    def test_reads_day_zero(self):
+        entity, _, _ = self._make(self._LP16V)
+        entity._handle_coordinator_update(entity.coordinator.data)
+        assert entity._attr_native_value == "00:00-05:30/22:30-00:00"
+
+    @pytest.mark.asyncio
+    async def test_writing_the_week_writes_every_day(self):
+        entity, coord, _ = self._make(self._LP16V)
+        await entity.async_set_value("00:00-06:00/22:30-00:00/12:00-13:00")
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        expected = []
+        for day in range(7):
+            expected.append((f"ID_Einst_SilenceTimer_{day * 3}", "00:00-06:00"))
+            expected.append((f"ID_Einst_SilenceTimer_{day * 3 + 2}", "12:00-13:00"))
+        assert pairs == expected
+        coord.async_write_many.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_a_day_that_drifted_is_written_back(self):
+        """A later day that differs from day 0 still gets the week's windows."""
+        parameters = dict(self._LP16V)
+        parameters["ID_Einst_SilenceTimer_19"] = "23:00-00:00"
+        entity, coord, _ = self._make(parameters)
+        await entity.async_set_value("00:00-05:30/22:30-00:00")
+        (pairs,), _kwargs = coord.async_write_many.await_args
+        assert pairs == [("ID_Einst_SilenceTimer_19", "22:30-00:00")]

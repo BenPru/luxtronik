@@ -21,6 +21,7 @@ from homeassistant.const import (
 from packaging.version import Version
 
 from .const import (
+    AIR_INVERTER_MODELS,
     SECOND_TO_HOUR_FACTOR,
     DeviceKey,
     LuxCalculation as LC,
@@ -163,15 +164,6 @@ SENSORS_INDEX: list[descr_index] = [
 _FAN_RPM_MODELS = "85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V"
 # The fan's control signal in 0.1 V, as the controller display shows it.
 _FAN_VOLT_MODELS = "77,LD9V"
-# Air-source inverters by model code (C0078), for the rpm compressor sensor.
-# C0238 cannot tell them while idle - an LP8V drops it to 0 (#881). rpm is
-# confirmed on the LD9V, LW SEC 2, LP8V, LP11V and LP16V. The other LP models
-# are air inverters in the firmware's type table (V3.92.3: codes 91-96,
-# 101-102); their names match once lux_overrides decodes those codes.
-_AIR_INVERTER_MODELS = (
-    "77,85,87,88,89,90,LD9V,LW SEC 2,LP5V,LP8V,LP11V,LP16V,"
-    "LP21V,LP24V,LP31V,LPI4V,LPI7V,LPI10V,LP5V_SE,LP8V_SE"
-)
 
 
 SENSORS: list[descr] = [
@@ -632,7 +624,7 @@ SENSORS: list[descr] = [
         # sensor for the whole session (#881). P0975 is a setting, not a
         # state, and keeps this exclusive with the frequency sensor.
         entity_active=(
-            (LC.C0078_MODEL_CODE, f"in {_AIR_INVERTER_MODELS}"),
+            (LC.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         ),
     ),
@@ -647,7 +639,7 @@ SENSORS: list[descr] = [
         # exclude each other. A model code the table cannot decode reads None,
         # which fails `not_in` too: such a unit gets no rpm sensor.
         entity_active=(
-            (LC.C0078_MODEL_CODE, f"not_in {_AIR_INVERTER_MODELS}"),
+            (LC.C0078_MODEL_CODE, f"not_in {AIR_INVERTER_MODELS}"),
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         ),
@@ -793,6 +785,27 @@ SENSORS: list[descr] = [
         # to route through that branch - the comparison itself never runs
         # numerically on a datetime and is always True there.
         entity_active=((LP.P1119_LAST_DEFROST_TIMESTAMP, "!= 0"),),
+    ),
+    # C0141 counts down to the next defrost; the web interface shows it as a
+    # "defrost demand" percentage (#882). It idles at 10800 s (3 h) on every
+    # series-3 air inverter in the corpus, but at 2700 s on series-1 LWC/L2A
+    # units, so the span is only known on series 3. Whether the web
+    # interface reaches 100 % exactly at 0 is unconfirmed.
+    descr(
+        key=SensorKey.DEFROST_DEMAND,
+        luxtronik_key=LC.C0141_TIMER_DEFROST,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=PERCENTAGE,
+        icon="mdi:snowflake-melt",
+        countdown_percent_of=10800,
+        native_precision=0,
+        extra_attributes=(
+            attr(
+                SA.REMAINING_TIME, LC.C0141_TIMER_DEFROST, SensorAttrFormat.HOUR_MINUTE
+            ),
+        ),
+        firmware_series=(3,),
+        entity_active=((LC.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),),
     ),
     # endregion Main heatpump
     # region Heating

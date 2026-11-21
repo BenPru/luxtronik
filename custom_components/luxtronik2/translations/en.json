@@ -72,6 +72,9 @@
             "thermal_power_limitation_switch": {
                 "name": "Max. thermal power"
             },
+            "silent_mode": {
+                "name": "Silent mode"
+            },
             "efficiency_pump": {
                 "name": "Efficiency pump"
             },
@@ -929,6 +932,14 @@
             "last_defrost": {
                 "name": "Last defrost"
             },
+            "defrost_demand": {
+                "name": "Defrost demand",
+                "state_attributes": {
+                    "remaining_time": {
+                        "name": "Remaining time"
+                    }
+                }
+            },
             "additional_heat_generator_energy_p1059": {
                 "name": "Additional heat generator energy (firmware before x.88)"
             },
@@ -1301,6 +1312,36 @@
             },
             "timer_circulation_schedule_sunday": {
                 "name": "Circulation Pump Release Times (Sunday)"
+            },
+            "timer_silent_mode_schedule_week": {
+                "name": "Silent mode times (Week)"
+            },
+            "timer_silent_mode_schedule_weekday": {
+                "name": "Silent mode times (Weekdays)"
+            },
+            "timer_silent_mode_schedule_weekend": {
+                "name": "Silent mode times (Weekend)"
+            },
+            "timer_silent_mode_schedule_monday": {
+                "name": "Silent mode times (Monday)"
+            },
+            "timer_silent_mode_schedule_tuesday": {
+                "name": "Silent mode times (Tuesday)"
+            },
+            "timer_silent_mode_schedule_wednesday": {
+                "name": "Silent mode times (Wednesday)"
+            },
+            "timer_silent_mode_schedule_thursday": {
+                "name": "Silent mode times (Thursday)"
+            },
+            "timer_silent_mode_schedule_friday": {
+                "name": "Silent mode times (Friday)"
+            },
+            "timer_silent_mode_schedule_saturday": {
+                "name": "Silent mode times (Saturday)"
+            },
+            "timer_silent_mode_schedule_sunday": {
+                "name": "Silent mode times (Sunday)"
             }
         },
         "select": {
@@ -1352,6 +1393,14 @@
             },
             "timer_circulation_program": {
                 "name": "Circulation pump timer program",
+                "state": {
+                    "week": "Whole week",
+                    "weekday_weekend": "Weekdays + weekend",
+                    "daily": "Per day"
+                }
+            },
+            "timer_silent_mode_program": {
+                "name": "Silent mode timer program",
                 "state": {
                     "week": "Whole week",
                     "weekday_weekend": "Weekdays + weekend",

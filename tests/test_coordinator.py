@@ -2347,6 +2347,23 @@ class TestIsVersionNotCompatible:
         )
         assert coord._is_version_not_compatible(desc) is True
 
+    @pytest.mark.parametrize(
+        ("firmware", "incompatible"),
+        [
+            ("V3.92.3", False),
+            ("V3.81", False),
+            ("V2.88.3", True),
+            ("V1.90.0", True),
+            ("V4.81.3", True),
+            # Unparsable firmware reads as series 0, which is no listed series.
+            ("garbage", True),
+        ],
+    )
+    def test_firmware_series(self, firmware, incompatible):
+        coord = _make_coordinator(calculations={"ID_WEB_SoftStand": firmware})
+        desc = LuxtronikEntityDescription(key="test", firmware_series=(3,))
+        assert coord._is_version_not_compatible(desc) is incompatible
+
 
 # ===========================================================================
 # Detection methods

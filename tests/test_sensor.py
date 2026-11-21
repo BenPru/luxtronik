@@ -23,6 +23,7 @@ from conftest import make_coordinator_data
 from custom_components.luxtronik2 import lux_overrides
 from custom_components.luxtronik2.binary_sensor import LuxtronikBinarySensorEntity
 from custom_components.luxtronik2.const import (
+    AIR_INVERTER_MODELS,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -38,6 +39,8 @@ from custom_components.luxtronik2.const import (
     LuxStatus1Option,
     LuxStatus3Option,
     LuxVisibility,
+    SensorAttrFormat,
+    SensorAttrKey as SA,
     SensorKey,
 )
 from custom_components.luxtronik2.coordinator import LuxtronikCoordinator
@@ -53,7 +56,6 @@ from custom_components.luxtronik2.sensor import (
     LuxtronikStatusSensorEntity,
 )
 from custom_components.luxtronik2.sensor_entities_predefined import (
-    _AIR_INVERTER_MODELS,
     SENSORS,
     SENSORS_ROOM_THERMOSTAT_TYPE,
 )
@@ -1628,7 +1630,7 @@ class TestCompressorSpeed:
         P0975 reads 2, as on every air inverter. A pump gets either this
         sensor or the frequency one, never both, so it is enabled by default."""
         by_model, fallback = (d for d in SENSORS if d.key == SensorKey.COMPRESSOR_SPEED)
-        models = _AIR_INVERTER_MODELS
+        models = AIR_INVERTER_MODELS
         for description in (by_model, fallback):
             assert description.entity_registry_enabled_default is None
             assert description.luxtronik_key == LC.C0231_PUMP_FREQUENCY
@@ -1641,6 +1643,68 @@ class TestCompressorSpeed:
             (LC.C0078_MODEL_CODE, f"not_in {models}"),
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        )
+
+
+def _defrost_demand_description() -> LuxtronikSensorDescription:
+    return next(d for d in SENSORS if d.key == SensorKey.DEFROST_DEMAND)
+
+
+class TestDefrostDemand:
+    """C0141 ID_WEB_Time_AbtIn counts down from 3 h to the next defrost on a
+    series-3 air unit. The web interface shows it as a "defrost demand"
+    percentage rising to 100 % as the countdown reaches 0 (#882)."""
+
+    @staticmethod
+    def _value(raw):
+        data = make_coordinator_data(calculations={"ID_WEB_Time_AbtIn": raw})
+        entity = _make_sensor(_defrost_demand_description(), data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_full_countdown_is_no_demand(self):
+        """10800 s is where it idles on every series-3 air unit in the corpus."""
+        assert self._value(10800) == 0
+
+    def test_countdown_at_zero_is_full_demand(self):
+        assert self._value(0) == 100
+
+    def test_part_way_through(self):
+        assert self._value(5400) == 50
+        assert self._value(2700) == 75
+
+    def test_rounds_to_whole_percent(self):
+        assert self._value(10000) == 7
+
+    def test_reading_beyond_the_span_clamps_to_zero(self):
+        assert self._value(12000) == 0
+
+    def test_missing_register_reads_none(self):
+        assert self._value(None) is None
+
+    def test_description(self):
+        description = _defrost_demand_description()
+        assert description.luxtronik_key == LC.C0141_TIMER_DEFROST
+        assert description.countdown_percent_of == 10800
+        assert description.native_unit_of_measurement == PERCENTAGE
+        assert description.state_class == SensorStateClass.MEASUREMENT
+        assert description.native_precision == 0
+
+    def test_remaining_time_attribute(self):
+        """The countdown itself, as h:mm. It changes every poll, so it is
+        kept out of the recorder."""
+        (remaining,) = _defrost_demand_description().extra_attributes
+        assert remaining.key == SA.REMAINING_TIME
+        assert remaining.luxtronik_key == LC.C0141_TIMER_DEFROST
+        assert remaining.format == SensorAttrFormat.HOUR_MINUTE
+        assert SA.REMAINING_TIME in LuxtronikSensorEntity._unrecorded_attributes
+
+    def test_exists_on_series_3_air_inverters_only(self):
+        """The 3 h span is only known there: series-1 LWC/L2A idle at 2700."""
+        description = _defrost_demand_description()
+        assert description.firmware_series == (3,)
+        assert description.entity_active == (
+            (LC.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),
         )
 
 
