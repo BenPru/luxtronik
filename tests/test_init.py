@@ -1704,19 +1704,19 @@ class TestRemoveReplacedCompressorFrequency:
     _UNIQUE_ID = "sensor.luxtronik2_pump_frequency"
 
     @pytest.mark.parametrize(
-        ("max_frequency", "medium", "removed"),
+        ("model", "max_frequency", "medium", "removed"),
         [
             # Air inverter (LD9V, #863): the rpm sensor replaces it.
-            (105, 2, True),
+            ("LD9V", 105, 2, True),
             # Brine inverter: keeps its Hz sensor.
-            (118, 0, False),
+            ("MSW2-9S", 118, 0, False),
             # Fixed-speed unit: no replacement, so nothing is touched.
-            (0, 2, False),
+            ("LD5", 0, 2, False),
         ],
     )
     @pytest.mark.asyncio
     async def test_removes_only_where_the_rpm_sensor_replaces_it(
-        self, max_frequency, medium, removed
+        self, model, max_frequency, medium, removed
     ):
         from custom_components.luxtronik2 import (
             _async_remove_replaced_compressor_frequency,
@@ -1724,7 +1724,11 @@ class TestRemoveReplacedCompressorFrequency:
         from tests.test_coordinator import _make_coordinator
 
         coord = _make_coordinator(
-            calculations={"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": max_frequency},
+            calculations={
+                "ID_WEB_Freq_VD": 0,
+                "ID_WEB_Code_WP_akt": model,
+                "ID_WEB_Freq_VD_Max": max_frequency,
+            },
             parameters={"ID_Einst_Medium_Waermequelle": medium},
         )
         ent_reg = MagicMock()

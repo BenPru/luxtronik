@@ -757,37 +757,88 @@ def _fan_variant(description) -> str:
 
 class TestEntityActive:
     @pytest.mark.parametrize(
-        ("calculations", "medium", "frequency", "speed"),
+        ("model", "calculations", "medium", "frequency", "speed"),
         [
             # LP16V (#850): air inverter, running.
-            ({"ID_WEB_Freq_VD": 1301, "ID_WEB_Freq_VD_Max": 55}, 2, False, True),
+            (
+                "LP16V",
+                {"ID_WEB_Freq_VD": 1301, "ID_WEB_Freq_VD_Max": 55},
+                2,
+                False,
+                True,
+            ),
+            # LP8V (#881) idle: C0238 drops to 0, the model still decides.
+            ("LP8V", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, True),
+            # A raw code matches too; the list holds code and name.
+            (88, {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, True),
+            # An unlisted air inverter: the C0238 fallback.
+            (
+                "LW SEC",
+                {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 120},
+                2,
+                False,
+                True,
+            ),
+            # An unknown model code decodes to None, which fails the fallback's
+            # `not_in`: no rpm sensor (the gates must stay exclusive).
+            (None, {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 2, False, False),
             # MSW2-9S: brine inverter, idle - the gate must not need a reading.
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 118}, 0, True, False),
+            (
+                "MSW2-9S",
+                {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 118},
+                0,
+                True,
+                False,
+            ),
             # Fixed-speed air (LD5) and brine (MSW 30) units: neither.
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, False),
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 0, False, False),
+            ("LD5", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, False),
+            ("MSW 30", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 0, False, False),
             # A heat-source medium no corpus inverter reports: still one sensor,
             # the Hz one, whose rpm conversion covers either unit.
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 1, True, False),
+            (None, {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 1, True, False),
         ],
     )
     def test_compressor_sensors_split_by_heat_source(
-        self, calculations, medium, frequency, speed
+        self, model, calculations, medium, frequency, speed
     ):
-        """Inverters only (C0238 > 0). C0231 reads Hz on brine inverters and
-        rpm on air ones, and P0975 (heat-source medium) reads 0 on every brine
-        inverter and 2 on every air inverter in the corpus, so each pump gets
-        the sensor in its controller's own unit (#863)."""
+        """Inverters only. C0231 reads Hz on brine inverters and rpm on air
+        ones, and P0975 (heat-source medium) reads 0 on every brine inverter
+        and 2 on every air inverter in the corpus, so each pump gets the
+        sensor in its controller's own unit (#863). Known air inverter models
+        get the rpm sensor whatever C0238 reads, which drops to 0 while an
+        LP8V is idle (#881); other models need C0238 > 0."""
         coord = _make_coordinator(
-            calculations=calculations,
+            calculations={**calculations, "ID_WEB_Code_WP_akt": model},
             parameters={"ID_Einst_Medium_Waermequelle": medium},
         )
         for key, active in (
             (SensorKey.PUMP_FREQUENCY, frequency),
             (SensorKey.COMPRESSOR_SPEED, speed),
         ):
-            description = next(d for d in SENSORS if d.key == key)
-            assert coord.entity_active(description) is active, key
+            assert (
+                any(coord.entity_active(d) for d in SENSORS if d.key == key) is active
+            ), key
+
+    def test_compressor_speed_gates_are_exclusive(self):
+        """The two rpm descriptions share the `compressor_speed` key, so their
+        gates must never both hold - one unique_id, one entity."""
+        with patch.object(HeatpumpCode, "codes", dict(HeatpumpCode.codes)):
+            update_Luxtronik_HeatpumpCodes()
+            models = [*HeatpumpCode.codes, *HeatpumpCode.codes.values()]
+        speed_descriptions = [d for d in SENSORS if d.key == SensorKey.COMPRESSOR_SPEED]
+        assert len(speed_descriptions) == 2
+        for model in models:
+            for max_frequency in (0, 105):
+                coord = _make_coordinator(
+                    calculations={
+                        "ID_WEB_Freq_VD": 0,
+                        "ID_WEB_Code_WP_akt": model,
+                        "ID_WEB_Freq_VD_Max": max_frequency,
+                    },
+                    parameters={"ID_Einst_Medium_Waermequelle": 2},
+                )
+                active = [d for d in speed_descriptions if coord.entity_active(d)]
+                assert len(active) <= 1, (model, max_frequency)
 
     @pytest.mark.parametrize(
         ("model", "max_frequency", "medium", "expected"),
