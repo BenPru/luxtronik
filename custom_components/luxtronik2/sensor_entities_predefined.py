@@ -158,8 +158,9 @@ SENSORS_INDEX: list[descr_index] = [
 
 # C0184 (fan) by model code (C0078), each raw code next to its decoded name.
 # Items are separated by commas only - names may hold spaces ("LW SEC 2").
-# rpm confirmed on the LP11V (#874), taken for the LP*V family.
-_FAN_RPM_MODELS = "87,88,89,90,LP5V,LP8V,LP11V,LP16V"
+# rpm confirmed on the display of an LP11V and an LW SEC 2 (#874); the LP11V
+# is taken for its LP*V siblings.
+_FAN_RPM_MODELS = "85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V"
 # The fan's control signal in 0.1 V, as the controller display shows it.
 _FAN_VOLT_MODELS = "77,LD9V"
 
@@ -626,12 +627,13 @@ SENSORS: list[descr] = [
     # only on air inverters, 0 on every brine and fixed-speed unit, hence the
     # compressor-speed gate. The library types it rpm, but what it holds
     # depends on the fan, so it is split by model (C0078):
-    # - rpm, confirmed against the display on an LP11V (311 vs 310 rpm) and
-    #   taken for its LP*V siblings: enabled by default.
+    # - rpm, confirmed against the display on an LP11V (311 vs 310 rpm) and an
+    #   LW SEC 2 (600 vs 600 rpm), the LP11V taken for its LP*V siblings:
+    #   enabled by default.
     # - LD9V: the fan's 2-10 V control signal in 0.1 V, as its display shows
     #   it (59 = 5.9 V running, 5 = 0.5 V idle or defrosting): own sensor.
-    # - any other air inverter: rpm as the library says, unconfirmed (LW SEC 2
-    #   reads 600), so disabled by default. It shares the `fan_speed` key with
+    # - any other air inverter: rpm as the library says, unconfirmed, so
+    #   disabled by default. It shares the `fan_speed` key with
     #   the confirmed one - the gates exclude each other - so confirming a model
     #   only adds its code and name to _FAN_RPM_MODELS and keeps the entity ID.
     # The unknown-code case (C0078 None) gets none of the three.

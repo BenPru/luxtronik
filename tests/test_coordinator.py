@@ -798,8 +798,10 @@ class TestEntityActive:
             (89, 91, 2, "rpm"),
             # LD9V (#863/#874): the fan's control signal in volts.
             ("LD9V", 105, 2, "volt"),
-            # LW SEC 2: an air inverter whose rpm nobody has confirmed.
-            ("LW SEC 2", 120, 2, "unconfirmed"),
+            # LW SEC 2 (#874): rpm confirmed on its display - a name with spaces.
+            ("LW SEC 2", 120, 2, "rpm"),
+            # An air inverter whose rpm nobody has confirmed.
+            ("LW SEC", 120, 2, "unconfirmed"),
             # Fixed-speed air (LD5) and a brine inverter: no fan sensor.
             ("LD5", 0, 2, None),
             ("MSW2-9S", 118, 0, None),

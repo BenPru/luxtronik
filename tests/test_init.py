@@ -1781,9 +1781,9 @@ class TestRemoveReplacedFanSpeed:
         ("model", "removed"),
         [
             ("LD9V", True),
-            # rpm, enabled (LP11V) or disabled (LW SEC 2): the entity stays.
+            # rpm, enabled (LP11V) or disabled (LW SEC): the entity stays.
             ("LP11V", False),
-            ("LW SEC 2", False),
+            ("LW SEC", False),
             # Unknown model code: nothing is created, so nothing is touched.
             (None, False),
         ],

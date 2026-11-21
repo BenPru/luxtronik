@@ -1661,9 +1661,10 @@ class TestFanSpeed:
         assert description.native_precision == 0
 
     def test_confirmed_models_are_enabled(self):
-        """rpm confirmed on an LP11V's display, taken for its LP*V siblings."""
+        """rpm confirmed on the display of an LP11V (taken for its LP*V
+        siblings) and an LW SEC 2."""
         assert _fan_rpm(enabled=True).entity_active == (
-            (LC.C0078_MODEL_CODE, "in 87,88,89,90,LP5V,LP8V,LP11V,LP16V"),
+            (LC.C0078_MODEL_CODE, "in 85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V"),
         )
 
     def test_other_air_inverters_start_disabled(self):
@@ -1673,7 +1674,7 @@ class TestFanSpeed:
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
             (
                 LC.C0078_MODEL_CODE,
-                "not_in 87,88,89,90,LP5V,LP8V,LP11V,LP16V,77,LD9V",
+                "not_in 85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V,77,LD9V",
             ),
         )
 
