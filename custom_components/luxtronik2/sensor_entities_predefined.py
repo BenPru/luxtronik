@@ -609,7 +609,7 @@ SENSORS: list[descr] = [
         native_precision=1,
         # Inverters that are not air-source: C0238 (maximum compressor
         # frequency) is 0 on every fixed-speed unit in the corpus and stays
-        # set while every brine inverter in it is idle; P0975 reads 0 on every brine
+        # set while its brine inverters idle; P0975 reads 0 on every brine
         # inverter, 2 on every air one. `!= 2` rather than `== 0`, so an
         # unseen P0975 value still gets this sensor.
         entity_active=(
@@ -628,8 +628,12 @@ SENSORS: list[descr] = [
         native_precision=0,
         # Known air inverters by model, whatever the compressor is doing: an
         # idle LP8V reads C0238 = 0, so a start while idle used to miss the
-        # sensor for the whole session (#881).
-        entity_active=((LC.C0078_MODEL_CODE, f"in {_AIR_INVERTER_MODELS}"),),
+        # sensor for the whole session (#881). P0975 is a setting, not a
+        # state, and keeps this exclusive with the frequency sensor.
+        entity_active=(
+            (LC.C0078_MODEL_CODE, f"in {_AIR_INVERTER_MODELS}"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        ),
     ),
     descr(
         key=SensorKey.COMPRESSOR_SPEED,

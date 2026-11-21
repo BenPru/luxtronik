@@ -1625,7 +1625,10 @@ class TestCompressorSpeed:
             assert description.entity_registry_enabled_default is None
             assert description.luxtronik_key == LC.C0231_PUMP_FREQUENCY
             assert description.native_unit_of_measurement == "rpm"
-        assert by_model.entity_active == ((LC.C0078_MODEL_CODE, f"in {models}"),)
+        assert by_model.entity_active == (
+            (LC.C0078_MODEL_CODE, f"in {models}"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        )
         assert fallback.entity_active == (
             (LC.C0078_MODEL_CODE, f"not_in {models}"),
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),

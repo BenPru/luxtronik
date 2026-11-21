@@ -769,6 +769,9 @@ class TestEntityActive:
             ),
             # LP8V (#881) idle: C0238 drops to 0, the model still decides.
             ("LP8V", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, True),
+            # A listed model reporting another heat source: the Hz sensor
+            # only - never both.
+            ("LP8V", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 100}, 0, True, False),
             # A raw code matches too; the list holds code and name.
             (88, {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, True),
             # An unlisted air inverter: the C0238 fallback.
