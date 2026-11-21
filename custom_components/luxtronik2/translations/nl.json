@@ -909,6 +909,9 @@
             "fan_speed": {
                 "name": "Ventilatortoerental"
             },
+            "fan_control_signal": {
+                "name": "Ventilatorstuursignaal"
+            },
             "domestic_water": {
                 "name": "Warm water"
             },

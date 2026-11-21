@@ -116,6 +116,15 @@ class TestSensorPredefined:
             assert s.key is not None
             assert s.luxtronik_key is not None
 
+    def test_unique_keys(self):
+        """A key is the entity's unique_id. Only fan_speed is shared: its two
+        descriptions differ in enabled-by-default and their gates exclude each
+        other (test_every_model_gets_at_most_one_fan_sensor)."""
+        keys = [s.key for s in SENSORS]
+        shared = {key for key in keys if keys.count(key) > 1}
+        assert shared == {SensorKey.FAN_SPEED}
+        assert keys.count(SensorKey.FAN_SPEED) == 2
+
 
 class TestNumberPredefined:
     def test_has_entries(self):
@@ -286,17 +295,21 @@ class TestVisibilityGates:
 
     def test_every_entity_active_formula_parses(self):
         """A formula that does not parse logs a warning and then falls
-        through to True - the entity is created on every install. `in 3, 4`
-        (a space after the comma) is the easy way to get there.
+        through to True - the entity is created on every install. An empty
+        list item (`in 3,,4`, a trailing comma) is the easy way to get there.
         """
         offenders = []
         for descr in _all_descriptions():
             for _register, formula in descr.entity_active:
-                parts = formula.split()
+                parts = formula.split(maxsplit=1)
                 if (
                     len(parts) != 2
-                    or parts[0] not in {"==", "!=", "<", "<=", ">", ">=", "in"}
-                    or (parts[0] == "in" and "" in parts[1].split(","))
+                    or parts[0]
+                    not in {"==", "!=", "<", "<=", ">", ">=", "in", "not_in"}
+                    or (
+                        parts[0] in {"in", "not_in"}
+                        and "" in [item.strip() for item in parts[1].split(",")]
+                    )
                 ):
                     offenders.append((type(descr).__name__, descr.key, formula))
         assert offenders == []

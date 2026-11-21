@@ -52,7 +52,6 @@ from .const import (
     SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
-from .model import LuxtronikSensorDescription
 from .number_entities_predefined import NUMBER_SENSORS
 from .sensor_entities_predefined import SENSORS
 
@@ -132,6 +131,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
     await _async_remove_undetected_solar_entities(hass, entry, coordinator)
     await _async_remove_replaced_compressor_frequency(hass, entry, coordinator)
+    await _async_remove_replaced_fan_speed(hass, entry, coordinator)
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
@@ -664,40 +664,77 @@ async def _async_remove_withdrawn_ventilation_schedule_entities(
             )
 
 
+async def _async_remove_replaced_sensor(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    coordinator: LuxtronikCoordinator,
+    replaced: SK,
+    replacement: SK,
+    reason: str,
+) -> None:
+    """Drop a sensor entity that another sensor replaces on this unit.
+
+    A released sensor whose gate is later narrowed leaves its registry entry
+    behind as "no longer provided" on the units it no longer covers. Gated on
+    live detection like the solar cleanup below.
+
+    Removing is destructive (it drops the user's name, area and labels), so it
+    only happens when the live gates say the replacement is created and the
+    replaced sensor is not. A unit whose gate registers are missing keeps
+    everything.
+    """
+
+    def active(key: SK) -> bool:
+        # A key can have several descriptions with exclusive gates (fan_speed).
+        return any(coordinator.entity_active(d) for d in SENSORS if d.key == key)
+
+    if not active(replacement) or active(replaced):
+        return
+    unique_id = f"{P.SENSOR}.{config_entry.data[CONF_HA_SENSOR_PREFIX]}_{replaced}"
+    ent_reg = async_get(hass)
+    entity_id = ent_reg.async_get_entity_id(P.SENSOR, DOMAIN, unique_id)
+    if entity_id is not None:
+        ent_reg.async_remove(entity_id)
+        LOGGER.info("Removed %s - %s", entity_id, reason)
+
+
 async def _async_remove_replaced_compressor_frequency(
     hass: HomeAssistant, config_entry: ConfigEntry, coordinator: LuxtronikCoordinator
 ) -> None:
     """Drop the Hz compressor sensor where the rpm one replaces it (#863).
 
     2026.11.15 created "Compressor frequency" (Hz), enabled by default, on
-    every inverter. Air inverters now get "Compressor speed" (rpm) instead, so
-    their Hz entity would linger as "no longer provided". Gated on live
-    detection like the solar cleanup below.
-
-    Removing is destructive (it drops the user's name, area and labels), so it
-    only happens when the live gates say the rpm sensor is created and the Hz
-    one is not. A unit whose gate registers are missing keeps everything.
+    every inverter. Air inverters now get "Compressor speed" (rpm) instead.
     """
-
-    def description(key: SK) -> LuxtronikSensorDescription:
-        return next(d for d in SENSORS if d.key == key)
-
-    if not coordinator.entity_active(
-        description(SK.COMPRESSOR_SPEED)
-    ) or coordinator.entity_active(description(SK.PUMP_FREQUENCY)):
-        return
-    unique_id = (
-        f"{P.SENSOR}.{config_entry.data[CONF_HA_SENSOR_PREFIX]}_{SK.PUMP_FREQUENCY}"
+    await _async_remove_replaced_sensor(
+        hass,
+        config_entry,
+        coordinator,
+        SK.PUMP_FREQUENCY,
+        SK.COMPRESSOR_SPEED,
+        "an air inverter reports its compressor speed in rpm, "
+        "see the new Compressor speed sensor",
     )
-    ent_reg = async_get(hass)
-    entity_id = ent_reg.async_get_entity_id(P.SENSOR, DOMAIN, unique_id)
-    if entity_id is not None:
-        ent_reg.async_remove(entity_id)
-        LOGGER.info(
-            "Removed %s - an air inverter reports its compressor speed in rpm, "
-            "see the new Compressor speed sensor",
-            entity_id,
-        )
+
+
+async def _async_remove_replaced_fan_speed(
+    hass: HomeAssistant, config_entry: ConfigEntry, coordinator: LuxtronikCoordinator
+) -> None:
+    """Drop the rpm fan sensor where the control-signal one replaces it (#874).
+
+    2026.11.18 created "Fan speed" (rpm, disabled by default) on every air
+    inverter. On an LD9V the register holds the fan's control signal in volts,
+    which now has a sensor of its own.
+    """
+    await _async_remove_replaced_sensor(
+        hass,
+        config_entry,
+        coordinator,
+        SK.FAN_SPEED,
+        SK.FAN_CONTROL_SIGNAL,
+        "this heat pump reports its fan as a control signal in volts, "
+        "see the new Fan control signal sensor",
+    )
 
 
 _SOLAR_VISIBILITIES = (

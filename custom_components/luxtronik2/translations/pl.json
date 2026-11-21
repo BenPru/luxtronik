@@ -909,6 +909,9 @@
             "fan_speed": {
                 "name": "Prędkość obrotowa wentylatora"
             },
+            "fan_control_signal": {
+                "name": "Sygnał sterujący wentylatora"
+            },
             "domestic_water": {
                 "name": "Ciepła woda"
             },
