@@ -554,18 +554,30 @@ class TestNormalizeSensorValue:
         result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
         assert result == LuxOperationMode.domestic_water
 
-    def test_compressor_heating_up_with_no_request_line3_maps_to_no_request(self):
+    @pytest.mark.parametrize(
+        ("heater", "expected"),
+        [
+            (False, LuxOperationMode.no_request),
+            # Was renamed compressor_heater by a workaround the library's
+            # mislabel needed; that name never matched the idle check.
+            (True, LuxOperationMode.domestic_water),
+        ],
+    )
+    def test_compressor_heating_up_with_no_request_line3(self, heater, expected):
         """Line 1 code 7 (compressor heating up, which the library called pump
-        forerun) with no_request on line 3 and no add circ pump is no_request."""
+        forerun) counts as idle only while the compressor heater is off."""
         data = make_coordinator_data(
             calculations={
                 "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.compressor_heating_up,
                 "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
                 "ID_WEB_ZUPout": False,
+                "ID_WEB_LIN_VDH_out": heater,
             }
         )
-        result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
-        assert result == LuxOperationMode.no_request
+        result = normalize_sensor_value(
+            LuxOperationMode.domestic_water, data, LC.C0080_STATUS
+        )
+        assert result == expected
 
     @pytest.mark.parametrize(
         "line3",

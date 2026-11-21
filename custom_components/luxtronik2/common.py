@@ -398,8 +398,14 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
         LuxStatus3Option.domestic_water_post_heating,
         LuxStatus3Option.pressure_compensation,
     ]
+    # With the compressor heater on, raw 7 used to be renamed compressor_heater,
+    # which this check never matched; keep it that way.
+    preheating = status_line1 == LuxStatus1Option.compressor_heating_up and bool(
+        get_sensor_data(coordinator, LC.C0182_COMPRESSOR_HEATER)
+    )
     if (
         status_line1 in s1_workaround
+        and not preheating
         and status_line3 in s3_workaround
         and not add_circ_pump
     ):

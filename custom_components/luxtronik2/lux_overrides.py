@@ -842,7 +842,8 @@ def update_Luxtronik_StatusLineCodes():
     connection" and a compressor heating up (7) read "pump forerun". A V1.77
     dump in the corpus confirms code 4: five high-pressure faults in a row, the
     compressor off, line 1 4 and lines 2 and 3 on their (then unknown) fault
-    codes. Lines 2 and 3 also gain the codes the library lacks.
+    codes. Lines 2 and 3 also gain the codes the library lacks, and line 3
+    code 13 loses the library's misspelling of "energy", which matched no option.
     """
     MainMenuStatusLine1.codes = {
         0: "heatpump running",

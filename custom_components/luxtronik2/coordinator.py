@@ -1414,10 +1414,10 @@ async def connect_and_get_coordinator(
         warn_on_unknown_selection_codes()
         _OVERRIDES_APPLIED = True
         LOGGER.info(
-            "Library overrides applied (HeatpumpCodes, SwitchoffCodes, StatusLineCodes, "
-            "Parameters, "
-            "instance data isolation, parsed block length recording, unknown "
-            "visibility naming, unknown selection code warning)."
+            "Library overrides applied (HeatpumpCodes, SwitchoffCodes, "
+            "StatusLineCodes, Parameters, instance data isolation, parsed "
+            "block length recording, unknown visibility naming, unknown "
+            "selection code warning)."
         )
 
     config_data: dict[str, Any] = dict(

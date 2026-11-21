@@ -782,7 +782,7 @@
                     "heatpump_idle": "De warmtepomp is inactief",
                     "heatpump_coming": "De warmtepomp start",
                     "heatpump_shutdown": "De warmtepomp schakelt uit",
-                    "errorcode_slot_0": "Foutcode warmtepomp in slot 0",
+                    "errorcode_slot_0": "Storing",
                     "pump_forerun": "Pompvoorloop",
                     "defrost": "Ontdooien",
                     "waiting_on_lin_connection": "Wacht op LIN-verbinding",

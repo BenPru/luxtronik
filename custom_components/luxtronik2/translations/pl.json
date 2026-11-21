@@ -782,7 +782,7 @@
                     "heatpump_idle": "Pompa ciepła jest nieaktywna",
                     "heatpump_coming": "Pompa ciepła jest uruchamiana",
                     "heatpump_shutdown": "Pompa ciepła wyłącza się",
-                    "errorcode_slot_0": "Kod błędu pompy ciepła w gnieździe 0",
+                    "errorcode_slot_0": "Awaria",
                     "pump_forerun": "Rozbieg pompy",
                     "defrost": "Rozmrażanie",
                     "waiting_on_lin_connection": "Oczekiwanie na połączenie LIN",

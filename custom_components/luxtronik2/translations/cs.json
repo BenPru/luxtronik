@@ -782,7 +782,7 @@
                     "heatpump_idle": "Tepelné čerpadlo je v klidovém režimu",
                     "heatpump_coming": "Tepelné čerpadlo se spouští",
                     "heatpump_shutdown": "Tepelné čerpadlo vypíná",
-                    "errorcode_slot_0": "Chybový kód tepelného čerpadla ve slotu 0",
+                    "errorcode_slot_0": "Porucha",
                     "pump_forerun": "Předehřev čerpadla",
                     "defrost": "Odmrazování",
                     "waiting_on_lin_connection": "Čekání na připojení LIN",

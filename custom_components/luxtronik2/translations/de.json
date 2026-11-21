@@ -782,7 +782,7 @@
                     "heatpump_idle": "Die Wärmepumpe ist im Leerlauf",
                     "heatpump_coming": "Die Wärmepumpe startet",
                     "heatpump_shutdown": "Die Wärmepumpe schaltet ab",
-                    "errorcode_slot_0": "Wärmepumpe Fehlercode in Schacht 0",
+                    "errorcode_slot_0": "Störung",
                     "pump_forerun": "Pumpenvorlauf",
                     "defrost": "Taut ab",
                     "waiting_on_lin_connection": "Wartet auf LIN Verbindung",

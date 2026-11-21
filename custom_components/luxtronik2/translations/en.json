@@ -782,7 +782,7 @@
                     "heatpump_idle": "The heatpump is idle",
                     "heatpump_coming": "The heatpump is coming",
                     "heatpump_shutdown": "The heatpump is shutting down",
-                    "errorcode_slot_0": "Heatpump error code in slot 0",
+                    "errorcode_slot_0": "Fault",
                     "pump_forerun": "Pump forerun",
                     "defrost": "Defrost",
                     "waiting_on_lin_connection": "Waiting on LIN connection",

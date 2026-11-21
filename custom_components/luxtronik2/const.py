@@ -278,8 +278,9 @@ class LuxStatus1Option(StrEnum):
     defrost = "defrost"
     waiting_on_lin_connection = "waiting_on_lin_connection"
     compressor_heating_up = "compressor_heating_up"
-    # No longer decoded since the firmware's own table replaced the library's
-    # (raw 7 is "compressor heating up"); kept so recorded history stays valid.
+    # Neither is produced any more: the firmware's own table replaced the
+    # library's (raw 7 is "compressor heating up"), and compressor_heater came
+    # from a workaround for that mislabel. Kept so recorded history stays valid.
     pump_forerun = "pump_forerun"
     compressor_heater = "compressor_heater"
 

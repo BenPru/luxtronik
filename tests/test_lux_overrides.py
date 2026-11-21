@@ -66,6 +66,8 @@ class TestUpdateLuxtronikStatusLineCodes:
         lux_overrides.update_Luxtronik_StatusLineCodes()
         codes = MainMenuStatusLine3.codes
         assert codes[0] == "heating"
+        # The library misspells "energy" here, which matched no option.
+        assert codes[13] == "heating external energy source"
         assert codes[17] == "second heat generator 1 active"
         assert {k: codes[k] for k in (15, 18, 19, 20)} == {
             15: "fault",
@@ -91,22 +93,21 @@ class TestUpdateLuxtronikStatusLineCodes:
         from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
 
         lux_overrides.update_Luxtronik_StatusLineCodes()
-        translations = json.loads(
-            (
-                Path(__file__).resolve().parent.parent
-                / "custom_components"
-                / "luxtronik2"
-                / "translations"
-                / "en.json"
-            ).read_text(encoding="utf-8")
+        folder = (
+            Path(__file__).resolve().parent.parent
+            / "custom_components"
+            / "luxtronik2"
+            / "translations"
         )
-        states = translations["entity"]["sensor"][key]["state"]
         if options is None:
             options = set(next(d for d in SENSORS if d.key == key).options or ())
-        for name in datatype.codes.values():
-            value = name.replace(" ", "_").replace("/", "_").lower()
-            assert value in options, value
-            assert value in states, value
+        for lang in ("en", "de", "nl", "cs", "pl"):
+            translations = json.loads((folder / f"{lang}.json").read_text("utf-8"))
+            states = translations["entity"]["sensor"][key]["state"]
+            for name in datatype.codes.values():
+                value = name.replace(" ", "_").replace("/", "_").lower()
+                assert value in options, value
+                assert value in states, (lang, value)
 
 
 class TestUpdateLuxtronikHeatpumpCodes:
