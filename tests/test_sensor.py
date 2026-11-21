@@ -1624,31 +1624,82 @@ class TestCompressorSpeed:
         )
 
 
-def _fan_speed_description() -> LuxtronikSensorDescription:
-    return next(d for d in SENSORS if d.key == SensorKey.FAN_SPEED)
+def _fan_descriptions() -> list[LuxtronikSensorDescription]:
+    return [d for d in SENSORS if d.luxtronik_key == LC.C0184_FAN_SPEED]
+
+
+def _fan_rpm(*, enabled: bool) -> LuxtronikSensorDescription:
+    return next(
+        d
+        for d in _fan_descriptions()
+        if d.key == SensorKey.FAN_SPEED
+        and (d.entity_registry_enabled_default is None) is enabled
+    )
+
+
+def _fan_control_signal() -> LuxtronikSensorDescription:
+    return next(d for d in SENSORS if d.key == SensorKey.FAN_CONTROL_SIGNAL)
 
 
 class TestFanSpeed:
-    """C0184 ID_WEB_HZIO_VEN, the heat-source fan of an air unit in rpm, as
-    the library types it (#874). A plain pass-through, so only the
-    declaration is tested; reading values is covered generically."""
+    """C0184 ID_WEB_HZIO_VEN, the heat-source fan of an air unit (#874). The
+    library types it rpm, but the LD9V reports its fan's control signal in
+    0.1 V, so the model decides. Which unit gets which is tested in
+    test_coordinator; here only the declarations."""
 
-    def test_description_is_rpm_without_conversion(self):
-        description = _fan_speed_description()
-        assert description.luxtronik_key == LC.C0184_FAN_SPEED
+    def test_there_are_three_fan_sensors(self):
+        assert len(_fan_descriptions()) == 3
+
+    @pytest.mark.parametrize("enabled", [True, False])
+    def test_rpm_without_conversion(self, enabled):
+        description = _fan_rpm(enabled=enabled)
         assert description.state_class == SensorStateClass.MEASUREMENT
         assert description.rpm_above is None
+        assert description.factor is None
         assert description.device_class is None
         assert description.native_unit_of_measurement == "rpm"
         assert description.native_precision == 0
 
-    def test_exists_on_air_inverters_only_and_starts_disabled(self):
-        """Non-zero in the corpus only where the rpm compressor sensor
-        exists. Disabled by default until the low LD9V reading is confirmed
-        against a controller display."""
-        description = _fan_speed_description()
-        assert description.entity_registry_enabled_default is False
-        assert description.entity_active == (
+    def test_confirmed_models_are_enabled(self):
+        """rpm confirmed on the display of an LP11V (taken for its LP*V
+        siblings) and an LW SEC 2."""
+        assert _fan_rpm(enabled=True).entity_active == (
+            (LC.C0078_MODEL_CODE, "in 85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V"),
+        )
+
+    def test_other_air_inverters_start_disabled(self):
+        assert _fan_rpm(enabled=False).entity_registry_enabled_default is False
+        assert _fan_rpm(enabled=False).entity_active == (
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+            (
+                LC.C0078_MODEL_CODE,
+                "not_in 85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V,77,LD9V",
+            ),
         )
+
+
+class TestFanControlSignal:
+    """The LD9V shows its fan as a 2-10 V control output: 0.5 V idle or
+    defrosting, 5.9 V and up while running (#863), read as 5 and 59."""
+
+    @staticmethod
+    def _value(raw):
+        data = make_coordinator_data(calculations={"ID_WEB_HZIO_VEN": raw})
+        entity = _make_sensor(_fan_control_signal(), data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_running_reading_is_volts(self):
+        assert self._value(59) == pytest.approx(5.9)
+
+    def test_idle_reading_is_volts(self):
+        assert self._value(5) == pytest.approx(0.5)
+
+    def test_description(self):
+        description = _fan_control_signal()
+        assert description.device_class == SensorDeviceClass.VOLTAGE
+        assert description.native_unit_of_measurement == "V"
+        assert description.native_precision == 1
+        assert description.entity_registry_enabled_default is False
+        assert description.entity_active == ((LC.C0078_MODEL_CODE, "in 77,LD9V"),)

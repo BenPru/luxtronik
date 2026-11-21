@@ -1769,6 +1769,54 @@ class TestRemoveReplacedCompressorFrequency:
         ent_reg.async_remove.assert_not_called()
 
 
+class TestRemoveReplacedFanSpeed:
+    """2026.11.18 created the rpm fan sensor on every air inverter. On an LD9V
+    the register is the fan's control signal in volts, which now has its own
+    sensor, so the rpm entity is removed there (#874). Every other air
+    inverter keeps `fan_speed` - the key both rpm descriptions share."""
+
+    _UNIQUE_ID = "sensor.luxtronik2_fan_speed"
+
+    @pytest.mark.parametrize(
+        ("model", "removed"),
+        [
+            ("LD9V", True),
+            # rpm, enabled (LP11V) or disabled (LW SEC): the entity stays.
+            ("LP11V", False),
+            ("LW SEC", False),
+            # Unknown model code: nothing is created, so nothing is touched.
+            (None, False),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_removes_only_where_the_control_signal_replaces_it(
+        self, model, removed
+    ):
+        from custom_components.luxtronik2 import _async_remove_replaced_fan_speed
+        from tests.test_coordinator import _make_coordinator
+
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_HZIO_VEN": 59,
+                "ID_WEB_Code_WP_akt": model,
+                "ID_WEB_Freq_VD_Max": 105,
+            },
+            parameters={"ID_Einst_Medium_Waermequelle": 2},
+        )
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.side_effect = lambda _p, _d, uid: (
+            "sensor.heat_pump_fan_speed" if uid == self._UNIQUE_ID else None
+        )
+
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_replaced_fan_speed(MagicMock(), _mock_entry(), coord)
+
+        if removed:
+            ent_reg.async_remove.assert_called_once_with("sensor.heat_pump_fan_speed")
+        else:
+            ent_reg.async_remove.assert_not_called()
+
+
 class TestHomeAssistantVersionGuard:
     """Setup must fail loud on a core older than the integration needs.
 

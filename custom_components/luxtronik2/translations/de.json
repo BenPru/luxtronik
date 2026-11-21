@@ -915,6 +915,9 @@
             "fan_speed": {
                 "name": "Ventilatordrehzahl"
             },
+            "fan_control_signal": {
+                "name": "Ventilator-Steuersignal"
+            },
             "domestic_water": {
                 "name": "Brauchwasser"
             },
