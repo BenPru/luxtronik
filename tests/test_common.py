@@ -545,10 +545,12 @@ class TestNormalizeSensorValue:
         assert result == LuxOperationMode.cooling
 
     def test_status_line3_thermal_desinfection_maps_to_domestic_water(self):
-        """If status_line3 is thermal_desinfection, C0080_STATUS becomes domestic_water."""
+        """If status_line3 is thermal disinfection, C0080_STATUS becomes
+        domestic_water. The register holds the library's spelling, with a space;
+        the check once compared that to the underscore option and never fired."""
         data = make_coordinator_data(
             calculations={
-                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.thermal_desinfection,
+                "ID_WEB_HauptMenuStatus_Zeile3": "thermal desinfection",
             }
         )
         result = normalize_sensor_value(LuxOperationMode.heating, data, LC.C0080_STATUS)
