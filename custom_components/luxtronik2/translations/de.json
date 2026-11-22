@@ -226,14 +226,8 @@
             "efficiency_pump_nominal_voltage": {
                 "name": "Effizienzpumpe Nominal Spannung"
             },
-            "efficiency_pump_nominal_percentage": {
-                "name": "Effizienzpumpe Nominal Prozent"
-            },
             "efficiency_pump_minimal_voltage": {
                 "name": "Effizienzpumpe Minimal Spannung"
-            },
-            "efficiency_pump_minimal_percentage": {
-                "name": "Effizienzpumpe Minimal Prozent"
             },
             "cooling_threshold_temperature": {
                 "name": "minimale Außentemperatur"
@@ -1146,6 +1140,12 @@
             },
             "cop_30d": {
                 "name": "Arbeitszahl 30 Tage"
+            },
+            "efficiency_pump_nominal_percentage": {
+                "name": "Effizienzpumpe Nominal Prozent"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Effizienzpumpe Minimal Prozent"
             }
         },
         "date": {

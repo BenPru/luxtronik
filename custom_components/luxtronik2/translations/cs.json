@@ -223,14 +223,8 @@
             "efficiency_pump_nominal_voltage": {
                 "name": "Nominální napětí účinného čerpadla"
             },
-            "efficiency_pump_nominal_percentage": {
-                "name": "Nominální procento účinného čerpadla"
-            },
             "efficiency_pump_minimal_voltage": {
                 "name": "Minimální napětí účinného čerpadla"
-            },
-            "efficiency_pump_minimal_percentage": {
-                "name": "Minimální procento účinného čerpadla"
             },
             "cooling_threshold_temperature": {
                 "name": "Minimální teplota pro chlazení"
@@ -1146,6 +1140,12 @@
             },
             "cop_30d": {
                 "name": "COP 30 dní"
+            },
+            "efficiency_pump_nominal_percentage": {
+                "name": "Nominální procento účinného čerpadla"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Minimální procento účinného čerpadla"
             }
         },
         "date": {

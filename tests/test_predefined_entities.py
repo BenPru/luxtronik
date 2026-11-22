@@ -108,6 +108,34 @@ class TestSwitchPredefined:
         assert zup.device_key == DeviceKey.heating
 
 
+class TestEfficiencyPump:
+    """P867/P868 are a 0-10 V installer setting on series 1/2 (> 100) but a
+    value the controller rewrites itself every ~2 h on series 3 (<= 100), so
+    only the voltage form is writable; the percentage form is a read-only
+    diagnostic sensor.
+    """
+
+    _REGISTERS = (
+        LuxParameter.P0867_EFFICIENCY_PUMP_NOMINAL,
+        LuxParameter.P0868_EFFICIENCY_PUMP_MINIMAL,
+    )
+
+    def test_only_the_voltage_form_is_writable(self):
+        numbers = [d for d in NUMBER_SENSORS if d.luxtronik_key in self._REGISTERS]
+        assert {d.luxtronik_key for d in numbers} == set(self._REGISTERS)
+        for number in numbers:
+            assert number.entity_active == ((number.luxtronik_key, "> 100"),)
+
+    def test_percentage_form_is_a_read_only_diagnostic_sensor(self):
+        sensors = [d for d in SENSORS if d.luxtronik_key in self._REGISTERS]
+        assert {d.luxtronik_key for d in sensors} == set(self._REGISTERS)
+        for sensor in sensors:
+            assert sensor.entity_active == ((sensor.luxtronik_key, "<= 100"),)
+            assert sensor.native_unit_of_measurement == "%"
+            assert sensor.entity_category == "diagnostic"
+            assert sensor.entity_registry_enabled_default is False
+
+
 class TestSensorPredefined:
     def test_has_entries(self):
         assert len(SENSORS) > 0

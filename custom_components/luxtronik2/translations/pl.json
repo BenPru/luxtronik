@@ -226,14 +226,8 @@
             "efficiency_pump_nominal_voltage": {
                 "name": "Nominalne napięcie pompy wydajnościowej"
             },
-            "efficiency_pump_nominal_percentage": {
-                "name": "Nominalne procento pompy wydajnościowej"
-            },
             "efficiency_pump_minimal_voltage": {
                 "name": "Minimalne napięcie pompy wydajnościowej"
-            },
-            "efficiency_pump_minimal_percentage": {
-                "name": "Minimalne procento pompy wydajnościowej"
             },
             "cooling_start_delay_hours": {
                 "name": "Opóźnienie startu"
@@ -1146,6 +1140,12 @@
             },
             "cop_30d": {
                 "name": "COP 30 dni"
+            },
+            "efficiency_pump_nominal_percentage": {
+                "name": "Nominalne procento pompy wydajnościowej"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Minimalne procento pompy wydajnościowej"
             }
         },
         "date": {

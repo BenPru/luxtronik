@@ -226,14 +226,8 @@
             "efficiency_pump_nominal_voltage": {
                 "name": "Efficiëntie pomp nominaal spanning"
             },
-            "efficiency_pump_nominal_percentage": {
-                "name": "Efficiëntie pomp nominaal percentage"
-            },
             "efficiency_pump_minimal_voltage": {
                 "name": "Efficiëntie pomp minimaal spanning"
-            },
-            "efficiency_pump_minimal_percentage": {
-                "name": "Efficiëntie pomp minimaal percentage"
             },
             "cooling_threshold_temperature": {
                 "name": "Minimale buitentemperatuur"
@@ -1146,6 +1140,12 @@
             },
             "cop_30d": {
                 "name": "COP 30 dagen"
+            },
+            "efficiency_pump_nominal_percentage": {
+                "name": "Efficiëntie pomp nominaal percentage"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Efficiëntie pomp minimaal percentage"
             }
         },
         "date": {

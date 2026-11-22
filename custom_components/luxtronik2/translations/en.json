@@ -226,14 +226,8 @@
             "efficiency_pump_nominal_voltage": {
                 "name": "Efficiency pump nominal voltage"
             },
-            "efficiency_pump_nominal_percentage": {
-                "name": "Efficiency pump nominal percentage"
-            },
             "efficiency_pump_minimal_voltage": {
                 "name": "Efficiency pump minimal voltage"
-            },
-            "efficiency_pump_minimal_percentage": {
-                "name": "Efficiency pump minimal percentage"
             },
             "cooling_threshold_temperature": {
                 "name": "Minimal outdoor temperature"
@@ -1146,6 +1140,12 @@
             },
             "cop_30d": {
                 "name": "COP 30 days"
+            },
+            "efficiency_pump_nominal_percentage": {
+                "name": "Efficiency pump nominal percentage"
+            },
+            "efficiency_pump_minimal_percentage": {
+                "name": "Efficiency pump minimal percentage"
             }
         },
         "date": {
