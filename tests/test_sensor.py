@@ -271,7 +271,7 @@ class TestStatusSensorUpdate:
                 "ID_WEB_VD1out": 1,
                 "ID_WEB_ZW1out": 0,
                 "ID_WEB_HauptMenuStatus_Zeile1": "heatpump_running",
-                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.thermal_desinfection,
+                "ID_WEB_HauptMenuStatus_Zeile3": "thermal desinfection",
                 "ID_WEB_ZUPout": 0,
             },
         )

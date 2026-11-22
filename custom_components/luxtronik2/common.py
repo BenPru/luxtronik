@@ -369,15 +369,14 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
     off). Each ``if`` below is one such workaround. Returns ``value`` unchanged
     when no workaround applies.
     """
-    status_line3_raw = get_sensor_data(
-        coordinator, LC.C0119_STATUS_LINE_3, raw_value=True
-    )
+    # Normalised ("thermal_desinfection"), like the options it is compared to.
+    # The raw library string has spaces, which matched only one-word names.
+    status_line3 = get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
 
-    if status_line3_raw == LuxStatus3Option.thermal_desinfection:
+    if status_line3 == LuxStatus3Option.thermal_desinfection:
         return LuxOperationMode.domestic_water
 
     status_line1 = get_sensor_data(coordinator, LC.C0117_STATUS_LINE_1)
-    status_line3 = get_sensor_data(coordinator, LC.C0119_STATUS_LINE_3)
     add_circ_pump = get_sensor_data(coordinator, LC.C0047_ADDITIONAL_CIRCULATION_PUMP)
     s1_workaround: list[str] = [
         LuxStatus1Option.heatpump_idle,
@@ -424,10 +423,7 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
         return LuxOperationMode.domestic_water
 
     if value == LuxOperationMode.no_request:
-        if (
-            status_line3_raw is not None
-            and status_line3_raw == LuxStatus3Option.cooling
-        ):
+        if status_line3 == LuxStatus3Option.cooling:
             return LuxOperationMode.cooling
 
         # Passive cooling reads as no_request + heating, exactly like an idle
@@ -435,8 +431,7 @@ def _derive_operation_mode(value: Any, coordinator: LuxtronikCoordinatorData) ->
         # tells them apart; temperatures cannot (#826). See
         # LuxtronikCoordinator._update_cooling_counter().
         if (
-            status_line3_raw is not None
-            and status_line3_raw == LuxStatus3Option.heating
+            status_line3 == LuxStatus3Option.heating
             and coordinator.cooling_counter_running
         ):
             return LuxOperationMode.cooling
