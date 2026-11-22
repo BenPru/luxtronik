@@ -1,8 +1,9 @@
 """Predefined timer-program schedule text entities.
 
 Covers the DHW (Bw), heating (Hkr), ventilation (Luf) and circulation pump
-(ZIP) circuits, plus the inverter silent mode (see `_SILENT_MODE_ENTITIES`). The remaining timer-program circuits (Mk1/Mk2/Mk3/Swb) follow
-the DHW and heating pattern and need one `_TimerCircuit` instance plus translations
+(ZIP) circuits, plus the inverter silent mode (see `_SILENT_MODE_ENTITIES`).
+The remaining timer-program circuits (Mk1/Mk2/Mk3/Swb) follow the DHW and
+heating pattern and need one `_TimerCircuit` instance plus translations
 each; see the "lux-timer-program-parameter-layout" memory for their
 selector/prefix values.
 

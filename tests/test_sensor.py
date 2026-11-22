@@ -1690,6 +1690,16 @@ class TestDefrostDemand:
         assert description.state_class == SensorStateClass.MEASUREMENT
         assert description.native_precision == 0
 
+    def test_no_description_sets_both_countdown_and_factor(self):
+        """`countdown_percent_of` replaces `factor`; setting both would drop
+        the factor silently."""
+        assert not [
+            d.key
+            for d in SENSORS
+            if d.countdown_percent_of is not None
+            and (d.factor is not None or d.factor_by_firmware_series is not None)
+        ]
+
     def test_remaining_time_attribute(self):
         """The countdown itself, as h:mm. It changes every poll, so it is
         kept out of the recorder."""
