@@ -77,18 +77,9 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         visibility=LV.V0239_EFFICIENCY_PUMP_NOMINAL,
         entity_active=((LP.P0867_EFFICIENCY_PUMP_NOMINAL, "> 100"),),
     ),
-    LuxtronikNumberDescription(
-        key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
-        luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
-        native_unit_of_measurement=PERCENTAGE,
-        native_min_value=0,
-        native_max_value=100,
-        native_step=1,
-        mode=NumberMode.BOX,
-        entity_category=EntityCategory.CONFIG,
-        visibility=LV.V0239_EFFICIENCY_PUMP_NOMINAL,
-        entity_active=((LP.P0867_EFFICIENCY_PUMP_NOMINAL, "<= 100"),),
-    ),
+    # Only the voltage form is writable. Below 101 (series 3) the controller
+    # rewrites P867/P868 itself; see the read-only sensors in
+    # sensor_entities_predefined.
     LuxtronikNumberDescription(
         key=SensorKey.EFFICIENCY_PUMP_MINIMAL_VOLTAGE,
         luxtronik_key=LP.P0868_EFFICIENCY_PUMP_MINIMAL,
@@ -102,18 +93,6 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         entity_category=EntityCategory.CONFIG,
         visibility=LV.V0240_EFFICIENCY_PUMP_MINIMAL,
         entity_active=((LP.P0868_EFFICIENCY_PUMP_MINIMAL, "> 100"),),
-    ),
-    LuxtronikNumberDescription(
-        key=SensorKey.EFFICIENCY_PUMP_MINIMAL_PERCENTAGE,
-        luxtronik_key=LP.P0868_EFFICIENCY_PUMP_MINIMAL,
-        native_unit_of_measurement=PERCENTAGE,
-        native_min_value=0,
-        native_max_value=100,
-        native_step=1,
-        mode=NumberMode.BOX,
-        entity_category=EntityCategory.CONFIG,
-        visibility=LV.V0240_EFFICIENCY_PUMP_MINIMAL,
-        entity_active=((LP.P0868_EFFICIENCY_PUMP_MINIMAL, "<= 100"),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEAT_SOURCE_INPUT_TEMPERATURE_MIN,

@@ -728,6 +728,30 @@ SENSORS: list[descr] = [
         native_unit_of_measurement=PERCENTAGE,
         entity_registry_enabled_default=False,
     ),
+    # Efficiency pump nominal/minimal on series 3 (values <= 100; series 1/2
+    # hold 3.5-10 V there as a writable installer setting, see
+    # number_entities_predefined). Read-only: the controller rewrites P867
+    # itself every ~2 h, so a write is at best temporary. While heating it
+    # tracks C0241 within ~2 points, but it also updates with the pump off to
+    # values C0241 does not explain, so the name makes no pump-speed claim.
+    descr(
+        key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
+        luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=PERCENTAGE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        entity_active=((LP.P0867_EFFICIENCY_PUMP_NOMINAL, "<= 100"),),
+    ),
+    descr(
+        key=SensorKey.EFFICIENCY_PUMP_MINIMAL_PERCENTAGE,
+        luxtronik_key=LP.P0868_EFFICIENCY_PUMP_MINIMAL,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=PERCENTAGE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        entity_active=((LP.P0868_EFFICIENCY_PUMP_MINIMAL, "<= 100"),),
+    ),
     descr(
         key=SensorKey.CIRCULATION_PUMP_DELTA_TARGET,
         luxtronik_key=LC.C0242_CIRCULATION_PUMP_DELTA_TARGET,

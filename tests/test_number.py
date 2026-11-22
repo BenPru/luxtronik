@@ -11,7 +11,6 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
     CONF_TIMEOUT,
-    PERCENTAGE,
     UnitOfElectricPotential,
     UnitOfTemperature,
 )
@@ -620,25 +619,6 @@ class TestEfficiencyPump:
         entity._handle_coordinator_update(data)
 
         assert entity._attr_native_value == 5.0
-
-    def test_efficiency_pump_percentage(self):
-        data = make_coordinator_data(
-            parameters={"ID_Einst_Effizienzpumpe_Nominal_akt": 50}
-        )
-        desc_percent = LuxtronikNumberDescription(
-            key=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
-            luxtronik_key=LP.P0867_EFFICIENCY_PUMP_NOMINAL,
-            translation_key_name=SensorKey.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
-            native_unit_of_measurement=PERCENTAGE,
-            native_min_value=0,
-            native_max_value=100,
-            native_step=1,
-            mode=NumberMode.BOX,
-        )
-        entity = _make_number_entity(data, desc_percent)
-        entity._handle_coordinator_update(data)
-
-        assert entity._attr_native_value == 50.0
 
     def test_efficiency_pump_visibility_formula_high_value(self):
         data = make_coordinator_data(

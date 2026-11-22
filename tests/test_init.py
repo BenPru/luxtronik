@@ -1446,6 +1446,54 @@ class TestRemoveLegacySmartGridSwitch:
         ent_reg.async_remove.assert_not_called()
 
 
+class TestRemoveEfficiencyPumpPercentageNumbers:
+    """The series-3 efficiency pump percentages became read-only sensors.
+
+    No unit gets the number entities any more, so their registry entries
+    would linger as "no longer provided" on every series-3 install.
+    """
+
+    _UNIQUE_IDS = {
+        "number.luxtronik2_efficiency_pump_nominal_percentage": "number.a",
+        "number.luxtronik2_efficiency_pump_minimal_percentage": "number.b",
+    }
+
+    @pytest.mark.asyncio
+    async def test_removes_both_number_entities(self):
+        from custom_components.luxtronik2 import (
+            _async_remove_efficiency_pump_percentage_numbers,
+        )
+
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.side_effect = lambda platform, domain, uid: (
+            self._UNIQUE_IDS.get(uid)
+            if (platform, domain) == ("number", DOMAIN)
+            else None
+        )
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_efficiency_pump_percentage_numbers(
+                MagicMock(), _mock_entry()
+            )
+        assert sorted(c.args[0] for c in ent_reg.async_remove.call_args_list) == [
+            "number.a",
+            "number.b",
+        ]
+
+    @pytest.mark.asyncio
+    async def test_does_nothing_when_never_registered(self):
+        from custom_components.luxtronik2 import (
+            _async_remove_efficiency_pump_percentage_numbers,
+        )
+
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.return_value = None
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_efficiency_pump_percentage_numbers(
+                MagicMock(), _mock_entry()
+            )
+        ent_reg.async_remove.assert_not_called()
+
+
 # ===========================================================================
 # _async_remove_withdrawn_ventilation_schedule_entities
 # ===========================================================================

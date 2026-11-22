@@ -129,6 +129,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     await _async_delete_legacy_devices(hass, entry, coordinator)
     await _async_remove_legacy_smart_grid_switch(hass, entry)
     await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
+    await _async_remove_efficiency_pump_percentage_numbers(hass, entry)
     await _async_remove_undetected_solar_entities(hass, entry, coordinator)
     await _async_remove_replaced_compressor_frequency(hass, entry, coordinator)
     await _async_remove_replaced_fan_speed(hass, entry, coordinator)
@@ -660,6 +661,34 @@ async def _async_remove_withdrawn_ventilation_schedule_entities(
             LOGGER.info(
                 "Removed the withdrawn ventilation schedule entity %s - see "
                 "TIMER_SCHEDULES.md for why it is gone",
+                entity_id,
+            )
+
+
+async def _async_remove_efficiency_pump_percentage_numbers(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> None:
+    """Drop the series-3 efficiency pump percentage number entities.
+
+    2026.06 made P867/P868 writable percentages on series 3 (values <= 100),
+    enabled by default. There the controller rewrites the register itself
+    every ~2 h, so they are now read-only sensors under the same keys. No
+    unit gets the number entities any more, so this is unconditional, like
+    the SmartGrid switch above.
+    """
+    prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
+    ent_reg = async_get(hass)
+    for key in (
+        SK.EFFICIENCY_PUMP_NOMINAL_PERCENTAGE,
+        SK.EFFICIENCY_PUMP_MINIMAL_PERCENTAGE,
+    ):
+        unique_id = f"{P.NUMBER}.{prefix}_{key}"
+        entity_id = ent_reg.async_get_entity_id(P.NUMBER, DOMAIN, unique_id)
+        if entity_id is not None:
+            ent_reg.async_remove(entity_id)
+            LOGGER.info(
+                "Removed %s - the controller sets this value itself, it is "
+                "now a read-only sensor",
                 entity_id,
             )
 
