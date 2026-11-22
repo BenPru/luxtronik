@@ -53,6 +53,7 @@ from custom_components.luxtronik2.sensor import (
     LuxtronikStatusSensorEntity,
 )
 from custom_components.luxtronik2.sensor_entities_predefined import (
+    _AIR_INVERTER_MODELS,
     SENSORS,
     SENSORS_ROOM_THERMOSTAT_TYPE,
 )
@@ -1622,11 +1623,22 @@ class TestCompressorSpeed:
         assert description.native_precision == 0
 
     def test_exists_and_is_enabled_on_air_inverters_only(self):
-        """P0975 reads 2 on every air inverter. A pump gets either this sensor
-        or the frequency one, never both, so it is enabled by default."""
-        description = _compressor_speed_description()
-        assert description.entity_registry_enabled_default is None
-        assert description.entity_active == (
+        """Known air inverter models by model code, so an idle start still
+        creates it (#881); any other model when C0238 marks an inverter and
+        P0975 reads 2, as on every air inverter. A pump gets either this
+        sensor or the frequency one, never both, so it is enabled by default."""
+        by_model, fallback = (d for d in SENSORS if d.key == SensorKey.COMPRESSOR_SPEED)
+        models = _AIR_INVERTER_MODELS
+        for description in (by_model, fallback):
+            assert description.entity_registry_enabled_default is None
+            assert description.luxtronik_key == LC.C0231_PUMP_FREQUENCY
+            assert description.native_unit_of_measurement == "rpm"
+        assert by_model.entity_active == (
+            (LC.C0078_MODEL_CODE, f"in {models}"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        )
+        assert fallback.entity_active == (
+            (LC.C0078_MODEL_CODE, f"not_in {models}"),
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         )

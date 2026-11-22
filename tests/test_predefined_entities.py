@@ -117,13 +117,15 @@ class TestSensorPredefined:
             assert s.luxtronik_key is not None
 
     def test_unique_keys(self):
-        """A key is the entity's unique_id. Only fan_speed is shared: its two
-        descriptions differ in enabled-by-default and their gates exclude each
-        other (test_every_model_gets_at_most_one_fan_sensor)."""
+        """A key is the entity's unique_id. Only fan_speed and compressor_speed
+        are shared, each by two descriptions whose gates exclude each other
+        (test_every_model_gets_at_most_one_fan_sensor,
+        test_compressor_speed_gates_are_exclusive)."""
         keys = [s.key for s in SENSORS]
         shared = {key for key in keys if keys.count(key) > 1}
-        assert shared == {SensorKey.FAN_SPEED}
+        assert shared == {SensorKey.FAN_SPEED, SensorKey.COMPRESSOR_SPEED}
         assert keys.count(SensorKey.FAN_SPEED) == 2
+        assert keys.count(SensorKey.COMPRESSOR_SPEED) == 2
 
 
 class TestNumberPredefined:
