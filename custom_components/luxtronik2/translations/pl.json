@@ -1142,10 +1142,10 @@
                 "name": "COP 30 dni"
             },
             "efficiency_pump_nominal_percentage": {
-                "name": "Nominalne procento pompy wydajnościowej"
+                "name": "Nominalny procent pompy wydajnościowej"
             },
             "efficiency_pump_minimal_percentage": {
-                "name": "Minimalne procento pompy wydajnościowej"
+                "name": "Minimalny procent pompy wydajnościowej"
             }
         },
         "date": {

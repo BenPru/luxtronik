@@ -109,7 +109,7 @@ class TestSwitchPredefined:
 
 
 class TestEfficiencyPump:
-    """P867/P868 are a 0-10 V installer setting on series 1/2 (> 100) but a
+    """P867/P868 are a 3.5-10 V installer setting on series 1/2 (> 100) but a
     value the controller rewrites itself every ~2 h on series 3 (<= 100), so
     only the voltage form is writable; the percentage form is a read-only
     diagnostic sensor.
