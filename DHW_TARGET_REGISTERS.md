@@ -434,8 +434,8 @@ with the integration disabled:
 Consequences for this document: below 88.3 the `number` entity exposes a
 controller-managed value that moves on its own, and is named for it ("Target
 (heat pump coverage)" / "Soll (Deckung WP)", translation key
-`dhw_target_temperature_coverage`; same unique ID); a "target decreases by itself"
-report on such firmware is the controller, not a write, and the first thing to
+`dhw_target_temperature_coverage`; same unique ID); a "target decreases by
+itself" report on such firmware is the controller, not a write, and the first thing to
 check is whether flow/hot-gas hit a limit at the drop. Disabling the
 integration removes the observer, not the effect. He did not attach his dump
 (local network data survived redaction), so V1.81 is still absent from the

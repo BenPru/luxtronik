@@ -518,9 +518,10 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
     # endregion Heating
     # region Domestic water
     # Below minor 88.3 the DHW control works on P0002 "Deckung WP", which the
-    # controller adapts after each run (-1 K when a run misses it, +0.5 K back
-    # towards P0105), so it is named as the coverage value, not the plain
-    # target (#793). Same key, so the unique ID is unchanged.
+    # controller adapts after each run (the reached tank temperature on a
+    # limit stop, -1 K when a run misses it, +0.5 K back towards P0105), so it
+    # is named as the coverage value, not the plain target (#793). Same key,
+    # so the unique ID is unchanged.
     LuxtronikNumberDescription(
         key=SensorKey.DHW_TARGET_TEMPERATURE,
         luxtronik_key=LP.P0002_DHW_TARGET_TEMPERATURE,
