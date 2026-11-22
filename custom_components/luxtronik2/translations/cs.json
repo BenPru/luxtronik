@@ -187,6 +187,9 @@
             "dhw_target_temperature": {
                 "name": "požadovaná teplota TUV"
             },
+            "dhw_target_temperature_coverage": {
+                "name": "požadovaná teplota TUV (krytí TČ)"
+            },
             "dhw_thermal_desinfection_target": {
                 "name": "požadovaná teplota termální dezinfekce TUV"
             },

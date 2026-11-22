@@ -770,6 +770,20 @@ class TestFirmwareGatesAreSeriesAgnostic:
         )
         assert coord._is_version_not_compatible(desc) is False
 
+    def test_dhw_target_legacy_register_named_as_coverage_value(self):
+        """Below 88.3 the entity is P0002 "Deckung WP", which the controller
+        adapts after every DHW run (#793), so it must not carry the plain
+        "Target" name. The unique ID still comes from `key`, so renaming
+        through `translation_key_name` leaves registry entries untouched."""
+        legacy = _number_desc(
+            SensorKey.DHW_TARGET_TEMPERATURE, LP.P0002_DHW_TARGET_TEMPERATURE
+        )
+        modern = _number_desc(
+            SensorKey.DHW_TARGET_TEMPERATURE, LP.P0105_DHW_TARGET_TEMPERATURE
+        )
+        assert legacy.translation_key_name == "dhw_target_temperature_coverage"
+        assert modern.translation_key_name is None
+
     def test_dhw_target_modern_register_active_on_v1_90_0(self):
         """Issue #785: a V1.90.0 unit controls on P0105 and ignores P0002.
 
