@@ -187,6 +187,9 @@
             "dhw_target_temperature": {
                 "name": "Soll"
             },
+            "dhw_target_temperature_coverage": {
+                "name": "Soll (Deckung WP)"
+            },
             "dhw_thermal_desinfection_target": {
                 "name": "Thermische Desinfektion Soll Temperatur"
             },
