@@ -237,8 +237,9 @@ class TestStatusSensorUpdate:
         entity._handle_coordinator_update()
         entity.async_write_ha_state.assert_called()
 
-    def test_workaround_pump_forerun_no_request(self):
-        """When sl1 is pump_forerun and sl3 is no_request, override to no_request."""
+    def test_workaround_compressor_heating_up_no_request(self):
+        """When sl1 is compressor_heating_up (raw 7) and sl3 is no_request,
+        override to no_request."""
         data = make_coordinator_data(
             parameters={
                 "ID_Ba_Hz_akt": "Automatic",
@@ -248,7 +249,7 @@ class TestStatusSensorUpdate:
                 "ID_WEB_WP_BZ_akt": "heating",
                 "ID_WEB_VD1out": 1,
                 "ID_WEB_ZW1out": 0,
-                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.pump_forerun,
+                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.compressor_heating_up,
                 "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
                 "ID_WEB_ZUPout": 0,
             },
@@ -475,6 +476,13 @@ class TestBuildStatusText:
         entity = _make_status_sensor(data)
         result = entity._build_status_text()
         assert result == ""
+
+    def test_returns_empty_in_a_fault(self):
+        """Line 2 code 2 is the error text's second line, not "since"/"in":
+        there is no time span to describe, as when it decoded to None."""
+        data = _status_text_data(**{"ID_WEB_HauptMenuStatus_Zeile2": "fault"})
+        entity = _make_status_sensor(data)
+        assert entity._build_status_text() == ""
 
     def test_returns_full_text_when_all_present(self):
         entity = _make_status_sensor(_status_text_data())

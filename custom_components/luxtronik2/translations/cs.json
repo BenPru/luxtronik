@@ -809,7 +809,7 @@
                     "heatpump_idle": "Tepelné čerpadlo je v klidovém režimu",
                     "heatpump_coming": "Tepelné čerpadlo se spouští",
                     "heatpump_shutdown": "Tepelné čerpadlo vypíná",
-                    "errorcode_slot_0": "Chybový kód tepelného čerpadla ve slotu 0",
+                    "errorcode_slot_0": "Porucha",
                     "pump_forerun": "Předehřev čerpadla",
                     "defrost": "Odmrazování",
                     "waiting_on_lin_connection": "Čekání na připojení LIN",
@@ -822,7 +822,8 @@
                 "state": {
                     "since": "již",
                     "in": "za",
-                    "unknown": "neznámo"
+                    "unknown": "neznámo",
+                    "fault": "porucha"
                 }
             },
             "status_line_3": {
@@ -843,7 +844,11 @@
                     "info_bake_out_program": "informace z programu pečení",
                     "heating_external_energy_source": "ohřev z externího zdroje energie",
                     "domestic_water_external_energy_source": "TUV z externího zdroje energie",
-                    "second_heat_generator_1_active": "druhý generátor tepla 1 aktivní"
+                    "second_heat_generator_1_active": "druhý generátor tepla 1 aktivní",
+                    "fault": "Porucha",
+                    "compressor_heater": "Ohřev kompresoru",
+                    "domestic_water_post_heating": "Dohřev TUV",
+                    "pressure_compensation": "Vyrovnávání tlaku"
                 }
             },
             "heat_source_output": {

@@ -8,6 +8,9 @@ from luxtronik.datatypes import (
     Celsius,
     HeatpumpCode,
     Kelvin,
+    MainMenuStatusLine1,
+    MainMenuStatusLine2,
+    MainMenuStatusLine3,
     Percent2,
     SwitchoffFile,
     Unknown,
@@ -25,10 +28,86 @@ from custom_components.luxtronik2.const import (
     PARSED_COUNT_ATTR,
     WRITABLE_PARAMETER_PREFIXES,
     LuxCalculation as LC,
+    LuxStatus1Option,
+    LuxStatus3Option,
     LuxSwitchoffReason,
     LuxVisibility as LV,
 )
 from custom_components.luxtronik2.model import LuxtronikCoordinatorData
+
+
+class TestUpdateLuxtronikStatusLineCodes:
+    """The main-menu status lines as the controller firmware itself names them.
+
+    Read from MainDisplay::writeFirstMainScreenLine / writeSecondMainScreenLine
+    / writeStatusLine in firmware V3.89.3 (unstripped). The library's line 1
+    table is shifted by one from code 3 on, and all three lack the fault codes.
+    """
+
+    def test_line_1_follows_the_firmware(self):
+        lux_overrides.update_Luxtronik_StatusLineCodes()
+        assert MainMenuStatusLine1.codes == {
+            0: "heatpump running",
+            1: "heatpump idle",
+            2: "heatpump coming",
+            3: "heatpump shutdown",
+            4: "errorcode slot 0",
+            5: "defrost",
+            6: "waiting on LIN connection",
+            7: "compressor heating up",
+            8: "heatpump shutdown",
+        }
+
+    def test_line_2_adds_the_fault_code(self):
+        lux_overrides.update_Luxtronik_StatusLineCodes()
+        assert MainMenuStatusLine2.codes == {0: "since", 1: "in", 2: "fault"}
+
+    def test_line_3_adds_codes_the_library_lacks(self):
+        lux_overrides.update_Luxtronik_StatusLineCodes()
+        codes = MainMenuStatusLine3.codes
+        assert codes[0] == "heating"
+        # The library misspells "energy" here, which matched no option.
+        assert codes[13] == "heating external energy source"
+        assert codes[17] == "second heat generator 1 active"
+        assert {k: codes[k] for k in (15, 18, 19, 20)} == {
+            15: "fault",
+            18: "compressor heater",
+            19: "domestic water post heating",
+            20: "pressure compensation",
+        }
+        assert 11 not in codes
+
+    @pytest.mark.parametrize(
+        ("datatype", "key", "options"),
+        [
+            (MainMenuStatusLine1, "status_line_1", {e.value for e in LuxStatus1Option}),
+            (MainMenuStatusLine2, "status_line_2", None),
+            (MainMenuStatusLine3, "status_line_3", {e.value for e in LuxStatus3Option}),
+        ],
+    )
+    def test_every_name_is_an_option_and_translated(self, datatype, key, options):
+        """A decoded name the sensor cannot show is an invalid ENUM state."""
+        import json
+        from pathlib import Path
+
+        from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
+
+        lux_overrides.update_Luxtronik_StatusLineCodes()
+        folder = (
+            Path(__file__).resolve().parent.parent
+            / "custom_components"
+            / "luxtronik2"
+            / "translations"
+        )
+        if options is None:
+            options = set(next(d for d in SENSORS if d.key == key).options or ())
+        for lang in ("en", "de", "nl", "cs", "pl"):
+            translations = json.loads((folder / f"{lang}.json").read_text("utf-8"))
+            states = translations["entity"]["sensor"][key]["state"]
+            for name in datatype.codes.values():
+                value = name.replace(" ", "_").replace("/", "_").lower()
+                assert value in options, value
+                assert value in states, (lang, value)
 
 
 class TestUpdateLuxtronikHeatpumpCodes:

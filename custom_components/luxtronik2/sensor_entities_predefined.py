@@ -205,7 +205,8 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_visible_default=False,
         device_class=SensorDeviceClass.ENUM,
-        options=["since", "in"],
+        # 2: the second line of the error text while in a fault.
+        options=["since", "in", "fault"],
     ),
     descr(
         key=SensorKey.STATUS_LINE_3,

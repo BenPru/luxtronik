@@ -373,7 +373,12 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
         status_time_raw = self._get_value(LC.C0120_STATUS_TIME)
         line_1_state = self._get_value(LC.C0117_STATUS_LINE_1)
         line_2_state = self._get_value(LC.C0118_STATUS_LINE_2)
-        if status_time_raw is None or line_1_state is None or line_2_state is None:
+        # In a fault line 2 carries the error text, so there is no time span.
+        if (
+            status_time_raw is None
+            or line_1_state is None
+            or line_2_state in (None, "fault")
+        ):
             return ""
         status_time = self.formatted_data(
             LuxtronikEntityAttributeDescription(

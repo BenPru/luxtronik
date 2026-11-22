@@ -809,7 +809,7 @@
                     "heatpump_idle": "Die Wärmepumpe ist im Leerlauf",
                     "heatpump_coming": "Die Wärmepumpe startet",
                     "heatpump_shutdown": "Die Wärmepumpe schaltet ab",
-                    "errorcode_slot_0": "Wärmepumpe Fehlercode in Schacht 0",
+                    "errorcode_slot_0": "Störung",
                     "pump_forerun": "Pumpenvorlauf",
                     "defrost": "Taut ab",
                     "waiting_on_lin_connection": "Wartet auf LIN Verbindung",
@@ -822,7 +822,8 @@
                 "state": {
                     "since": "seit",
                     "in": "in",
-                    "unknown": "Unbekannt"
+                    "unknown": "Unbekannt",
+                    "fault": "Störung"
                 }
             },
             "status_line_3": {
@@ -843,7 +844,11 @@
                     "info_bake_out_program": "Information aus Aufheizprogramm",
                     "heating_external_energy_source": "heizen aus externer Energiequelle",
                     "domestic_water_external_energy_source": "Brauchwasser aus externer Energiequelle",
-                    "second_heat_generator_1_active": "zweiter Wärmeerzeuger 1 aktiv"
+                    "second_heat_generator_1_active": "zweiter Wärmeerzeuger 1 aktiv",
+                    "fault": "Störung",
+                    "compressor_heater": "Verdichter-Heizung",
+                    "domestic_water_post_heating": "Warmwasser-Nachheizung",
+                    "pressure_compensation": "Druckausgleich"
                 }
             },
             "heat_source_output": {
