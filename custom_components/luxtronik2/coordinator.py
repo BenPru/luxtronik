@@ -835,6 +835,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> bool:
         """Check if the current firmware version is NOT compatible with the entity description."""
 
+        if (
+            description.firmware_series
+            and self.firmware_series not in description.firmware_series
+        ):
+            return True
+
         # Check minimum version if specified
         if (
             description.min_firmware_version is not None

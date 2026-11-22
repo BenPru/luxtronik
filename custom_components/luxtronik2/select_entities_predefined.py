@@ -5,9 +5,11 @@ from __future__ import annotations
 from homeassistant.const import EntityCategory
 
 from .const import (
+    AIR_INVERTER_MODELS,
     DAY_SELECTOR_OPTIONS,
     SMART_GRID_MODE_CODES,
     DeviceKey,
+    LuxCalculation,
     LuxDaySelectorParameter,
     LuxHeatingControlModeTypes,
     LuxMode,
@@ -113,6 +115,17 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         options=timer_program_options,
         raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
         entity_active=((LuxParameter.P0085_DHW_CHARGING_PUMP, "!= 1"),),
+    ),
+    # Which shape the inverter silent-mode schedule follows (#882); gated on
+    # the model like the silent-mode switch.
+    LuxtronikSelectEntityDescription(
+        key=SK.TIMER_SILENT_MODE_PROGRAM,
+        device_key=DeviceKey.heatpump,
+        luxtronik_key=LuxParameter.P1092_TIMER_PROGRAM_SILENT_MODE,
+        entity_category=EntityCategory.CONFIG,
+        options=timer_program_options,
+        raw_option_map=TIMER_PROGRAM_RAW_OPTIONS,
+        entity_active=((LuxCalculation.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),),
     ),
     LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_SELECTOR,

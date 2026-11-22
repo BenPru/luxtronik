@@ -75,6 +75,9 @@
             "thermal_power_limitation_switch": {
                 "name": "Therm. Leistung max"
             },
+            "silent_mode": {
+                "name": "Silent Mode"
+            },
             "pump_heat_control": {
                 "name": "Pumpenheizkontrolle"
             },
@@ -929,6 +932,14 @@
             "last_defrost": {
                 "name": "Letzte Abtauung"
             },
+            "defrost_demand": {
+                "name": "Abtaubedarf",
+                "state_attributes": {
+                    "remaining_time": {
+                        "name": "Restzeit"
+                    }
+                }
+            },
             "additional_heat_generator_energy_p1059": {
                 "name": "Zusätzlicher Wärmeerzeuger Wärmemenge (Firmware vor x.88)"
             },
@@ -1301,6 +1312,36 @@
             },
             "timer_circulation_schedule_sunday": {
                 "name": "Zirkulation Schaltzeiten (Sonntag)"
+            },
+            "timer_silent_mode_schedule_week": {
+                "name": "Silent Mode Zeiten (Woche)"
+            },
+            "timer_silent_mode_schedule_weekday": {
+                "name": "Silent Mode Zeiten (Werktage)"
+            },
+            "timer_silent_mode_schedule_weekend": {
+                "name": "Silent Mode Zeiten (Wochenende)"
+            },
+            "timer_silent_mode_schedule_monday": {
+                "name": "Silent Mode Zeiten (Montag)"
+            },
+            "timer_silent_mode_schedule_tuesday": {
+                "name": "Silent Mode Zeiten (Dienstag)"
+            },
+            "timer_silent_mode_schedule_wednesday": {
+                "name": "Silent Mode Zeiten (Mittwoch)"
+            },
+            "timer_silent_mode_schedule_thursday": {
+                "name": "Silent Mode Zeiten (Donnerstag)"
+            },
+            "timer_silent_mode_schedule_friday": {
+                "name": "Silent Mode Zeiten (Freitag)"
+            },
+            "timer_silent_mode_schedule_saturday": {
+                "name": "Silent Mode Zeiten (Samstag)"
+            },
+            "timer_silent_mode_schedule_sunday": {
+                "name": "Silent Mode Zeiten (Sonntag)"
             }
         },
         "select": {
@@ -1352,6 +1393,14 @@
             },
             "timer_circulation_program": {
                 "name": "Zirkulation Zeitprogramm",
+                "state": {
+                    "week": "Ganze Woche",
+                    "weekday_weekend": "Werktage + Wochenende",
+                    "daily": "Einzelne Tage"
+                }
+            },
+            "timer_silent_mode_program": {
+                "name": "Zeitschaltprogramm Silent Mode",
                 "state": {
                     "week": "Ganze Woche",
                     "weekday_weekend": "Werktage + Wochenende",

@@ -155,6 +155,13 @@
       "pump_heat_control": { "default": "mdi:pump" },
       "electrical_power_limitation_switch": { "default": "mdi:download-lock" },
       "thermal_power_limitation_switch": { "default": "mdi:download-lock" },
+      "silent_mode": {
+        "default": "mdi:volume-off",
+        "state": {
+          "on": "mdi:volume-off",
+          "off": "mdi:volume-high"
+        }
+      },
       "heating": {
         "default": "mdi:radiator",
         "state": {

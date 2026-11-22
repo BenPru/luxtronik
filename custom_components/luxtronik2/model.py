@@ -125,6 +125,10 @@ class LuxtronikEntityDescription(EntityDescription, frozen_or_thawed=True):
     # against `LuxtronikCoordinator.firmware_series`.
     min_firmware_version: Version | None = None
     max_firmware_version: Version | None = None
+    # Controller series (firmware major) the entity exists on; empty = all.
+    # A hardware fact, not a version threshold - for a register whose meaning
+    # is only known on some generations. An unparsable firmware is series 0.
+    firmware_series: tuple[int, ...] = ()
 
     extra_attributes: tuple[LuxtronikEntityAttributeDescription, ...] = ()
     entity_registry_enabled_default: bool | None = (  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -163,6 +167,13 @@ class LuxtronikSensorDescription(  # type: ignore  # pyright: ignore[reportIncom
     MSW brine inverters (#863). The two ranges never meet - Hz stays at or
     below ~120, rpm starts at ~1300 - so the reading itself says which it is.
     Applied before `factor`.
+    """
+    countdown_percent_of: float | None = None
+    """Show a countdown from this value as the percentage elapsed.
+
+    0 % at the full span, 100 % when the countdown reaches 0, clamped to
+    that range; replaces `factor`. The defrost countdown (C0141) is shown
+    this way as "defrost demand" in the controller's web interface (#882).
     """
 
 
@@ -386,3 +397,9 @@ class LuxtronikTimerScheduleTextDescription(
     mode_selector_name: str = ""
     active_mode: str = ""
     row_names: tuple[tuple[str] | tuple[str, str], ...] = ()
+    #: Further blocks, laid out like ``row_names``, that every write gives the
+    #: same windows row for row; the state is still read from ``row_names``
+    #: alone. For a program shape the controller stores as copies in several
+    #: blocks: silent mode has no block of its own for "week" and keeps it in
+    #: all seven day blocks (#882).
+    mirror_row_names: tuple[tuple[tuple[str] | tuple[str, str], ...], ...] = ()

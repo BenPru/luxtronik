@@ -75,6 +75,9 @@
             "thermal_power_limitation_switch": {
                 "name": "Max. thermisch vermogen"
             },
+            "silent_mode": {
+                "name": "Stille modus"
+            },
             "pump_heat_control": {
                 "name": "Controle pompverwarming"
             },
@@ -1091,6 +1094,14 @@
             "last_defrost": {
                 "name": "Laatste ontdooiing"
             },
+            "defrost_demand": {
+                "name": "Ontdooibehoefte",
+                "state_attributes": {
+                    "remaining_time": {
+                        "name": "Resterende tijd"
+                    }
+                }
+            },
             "additional_heat_generator_energy_p1140": {
                 "name": "Warmtehoeveelheid extra warmtegenerator (firmware x.88 en later)"
             },
@@ -1301,6 +1312,36 @@
             },
             "timer_circulation_schedule_sunday": {
                 "name": "Circulatiepomp vrijgavetijden (zondag)"
+            },
+            "timer_silent_mode_schedule_week": {
+                "name": "Tijden stille modus (week)"
+            },
+            "timer_silent_mode_schedule_weekday": {
+                "name": "Tijden stille modus (werkdagen)"
+            },
+            "timer_silent_mode_schedule_weekend": {
+                "name": "Tijden stille modus (weekend)"
+            },
+            "timer_silent_mode_schedule_monday": {
+                "name": "Tijden stille modus (maandag)"
+            },
+            "timer_silent_mode_schedule_tuesday": {
+                "name": "Tijden stille modus (dinsdag)"
+            },
+            "timer_silent_mode_schedule_wednesday": {
+                "name": "Tijden stille modus (woensdag)"
+            },
+            "timer_silent_mode_schedule_thursday": {
+                "name": "Tijden stille modus (donderdag)"
+            },
+            "timer_silent_mode_schedule_friday": {
+                "name": "Tijden stille modus (vrijdag)"
+            },
+            "timer_silent_mode_schedule_saturday": {
+                "name": "Tijden stille modus (zaterdag)"
+            },
+            "timer_silent_mode_schedule_sunday": {
+                "name": "Tijden stille modus (zondag)"
             }
         },
         "select": {
@@ -1352,6 +1393,14 @@
             },
             "timer_circulation_program": {
                 "name": "Circulatiepomp tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
+            "timer_silent_mode_program": {
+                "name": "Tijdprogramma stille modus",
                 "state": {
                     "week": "Hele week",
                     "weekday_weekend": "Werkdagen + weekend",

@@ -224,6 +224,7 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
             SA.TIMER_BLOCK_DHW,
             SA.TIMER_DEFROST,
             SA.TIMER_HOT_GAS,
+            SA.REMAINING_TIME,
         }
     )
 
@@ -288,9 +289,13 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
             factor = self._value_factor
             precision = self.entity_description.native_precision
             rpm_above = self.entity_description.rpm_above
+            span = self.entity_description.countdown_percent_of
             if rpm_above is not None and value > rpm_above:
                 value = value / 60
-            value = float(value) * factor
+            if span is not None:
+                value = min(max(100 * (1 - value / span), 0.0), 100.0)
+            else:
+                value = float(value) * factor
             if precision is not None:
                 value = round(value, precision)
             self._attr_native_value = value

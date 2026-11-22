@@ -75,6 +75,9 @@
             "thermal_power_limitation_switch": {
                 "name": "Maks. moc cieplna"
             },
+            "silent_mode": {
+                "name": "Tryb cichy"
+            },
             "pump_heat_control": {
                 "name": "Sterowanie ogrzewaniem pompy"
             },
@@ -1073,6 +1076,14 @@
             "last_defrost": {
                 "name": "Ostatnie odszranianie"
             },
+            "defrost_demand": {
+                "name": "Zapotrzebowanie na odszranianie",
+                "state_attributes": {
+                    "remaining_time": {
+                        "name": "Pozostały czas"
+                    }
+                }
+            },
             "additional_heat_generator_energy_p1140": {
                 "name": "Ilość ciepła dodatkowego źródła ciepła (firmware x.88 i nowszy)"
             },
@@ -1301,6 +1312,36 @@
             },
             "timer_circulation_schedule_sunday": {
                 "name": "Czasy pracy pompy cyrkulacyjnej (niedziela)"
+            },
+            "timer_silent_mode_schedule_week": {
+                "name": "Godziny trybu cichego (tydzień)"
+            },
+            "timer_silent_mode_schedule_weekday": {
+                "name": "Godziny trybu cichego (dni robocze)"
+            },
+            "timer_silent_mode_schedule_weekend": {
+                "name": "Godziny trybu cichego (weekend)"
+            },
+            "timer_silent_mode_schedule_monday": {
+                "name": "Godziny trybu cichego (poniedziałek)"
+            },
+            "timer_silent_mode_schedule_tuesday": {
+                "name": "Godziny trybu cichego (wtorek)"
+            },
+            "timer_silent_mode_schedule_wednesday": {
+                "name": "Godziny trybu cichego (środa)"
+            },
+            "timer_silent_mode_schedule_thursday": {
+                "name": "Godziny trybu cichego (czwartek)"
+            },
+            "timer_silent_mode_schedule_friday": {
+                "name": "Godziny trybu cichego (piątek)"
+            },
+            "timer_silent_mode_schedule_saturday": {
+                "name": "Godziny trybu cichego (sobota)"
+            },
+            "timer_silent_mode_schedule_sunday": {
+                "name": "Godziny trybu cichego (niedziela)"
             }
         },
         "select": {
@@ -1352,6 +1393,14 @@
             },
             "timer_circulation_program": {
                 "name": "Program czasowy pompy cyrkulacyjnej",
+                "state": {
+                    "week": "Cały tydzień",
+                    "weekday_weekend": "Dni robocze + weekend",
+                    "daily": "Poszczególne dni"
+                }
+            },
+            "timer_silent_mode_program": {
+                "name": "Program czasowy trybu cichego",
                 "state": {
                     "week": "Cały tydzień",
                     "weekday_weekend": "Dni robocze + weekend",

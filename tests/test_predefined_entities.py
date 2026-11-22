@@ -17,6 +17,7 @@ from custom_components.luxtronik2.binary_sensor_entities_predefined import (
     BINARY_SENSORS,
 )
 from custom_components.luxtronik2.const import (
+    AIR_INVERTER_MODELS,
     DeviceKey,
     LuxCalculation,
     LuxParameter,
@@ -370,3 +371,57 @@ class TestVisibilityGates:
             )
         ]
         assert offenders == []
+
+
+class TestSilentMode:
+    """The inverter silent mode (#882): switch P1087, program select P1092
+    and the "week" schedule over 1093-1113.
+
+    Every unit with a long enough parameter block returns these registers,
+    brine and fixed-speed units included (they read off/week), so all three
+    are gated on the air inverter model list rather than on register
+    presence.
+    """
+
+    _GATE = ((LuxCalculation.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),)
+
+    def test_switch(self):
+        switch = next(d for d in SWITCHES if d.key == SensorKey.SILENT_MODE)
+        assert switch.luxtronik_key == LuxParameter.P1087_SILENT_MODE
+        assert (switch.on_state, switch.off_state) == ("on", "off")
+        assert switch.entity_active == self._GATE
+
+    def test_program_select(self):
+        from custom_components.luxtronik2.select_entities_predefined import (
+            SELECT_ENTITIES,
+            TIMER_PROGRAM_RAW_OPTIONS,
+        )
+
+        select = next(
+            d for d in SELECT_ENTITIES if d.key == SensorKey.TIMER_SILENT_MODE_PROGRAM
+        )
+        assert select.luxtronik_key == LuxParameter.P1092_TIMER_PROGRAM_SILENT_MODE
+        assert select.device_key is DeviceKey.heatpump
+        assert select.raw_option_map == TIMER_PROGRAM_RAW_OPTIONS
+        assert select.entity_active == self._GATE
+
+    def test_schedules(self):
+        from custom_components.luxtronik2.timer_schedule_entities_predefined import (
+            TIMER_SCHEDULE_ENTITIES,
+        )
+
+        schedules = [
+            d
+            for d in TIMER_SCHEDULE_ENTITIES
+            if d.mode_selector_name == "ID_Einst_SuSilence"
+        ]
+        # week, weekdays, weekend and seven days
+        assert len(schedules) == 10
+        for schedule in schedules:
+            assert str(schedule.key).startswith("timer_silent_mode_schedule_")
+            assert schedule.device_key is DeviceKey.heatpump
+            # The selector stands in as the entity's own register (#738).
+            assert (
+                schedule.luxtronik_key == LuxParameter.P1092_TIMER_PROGRAM_SILENT_MODE
+            )
+            assert schedule.entity_active == self._GATE
