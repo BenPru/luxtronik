@@ -77,6 +77,7 @@ from .lux_overrides import (
     record_parsed_block_lengths,
     update_Luxtronik_HeatpumpCodes,
     update_Luxtronik_Parameters,
+    update_Luxtronik_StatusLineCodes,
     update_Luxtronik_SwitchoffCodes,
     warn_on_unknown_selection_codes,
 )
@@ -834,6 +835,12 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     ) -> bool:
         """Check if the current firmware version is NOT compatible with the entity description."""
 
+        if (
+            description.firmware_series
+            and self.firmware_series not in description.firmware_series
+        ):
+            return True
+
         # Check minimum version if specified
         if (
             description.min_firmware_version is not None
@@ -988,18 +995,23 @@ class LuxtronikCoordinator(DataUpdateCoordinator[LuxtronikCoordinatorData]):
     }
 
     def _evaluate_visibility_formula(self, value: Any, formula: str) -> bool | None:
-        parts = formula.strip().split()
+        # Split off the operator only: a decoded name may hold spaces
+        # ("LW SEC 2", "LD7 (230 V)").
+        parts = formula.strip().split(maxsplit=1)
         if len(parts) != 2:
             LOGGER.warning("Invalid visibility formula: %s", formula)
             return None
         op_str, threshold_str = parts
-        if op_str == "in":
+        if op_str in ("in", "not_in"):
             # `in a,b,c` - equal to any item, each compared exactly as `==`
             # would, so a raw code and its decoded name can share one list.
-            return any(
-                self._evaluate_visibility_formula(value, f"== {item}")
+            # Items are separated by commas only. `not_in a,b,c` is the
+            # negation.
+            found = any(
+                self._evaluate_visibility_formula(value, f"== {item.strip()}")
                 for item in threshold_str.split(",")
             )
+            return found if op_str == "in" else not found
         op_func = self._VISIBILITY_FORMULA_OPERATORS.get(op_str)
         if op_func is None:
             LOGGER.warning("Unsupported operator in visibility formula: %s", formula)
@@ -1405,6 +1417,7 @@ async def connect_and_get_coordinator(
     if not _OVERRIDES_APPLIED:
         update_Luxtronik_HeatpumpCodes()
         update_Luxtronik_SwitchoffCodes()
+        update_Luxtronik_StatusLineCodes()
         update_Luxtronik_Parameters()
         isolate_instance_data()
         record_parsed_block_lengths()
@@ -1412,9 +1425,10 @@ async def connect_and_get_coordinator(
         warn_on_unknown_selection_codes()
         _OVERRIDES_APPLIED = True
         LOGGER.info(
-            "Library overrides applied (HeatpumpCodes, SwitchoffCodes, Parameters, "
-            "instance data isolation, parsed block length recording, unknown "
-            "visibility naming, unknown selection code warning)."
+            "Library overrides applied (HeatpumpCodes, SwitchoffCodes, "
+            "StatusLineCodes, Parameters, instance data isolation, parsed "
+            "block length recording, unknown visibility naming, unknown "
+            "selection code warning)."
         )
 
     config_data: dict[str, Any] = dict(

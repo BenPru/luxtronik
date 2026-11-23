@@ -351,6 +351,8 @@ The controller's menu also lists other pumps (BUP, ZIP, the brine/fan pump, mixe
 
 Air-source heat pumps periodically defrost their outdoor unit by briefly reversing the refrigerant cycle. Two binary sensors reflect this: **Defrost Valve** (the reversing valve is open) and **Defrost End / Flow OK** (the defrost cycle completed with acceptable flow). Seeing these toggle, or the heat pump's Status sensor briefly showing "Defrost", is normal periodic behavior on air/water systems — not a fault — and typically lasts a few minutes.
 
+On series-3 (firmware V3.x) air inverters, **Defrost demand** shows how close the next defrost is, as the controller's web interface does: 0 % right after a defrost, rising to 100 % when the next one is due. It is computed from the controller's countdown to the next defrost, which starts at 3 hours on these units; its *Remaining time* attribute shows that countdown as h:mm. On every unit, the raw countdown in seconds is also the `Abtauen in ID_WEB_Time_AbtIn` attribute of the **Status time** sensor (hidden by default). These units also get a **Last defrost** timestamp sensor. If Defrost demand doesn't match your web interface, please report it in [#882](https://github.com/BenPru/luxtronik/issues/882).
+
 ## Solar Thermal Collector
 
 If your system has an integrated **solar thermal collector** feeding the DHW tank (not to be confused with solar PV / electricity generation, which this integration doesn't monitor directly), several entities appear under the DHW device once the heat pump reports solar - its solar flag, solar operating hours, or a live solar buffer temperature:

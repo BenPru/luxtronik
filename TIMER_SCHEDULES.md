@@ -2,7 +2,7 @@
 
 Several circuits on the heat pump controller can be programmed with a weekly schedule directly on the controller (or its firmware's built-in web interface). This integration exposes those schedules as editable Home Assistant entities so they can be read and changed without touching the physical controller.
 
-Four circuits are wired up: **DHW (Bw)**, **heating (Hkr)**, the **ventilation module (Luf)** — as separate day and night schedules, see [Ventilation Timer Schedule](#ventilation-timer-schedule) — and the **DHW circulation pump (ZIP)**. The remaining timer-program circuits — mixing circuits 1/2/3 (Mk1/Mk2/Mk3), pool (Swb), and the combined "all circuits" block — are still deferred; see [Extending to other circuits](#extending-to-other-circuits) below.
+Four circuits are wired up: **DHW (Bw)**, **heating (Hkr)**, the **ventilation module (Luf)** — as separate day and night schedules, see [Ventilation Timer Schedule](#ventilation-timer-schedule) — and the **DHW circulation pump (ZIP)**, plus an air inverter's **silent mode**. The remaining timer-program circuits — mixing circuits 1/2/3 (Mk1/Mk2/Mk3), pool (Swb), and the combined "all circuits" block — are still deferred; see [Extending to other circuits](#extending-to-other-circuits) below.
 
 **A schedule window does not mean the same thing on every circuit.** On DHW it *blocks* heating; on the heating circuit it *raises* the circuit into day mode; on ventilation it *releases* a fan stage; on the circulation pump it *releases* the pump. Read your circuit's section below before programming it.
 
@@ -154,6 +154,26 @@ What the common values do:
 > **ℹ️ Note:** `00:00-00:00` means *off* here, where on the heating circuit the same window means *permanently lowered*. Both follow from the same rule — the window is unused — but the result is the opposite of "all day" on both circuits.
 
 Writing a schedule from an automation is how to switch the pump on demand — see [Advanced Features: Circulation Pump Control](ADVANCED_FEATURES.md#circulation-pump-control).
+
+## Silent Mode Timer Schedule
+
+**On the heat pump device**, and only on air-source inverters (Alpha Innotec LP…V/Hybrox, LD9V, LW SEC 2 and their rebrands, recognised by model code). Other units also report these settings but have no silent mode, so the entities are not created there. In silent mode the controller limits the fan and compressor speed, so the unit runs quieter at lower output.
+
+| Entity | Type | Description |
+|---|---|---|
+| **Silent mode** | Switch | Turns the silent mode on or off. |
+| **Silent mode timer program** | Select | Which schedule shape the controller uses: *Whole week*, *Weekdays + weekend*, or *Per day*. |
+| **Silent mode times (Week)** | Text | Up to **3 windows per day**. Exists while the *Week* shape is active. |
+| **Silent mode times (Weekdays)** / **(Weekend)** | Text | Exist while *Weekday/Weekend* is active. |
+| **Silent mode times (Monday)** … **(Sunday)** | Text | One entity per day of the week, present while *Per day* is active. |
+
+Each window is a period in which the unit runs in silent mode; all three units this was read from use night windows. How the switch and the windows combine (whether the switch must be on for the windows to apply) is not confirmed yet.
+
+Unlike the other circuits, silent mode stores every shape in the same seven day slots, and the controller keeps a shared schedule as a copy in each day it covers. Writing the *Week* entity therefore writes all seven days, *Weekdays* writes Monday to Friday, and *Weekend* writes Saturday and Sunday. A window that crosses midnight is stored as two windows, for example `00:00-05:30/22:30-00:00` for 22:30–05:30.
+
+A shared entity shows the times of one day it covers: *Week* shows Sunday, *Weekdays* Monday and *Weekend* Saturday. Changing the timer program does not copy any times, so right after a change the other days may still hold the times of the previous program, while the controller runs each day on that day's own times. **After changing the program, save the times once** so every day the shape covers gets them. If the times shown are already the ones you want, send them again with the `text.set_value` action: the entity dialog only saves a value that changed.
+
+> **⚠️ Note:** which slot holds which day is taken from the other circuits, where the days run Sunday first ([#842](https://github.com/BenPru/luxtronik/issues/842)). For silent mode this has not been confirmed on a real unit yet. If the *Weekdays*, *Weekend* or per-day times in Home Assistant don't match the controller display, please report it in [#882](https://github.com/BenPru/luxtronik/issues/882) with a diagnostics download.
 
 ## Extending to other circuits
 

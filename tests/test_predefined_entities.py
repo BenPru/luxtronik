@@ -17,6 +17,7 @@ from custom_components.luxtronik2.binary_sensor_entities_predefined import (
     BINARY_SENSORS,
 )
 from custom_components.luxtronik2.const import (
+    AIR_INVERTER_MODELS,
     DeviceKey,
     LuxCalculation,
     LuxParameter,
@@ -115,6 +116,17 @@ class TestSensorPredefined:
         for s in SENSORS:
             assert s.key is not None
             assert s.luxtronik_key is not None
+
+    def test_unique_keys(self):
+        """A key is the entity's unique_id. Only fan_speed and compressor_speed
+        are shared, each by two descriptions whose gates exclude each other
+        (test_every_model_gets_at_most_one_fan_sensor,
+        test_compressor_speed_gates_are_exclusive)."""
+        keys = [s.key for s in SENSORS]
+        shared = {key for key in keys if keys.count(key) > 1}
+        assert shared == {SensorKey.FAN_SPEED, SensorKey.COMPRESSOR_SPEED}
+        assert keys.count(SensorKey.FAN_SPEED) == 2
+        assert keys.count(SensorKey.COMPRESSOR_SPEED) == 2
 
 
 class TestNumberPredefined:
@@ -286,17 +298,21 @@ class TestVisibilityGates:
 
     def test_every_entity_active_formula_parses(self):
         """A formula that does not parse logs a warning and then falls
-        through to True - the entity is created on every install. `in 3, 4`
-        (a space after the comma) is the easy way to get there.
+        through to True - the entity is created on every install. An empty
+        list item (`in 3,,4`, a trailing comma) is the easy way to get there.
         """
         offenders = []
         for descr in _all_descriptions():
             for _register, formula in descr.entity_active:
-                parts = formula.split()
+                parts = formula.split(maxsplit=1)
                 if (
                     len(parts) != 2
-                    or parts[0] not in {"==", "!=", "<", "<=", ">", ">=", "in"}
-                    or (parts[0] == "in" and "" in parts[1].split(","))
+                    or parts[0]
+                    not in {"==", "!=", "<", "<=", ">", ">=", "in", "not_in"}
+                    or (
+                        parts[0] in {"in", "not_in"}
+                        and "" in [item.strip() for item in parts[1].split(",")]
+                    )
                 ):
                     offenders.append((type(descr).__name__, descr.key, formula))
         assert offenders == []
@@ -355,3 +371,57 @@ class TestVisibilityGates:
             )
         ]
         assert offenders == []
+
+
+class TestSilentMode:
+    """The inverter silent mode (#882): switch P1087, program select P1092
+    and the "week" schedule over 1093-1113.
+
+    Every unit with a long enough parameter block returns these registers,
+    brine and fixed-speed units included (they read off/week), so all three
+    are gated on the air inverter model list rather than on register
+    presence.
+    """
+
+    _GATE = ((LuxCalculation.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),)
+
+    def test_switch(self):
+        switch = next(d for d in SWITCHES if d.key == SensorKey.SILENT_MODE)
+        assert switch.luxtronik_key == LuxParameter.P1087_SILENT_MODE
+        assert (switch.on_state, switch.off_state) == ("on", "off")
+        assert switch.entity_active == self._GATE
+
+    def test_program_select(self):
+        from custom_components.luxtronik2.select_entities_predefined import (
+            SELECT_ENTITIES,
+            TIMER_PROGRAM_RAW_OPTIONS,
+        )
+
+        select = next(
+            d for d in SELECT_ENTITIES if d.key == SensorKey.TIMER_SILENT_MODE_PROGRAM
+        )
+        assert select.luxtronik_key == LuxParameter.P1092_TIMER_PROGRAM_SILENT_MODE
+        assert select.device_key is DeviceKey.heatpump
+        assert select.raw_option_map == TIMER_PROGRAM_RAW_OPTIONS
+        assert select.entity_active == self._GATE
+
+    def test_schedules(self):
+        from custom_components.luxtronik2.timer_schedule_entities_predefined import (
+            TIMER_SCHEDULE_ENTITIES,
+        )
+
+        schedules = [
+            d
+            for d in TIMER_SCHEDULE_ENTITIES
+            if d.mode_selector_name == "ID_Einst_SuSilence"
+        ]
+        # week, weekdays, weekend and seven days
+        assert len(schedules) == 10
+        for schedule in schedules:
+            assert str(schedule.key).startswith("timer_silent_mode_schedule_")
+            assert schedule.device_key is DeviceKey.heatpump
+            # The selector stands in as the entity's own register (#738).
+            assert (
+                schedule.luxtronik_key == LuxParameter.P1092_TIMER_PROGRAM_SILENT_MODE
+            )
+            assert schedule.entity_active == self._GATE

@@ -25,6 +25,7 @@ from conftest import make_coordinator_data
 from custom_components.luxtronik2 import lux_overrides
 from custom_components.luxtronik2.binary_sensor import LuxtronikBinarySensorEntity
 from custom_components.luxtronik2.const import (
+    AIR_INVERTER_MODELS,
     CONF_HA_SENSOR_PREFIX,
     CONF_MAX_DATA_LENGTH,
     DEFAULT_MAX_DATA_LENGTH,
@@ -40,6 +41,7 @@ from custom_components.luxtronik2.const import (
     LuxStatus1Option,
     LuxStatus3Option,
     LuxVisibility,
+    SensorAttrFormat,
     SensorAttrKey as SA,
     SensorKey,
 )
@@ -164,6 +166,37 @@ class TestSensorHandleCoordinatorUpdate:
         entity = _make_sensor(desc, data)
         entity._handle_coordinator_update(data)
         assert entity._attr_native_value == 42
+
+
+class TestSensorDisplayPrecision:
+    """native_precision also sets how HA displays the state.
+
+    round(x, 0) still returns a float, so without a display precision
+    an rpm reading showed as "311.0 rpm" (#874).
+    """
+
+    @staticmethod
+    def _description(**kwargs) -> LuxtronikSensorDescription:
+        return LuxtronikSensorDescription(
+            key=SensorKey.FLOW_OUT_TEMPERATURE,
+            luxtronik_key=LC.C0011_FLOW_OUT_TEMPERATURE,
+            device_key=DeviceKey.heatpump,
+            **kwargs,
+        )
+
+    def test_native_precision_sets_display_precision(self):
+        entity = _make_sensor(self._description(native_precision=0))
+        assert entity.suggested_display_precision == 0
+
+    def test_explicit_display_precision_wins(self):
+        entity = _make_sensor(
+            self._description(native_precision=2, suggested_display_precision=1)
+        )
+        assert entity.suggested_display_precision == 1
+
+    def test_no_precision_leaves_display_unset(self):
+        entity = _make_sensor(self._description())
+        assert entity.suggested_display_precision is None
 
 
 # ===========================================================================
@@ -333,8 +366,9 @@ class TestStatusSensorUpdate:
         entity._handle_coordinator_update()
         entity.async_write_ha_state.assert_called()
 
-    def test_workaround_pump_forerun_no_request(self):
-        """When sl1 is pump_forerun and sl3 is no_request, override to no_request."""
+    def test_workaround_compressor_heating_up_no_request(self):
+        """When sl1 is compressor_heating_up (raw 7) and sl3 is no_request,
+        override to no_request."""
         data = make_coordinator_data(
             parameters={
                 "ID_Ba_Hz_akt": "Automatic",
@@ -344,7 +378,7 @@ class TestStatusSensorUpdate:
                 "ID_WEB_WP_BZ_akt": "heating",
                 "ID_WEB_VD1out": 1,
                 "ID_WEB_ZW1out": 0,
-                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.pump_forerun,
+                "ID_WEB_HauptMenuStatus_Zeile1": LuxStatus1Option.compressor_heating_up,
                 "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.no_request,
                 "ID_WEB_ZUPout": 0,
             },
@@ -366,7 +400,7 @@ class TestStatusSensorUpdate:
                 "ID_WEB_VD1out": 1,
                 "ID_WEB_ZW1out": 0,
                 "ID_WEB_HauptMenuStatus_Zeile1": "heatpump_running",
-                "ID_WEB_HauptMenuStatus_Zeile3": LuxStatus3Option.thermal_desinfection,
+                "ID_WEB_HauptMenuStatus_Zeile3": "thermal desinfection",
                 "ID_WEB_ZUPout": 0,
             },
         )
@@ -571,6 +605,13 @@ class TestBuildStatusText:
         entity = _make_status_sensor(data)
         result = entity._build_status_text()
         assert result == ""
+
+    def test_returns_empty_in_a_fault(self):
+        """Line 2 code 2 is the error text's second line, not "since"/"in":
+        there is no time span to describe, as when it decoded to None."""
+        data = _status_text_data(**{"ID_WEB_HauptMenuStatus_Zeile2": "fault"})
+        entity = _make_status_sensor(data)
+        assert entity._build_status_text() == ""
 
     def test_returns_full_text_when_all_present(self):
         entity = _make_status_sensor(_status_text_data())
@@ -1710,41 +1751,175 @@ class TestCompressorSpeed:
         assert description.native_precision == 0
 
     def test_exists_and_is_enabled_on_air_inverters_only(self):
-        """P0975 reads 2 on every air inverter. A pump gets either this sensor
-        or the frequency one, never both, so it is enabled by default."""
-        description = _compressor_speed_description()
-        assert description.entity_registry_enabled_default is None
-        assert description.entity_active == (
+        """Known air inverter models by model code, so an idle start still
+        creates it (#881); any other model when C0238 marks an inverter and
+        P0975 reads 2, as on every air inverter. A pump gets either this
+        sensor or the frequency one, never both, so it is enabled by default."""
+        by_model, fallback = (d for d in SENSORS if d.key == SensorKey.COMPRESSOR_SPEED)
+        models = AIR_INVERTER_MODELS
+        for description in (by_model, fallback):
+            assert description.entity_registry_enabled_default is None
+            assert description.luxtronik_key == LC.C0231_PUMP_FREQUENCY
+            assert description.native_unit_of_measurement == "rpm"
+        assert by_model.entity_active == (
+            (LC.C0078_MODEL_CODE, f"in {models}"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        )
+        assert fallback.entity_active == (
+            (LC.C0078_MODEL_CODE, f"not_in {models}"),
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         )
 
 
-def _fan_speed_description() -> LuxtronikSensorDescription:
-    return next(d for d in SENSORS if d.key == SensorKey.FAN_SPEED)
+def _defrost_demand_description() -> LuxtronikSensorDescription:
+    return next(d for d in SENSORS if d.key == SensorKey.DEFROST_DEMAND)
+
+
+class TestDefrostDemand:
+    """C0141 ID_WEB_Time_AbtIn counts down from 3 h to the next defrost on a
+    series-3 air unit. The web interface shows it as a "defrost demand"
+    percentage rising to 100 % as the countdown reaches 0 (#882)."""
+
+    @staticmethod
+    def _value(raw):
+        data = make_coordinator_data(calculations={"ID_WEB_Time_AbtIn": raw})
+        entity = _make_sensor(_defrost_demand_description(), data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_full_countdown_is_no_demand(self):
+        """10800 s is where it idles on every series-3 air unit in the corpus."""
+        assert self._value(10800) == 0
+
+    def test_countdown_at_zero_is_full_demand(self):
+        assert self._value(0) == 100
+
+    def test_part_way_through(self):
+        assert self._value(5400) == 50
+        assert self._value(2700) == 75
+
+    def test_rounds_to_whole_percent(self):
+        assert self._value(10000) == 7
+
+    def test_reading_beyond_the_span_clamps_to_zero(self):
+        assert self._value(12000) == 0
+
+    def test_missing_register_reads_none(self):
+        assert self._value(None) is None
+
+    def test_description(self):
+        description = _defrost_demand_description()
+        assert description.luxtronik_key == LC.C0141_TIMER_DEFROST
+        assert description.countdown_percent_of == 10800
+        assert description.native_unit_of_measurement == PERCENTAGE
+        assert description.state_class == SensorStateClass.MEASUREMENT
+        assert description.native_precision == 0
+
+    def test_no_description_sets_both_countdown_and_factor(self):
+        """`countdown_percent_of` replaces `factor`; setting both would drop
+        the factor silently."""
+        assert not [
+            d.key
+            for d in SENSORS
+            if d.countdown_percent_of is not None
+            and (d.factor is not None or d.factor_by_firmware_series is not None)
+        ]
+
+    def test_remaining_time_attribute(self):
+        """The countdown itself, as h:mm. It changes every poll, so it is
+        kept out of the recorder."""
+        (remaining,) = _defrost_demand_description().extra_attributes
+        assert remaining.key == SA.REMAINING_TIME
+        assert remaining.luxtronik_key == LC.C0141_TIMER_DEFROST
+        assert remaining.format == SensorAttrFormat.HOUR_MINUTE
+        assert SA.REMAINING_TIME in LuxtronikSensorEntity._unrecorded_attributes
+
+    def test_exists_on_series_3_air_inverters_only(self):
+        """The 3 h span is only known there: series-1 LWC/L2A idle at 2700."""
+        description = _defrost_demand_description()
+        assert description.firmware_series == (3,)
+        assert description.entity_active == (
+            (LC.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),
+        )
+
+
+def _fan_descriptions() -> list[LuxtronikSensorDescription]:
+    return [d for d in SENSORS if d.luxtronik_key == LC.C0184_FAN_SPEED]
+
+
+def _fan_rpm(*, enabled: bool) -> LuxtronikSensorDescription:
+    return next(
+        d
+        for d in _fan_descriptions()
+        if d.key == SensorKey.FAN_SPEED
+        and (d.entity_registry_enabled_default is None) is enabled
+    )
+
+
+def _fan_control_signal() -> LuxtronikSensorDescription:
+    return next(d for d in SENSORS if d.key == SensorKey.FAN_CONTROL_SIGNAL)
 
 
 class TestFanSpeed:
-    """C0184 ID_WEB_HZIO_VEN, the heat-source fan of an air unit in rpm, as
-    the library types it (#874). A plain pass-through, so only the
-    declaration is tested; reading values is covered generically."""
+    """C0184 ID_WEB_HZIO_VEN, the heat-source fan of an air unit (#874). The
+    library types it rpm, but the LD9V reports its fan's control signal in
+    0.1 V, so the model decides. Which unit gets which is tested in
+    test_coordinator; here only the declarations."""
 
-    def test_description_is_rpm_without_conversion(self):
-        description = _fan_speed_description()
-        assert description.luxtronik_key == LC.C0184_FAN_SPEED
+    def test_there_are_three_fan_sensors(self):
+        assert len(_fan_descriptions()) == 3
+
+    @pytest.mark.parametrize("enabled", [True, False])
+    def test_rpm_without_conversion(self, enabled):
+        description = _fan_rpm(enabled=enabled)
         assert description.state_class == SensorStateClass.MEASUREMENT
         assert description.rpm_above is None
+        assert description.factor is None
         assert description.device_class is None
         assert description.native_unit_of_measurement == "rpm"
         assert description.native_precision == 0
 
-    def test_exists_on_air_inverters_only_and_starts_disabled(self):
-        """Non-zero in the corpus only where the rpm compressor sensor
-        exists. Disabled by default until the low LD9V reading is confirmed
-        against a controller display."""
-        description = _fan_speed_description()
-        assert description.entity_registry_enabled_default is False
-        assert description.entity_active == (
+    def test_confirmed_models_are_enabled(self):
+        """rpm confirmed on the display of an LP11V (taken for its LP*V
+        siblings) and an LW SEC 2."""
+        assert _fan_rpm(enabled=True).entity_active == (
+            (LC.C0078_MODEL_CODE, "in 85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V"),
+        )
+
+    def test_other_air_inverters_start_disabled(self):
+        assert _fan_rpm(enabled=False).entity_registry_enabled_default is False
+        assert _fan_rpm(enabled=False).entity_active == (
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+            (
+                LC.C0078_MODEL_CODE,
+                "not_in 85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V,77,LD9V",
+            ),
         )
+
+
+class TestFanControlSignal:
+    """The LD9V shows its fan as a 2-10 V control output: 0.5 V idle or
+    defrosting, 5.9 V and up while running (#863), read as 5 and 59."""
+
+    @staticmethod
+    def _value(raw):
+        data = make_coordinator_data(calculations={"ID_WEB_HZIO_VEN": raw})
+        entity = _make_sensor(_fan_control_signal(), data)
+        entity._handle_coordinator_update(data)
+        return entity._attr_native_value
+
+    def test_running_reading_is_volts(self):
+        assert self._value(59) == pytest.approx(5.9)
+
+    def test_idle_reading_is_volts(self):
+        assert self._value(5) == pytest.approx(0.5)
+
+    def test_description(self):
+        description = _fan_control_signal()
+        assert description.device_class == SensorDeviceClass.VOLTAGE
+        assert description.native_unit_of_measurement == "V"
+        assert description.native_precision == 1
+        assert description.entity_registry_enabled_default is False
+        assert description.entity_active == ((LC.C0078_MODEL_CODE, "in 77,LD9V"),)

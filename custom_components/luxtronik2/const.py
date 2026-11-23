@@ -277,8 +277,11 @@ class LuxStatus1Option(StrEnum):
     heatpump_shutdown = "heatpump_shutdown"
     errorcode_slot_zero = "errorcode_slot_0"
     defrost = "defrost"
-    waiting_on_lin_connection = "witing_on_lin_connection"
+    waiting_on_lin_connection = "waiting_on_lin_connection"
     compressor_heating_up = "compressor_heating_up"
+    # Neither is produced any more: the firmware's own table replaced the
+    # library's (raw 7 is "compressor heating up"), and compressor_heater came
+    # from a workaround for that mislabel. Kept so recorded history stays valid.
     pump_forerun = "pump_forerun"
     compressor_heater = "compressor_heater"
 
@@ -304,6 +307,11 @@ class LuxStatus3Option(StrEnum):
     domestic_water_external_energy_source = "domestic_water_external_energy_source"
     flow_monitoring = "flow_monitoring"
     second_heat_generator_1_active = "second_heat_generator_1_active"
+    # Codes 15 and 18-20, which the library does not know (firmware V3.89.3).
+    fault = "fault"
+    compressor_heater = "compressor_heater"
+    domestic_water_post_heating = "domestic_water_post_heating"
+    pressure_compensation = "pressure_compensation"
 
 
 class LuxMkTypes(Enum):
@@ -411,6 +419,18 @@ LUX_STATE_ICON_MAP_COOL: Final[dict[StateType | date | datetime | Decimal, str]]
 LUX_MODELS_ALPHA_INNOTEC = ["LP", "LWP", "LWV", "MSW", "SWC", "SWP"]
 LUX_MODELS_NOVELAN = ["BW", "LA", "LD", "LI", "SI", "ZLW"]
 LUX_MODELS_OTHER = ["CB", "CI", "CN", "CS"]
+# Air-source inverters by model code (C0078), each raw code next to its
+# decoded name, for an `entity_active` "in" gate. Items are separated by
+# commas only - names may hold spaces ("LW SEC 2"). Gates the rpm compressor
+# sensor (C0238 cannot tell them while idle - an LP8V drops it to 0, #881)
+# and the silent mode (#882). rpm is confirmed on the LD9V, LW SEC 2, LP8V,
+# LP11V and LP16V. The other LP models are air inverters in the firmware's
+# type table (V3.92.3: codes 91-96, 101-102); their names match once
+# lux_overrides decodes those codes.
+AIR_INVERTER_MODELS: Final = (
+    "77,85,87,88,89,90,LD9V,LW SEC 2,LP5V,LP8V,LP11V,LP16V,"
+    "LP21V,LP24V,LP31V,LPI4V,LPI7V,LPI10V,LP5V_SE,LP8V_SE"
+)
 # endregion Lux Definitions
 
 
@@ -630,6 +650,10 @@ class LuxParameter(StrEnum):
     P1059_ADDITIONAL_HEAT_GENERATOR_AMOUNT_COUNTER = "parameters.ID_Waermemenge_ZWE"
     # "1060 ID_Waermemenge_Reset                                        ": "535051",
     # "1061 ID_Waermemenge_Reset_2                                      ": "0",
+    # Inverter silent mode (#882), named by lux_overrides after upstream `main`.
+    # Returned by every unit with a long enough block, so gate on the model.
+    P1087_SILENT_MODE = "parameters.SILENT_MODE"
+    P1092_TIMER_PROGRAM_SILENT_MODE = "parameters.ID_Einst_SuSilence"
     # Named by lux_overrides (upstream: Unknown_Parameter_1119). Unix epoch,
     # 0 = never; populated on V3-series air units only.
     P1119_LAST_DEFROST_TIMESTAMP = "parameters.LAST_DEFROST_TIMESTAMP"
@@ -900,6 +924,7 @@ class SensorKey(StrEnum):
     STATUS_LINE_3 = "status_line_3"
     HEAT_SOURCE_INPUT_TEMPERATURE = "heat_source_input_temperature"
     LAST_DEFROST = "last_defrost"
+    DEFROST_DEMAND = "defrost_demand"
     HEAT_SOURCE_INPUT_TEMPERATURE_MIN = "heat_source_input_temperature_min"
     OUTDOOR_TEMPERATURE = "outdoor_temperature"
     OUTDOOR_TEMPERATURE_AVERAGE = "outdoor_temperature_average"
@@ -953,6 +978,7 @@ class SensorKey(StrEnum):
     PUMP_FREQUENCY = "pump_frequency"
     COMPRESSOR_SPEED = "compressor_speed"
     FAN_SPEED = "fan_speed"
+    FAN_CONTROL_SIGNAL = "fan_control_signal"
     PUMP_FLOW_DELTA_TARGET = "pump_flow_delta_target"
     PUMP_FLOW_DELTA = "pump_flow_delta"
     CIRCULATION_PUMP_DELTA_TARGET = "circulation_pump_delta_target"
@@ -1092,6 +1118,7 @@ class SensorKey(StrEnum):
     DHW_CHARGING_PUMP = "dhw_charging_pump"
     DHW_MANUAL_FREQUENCY = "dhw_manual_frequency"
     SOLAR_PUMP = "solar_pump"
+    SILENT_MODE = "silent_mode"
     COMPRESSOR_HEATER = "compressor_heater"
     DEFROST_VALVE = "defrost_valve"
     ADDITIONAL_HEAT_GENERATOR = "additional_heat_generator"
@@ -1134,6 +1161,7 @@ class SensorKey(StrEnum):
     TIMER_HEATING_PROGRAM = "timer_heating_program"
     TIMER_VENTILATION_PROGRAM = "timer_ventilation_program"
     TIMER_CIRCULATION_PROGRAM = "timer_circulation_program"
+    TIMER_SILENT_MODE_PROGRAM = "timer_silent_mode_program"
     TIMER_DHW_SCHEDULE_WEEK = "timer_dhw_schedule_week"
     TIMER_DHW_SCHEDULE_WEEKDAY = "timer_dhw_schedule_weekday"
     TIMER_DHW_SCHEDULE_WEEKEND = "timer_dhw_schedule_weekend"
@@ -1204,6 +1232,17 @@ class SensorKey(StrEnum):
     TIMER_CIRCULATION_SCHEDULE_SATURDAY = "timer_circulation_schedule_saturday"
     TIMER_CIRCULATION_SCHEDULE_SUNDAY = "timer_circulation_schedule_sunday"
 
+    TIMER_SILENT_MODE_SCHEDULE_WEEK = "timer_silent_mode_schedule_week"
+    TIMER_SILENT_MODE_SCHEDULE_WEEKDAY = "timer_silent_mode_schedule_weekday"
+    TIMER_SILENT_MODE_SCHEDULE_WEEKEND = "timer_silent_mode_schedule_weekend"
+    TIMER_SILENT_MODE_SCHEDULE_MONDAY = "timer_silent_mode_schedule_monday"
+    TIMER_SILENT_MODE_SCHEDULE_TUESDAY = "timer_silent_mode_schedule_tuesday"
+    TIMER_SILENT_MODE_SCHEDULE_WEDNESDAY = "timer_silent_mode_schedule_wednesday"
+    TIMER_SILENT_MODE_SCHEDULE_THURSDAY = "timer_silent_mode_schedule_thursday"
+    TIMER_SILENT_MODE_SCHEDULE_FRIDAY = "timer_silent_mode_schedule_friday"
+    TIMER_SILENT_MODE_SCHEDULE_SATURDAY = "timer_silent_mode_schedule_saturday"
+    TIMER_SILENT_MODE_SCHEDULE_SUNDAY = "timer_silent_mode_schedule_sunday"
+
 
 # endregion Keys
 
@@ -1243,6 +1282,7 @@ class SensorAttrKey(StrEnum):
     ELECTRICITY_KWH = "electricity_kwh"
     ELECTRICITY_SOURCE = "electricity_source"
     WINDOW_START = "window_start"
+    REMAINING_TIME = "remaining_time"
 
     TIMER_HEATPUMP_ON = "WP Seit (ID_WEB_Time_WPein_akt)"
     TIMER_ADD_HEAT_GENERATOR_ON = "ZWE1 seit (ID_WEB_Time_ZWE1_akt)"

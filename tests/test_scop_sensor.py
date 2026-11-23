@@ -23,7 +23,10 @@ from custom_components.luxtronik2.scop import (
     ScopResult,
 )
 from custom_components.luxtronik2.sensor import LuxtronikScopSensorEntity
-from custom_components.luxtronik2.sensor_entities_predefined import SENSORS_SCOP
+from custom_components.luxtronik2.sensor_entities_predefined import (
+    SENSORS_COP,
+    SENSORS_SCOP,
+)
 
 _RESULT = ScopResult(
     value=5.9,
@@ -140,6 +143,11 @@ class TestScopDescriptions:
         }
         for descr in SENSORS_SCOP:
             assert descr.device_key == device[descr.circuit], descr.key
+
+    def test_cop_and_scop_display_two_decimals(self):
+        """A ratio of 4.0 shows as "4.00", like 3.87 next to it."""
+        for descr in (*SENSORS_COP, *SENSORS_SCOP):
+            assert descr.suggested_display_precision == 2, descr.key
 
 
 def _gate_coordinator(**parameters) -> LuxtronikCoordinator:

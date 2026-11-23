@@ -508,14 +508,16 @@ class LuxtronikTimerScheduleText(
         (up to 10 for a 5-row block) are queued and written in a single
         `async_write_many` batch, so the device sees one write cycle and the
         coordinator refreshes once - instead of up to 10 sequential
-        `async_write` calls each triggering a full refresh.
+        `async_write` calls each triggering a full refresh. The description's
+        `mirror_row_names` blocks get the same windows in that same batch.
         """
         row_names = self.entity_description.row_names
         pairs = _parse_schedule(value, len(row_names))
+        blocks = (row_names, *self.entity_description.mirror_row_names)
 
         data = self.coordinator.data
         writes: list[tuple[str, str]] = []
-        for index, names in enumerate(row_names):
+        for index, names in (row for block in blocks for row in enumerate(block)):
             start, typed_end = (
                 pairs[index] if index < len(pairs) else (_UNSET_TIME, _UNSET_TIME)
             )

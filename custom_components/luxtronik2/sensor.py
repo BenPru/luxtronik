@@ -253,6 +253,7 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
             SA.TIMER_BLOCK_DHW,
             SA.TIMER_DEFROST,
             SA.TIMER_HOT_GAS,
+            SA.REMAINING_TIME,
         }
     )
 
@@ -274,6 +275,13 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         self._sensor_prefix = prefix = entry.data[CONF_HA_SENSOR_PREFIX]
         self.entity_id = ENTITY_ID_FORMAT.format(f"{prefix}_{description.key}")
         self._attr_unique_id = self.entity_id
+        # round(x, 0) still yields a float, which HA shows as "311.0" unless
+        # it is told how many decimals to display (#874).
+        if (
+            description.suggested_display_precision is None
+            and description.native_precision is not None
+        ):
+            self._attr_suggested_display_precision = description.native_precision
 
     @property
     def _value_factor(self) -> float:
@@ -310,9 +318,13 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
             factor = self._value_factor
             precision = self.entity_description.native_precision
             rpm_above = self.entity_description.rpm_above
+            span = self.entity_description.countdown_percent_of
             if rpm_above is not None and value > rpm_above:
                 value = value / 60
-            value = float(value) * factor
+            if span is not None:
+                value = min(max(100 * (1 - value / span), 0.0), 100.0)
+            else:
+                value = float(value) * factor
             if precision is not None:
                 value = round(value, precision)
             self._attr_native_value = value
@@ -472,7 +484,12 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
         status_time_raw = self._get_value(LC.C0120_STATUS_TIME)
         line_1_state = self._get_value(LC.C0117_STATUS_LINE_1)
         line_2_state = self._get_value(LC.C0118_STATUS_LINE_2)
-        if status_time_raw is None or line_1_state is None or line_2_state is None:
+        # In a fault line 2 carries the error text, so there is no time span.
+        if (
+            status_time_raw is None
+            or line_1_state is None
+            or line_2_state in (None, "fault")
+        ):
             return ""
         status_time = self.formatted_data(
             LuxtronikEntityAttributeDescription(

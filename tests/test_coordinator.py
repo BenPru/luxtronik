@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.update_coordinator import UpdateFailed
+from luxtronik.datatypes import HeatpumpCode
 from packaging.version import Version
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -43,7 +44,10 @@ from custom_components.luxtronik2.coordinator import (
     LuxtronikSerialNumberError,
     LuxtronikWriteError,
 )
-from custom_components.luxtronik2.lux_overrides import TimeOfDay
+from custom_components.luxtronik2.lux_overrides import (
+    TimeOfDay,
+    update_Luxtronik_HeatpumpCodes,
+)
 from custom_components.luxtronik2.model import (
     LuxtronikCoordinatorData,
     LuxtronikEntityDescription,
@@ -742,39 +746,161 @@ class TestEntityVisible:
 # ===========================================================================
 
 
+def _fan_variant(description) -> str:
+    """Name the three C0184 descriptions apart - two share the key."""
+    if description.key == SensorKey.FAN_CONTROL_SIGNAL:
+        return "volt"
+    if description.entity_registry_enabled_default is False:
+        return "unconfirmed"
+    return "rpm"
+
+
 class TestEntityActive:
     @pytest.mark.parametrize(
-        ("calculations", "medium", "frequency", "speed"),
+        ("model", "calculations", "medium", "frequency", "speed"),
         [
             # LP16V (#850): air inverter, running.
-            ({"ID_WEB_Freq_VD": 1301, "ID_WEB_Freq_VD_Max": 55}, 2, False, True),
+            (
+                "LP16V",
+                {"ID_WEB_Freq_VD": 1301, "ID_WEB_Freq_VD_Max": 55},
+                2,
+                False,
+                True,
+            ),
+            # LP8V (#881) idle: C0238 drops to 0, the model still decides.
+            ("LP8V", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, True),
+            # A listed model reporting another heat source: the Hz sensor
+            # only - never both.
+            ("LP8V", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 100}, 0, True, False),
+            # A raw code matches too; the list holds code and name.
+            (88, {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, True),
+            # An unlisted air inverter: the C0238 fallback.
+            (
+                "LW SEC",
+                {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 120},
+                2,
+                False,
+                True,
+            ),
+            # An unknown model code decodes to None, which fails the fallback's
+            # `not_in`: no rpm sensor (the gates must stay exclusive).
+            (None, {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 2, False, False),
             # MSW2-9S: brine inverter, idle - the gate must not need a reading.
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 118}, 0, True, False),
+            (
+                "MSW2-9S",
+                {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 118},
+                0,
+                True,
+                False,
+            ),
             # Fixed-speed air (LD5) and brine (MSW 30) units: neither.
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, False),
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 0, False, False),
+            ("LD5", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 2, False, False),
+            ("MSW 30", {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 0}, 0, False, False),
             # A heat-source medium no corpus inverter reports: still one sensor,
             # the Hz one, whose rpm conversion covers either unit.
-            ({"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 1, True, False),
+            (None, {"ID_WEB_Freq_VD": 0, "ID_WEB_Freq_VD_Max": 105}, 1, True, False),
         ],
     )
     def test_compressor_sensors_split_by_heat_source(
-        self, calculations, medium, frequency, speed
+        self, model, calculations, medium, frequency, speed
     ):
-        """Inverters only (C0238 > 0). C0231 reads Hz on brine inverters and
-        rpm on air ones, and P0975 (heat-source medium) reads 0 on every brine
-        inverter and 2 on every air inverter in the corpus, so each pump gets
-        the sensor in its controller's own unit (#863)."""
+        """Inverters only. C0231 reads Hz on brine inverters and rpm on air
+        ones, and P0975 (heat-source medium) reads 0 on every brine inverter
+        and 2 on every air inverter in the corpus, so each pump gets the
+        sensor in its controller's own unit (#863). Known air inverter models
+        get the rpm sensor whatever C0238 reads, which drops to 0 while an
+        LP8V is idle (#881); other models need C0238 > 0."""
         coord = _make_coordinator(
-            calculations=calculations,
+            calculations={**calculations, "ID_WEB_Code_WP_akt": model},
             parameters={"ID_Einst_Medium_Waermequelle": medium},
         )
         for key, active in (
             (SensorKey.PUMP_FREQUENCY, frequency),
             (SensorKey.COMPRESSOR_SPEED, speed),
         ):
-            description = next(d for d in SENSORS if d.key == key)
-            assert coord.entity_active(description) is active, key
+            assert (
+                any(coord.entity_active(d) for d in SENSORS if d.key == key) is active
+            ), key
+
+    def test_compressor_speed_gates_are_exclusive(self):
+        """The two rpm descriptions share the `compressor_speed` key, so their
+        gates must never both hold - one unique_id, one entity."""
+        with patch.object(HeatpumpCode, "codes", dict(HeatpumpCode.codes)):
+            update_Luxtronik_HeatpumpCodes()
+            models = [*HeatpumpCode.codes, *HeatpumpCode.codes.values()]
+        speed_descriptions = [d for d in SENSORS if d.key == SensorKey.COMPRESSOR_SPEED]
+        assert len(speed_descriptions) == 2
+        for model in models:
+            for max_frequency in (0, 105):
+                coord = _make_coordinator(
+                    calculations={
+                        "ID_WEB_Freq_VD": 0,
+                        "ID_WEB_Code_WP_akt": model,
+                        "ID_WEB_Freq_VD_Max": max_frequency,
+                    },
+                    parameters={"ID_Einst_Medium_Waermequelle": 2},
+                )
+                active = [d for d in speed_descriptions if coord.entity_active(d)]
+                assert len(active) <= 1, (model, max_frequency)
+
+    @pytest.mark.parametrize(
+        ("model", "max_frequency", "medium", "expected"),
+        [
+            # LP11V (#874): rpm confirmed against its display.
+            ("LP11V", 91, 2, "rpm"),
+            # A raw code matches too; the gates list code and name.
+            (89, 91, 2, "rpm"),
+            # LD9V (#863/#874): the fan's control signal in volts.
+            ("LD9V", 105, 2, "volt"),
+            # LW SEC 2 (#874): rpm confirmed on its display - a name with spaces.
+            ("LW SEC 2", 120, 2, "rpm"),
+            # An air inverter whose rpm nobody has confirmed.
+            ("LW SEC", 120, 2, "unconfirmed"),
+            # Fixed-speed air (LD5) and a brine inverter: no fan sensor.
+            ("LD5", 0, 2, None),
+            ("MSW2-9S", 118, 0, None),
+            # An unknown model code decodes to None: no fan sensor either.
+            (None, 105, 2, None),
+        ],
+    )
+    def test_fan_sensors_split_by_model(self, model, max_frequency, medium, expected):
+        """C0184 holds rpm or the fan's control voltage depending on the fan,
+        so the model (C0078) decides which sensor a unit gets (#874)."""
+        coord = _make_coordinator(
+            calculations={
+                "ID_WEB_HZIO_VEN": 59,
+                "ID_WEB_Code_WP_akt": model,
+                "ID_WEB_Freq_VD_Max": max_frequency,
+            },
+            parameters={"ID_Einst_Medium_Waermequelle": medium},
+        )
+        active = {
+            _fan_variant(description)
+            for description in SENSORS
+            if description.luxtronik_key == LC.C0184_FAN_SPEED
+            and coord.entity_active(description)
+        }
+        assert active == ({expected} if expected else set())
+
+    def test_every_model_gets_at_most_one_fan_sensor(self):
+        """The two rpm descriptions share the `fan_speed` key, so their gates
+        must never both hold - one unique_id, one entity."""
+        with patch.object(HeatpumpCode, "codes", dict(HeatpumpCode.codes)):
+            update_Luxtronik_HeatpumpCodes()
+            models = [*HeatpumpCode.codes, *HeatpumpCode.codes.values()]
+        fan_descriptions = [d for d in SENSORS if d.luxtronik_key == LC.C0184_FAN_SPEED]
+        for model in models:
+            for medium in (0, 1, 2):
+                coord = _make_coordinator(
+                    calculations={
+                        "ID_WEB_HZIO_VEN": 59,
+                        "ID_WEB_Code_WP_akt": model,
+                        "ID_WEB_Freq_VD_Max": 105,
+                    },
+                    parameters={"ID_Einst_Medium_Waermequelle": medium},
+                )
+                active = [d for d in fan_descriptions if coord.entity_active(d)]
+                assert len(active) <= 1, (model, medium)
 
     def test_version_incompatible(self):
         coord = _make_coordinator(calculations={"ID_WEB_SoftStand": "V3.90.1"})
@@ -1241,6 +1367,27 @@ class TestFormulaInOperator:
         coord = _make_coordinator_direct()
         assert coord._evaluate_visibility_formula(2, "in 3,4,cooling") is False
         assert coord._evaluate_visibility_formula("load", "in 3,4,cooling") is False
+
+    def test_items_may_hold_spaces(self):
+        """Model names such as "LW SEC 2" hold spaces; only commas separate
+        items, and the space after a comma is ignored."""
+        coord = _make_coordinator_direct()
+        assert coord._evaluate_visibility_formula("LW SEC 2", "in 85,LW SEC 2") is True
+        assert coord._evaluate_visibility_formula("LW SEC", "in 85,LW SEC 2") is False
+        assert coord._evaluate_visibility_formula(4, "in 3, 4") is True
+        assert (
+            coord._evaluate_visibility_formula("LW SEC 2", "not_in LP11V, LW SEC 2")
+            is False
+        )
+
+    def test_not_in_is_the_negation(self):
+        coord = _make_coordinator_direct()
+        assert coord._evaluate_visibility_formula(3, "not_in 3,4,cooling") is False
+        assert (
+            coord._evaluate_visibility_formula("cooling", "not_in 3,cooling") is False
+        )
+        assert coord._evaluate_visibility_formula(2, "not_in 3,4,cooling") is True
+        assert coord._evaluate_visibility_formula("load", "not_in 3,cooling") is True
 
 
 def _number(key: SensorKey):
@@ -2199,6 +2346,23 @@ class TestIsVersionNotCompatible:
             key="test", max_firmware_version_minor=Version("89.0")
         )
         assert coord._is_version_not_compatible(desc) is True
+
+    @pytest.mark.parametrize(
+        ("firmware", "incompatible"),
+        [
+            ("V3.92.3", False),
+            ("V3.81", False),
+            ("V2.88.3", True),
+            ("V1.90.0", True),
+            ("V4.81.3", True),
+            # Unparsable firmware reads as series 0, which is no listed series.
+            ("garbage", True),
+        ],
+    )
+    def test_firmware_series(self, firmware, incompatible):
+        coord = _make_coordinator(calculations={"ID_WEB_SoftStand": firmware})
+        desc = LuxtronikEntityDescription(key="test", firmware_series=(3,))
+        assert coord._is_version_not_compatible(desc) is incompatible
 
 
 # ===========================================================================

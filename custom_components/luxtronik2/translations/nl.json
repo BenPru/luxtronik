@@ -80,6 +80,9 @@
             "thermal_power_limitation_switch": {
                 "name": "Max. thermisch vermogen"
             },
+            "silent_mode": {
+                "name": "Stille modus"
+            },
             "pump_heat_control": {
                 "name": "Controle pompverwarming"
             },
@@ -372,6 +375,10 @@
                     "767": "Veiligheidstemperatuurbegrenzer verwarmingselement",
                     "770": "Lage oververhitting",
                     "771": "Hoge oververhitting",
+                    "772": "Toepassingsgrens te lage condensatie",
+                    "773": "Toepassingsgrens te hoge condensatie",
+                    "774": "Toepassingsgrens te lage verdamping",
+                    "775": "Expansieventiel EVI",
                     "776": "Bedrijfslimieten compressor",
                     "777": "Expansieklep",
                     "778": "Vrees lage druk",
@@ -389,7 +396,7 @@
                     "790": "Grote omvormerfout",
                     "791": "ModBus-verbinding verbroken",
                     "792": "LIN-verbinding onderbroken",
-                    "793": "Fatale omvormerfout",
+                    "793": "Temperatuur omvormer",
                     "731": "Time-out TDI",
                     "739": "Voeler menggroep3",
                     "768": "Doorstromingsbewaking",
@@ -403,8 +410,18 @@
                     "800": "Desuperheater-fout",
                     "802": "Switchbox fan",
                     "803": "Switchbox fan",
+                    "804": "Sensor schakelkast",
+                    "805": "Sensor desuperheater",
                     "806": "ModBus SEC",
                     "807": "ModBus-verbinding verloren",
+                    "808": "Hardware niet ondersteund",
+                    "809": "Oververhitting",
+                    "810": "Versie parallelbedrijf",
+                    "811": "Controleer de condensaatbak",
+                    "813": "Omvormer niet compatibel",
+                    "814": "Voeler ontdooien",
+                    "815": "Modbus HZIO",
+                    "816": "Meerdere SHI-schrijfbronnen",
                     "minus_1": "Onbekende fout"
                 },
                 "state_attributes": {
@@ -563,6 +580,10 @@
                             "767": "Verwarmingselement controleren en zekering er weer in schuiven",
                             "770": "Controleer temperatuursensor, druksensor en expansieventiel",
                             "771": "Temperatuursensor, druksensor, vulhoeveelheid en expansieventiel controleren",
+                            "772": "Automatische reset",
+                            "773": "Automatische reset",
+                            "774": "Automatische reset",
+                            "775": "Automatische reset",
                             "776": "Controleer de thermodynamica",
                             "777": "Expansieventiel, aansluitkabel en eventueel SEC-bord controleren",
                             "778": "Sensor, stekker en aansluitkabel controleren",
@@ -592,8 +613,17 @@
                             "800": "Energie uit onthitter-buffer afnemen. Zodra de temperatuur < 80°C daalt, kan de machine weer gestart worden.",
                             "802": "Ventilator op werking controleren. Aansluitkabel controleren. Sensor controleren. Elektrische schakelkastopeningen op verstopping controleren.",
                             "803": "Ventilator op werking controleren. Aansluitkabel controleren. Sensor controleren. Elektrische schakelkastopeningen op verstopping controleren.",
+                            "804": "Bel installateur a.u.b.",
+                            "805": "Automatische reset",
                             "806": "Kabelverbinding tussen ModBus en SEC-printplaat controleren.",
-                            "807": "ModBus-interface op het bedieningselement, verbindingskabel naar de ModBus-verdeler alsmede ModBus-verdeler controleren. Modbus bedrading controleren."
+                            "807": "ModBus-interface op het bedieningselement, verbindingskabel naar de ModBus-verdeler alsmede ModBus-verdeler controleren. Modbus bedrading controleren.",
+                            "808": "Software bijwerken a.u.b.",
+                            "809": "Automatische reset",
+                            "810": "Bel installateur a.u.b.",
+                            "811": "Bel installateur a.u.b.",
+                            "813": "Bel installateur a.u.b.",
+                            "814": "Bel installateur a.u.b.",
+                            "815": "Automatische reset"
                         }
                     }
                 }
@@ -787,7 +817,7 @@
                     "heatpump_idle": "De warmtepomp is inactief",
                     "heatpump_coming": "De warmtepomp start",
                     "heatpump_shutdown": "De warmtepomp schakelt uit",
-                    "errorcode_slot_0": "Foutcode warmtepomp in slot 0",
+                    "errorcode_slot_0": "Storing",
                     "pump_forerun": "Pompvoorloop",
                     "defrost": "Ontdooien",
                     "waiting_on_lin_connection": "Wacht op LIN-verbinding",
@@ -800,7 +830,8 @@
                 "state": {
                     "since": "Sinds",
                     "in": "In",
-                    "unknown": "Onbekend"
+                    "unknown": "Onbekend",
+                    "fault": "Storing"
                 }
             },
             "status_line_3": {
@@ -821,7 +852,11 @@
                     "info_bake_out_program": "Informatie uit opwarmprogramma",
                     "heating_external_energy_source": "Verwarming uit een externe energiebron",
                     "domestic_water_external_energy_source": "Huishoudelijk water uit externe energiebron",
-                    "second_heat_generator_1_active": "tweede warmteopwekker 1 actief"
+                    "second_heat_generator_1_active": "tweede warmteopwekker 1 actief",
+                    "fault": "Storing",
+                    "compressor_heater": "Compressorverwarmer",
+                    "domestic_water_post_heating": "Warm water naverwarming",
+                    "pressure_compensation": "Drukvereffening"
                 }
             },
             "heat_source_output": {
@@ -913,6 +948,9 @@
             },
             "fan_speed": {
                 "name": "Ventilatortoerental"
+            },
+            "fan_control_signal": {
+                "name": "Ventilatorstuursignaal"
             },
             "domestic_water": {
                 "name": "Warm water"
@@ -1060,6 +1098,14 @@
             },
             "last_defrost": {
                 "name": "Laatste ontdooiing"
+            },
+            "defrost_demand": {
+                "name": "Ontdooibehoefte",
+                "state_attributes": {
+                    "remaining_time": {
+                        "name": "Resterende tijd"
+                    }
+                }
             },
             "additional_heat_generator_energy_p1140": {
                 "name": "Warmtehoeveelheid extra warmtegenerator (firmware x.88 en later)"
@@ -1271,6 +1317,36 @@
             },
             "timer_circulation_schedule_sunday": {
                 "name": "Circulatiepomp vrijgavetijden (zondag)"
+            },
+            "timer_silent_mode_schedule_week": {
+                "name": "Tijden stille modus (week)"
+            },
+            "timer_silent_mode_schedule_weekday": {
+                "name": "Tijden stille modus (werkdagen)"
+            },
+            "timer_silent_mode_schedule_weekend": {
+                "name": "Tijden stille modus (weekend)"
+            },
+            "timer_silent_mode_schedule_monday": {
+                "name": "Tijden stille modus (maandag)"
+            },
+            "timer_silent_mode_schedule_tuesday": {
+                "name": "Tijden stille modus (dinsdag)"
+            },
+            "timer_silent_mode_schedule_wednesday": {
+                "name": "Tijden stille modus (woensdag)"
+            },
+            "timer_silent_mode_schedule_thursday": {
+                "name": "Tijden stille modus (donderdag)"
+            },
+            "timer_silent_mode_schedule_friday": {
+                "name": "Tijden stille modus (vrijdag)"
+            },
+            "timer_silent_mode_schedule_saturday": {
+                "name": "Tijden stille modus (zaterdag)"
+            },
+            "timer_silent_mode_schedule_sunday": {
+                "name": "Tijden stille modus (zondag)"
             }
         },
         "select": {
@@ -1322,6 +1398,14 @@
             },
             "timer_circulation_program": {
                 "name": "Circulatiepomp tijdprogramma",
+                "state": {
+                    "week": "Hele week",
+                    "weekday_weekend": "Werkdagen + weekend",
+                    "daily": "Per dag"
+                }
+            },
+            "timer_silent_mode_program": {
+                "name": "Tijdprogramma stille modus",
                 "state": {
                     "week": "Hele week",
                     "weekday_weekend": "Werkdagen + weekend",

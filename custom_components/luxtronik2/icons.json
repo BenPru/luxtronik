@@ -63,6 +63,7 @@
       "pump_frequency": { "default": "mdi:sine-wave" },
       "compressor_speed": { "default": "mdi:speedometer" },
       "fan_speed": { "default": "mdi:fan" },
+      "fan_control_signal": { "default": "mdi:fan" },
       "pump_flow_delta_target": { "default": "mdi:delta" },
       "pump_flow_delta": { "default": "mdi:delta" },
       "circulation_pump_delta_target": { "default": "mdi:delta" },
@@ -154,6 +155,13 @@
       "pump_heat_control": { "default": "mdi:pump" },
       "electrical_power_limitation_switch": { "default": "mdi:download-lock" },
       "thermal_power_limitation_switch": { "default": "mdi:download-lock" },
+      "silent_mode": {
+        "default": "mdi:volume-off",
+        "state": {
+          "on": "mdi:volume-off",
+          "off": "mdi:volume-high"
+        }
+      },
       "heating": {
         "default": "mdi:radiator",
         "state": {

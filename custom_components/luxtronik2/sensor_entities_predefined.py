@@ -21,6 +21,7 @@ from homeassistant.const import (
 from packaging.version import Version
 
 from .const import (
+    AIR_INVERTER_MODELS,
     SECOND_TO_HOUR_FACTOR,
     DeviceKey,
     LuxCalculation as LC,
@@ -156,6 +157,15 @@ SENSORS_INDEX: list[descr_index] = [
     ),
 ]
 
+# C0184 (fan) by model code (C0078), each raw code next to its decoded name.
+# Items are separated by commas only - names may hold spaces ("LW SEC 2").
+# rpm confirmed on the display of an LP11V and an LW SEC 2 (#874); the LP11V
+# is taken for its LP*V siblings.
+_FAN_RPM_MODELS = "85,87,88,89,90,LW SEC 2,LP5V,LP8V,LP11V,LP16V"
+# The fan's control signal in 0.1 V, as the controller display shows it.
+_FAN_VOLT_MODELS = "77,LD9V"
+
+
 SENSORS: list[descr] = [
     # region Main heatpump
     descr(
@@ -196,7 +206,8 @@ SENSORS: list[descr] = [
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_visible_default=False,
         device_class=SensorDeviceClass.ENUM,
-        options=["since", "in"],
+        # 2: the second line of the error text while in a fault.
+        options=["since", "in", "fault"],
     ),
     descr(
         key=SensorKey.STATUS_LINE_3,
@@ -591,7 +602,7 @@ SENSORS: list[descr] = [
         native_precision=1,
         # Inverters that are not air-source: C0238 (maximum compressor
         # frequency) is 0 on every fixed-speed unit in the corpus and stays
-        # set while an inverter is idle; P0975 reads 0 on every brine
+        # set while its brine inverters idle; P0975 reads 0 on every brine
         # inverter, 2 on every air one. `!= 2` rather than `== 0`, so an
         # unseen P0975 value still gets this sensor.
         entity_active=(
@@ -608,19 +619,53 @@ SENSORS: list[descr] = [
         # display shows it (#863). No conversion - the gate decides the unit,
         # and a low reading on a start ramp must not be taken for Hz.
         native_precision=0,
-        # Air inverters only - the counterpart of the frequency gate above.
+        # Known air inverters by model, whatever the compressor is doing: an
+        # idle LP8V reads C0238 = 0, so a start while idle used to miss the
+        # sensor for the whole session (#881). P0975 is a setting, not a
+        # state, and keeps this exclusive with the frequency sensor.
         entity_active=(
+            (LC.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),
+            (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+        ),
+    ),
+    descr(
+        key=SensorKey.COMPRESSOR_SPEED,
+        luxtronik_key=LC.C0231_PUMP_FREQUENCY,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
+        native_precision=0,
+        # Any other air inverter - the counterpart of the frequency gate
+        # above. Shares the key with the model-gated one, so the gates must
+        # exclude each other. A model code the table cannot decode reads None,
+        # which fails `not_in` too: such a unit gets no rpm sensor.
+        entity_active=(
+            (LC.C0078_MODEL_CODE, f"not_in {AIR_INVERTER_MODELS}"),
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
         ),
     ),
-    # The heat-source fan of an air unit, in rpm as the library types the
-    # register (#874). Non-zero in the corpus only on air inverters: 600 on
-    # LW SEC 2, 260 on LP16V, 199 on LP11V - plausible rpm - and 59 heating /
-    # 5 idle on the LD9V family (C0237/C0238 = 23/105); 0 on every brine and
-    # fixed-speed unit, hence the compressor-speed gate. The LD9V scale is
-    # implausible for rpm and unconfirmed against a display, so the sensor
-    # starts disabled; confirm that family before enabling it by default.
+    # The heat-source fan of an air unit (#874), C0184. Non-zero in the corpus
+    # only on air inverters, 0 on every brine and fixed-speed unit, hence the
+    # compressor-speed gate. The library types it rpm, but what it holds
+    # depends on the fan, so it is split by model (C0078):
+    # - rpm, confirmed against the display on an LP11V (311 vs 310 rpm) and an
+    #   LW SEC 2 (600 vs 600 rpm), the LP11V taken for its LP*V siblings:
+    #   enabled by default.
+    # - LD9V: the fan's 2-10 V control signal in 0.1 V, as its display shows
+    #   it (59 = 5.9 V running, 5 = 0.5 V idle or defrosting): own sensor.
+    # - any other air inverter: rpm as the library says, unconfirmed, so
+    #   disabled by default. It shares the `fan_speed` key with
+    #   the confirmed one - the gates exclude each other - so confirming a model
+    #   only adds its code and name to _FAN_RPM_MODELS and keeps the entity ID.
+    # The unknown-code case (C0078 None) gets none of the three.
+    descr(
+        key=SensorKey.FAN_SPEED,
+        luxtronik_key=LC.C0184_FAN_SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
+        native_precision=0,
+        entity_active=((LC.C0078_MODEL_CODE, f"in {_FAN_RPM_MODELS}"),),
+    ),
     descr(
         key=SensorKey.FAN_SPEED,
         luxtronik_key=LC.C0184_FAN_SPEED,
@@ -631,7 +676,19 @@ SENSORS: list[descr] = [
         entity_active=(
             (LC.C0238_COMPRESSOR_FREQUENCY_MAX, "> 0"),
             (LP.P0975_HEAT_SOURCE_MEDIUM, "== 2"),
+            (LC.C0078_MODEL_CODE, f"not_in {_FAN_RPM_MODELS},{_FAN_VOLT_MODELS}"),
         ),
+    ),
+    descr(
+        key=SensorKey.FAN_CONTROL_SIGNAL,
+        luxtronik_key=LC.C0184_FAN_SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        factor=0.1,
+        native_precision=1,
+        entity_registry_enabled_default=False,
+        entity_active=((LC.C0078_MODEL_CODE, f"in {_FAN_VOLT_MODELS}"),),
     ),
     descr(
         key=SensorKey.PUMP_FLOW_DELTA_TARGET,
@@ -728,6 +785,27 @@ SENSORS: list[descr] = [
         # to route through that branch - the comparison itself never runs
         # numerically on a datetime and is always True there.
         entity_active=((LP.P1119_LAST_DEFROST_TIMESTAMP, "!= 0"),),
+    ),
+    # C0141 counts down to the next defrost; the web interface shows it as a
+    # "defrost demand" percentage (#882). It idles at 10800 s (3 h) on every
+    # series-3 air inverter in the corpus, but at 2700 s on series-1 LWC/L2A
+    # units, so the span is only known on series 3. Whether the web
+    # interface reaches 100 % exactly at 0 is unconfirmed.
+    descr(
+        key=SensorKey.DEFROST_DEMAND,
+        luxtronik_key=LC.C0141_TIMER_DEFROST,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=PERCENTAGE,
+        icon="mdi:snowflake-melt",
+        countdown_percent_of=10800,
+        native_precision=0,
+        extra_attributes=(
+            attr(
+                SA.REMAINING_TIME, LC.C0141_TIMER_DEFROST, SensorAttrFormat.HOUR_MINUTE
+            ),
+        ),
+        firmware_series=(3,),
+        entity_active=((LC.C0078_MODEL_CODE, f"in {AIR_INVERTER_MODELS}"),),
     ),
     # endregion Main heatpump
     # region Heating
@@ -1155,6 +1233,7 @@ SENSORS_COP: list[cop_descr] = [
         denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
         required_status=LuxOperationMode.heating,
         icon="mdi:speedometer",
+        suggested_display_precision=2,
     ),
     cop_descr(
         key=SensorKey.COP_DHW,
@@ -1164,6 +1243,7 @@ SENSORS_COP: list[cop_descr] = [
         denominator_key=LC.C0268_CURRENT_POWER_CONSUMPTION,
         required_status=LuxOperationMode.domestic_water,
         icon="mdi:speedometer",
+        suggested_display_precision=2,
     ),
 ]
 # endregion COP
@@ -1193,6 +1273,7 @@ SENSORS_SCOP: list[scop_descr] = [
         entity_active=gate,
         state_class=SensorStateClass.MEASUREMENT,
         icon="mdi:chart-line",
+        suggested_display_precision=2,
     )
     for key, window_days, circuit, device_key, luxtronik_key, gate in (
         (

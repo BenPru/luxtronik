@@ -17,3 +17,6 @@ updates:
     # Home Assistant core pins probatio too; the test floor tracks the oldest
     # supported core, so it moves when the minimum HA version moves (#841).
     - dependency-name: "probatio"
+    # pytest-homeassistant-custom-component pins pytest-asyncio exactly, so the
+    # version follows that pin; a floor above it makes CI uninstallable (#887).
+    - dependency-name: "pytest-asyncio"

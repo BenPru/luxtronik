@@ -80,6 +80,9 @@
             "thermal_power_limitation_switch": {
                 "name": "Max. tepelný výkon"
             },
+            "silent_mode": {
+                "name": "Tichý režim"
+            },
             "pump_heat_control": {
                 "name": "Ovládání čerpadla pro ohřev"
             },
@@ -374,6 +377,10 @@
                     "769": "Řízení čerpadla",
                     "770": "Nízké přehřátí",
                     "771": "Vysoké přehřátí",
+                    "772": "Mez použití: příliš nízká kondenzace",
+                    "773": "Mez použití: příliš vysoká kondenzace",
+                    "774": "Mez použití: příliš nízké vypařování",
+                    "775": "Expanzní ventil EVI",
                     "776": "Meze použití kompresoru",
                     "777": "Expanzní ventil",
                     "778": "Snímač nízkého tlaku",
@@ -391,7 +398,7 @@
                     "790": "Závažná chyba měniče",
                     "791": "Ztráta ModBus spojení",
                     "792": "Přerušené LIN spojení",
-                    "793": "Závažná chyba měniče",
+                    "793": "Teplota invertoru",
                     "731": "Časový limit TDI",
                     "739": "Čidlo směšovacího okruhu 3",
                     "794": "Přepětí",
@@ -403,8 +410,18 @@
                     "800": "Chyba desuperheateru",
                     "802": "Ventilátor rozvaděče",
                     "803": "Ventilátor rozvaděče",
+                    "804": "Čidlo rozvaděče",
+                    "805": "Čidlo desuperheateru",
                     "806": "ModBus SEC",
                     "807": "Ztráta spojení ModBus",
+                    "808": "Nepodporovaný hardware",
+                    "809": "Přehřátí",
+                    "810": "Verze paralelního módu",
+                    "811": "Kontrola vany kondenzátu",
+                    "813": "Invertor není kompatibilní",
+                    "814": "Čidlo odtávání",
+                    "815": "Modbus HZIO",
+                    "816": "Více zdrojů zápisu SHI",
                     "minus_1": "Neznámá chyba"
                 },
                 "state_attributes": {
@@ -563,6 +580,10 @@
                             "767": "Kontrola topného tělesa a znovu zasunutí pojistky.",
                             "770": "Kontrola teplotního čidla, tlakového snímače a expanzního ventilu.",
                             "771": "Kontrola teplotního čidla, tlakového snímače, naplnění a expanzního ventilu.",
+                            "772": "Automatický reset.",
+                            "773": "Automatický reset.",
+                            "774": "Automatický reset.",
+                            "775": "Automatický reset.",
                             "776": "Kontrola termodynamiky.",
                             "777": "Kontrola expanzního ventilu, připojovacího kabelu a případně desky SEC.",
                             "778": "Kontrola čidla, konektoru a připojovacího vedení.",
@@ -590,8 +611,17 @@
                             "800": "Odebrání energie ze zásobníku desuperheateru. Jakmile teplota klesne pod 80 °C, lze zařízení znovu spustit.",
                             "802": "Kontrola funkce ventilátoru. Kontrola připojovacího kabelu. Kontrola čidla. Kontrola otvorů rozvaděče na ucpání.",
                             "803": "Kontrola funkce ventilátoru. Kontrola připojovacího kabelu. Kontrola čidla. Kontrola otvorů rozvaděče na ucpání.",
+                            "804": "Volejte instalatéra.",
+                            "805": "Automatický reset.",
                             "806": "Kontrola kabeláže ModBus desky SEC.",
                             "807": "Kontrola rozhraní ModBus na ovládacím panelu, propojovacího kabelu k rozbočovači ModBus a samotného rozbočovače ModBus. Kontrola kabeláže ModBus.",
+                            "808": "Prosím aktualizujte software.",
+                            "809": "Automatický reset.",
+                            "810": "Volejte instalatéra.",
+                            "811": "Volejte instalatéra.",
+                            "813": "Volejte instalatéra.",
+                            "814": "Volejte instalatéra.",
+                            "815": "Automatický reset.",
                             "768": "Kontrola průtoku topné vody a přepadu. Odstranění poruchy.",
                             "769": "Kontrola kabeláže zátěže a řízení oběhového čerpadla. Odstranění poruchy."
                         }
@@ -787,7 +817,7 @@
                     "heatpump_idle": "Tepelné čerpadlo je v klidovém režimu",
                     "heatpump_coming": "Tepelné čerpadlo se spouští",
                     "heatpump_shutdown": "Tepelné čerpadlo vypíná",
-                    "errorcode_slot_0": "Chybový kód tepelného čerpadla ve slotu 0",
+                    "errorcode_slot_0": "Porucha",
                     "pump_forerun": "Předehřev čerpadla",
                     "defrost": "Odmrazování",
                     "waiting_on_lin_connection": "Čekání na připojení LIN",
@@ -800,7 +830,8 @@
                 "state": {
                     "since": "již",
                     "in": "za",
-                    "unknown": "neznámo"
+                    "unknown": "neznámo",
+                    "fault": "porucha"
                 }
             },
             "status_line_3": {
@@ -821,7 +852,11 @@
                     "info_bake_out_program": "informace z programu pečení",
                     "heating_external_energy_source": "ohřev z externího zdroje energie",
                     "domestic_water_external_energy_source": "TUV z externího zdroje energie",
-                    "second_heat_generator_1_active": "druhý generátor tepla 1 aktivní"
+                    "second_heat_generator_1_active": "druhý generátor tepla 1 aktivní",
+                    "fault": "Porucha",
+                    "compressor_heater": "Ohřev kompresoru",
+                    "domestic_water_post_heating": "Dohřev TUV",
+                    "pressure_compensation": "Vyrovnávání tlaku"
                 }
             },
             "heat_source_output": {
@@ -902,6 +937,14 @@
             "last_defrost": {
                 "name": "Poslední odmrazování"
             },
+            "defrost_demand": {
+                "name": "Potřeba odmrazování",
+                "state_attributes": {
+                    "remaining_time": {
+                        "name": "Zbývající čas"
+                    }
+                }
+            },
             "additional_heat_generator_energy_p1059": {
                 "name": "Množství tepla dodatečného zdroje (firmware před x.88)"
             },
@@ -922,6 +965,9 @@
             },
             "fan_speed": {
                 "name": "Otáčky ventilátoru"
+            },
+            "fan_control_signal": {
+                "name": "Řídicí signál ventilátoru"
             },
             "domestic_water": {
                 "name": "TUV"
@@ -1271,6 +1317,36 @@
             },
             "timer_circulation_schedule_sunday": {
                 "name": "Časy chodu cirkulace TUV (neděle)"
+            },
+            "timer_silent_mode_schedule_week": {
+                "name": "Časy tichého režimu (týden)"
+            },
+            "timer_silent_mode_schedule_weekday": {
+                "name": "Časy tichého režimu (pracovní dny)"
+            },
+            "timer_silent_mode_schedule_weekend": {
+                "name": "Časy tichého režimu (víkend)"
+            },
+            "timer_silent_mode_schedule_monday": {
+                "name": "Časy tichého režimu (pondělí)"
+            },
+            "timer_silent_mode_schedule_tuesday": {
+                "name": "Časy tichého režimu (úterý)"
+            },
+            "timer_silent_mode_schedule_wednesday": {
+                "name": "Časy tichého režimu (středa)"
+            },
+            "timer_silent_mode_schedule_thursday": {
+                "name": "Časy tichého režimu (čtvrtek)"
+            },
+            "timer_silent_mode_schedule_friday": {
+                "name": "Časy tichého režimu (pátek)"
+            },
+            "timer_silent_mode_schedule_saturday": {
+                "name": "Časy tichého režimu (sobota)"
+            },
+            "timer_silent_mode_schedule_sunday": {
+                "name": "Časy tichého režimu (neděle)"
             }
         },
         "select": {
@@ -1322,6 +1398,14 @@
             },
             "timer_circulation_program": {
                 "name": "Časový program cirkulace TUV",
+                "state": {
+                    "week": "Celý týden",
+                    "weekday_weekend": "Pracovní dny + víkend",
+                    "daily": "Jednotlivé dny"
+                }
+            },
+            "timer_silent_mode_program": {
+                "name": "Časový program tichého režimu",
                 "state": {
                     "week": "Celý týden",
                     "weekday_weekend": "Pracovní dny + víkend",
