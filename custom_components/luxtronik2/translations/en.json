@@ -1,4 +1,9 @@
 {
+    "device_automation": {
+        "action_type": {
+            "recalculate_evu": "Recalculate EVU schedule from the last seven days"
+        }
+    },
     "entity": {
         "binary_sensor": {
             "evu_unlocked": {
@@ -1523,6 +1528,15 @@
         }
     },
     "exceptions": {
+        "evu_status_required": {
+            "message": "Select the Luxtronik operating status sensor to recalculate the EVU schedule."
+        },
+        "evu_recorder_required": {
+            "message": "The recorder integration is required to recalculate the EVU schedule."
+        },
+        "evu_history_empty": {
+            "message": "No usable operating status history was found in the last seven days. The EVU schedule was not changed."
+        },
         "readonly_firmware": {
             "message": "Writing is blocked: Luxtronik firmware {firmware} crashes the controller on write commands, so the integration is read-only"
         },

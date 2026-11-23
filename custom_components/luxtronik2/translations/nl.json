@@ -1,4 +1,9 @@
 {
+    "device_automation": {
+        "action_type": {
+            "recalculate_evu": "EVU-schema opnieuw berekenen uit de laatste zeven dagen"
+        }
+    },
     "entity": {
         "binary_sensor": {
             "evu_unlocked": {
@@ -1523,6 +1528,15 @@
         }
     },
     "exceptions": {
+        "evu_status_required": {
+            "message": "Selecteer de Luxtronik-bedrijfsstatussensor om het EVU-schema opnieuw te berekenen."
+        },
+        "evu_recorder_required": {
+            "message": "De recorder-integratie is vereist om het EVU-schema opnieuw te berekenen."
+        },
+        "evu_history_empty": {
+            "message": "Geen bruikbare bedrijfsstatushistorie gevonden in de laatste zeven dagen. Het EVU-schema is niet gewijzigd."
+        },
         "readonly_firmware": {
             "message": "Schrijven geblokkeerd: Luxtronik-firmware {firmware} laat de regelaar crashen bij schrijfopdrachten, daarom is de integratie alleen-lezen"
         },

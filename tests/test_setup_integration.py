@@ -115,6 +115,71 @@ def _make_entry(**data_overrides: Any) -> MockConfigEntry:
     return MockConfigEntry(domain=DOMAIN, version=CONFIG_ENTRY_VERSION, data=data)
 
 
+async def test_evu_device_action_recalculates_and_survives_entry_reload(
+    hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Exercise platform service registration, action execution and real restore data."""
+    from datetime import UTC, datetime, timedelta
+    from unittest.mock import MagicMock
+
+    from homeassistant.core import State
+    from homeassistant.util import dt as dt_util
+
+    from custom_components.luxtronik2.const import SensorAttrKey as SA
+    from custom_components.luxtronik2.device_action import (
+        async_call_action_from_config,
+        async_get_actions,
+        async_validate_action_config,
+    )
+
+    client = FakeLuxtronikClient(
+        host="192.168.1.100",
+        port=DEFAULT_PORT,
+        socket_timeout=10,
+        max_data_length=1024,
+    )
+    _patch_client(monkeypatch, client)
+    entry = _make_entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    entity_id = f"sensor.{DOMAIN}_status"
+    status_entry = er.async_get(hass).async_get(entity_id)
+    assert status_entry is not None
+    actions = await async_get_actions(hass, status_entry.device_id)
+    assert len(actions) == 1
+    now = datetime.now(UTC)
+    yesterday = (now - timedelta(days=1)).replace(
+        hour=8, minute=0, second=0, microsecond=0
+    )
+    history = [
+        State(entity_id, value, last_changed=yesterday + timedelta(hours=offset))
+        for value, offset in (("heating", 0), ("evu", 3), ("heating", 5))
+    ]
+    recorder = MagicMock()
+    recorder.async_add_executor_job = AsyncMock(return_value={entity_id: history})
+    monkeypatch.setattr(
+        "custom_components.luxtronik2.sensor.get_instance", lambda _: recorder
+    )
+    hass.config.components.add("recorder")
+    config = await async_validate_action_config(hass, actions[0])
+    await async_call_action_from_config(hass, config, {}, None)
+    expected_start = dt_util.as_local(history[1].last_changed).strftime("%H:%M")
+    assert (
+        hass.states.get(entity_id).attributes[SA.EVU_FIRST_START_TIME] == expected_start
+    )
+    expected_days = hass.states.get(entity_id).attributes[SA.EVU_DAYS]
+    assert expected_days
+
+    hass.config.components.remove("recorder")
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    restored = hass.states.get(entity_id)
+    assert restored.attributes[SA.EVU_FIRST_START_TIME] == expected_start
+    assert restored.attributes[SA.EVU_DAYS] == expected_days
+
+
 async def test_setup_entry_registers_entities_with_visibility_driven_defaults(
     hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch
 ) -> None:

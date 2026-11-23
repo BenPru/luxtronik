@@ -1,4 +1,9 @@
 {
+    "device_automation": {
+        "action_type": {
+            "recalculate_evu": "Přepočítat plán EVU z posledních sedmi dnů"
+        }
+    },
     "entity": {
         "binary_sensor": {
             "evu_unlocked": {
@@ -1523,6 +1528,15 @@
         }
     },
     "exceptions": {
+        "evu_status_required": {
+            "message": "Pro přepočet plánu EVU vyberte snímač provozního stavu Luxtronik."
+        },
+        "evu_recorder_required": {
+            "message": "Pro přepočet plánu EVU je vyžadována integrace recorder."
+        },
+        "evu_history_empty": {
+            "message": "Za posledních sedm dnů nebyla nalezena použitelná historie provozního stavu. Plán EVU nebyl změněn."
+        },
         "readonly_firmware": {
             "message": "Zápis je zablokován: firmware Luxtronik {firmware} při příkazech zápisu zhavaruje řídicí jednotku, proto je integrace pouze pro čtení"
         },

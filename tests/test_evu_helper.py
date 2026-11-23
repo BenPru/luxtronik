@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import time
+from datetime import datetime, time
 from unittest.mock import patch
 
 from custom_components.luxtronik2.const import LuxOperationMode, SensorAttrKey as SA
@@ -13,10 +13,10 @@ class TestEVUTrackerInit:
     def test_initial_state(self):
         tracker = LuxtronikEVUTracker()
         assert tracker._last_state is None
-        assert tracker._evu_first_start == time.min
-        assert tracker._evu_first_end == time.min
-        assert tracker._evu_second_start == time.min
-        assert tracker._evu_second_end == time.min
+        assert tracker._evu_first_start is None
+        assert tracker._evu_first_end is None
+        assert tracker._evu_second_start is None
+        assert tracker._evu_second_end is None
         assert tracker._evu_days == []
 
 
@@ -51,7 +51,8 @@ class TestEVUTrackerUpdate:
         mock_dt.now.return_value = datetime(2024, 1, 1, 11, 0)
 
         tracker = LuxtronikEVUTracker()
-        tracker._last_state = LuxOperationMode.evu  # previous state was evu
+        tracker.update("heating", datetime(2024, 1, 1, 9, 0))
+        tracker.update(LuxOperationMode.evu, datetime(2024, 1, 1, 10, 0))
         tracker.update("heating")  # EVU ended
 
         assert tracker._evu_first_end == time(11, 0)
@@ -136,9 +137,9 @@ class TestEVUTrackerGetAttributes:
 
         tracker = LuxtronikEVUTracker()
 
-        # Pre-fill first slot so _should_use_first_slot returns False
-        tracker._evu_first_start = time(6, 0)
-        tracker._evu_first_end = time(8, 0)
+        tracker.update("heating", dt_cls(2024, 1, 2, 5))
+        tracker.update("evu", dt_cls(2024, 1, 2, 6))
+        tracker.update("heating", dt_cls(2024, 1, 2, 8))
 
         # Simulate EVU activation at 14:00 (after first slot)
         tracker._last_state = "heating"
@@ -154,23 +155,6 @@ class TestEVUTrackerGetAttributes:
             mock_dt.now.return_value = fake_pm_end
             tracker.update("heating")
         assert tracker._evu_second_end == time(16, 0)
-
-
-class TestShouldUseFirstSlot:
-    def test_first_slot_when_empty(self):
-        tracker = LuxtronikEVUTracker()
-        assert tracker._should_use_first_slot(time(10, 0)) is True
-
-    def test_first_slot_before_start(self):
-        tracker = LuxtronikEVUTracker()
-        tracker._evu_first_start = time(12, 0)
-        assert tracker._should_use_first_slot(time(10, 0)) is True
-
-    def test_second_slot_after_first_end(self):
-        tracker = LuxtronikEVUTracker()
-        tracker._evu_first_start = time(8, 0)
-        tracker._evu_first_end = time(10, 0)
-        assert tracker._should_use_first_slot(time(14, 0)) is False
 
 
 # ===========================================================================
@@ -208,3 +192,99 @@ class TestEVUHelperMultiDayGap:
         minutes = tracker.get_next_event_minutes()
         assert minutes is not None
         assert minutes == 120  # 12:00 - 10:00 = 120 min
+
+
+def test_pairs_two_daily_windows_despite_polling_jitter():
+    """The first end must stay with its start; weekdays come from actual events."""
+    tracker = LuxtronikEVUTracker()
+    tracker.update("heating", datetime(2026, 11, 16, 8))
+    for day in range(16, 23):
+        for value, hour, minute in (
+            ("evu", 11, 54),
+            ("no_request", 13, 55),
+            ("evu", 17, 55),
+            ("no_request", 19, 55),
+        ):
+            tracker.update(value, datetime(2026, 11, day, hour, minute))
+    attrs = tracker.get_attributes()
+    assert attrs[SA.EVU_FIRST_START_TIME] == "11:54"
+    assert attrs[SA.EVU_FIRST_END_TIME] == "13:55"
+    assert attrs[SA.EVU_SECOND_START_TIME] == "17:55"
+    assert attrs[SA.EVU_SECOND_END_TIME] == "19:55"
+    assert attrs[SA.EVU_DAYS] == (
+        "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday"
+    )
+
+
+def test_history_boundary_and_unavailable_do_not_invent_transitions():
+    tracker = LuxtronikEVUTracker()
+    tracker.update("evu", datetime(2026, 11, 16, 12))
+    tracker.update("heating", datetime(2026, 11, 16, 14))
+    assert tracker.get_attributes()[SA.EVU_FIRST_START_TIME] == ""
+    assert tracker.get_attributes()[SA.EVU_FIRST_END_TIME] == ""
+    tracker.update("evu", datetime(2026, 11, 16, 18))
+    tracker.update("unavailable", datetime(2026, 11, 16, 19))
+    tracker.update("heating", datetime(2026, 11, 16, 21))
+    assert tracker.get_attributes()[SA.EVU_FIRST_END_TIME] == ""
+    assert tracker.get_attributes()[SA.EVU_SECOND_END_TIME] == ""
+
+
+def test_restore_preserves_active_interval_and_rebases_changed_startup_state():
+    tracker = LuxtronikEVUTracker()
+    tracker.update("heating", datetime(2026, 11, 16, 8))
+    tracker.update("evu", datetime(2026, 11, 16, 12))
+    restored = LuxtronikEVUTracker()
+    restored.restore(tracker.as_dict())
+    restored.update("evu", datetime(2026, 11, 16, 13))
+    restored.update("heating", datetime(2026, 11, 16, 14))
+    assert restored.get_attributes()[SA.EVU_FIRST_START_TIME] == "12:00"
+    assert restored.get_attributes()[SA.EVU_FIRST_END_TIME] == "14:00"
+
+    changed = LuxtronikEVUTracker()
+    changed.restore(tracker.as_dict())
+    changed.update("heating", datetime(2026, 11, 16, 15))
+    assert changed.get_attributes()[SA.EVU_FIRST_END_TIME] == ""
+
+
+def test_midnight_is_a_valid_start_and_end_is_paired_across_dates():
+    tracker = LuxtronikEVUTracker()
+    tracker.update("heating", datetime(2026, 11, 16, 23))
+    tracker.update("evu", datetime(2026, 11, 17, 0))
+    tracker.update("heating", datetime(2026, 11, 17, 2))
+    assert tracker.get_attributes()[SA.EVU_FIRST_START_TIME] == "00:00"
+    assert tracker.get_attributes()[SA.EVU_FIRST_END_TIME] == "02:00"
+
+
+def test_countdown_skips_inactive_days_after_last_event():
+    tracker = LuxtronikEVUTracker()
+    tracker._evu_first_start = time(12)
+    tracker._evu_first_end = time(14)
+    tracker._evu_days = [4]  # Friday only
+    with patch(
+        "custom_components.luxtronik2.evu_helper.dt_util.now",
+        return_value=datetime(2026, 11, 20, 15),
+    ):
+        assert tracker.get_next_event_minutes() == 6 * 1440 + 21 * 60
+
+
+def test_overnight_end_is_on_the_day_after_the_evu_start():
+    tracker = LuxtronikEVUTracker()
+    tracker.update("heating", datetime(2026, 11, 20, 20))
+    tracker.update("evu", datetime(2026, 11, 20, 23))
+    tracker.update("heating", datetime(2026, 11, 21, 1))
+    with patch(
+        "custom_components.luxtronik2.evu_helper.dt_util.now",
+        return_value=datetime(2026, 11, 21, 0, 30),
+    ):
+        assert tracker.get_next_event_minutes() == 30
+
+
+def test_daily_slot_assignment_does_not_depend_on_previous_days_times():
+    tracker = LuxtronikEVUTracker()
+    tracker.update("heating", datetime(2026, 11, 16, 8))
+    for day, start, end in ((16, 10, 12), (17, 15, 17)):
+        tracker.update("evu", datetime(2026, 11, day, start))
+        tracker.update("heating", datetime(2026, 11, day, end))
+    assert tracker.get_attributes()[SA.EVU_FIRST_START_TIME] == "15:00"
+    assert tracker.get_attributes()[SA.EVU_FIRST_END_TIME] == "17:00"
+    assert tracker.get_attributes()[SA.EVU_SECOND_START_TIME] == ""

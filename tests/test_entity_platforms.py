@@ -829,6 +829,13 @@ class TestLuxtronikDateEntity:
 
 
 class TestSensorAsyncSetupEntry:
+    @pytest.fixture(autouse=True)
+    def mock_sensor_platform(self):
+        with patch(
+            "custom_components.luxtronik2.sensor.entity_platform.async_get_current_platform"
+        ):
+            yield
+
     @pytest.mark.asyncio
     async def test_skips_when_no_update_success(self):
         from custom_components.luxtronik2.sensor import async_setup_entry
