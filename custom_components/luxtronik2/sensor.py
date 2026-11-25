@@ -16,9 +16,10 @@ from homeassistant.components.sensor import (
     SensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import ServiceValidationError
-from homeassistant.helpers import entity_platform
+from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData
 from homeassistant.helpers.translation import async_get_cached_translations
@@ -77,12 +78,19 @@ PARALLEL_UPDATES = 0
 
 
 async def _async_recalculate_evu(
-    entity: LuxtronikSensorEntity, _service_call: ServiceCall
+    entity: LuxtronikSensorEntity, service_call: ServiceCall
 ) -> None:
-    if not isinstance(entity, LuxtronikStatusSensorEntity):
-        raise ServiceValidationError(
-            translation_domain=DOMAIN, translation_key="evu_status_required"
-        )
+    if (
+        not isinstance(entity, LuxtronikStatusSensorEntity)
+        or entity.entity_description.key != SensorKey.STATUS
+    ):
+        # A device or area target also reaches other enum sensors, such as
+        # Smart Grid Status; only naming one of them explicitly is an error.
+        if entity.entity_id in cv.ensure_list(service_call.data.get(ATTR_ENTITY_ID)):
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="evu_status_required"
+            )
+        return
     await entity.async_recalculate_evu()
 
 
@@ -95,16 +103,18 @@ async def async_setup_entry(
 
     coordinator = entry.runtime_data
 
-    # Ensure coordinator has valid data before adding entities
-    if not coordinator.last_update_success:
-        return
-
+    # Registered before the early return, so the service (and the device action
+    # calling it) exists even when the heat pump was unreachable at startup.
     entity_platform.async_get_current_platform().async_register_entity_service(
         SERVICE_RECALCULATE_EVU,
         {},
         _async_recalculate_evu,
         entity_device_classes=[SensorDeviceClass.ENUM],
     )
+
+    # Ensure coordinator has valid data before adding entities
+    if not coordinator.last_update_success:
+        return
 
     unavailable_keys = [
         i.luxtronik_key
@@ -380,7 +390,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
     @property
     def extra_restore_state_data(self) -> LuxtronikStatusExtraStoredData:
         """Persist the schedule and any active EVU interval across HA restarts."""
-        return LuxtronikStatusExtraStoredData(self._evu_tracker.as_dict())
+        return LuxtronikStatusExtraStoredData(self._evu_tracker_state)
 
     @property
     def _evu_tracker_state(self) -> dict[str, Any]:
@@ -398,10 +408,6 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
 
     async def async_recalculate_evu(self) -> None:
         """Replace the EVU schedule by replaying the last seven days of status."""
-        if self.entity_description.key != SensorKey.STATUS:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN, translation_key="evu_status_required"
-            )
         if "recorder" not in self.hass.config.components:
             raise ServiceValidationError(
                 translation_domain=DOMAIN, translation_key="evu_recorder_required"

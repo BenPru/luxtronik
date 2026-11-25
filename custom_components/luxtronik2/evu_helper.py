@@ -24,6 +24,7 @@ class LuxtronikEVUTracker:
         self._slot_day: date | None = None
         self._daily_starts = 0
         self._resuming = False
+        self._warned_extra_windows = False
 
     def update(self, current_value: str | None, now: datetime | None = None):
         """Learn paired EVU transitions, optionally replaying historical timestamps."""
@@ -52,7 +53,12 @@ class LuxtronikEVUTracker:
                 self._slot_day = now.date()
                 self._daily_starts = 0
             if self._daily_starts >= 2:
-                LOGGER.warning("EVU schedule supports only two time windows per day")
+                # A unit with three lockouts a day would otherwise warn daily.
+                if not self._warned_extra_windows:
+                    LOGGER.warning(
+                        "EVU schedule supports only two time windows per day"
+                    )
+                    self._warned_extra_windows = True
                 self._last_state = current_value
                 self._active_slot = None
                 return
@@ -80,16 +86,19 @@ class LuxtronikEVUTracker:
         self._last_state = current_value
         self._resuming = False
 
-    def get_next_event_minutes(self) -> int | None:
+    def get_next_event_minutes(
+        self, *, starts: bool = True, ends: bool = True
+    ) -> int | None:
+        """Minutes until the next learned start and/or end, or None if unknown."""
         now = dt_util.now().replace(second=0, microsecond=0)
         events = []
         for start, end in (
             (self._evu_first_start, self._evu_first_end),
             (self._evu_second_start, self._evu_second_end),
         ):
-            if start is not None:
+            if starts and start is not None:
                 events.append((start, 0))
-            if end is not None:
+            if ends and end is not None:
                 events.append((end, int(start is not None and end < start)))
         candidates = []
         for offset in range(-1, 8):
@@ -143,9 +152,15 @@ class LuxtronikEVUTracker:
         self._last_state = data.get("last_state")
         self._active_slot = data.get("active_slot")
         self._daily_starts = data.get("daily_starts", 0)
-        self._slot_day = (
-            date.fromisoformat(data["slot_day"]) if data.get("slot_day") else None
-        )
+        try:
+            self._slot_day = (
+                date.fromisoformat(data["slot_day"]) if data.get("slot_day") else None
+            )
+        except (TypeError, ValueError):
+            # Without a valid day the per-day count is meaningless; start afresh.
+            LOGGER.warning("Ignoring invalid restored EVU day: %r", data["slot_day"])
+            self._slot_day = None
+            self._daily_starts = 0
         self._resuming = True
 
     def get_attributes(self) -> dict[str, str]:
@@ -160,13 +175,14 @@ class LuxtronikEVUTracker:
 
     def get_evu_status_suffix(self, current_value: str | None) -> str:
         """Return EVU status suffix for status text."""
-        evu_event_minutes = self.get_next_event_minutes()
-        if evu_event_minutes is None:
-            return ""
+        # During a lockout only an end can answer "until"; outside one, only a
+        # start can answer "in". The next event of the other kind is no answer.
         if current_value == LuxOperationMode.evu:
-            return f"EVU until {evu_event_minutes} min"
-        if evu_event_minutes <= 30:
-            return f"EVU in {evu_event_minutes} min"
+            minutes = self.get_next_event_minutes(starts=False)
+            return "" if minutes is None else f"EVU until {minutes} min"
+        minutes = self.get_next_event_minutes(ends=False)
+        if minutes is not None and minutes <= 30:
+            return f"EVU in {minutes} min"
         return ""
 
     def _format_time(self, value: time | None) -> str:

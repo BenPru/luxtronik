@@ -288,3 +288,56 @@ def test_daily_slot_assignment_does_not_depend_on_previous_days_times():
     assert tracker.get_attributes()[SA.EVU_FIRST_START_TIME] == "15:00"
     assert tracker.get_attributes()[SA.EVU_FIRST_END_TIME] == "17:00"
     assert tracker.get_attributes()[SA.EVU_SECOND_START_TIME] == ""
+
+
+def test_third_daily_window_is_not_learned_and_warns_only_once(caplog):
+    tracker = LuxtronikEVUTracker()
+    tracker.update("heating", datetime(2026, 11, 16, 6))
+    for day in (16, 17):
+        for start in (8, 12, 18):
+            tracker.update("evu", datetime(2026, 11, day, start))
+            tracker.update("heating", datetime(2026, 11, day, start + 1))
+    attrs = tracker.get_attributes()
+    assert attrs[SA.EVU_FIRST_START_TIME] == "08:00"
+    assert attrs[SA.EVU_SECOND_START_TIME] == "12:00"
+    assert attrs[SA.EVU_SECOND_END_TIME] == "13:00"
+    assert caplog.text.count("only two time windows per day") == 1
+
+
+def test_restore_ignores_invalid_times_and_slot_day():
+    tracker = LuxtronikEVUTracker()
+    tracker.restore(
+        {
+            "attributes": {
+                SA.EVU_FIRST_START_TIME: "25:99",
+                SA.EVU_FIRST_END_TIME: "14:00",
+            },
+            "last_state": "heating",
+            "slot_day": "not-a-date",
+            "daily_starts": 2,
+        }
+    )
+    assert tracker._evu_first_start is None
+    assert tracker._evu_first_end == time(14)
+    # The day's start count goes with the unreadable day: a new start is the first.
+    tracker.update("heating", datetime(2026, 11, 16, 9))
+    tracker.update("evu", datetime(2026, 11, 16, 10))
+    assert tracker.get_attributes()[SA.EVU_FIRST_START_TIME] == "10:00"
+
+
+def test_suffix_counts_down_to_an_end_during_evu_and_to_a_start_outside():
+    tracker = LuxtronikEVUTracker()
+    tracker._evu_first_start = time(12)
+    with patch(
+        "custom_components.luxtronik2.evu_helper.dt_util.now",
+        return_value=datetime(2026, 11, 16, 11, 50),
+    ):
+        # No end learned yet: the next start is no answer to "until when".
+        assert tracker.get_evu_status_suffix(LuxOperationMode.evu) == ""
+        assert tracker.get_evu_status_suffix("heating") == "EVU in 10 min"
+        tracker._evu_first_start, tracker._evu_first_end = time(8), time(12)
+        assert tracker.get_evu_status_suffix(LuxOperationMode.evu) == (
+            "EVU until 10 min"
+        )
+        # An end 10 minutes away does not announce an upcoming lockout.
+        assert tracker.get_evu_status_suffix("heating") == ""
