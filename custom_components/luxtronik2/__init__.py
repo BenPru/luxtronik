@@ -803,6 +803,7 @@ async def _async_remove_undetected_solar_entities(
         return
     if not async_entries_for_device(ent_reg, device.id, include_disabled_entities=True):
         dev_reg.async_remove_device(device.id)
+        LOGGER.info("Removed the empty hot water device - no hot water detected")
 
 
 _MIXING_CIRCUIT_TYPES = (
@@ -821,8 +822,8 @@ async def _async_remove_unconfigured_mixing_circuit_entities(
     circuits were created on every heat pump, though MK2 heats on only 2 of
     the 39 in the diagnostics corpus. Their `entity_active` gates on the
     circuit type now stop creating them, but existing registry entries would
-    linger as "no longer provided" on the heating device. Same lazy approach
-    as the SmartGrid switch above.
+    linger as "no longer provided" on the heating device. Same approach as
+    the solar entities above: lazy, and gated on the live registers.
 
     Removing is destructive (it drops the user's name, area and labels), so it
     only happens when the circuit type decided: an entity is left alone when
@@ -858,7 +859,6 @@ async def _async_remove_unconfigured_mixing_circuit_entities(
                     "Removed %s - its mixing circuit is not configured",
                     entity_id,
                 )
-        LOGGER.info("Removed the empty hot water device - no hot water detected")
 
 
 async def _fix_select_entity_unique_ids(

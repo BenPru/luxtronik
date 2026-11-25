@@ -1654,6 +1654,18 @@ class TestRemoveUnconfiguredMixingCircuitEntities:
         target = "number.luxtronik2_cooling_target_temperature_mk1"
         assert await self._removed(coord, {target}) == set()
 
+    @pytest.mark.asyncio
+    async def test_logs_only_the_entities_it_removed(self, caplog):
+        coord = self._coordinator((1, 1, 0))
+        caplog.clear()
+        with caplog.at_level("INFO", logger="custom_components.luxtronik2"):
+            removed = await self._removed(coord, _ALL_MK_UNIQUE_IDS)
+        assert removed == _mk_unique_ids(3, heating=True, flow=True)
+        assert sorted(r.getMessage() for r in caplog.records) == sorted(
+            f"Removed {entity_id} - its mixing circuit is not configured"
+            for entity_id in removed
+        )
+
 
 # ===========================================================================
 # _async_remove_undetected_solar_entities
@@ -1787,6 +1799,18 @@ class TestRemoveUndetectedSolarEntities:
             ent_reg, "dhw_device_id", include_disabled_entities=True
         )
         dev_reg.async_remove_device.assert_called_once_with("dhw_device_id")
+
+    @pytest.mark.asyncio
+    async def test_logs_the_removed_dhw_device(self, caplog):
+        coord = self._coordinator(has_solar=False, has_domestic_water=False)
+        ent_reg, dev_reg, remaining = self._registries(set())
+
+        with caplog.at_level("INFO", logger="custom_components.luxtronik2"):
+            await self._run(coord, ent_reg, dev_reg, remaining)
+
+        assert [r.getMessage() for r in caplog.records] == [
+            "Removed the empty hot water device - no hot water detected"
+        ]
 
     @pytest.mark.asyncio
     async def test_keeps_the_dhw_device_while_entities_remain_on_it(self):
