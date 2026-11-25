@@ -7,6 +7,7 @@ from homeassistant.const import EntityCategory
 from .const import (
     AIR_INVERTER_MODELS,
     DAY_SELECTOR_OPTIONS,
+    MK_HEATING_TYPES,
     SMART_GRID_MODE_CODES,
     DeviceKey,
     LuxCalculation,
@@ -137,21 +138,21 @@ SELECT_ENTITIES: list[LuxtronikSelectEntityDescription] = [
         key=SK.HEATING_MODE_MK1,
         device_key=DeviceKey.heating,
         luxtronik_key=LuxParameter.P0695_MODE_HZ_MK1,
-        entity_registry_enabled_default=False,
+        entity_active=((LuxParameter.P0042_MIXING_CIRCUIT1_TYPE, MK_HEATING_TYPES),),
         options=mode_mk_options,
     ),
     LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_MK2,
         device_key=DeviceKey.heating,
         luxtronik_key=LuxParameter.P0696_MODE_HZ_MK2,
-        entity_registry_enabled_default=False,
+        entity_active=((LuxParameter.P0130_MIXING_CIRCUIT2_TYPE, MK_HEATING_TYPES),),
         options=mode_mk_options,
     ),
     LuxtronikSelectEntityDescription(
         key=SK.HEATING_MODE_MK3,
         device_key=DeviceKey.heating,
         luxtronik_key=LuxParameter.P0779_MODE_HZ_MK3,
-        entity_registry_enabled_default=False,
+        entity_active=((LuxParameter.P0780_MIXING_CIRCUIT3_TYPE, MK_HEATING_TYPES),),
         options=mode_mk_options,
     ),
     LuxtronikSelectEntityDescription(

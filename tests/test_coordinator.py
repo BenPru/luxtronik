@@ -53,6 +53,7 @@ from custom_components.luxtronik2.model import (
     LuxtronikEntityDescription,
 )
 from custom_components.luxtronik2.number_entities_predefined import NUMBER_SENSORS
+from custom_components.luxtronik2.select_entities_predefined import SELECT_ENTITIES
 from custom_components.luxtronik2.sensor_entities_predefined import SENSORS
 
 # ===========================================================================
@@ -1479,6 +1480,121 @@ class TestDeclaredActiveGates:
             assert [c[0] for c in _number(key).entity_active] == [type_register], key
 
     # endregion Mixing-circuit cooling targets
+    # region Mixing circuits - P0042 / P0130 / P0780, not V0007 / V0008 / V0211
+    # ID_Visi_MK2 reads 1 on all 39 corpus units, yet only 2 of them heat on
+    # MK2. The installer's circuit type decides: 0 none, 1 discharge, 2 load,
+    # 3 cooling, 4 heating+cooling. An unconfigured circuit's flow sensor reads
+    # 75.0 (open) or 0.0 in every corpus dump; a cooling-only one reads real
+    # temperatures, so it keeps its flow sensors but not the heating curve.
+
+    MK_TYPES = ("ID_Einst_MK1Typ_akt", "ID_Einst_MK2Typ_akt", "ID_Einst_MK3Typ_akt")
+    MK_HEATING = {
+        1: (
+            (NUMBER_SENSORS, SensorKey.HEATING_CURVE_CIRCUIT1_END_TEMPERATURE),
+            (
+                NUMBER_SENSORS,
+                SensorKey.HEATING_CURVE_CIRCUIT1_PARALLEL_SHIFT_TEMPERATURE,
+            ),
+            (NUMBER_SENSORS, SensorKey.HEATING_CURVE_CIRCUIT1_NIGHT_TEMPERATURE),
+            (SELECT_ENTITIES, SensorKey.HEATING_MODE_MK1),
+        ),
+        2: (
+            (NUMBER_SENSORS, SensorKey.HEATING_CURVE_CIRCUIT2_END_TEMPERATURE),
+            (
+                NUMBER_SENSORS,
+                SensorKey.HEATING_CURVE_CIRCUIT2_PARALLEL_SHIFT_TEMPERATURE,
+            ),
+            (NUMBER_SENSORS, SensorKey.HEATING_CURVE_CIRCUIT2_NIGHT_TEMPERATURE),
+            (SELECT_ENTITIES, SensorKey.HEATING_MODE_MK2),
+        ),
+        3: (
+            (NUMBER_SENSORS, SensorKey.HEATING_CURVE_CIRCUIT3_END_TEMPERATURE),
+            (
+                NUMBER_SENSORS,
+                SensorKey.HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE,
+            ),
+            (NUMBER_SENSORS, SensorKey.HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE),
+            (SELECT_ENTITIES, SensorKey.HEATING_MODE_MK3),
+        ),
+    }
+    MK_FLOW = {
+        1: (
+            (SENSORS, SensorKey.FLOW_IN_CIRCUIT1_TEMPERATURE),
+            (SENSORS, SensorKey.FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE),
+        ),
+        2: (
+            (SENSORS, SensorKey.FLOW_IN_CIRCUIT2_TEMPERATURE),
+            (SENSORS, SensorKey.FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE),
+        ),
+        3: (
+            (SENSORS, SensorKey.FLOW_IN_CIRCUIT3_TEMPERATURE),
+            (SENSORS, SensorKey.FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE),
+        ),
+    }
+
+    @classmethod
+    def _mk_coord(cls, types: tuple[Any, Any, Any]) -> LuxtronikCoordinator:
+        return _make_coordinator(
+            visibilities={"ID_Visi_MK1": 0, "ID_Visi_MK2": 0, "ID_Visi_MK3": 0},
+            parameters={
+                **dict(zip(cls.MK_TYPES, types, strict=True)),
+                **{
+                    f"ID_Einst_HzMK{n}{part}_akt": 30.0
+                    for n in (1, 2, 3)
+                    for part in ("E", "ANH", "ABS")
+                },
+                **{f"ID_Ba_Hz_MK{n}_akt": 0 for n in (1, 2, 3)},
+            },
+            calculations={
+                **{f"ID_WEB_Temperatur_TFB{n}": 25.0 for n in (1, 2, 3)},
+                **{f"ID_WEB_Sollwert_TVL_MK{n}": 30.0 for n in (1, 2, 3)},
+            },
+        )
+
+    @staticmethod
+    def _active(coord: LuxtronikCoordinator, entities) -> list[bool]:
+        return [
+            coord.entity_active(next(d for d in group if d.key == key))
+            for group, key in entities
+        ]
+
+    def test_heating_circuit_keeps_curve_mode_and_flow_sensors(self):
+        for circuit_type in (1, 2, 4, "discharge", "load", "heating_cooling"):
+            coord = self._mk_coord((circuit_type, 0, 0))
+            assert self._active(coord, self.MK_HEATING[1]) == [True] * 4, circuit_type
+            assert self._active(coord, self.MK_FLOW[1]) == [True] * 2, circuit_type
+
+    def test_cooling_circuit_keeps_only_its_flow_sensors(self):
+        for circuit_type in (3, "cooling"):
+            coord = self._mk_coord((circuit_type, 0, 0))
+            assert self._active(coord, self.MK_HEATING[1]) == [False] * 4, circuit_type
+            assert self._active(coord, self.MK_FLOW[1]) == [True] * 2, circuit_type
+
+    def test_unconfigured_circuit_creates_nothing(self):
+        for circuit_type in (0, "off"):
+            coord = self._mk_coord((circuit_type, 0, 0))
+            assert self._active(coord, self.MK_HEATING[1]) == [False] * 4, circuit_type
+            assert self._active(coord, self.MK_FLOW[1]) == [False] * 2, circuit_type
+
+    def test_each_circuit_follows_its_own_type(self):
+        """Guzz-T's MSW 12 (#292): MK1 unused, MK2 and MK3 discharge."""
+        coord = self._mk_coord((0, 1, 3))
+        assert self._active(coord, self.MK_HEATING[1] + self.MK_FLOW[1]) == [False] * 6
+        assert self._active(coord, self.MK_HEATING[2] + self.MK_FLOW[2]) == [True] * 6
+        assert self._active(coord, self.MK_HEATING[3]) == [False] * 4
+        assert self._active(coord, self.MK_FLOW[3]) == [True] * 2
+
+    def test_existing_circuit_entities_are_enabled_whatever_the_visibility_flag(self):
+        """Existence now says the circuit is configured, so a 0 in
+        ID_Visi_MK* must not disable its entities by default."""
+        coord = self._mk_coord((1, 1, 1))
+        for circuit in (1, 2, 3):
+            for group, key in self.MK_HEATING[circuit] + self.MK_FLOW[circuit]:
+                description = next(d for d in group if d.key == key)
+                assert description.entity_registry_enabled_default is not False, key
+                assert coord.entity_visible(description) is True, key
+
+    # endregion Mixing circuits
     # region Smart Grid offsets - P1030
 
     SMART_GRID_OFFSETS = (

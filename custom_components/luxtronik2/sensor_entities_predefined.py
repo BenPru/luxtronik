@@ -22,6 +22,7 @@ from packaging.version import Version
 
 from .const import (
     AIR_INVERTER_MODELS,
+    MK_CONFIGURED_TYPES,
     SECOND_TO_HOUR_FACTOR,
     DeviceKey,
     LuxCalculation as LC,
@@ -833,6 +834,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_active=((LP.P0042_MIXING_CIRCUIT1_TYPE, MK_CONFIGURED_TYPES),),
     ),
     descr(
         key=SensorKey.FLOW_IN_CIRCUIT2_TEMPERATURE,
@@ -842,6 +844,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_active=((LP.P0130_MIXING_CIRCUIT2_TYPE, MK_CONFIGURED_TYPES),),
     ),
     descr(
         key=SensorKey.FLOW_IN_CIRCUIT3_TEMPERATURE,
@@ -851,6 +854,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_active=((LP.P0780_MIXING_CIRCUIT3_TYPE, MK_CONFIGURED_TYPES),),
     ),
     descr(
         key=SensorKey.FLOW_IN_CIRCUIT1_TARGET_TEMPERATURE,
@@ -860,6 +864,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_active=((LP.P0042_MIXING_CIRCUIT1_TYPE, MK_CONFIGURED_TYPES),),
     ),
     descr(
         key=SensorKey.FLOW_IN_CIRCUIT2_TARGET_TEMPERATURE,
@@ -869,6 +874,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_active=((LP.P0130_MIXING_CIRCUIT2_TYPE, MK_CONFIGURED_TYPES),),
     ),
     descr(
         key=SensorKey.FLOW_IN_CIRCUIT3_TARGET_TEMPERATURE,
@@ -878,6 +884,7 @@ SENSORS: list[descr] = [
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_active=((LP.P0780_MIXING_CIRCUIT3_TYPE, MK_CONFIGURED_TYPES),),
     ),
     descr(
         key=SensorKey.FLOW_OUT_TEMPERATURE,

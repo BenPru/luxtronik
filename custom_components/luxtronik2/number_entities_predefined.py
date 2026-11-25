@@ -15,6 +15,7 @@ from packaging.version import Version
 
 from .const import (
     DEFAULT_DHW_MIN_TEMPERATURE,
+    MK_HEATING_TYPES,
     DeviceKey,
     LuxCalculation as LC,
     LuxParameter as LP,
@@ -281,7 +282,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0007_MK1,
+        entity_active=((LP.P0042_MIXING_CIRCUIT1_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT1_PARALLEL_SHIFT_TEMPERATURE,
@@ -294,7 +295,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0007_MK1,
+        entity_active=((LP.P0042_MIXING_CIRCUIT1_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT1_NIGHT_TEMPERATURE,
@@ -307,7 +308,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0007_MK1,
+        entity_active=((LP.P0042_MIXING_CIRCUIT1_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT2_END_TEMPERATURE,
@@ -320,7 +321,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0008_MK2,
+        entity_active=((LP.P0130_MIXING_CIRCUIT2_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT2_PARALLEL_SHIFT_TEMPERATURE,
@@ -333,7 +334,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0008_MK2,
+        entity_active=((LP.P0130_MIXING_CIRCUIT2_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT2_NIGHT_TEMPERATURE,
@@ -346,7 +347,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0008_MK2,
+        entity_active=((LP.P0130_MIXING_CIRCUIT2_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT3_END_TEMPERATURE,
@@ -359,7 +360,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0211_MK3,
+        entity_active=((LP.P0780_MIXING_CIRCUIT3_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT3_PARALLEL_SHIFT_TEMPERATURE,
@@ -372,7 +373,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0211_MK3,
+        entity_active=((LP.P0780_MIXING_CIRCUIT3_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_CURVE_CIRCUIT3_NIGHT_TEMPERATURE,
@@ -385,7 +386,7 @@ NUMBER_SENSORS: list[LuxtronikNumberDescription] = [
         native_step=0.5,
         entity_category=EntityCategory.CONFIG,
         mode=NumberMode.BOX,
-        visibility=LV.V0211_MK3,
+        entity_active=((LP.P0780_MIXING_CIRCUIT3_TYPE, MK_HEATING_TYPES),),
     ),
     LuxtronikNumberDescription(
         key=SensorKey.HEATING_NIGHT_LOWERING_TO_TEMPERATURE,

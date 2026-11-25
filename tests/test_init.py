@@ -51,6 +51,7 @@ from custom_components.luxtronik2.const import (
     DeviceKey,
     SensorKey as SK,
 )
+from custom_components.luxtronik2.coordinator import LuxtronikCoordinator
 
 _ENTRY_DATA = {
     CONF_HOST: "192.168.1.100",
@@ -1521,6 +1522,152 @@ class TestRemoveWithdrawnVentilationScheduleEntities:
 
 
 # ===========================================================================
+# _async_remove_unconfigured_mixing_circuit_entities
+# ===========================================================================
+
+
+def _mk_unique_ids(circuit: int, *, heating: bool, flow: bool) -> set[str]:
+    ids: set[str] = set()
+    if heating:
+        ids |= {
+            f"number.luxtronik2_heating_curve_circuit{circuit}_{part}_temperature"
+            for part in ("end", "parallel_shift", "night")
+        }
+        ids.add(f"select.luxtronik2_heating_mode_mk{circuit}")
+    if flow:
+        ids |= {
+            f"sensor.luxtronik2_flow_in_circuit{circuit}_temperature",
+            f"sensor.luxtronik2_flow_in_circuit{circuit}_target_temperature",
+        }
+    return ids
+
+
+_ALL_MK_UNIQUE_IDS = set().union(
+    *(_mk_unique_ids(n, heating=True, flow=True) for n in (1, 2, 3))
+)
+
+
+class TestRemoveUnconfiguredMixingCircuitEntities:
+    """A mixing circuit's entities go once its type says it is not configured.
+
+    Until the circuit type gated them, the curves, mode selects and flow
+    sensors of all three circuits were created on every heat pump; MK2 heats
+    on only 2 of the 39 in the diagnostics corpus. The gate stops creating
+    them, but existing registry entries would linger as "no longer provided"
+    on the heating device - the clutter the gate is meant to remove (#880).
+    """
+
+    _MK_TYPES = ("ID_Einst_MK1Typ_akt", "ID_Einst_MK2Typ_akt", "ID_Einst_MK3Typ_akt")
+
+    @classmethod
+    def _coordinator(cls, types, *, missing=()):
+        parameters = {
+            **{
+                name: value
+                for name, value in zip(cls._MK_TYPES, types, strict=True)
+                if value is not None
+            },
+            **{
+                f"ID_Einst_HzMK{n}{part}_akt": 30.0
+                for n in (1, 2, 3)
+                for part in ("E", "ANH", "ABS")
+            },
+            **{f"ID_Ba_Hz_MK{n}_akt": 0 for n in (1, 2, 3)},
+            "ID_Sollwert_KuCft1_akt": 20.0,
+        }
+        calculations = {
+            **{f"ID_WEB_Temperatur_TFB{n}": 25.0 for n in (1, 2, 3)},
+            **{f"ID_WEB_Sollwert_TVL_MK{n}": 30.0 for n in (1, 2, 3)},
+        }
+        for name in missing:
+            parameters.pop(name, None)
+            calculations.pop(name, None)
+        hass = MagicMock()
+        client = MagicMock()
+        data = make_coordinator_data(parameters=parameters, calculations=calculations)
+        client.parameters = data.parameters
+        client.calculations = data.calculations
+        client.visibilities = data.visibilities
+        with patch("homeassistant.helpers.frame.report_usage"):
+            coord = LuxtronikCoordinator(
+                hass=hass,
+                client=client,
+                config={CONF_HOST: "192.168.1.100", CONF_PORT: DEFAULT_PORT},
+            )
+        coord.data = data
+        return coord
+
+    @staticmethod
+    async def _removed(coord, registered) -> set[str]:
+        from custom_components.luxtronik2 import (
+            _async_remove_unconfigured_mixing_circuit_entities,
+        )
+
+        ent_reg = MagicMock()
+        ent_reg.async_get_entity_id.side_effect = lambda _p, _d, uid: (
+            uid if uid in registered else None
+        )
+        with patch("custom_components.luxtronik2.async_get", return_value=ent_reg):
+            await _async_remove_unconfigured_mixing_circuit_entities(
+                MagicMock(), _mock_entry(), coord
+            )
+        return {c.args[0] for c in ent_reg.async_remove.call_args_list}
+
+    @pytest.mark.asyncio
+    async def test_removes_every_entity_of_unconfigured_circuits(self):
+        coord = self._coordinator((0, 0, 0))
+        assert await self._removed(coord, _ALL_MK_UNIQUE_IDS) == _ALL_MK_UNIQUE_IDS
+
+    @pytest.mark.asyncio
+    async def test_keeps_the_flow_sensors_of_a_cooling_circuit(self):
+        coord = self._coordinator((3, 0, 0))
+        removed = await self._removed(coord, _ALL_MK_UNIQUE_IDS)
+        assert removed == _ALL_MK_UNIQUE_IDS - _mk_unique_ids(
+            1, heating=False, flow=True
+        )
+
+    @pytest.mark.asyncio
+    async def test_keeps_heating_circuits(self):
+        coord = self._coordinator((1, 2, 4))
+        assert await self._removed(coord, _ALL_MK_UNIQUE_IDS) == set()
+
+    @pytest.mark.asyncio
+    async def test_keeps_a_circuit_whose_type_is_not_returned(self):
+        # Removing drops the user's name, area and labels: without the type
+        # the circuit is not established as unconfigured.
+        coord = self._coordinator((None, 0, 0))
+        removed = await self._removed(coord, _ALL_MK_UNIQUE_IDS)
+        assert removed == _ALL_MK_UNIQUE_IDS - _mk_unique_ids(
+            1, heating=True, flow=True
+        )
+
+    @pytest.mark.asyncio
+    async def test_keeps_an_entity_whose_own_register_is_not_returned(self):
+        # On a configured circuit the gate also says no when the entity's own
+        # register is missing; that is no reason to delete the entry.
+        coord = self._coordinator((1, 1, 1), missing=("ID_WEB_Temperatur_TFB1",))
+        assert await self._removed(coord, _ALL_MK_UNIQUE_IDS) == set()
+
+    @pytest.mark.asyncio
+    async def test_leaves_the_cooling_targets_alone(self):
+        coord = self._coordinator((0, 0, 0))
+        target = "number.luxtronik2_cooling_target_temperature_mk1"
+        assert await self._removed(coord, {target}) == set()
+
+    @pytest.mark.asyncio
+    async def test_logs_only_the_entities_it_removed(self, caplog):
+        coord = self._coordinator((1, 1, 0))
+        caplog.clear()
+        with caplog.at_level("INFO", logger="custom_components.luxtronik2"):
+            removed = await self._removed(coord, _ALL_MK_UNIQUE_IDS)
+        assert removed == _mk_unique_ids(3, heating=True, flow=True)
+        assert sorted(r.getMessage() for r in caplog.records) == sorted(
+            f"Removed {entity_id} - its mixing circuit is not configured"
+            for entity_id in removed
+        )
+
+
+# ===========================================================================
 # _async_remove_undetected_solar_entities
 # ===========================================================================
 
@@ -1652,6 +1799,18 @@ class TestRemoveUndetectedSolarEntities:
             ent_reg, "dhw_device_id", include_disabled_entities=True
         )
         dev_reg.async_remove_device.assert_called_once_with("dhw_device_id")
+
+    @pytest.mark.asyncio
+    async def test_logs_the_removed_dhw_device(self, caplog):
+        coord = self._coordinator(has_solar=False, has_domestic_water=False)
+        ent_reg, dev_reg, remaining = self._registries(set())
+
+        with caplog.at_level("INFO", logger="custom_components.luxtronik2"):
+            await self._run(coord, ent_reg, dev_reg, remaining)
+
+        assert [r.getMessage() for r in caplog.records] == [
+            "Removed the empty hot water device - no hot water detected"
+        ]
 
     @pytest.mark.asyncio
     async def test_keeps_the_dhw_device_while_entities_remain_on_it(self):
