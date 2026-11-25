@@ -1,4 +1,9 @@
 {
+    "device_automation": {
+        "action_type": {
+            "recalculate_evu": "EVU-Zeitplan aus den letzten sieben Tagen neu berechnen"
+        }
+    },
     "entity": {
         "binary_sensor": {
             "evu_unlocked": {
@@ -1607,6 +1612,15 @@
         }
     },
     "exceptions": {
+        "evu_status_required": {
+            "message": "Wähle den Luxtronik-Betriebsstatussensor, um den EVU-Zeitplan neu zu berechnen."
+        },
+        "evu_recorder_required": {
+            "message": "Die Recorder-Integration wird benötigt, um den EVU-Zeitplan neu zu berechnen."
+        },
+        "evu_history_empty": {
+            "message": "In den letzten sieben Tagen wurde keine nutzbare Betriebsstatushistorie gefunden. Der EVU-Zeitplan wurde nicht geändert."
+        },
         "readonly_firmware": {
             "message": "Schreiben blockiert: Die Luxtronik-Firmware {firmware} stürzt bei Schreibbefehlen ab, daher ist die Integration schreibgeschützt"
         },

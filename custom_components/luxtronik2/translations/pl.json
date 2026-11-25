@@ -1,4 +1,9 @@
 {
+    "device_automation": {
+        "action_type": {
+            "recalculate_evu": "Przelicz harmonogram EVU z ostatnich siedmiu dni"
+        }
+    },
     "entity": {
         "binary_sensor": {
             "evu_unlocked": {
@@ -1607,6 +1612,15 @@
         }
     },
     "exceptions": {
+        "evu_status_required": {
+            "message": "Wybierz czujnik stanu pracy Luxtronik, aby przeliczyć harmonogram EVU."
+        },
+        "evu_recorder_required": {
+            "message": "Do przeliczenia harmonogramu EVU wymagana jest integracja recorder."
+        },
+        "evu_history_empty": {
+            "message": "Nie znaleziono użytecznej historii stanu pracy z ostatnich siedmiu dni. Harmonogram EVU nie został zmieniony."
+        },
         "readonly_firmware": {
             "message": "Zapis zablokowany: firmware Luxtronik {firmware} powoduje awarię sterownika przy poleceniach zapisu, dlatego integracja działa tylko w trybie odczytu"
         },

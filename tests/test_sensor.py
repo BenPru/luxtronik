@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import (
@@ -15,6 +15,8 @@ from homeassistant.const import (
     UnitOfTemperature,
     UnitOfVolumeFlowRate,
 )
+from homeassistant.core import State
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity import EntityCategory
 from luxtronik.calculations import Calculations
 import pytest
@@ -44,6 +46,7 @@ from custom_components.luxtronik2.const import (
     SensorKey,
 )
 from custom_components.luxtronik2.coordinator import LuxtronikCoordinator
+from custom_components.luxtronik2.evu_helper import LuxtronikEVUTracker
 from custom_components.luxtronik2.lux_overrides import parameters_to_add_update
 from custom_components.luxtronik2.model import (
     LuxtronikBinarySensorEntityDescription,
@@ -232,6 +235,129 @@ def _make_status_sensor(data=None, description=None):
     _patch_entity(entity)
     entity._get_entity_translations = MagicMock(return_value={})
     return entity
+
+
+async def test_recalculate_evu_replays_history_in_local_time():
+    entity = _make_status_sensor()
+    entity.hass.config.components = {"recorder"}
+    end = datetime(2026, 11, 23, 8, tzinfo=UTC)
+    states = [
+        State(
+            entity.entity_id,
+            value,
+            last_changed=datetime(2026, 11, 22, hour, tzinfo=UTC),
+        )
+        for value, hour in (
+            ("heating", 8),
+            ("evu", 11),
+            ("heating", 13),
+            ("evu", 17),
+            ("no_request", 19),
+        )
+    ]
+    entity._evu_tracker._evu_days = [1]
+    recorder = MagicMock()
+    recorder.async_add_executor_job = AsyncMock(return_value={entity.entity_id: states})
+    with (
+        patch(
+            "custom_components.luxtronik2.sensor.get_instance", return_value=recorder
+        ),
+        patch("custom_components.luxtronik2.sensor.dt_util.utcnow", return_value=end),
+        patch(
+            "custom_components.luxtronik2.sensor.dt_util.as_local",
+            side_effect=lambda stamp: stamp + timedelta(hours=1),
+        ),
+    ):
+        await entity.async_recalculate_evu()
+    attrs = entity._attr_extra_state_attributes
+    assert attrs[SA.EVU_FIRST_START_TIME] == "12:00"
+    assert attrs[SA.EVU_FIRST_END_TIME] == "14:00"
+    assert attrs[SA.EVU_SECOND_START_TIME] == "18:00"
+    assert attrs[SA.EVU_SECOND_END_TIME] == "20:00"
+    assert attrs[SA.EVU_DAYS] == "Sunday"
+    query = recorder.async_add_executor_job.call_args.args[0]
+    assert query.args == (entity.hass, end - timedelta(days=7), end)
+    assert query.keywords["entity_id"] == entity.entity_id
+    assert query.keywords["include_start_time_state"]
+
+
+@pytest.mark.parametrize("states", [[], ["unavailable", "unknown"]])
+async def test_recalculate_empty_history_keeps_existing_schedule(states):
+    entity = _make_status_sensor()
+    entity.hass.config.components = {"recorder"}
+    original = entity._evu_tracker
+    recorder = MagicMock()
+    recorder.async_add_executor_job = AsyncMock(
+        return_value={
+            entity.entity_id: [State(entity.entity_id, state) for state in states]
+        }
+    )
+    with (
+        patch(
+            "custom_components.luxtronik2.sensor.get_instance", return_value=recorder
+        ),
+        pytest.raises(ServiceValidationError),
+    ):
+        await entity.async_recalculate_evu()
+    assert entity._evu_tracker is original
+    entity.async_write_ha_state.assert_not_called()
+
+
+async def test_recalculate_without_evu_clears_obsolete_schedule():
+    entity = _make_status_sensor()
+    entity.hass.config.components = {"recorder"}
+    entity._evu_tracker._evu_days = [1]
+    recorder = MagicMock()
+    recorder.async_add_executor_job = AsyncMock(
+        return_value={entity.entity_id: [State(entity.entity_id, "heating")]}
+    )
+    with patch(
+        "custom_components.luxtronik2.sensor.get_instance", return_value=recorder
+    ):
+        await entity.async_recalculate_evu()
+    assert entity._attr_extra_state_attributes[SA.EVU_DAYS] == ""
+
+
+async def test_recalculate_requires_recorder():
+    entity = _make_status_sensor()
+    entity.hass.config.components = set()
+    with pytest.raises(ServiceValidationError):
+        await entity.async_recalculate_evu()
+
+
+def test_live_connection_failure_does_not_create_an_evu_end():
+    entity = _make_status_sensor()
+    entity._evu_tracker.update("heating", datetime(2026, 11, 16, 8))
+    entity._evu_tracker.update("evu", datetime(2026, 11, 16, 12))
+    entity.coordinator.last_update_success = False
+    entity._handle_coordinator_update()
+    entity.coordinator.last_update_success = True
+    entity._handle_coordinator_update()
+    assert entity._attr_extra_state_attributes[SA.EVU_FIRST_END_TIME] == ""
+
+
+async def test_status_extra_restore_data_is_applied_before_first_update():
+    entity = _make_status_sensor()
+    tracker = LuxtronikEVUTracker()
+    tracker.update("heating", datetime(2026, 11, 16, 8))
+    tracker.update("evu", datetime(2026, 11, 16, 12))
+    tracker.update("heating", datetime(2026, 11, 16, 14))
+    entity._evu_tracker = tracker
+    stored = entity.extra_restore_state_data
+    restored = _make_status_sensor()
+    restored.async_get_last_state = AsyncMock(return_value=None)
+    restored.async_get_last_extra_data = AsyncMock(return_value=stored)
+    with (
+        patch(
+            "homeassistant.helpers.update_coordinator.CoordinatorEntity.async_added_to_hass",
+            new_callable=AsyncMock,
+        ),
+        patch("custom_components.luxtronik2.base.async_dispatcher_connect"),
+    ):
+        await restored.async_added_to_hass()
+    assert restored._attr_extra_state_attributes[SA.EVU_FIRST_START_TIME] == "12:00"
+    assert restored._attr_extra_state_attributes[SA.EVU_FIRST_END_TIME] == "14:00"
+    assert restored._attr_extra_state_attributes[SA.EVU_DAYS] == "Monday"
 
 
 class TestStatusSensorUpdate:

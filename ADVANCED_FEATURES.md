@@ -100,7 +100,19 @@ They are computed from Home Assistant's long-term statistics of the heat pump's 
 
 Many installations (mainly in Germany/Austria) let the electricity utility (EVU, *Energieversorgungsunternehmen*) force the compressor into a lockout for a period, in exchange for a cheaper tariff. When this happens, the **Status** sensor's text briefly shows a cryptic-looking suffix, e.g. `EVU until 42 min` while a lockout is active, or `EVU in 15 min` when one is about to start within the next 30 minutes. This is expected behavior, not a fault.
 
-The integration learns these lockout windows by observing the heat pump's own operating-mode transitions over time (it does not read a pre-configured EVU schedule from the controller) — so right after a Home Assistant restart, no EVU timing is known yet until at least one lockout has been observed. Once learned, the Status sensor also exposes extra attributes: first/second daily start and end time, which days of the week a lockout has been observed on, and minutes until the next event.
+The integration learns these lockout windows by observing the heat pump's own operating-mode transitions over time (it does not read a pre-configured EVU schedule from the controller). The learned schedule and transition context survive Home Assistant restarts and integration reloads. The Status sensor exposes extra attributes: first/second daily start and end time, which days of the week a lockout has been observed on, and minutes until the next event.
+
+To replace incorrect or outdated EVU attributes, select the heat pump in an automation's **Device** action and choose **Recalculate EVU schedule from the last seven days**. This replays the Status sensor's recorded state changes in Home Assistant's local time zone, replacing the learned weekdays and the first two daily time windows with their latest observed times. It does not write anything to the heat pump.
+
+The same action is available under **Developer Tools → Actions**:
+
+```yaml
+action: luxtronik2.recalculate_evu
+target:
+  entity_id: sensor.luxtronik2_status
+```
+
+Use your actual Status entity ID, which may have a different prefix or have been renamed. Recorder must be enabled and must include this sensor; only history retained within the last seven days can be used. Empty or entirely unavailable history raises an error and leaves the existing schedule unchanged. Valid history without EVU events clears the old schedule. Transitions across `unknown`/`unavailable` gaps are not inferred. The times are observations, limited by the polling interval, not exact switching times supplied by the utility. Different schedules on individual weekdays are represented by the same two time windows, as before.
 
 **Smart Grid Status** is a related but separate sensor: it only reports a value while *Smart Grid mode* (see [Smart Grid & Power Limitation](#smart-grid--power-limitation) below) is set to something other than `Off`, and derives an SG-ready state from the heat pump's two EVU input signals. **Which state a given pair of signals means depends on the selected mode** — the controller keeps a separate state table for `+/-`, `SG 1.0` and `SG 1.1`, so for example both contacts closed is `Increased operation` under `+/-`, a `Start command` under `SG 1.0`, and `Power limitation` under `SG 1.1`.
 

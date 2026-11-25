@@ -231,7 +231,12 @@ class TestScopSetup:
             active or d not in SENSORS_SCOP
         )
         add = MagicMock()
-        with patch("homeassistant.helpers.frame.report_usage"):
+        with (
+            patch("homeassistant.helpers.frame.report_usage"),
+            patch(
+                "custom_components.luxtronik2.sensor.entity_platform.async_get_current_platform"
+            ),
+        ):
             await async_setup_entry(hass, entry, add)
         return add
 

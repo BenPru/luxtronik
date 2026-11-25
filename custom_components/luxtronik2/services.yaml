@@ -1,3 +1,16 @@
+recalculate_evu:
+  name: Recalculate EVU schedule
+  description: >-
+    Rebuild the status sensor's EVU weekdays and first two daily time windows
+    from recorded status changes in the last seven days. The latest observed
+    times are used. Requires recorder history; does not write to the heat pump.
+    Also available as a device action.
+  target:
+    entity:
+      integration: luxtronik2
+      domain: sensor
+      device_class: enum
+
 write:
   name: Write Luxtronik Parameter
   description: |

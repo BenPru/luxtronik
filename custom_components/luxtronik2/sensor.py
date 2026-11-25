@@ -3,16 +3,27 @@
 # region Imports
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from functools import partial
+from typing import Any
 
+from homeassistant.components.recorder import get_instance
+from homeassistant.components.recorder.history import state_changes_during_period
 from homeassistant.components.sensor import (
     ENTITY_ID_FORMAT,  # pyright: ignore[reportAttributeAccessIssue]
+    SensorDeviceClass,
     SensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.const import ATTR_ENTITY_ID
+from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import ExtraStoredData
 from homeassistant.helpers.translation import async_get_cached_translations
+from homeassistant.util import dt as dt_util
 
 from . import LuxtronikConfigEntry
 from .base import LuxtronikEntity
@@ -30,8 +41,10 @@ from .const import (
     CONF_HA_SENSOR_PREFIX,
     DOMAIN,
     LOGGER,
+    SERVICE_RECALCULATE_EVU,
     DeviceKey,
     LuxCalculation as LC,
+    LuxOperationMode,
     LuxParameter as LP,
     LuxRoomThermostatType,
     SensorAttrFormat,
@@ -64,6 +77,23 @@ from .sensor_entities_predefined import (
 PARALLEL_UPDATES = 0
 
 
+async def _async_recalculate_evu(
+    entity: LuxtronikSensorEntity, service_call: ServiceCall
+) -> None:
+    if (
+        not isinstance(entity, LuxtronikStatusSensorEntity)
+        or entity.entity_description.key != SensorKey.STATUS
+    ):
+        # A device or area target also reaches other enum sensors, such as
+        # Smart Grid Status; only naming one of them explicitly is an error.
+        if entity.entity_id in cv.ensure_list(service_call.data.get(ATTR_ENTITY_ID)):
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="evu_status_required"
+            )
+        return
+    await entity.async_recalculate_evu()
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: LuxtronikConfigEntry,
@@ -72,6 +102,15 @@ async def async_setup_entry(
     """Set up Luxtronik sensors dynamically through Luxtronik discovery."""
 
     coordinator = entry.runtime_data
+
+    # Registered before the early return, so the service (and the device action
+    # calling it) exists even when the heat pump was unreachable at startup.
+    entity_platform.async_get_current_platform().async_register_entity_service(
+        SERVICE_RECALCULATE_EVU,
+        {},
+        _async_recalculate_evu,
+        entity_device_classes=[SensorDeviceClass.ENUM],
+    )
 
     # Ensure coordinator has valid data before adding entities
     if not coordinator.last_update_success:
@@ -305,6 +344,17 @@ class LuxtronikSensorEntity(LuxtronikEntity[LuxtronikSensorDescription], SensorE
         super()._handle_coordinator_update()
 
 
+@dataclass
+class LuxtronikStatusExtraStoredData(ExtraStoredData):
+    """Keep the EVU tracker outside recorder-excluded state attributes."""
+
+    _evu_tracker_state: dict[str, Any]
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return JSON-serializable restore data."""
+        return {"_evu_tracker_state": self._evu_tracker_state}
+
+
 class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
     """Luxtronik Status Sensor with extended attr."""
 
@@ -338,6 +388,68 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
         self._smart_grid_available: bool = True
 
     @property
+    def extra_restore_state_data(self) -> LuxtronikStatusExtraStoredData:
+        """Persist the schedule and any active EVU interval across HA restarts."""
+        return LuxtronikStatusExtraStoredData(self._evu_tracker_state)
+
+    @property
+    def _evu_tracker_state(self) -> dict[str, Any]:
+        return self._evu_tracker.as_dict()
+
+    @_evu_tracker_state.setter
+    def _evu_tracker_state(self, value: dict[str, Any]) -> None:
+        self._evu_tracker.restore(value)
+
+    async def async_added_to_hass(self) -> None:
+        """Migrate old schedule attributes before the first coordinator update."""
+        if (last_state := await self.async_get_last_state()) is not None:
+            self._evu_tracker.restore_attributes(last_state.attributes)
+        await super().async_added_to_hass()
+
+    async def async_recalculate_evu(self) -> None:
+        """Replace the EVU schedule by replaying the last seven days of status."""
+        if "recorder" not in self.hass.config.components:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="evu_recorder_required"
+            )
+        end = dt_util.utcnow()
+        start = end - timedelta(days=7)
+        history = await get_instance(self.hass).async_add_executor_job(
+            partial(
+                state_changes_during_period,
+                self.hass,
+                start,
+                end,
+                entity_id=self.entity_id,
+                no_attributes=True,
+                include_start_time_state=True,
+            )
+        )
+        states = history.get(self.entity_id, [])
+        if not any(state.state in LuxOperationMode for state in states):
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="evu_history_empty"
+            )
+        tracker = LuxtronikEVUTracker()
+        for state in states:
+            tracker.update(state.state, dt_util.as_local(state.last_changed))
+        tracker.resume(
+            str(self._attr_native_value)
+            if self._attr_native_value is not None
+            else None
+        )
+        self._evu_tracker = tracker
+        self._attr_extra_state_attributes.update(tracker.get_attributes())
+        self._attr_extra_state_attributes[SA.STATUS_TEXT] = self._build_status_text()
+        self.async_write_ha_state()
+        LOGGER.info(
+            "Recalculated EVU schedule for %s from %s status states since %s",
+            self.entity_id,
+            len(states),
+            start,
+        )
+
+    @property
     def available(self) -> bool:
         """SmartGrid status sensor is unavailable when SmartGrid is disabled."""
         if self.entity_description.key == SensorKey.SMART_GRID_STATUS:
@@ -358,7 +470,7 @@ class LuxtronikStatusSensorEntity(LuxtronikSensorEntity):
 
         self._evu_tracker.update(
             str(self._attr_native_value)
-            if self._attr_native_value is not None
+            if self.available and self._attr_native_value is not None
             else None
         )
 

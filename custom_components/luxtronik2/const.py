@@ -117,6 +117,7 @@ DEFAULT_MAX_DATA_LENGTH: Final = 10000
 
 
 SERVICE_WRITE: Final = "write"
+SERVICE_RECALCULATE_EVU: Final = "recalculate_evu"
 ATTR_PARAMETER: Final = "parameter"
 ATTR_VALUE: Final = "value"
 
