@@ -323,6 +323,16 @@ class LuxMkTypes(Enum):
     heating_cooling = 4
 
 
+# `entity_active` formulas on a mixing circuit's type register (P0042 / P0130 /
+# P0780), which the installer sets. Codes and names side by side, so the gates
+# keep working if the register ever decodes to a LuxMkTypes name (#773).
+# A circuit that heats has a heating curve and a heating mode.
+MK_HEATING_TYPES: Final = "in 1,2,4,discharge,load,heating_cooling"
+# Any configured circuit - cooling-only included - has a flow sensor. Unused,
+# it reads 75.0 (open) or 0.0 on every unit in the diagnostics corpus.
+MK_CONFIGURED_TYPES: Final = "in 1,2,3,4,discharge,load,cooling,heating_cooling"
+
+
 class LuxHeatingControlModeTypes(StrEnum):
     """How the heating circuit derives its flow setpoint (P0103)."""
 

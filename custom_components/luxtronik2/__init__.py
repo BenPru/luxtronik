@@ -43,16 +43,20 @@ from .const import (
     DOMAIN,
     LOGGER,
     MIN_HA_VERSION,
+    MK_CONFIGURED_TYPES,
+    MK_HEATING_TYPES,
     PLATFORMS,
     SERVICE_WRITE,
     SERVICE_WRITE_SCHEMA,
     WRITABLE_PARAMETER_PREFIXES,
     DeviceKey,
+    LuxParameter as LP,
     LuxVisibility as LV,
     SensorKey as SK,
 )
 from .coordinator import LuxtronikCoordinator, connect_and_get_coordinator
 from .number_entities_predefined import NUMBER_SENSORS
+from .select_entities_predefined import SELECT_ENTITIES
 from .sensor_entities_predefined import SENSORS
 
 # endregion Imports
@@ -130,6 +134,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LuxtronikConfigEntry) ->
     await _async_remove_legacy_smart_grid_switch(hass, entry)
     await _async_remove_withdrawn_ventilation_schedule_entities(hass, entry)
     await _async_remove_undetected_solar_entities(hass, entry, coordinator)
+    await _async_remove_unconfigured_mixing_circuit_entities(hass, entry, coordinator)
     await _async_remove_replaced_compressor_frequency(hass, entry, coordinator)
     await _async_remove_replaced_fan_speed(hass, entry, coordinator)
 
@@ -798,6 +803,61 @@ async def _async_remove_undetected_solar_entities(
         return
     if not async_entries_for_device(ent_reg, device.id, include_disabled_entities=True):
         dev_reg.async_remove_device(device.id)
+
+
+_MIXING_CIRCUIT_TYPES = (
+    LP.P0042_MIXING_CIRCUIT1_TYPE,
+    LP.P0130_MIXING_CIRCUIT2_TYPE,
+    LP.P0780_MIXING_CIRCUIT3_TYPE,
+)
+
+
+async def _async_remove_unconfigured_mixing_circuit_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry, coordinator: LuxtronikCoordinator
+) -> None:
+    """Drop a mixing circuit's entities once its type says it is unused (#880).
+
+    Until 2026.11 the curves, mode selects and flow sensors of all three
+    circuits were created on every heat pump, though MK2 heats on only 2 of
+    the 39 in the diagnostics corpus. Their `entity_active` gates on the
+    circuit type now stop creating them, but existing registry entries would
+    linger as "no longer provided" on the heating device. Same lazy approach
+    as the SmartGrid switch above.
+
+    Removing is destructive (it drops the user's name, area and labels), so it
+    only happens when the circuit type decided: an entity is left alone when
+    the type register or its own register was not returned. The cooling
+    targets, gated on the same registers since #773, are not touched.
+    """
+    prefix = config_entry.data[CONF_HA_SENSOR_PREFIX]
+    ent_reg = async_get(hass)
+    for platform, descriptions in (
+        (P.NUMBER, NUMBER_SENSORS),
+        (P.SELECT, SELECT_ENTITIES),
+        (P.SENSOR, SENSORS),
+    ):
+        for description in descriptions:
+            gates = [
+                key
+                for key, formula in description.entity_active
+                if key in _MIXING_CIRCUIT_TYPES
+                and formula in (MK_HEATING_TYPES, MK_CONFIGURED_TYPES)
+            ]
+            if not gates or any(coordinator.get_value(key) is None for key in gates):
+                continue
+            if coordinator.get_value(description.luxtronik_key) is None:
+                continue
+            if coordinator.entity_active(description):
+                continue
+            # Mirrors the entity_id/unique_id the platforms assign.
+            unique_id = f"{platform}.{prefix}_{description.key}"
+            entity_id = ent_reg.async_get_entity_id(platform, DOMAIN, unique_id)
+            if entity_id is not None:
+                ent_reg.async_remove(entity_id)
+                LOGGER.info(
+                    "Removed %s - its mixing circuit is not configured",
+                    entity_id,
+                )
         LOGGER.info("Removed the empty hot water device - no hot water detected")
 
 
